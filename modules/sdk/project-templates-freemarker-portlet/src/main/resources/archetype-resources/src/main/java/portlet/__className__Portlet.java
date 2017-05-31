@@ -28,4 +28,59 @@ import org.osgi.service.component.annotations.Component;
 	service = Portlet.class
 )
 public class ${className}Portlet extends FreeMarkerPortlet {
+
+	@Override
+	public void processAction(
+		ActionRequest actionRequest, ActionResponse actionResponse)
+		throws IOException, PortletException {
+
+		try {
+			String cmd = ParamUtil.getString(actionRequest, Constants.CMD);
+
+			if (cmd.equals("sayHello")) {
+				String name = ParamUtil.getString(actionRequest, "name", "");
+
+				name = capitalizeFully(name);
+			}
+
+			sendRedirect(actionRequest, actionResponse);
+		}
+		catch (Exception e) {
+			if ((e instanceof OSGiException) ||
+			(e instanceof PrincipalException)) {
+
+				SessionErrors.add(actionRequest, e.getClass().getName());
+			}
+		}
+	}
+
+
+	/**
+	 * capitalizeFully: Capitalizes first letter of all words in given string.
+	 * @param str String to capitalize.
+	 * @return String The fully capitalized string.
+	 */
+	public String capitalizeFully(String str) {
+		if (str == null || str.length() == 0) {
+			return str;
+		}
+		int strLen = str.length();
+		str = str.toLowerCase();
+		StringBuffer buffer = new StringBuffer(strLen);
+		boolean capitalizeNext = true;
+		for (int i = 0; i < strLen; i++) {
+			char ch = str.charAt(i);
+
+			if (Character.isWhitespace(ch)) {
+				buffer.append(ch);
+				capitalizeNext = true;
+			} else if (capitalizeNext) {
+				buffer.append(Character.toTitleCase(ch));
+				capitalizeNext = false;
+			} else {
+				buffer.append(ch);
+			}
+		}
+		return buffer.toString();
+	}
 }

@@ -1,45 +1,38 @@
-package ${package}.portlet;
+package ${package}.portlet.action;
+
+import ${package}.constants.${className}PortletKeys;
+import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand;
+import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
+import com.liferay.portal.kernel.util.ParamUtil;
+import org.osgi.service.component.annotations.Component;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
-import javax.portlet.RenderRequest;
-import javax.portlet.RenderResponse;
-
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.portlet.bind.annotation.RenderMapping;
 
 /**
+ * class SayHelloMVCActionCommand: Handles the say hello action.
+ *
  * @author ${author}
  */
-@Controller
-@RequestMapping("VIEW")
-public class ${className}PortletViewController {
-
-	@RenderMapping
-	public String view(RenderRequest request, RenderResponse response) {
-		return "view";
-	}
-
-	/**
-	 * Returns the view when the action key is set to <code>sayHello</code>.
-	 *
-	 * @param  request the render request
-	 * @param  response the render response
-	 * @return the view result
-	 */
-	@RenderMapping(params = "action=sayHello")
-	public String sayHello(RenderRequest request, RenderResponse response) {
-		return "say_hello";
-	}
+@Component(
+	immediate = true,
+	property = {
+		"javax.portlet.name=" + ${className}PortletKeys.${className},
+		"mvc.command.name=/say_hello"
+	},
+	service = MVCActionCommand.class
+)
+public class SayHelloMVCActionCommand extends BaseMVCActionCommand {
 
 	/**
-	 * Handles the say hello action.
-	 * @param  request the action request
-	 * @param  response the action response
+	 * doProcessAction: Invoked when the /say_hello action is submitted.
+	 * @param request
+	 * @param response
+	 * @throws Exception
 	 */
-	@ActionMapping(params = "action=sayHello")
-	public void sayHello(ActionRequest request, ActionResponse response){
+	@Override
+	protected void doProcessAction(
+		ActionRequest request, ActionResponse response) throws Exception {
 
 		String name = ParamUtil.getString(request, "userName", "");
 
@@ -49,6 +42,7 @@ public class ${className}PortletViewController {
 		// hide the success message.
 		hideDefaultSuccessMessage(request);
 
+		response.setRenderParameter("mvcPath", "/say_hello.jsp");
 		response.setRenderParameter("name", name);
 	}
 
