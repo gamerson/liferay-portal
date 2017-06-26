@@ -20,6 +20,7 @@ import com.liferay.gradle.plugins.workspace.configurators.RootProjectConfigurato
 import com.liferay.gradle.plugins.workspace.configurators.ThemesProjectConfigurator;
 import com.liferay.gradle.plugins.workspace.configurators.WarsProjectConfigurator;
 import com.liferay.gradle.plugins.workspace.internal.util.GradleUtil;
+import com.liferay.portal.tools.bundle.support.constants.BundleSupportConstants;
 
 import groovy.lang.MissingPropertyException;
 
@@ -50,10 +51,19 @@ public class WorkspaceExtension {
 
 		_bundleDistRootDirName = _getProperty(
 			settings, "bundle.dist.root.dir", _BUNDLE_DIST_ROOT_DIR_NAME);
-		_bundleUrl = _getProperty(settings, "bundle.url", _BUNDLE_URL);
-		_configsDir = _getProperty(settings, "configs.dir", _CONFIGS_DIR);
-		_environment = _getProperty(settings, "environment", _ENVIRONMENT);
-		_homeDir = _getProperty(settings, "home.dir", _HOME_DIR);
+		_bundleTokenDownload = _getProperty(
+			settings, "bundle.token.download", _BUNDLE_TOKEN_DOWNLOAD);
+		_bundleUrl = _getProperty(
+			settings, "bundle.url", BundleSupportConstants.DEFAULT_BUNDLE_URL);
+		_configsDir = _getProperty(
+			settings, "configs.dir",
+			BundleSupportConstants.DEFAULT_CONFIGS_DIR_NAME);
+		_environment = _getProperty(
+			settings, "environment",
+			BundleSupportConstants.DEFAULT_ENVIRONMENT);
+		_homeDir = _getProperty(
+			settings, "home.dir",
+			BundleSupportConstants.DEFAULT_LIFERAY_HOME_DIR_NAME);
 		_rootProjectConfigurator = new RootProjectConfigurator(settings);
 	}
 
@@ -85,6 +95,10 @@ public class WorkspaceExtension {
 		return _rootProjectConfigurator;
 	}
 
+	public boolean isBundleTokenDownload() {
+		return GradleUtil.toBoolean(_bundleTokenDownload);
+	}
+
 	public ProjectConfigurator propertyMissing(String name) {
 		for (ProjectConfigurator projectConfigurator : _projectConfigurators) {
 			if (name.equals(projectConfigurator.getName())) {
@@ -97,6 +111,10 @@ public class WorkspaceExtension {
 
 	public void setBundleDistRootDirName(Object bundleDistRootDirName) {
 		_bundleDistRootDirName = bundleDistRootDirName;
+	}
+
+	public void setBundleTokenDownload(Object bundleTokenDownload) {
+		_bundleTokenDownload = bundleTokenDownload;
 	}
 
 	public void setBundleUrl(Object bundleUrl) {
@@ -115,6 +133,13 @@ public class WorkspaceExtension {
 		_homeDir = homeDir;
 	}
 
+	private boolean _getProperty(
+		Object object, String keySuffix, boolean defaultValue) {
+
+		return GradleUtil.getProperty(
+			object, WorkspacePlugin.PROPERTY_PREFIX + keySuffix, defaultValue);
+	}
+
 	private String _getProperty(
 		Object object, String keySuffix, String defaultValue) {
 
@@ -124,17 +149,10 @@ public class WorkspaceExtension {
 
 	private static final String _BUNDLE_DIST_ROOT_DIR_NAME = null;
 
-	private static final String _BUNDLE_URL =
-		"https://cdn.lfrs.sl/releases.liferay.com/portal/7.0.3-ga4" +
-			"/liferay-ce-portal-tomcat-7.0-ga4-20170613175008905.zip";
-
-	private static final String _CONFIGS_DIR = "configs";
-
-	private static final String _ENVIRONMENT = "local";
-
-	private static final String _HOME_DIR = "bundles";
+	private static final boolean _BUNDLE_TOKEN_DOWNLOAD = false;
 
 	private Object _bundleDistRootDirName;
+	private Object _bundleTokenDownload;
 	private Object _bundleUrl;
 	private Object _configsDir;
 	private Object _environment;
