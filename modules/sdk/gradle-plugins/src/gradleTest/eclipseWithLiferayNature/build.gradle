@@ -1,17 +1,15 @@
-buildscript {
-	dependencies {
-		classpath fileTree(dir: pluginClasspathDir, include: "*.jar")
-	}
-}
-
-apply plugin: "com.liferay.plugins"
+apply plugin: "com.liferay.plugin"
 
 task runGradleTest
 
 runGradleTest {
-	dependsOn ":eclipse"
-	
+	dependsOn tasks.eclipse
 	doLast {
-		// TODO assert that .project contains liferay IDE nature
+	
+		File expectedFile = file('./.project')
+		
+		String fileContents = expectedFile.text
+
+		assert fileContents.contains('<nature>com.liferay.ide.core.liferayNature</nature>')
 	}
 }
