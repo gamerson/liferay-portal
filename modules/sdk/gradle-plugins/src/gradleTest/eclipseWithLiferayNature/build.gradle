@@ -1,0 +1,17 @@
+buildscript {
+	dependencies {
+		classpath fileTree(dir: pluginClasspathDir, include: "*.jar")
+	}
+}
+
+apply plugin: "com.liferay.plugins"
+
+task runGradleTest
+
+runGradleTest {
+	dependsOn ":eclipse"
+	
+	doLast {
+		// TODO assert that .project contains liferay IDE nature
+	}
+}
