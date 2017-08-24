@@ -45,6 +45,7 @@ public class EclipseDefaultsPlugin extends BaseDefaultsPlugin<EclipsePlugin> {
 		Project project, EclipsePlugin eclipsePlugin) {
 
 		_configureEclipseClasspathFile(project);
+		_configureEclipseProjectFile(project);
 		_configureTaskEclipse(eclipsePlugin);
 	}
 
@@ -54,6 +55,13 @@ public class EclipseDefaultsPlugin extends BaseDefaultsPlugin<EclipsePlugin> {
 	}
 
 	private EclipseDefaultsPlugin() {
+	}
+	
+	private void _configureEclipseProjectFile(Project project) {
+		EclipseModel eclipseModel = GradleUtil.getExtension(
+				project, EclipseModel.class);
+
+		eclipseModel.getProject().getNatures().add("com.liferay.ide.core.liferayNature");
 	}
 
 	private void _configureEclipseClasspathFile(Project project) {
