@@ -38,11 +38,15 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -201,10 +205,37 @@ public class CSSBuilder implements AutoCloseable {
 			List<String> fileNames, String dirName, String docrootDirName)
 		throws Exception {
 
-		DirectoryScanner directoryScanner = new DirectoryScanner();
-
 		String basedir = docrootDirName.concat(dirName);
 
+		String[] fileNamesArray = _getScssFiles(basedir);
+		
+		if (!_isModified(basedir, fileNamesArray)) {
+						
+			long oldestSassModifiedTime = _getOldestModifiedTime(basedir, fileNamesArray);
+			
+			String[] scssFragments = _getScssFragments(basedir);
+			
+			long newestFragmentModifiedTime = _getNewestModifiedTime(basedir, scssFragments);
+			
+			if (oldestSassModifiedTime > newestFragmentModifiedTime)
+			{
+				return;
+			}
+		}
+
+		for (String fileName : fileNamesArray) {
+			if (fileName.contains("_rtl")) {
+				continue;
+			}
+
+			fileNames.add(_normalizeFileName(dirName, fileName));
+		}
+	}
+
+	private String[] _getScssFiles( String basedir) {
+
+		DirectoryScanner directoryScanner = new DirectoryScanner();
+		
 		directoryScanner.setBasedir(basedir);
 
 		directoryScanner.setExcludes(
@@ -219,19 +250,65 @@ public class CSSBuilder implements AutoCloseable {
 		directoryScanner.scan();
 
 		String[] fileNamesArray = directoryScanner.getIncludedFiles();
+		return fileNamesArray;
+	}
+	
+	private String[] _getScssFragments( String basedir) {
 
-		if (!_isModified(basedir, fileNamesArray)) {
-			return;
-		}
+		DirectoryScanner directoryScanner = new DirectoryScanner();
+		
+		directoryScanner.setBasedir(basedir);
 
-		for (String fileName : fileNamesArray) {
-			if (fileName.contains("_rtl")) {
-				continue;
-			}
+		directoryScanner.setIncludes(new String[] {"**\\\\_*.scss"});
 
-			fileNames.add(_normalizeFileName(dirName, fileName));
+		directoryScanner.scan();
+
+		String[] fileNamesArray = directoryScanner.getIncludedFiles();
+		return fileNamesArray;
+	}
+	
+	private long _getNewestModifiedTime(String baseDir, String[] fileNames)
+	{
+		long newestModifiedTime = Stream.of(fileNames).map(
+			x -> Paths.get(baseDir, x)
+		).map(
+			this::_getLastModifiedTime
+		).max(
+			Comparator.naturalOrder()
+		).orElse(
+			Long.MIN_VALUE
+		);
+		
+		return newestModifiedTime;
+	}
+	
+	private long _getOldestModifiedTime(String baseDir, String[] fileNames)
+	{
+		long oldestModifiedTime = Stream.of(fileNames).map(
+			x -> Paths.get(baseDir, x)
+		).map(
+			this::_getLastModifiedTime
+		).min(
+			Comparator.naturalOrder()
+		).orElse(
+			Long.MIN_VALUE
+		);
+		
+		return oldestModifiedTime;
+	}
+	
+	private long _getLastModifiedTime(Path path)
+	{
+		try
+		{
+			return Files.getLastModifiedTime(path).toMillis();
+		} catch (IOException e)
+		{
+			return -1;
 		}
 	}
+	
+
 
 	private void _deltree(String dirName) throws IOException {
 		Files.walkFileTree(
@@ -319,7 +396,7 @@ public class CSSBuilder implements AutoCloseable {
 
 	private boolean _isModified(String dirName, String[] fileNames)
 		throws Exception {
-
+		
 		for (String fileName : fileNames) {
 			if (fileName.contains("_rtl")) {
 				continue;
