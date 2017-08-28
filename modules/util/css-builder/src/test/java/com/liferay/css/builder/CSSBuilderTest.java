@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 
 import java.net.URL;
+
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitResult;
@@ -31,15 +32,11 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -58,16 +55,6 @@ public class CSSBuilderTest {
 		_docrootDirName = path.toString();
 	}
 
-
-	
-	private static void _changeContentInFile(Path path, String target, String replacement) throws Exception {
-		Charset charset = StandardCharsets.UTF_8;
-		String content = new String(Files.readAllBytes(path), charset);
-		content = content.replaceAll(target, replacement);
-		Files.write(path, content.getBytes(charset));
-		
-	}
-	
 	@After
 	public void tearDown() throws Exception {
 		Files.walkFileTree(
@@ -97,6 +84,40 @@ public class CSSBuilderTest {
 			});
 	}
 
+	@Test
+	public void testCssBuilderWithFileChange() throws Exception
+	{
+
+		Path changingImport = Paths.get(
+			_docrootDirName, "css", "_import_change.scss");
+
+		_changeContentInFile(changingImport, "brown", "khaki");
+
+		try (CSSBuilder cssBuilder = new CSSBuilder(
+				_docrootDirName, false, ".sass-cache/",
+				_PORTAL_COMMON_CSS_DIR_NAME, 6, new String[0], "jni")) {
+
+			cssBuilder.execute(Arrays.asList(new String[] {"/css"}));
+		}
+
+		String actualTestImportChangeContent = _read(
+			_docrootDirName + "/css/.sass-cache/test_import_change.css");
+
+		_changeContentInFile(changingImport, "khaki", "brown");
+
+		try (CSSBuilder cssBuilder = new CSSBuilder(
+				_docrootDirName, false, ".sass-cache/",
+				_PORTAL_COMMON_CSS_DIR_NAME, 6, new String[0], "jni")) {
+
+			cssBuilder.execute(Arrays.asList(new String[] {"/css"}));
+		}
+
+		actualTestImportChangeContent = _read(
+			_docrootDirName + "/css/.sass-cache/test_import_change.css");
+
+		Assert.assertTrue(actualTestImportChangeContent.contains("brown"));
+	}
+
 	/*@Test
 	public void testCssBuilderWithJni() throws Exception {
 		_testCssBuilder("jni", _PORTAL_COMMON_CSS_DIR_NAME);
@@ -116,6 +137,19 @@ public class CSSBuilderTest {
 	public void testCssBuilderWithRubyAndPortalCommonJar() throws Exception {
 		_testCssBuilder("ruby", _PORTAL_COMMON_CSS_DIR_NAME);
 	}*/
+
+	private static void _changeContentInFile(
+			Path path, String target, String replacement)
+		throws Exception {
+
+		final Charset charset = StandardCharsets.UTF_8;
+
+		String content = new String(Files.readAllBytes(path), charset);
+
+		content = content.replaceAll(target, replacement);
+
+		Files.write(path, content.getBytes(charset));
+	}
 
 	private void _assertMatchesCount(
 		Pattern pattern, String s, int expectedCount) {
@@ -139,52 +173,17 @@ public class CSSBuilderTest {
 		return StringUtil.replace(
 			s, StringPool.RETURN_NEW_LINE, StringPool.NEW_LINE);
 	}
-	
-	@Test
-	public void testCssBuilderWithFileChange() throws Exception
-	{
-		Path changingImport = Paths.get(_docrootDirName, "css", "_import_change.scss");
-
-		_changeContentInFile(changingImport, "brown", "khaki");	
-
-
-		try (CSSBuilder cssBuilder = new CSSBuilder(
-				_docrootDirName, false, ".sass-cache/", _PORTAL_COMMON_CSS_DIR_NAME, 6,
-				new String[0], "jni")) {
-
-			cssBuilder.execute(Arrays.asList(new String[] {"/css"}));
-		}
-		
-		String actualTestImportChangeContent = _read(
-				_docrootDirName + "/css/.sass-cache/test_import_change.css");
-		
-		_changeContentInFile(changingImport, "khaki", "brown");	
-
-		try (CSSBuilder cssBuilder = new CSSBuilder(
-				_docrootDirName, false, ".sass-cache/", _PORTAL_COMMON_CSS_DIR_NAME, 6,
-				new String[0], "jni")) {
-
-			cssBuilder.execute(Arrays.asList(new String[] {"/css"}));
-		}
-		
-		actualTestImportChangeContent = _read(
-				_docrootDirName + "/css/.sass-cache/test_import_change.css");
-		
-		Assert.assertTrue(actualTestImportChangeContent.contains("brown"));
-		
-
-	}
 
 	private void _testCssBuilder(String compiler, String portalCommonCssPath)
 		throws Exception {
-		
+
 		try (CSSBuilder cssBuilder = new CSSBuilder(
 				_docrootDirName, false, ".sass-cache/", portalCommonCssPath, 6,
 				new String[0], compiler)) {
 
 			cssBuilder.execute(Arrays.asList(new String[] {"/css"}));
 		}
-	
+
 		String expectedTestContent = _read(
 			_docrootDirName + "/expected/test.css");
 
