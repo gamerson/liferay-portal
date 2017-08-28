@@ -38,14 +38,12 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -208,17 +206,17 @@ public class CSSBuilder implements AutoCloseable {
 		String basedir = docrootDirName.concat(dirName);
 
 		String[] fileNamesArray = _getScssFiles(basedir);
-		
+
 		if (!_isModified(basedir, fileNamesArray)) {
-						
-			long oldestSassModifiedTime = _getOldestModifiedTime(basedir, fileNamesArray);
-			
+			long oldestSassModifiedTime = _getOldestModifiedTime(
+				basedir, fileNamesArray);
+
 			String[] scssFragments = _getScssFragments(basedir);
-			
-			long newestFragmentModifiedTime = _getNewestModifiedTime(basedir, scssFragments);
-			
-			if (oldestSassModifiedTime > newestFragmentModifiedTime)
-			{
+
+			long newestFragmentModifiedTime = _getNewestModifiedTime(
+				basedir, scssFragments);
+
+			if (oldestSassModifiedTime > newestFragmentModifiedTime) {
 				return;
 			}
 		}
@@ -231,84 +229,6 @@ public class CSSBuilder implements AutoCloseable {
 			fileNames.add(_normalizeFileName(dirName, fileName));
 		}
 	}
-
-	private String[] _getScssFiles( String basedir) {
-
-		DirectoryScanner directoryScanner = new DirectoryScanner();
-		
-		directoryScanner.setBasedir(basedir);
-
-		directoryScanner.setExcludes(
-			new String[] {
-				"**\\_*.scss", "**\\_diffs\\**", "**\\.sass-cache*\\**",
-				"**\\.sass_cache_*\\**", "**\\_sass_cache_*\\**",
-				"**\\_styled\\**", "**\\_unstyled\\**", "**\\css\\aui\\**",
-				"**\\tmp\\**"
-			});
-		directoryScanner.setIncludes(new String[] {"**\\*.scss"});
-
-		directoryScanner.scan();
-
-		String[] fileNamesArray = directoryScanner.getIncludedFiles();
-		return fileNamesArray;
-	}
-	
-	private String[] _getScssFragments( String basedir) {
-
-		DirectoryScanner directoryScanner = new DirectoryScanner();
-		
-		directoryScanner.setBasedir(basedir);
-
-		directoryScanner.setIncludes(new String[] {"**\\\\_*.scss"});
-
-		directoryScanner.scan();
-
-		String[] fileNamesArray = directoryScanner.getIncludedFiles();
-		return fileNamesArray;
-	}
-	
-	private long _getNewestModifiedTime(String baseDir, String[] fileNames)
-	{
-		long newestModifiedTime = Stream.of(fileNames).map(
-			x -> Paths.get(baseDir, x)
-		).map(
-			this::_getLastModifiedTime
-		).max(
-			Comparator.naturalOrder()
-		).orElse(
-			Long.MIN_VALUE
-		);
-		
-		return newestModifiedTime;
-	}
-	
-	private long _getOldestModifiedTime(String baseDir, String[] fileNames)
-	{
-		long oldestModifiedTime = Stream.of(fileNames).map(
-			x -> Paths.get(baseDir, x)
-		).map(
-			this::_getLastModifiedTime
-		).min(
-			Comparator.naturalOrder()
-		).orElse(
-			Long.MIN_VALUE
-		);
-		
-		return oldestModifiedTime;
-	}
-	
-	private long _getLastModifiedTime(Path path)
-	{
-		try
-		{
-			return Files.getLastModifiedTime(path).toMillis();
-		} catch (IOException e)
-		{
-			return -1;
-		}
-	}
-	
-
 
 	private void _deltree(String dirName) throws IOException {
 		Files.walkFileTree(
@@ -338,6 +258,49 @@ public class CSSBuilder implements AutoCloseable {
 			});
 	}
 
+	private long _getLastModifiedTime(Path path)
+	{
+
+		try {
+			return Files.getLastModifiedTime(path).toMillis();
+		}
+		catch (IOException ioe) {
+			return -1;
+		}
+	}
+
+	private long _getNewestModifiedTime(String baseDir, String[] fileNames) {
+		final Stream<String> stream = Stream.of(fileNames);
+
+		final long newestModifiedTime = stream.map(
+			x -> Paths.get(baseDir, x)
+		).map(
+			this::_getLastModifiedTime
+		).max(
+			Comparator.naturalOrder()
+		).orElse(
+			Long.MIN_VALUE
+		);
+
+		return newestModifiedTime;
+	}
+
+	private long _getOldestModifiedTime(String baseDir, String[] fileNames) {
+		final Stream<String> stream = Stream.of(fileNames);
+
+		final long oldestModifiedTime = stream.map(
+			x -> Paths.get(baseDir, x)
+		).map(
+			this::_getLastModifiedTime
+		).min(
+			Comparator.naturalOrder()
+		).orElse(
+			Long.MIN_VALUE
+		);
+
+		return oldestModifiedTime;
+	}
+
 	private String _getRtlCss(String fileName, String css) throws Exception {
 		String rtlCss = css;
 
@@ -355,6 +318,41 @@ public class CSSBuilder implements AutoCloseable {
 		}
 
 		return rtlCss;
+	}
+
+	private String[] _getScssFiles(String basedir) {
+		DirectoryScanner directoryScanner = new DirectoryScanner();
+
+		directoryScanner.setBasedir(basedir);
+
+		directoryScanner.setExcludes(
+			new String[] {
+				"**\\_*.scss", "**\\_diffs\\**", "**\\.sass-cache*\\**",
+				"**\\.sass_cache_*\\**", "**\\_sass_cache_*\\**",
+				"**\\_styled\\**", "**\\_unstyled\\**", "**\\css\\aui\\**",
+				"**\\tmp\\**"
+			});
+		directoryScanner.setIncludes(new String[] {"**\\*.scss"});
+
+		directoryScanner.scan();
+
+		String[] fileNamesArray = directoryScanner.getIncludedFiles();
+
+		return fileNamesArray;
+	}
+
+	private String[] _getScssFragments(String basedir) {
+		DirectoryScanner directoryScanner = new DirectoryScanner();
+
+		directoryScanner.setBasedir(basedir);
+
+		directoryScanner.setIncludes(new String[] {"**\\\\_*.scss"});
+
+		directoryScanner.scan();
+
+		String[] fileNamesArray = directoryScanner.getIncludedFiles();
+
+		return fileNamesArray;
 	}
 
 	private void _initSassCompiler(String sassCompilerClassName)
@@ -396,7 +394,7 @@ public class CSSBuilder implements AutoCloseable {
 
 	private boolean _isModified(String dirName, String[] fileNames)
 		throws Exception {
-		
+
 		for (String fileName : fileNames) {
 			if (fileName.contains("_rtl")) {
 				continue;
