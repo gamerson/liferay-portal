@@ -76,12 +76,12 @@ unzipPortalCommonCSS {
 	includeEmptyDirs = false
 }
 
-compileTestJava {
+compileJava { 
     sourceCompatibility = "1.8"
     targetCompatibility = "1.8"
 }
 
-compileJava { 
+compileTestJava {
     sourceCompatibility = "1.8"
     targetCompatibility = "1.8"
 }

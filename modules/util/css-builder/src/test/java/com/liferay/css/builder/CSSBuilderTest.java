@@ -85,40 +85,39 @@ public class CSSBuilderTest {
 	}
 
 	@Test
-	public void testCssBuilderWithFileChange() throws Exception
-	{
+	public void testCssBuilderWithFileChange() throws Exception {
 
-		Path changingImport = Paths.get(
+		final Path changingImport = Paths.get(
 			_docrootDirName, "css", "_import_change.scss");
 
 		_changeContentInFile(changingImport, "brown", "khaki");
 
-		try (CSSBuilder cssBuilder = new CSSBuilder(
+		try (final CSSBuilder cssBuilder = new CSSBuilder(
 				_docrootDirName, false, ".sass-cache/",
 				_PORTAL_COMMON_CSS_DIR_NAME, 6, new String[0], "jni")) {
 
 			cssBuilder.execute(Arrays.asList(new String[] {"/css"}));
 		}
+		
+		final String testImportChangeCssPath = _docrootDirName + "/css/.sass-cache/test_import_change.css";
 
-		String actualTestImportChangeContent = _read(
-			_docrootDirName + "/css/.sass-cache/test_import_change.css");
+		String actualTestImportChangeContent = _read(testImportChangeCssPath);
 
 		_changeContentInFile(changingImport, "khaki", "brown");
 
-		try (CSSBuilder cssBuilder = new CSSBuilder(
+		try (final CSSBuilder cssBuilder = new CSSBuilder(
 				_docrootDirName, false, ".sass-cache/",
 				_PORTAL_COMMON_CSS_DIR_NAME, 6, new String[0], "jni")) {
 
 			cssBuilder.execute(Arrays.asList(new String[] {"/css"}));
 		}
 
-		actualTestImportChangeContent = _read(
-			_docrootDirName + "/css/.sass-cache/test_import_change.css");
+		actualTestImportChangeContent = _read(testImportChangeCssPath);
 
 		Assert.assertTrue(actualTestImportChangeContent.contains("brown"));
 	}
 
-	/*@Test
+	@Test
 	public void testCssBuilderWithJni() throws Exception {
 		_testCssBuilder("jni", _PORTAL_COMMON_CSS_DIR_NAME);
 	}
@@ -136,7 +135,7 @@ public class CSSBuilderTest {
 	@Test
 	public void testCssBuilderWithRubyAndPortalCommonJar() throws Exception {
 		_testCssBuilder("ruby", _PORTAL_COMMON_CSS_DIR_NAME);
-	}*/
+	}
 
 	private static void _changeContentInFile(
 			Path path, String target, String replacement)
