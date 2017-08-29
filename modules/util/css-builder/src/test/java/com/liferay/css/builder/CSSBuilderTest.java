@@ -86,7 +86,6 @@ public class CSSBuilderTest {
 
 	@Test
 	public void testCssBuilderWithFileChange() throws Exception {
-
 		final Path changingImport = Paths.get(
 			_docrootDirName, "css", "_import_change.scss");
 
@@ -100,6 +99,9 @@ public class CSSBuilderTest {
 		}
 		
 		final String testImportChangeCssPath = _docrootDirName + "/css/.sass-cache/test_import_change.css";
+
+		final String testImportChangeCssPath =
+			_docrootDirName + "/css/.sass-cache/test_import_change.css";
 
 		String actualTestImportChangeContent = _read(testImportChangeCssPath);
 

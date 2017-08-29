@@ -258,6 +258,25 @@ public class CSSBuilder implements AutoCloseable {
 			});
 	}
 
+	private final String[] _getFilesFromDirectory(
+		final String baseDir, final String[] includes,
+		final String[] excludes) {
+
+		final DirectoryScanner directoryScanner = new DirectoryScanner();
+
+		directoryScanner.setBasedir(baseDir);
+
+		directoryScanner.setExcludes(excludes);
+
+		directoryScanner.setIncludes(includes);
+
+		directoryScanner.scan();
+
+		final String[] fileNamesArray = directoryScanner.getIncludedFiles();
+
+		return fileNamesArray;
+	}
+
 	private final long _getLastModifiedTime(final Path path) {
 		try {
 			return Files.getLastModifiedTime(path).toMillis();
@@ -267,7 +286,9 @@ public class CSSBuilder implements AutoCloseable {
 		}
 	}
 
-	private final long _getNewestModifiedTime(final String baseDir, final String[] fileNames) {
+	private final long _getNewestModifiedTime(
+		final String baseDir, final String[] fileNames) {
+
 		final Stream<String> stream = Stream.of(fileNames);
 
 		final long newestModifiedTime = stream.map(
@@ -283,7 +304,9 @@ public class CSSBuilder implements AutoCloseable {
 		return newestModifiedTime;
 	}
 
-	private final long _getOldestModifiedTime(final String baseDir, final String[] fileNames) {
+	private final long _getOldestModifiedTime(
+		final String baseDir, final String[] fileNames) {
+
 		final Stream<String> stream = Stream.of(fileNames);
 
 		final long oldestModifiedTime = stream.map(
@@ -319,47 +342,27 @@ public class CSSBuilder implements AutoCloseable {
 	}
 
 	private final String[] _getScssFiles(final String baseDir) {
-		
-		final String[] includes = new String[] {"**\\*.scss"};
-		
-		final String[] excludes = new String[] {
-				"**\\_*.scss", "**\\_diffs\\**", "**\\.sass-cache*\\**",
-				"**\\.sass_cache_*\\**", "**\\_sass_cache_*\\**",
-				"**\\_styled\\**", "**\\_unstyled\\**", "**\\css\\aui\\**",
-				"**\\tmp\\**"
-			};
-		
+		final String[] includes = {"**\\*.scss"};
+
+		final String[] excludes = {
+			"**\\_*.scss", "**\\_diffs\\**", "**\\.sass-cache*\\**",
+			"**\\.sass_cache_*\\**", "**\\_sass_cache_*\\**", "**\\_styled\\**",
+			"**\\_unstyled\\**", "**\\css\\aui\\**", "**\\tmp\\**"
+		};
+
 		return _getFilesFromDirectory(baseDir, includes, excludes);
 	}
 
 	private final String[] _getScssFragments(final String baseDir) {
-		
-		final String[] includes = new String[] {"**\\\\_*.scss"};
-		
-		final String[] excludes = new String[] {
-				"**\\_diffs\\**", "**\\.sass-cache*\\**",
-				"**\\.sass_cache_*\\**", "**\\_sass_cache_*\\**",
-				"**\\_styled\\**", "**\\_unstyled\\**", "**\\css\\aui\\**",
-				"**\\tmp\\**"
-			};
-		
+		final String[] includes = {"**\\\\_*.scss"};
+
+		final String[] excludes = {
+			"**\\_diffs\\**", "**\\.sass-cache*\\**", "**\\.sass_cache_*\\**",
+			"**\\_sass_cache_*\\**", "**\\_styled\\**", "**\\_unstyled\\**",
+			"**\\css\\aui\\**", "**\\tmp\\**"
+		};
+
 		return _getFilesFromDirectory(baseDir, includes, excludes);
-	}
-	
-	private final String[] _getFilesFromDirectory(final String baseDir, 
-			final String[] includes, final String[] excludes)
-	{
-		final DirectoryScanner directoryScanner = new DirectoryScanner();
-
-		directoryScanner.setBasedir(baseDir);
-
-		directoryScanner.setIncludes(includes);
-
-		directoryScanner.scan();
-
-		final String[] fileNamesArray = directoryScanner.getIncludedFiles();
-
-		return fileNamesArray;
 	}
 
 	private void _initSassCompiler(String sassCompilerClassName)
