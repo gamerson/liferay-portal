@@ -542,6 +542,29 @@ public class ProjectTemplatesTest {
 			"mvc-portlet", "MVCPortlet", "META-INF/resources/init.jsp",
 			"META-INF/resources/view.jsp");
 	}
+	
+	@Test
+	public void testBuildTemplateMVCWarPortlet() throws Exception {
+		File gradleProjectDir = _buildTemplateWithGradle("mvc-war-portlet", "MVCWarPortlet");
+
+		_testContains(
+			gradleProjectDir, "build.gradle",
+			"apply plugin: \"war\"");
+		_testContains(
+			gradleProjectDir,
+			"docroot/WEB-INF/liferay-plugin-package.properties",
+			"name=MVCWarPortlet");
+
+		File mavenProjectDir = _buildTemplateWithMaven("mvc-war-portlet", "MVCWarPortlet");
+
+		_testContains(
+			mavenProjectDir, "pom.xml",
+			"maven-war-plugin");
+
+		_buildProjects(
+			gradleProjectDir, mavenProjectDir, "build/libs/mvcwarportlet.war",
+			"target/mvcwarportlet-1.0.0.war");
+	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testBuildTemplateOnExistingDirectory() throws Exception {
