@@ -1,9 +1,20 @@
 import com.liferay.gradle.util.copy.StripPathSegmentsAction
 
 apply plugin: "com.liferay.maven.plugin.builder"
+apply plugin: "maven-publish"
 
 task copyPortalCommonCSSJar(type: Copy)
 task unzipPortalCommonCSS(type: Copy)
+
+File mavenWrapperPropertiesFile = file("src/test/resources/maven-wrapper/.mvn/wrapper/maven-wrapper.properties")
+
+Properties mavenWrapperProperties = GUtil.loadProperties(mavenWrapperPropertiesFile)
+
+String mavenDistributionVersion = mavenWrapperProperties["distributionUrl"]
+
+mavenDistributionVersion = mavenDistributionVersion.find(/\d+\.\d+\.\d+/)
+
+String repoPath = file("${buildDir}/repo/").getAbsolutePath()
 
 buildPluginDescriptor {
 	configurationScopeMapping "mavenCompile", Conf2ScopeMappingContainer.COMPILE
@@ -31,6 +42,7 @@ configurations {
 	mavenCompile {
 		extendsFrom compile
 	}
+	mavenDistribution
 }
 
 dependencies {
@@ -44,11 +56,15 @@ dependencies {
 
 	mavenCompile group: "com.liferay", name: "com.liferay.frontend.css.common", version: "2.0.3"
 
+	mavenDistribution classifier: "bin", ext: "zip", group: "org.apache.maven", name: "apache-maven", version: mavenDistributionVersion
+
 	provided group: "com.liferay.portal", name: "com.liferay.portal.impl", version: "2.0.0"
 	provided group: "com.liferay.portal", name: "com.liferay.portal.kernel", version: "2.0.0"
 	provided group: "org.apache.maven", name: "maven-artifact", version: "3.2.5"
 	provided group: "org.apache.maven", name: "maven-core", version: "3.2.5"
 	provided group: "org.apache.maven", name: "maven-plugin-api", version: "3.2.5"
+
+	testCompile project(":test:maven-executor")
 }
 
 formatSource {
@@ -59,9 +75,39 @@ liferay {
 	deployDir = "../../../tools/sdk/dependencies/com.liferay.css.builder/lib"
 }
 
+publish {
+	dependsOn buildPluginDescriptor
+	dependsOn jar
+}
+
+publishing {
+	publications {
+		maven(MavenPublication) {
+			groupId 'com.liferay'
+			artifactId jar.baseName
+			version "${version}"
+			from components.java
+		}
+	}
+
+	repositories {
+		maven {
+			url uri(repoPath)
+		}
+	}
+}
+
 test {
 	dependsOn copyPortalCommonCSSJar
+	dependsOn publish
 	dependsOn unzipPortalCommonCSS
+
+	doFirst {
+		systemProperty "maven.distribution.file.name", configurations.mavenDistribution.singleFile
+	}
+
+	systemProperty 'repoPath', "${repoPath}"
+	systemProperty 'version', "${version}"
 }
 
 unzipPortalCommonCSS {
