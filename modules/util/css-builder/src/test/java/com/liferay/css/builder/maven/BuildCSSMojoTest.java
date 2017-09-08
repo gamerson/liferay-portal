@@ -44,19 +44,19 @@ public class BuildCSSMojoTest {
 
 	@BeforeClass
 	public static void setUpClass() throws IOException {
-		final String mavenRepoArgument = String.format(
-			"-Dmaven.repo.local=%s", _repoPath);
-		final String mavenVersionArgument = String.format(
+		final String mavenRepoLocalArg = String.format(
+			"-Dmaven.repo.local=%s", _testRepoPath);
+		final String cssbuilderVersionArg = String.format(
 			"-Dcssbuilder.version=%s", _version);
-		final String mavenRepoLocationArgument = String.format(
-			"-Dcssbuilder.repolocation=%s", _repoPath);
+		final String testRepoPathArg = String.format(
+			"-Dtest.repo.path=%s", _testRepoPath);
 
-		_goodMavenCommand = new String[] {
-			mavenRepoArgument, mavenRepoLocationArgument, mavenVersionArgument,
-			"-f", _pomFixedName, _mavenGoalCssBuilder
+		_fixedMavenArgs = new String[] {
+			mavenRepoLocalArg, testRepoPathArg, cssbuilderVersionArg, "-f",
+			_pomFixedName, _mavenGoalCssBuilder
 		};
 
-		_badMavenCommand =
+		_brokenMavenArgs =
 			new String[] {"-f", _pomBrokenName, _mavenGoalCssBuilder};
 	}
 
@@ -87,28 +87,45 @@ public class BuildCSSMojoTest {
 
 	@Test(expected = AssertionError.class)
 	public void testBadPom() throws Exception {
-		_executeMaven(_tempPomFolder.toPath(), _badMavenCommand);
+		_executeMaven(_tempPomFolder.toPath(), _brokenMavenArgs);
 
-		final boolean anyCssFilesInDirectory = _anyCssFilesInDirectory(
+		final boolean anyCssFilesInDirectory = _hasCssFilesInPath(
 			_tempCss.toPath());
 
 		Assert.assertFalse(anyCssFilesInDirectory);
 	}
 
 	@Test
-	public void testGoodPom() throws Exception {
-		_executeMaven(_tempPomFolder.toPath(), _goodMavenCommand);
-		final boolean anyCssFilesInDirectory = _anyCssFilesInDirectory(
+	public void testFixedPom() throws Exception {
+		_executeMaven(_tempPomFolder.toPath(), _fixedMavenArgs);
+
+		final boolean hasCssFilesInDirectory = _hasCssFilesInPath(
 			_tempCss.toPath());
 
-		Assert.assertFalse(anyCssFilesInDirectory);
+		Assert.assertFalse(hasCssFilesInDirectory);
 	}
 
 	@Rule
 	public final TemporaryFolder testCaseTemporaryFolder =
 		new TemporaryFolder();
 
-	private static final boolean _anyCssFilesInDirectory(final Path dirPath)
+	private static final void _executeMaven(
+			final Path projectDir, final String... args)
+		throws Exception {
+
+		final String[] completeArgs = new String[args.length + 1];
+
+		completeArgs[0] = "--update-snapshots";
+
+		System.arraycopy(args, 0, completeArgs, 1, args.length);
+
+		final MavenExecutor.Result result = mavenExecutor.execute(
+			projectDir.toFile(), args);
+
+		Assert.assertEquals(result.output, 0, result.exitCode);
+	}
+
+	private static final boolean _hasCssFilesInPath(final Path dirPath)
 		throws IOException {
 
 		boolean foundCssFile = false;
@@ -127,30 +144,14 @@ public class BuildCSSMojoTest {
 		return foundCssFile;
 	}
 
-	private static final void _executeMaven(
-			final Path projectDir, final String... args)
-		throws Exception {
-
-		final String[] completeArgs = new String[args.length + 1];
-
-		completeArgs[0] = "--update-snapshots";
-
-		System.arraycopy(args, 0, completeArgs, 1, args.length);
-
-		final MavenExecutor.Result result = mavenExecutor.execute(
-			projectDir.toFile(), args);
-
-		Assert.assertEquals(result.output, 0, result.exitCode);
-	}
-
 	private static final boolean _isCSS(final Path path) {
 		final String lowerCasePath = StringUtil.toLowerCase(path.toString());
 
 		return lowerCasePath.endsWith(".css");
 	}
 
-	private static String[] _badMavenCommand;
-	private static String[] _goodMavenCommand;
+	private static String[] _brokenMavenArgs;
+	private static String[] _fixedMavenArgs;
 	private static final String _mainPomFolder =
 		"./src/test/resources/com/liferay/css/builder/maven/dependencies";
 	private static final String _mavenGoalCssBuilder = "css-builder:build";
@@ -160,7 +161,8 @@ public class BuildCSSMojoTest {
 	private static final String _pomFixedName = "pom-fixed.xml";
 	private static final File _pomFixedPath = Paths.get(
 		_mainPomFolder, _pomFixedName).toFile();
-	private static final String _repoPath = System.getProperty("repoPath");
+	private static final String _testRepoPath = System.getProperty(
+		"testRepoPath");
 	private static final String _version = System.getProperty("version");
 
 	private File _tempCss;

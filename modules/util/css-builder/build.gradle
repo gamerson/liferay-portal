@@ -14,7 +14,7 @@ String mavenDistributionVersion = mavenWrapperProperties["distributionUrl"]
 
 mavenDistributionVersion = mavenDistributionVersion.find(/\d+\.\d+\.\d+/)
 
-String repoPath = file("${buildDir}/repo/").getAbsolutePath()
+String testRepoPath = file("${buildDir}/repo/").getAbsolutePath()
 
 buildPluginDescriptor {
 	configurationScopeMapping "mavenCompile", Conf2ScopeMappingContainer.COMPILE
@@ -92,7 +92,7 @@ publishing {
 
 	repositories {
 		maven {
-			url uri(repoPath)
+			url uri(testRepoPath)
 		}
 	}
 }
@@ -106,7 +106,7 @@ test {
 		systemProperty "maven.distribution.file.name", configurations.mavenDistribution.singleFile
 	}
 
-	systemProperty 'repoPath', "${repoPath}"
+	systemProperty 'testRepoPath', "${testRepoPath}"
 	systemProperty 'version', "${version}"
 }
 
