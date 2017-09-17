@@ -35,25 +35,25 @@ public class CSSBuilderInvoker {
 		String[] dirNames = cssBuilderArgs.getDirNames();
 
 		if (dirNames.length == 1) {
-			args.add("sass.dir=" + dirNames[0]);
+			args.add("sass.dir " + dirNames[0]);
 		}
 		else {
 			for (int i = 0; i < dirNames.length; i++) {
-				args.add("sass.dir." + i + "=" + dirNames[i]);
+				args.add("sass.dir " + dirNames[i]);
 			}
 		}
 
 		args.add(
-			"sass.append.css.import.timestamps=" +
+			"sass.append.css.import.timestamps " +
 				cssBuilderArgs.isAppendCssImportTimestamps());
 		args.add(
-			"sass.docroot.dir=" +
+			"sass.docroot.dir " +
 				_getAbsolutePath(baseDir, cssBuilderArgs.getDocrootDirName()));
 		args.add(
-			"sass.generate.source.map=" + cssBuilderArgs.isGenerateSourceMap());
-		args.add("sass.output.dir=" + cssBuilderArgs.getOutputDirName());
+			"sass.generate.source.map " + cssBuilderArgs.isGenerateSourceMap());
+		args.add("sass.output.dir " + cssBuilderArgs.getOutputDirName());
 		args.add(
-			"sass.portal.common.path=" +
+			"sass.portal.common.path " +
 				_getAbsolutePath(
 					baseDir, cssBuilderArgs.getPortalCommonPath()));
 		args.add("sass.precision=" + cssBuilderArgs.getPrecision());
@@ -65,12 +65,12 @@ public class CSSBuilderInvoker {
 			(rtlExcludedPathRegexps.length > 0)) {
 
 			args.add(
-				"sass.rtl.excluded.path.regexps=" +
+				"sass.rtl.excluded.path.regexps " +
 					StringUtil.merge(rtlExcludedPathRegexps));
 		}
 
 		args.add(
-			"sass.compiler.class.name=" +
+			"sass.compiler.class.name " +
 				cssBuilderArgs.getSassCompilerClassName());
 
 		CSSBuilder.main(args.toArray(new String[args.size()]));
