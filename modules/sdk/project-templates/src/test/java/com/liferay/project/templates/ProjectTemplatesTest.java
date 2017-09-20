@@ -1366,16 +1366,15 @@ public class ProjectTemplatesTest {
 	public void testBuildTemplateWarHook() throws Exception {
 		File gradleProjectDir = _buildTemplateWithGradle("war-hook", "WarHook");
 
+		_testExists(gradleProjectDir, "src/main/resources/portal.properties");
 		_testExists(
-			gradleProjectDir, "src/main/resources/warhook/portal.properties");
-		_testExists(
-			gradleProjectDir,
-			"src/main/webapp/warhook/WEB-INF/liferay-hook.xml");
+			gradleProjectDir, "src/main/webapp/WEB-INF/liferay-hook.xml");
 		_testExists(gradleProjectDir, "build.gradle");
 
 		_testContains(
-			gradleProjectDir, "src/main/java/warhook/WarHookAction.java",
-			"public class WarHookLoginPreAction extends Action");
+			gradleProjectDir,
+			"src/main/java/warhook/WarHookLoginPostAction.java",
+			"public class WarHookLoginPostAction extends Action");
 
 		_testContains(
 			gradleProjectDir, "src/main/java/warhook/WarHookStartupAction.java",
@@ -1383,12 +1382,11 @@ public class ProjectTemplatesTest {
 
 		_testContains(
 			gradleProjectDir,
-			"src/main/webapp/warhook/WEB-INF/liferay-plugin-package.properties",
+			"src/main/webapp/WEB-INF/liferay-plugin-package.properties",
 			"name=WarHook");
 
 		File mavenProjectDir = _buildTemplateWithMaven(
-			"war-hook", "WarHook", "warhook", "-DclassName=WarHook",
-			"-Dpackage=WarHook");
+			"war-hook", "WarHook", "-DclassName=WarHook", "-Dpackage=warhook");
 
 		_testContains(mavenProjectDir, "pom.xml");
 
