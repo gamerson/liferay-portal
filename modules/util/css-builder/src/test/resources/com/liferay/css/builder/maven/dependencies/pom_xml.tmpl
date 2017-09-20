@@ -6,17 +6,13 @@
 	<name>mojo-test</name>
 	<version>1.0.0</version>
 	<packaging>jar</packaging>
-	<properties>
-		<cssbuilder.version>1.1.2</cssbuilder.version>
-		<test.repo.path>${project.basedir}/../repo/</test.repo.path>
-	</properties>
 	<build>
-		<finalName>com.liferay.css.builder.maven.mojo-test-${project.version}</finalName>
+		<finalName>com.liferay.css.builder.maven.mojo-test</finalName>
 		<plugins>
 			<plugin>
 				<groupId>com.liferay</groupId>
 				<artifactId>com.liferay.css.builder</artifactId>
-				<version>${cssbuilder.version}</version>
+				<version>[$CSS_BUILDER_VERSION$]</version>
 				<executions>
 					<execution>
 						<id>default-build-css</id>
@@ -32,22 +28,4 @@
 			</plugin>
 		</plugins>
 	</build>
-	<pluginRepositories>
-		<pluginRepository>
-			<id>com.liferay</id>
-			<url>file://${cssbuilder.repolocation}</url>
-
-			<layout>
-				default
-			</layout>
-			<name>CSSBuilder Test Repository</name>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</pluginRepository>
-	</pluginRepositories>
-
 </project>

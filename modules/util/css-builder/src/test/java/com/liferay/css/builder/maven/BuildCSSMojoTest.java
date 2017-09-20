@@ -19,6 +19,7 @@ import com.liferay.maven.executor.MavenExecutor;
 import java.io.File;
 import java.io.IOException;
 
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -58,10 +59,7 @@ public class BuildCSSMojoTest {
 			StandardCopyOption.COPY_ATTRIBUTES,
 			StandardCopyOption.REPLACE_EXISTING);
 
-		Files.copy(
-			dependenciesFolder.resolve("pom.xml"), testPom.toPath(),
-			StandardCopyOption.COPY_ATTRIBUTES,
-			StandardCopyOption.REPLACE_EXISTING);
+		_preparePomXml(dependenciesFolder, testPom.toPath());
 	}
 
 	@Test
@@ -80,23 +78,8 @@ public class BuildCSSMojoTest {
 	private static final void _executeMaven(final Path projectDir)
 		throws Exception {
 
-		String testRepoPath = System.getProperty("testRepoPath");
-		String version = System.getProperty("version");
-
-		String mavenRepoLocalArg = String.format(
-			"-Dmaven.repo.local=%s", testRepoPath);
-		String cssbuilderVersionArg = String.format(
-			"-Dcssbuilder.version=%s", version);
-		String testRepoPathArg = String.format(
-			"-Dtest.repo.path=%s", testRepoPath);
-
-		String[] args = {
-			"--update-snapshots", mavenRepoLocalArg, testRepoPathArg,
-			cssbuilderVersionArg, "css-builder:build"
-		};
-
 		MavenExecutor.Result result = mavenExecutor.execute(
-			projectDir.toFile(), args);
+			projectDir.toFile(), "css-builder:build");
 
 		Assert.assertEquals(result.output, 0, result.exitCode);
 	}
@@ -148,5 +131,31 @@ public class BuildCSSMojoTest {
 
 		return foundCssFile[0];
 	}
+
+	private static void _preparePomXml(
+			Path dependenciesFolder, Path testPomPath)
+		throws IOException {
+
+		Path pomTemplatePath = Paths.get(
+			dependenciesFolder.toString(), "pom_xml.tmpl");
+
+		String content = new String(Files.readAllBytes(pomTemplatePath));
+
+		content = _replace(
+			content, "[$CSS_BUILDER_VERSION$]", _CSS_BUILDER_VERSION);
+
+		Files.write(testPomPath, content.getBytes(StandardCharsets.UTF_8));
+	}
+
+	private static String _replace(String s, String key, String value) {
+		if (value == null) {
+			value = "";
+		}
+
+		return s.replace(key, value);
+	}
+
+	private static final String _CSS_BUILDER_VERSION = System.getProperty(
+		"css.builder.version");
 
 }
