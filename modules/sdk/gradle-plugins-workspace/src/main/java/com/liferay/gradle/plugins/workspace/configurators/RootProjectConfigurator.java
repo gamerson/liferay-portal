@@ -173,7 +173,8 @@ public class RootProjectConfigurator implements Plugin<Project> {
 
 			});
 
-		_configureTaskCopyBundleFromDownload(copy, downloadBundleTask);
+		_configureTaskCopyBundleFromDownload(
+			copy, downloadBundleTask, workspaceExtension);
 
 		_configureTaskCopyBundlePreserveTimestamps(copy);
 
@@ -436,7 +437,8 @@ public class RootProjectConfigurator implements Plugin<Project> {
 	}
 
 	private void _configureTaskCopyBundleFromDownload(
-		Copy copy, final Download download) {
+		Copy copy, final Download download,
+		final WorkspaceExtension workspaceExtension) {
 
 		final Project project = copy.getProject();
 
@@ -452,6 +454,13 @@ public class RootProjectConfigurator implements Plugin<Project> {
 					Copy copy = (Copy)task;
 
 					File destinationDir = copy.getDestinationDir();
+
+					if (destinationDir.getPath() ==
+							workspaceExtension.getHomeDir().getPath()) {
+
+						throw new GradleException(
+							"Destination Dir cannot be the same as Source Dir");
+					}
 
 					for (String rootDirName : rootDirNames) {
 						FileUtil.moveTree(
