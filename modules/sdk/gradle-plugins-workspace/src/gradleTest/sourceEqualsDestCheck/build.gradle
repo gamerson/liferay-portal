@@ -1,0 +1,13 @@
+task runGradleTest
+
+gradle.liferayWorkspace {
+	bundleUrl = uri("bundlesDir/bundles.zip")
+}
+
+runGradleTest {
+	doLast{
+		assert downloadBundle.state.failure.contains("Destination Dir cannot be the same as Source Dir")
+	}
+}
+
+downloadBundle.finalizedBy runGradleTest
