@@ -341,6 +341,21 @@ public class RootProjectConfigurator implements Plugin<Project> {
 						download.header(
 							HttpHeaders.AUTHORIZATION, "Bearer " + token);
 					}
+
+					String bundleUrl = workspaceExtension.getBundleUrl();
+
+					File bundleCacheDir =
+						workspaceExtension.getBundleCacheDir();
+
+					File bundleFile = FileUtil.urlToFile(bundleUrl);
+
+					File destBundleFile = new File(
+						bundleCacheDir, bundleFile.getName());
+
+					if (bundleFile.equals(destBundleFile)) {
+						throw new GradleException(
+							"Destination cannot be the same as bundle url");
+					}
 				}
 
 			});
