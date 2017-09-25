@@ -355,8 +355,8 @@ public class CSSBuilder implements AutoCloseable, IDefaultProvider {
 		String[] includes = {"**\\\\_*.scss"};
 
 		return _getFilesFromDirectory(baseDir, includes, _EXCLUDES);
-    }
-    
+	}
+
 	private void _init() throws Exception {
 		File portalCommonDir = new File(_portalCommonPath);
 
@@ -591,19 +591,32 @@ public class CSSBuilder implements AutoCloseable, IDefaultProvider {
 
 	private static RTLCSSConverter _rtlCSSConverter;
 
-	@Parameter(names = "sass.append.css.import.timestamps")
+	@Parameter(
+		description = "Whether to append the current timestamp to the URLs in the @import CSS at-rules.",
+		names = "sass.append.css.import.timestamps"
+	)
 	private boolean _appendCssImportTimestamps =
 		CSSBuilderArgs.APPEND_CSS_IMPORT_TIMESTAMPS;
 
 	private boolean _cleanPortalCommonDir;
 
-	@Parameter(names = "sass.docroot.dir")
+	@Parameter(
+		description = "If the java plugin is applied: The first resources directory of the main source set (by default: src/main/resources).\nIf the war plugin is applied: project.webAppDir.\nOtherwise: null",
+		names = "sass.docroot.dir"
+	)
 	private String _docrootDirName = CSSBuilderArgs.DOCROOT_DIR_NAME;
 
-	@Parameter(names = "sass.generate.source.map")
+	@Parameter(
+		description = "Whether to generate source maps for easier debugging.",
+		names = "sass.generate.source.map"
+	)
 	private boolean _generateSourceMap;
 
-	@Parameter(names = "sass.output.dir")
+	@Parameter(
+		description = "The name of the sub-directories where the SCSS files are compiled to. " +
+			"For each directory that contains SCSS files, a sub-directory with this name is created. ",
+		names = "sass.output.dir"
+	)
 	private String _outputDirName = CSSBuilderArgs.OUTPUT_DIR_NAME;
 
 	@Parameter
@@ -611,23 +624,38 @@ public class CSSBuilder implements AutoCloseable, IDefaultProvider {
 
 	private String _portalCommonDirName;
 
-	@Parameter(names = {"sass.portal.common.path", "sass.portal.common.dir"})
+	@Parameter(
+		description = "The value of the portalCommonDir property if set; otherwise portalCommonFile.",
+		names = {"sass.portal.common.path", "sass.portal.common.dir"}
+	)
 	private String _portalCommonPath;
 
-	@Parameter(names = "sass.precision")
+	@Parameter(
+		description = "The numeric precision of numbers in Sass.",
+		names = "sass.precision"
+	)
 	private Integer _precision = CSSBuilderArgs.PRECISION;
 
 	private Pattern[] _rtlExcludedPathPatterns;
 
-	@Parameter(names = "sass.rtl.excluded.path.regexps")
+	@Parameter(
+		description = "The SCSS file patterns to exclude when converting for right-to-left (RTL) support.",
+		names = "sass.rtl.excluded.path.regexps"
+	)
 	private String _rtlExcludedPathRegexps;
 
 	private SassCompiler _sassCompiler;
 
-	@Parameter(names = "sass.compiler.class.name")
+	@Parameter(
+		description = "The type of Sass compiler to use. Supported values are \"jni\" and \"ruby\". If not set, defaults to \"jni\".",
+		names = "sass.compiler.class.name"
+	)
 	private String _sassCompilerClassName;
 
-	@Parameter(names = "sass.dir")
+	@Parameter(
+		description = "The name of the directories, relative to docrootDir, which contain the SCSS files to compile. All sub-directories are searched for SCSS files as well.",
+		names = "sass.dir"
+	)
 	private List<String> _sassDirs = new ArrayList<>();
 
 }
