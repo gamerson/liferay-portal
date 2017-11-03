@@ -4,7 +4,7 @@
 <pre id="<portlet:namespace />">
 </pre>
 
-<aui:script require="${artifactId}@${packageJsonVersion}">
+<aui:script require="<%= bootstrapRequire %>">
 	var out = document.getElementById('<portlet:namespace />');
 
 	out.innerHTML += 'Portlet main module loaded.\n';
@@ -12,7 +12,7 @@
 	out.innerHTML += '\n';
 
 	${auiScriptRequireVarName}.default({
-			log: function(msg) {
+		log: function(msg) {
 			out.innerHTML += msg + '\n';
 		}
 	});

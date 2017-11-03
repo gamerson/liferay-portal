@@ -3,6 +3,6 @@
 
 <div id="<portlet:namespace />"></div>
 
-<aui:script require="${artifactId}@${packageJsonVersion}">
+<aui:script require="<%= bootstrapRequire %>">
 	${auiScriptRequireVarName}.default('<portlet:namespace />');
 </aui:script>
