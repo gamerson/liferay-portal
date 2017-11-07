@@ -14,8 +14,6 @@
 
 package com.liferay.project.templates;
 
-import aQute.bnd.osgi.Constants;
-
 import com.liferay.project.templates.internal.util.FileUtil;
 import com.liferay.project.templates.internal.util.Validator;
 import com.liferay.project.templates.internal.util.WorkspaceUtil;
@@ -159,7 +157,7 @@ public class ProjectTemplateFilesTest {
 
 	private void _testArchetypeMetadataXml(
 			Path projectTemplateDirPath, String projectTemplateDirName,
-			Properties bndProperties, boolean requireAuthorProperty,
+			boolean requireAuthorProperty,
 			Set<String> archetypeResourcePropertyNames)
 		throws IOException {
 
@@ -240,87 +238,15 @@ public class ProjectTemplateFilesTest {
 
 		requiredPropertyNames.addAll(_archetypeMetadataXmlDefaultPropertyNames);
 
-		List<Path> definitionsVmPaths = new ArrayList<>();
-
-		Path definitionsVmPath = projectTemplateDirPath.resolve(
-			"src/main/resources/definitions.vm");
-
-		if (Files.exists(definitionsVmPath)) {
-			definitionsVmPaths.add(definitionsVmPath);
-		}
-
-		String includeResource = bndProperties.getProperty(
-			Constants.INCLUDERESOURCE);
-
-		if (Validator.isNotNull(includeResource)) {
-			for (String fileName : includeResource.split(",")) {
-				if (!fileName.endsWith("/definitions.vm")) {
-					continue;
-				}
-
-				definitionsVmPath = projectTemplateDirPath.resolve(fileName);
-
-				if (Files.exists(definitionsVmPath)) {
-					definitionsVmPaths.add(definitionsVmPath);
-				}
-			}
-		}
-
-		Set<String> declaredVariables = new HashSet<>();
 		StringBuilder messageSuffix = new StringBuilder(
 			archetypeMetadataXmlPath.toString());
-
-		for (int i = 0; i < definitionsVmPaths.size(); i++) {
-			definitionsVmPath = definitionsVmPaths.get(i);
-
-			String definitionsVm = FileUtil.read(definitionsVmPath);
-
-			matcher = _velocitySetDirectivePattern.matcher(definitionsVm);
-
-			while (matcher.find()) {
-				declaredVariables.add(matcher.group(1));
-			}
-
-			messageSuffix.append(", ");
-
-			if (i == (definitionsVmPaths.size() - 1)) {
-				messageSuffix.append("or ");
-			}
-		}
 
 		for (String name : archetypeResourcePropertyNames) {
 			Assert.assertTrue(
 				"Undeclared \"" + name + "\" property. Please add it to " +
 					messageSuffix,
-				declaredVariables.contains(name) ||
 				requiredPropertyNames.contains(name));
 		}
-	}
-
-	private Properties _testBndBnd(Path projectTemplateDirPath)
-		throws IOException {
-
-		Path bndBndPath = projectTemplateDirPath.resolve("bnd.bnd");
-
-		Properties properties = FileUtil.readProperties(bndBndPath);
-
-		String bundleDescription = properties.getProperty(
-			Constants.BUNDLE_DESCRIPTION);
-
-		Assert.assertTrue(
-			"Missing \"" + Constants.BUNDLE_DESCRIPTION + "\" header in " +
-				bndBndPath,
-			Validator.isNotNull(bundleDescription));
-
-		Matcher matcher = _bundleDescriptionPattern.matcher(bundleDescription);
-
-		Assert.assertTrue(
-			"Header \"" + Constants.BUNDLE_DESCRIPTION + "\" in " + bndBndPath +
-				" must match pattern \"" + _bundleDescriptionPattern.pattern() +
-					"\"",
-			matcher.matches());
-
-		return properties;
 	}
 
 	private void _testBuildGradle(
@@ -695,11 +621,10 @@ public class ProjectTemplateFilesTest {
 		String projectTemplateDirName = String.valueOf(
 			projectTemplateDirPath.getFileName());
 
-		Properties bndProperties = _testBndBnd(projectTemplateDirPath);
-
 		_testBuildGradle(projectTemplateDirName, archetypeResourcesDirPath);
 
 		_testGitIgnore(projectTemplateDirName, archetypeResourcesDirPath);
+
 		_testGradleWrapper(archetypeResourcesDirPath);
 		_testMavenWrapper(archetypeResourcesDirPath);
 		_testPomXml(archetypeResourcesDirPath, documentBuilder);
@@ -775,7 +700,7 @@ public class ProjectTemplateFilesTest {
 			});
 
 		_testArchetypeMetadataXml(
-			projectTemplateDirPath, projectTemplateDirName, bndProperties,
+			projectTemplateDirPath, projectTemplateDirName,
 			requireAuthorProperty.get(), archetypeResourcePropertyNames);
 	}
 
@@ -840,7 +765,7 @@ public class ProjectTemplateFilesTest {
 				text.startsWith(xmlDeclaration));
 		}
 
-		if (!fileName.endsWith(".es.js")) {
+		if (!fileName.endsWith(".js")) {
 			matcher = _archetypeResourcePropertyNamePattern.matcher(text);
 
 			while (matcher.find()) {
@@ -903,8 +828,8 @@ public class ProjectTemplateFilesTest {
 		"[a-z]+(?:-[a-z]+)*");
 	private static final Set<String> _textFileExtensions = new HashSet<>(
 		Arrays.asList(
-			"bnd", "gradle", "java", "js", "jsp", "jspf", "properties", "vm",
-			"xml"));
+			"bnd", "gradle", "java", "js", "json", "jsp", "jspf", "properties",
+			"vm", "xml"));
 	private static final Pattern _velocityDirectivePattern = Pattern.compile(
 		"#(if|set)\\s*\\(\\s*(.+)\\s*\\)");
 	private static final Pattern _velocitySetDirectivePattern = Pattern.compile(
