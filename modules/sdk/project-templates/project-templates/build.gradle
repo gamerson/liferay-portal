@@ -140,14 +140,17 @@ test {
 		String gradleDistributionUrl = gradleWrapperProperties["distributionUrl"]
 
 		File gradleDistributionFile = FileUtil.get(project, gradleDistributionUrl)
+		
+		File projectTemplateBuildDir = new File(buildDir, "projects")
 
 		systemProperty "gradle.distribution", uri(gradleDistributionFile)
 		systemProperty "maven.distribution.file.name", configurations.mavenDistribution.singleFile
+		systemProperty "projectTemplateBuildDir", projectTemplateBuildDir.path
 	}
 
 	jvmArgs "-XX:MaxMetaspaceSize=256m"
 	maxHeapSize = "1024m"
-
+	
 	systemProperty "http.proxyHost", System.properties["http.proxyHost"]
 	systemProperty "http.proxyPort", System.properties["http.proxyPort"]
 	systemProperty "maven.debug", System.properties["maven.debug"]

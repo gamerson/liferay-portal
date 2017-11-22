@@ -14,19 +14,6 @@
 
 package com.liferay.project.templates;
 
-import aQute.bnd.main.bnd;
-
-import com.liferay.maven.executor.MavenExecutor;
-import com.liferay.project.templates.internal.util.FileUtil;
-import com.liferay.project.templates.internal.util.Validator;
-import com.liferay.project.templates.internal.util.WorkspaceUtil;
-import com.liferay.project.templates.util.FileTestUtil;
-import com.liferay.project.templates.util.StringTestUtil;
-
-import difflib.Delta;
-import difflib.DiffUtils;
-import difflib.Patch;
-
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -34,9 +21,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
-
 import java.net.URI;
-
 import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.FileVisitResult;
@@ -46,7 +31,6 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -59,17 +43,12 @@ import java.util.jar.JarFile;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import net.diibadaaba.zipdiff.DifferenceCalculator;
-import net.diibadaaba.zipdiff.Differences;
-
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipFile;
-
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.BuildTask;
 import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.TaskOutcome;
-
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.BeforeClass;
@@ -77,6 +56,20 @@ import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+
+import com.liferay.maven.executor.MavenExecutor;
+import com.liferay.project.templates.internal.util.FileUtil;
+import com.liferay.project.templates.internal.util.Validator;
+import com.liferay.project.templates.internal.util.WorkspaceUtil;
+import com.liferay.project.templates.util.FileTestUtil;
+import com.liferay.project.templates.util.StringTestUtil;
+
+import aQute.bnd.main.bnd;
+import difflib.Delta;
+import difflib.DiffUtils;
+import difflib.Patch;
+import net.diibadaaba.zipdiff.DifferenceCalculator;
+import net.diibadaaba.zipdiff.Differences;
 
 /**
  * @author Lawrence Lee
@@ -156,10 +149,16 @@ public class ProjectTemplatesTest {
 			"activator", "bar-activator", "com.test",
 			"-DclassName=BarActivator", "-Dpackage=bar.activator");
 
+		String gradlePackageName = "bar.activator-1.0.0.jar";
+
 		_buildProjects(
 			gradleProjectDir, mavenProjectDir,
-			"build/libs/bar.activator-1.0.0.jar",
+			"build/libs/" + gradlePackageName,
 			"target/bar-activator-1.0.0.jar");
+
+		_storeProjectTemplateProjects(
+			new File(gradleProjectDir, "build/libs/" + gradlePackageName),
+			gradlePackageName);
 	}
 
 	@Test
@@ -2859,6 +2858,20 @@ public class ProjectTemplatesTest {
 			workspaceProjectDir, jarFilePath);
 
 		_testBundlesDiff(gradleBundleFile, workspaceBundleFile);
+	}
+
+	private void _storeProjectTemplateProjects(File file, String packageName) throws IOException {
+		Path destinationPath = Paths.get(System.getProperty("projectTemplateBuildDir"), packageName);
+
+		Path sourcePath = file.toPath();
+
+		Path tmp = destinationPath.getParent();
+
+		if (tmp != null) {
+			Files.createDirectories(tmp);
+		}
+
+		Files.copy(sourcePath, destinationPath, StandardCopyOption.REPLACE_EXISTING);
 	}
 
 	private static final String _BUNDLES_DIFF_IGNORES = StringTestUtil.merge(
