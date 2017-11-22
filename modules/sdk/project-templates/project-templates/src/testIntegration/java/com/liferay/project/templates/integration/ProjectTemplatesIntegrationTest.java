@@ -14,9 +14,45 @@
 
 package com.liferay.project.templates.integration;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
+
+import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
+
 /**
  * @author Lawrence Lee
  */
+
+@RunWith(Arquillian.class)
 public class ProjectTemplatesIntegrationTest {
+
+	@Test
+	public void testProjectInstall() throws Exception {
+		File projectTemplateBuildDir = new File(System.getProperty("projectTemplateBuildDir"));
+
+		ArrayList<File> projectTemplateBuildFiles = new ArrayList<File>(Arrays.asList(projectTemplateBuildDir.listFiles()));
+
+		for (File file : projectTemplateBuildFiles) {
+			Bundle bundle = FrameworkUtil.getBundle(ProjectTemplatesIntegrationTest.class);
+
+			BundleContext bundleContext = bundle.getBundleContext();
+
+			Assert.assertTrue(file.exists());
+
+			Bundle testBundle = bundleContext.installBundle(file.getAbsolutePath());
+
+			testBundle.start();
+
+			Assert.assertEquals(Bundle.ACTIVE, testBundle.getState());
+		}
+	}
 
 }
