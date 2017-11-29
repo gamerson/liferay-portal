@@ -69,88 +69,71 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>exec-maven-plugin</artifactId>
-				<version>1.5.0</version>
-				<executions>
-					<execution>
-						<id>transpile-js</id>
-						<phase>process-classes</phase>
-						<goals>
-							<goal>exec</goal>
-						</goals>
-						<configuration>
-							<executable>${project.build.directory}/node/node</executable>
-							<workingDirectory>${project.build.outputDirectory}/META-INF/resources</workingDirectory>
-							<arguments>
-								<argument>${node.modules.dir}/metal-cli/index.js</argument>
-								<argument>build</argument>
-								<argument>--bundleFileName=</argument>
-								<argument>--dest</argument>
-								<argument>${project.build.outputDirectory}/META-INF/resources</argument>
-								<argument>--format</argument>
-								<argument>amd</argument>
-								<argument>--globalName=</argument>
-								<argument>--moduleName=</argument>
-								<argument>--soyDeps</argument>
-								<argument>${node.modules.dir}/lexicon*/src/**/*.soy</argument>
-								<argument>${node.modules.dir}/metal*/src/**/*.soy</argument>
-								<argument>--soyDest</argument>
-								<argument>${project.build.outputDirectory}/META-INF/resources</argument>
-								<argument>--soySrc</argument>
-								<argument>**/*.soy</argument>
-								<argument>--src</argument>
-								<argument>**/*.es.js</argument>
-								<argument>**/*.soy.js</argument>
-							</arguments>
-						</configuration>
-					</execution>
-					<execution>
-						<id>config-js-modules</id>
-						<phase>process-classes</phase>
-						<goals>
-							<goal>exec</goal>
-						</goals>
-						<configuration>
-							<executable>${project.build.directory}/node/node</executable>
-							<workingDirectory>${project.build.outputDirectory}/META-INF/resources</workingDirectory>
-							<arguments>
-								<argument>${node.modules.dir}/liferay-module-config-generator/bin/index.js</argument>
-								<argument>--config=</argument>
-								<argument>--extension=</argument>
-								<argument>--filePattern</argument>
-								<argument>**/resources/*.js</argument>
-								<argument>--format</argument>
-								<argument>/_/g,-</argument>
-								<argument>--ignorePath</argument>
-								<argument>true</argument>
-								<argument>--moduleConfig</argument>
-								<argument>${project.basedir}/package.json</argument>
-								<argument>--namespace</argument>
-								<argument>Liferay.Loader</argument>
-								<argument>--output</argument>
-								<argument>${project.build.outputDirectory}/META-INF/config.json</argument>
-								<argument>--moduleRoot</argument>
-								<argument>${project.build.outputDirectory}/META-INF/resources</argument>
-								<argument>${project.build.outputDirectory}/META-INF</argument>
-							</arguments>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
 				<groupId>com.liferay</groupId>
 				<artifactId>com.liferay.portal.tools.soy.builder</artifactId>
 				<version>@com.liferay.portal.tools.soy.builder.version@</version>
-				<configuration>
-					<dir>${project.build.outputDirectory}</dir>
-				</configuration>
+
 				<executions>
 					<execution>
+                        <id>transpile-js</id>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>transpile-js</goal>
+						</goals>
+                        <configuration>
+                            <nodePath>${project.build.directory}/node/node</nodePath>
+                            <workingPath>${project.build.outputDirectory}/META-INF/resources</workingPath>
+                            <modulePath>${node.modules.dir}/metal-cli/index.js</modulePath>
+                            <bundleFileName></bundleFileName>
+                            <dest>${project.build.outputDirectory}/META-INF/resources</dest>
+                            <format>amd</format>
+                            <globalName></globalName>
+                            <moduleName></moduleName>
+                            <soyDeps>
+                                <soyDep>${node.modules.dir}/lexicon*/src/**/*.soy</soyDep>
+                                <soyDep>${node.modules.dir}/metal*/src/**/*.soy</soyDep>
+                            </soyDeps>
+                            <soyDest>${project.build.outputDirectory}/META-INF/resources</soyDest>
+                            <soySrcs>
+                                <soySrc>**/*.soy</soySrc>
+                            </soySrcs>
+                            <srcs>
+                                <src>**/*.es.js</src>
+                                <src>**/*.soy.js</src>
+                            </srcs>
+                        </configuration>
+					</execution>
+					<execution>
+                        <id>config-js-modules</id>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>config-js-modules</goal>
+						</goals>
+                        <configuration>
+                            <nodePath>${project.build.directory}/node/node</nodePath>
+                            <workingPath>${project.build.outputDirectory}/META-INF/resources</workingPath>
+                            <modulePath>${node.modules.dir}/liferay-module-config-generator/bin/index.js</modulePath>
+                            <config></config>
+                            <extension></extension>
+                            <filePattern>**/resources/*.js</filePattern>
+                            <format>/_/g,-</format>
+                            <ignorePath>true</ignorePath>
+                            <moduleConfig>${project.basedir}/package.json</moduleConfig>
+                            <namespace>Liferay.Loader</namespace>
+                            <output>${project.build.outputDirectory}/META-INF/config.json</output>
+                            <moduleRoot>${project.build.outputDirectory}/META-INF/resources</moduleRoot>
+                            <input>${project.build.outputDirectory}/META-INF</input>
+                        </configuration>
+					</execution>
+					<execution>
+                        <id>replace-translation</id>
 						<phase>process-classes</phase>
 						<goals>
 							<goal>replace-translation</goal>
 						</goals>
+                        <configuration>
+                            <dir>${project.build.outputDirectory}</dir>
+                        </configuration>
 					</execution>
 				</executions>
 			</plugin>
