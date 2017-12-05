@@ -12,47 +12,74 @@
  * details.
  */
 
-package com.liferay.project.templates.integration;
+package com.liferay.project.templates.integration.test;
+
+import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
+import com.liferay.portal.kernel.util.PropsKeys;
+import com.liferay.portal.kernel.util.PropsUtil;
 
 import java.io.File;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 
-import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
-
 /**
  * @author Lawrence Lee
  */
-
 @RunWith(Arquillian.class)
 public class ProjectTemplatesIntegrationTest {
 
 	@Test
 	public void testProjectInstall() throws Exception {
-		File projectTemplateBuildDir = new File(System.getProperty("projectTemplateBuildDir"));
+		File projectTemplateTomcatTmpDir = new File(
+			PropsUtil.get(PropsKeys.LIFERAY_HOME),
+			"/project-templates-projects");
 
-		ArrayList<File> projectTemplateBuildFiles = new ArrayList<File>(Arrays.asList(projectTemplateBuildDir.listFiles()));
+		ArrayList<File> projectTemplateBuildFiles = new ArrayList<>(
+			Arrays.asList(projectTemplateTomcatTmpDir.listFiles()));
 
 		for (File file : projectTemplateBuildFiles) {
-			Bundle bundle = FrameworkUtil.getBundle(ProjectTemplatesIntegrationTest.class);
+			Bundle bundle = FrameworkUtil.getBundle(
+				ProjectTemplatesIntegrationTest.class);
 
 			BundleContext bundleContext = bundle.getBundleContext();
 
 			Assert.assertTrue(file.exists());
 
-			Bundle testBundle = bundleContext.installBundle(file.getAbsolutePath());
+			Bundle testBundle = bundleContext.installBundle(
+				file.toURI().toASCIIString());
 
 			testBundle.start();
 
-			Assert.assertEquals(Bundle.ACTIVE, testBundle.getState());
+			Assert.assertEquals(
+				_toPrintStatus(Bundle.ACTIVE),
+				_toPrintStatus(testBundle.getState()));
+
+			testBundle.uninstall();
+
+			Assert.assertEquals(
+				_toPrintStatus(Bundle.UNINSTALLED),
+				_toPrintStatus(testBundle.getState()));
 		}
+	}
+
+	private static String _toPrintStatus(int status) {
+		switch (status) {
+			case Bundle.ACTIVE:
+				return "ACTIVE";
+			case Bundle.UNINSTALLED:
+				return "UNINSTALLED";
+		}
+
+		return null;
 	}
 
 }
