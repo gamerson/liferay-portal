@@ -7,5 +7,5 @@ dependencies {
 testIntegration {
 	dependsOn ":sdk:project-templates:project-templates:test"
 
-	systemProperty "projectTemplateTmpDir", new File(liferay.liferayHome, "/project-templates-projects").path
+	systemProperty "projectBuildOutputDir", new File(liferay.liferayHome, "/project-templates-test").path
 }

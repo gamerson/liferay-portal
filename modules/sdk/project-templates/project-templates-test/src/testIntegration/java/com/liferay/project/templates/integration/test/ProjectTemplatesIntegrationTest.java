@@ -19,14 +19,12 @@ import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.PropsUtil;
 
 import java.io.File;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
@@ -39,12 +37,12 @@ public class ProjectTemplatesIntegrationTest {
 
 	@Test
 	public void testProjectInstall() throws Exception {
-		File projectTemplateTomcatTmpDir = new File(
+		File projectBuildOutputDir = new File(
 			PropsUtil.get(PropsKeys.LIFERAY_HOME),
-			"/project-templates-projects");
+			"/project-templates-tests");
 
 		ArrayList<File> projectTemplateBuildFiles = new ArrayList<>(
-			Arrays.asList(projectTemplateTomcatTmpDir.listFiles()));
+			Arrays.asList(projectBuildOutputDir.listFiles()));
 
 		for (File file : projectTemplateBuildFiles) {
 			Bundle bundle = FrameworkUtil.getBundle(

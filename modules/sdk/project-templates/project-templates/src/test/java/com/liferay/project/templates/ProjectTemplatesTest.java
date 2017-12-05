@@ -2157,7 +2157,7 @@ public class ProjectTemplatesTest {
 		throws IOException {
 
 		Path outputPath = Paths.get(
-			System.getProperty("projectTemplateTmpDir"),
+			System.getProperty("projectBuildOutputDir"),
 			outputFile.getAbsolutePath());
 
 		Path sourcePath = outputFile.toPath();
