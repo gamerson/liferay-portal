@@ -156,16 +156,10 @@ public class ProjectTemplatesTest {
 			"activator", "bar-activator", "com.test",
 			"-DclassName=BarActivator", "-Dpackage=bar.activator");
 
-		String gradlePackageName = "bar.activator-1.0.0.jar";
-
 		_buildProjects(
 			gradleProjectDir, mavenProjectDir,
-			"build/libs/" + gradlePackageName,
+			"build/libs/bar.activator-1.0.0.jar",
 			"target/bar-activator-1.0.0.jar");
-
-		_storeProjectTemplateProjects(
-			new File(gradleProjectDir, "build/libs/" + gradlePackageName),
-			gradlePackageName);
 	}
 
 	@Test
@@ -1890,6 +1884,8 @@ public class ProjectTemplatesTest {
 			else if (gradleBundleFileName.endsWith(".war")) {
 				_testWarsDiff(gradleBundleFile, mavenBundleFile);
 			}
+
+			_storeProjectOutputFile(gradleBundleFile);
 		}
 		catch (Throwable t) {
 			if (_TEST_DEBUG_BUNDLE_DIFFS) {
@@ -2155,6 +2151,20 @@ public class ProjectTemplatesTest {
 		MavenExecutor.Result result = mavenExecutor.execute(projectDir, args);
 
 		Assert.assertEquals(result.output, 0, result.exitCode);
+	}
+
+	private static void _storeProjectOutputFile(File outputFile)
+		throws IOException {
+
+		Path outputPath = Paths.get(
+			System.getProperty("projectTemplateTmpDir"),
+			outputFile.getAbsolutePath());
+
+		Path sourcePath = outputFile.toPath();
+
+		Files.createDirectories(outputFile.getParentFile().toPath());
+
+		Files.copy(sourcePath, outputPath, StandardCopyOption.REPLACE_EXISTING);
 	}
 
 	private static void _testBundlesDiff(File bundleFile1, File bundleFile2)
@@ -2539,26 +2549,6 @@ public class ProjectTemplatesTest {
 
 		return _buildTemplateWithGradle(
 			destinationDir, WorkspaceUtil.WORKSPACE, "test-workspace");
-	}
-
-	private void _storeProjectTemplateProjects(File file, String packageName)
-		throws IOException {
-
-		Path destinationPath = Paths.get(
-			System.getProperty("projectTemplateTmpDir"), packageName);
-
-		Path sourcePath = file.toPath();
-
-		Path tmp = destinationPath.getParent();
-
-		if (tmp != null) {
-			Files.createDirectories(tmp);
-		}
-
-		Files.copy(
-			sourcePath, destinationPath, StandardCopyOption.REPLACE_EXISTING);
-
-		System.out.println("File was copied to:" + destinationPath);
 	}
 
 	private void _testBuildTemplateNpm(
