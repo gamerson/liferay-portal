@@ -101,7 +101,9 @@ public class FileTestUtil {
 
 					String fileName = fileNamePath.toString();
 
-					if (fileName.startsWith(PROJECT_TEMPLATE_DIR_PREFIX)) {
+					if (fileName.startsWith(PROJECT_TEMPLATE_DIR_PREFIX) &&
+						!fileName.contentEquals("project-templates-test")) {
+
 						return true;
 					}
 

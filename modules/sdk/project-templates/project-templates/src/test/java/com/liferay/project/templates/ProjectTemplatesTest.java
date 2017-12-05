@@ -156,10 +156,16 @@ public class ProjectTemplatesTest {
 			"activator", "bar-activator", "com.test",
 			"-DclassName=BarActivator", "-Dpackage=bar.activator");
 
+		String gradlePackageName = "bar.activator-1.0.0.jar";
+
 		_buildProjects(
 			gradleProjectDir, mavenProjectDir,
-			"build/libs/bar.activator-1.0.0.jar",
+			"build/libs/" + gradlePackageName,
 			"target/bar-activator-1.0.0.jar");
+
+		_storeProjectTemplateProjects(
+			new File(gradleProjectDir, "build/libs/" + gradlePackageName),
+			gradlePackageName);
 	}
 
 	@Test
@@ -2533,6 +2539,26 @@ public class ProjectTemplatesTest {
 
 		return _buildTemplateWithGradle(
 			destinationDir, WorkspaceUtil.WORKSPACE, "test-workspace");
+	}
+
+	private void _storeProjectTemplateProjects(File file, String packageName)
+		throws IOException {
+
+		Path destinationPath = Paths.get(
+			System.getProperty("projectTemplateTmpDir"), packageName);
+
+		Path sourcePath = file.toPath();
+
+		Path tmp = destinationPath.getParent();
+
+		if (tmp != null) {
+			Files.createDirectories(tmp);
+		}
+
+		Files.copy(
+			sourcePath, destinationPath, StandardCopyOption.REPLACE_EXISTING);
+
+		System.out.println("File was copied to:" + destinationPath);
 	}
 
 	private void _testBuildTemplateNpm(
