@@ -19,8 +19,7 @@ import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.PropsUtil;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.stream.Stream;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -41,32 +40,42 @@ public class ProjectTemplatesIntegrationTest {
 			PropsUtil.get(PropsKeys.LIFERAY_HOME),
 			"/project-templates-tests");
 
-		ArrayList<File> projectTemplateBuildFiles = new ArrayList<>(
-			Arrays.asList(projectBuildOutputDir.listFiles()));
+		Stream<File> projectTemplateBuildFiles = Stream.of(projectBuildOutputDir.listFiles());
 
-		for (File file : projectTemplateBuildFiles) {
-			Bundle bundle = FrameworkUtil.getBundle(
-				ProjectTemplatesIntegrationTest.class);
+		projectTemplateBuildFiles.flatMap( file -> {
+			try {
+				Bundle bundle = FrameworkUtil.getBundle(
+					ProjectTemplatesIntegrationTest.class);
 
-			BundleContext bundleContext = bundle.getBundleContext();
+				BundleContext bundleContext = bundle.getBundleContext();
 
-			Assert.assertTrue(file.exists());
+				Assert.assertTrue(file.exists());
 
-			Bundle testBundle = bundleContext.installBundle(
-				file.toURI().toASCIIString());
+				Bundle testBundle = bundleContext.installBundle(
+					file.toURI().toASCIIString());
 
-			testBundle.start();
+				testBundle.start();
 
-			Assert.assertEquals(
-				_toPrintStatus(Bundle.ACTIVE),
-				_toPrintStatus(testBundle.getState()));
+				Assert.assertEquals(
+					_toPrintStatus(Bundle.ACTIVE),
+					_toPrintStatus(testBundle.getState()));
 
-			testBundle.uninstall();
+				testBundle.uninstall();
 
-			Assert.assertEquals(
-				_toPrintStatus(Bundle.UNINSTALLED),
-				_toPrintStatus(testBundle.getState()));
-		}
+				Assert.assertEquals(
+					_toPrintStatus(Bundle.UNINSTALLED),
+					_toPrintStatus(testBundle.getState()));
+
+				return null;
+			} catch (Throwable t) {
+	            return Stream.of(t);
+	        }
+		}).reduce((t1, t2) -> {
+            t1.addSuppressed(t2);
+            return t1;
+        }).ifPresent(ex -> {
+            throw new RuntimeException(ex);
+        });
 	}
 
 	private static String _toPrintStatus(int status) {

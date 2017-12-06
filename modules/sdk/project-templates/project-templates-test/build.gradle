@@ -4,6 +4,9 @@ dependencies {
 	testIntegrationCompile group: "junit", name: "junit", version: "4.12"
 }
 
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+
 testIntegration {
 	dependsOn ":sdk:project-templates:project-templates:test"
 
