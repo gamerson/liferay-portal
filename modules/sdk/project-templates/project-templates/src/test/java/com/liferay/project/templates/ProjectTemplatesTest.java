@@ -2158,11 +2158,11 @@ public class ProjectTemplatesTest {
 
 		Path outputPath = Paths.get(
 			System.getProperty("projectBuildOutputDir"),
-			outputFile.getAbsolutePath());
+			outputFile.getName());
 
 		Path sourcePath = outputFile.toPath();
 
-		Files.createDirectories(outputFile.getParentFile().toPath());
+		Files.createDirectories(outputPath);
 
 		Files.copy(sourcePath, outputPath, StandardCopyOption.REPLACE_EXISTING);
 	}

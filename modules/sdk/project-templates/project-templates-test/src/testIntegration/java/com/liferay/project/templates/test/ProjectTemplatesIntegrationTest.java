@@ -38,7 +38,7 @@ public class ProjectTemplatesIntegrationTest {
 	public void testProjectInstall() throws Exception {
 		File projectBuildOutputDir = new File(
 			PropsUtil.get(PropsKeys.LIFERAY_HOME),
-			"/project-templates-tests");
+			"/project-templates-test");
 
 		Stream<File> projectTemplateBuildFiles = Stream.of(projectBuildOutputDir.listFiles());
 
