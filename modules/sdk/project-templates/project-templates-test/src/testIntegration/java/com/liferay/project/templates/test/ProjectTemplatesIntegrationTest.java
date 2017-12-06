@@ -12,7 +12,7 @@
  * details.
  */
 
-package com.liferay.project.templates.integration.test;
+package com.liferay.project.templates.test;
 
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.portal.kernel.util.PropsKeys;
