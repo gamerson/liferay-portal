@@ -10,5 +10,9 @@ targetCompatibility = '1.8'
 testIntegration {
 	dependsOn ":sdk:project-templates:project-templates:test"
 
-	systemProperty "projectBuildOutputDir", new File(liferay.liferayHome, "/project-templates-test").path
+	systemProperty "projectBuildOutputDir", new File(liferay.liferayHome, "project-templates-test").path
+}
+
+stopTestableTomcat {
+	delete new File(liferay.liferayHome, "project-templates-test")	
 }
