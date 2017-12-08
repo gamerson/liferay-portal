@@ -49,7 +49,17 @@ public class ProjectTemplatesIntegrationTest {
 	@Test
 	public void testProjectInstall() throws Exception {
 		File projectBuildOutputDir = new File(
-			PropsUtil.get(PropsKeys.LIFERAY_HOME), "/project-templates-test");
+			PropsUtil.get(PropsKeys.LIFERAY_HOME), "project-templates-test");
+
+		Assert.assertTrue(
+			"Project Build Output Dir: " +
+				projectBuildOutputDir.getAbsolutePath(),
+			projectBuildOutputDir.exists());
+
+		Assert.assertTrue(
+			"Project Build Output Dir contains " +
+				projectBuildOutputDir.listFiles().length,
+			projectBuildOutputDir.listFiles().length > 0);
 
 		Map<File, Bundle> installedBundleMap = _installBundles(
 			projectBuildOutputDir);

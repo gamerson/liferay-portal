@@ -2687,7 +2687,7 @@ public class ProjectTemplatesTest {
 		_buildProjects(
 			gradleProjectDir, mavenProjectDir,
 			"build/libs/com.liferay.test-1.0.0.jar",
-			"target/" + portletClassName + "-1.0.0.jar");
+			"target/" + portletClassName.toLowerCase() + "-1.0.0.jar");
 
 		return gradleProjectDir;
 	}
@@ -2718,8 +2718,8 @@ public class ProjectTemplatesTest {
 			"apply plugin: \"com.liferay.plugin\"");
 		_testContains(
 			gradleProjectDir,
-			"src/main/java/" + portletFileName + "/portlet/" + portletFileName +
-				"Portlet.java",
+			"src/main/java/" + portletFileName.toLowerCase() + "/portlet/" +
+				portletFileName + "Portlet.java",
 			"public class " + portletFileName + "Portlet extends " +
 				portletClassName + " {");
 
