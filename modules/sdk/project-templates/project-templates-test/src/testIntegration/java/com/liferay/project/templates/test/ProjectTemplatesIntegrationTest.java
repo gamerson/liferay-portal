@@ -14,11 +14,19 @@
 
 package com.liferay.project.templates.test;
 
+import aQute.bnd.osgi.Jar;
+
+import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
+import com.liferay.portal.kernel.util.PropsKeys;
+import com.liferay.portal.kernel.util.PropsUtil;
+
 import java.io.File;
+
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.stream.Collectors;
@@ -27,15 +35,10 @@ import java.util.stream.Stream;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
-
-import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
-
-import aQute.bnd.osgi.Jar;
 
 /**
  * @author Lawrence Lee
@@ -46,21 +49,96 @@ public class ProjectTemplatesIntegrationTest {
 	@Test
 	public void testProjectInstall() throws Exception {
 		File projectBuildOutputDir = new File(
-			PropsUtil.get(PropsKeys.LIFERAY_HOME),
-			"/project-templates-test");
+			PropsUtil.get(PropsKeys.LIFERAY_HOME), "/project-templates-test");
 
-		Map<File, Bundle> installedBundleMap = _installBundles(projectBuildOutputDir);
+		Map<File, Bundle> installedBundleMap = _installBundles(
+			projectBuildOutputDir);
 
-		Stream<Entry<File, Bundle>> installedBundleStream = installedBundleMap.entrySet().stream();
+		Stream<Entry<File, Bundle>> installedBundleStream =
+			installedBundleMap.entrySet().stream();
 
-		Stream<Entry<File, Bundle>> sortedInstalledBundleStream = installedBundleStream.sorted(Map.Entry.<File, Bundle>comparingByKey());
+		Stream<Entry<File, Bundle>> sortedInstalledBundleStream =
+			installedBundleStream.sorted(
+				Map.Entry.<File, Bundle>comparingByKey());
 
-		Map<File, Bundle> sortedInstalledBundleMap = sortedInstalledBundleStream.collect(Collectors.toMap(Map.Entry::getKey,
-           Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+		Map<File, Bundle> sortedInstalledBundleMap =
+			sortedInstalledBundleStream.collect(
+				Collectors.toMap(
+					Map.Entry::getKey, Map.Entry::getValue,
+					(e1, e2) -> e1, LinkedHashMap::new));
 
 		_execute("start", sortedInstalledBundleMap);
 
 		_execute("uninstall", sortedInstalledBundleMap);
+	}
+
+	private static String _toPrintStatus(int status) {
+		switch (status) {
+			case Bundle.ACTIVE:
+				return "ACTIVE";
+			case Bundle.INSTALLED:
+				return "INSTALLED";
+			case Bundle.UNINSTALLED:
+				return "UNINSTALLED";
+		}
+
+		return null;
+	}
+
+	private void _execute(String command, Map<File, Bundle> map) {
+		Set<Entry<File, Bundle>> entrySet = map.entrySet();
+
+		Stream<Entry<File, Bundle>> stream = entrySet.stream();
+
+		stream.map(
+			entry -> {
+				File file = entry.getKey();
+				Bundle bundle = entry.getValue();
+				Throwable throwable = null;
+
+				try {
+					if (command.contentEquals("start")) {
+						if (!_isFragment(file) &&
+							!file.getName().contains("simple.ct")) {
+
+							bundle.start();
+
+							Assert.assertEquals(
+								_toPrintStatus(Bundle.ACTIVE),
+								_toPrintStatus(bundle.getState()));
+						}
+					}
+					else {
+						bundle.uninstall();
+
+						Assert.assertEquals(
+							_toPrintStatus(Bundle.UNINSTALLED),
+							_toPrintStatus(bundle.getState()));
+					}
+
+					return null;
+				}
+				catch (Throwable t) {
+					throwable = t;
+				}
+
+				return throwable;
+			}
+		).filter(
+			x -> {
+				return x != null;
+			}
+		).reduce(
+			(t1, t2) -> {
+				t1.addSuppressed(t2);
+
+				return t1;
+			}
+		).ifPresent(
+			ex -> {
+				throw new RuntimeException(ex);
+			}
+		);
 	}
 
 	private Map<File, Bundle> _installBundles(File fileDir) {
@@ -68,88 +146,55 @@ public class ProjectTemplatesIntegrationTest {
 
 		Map<File, Bundle> installedBundleList = new HashMap<>();
 
-		fileListStream.flatMap( file -> {
-			Bundle bundleFile;
-			BundleContext bundleContext;
-			Bundle testBundle;
+		fileListStream.flatMap(
+			file -> {
+				Bundle bundleFile;
+				BundleContext bundleContext;
+				Bundle testBundle;
 
-			try {
-				bundleFile = FrameworkUtil.getBundle(
-					ProjectTemplatesIntegrationTest.class);
+				try {
+					bundleFile = FrameworkUtil.getBundle(
+						ProjectTemplatesIntegrationTest.class);
 
-				bundleContext = bundleFile.getBundleContext();
+					bundleContext = bundleFile.getBundleContext();
 
-				Assert.assertTrue(file.exists());
+					Assert.assertTrue(file.exists());
 
-				if (file.getName().endsWith(".war")) {
-					testBundle = bundleContext.installBundle(
-						"webbundle:" + file.toURI().toASCIIString() + "?Web-ContextPath=/" +
-							file.getName());
-				}
-
-				else {
-					testBundle = bundleContext.installBundle(
-						file.toURI().toASCIIString());
-				}
-
-				Assert.assertEquals(
-					_toPrintStatus(Bundle.INSTALLED),
-					_toPrintStatus(testBundle.getState()));
-
-				installedBundleList.put(file, testBundle);
-
-				return null;
-			} catch (Throwable t) {
-	            return Stream.of(t);
-	        }
-		}).reduce((t1, t2) -> {
-            t1.addSuppressed(t2);
-            return t1;
-        }).ifPresent(ex -> {
-            throw new RuntimeException(ex);
-        });
-
-		return installedBundleList;
-	}
-
-	private void _execute(String command, Map<File, Bundle> map) {
-		map.entrySet().stream().map( entry -> {
-			File file = entry.getKey();
-			Bundle bundle = entry.getValue();
-			Throwable throwable = null;
-
-			try {
-				if (command.contentEquals("start")) {
-					if (!_isFragment(file) && !file.getName().contains("simple.ct")) {
-						bundle.start();
-
-						Assert.assertEquals(
-								_toPrintStatus(Bundle.ACTIVE),
-								_toPrintStatus(bundle.getState()));
+					if (file.getName().endsWith(".war")) {
+						testBundle = bundleContext.installBundle(
+							"webbundle:" + file.toURI().toASCIIString() +
+								"?Web-ContextPath=/" + file.getName());
 					}
-				}
-				else {
-					bundle.uninstall();
+					else {
+						testBundle = bundleContext.installBundle(
+							file.toURI().toASCIIString());
+					}
 
 					Assert.assertEquals(
-						_toPrintStatus(Bundle.UNINSTALLED),
-						_toPrintStatus(bundle.getState()));
-				}
+						_toPrintStatus(Bundle.INSTALLED),
+						_toPrintStatus(testBundle.getState()));
 
-				return null;
+					installedBundleList.put(file, testBundle);
+
+					return null;
+				}
+				catch (Throwable t) {
+					return Stream.of(t);
+				}
 			}
-			catch (Throwable t) {
-				throwable = t;
+		).reduce(
+			(t1, t2) -> {
+				t1.addSuppressed(t2);
+
+				return t1;
 			}
-			return throwable;
-		}).filter( x -> {
-			return x != null;
-		}).reduce((t1, t2) -> {
-			t1.addSuppressed(t2);
-			return t1;
-		}).ifPresent(ex -> {
-			throw new RuntimeException(ex);
-		});
+		).ifPresent(
+			ex -> {
+				throw new RuntimeException(ex);
+			}
+		);
+
+		return installedBundleList;
 	}
 
 	private boolean _isFragment(File file) throws Exception {
@@ -165,19 +210,6 @@ public class ProjectTemplatesIntegrationTest {
 				return true;
 			}
 		}
-	}
-
-	private static String _toPrintStatus(int status) {
-		switch (status) {
-			case Bundle.ACTIVE:
-				return "ACTIVE";
-			case Bundle.INSTALLED:
-				return "INSTALLED";
-			case Bundle.UNINSTALLED:
-				return "UNINSTALLED";
-		}
-
-		return null;
 	}
 
 }

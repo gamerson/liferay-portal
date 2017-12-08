@@ -14,6 +14,19 @@
 
 package com.liferay.project.templates;
 
+import aQute.bnd.main.bnd;
+
+import com.liferay.maven.executor.MavenExecutor;
+import com.liferay.project.templates.internal.util.FileUtil;
+import com.liferay.project.templates.internal.util.Validator;
+import com.liferay.project.templates.internal.util.WorkspaceUtil;
+import com.liferay.project.templates.util.FileTestUtil;
+import com.liferay.project.templates.util.StringTestUtil;
+
+import difflib.Delta;
+import difflib.DiffUtils;
+import difflib.Patch;
+
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -21,7 +34,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+
 import java.net.URI;
+
 import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.FileVisitResult;
@@ -31,6 +46,7 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -43,12 +59,17 @@ import java.util.jar.JarFile;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.diibadaaba.zipdiff.DifferenceCalculator;
+import net.diibadaaba.zipdiff.Differences;
+
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipFile;
+
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.BuildTask;
 import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.TaskOutcome;
+
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.BeforeClass;
@@ -56,20 +77,6 @@ import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-
-import com.liferay.maven.executor.MavenExecutor;
-import com.liferay.project.templates.internal.util.FileUtil;
-import com.liferay.project.templates.internal.util.Validator;
-import com.liferay.project.templates.internal.util.WorkspaceUtil;
-import com.liferay.project.templates.util.FileTestUtil;
-import com.liferay.project.templates.util.StringTestUtil;
-
-import aQute.bnd.main.bnd;
-import difflib.Delta;
-import difflib.DiffUtils;
-import difflib.Patch;
-import net.diibadaaba.zipdiff.DifferenceCalculator;
-import net.diibadaaba.zipdiff.Differences;
 
 /**
  * @author Lawrence Lee
@@ -118,7 +125,8 @@ public class ProjectTemplatesTest {
 			"apply plugin: \"com.liferay.plugin\"");
 		_testContains(
 			gradleProjectDir,
-			"src/main/java/simple/template/portlet/portlet/SimpleTemplatePortlet.java",
+			"src/main/java/simple/template/portlet/portlet" +
+				"/SimpleTemplatePortlet.java",
 			"public class SimpleTemplatePortlet extends MVCPortlet {");
 
 		File mavenProjectDir = _buildTemplateWithMaven(
@@ -178,7 +186,8 @@ public class ProjectTemplatesTest {
 			"1.0.0");
 
 		File mavenProjectDir = _buildTemplateWithMaven(
-			"api", "foo-api", "com.test", "-DclassName=FooApi", "-Dpackage=foo.api");
+			"api", "foo-api", "com.test", "-DclassName=FooApi",
+			"-Dpackage=foo.api");
 
 		_buildProjects(
 			gradleProjectDir, mavenProjectDir, "build/libs/foo.api-1.0.0.jar",
@@ -220,7 +229,8 @@ public class ProjectTemplatesTest {
 
 		_testContains(
 			gradleProjectDir,
-			"src/main/java/simple/ct/report/content/targeting/report/SimpleCtReportReport.java",
+			"src/main/java/simple/ct/report/content/targeting/report" +
+				"/SimpleCtReportReport.java",
 			"public class SimpleCtReportReport extends BaseJSPReport");
 
 		File mavenProjectDir = _buildTemplateWithMaven(
@@ -228,7 +238,8 @@ public class ProjectTemplatesTest {
 			"-DclassName=SimpleCtReport", "-Dpackage=simple.ct.report");
 
 		_buildProjects(
-			gradleProjectDir, mavenProjectDir, "build/libs/simple.ct.report-1.0.0.jar",
+			gradleProjectDir, mavenProjectDir,
+			"build/libs/simple.ct.report-1.0.0.jar",
 			"target/simple-ct-report-1.0.0.jar");
 	}
 
@@ -250,7 +261,8 @@ public class ProjectTemplatesTest {
 
 		_testContains(
 			gradleProjectDir,
-			"src/main/java/simple/ct/rule/content/targeting/rule/SimpleCtRuleRule.java",
+			"src/main/java/simple/ct/rule/content/targeting/rule" +
+				"/SimpleCtRuleRule.java",
 			"public class SimpleCtRuleRule extends BaseJSPRule");
 
 		File mavenProjectDir = _buildTemplateWithMaven(
@@ -258,7 +270,8 @@ public class ProjectTemplatesTest {
 			"-DclassName=SimpleCtRule", "-Dpackage=simple.ct.rule");
 
 		_buildProjects(
-			gradleProjectDir, mavenProjectDir, "build/libs/simple.ct.rule-1.0.0.jar",
+			gradleProjectDir, mavenProjectDir,
+			"build/libs/simple.ct.rule-1.0.0.jar",
 			"target/simple-ct-rule-1.0.0.jar");
 	}
 
@@ -282,16 +295,19 @@ public class ProjectTemplatesTest {
 
 		_testContains(
 			gradleProjectDir,
-			"src/main/java/simple/ct/tracking/action/content/targeting/tracking/action" +
-				"/SimpleCtTrackingActionTrackingAction.java",
-			"public class SimpleCtTrackingActionTrackingAction extends BaseJSPTrackingAction");
+			"src/main/java/simple/ct/tracking/action/content/targeting" +
+				"/tracking/action/SimpleCtTrackingActionTrackingAction.java",
+			"public class SimpleCtTrackingActionTrackingAction extends " +
+				"BaseJSPTrackingAction");
 
 		File mavenProjectDir = _buildTemplateWithMaven(
-			"content-targeting-tracking-action", "simple-ct-tracking-action", "com.test",
-			"-DclassName=SimpleCtTrackingAction", "-Dpackage=simple.ct.tracking.action");
+			"content-targeting-tracking-action", "simple-ct-tracking-action",
+			"com.test", "-DclassName=SimpleCtTrackingAction",
+			"-Dpackage=simple.ct.tracking.action");
 
 		_buildProjects(
-			gradleProjectDir, mavenProjectDir, "build/libs/simple.ct.tracking.action-1.0.0.jar",
+			gradleProjectDir, mavenProjectDir,
+			"build/libs/simple.ct.tracking.action-1.0.0.jar",
 			"target/simple-ct-tracking-action-1.0.0.jar");
 	}
 
@@ -315,16 +331,19 @@ public class ProjectTemplatesTest {
 			gradleProjectDir,
 			"src/main/java/simple/control/menu/entry/control/menu" +
 				"/SimpleControlMenuEntryProductNavigationControlMenuEntry.java",
-			"public class SimpleControlMenuEntryProductNavigationControlMenuEntry",
+			"public class " +
+				"SimpleControlMenuEntryProductNavigationControlMenuEntry",
 			"extends BaseProductNavigationControlMenuEntry",
 			"implements ProductNavigationControlMenuEntry");
 
 		File mavenProjectDir = _buildTemplateWithMaven(
-			"control-menu-entry", "simple-control-menu-entry", "com.test", "-DclassName=SimpleControlMenuEntry",
+			"control-menu-entry", "simple-control-menu-entry", "com.test",
+			"-DclassName=SimpleControlMenuEntry",
 			"-Dpackage=simple.control.menu.entry");
 
 		_buildProjects(
-			gradleProjectDir, mavenProjectDir, "build/libs/simple.control.menu.entry-1.0.0.jar",
+			gradleProjectDir, mavenProjectDir,
+			"build/libs/simple.control.menu.entry-1.0.0.jar",
 			"target/simple-control-menu-entry-1.0.0.jar");
 	}
 
@@ -348,13 +367,16 @@ public class ProjectTemplatesTest {
 			"apply plugin: \"com.liferay.plugin\"");
 		_testContains(
 			gradleProjectDir,
-			"src/main/java/simple/form/field/form/field/SimpleFormFieldDDMFormFieldRenderer.java",
+			"src/main/java/simple/form/field/form/field" +
+				"/SimpleFormFieldDDMFormFieldRenderer.java",
 			"public class SimpleFormFieldDDMFormFieldRenderer extends " +
 				"BaseDDMFormFieldRenderer {");
 		_testContains(
 			gradleProjectDir,
-			"src/main/java/simple/form/field/form/field/SimpleFormFieldDDMFormFieldType.java",
-			"class SimpleFormFieldDDMFormFieldType extends BaseDDMFormFieldType");
+			"src/main/java/simple/form/field/form/field" +
+				"/SimpleFormFieldDDMFormFieldType.java",
+			"class SimpleFormFieldDDMFormFieldType extends " +
+				"BaseDDMFormFieldType");
 		_testContains(
 			gradleProjectDir, "src/main/resources/META-INF/resources/config.js",
 			"'simple-form-field-form-field': {");
@@ -368,11 +390,12 @@ public class ProjectTemplatesTest {
 			"var SimpleFormFieldField");
 
 		File mavenProjectDir = _buildTemplateWithMaven(
-			"form-field", "simple-form-field", "com.test", "-DclassName=SimpleFormField",
-			"-Dpackage=simple.form.field");
+			"form-field", "simple-form-field", "com.test",
+			"-DclassName=SimpleFormField", "-Dpackage=simple.form.field");
 
 		_buildProjects(
-			gradleProjectDir, mavenProjectDir, "build/libs/simple.form.field-1.0.0.jar",
+			gradleProjectDir, mavenProjectDir,
+			"build/libs/simple.form.field-1.0.0.jar",
 			"target/simple-form-field-1.0.0.jar");
 	}
 
@@ -475,14 +498,17 @@ public class ProjectTemplatesTest {
 		File gradleProjectDir = _buildTemplateWithGradle(
 			"layout-template", "simpleLayoutTemplate");
 
-		_testExists(gradleProjectDir, "src/main/webapp/simpleLayoutTemplate.png");
+		_testExists(
+			gradleProjectDir, "src/main/webapp/simpleLayoutTemplate.png");
 
 		_testContains(
-			gradleProjectDir, "src/main/webapp/simpleLayoutTemplate.ftl", "class=\"simpleLayoutTemplate\"");
+			gradleProjectDir, "src/main/webapp/simpleLayoutTemplate.ftl",
+			"class=\"simpleLayoutTemplate\"");
 		_testContains(
 			gradleProjectDir,
 			"src/main/webapp/WEB-INF/liferay-layout-templates.xml",
-			"<layout-template id=\"simpleLayoutTemplate\" name=\"simpleLayoutTemplate\">",
+			"<layout-template id=\"simpleLayoutTemplate\" " +
+				"name=\"simpleLayoutTemplate\">",
 			"<template-path>/simpleLayoutTemplate.ftl</template-path>",
 			"<thumbnail-path>/simpleLayoutTemplate.png</thumbnail-path>");
 		_testContains(
@@ -498,7 +524,8 @@ public class ProjectTemplatesTest {
 			"src/main/resources/.gitkeep", gradleProjectDir, mavenProjectDir);
 
 		_buildProjects(
-			gradleProjectDir, mavenProjectDir, "build/libs/simpleLayoutTemplate.war",
+			gradleProjectDir, mavenProjectDir,
+			"build/libs/simpleLayoutTemplate.war",
 			"target/simpleLayoutTemplate-1.0.0.war");
 	}
 
@@ -696,7 +723,8 @@ public class ProjectTemplatesTest {
 
 		_buildProjects(
 			gradleProjectDir, mavenProjectDir,
-			"build/libs/simple.panel.app-1.0.0.jar", "target/simple.panel.app-1.0.0.jar");
+			"build/libs/simple.panel.app-1.0.0.jar",
+			"target/simple.panel.app-1.0.0.jar");
 	}
 
 	@Test
@@ -718,7 +746,8 @@ public class ProjectTemplatesTest {
 			"portlet", "simple.portlet", "--class-name", "Foo");
 
 		_testContains(
-			gradleProjectDir, "bnd.bnd", "Export-Package: simple.portlet.constants");
+			gradleProjectDir, "bnd.bnd",
+			"Export-Package: simple.portlet.constants");
 		_testContains(
 			gradleProjectDir, "build.gradle",
 			"apply plugin: \"com.liferay.plugin\"");
@@ -727,8 +756,10 @@ public class ProjectTemplatesTest {
 			"src/main/java/simple/portlet/constants/FooPortletKeys.java",
 			"public class FooPortletKeys");
 		_testContains(
-			gradleProjectDir, "src/main/java/simple/portlet/portlet/FooPortlet.java",
-			"package simple.portlet.portlet;", "javax.portlet.display-name=simple.portlet",
+			gradleProjectDir,
+			"src/main/java/simple/portlet/portlet/FooPortlet.java",
+			"package simple.portlet.portlet;",
+			"javax.portlet.display-name=simple.portlet",
 			"javax.portlet.name=\" + FooPortletKeys.Foo",
 			"public class FooPortlet extends GenericPortlet {",
 			"printWriter.print(\"simple.portlet Portlet");
@@ -738,7 +769,8 @@ public class ProjectTemplatesTest {
 			"-Dpackage=simple.portlet");
 
 		_buildProjects(
-			gradleProjectDir, mavenProjectDir, "build/libs/simple.portlet-1.0.0.jar",
+			gradleProjectDir, mavenProjectDir,
+			"build/libs/simple.portlet-1.0.0.jar",
 			"target/simple.portlet-1.0.0.jar");
 	}
 
@@ -765,8 +797,8 @@ public class ProjectTemplatesTest {
 			"-DclassName=Icontest", "-Dpackage=icon.test");
 
 		_buildProjects(
-			gradleProjectDir, mavenProjectDir,
-			"build/libs/icon.test-1.0.0.jar", "target/icontest-1.0.0.jar");
+			gradleProjectDir, mavenProjectDir, "build/libs/icon.test-1.0.0.jar",
+			"target/icontest-1.0.0.jar");
 	}
 
 	@Test
@@ -823,8 +855,8 @@ public class ProjectTemplatesTest {
 			"apply plugin: \"com.liferay.plugin\"");
 		_testContains(
 			gradleProjectDir,
-			"src/main/java/toolbar/contributor/test/portlet/toolbar/contributor" +
-				"/ToolbartestPortletToolbarContributor.java",
+			"src/main/java/toolbar/contributor/test/portlet/toolbar" +
+				"/contributor/ToolbartestPortletToolbarContributor.java",
 			"public class ToolbartestPortletToolbarContributor",
 			"implements PortletToolbarContributor");
 
@@ -834,7 +866,8 @@ public class ProjectTemplatesTest {
 
 		_buildProjects(
 			gradleProjectDir, mavenProjectDir,
-			"build/libs/toolbar.contributor.test-1.0.0.jar", "target/toolbartest-1.0.0.jar");
+			"build/libs/toolbar.contributor.test-1.0.0.jar",
+			"target/toolbartest-1.0.0.jar");
 	}
 
 	@Test
@@ -1235,12 +1268,13 @@ public class ProjectTemplatesTest {
 
 		_testContains(
 			gradleProjectDir,
-			"src/main/java/simplespringmvc/portlet/SimplespringmvcPortletViewController.java",
+			"src/main/java/simplespringmvc/portlet" +
+				"/SimplespringmvcPortletViewController.java",
 			"public class SimplespringmvcPortletViewController {");
 
 		File mavenProjectDir = _buildTemplateWithMaven(
-			"spring-mvc-portlet", "simplespringmvc", "com.test", "-DclassName=Simplespringmvc",
-			"-Dpackage=simplespringmvc");
+			"spring-mvc-portlet", "simplespringmvc", "com.test",
+			"-DclassName=Simplespringmvc", "-Dpackage=simplespringmvc");
 
 		_buildProjects(
 			gradleProjectDir, mavenProjectDir, "build/libs/simplespringmvc.war",
@@ -1248,7 +1282,8 @@ public class ProjectTemplatesTest {
 
 		ZipFile zipFile = null;
 
-		File gradleWarFile = new File(gradleProjectDir, "build/libs/simplespringmvc.war");
+		File gradleWarFile = new File(
+			gradleProjectDir, "build/libs/simplespringmvc.war");
 
 		try {
 			zipFile = new ZipFile(gradleWarFile);
@@ -1284,7 +1319,8 @@ public class ProjectTemplatesTest {
 		throws Exception {
 
 		File gradleProjectDir = _buildTemplateWithGradle(
-			"spring-mvc-portlet", "springmvcpackage", "--package-name", "springmvcpackage");
+			"spring-mvc-portlet", "springmvcpackage", "--package-name",
+			"springmvcpackage");
 
 		_testExists(gradleProjectDir, "src/main/webapp/WEB-INF/jsp/init.jsp");
 		_testExists(gradleProjectDir, "src/main/webapp/WEB-INF/jsp/view.jsp");
@@ -1296,11 +1332,12 @@ public class ProjectTemplatesTest {
 			"public class SpringmvcpackagePortletViewController {");
 
 		File mavenProjectDir = _buildTemplateWithMaven(
-			"spring-mvc-portlet", "springmvcpackage", "com.test", "-DclassName=Springmvcpackage",
-			"-Dpackage=springmvcpackage");
+			"spring-mvc-portlet", "springmvcpackage", "com.test",
+			"-DclassName=Springmvcpackage", "-Dpackage=springmvcpackage");
 
 		_buildProjects(
-			gradleProjectDir, mavenProjectDir, "build/libs/springmvcpackage.war",
+			gradleProjectDir, mavenProjectDir,
+			"build/libs/springmvcpackage.war",
 			"target/springmvcpackage-1.0.0.war");
 	}
 
@@ -1316,15 +1353,17 @@ public class ProjectTemplatesTest {
 
 		_testContains(
 			gradleProjectDir,
-			"src/main/java/springmvcportlet/portlet/SpringmvcportletPortletViewController.java",
+			"src/main/java/springmvcportlet/portlet" +
+				"/SpringmvcportletPortletViewController.java",
 			"public class SpringmvcportletPortletViewController {");
 
 		File mavenProjectDir = _buildTemplateWithMaven(
-			"spring-mvc-portlet", "springmvcportlet", "com.test", "-DclassName=Springmvcportlet",
-			"-Dpackage=springmvcportlet");
+			"spring-mvc-portlet", "springmvcportlet", "com.test",
+			"-DclassName=Springmvcportlet", "-Dpackage=springmvcportlet");
 
 		_buildProjects(
-			gradleProjectDir, mavenProjectDir, "build/libs/springmvcportlet.war",
+			gradleProjectDir, mavenProjectDir,
+			"build/libs/springmvcportlet.war",
 			"target/springmvcportlet-1.0.0.war");
 	}
 
@@ -1349,7 +1388,8 @@ public class ProjectTemplatesTest {
 			"-DclassName=Springmvc", "-Dpackage=springmvc.portlet");
 
 		_buildProjects(
-			gradleProjectDir, mavenProjectDir, "build/libs/springmvc-portlet.war",
+			gradleProjectDir, mavenProjectDir,
+			"build/libs/springmvc-portlet.war",
 			"target/springmvc-portlet-1.0.0.war");
 	}
 
@@ -1372,12 +1412,14 @@ public class ProjectTemplatesTest {
 			"implements TemplateContextContributor");
 
 		File mavenProjectDir = _buildTemplateWithMaven(
-			"template-context-contributor", "template-context-contributor", "com.test",
-			"-DclassName=TemplateContextContributor", "-Dpackage=template.context.contributor");
+			"template-context-contributor", "template-context-contributor",
+			"com.test", "-DclassName=TemplateContextContributor",
+			"-Dpackage=template.context.contributor");
 
 		_buildProjects(
 			gradleProjectDir, mavenProjectDir,
-			"build/libs/template.context.contributor-1.0.0.jar", "target/template-context-contributor-1.0.0.jar");
+			"build/libs/template.context.contributor-1.0.0.jar",
+			"target/template-context-contributor-1.0.0.jar");
 	}
 
 	@Test
@@ -2150,8 +2192,7 @@ public class ProjectTemplatesTest {
 		throws IOException {
 
 		Path outputPath = Paths.get(
-			System.getProperty("projectBuildOutputDir"),
-			outputFile.getName());
+			System.getProperty("projectBuildOutputDir"), outputFile.getName());
 
 		Path sourcePath = outputFile.toPath();
 
@@ -2566,33 +2607,45 @@ public class ProjectTemplatesTest {
 			String... resourceFileNames)
 		throws Exception {
 
-		File gradleProjectDir = _buildTemplateWithGradle(template, portletClassName.toLowerCase());
+		File gradleProjectDir = _buildTemplateWithGradle(
+			template, portletClassName.toLowerCase());
 
 		for (String resourceFileName : resourceFileNames) {
 			_testExists(
 				gradleProjectDir, "src/main/resources/" + resourceFileName);
 		}
 
-		String portletFileName = portletClassName.substring(0, 1).toUpperCase() + portletClassName.substring(1).toLowerCase();
+		String portletFileName = portletClassName.substring(
+			0, 1).toUpperCase() + portletClassName.substring(1).toLowerCase();
 
 		_testContains(
-			gradleProjectDir, "bnd.bnd", "Export-Package: " + portletClassName.toLowerCase() + ".constants");
+			gradleProjectDir, "bnd.bnd",
+			"Export-Package: " + portletClassName.toLowerCase() + ".constants");
 		_testContains(
 			gradleProjectDir, "build.gradle",
 			"apply plugin: \"com.liferay.plugin\"");
 		_testContains(
-			gradleProjectDir, "src/main/java/" + portletClassName.toLowerCase() + "/constants/" + portletFileName + "PortletKeys.java",
+			gradleProjectDir,
+			"src/main/java/" + portletClassName.toLowerCase() + "/constants/" +
+				portletFileName + "PortletKeys.java",
 			"public class " + portletFileName + "PortletKeys");
 		_testContains(
-			gradleProjectDir, "src/main/java/" + portletClassName.toLowerCase() + "/portlet/" + portletFileName + "Portlet.java",
-			"javax.portlet.name=\" + " + portletFileName + "PortletKeys." + portletFileName,
-			"public class " + portletFileName + "Portlet extends " + portletClassName + " {");
+			gradleProjectDir,
+			"src/main/java/" + portletClassName.toLowerCase() + "/portlet/" +
+				portletFileName + "Portlet.java",
+			"javax.portlet.name=\" + " + portletFileName + "PortletKeys." +
+				portletFileName,
+			"public class " + portletFileName + "Portlet extends " +
+				portletClassName + " {");
 
 		File mavenProjectDir = _buildTemplateWithMaven(
-			template, portletClassName.toLowerCase(), "com.test", "-DclassName=" + portletFileName, "-Dpackage=" + portletClassName.toLowerCase());
+			template, portletClassName.toLowerCase(), "com.test",
+			"-DclassName=" + portletFileName,
+			"-Dpackage=" + portletClassName.toLowerCase());
 
 		_buildProjects(
-			gradleProjectDir, mavenProjectDir, "build/libs/" + portletClassName.toLowerCase() + "-1.0.0.jar",
+			gradleProjectDir, mavenProjectDir,
+			"build/libs/" + portletClassName.toLowerCase() + "-1.0.0.jar",
 			"target/" + portletClassName.toLowerCase() + "-1.0.0.jar");
 
 		return gradleProjectDir;
@@ -2604,7 +2657,8 @@ public class ProjectTemplatesTest {
 		throws Exception, IOException {
 
 		File gradleProjectDir = _buildTemplateWithGradle(
-			template, portletClassName.toLowerCase(), "--package-name", "com.liferay.test");
+			template, portletClassName.toLowerCase(), "--package-name",
+			"com.liferay.test");
 
 		_testExists(gradleProjectDir, "bnd.bnd");
 
@@ -2613,23 +2667,27 @@ public class ProjectTemplatesTest {
 				gradleProjectDir, "src/main/resources/" + resourceFileName);
 		}
 
-		String portletFileName = portletClassName.substring(0, 1).toUpperCase() + portletClassName.substring(1).toLowerCase();
+		String portletFileName = portletClassName.substring(
+			0, 1).toUpperCase() + portletClassName.substring(1).toLowerCase();
 
 		_testContains(
 			gradleProjectDir, "build.gradle",
 			"apply plugin: \"com.liferay.plugin\"");
 		_testContains(
 			gradleProjectDir,
-			"src/main/java/com/liferay/test/portlet/" + portletFileName + "Portlet.java",
-			"public class " + portletFileName + "Portlet extends " + portletClassName + " {");
+			"src/main/java/com/liferay/test/portlet/" + portletFileName +
+				"Portlet.java",
+			"public class " + portletFileName + "Portlet extends " +
+				portletClassName + " {");
 
 		File mavenProjectDir = _buildTemplateWithMaven(
-			template, portletClassName.toLowerCase(), "com.test", "-DclassName=" + portletFileName,
-			"-Dpackage=com.liferay.test");
+			template, portletClassName.toLowerCase(), "com.test",
+			"-DclassName=" + portletFileName, "-Dpackage=com.liferay.test");
 
 		_buildProjects(
 			gradleProjectDir, mavenProjectDir,
-			"build/libs/com.liferay.test-1.0.0.jar", "target/" + portletClassName + "-1.0.0.jar");
+			"build/libs/com.liferay.test-1.0.0.jar",
+			"target/" + portletClassName + "-1.0.0.jar");
 
 		return gradleProjectDir;
 	}
@@ -2639,7 +2697,8 @@ public class ProjectTemplatesTest {
 			String... resourceFileNames)
 		throws Exception {
 
-		File gradleProjectDir = _buildTemplateWithGradle(template, portletClassName.toLowerCase() + "portlet");
+		File gradleProjectDir = _buildTemplateWithGradle(
+			template, portletClassName.toLowerCase() + "portlet");
 
 		_testExists(gradleProjectDir, "bnd.bnd");
 
@@ -2648,22 +2707,31 @@ public class ProjectTemplatesTest {
 				gradleProjectDir, "src/main/resources/" + resourceFileName);
 		}
 
-		String portletFileName = portletClassName.substring(0, 1).toUpperCase() + portletClassName.substring(1).toLowerCase() + "portlet";
+		String fileName =
+			portletClassName.substring(0, 1).toUpperCase() +
+				portletClassName.substring(1).toLowerCase();
+
+		String portletFileName = fileName + "portlet";
 
 		_testContains(
 			gradleProjectDir, "build.gradle",
 			"apply plugin: \"com.liferay.plugin\"");
 		_testContains(
 			gradleProjectDir,
-			"src/main/java/" + portletFileName + "/portlet/" + portletFileName + "Portlet.java",
-			"public class " + portletFileName + "Portlet extends " + portletClassName + " {");
+			"src/main/java/" + portletFileName + "/portlet/" + portletFileName +
+				"Portlet.java",
+			"public class " + portletFileName + "Portlet extends " +
+				portletClassName + " {");
 
 		File mavenProjectDir = _buildTemplateWithMaven(
-			template, portletClassName.toLowerCase() + "portlet", "com.test", "-DclassName=" + portletFileName,
+			template, portletClassName.toLowerCase() + "portlet", "com.test",
+			"-DclassName=" + portletFileName,
 			"-Dpackage=" + portletClassName.toLowerCase() + "portlet");
 
 		_buildProjects(
-			gradleProjectDir, mavenProjectDir, "build/libs/" + portletClassName.toLowerCase() + "portlet-1.0.0.jar",
+			gradleProjectDir, mavenProjectDir,
+			"build/libs/" + portletClassName.toLowerCase() +
+				"portlet-1.0.0.jar",
 			"target/" + portletClassName.toLowerCase() + "portlet-1.0.0.jar");
 
 		return gradleProjectDir;
@@ -2684,23 +2752,28 @@ public class ProjectTemplatesTest {
 				gradleProjectDir, "src/main/resources/" + resourceFileName);
 		}
 
-		String portletFileName = portletClassName.substring(0, 1).toUpperCase() + portletClassName.substring(1).toLowerCase();
+		String portletFileName = portletClassName.substring(
+			0, 1).toUpperCase() + portletClassName.substring(1).toLowerCase();
 
 		_testContains(
 			gradleProjectDir, "build.gradle",
 			"apply plugin: \"com.liferay.plugin\"");
 		_testContains(
 			gradleProjectDir,
-			"src/main/java/" + portletClassName.toLowerCase() + "/portlet/portlet/" + portletFileName + "Portlet.java",
-			"public class " + portletFileName + "Portlet extends " + portletClassName + " {");
+			"src/main/java/" + portletClassName.toLowerCase() +
+				"/portlet/portlet/" + portletFileName + "Portlet.java",
+			"public class " + portletFileName + "Portlet extends " +
+				portletClassName + " {");
 
 		File mavenProjectDir = _buildTemplateWithMaven(
-			template, portletClassName.toLowerCase() + "-portlet", "com.test", "-DclassName=" + portletFileName,
+			template, portletClassName.toLowerCase() + "-portlet", "com.test",
+			"-DclassName=" + portletFileName,
 			"-Dpackage=" + portletClassName.toLowerCase() + ".portlet");
 
 		_buildProjects(
 			gradleProjectDir, mavenProjectDir,
-			"build/libs/" + portletClassName.toLowerCase() + ".portlet-1.0.0.jar",
+			"build/libs/" + portletClassName.toLowerCase() +
+				".portlet-1.0.0.jar",
 			"target/" + portletClassName.toLowerCase() + "-portlet-1.0.0.jar");
 
 		return gradleProjectDir;
