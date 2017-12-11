@@ -21,6 +21,7 @@
 				<include>bnd.bnd</include>
 				<include>build.gradle</include>
 				<include>package.json</include>
+				<include>gulpfile.js</include>
 			</includes>
 		</fileSet>
 	</fileSets>
