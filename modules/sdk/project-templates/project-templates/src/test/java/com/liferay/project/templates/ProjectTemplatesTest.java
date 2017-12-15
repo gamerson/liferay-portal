@@ -19,7 +19,6 @@ import aQute.bnd.main.bnd;
 import com.liferay.maven.executor.MavenExecutor;
 import com.liferay.project.templates.internal.util.FileUtil;
 import com.liferay.project.templates.internal.util.Validator;
-import com.liferay.project.templates.internal.util.WorkspaceUtil;
 import com.liferay.project.templates.util.FileTestUtil;
 import com.liferay.project.templates.util.StringTestUtil;
 
@@ -1177,6 +1176,11 @@ public class ProjectTemplatesTest {
 			gradleProjectDir,
 			"src/main/resources/META-INF/resources/View.es.js");
 
+
+		_testNotExists(
+			gradleProjectDir,
+			"gulpfile.js");
+		
 		_testContains(
 			gradleProjectDir, "build.gradle",
 			"apply plugin: \"com.liferay.plugin\"");
@@ -1197,6 +1201,11 @@ public class ProjectTemplatesTest {
 		File mavenProjectDir = _buildTemplateWithMaven(
 			"soy-portlet", "foo", "com.test", "-DclassName=Foo",
 			"-Dpackage=com.liferay.test");
+		
+
+		_testExists(
+			mavenProjectDir,
+			"gulpfile.js");
 
 		String gradleBundleFileName = "build/libs/com.liferay.test-1.0.0.jar";
 		String mavenBundleFileName = "target/foo-1.0.0.jar";
