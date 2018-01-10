@@ -23,6 +23,7 @@ gulp.task('config-js-modules', function(done) {
 	callNode([
 		`${__dirname}/node_modules/liferay-module-config-generator/bin/index.js`,
 		 '--config',
+		 '',
 		 '--extension',
 		 '--filePattern',
 		 '**/resources/*.js',
