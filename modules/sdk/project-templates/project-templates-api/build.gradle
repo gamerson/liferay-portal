@@ -1,0 +1,22 @@
+import aQute.bnd.osgi.Jar;
+
+task createBladeSample {	
+	println rootProject
+	println "this is evaluated"
+	
+	dependsOn ":sdk:project-templates:project-templates:jar"
+	
+	println "this is the project path" project(":sdk:project-templates:project-templates").path
+	
+	File file = new File(project.path, "build/libs/com.liferay.project.templates-3.1.1.jar")
+	
+	
+	//Jar jar = new Jar(file)
+
+	doLast {
+		javaexec {
+			main = "-jar"
+			args = [file.path, "--template", "api", "--name", "ApiSample", "--class-name", "BladeSampleApiPortlet", "--package-name", "com.liferay.blade.samples.portlet"]
+		}
+	}
+}
