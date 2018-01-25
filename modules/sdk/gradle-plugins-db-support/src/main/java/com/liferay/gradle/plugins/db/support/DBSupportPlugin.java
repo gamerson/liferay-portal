@@ -19,6 +19,7 @@ import com.liferay.gradle.plugins.db.support.tasks.BaseDBSupportTask;
 import com.liferay.gradle.plugins.db.support.tasks.CleanServiceBuilderTask;
 
 import java.io.File;
+
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -105,9 +106,10 @@ public class DBSupportPlugin implements Plugin<Project> {
 	private CleanServiceBuilderTask _addTaskCleanServiceBuilder(
 		final Project project) {
 
-		final CleanServiceBuilderTask cleanServiceBuilderTask = GradleUtil.addTask(
-			project, CLEAN_SERVICE_BUILDER_TASK_NAME,
-			CleanServiceBuilderTask.class);
+		final CleanServiceBuilderTask cleanServiceBuilderTask =
+			GradleUtil.addTask(
+				project, CLEAN_SERVICE_BUILDER_TASK_NAME,
+				CleanServiceBuilderTask.class);
 
 		cleanServiceBuilderTask.setDescription(
 			"Cleans the Liferay database from the Service Builder tables and " +
@@ -150,23 +152,7 @@ public class DBSupportPlugin implements Plugin<Project> {
 
 			});
 
-
 		return cleanServiceBuilderTask;
-	}
-
-	private File _getResourcesDir(Project project) {
-		SourceSet sourceSet = GradleUtil.getSourceSet(
-			project, SourceSet.MAIN_SOURCE_SET_NAME);
-
-		return _getSrcDir(sourceSet.getResources());
-	}
-
-	private File _getSrcDir(SourceDirectorySet sourceDirectorySet) {
-		Set<File> srcDirs = sourceDirectorySet.getSrcDirs();
-
-		Iterator<File> iterator = srcDirs.iterator();
-
-		return iterator.next();
 	}
 
 	private void _configureTasksBaseDBSupport(
@@ -184,6 +170,21 @@ public class DBSupportPlugin implements Plugin<Project> {
 				}
 
 			});
+	}
+
+	private File _getResourcesDir(Project project) {
+		SourceSet sourceSet = GradleUtil.getSourceSet(
+			project, SourceSet.MAIN_SOURCE_SET_NAME);
+
+		return _getSrcDir(sourceSet.getResources());
+	}
+
+	private File _getSrcDir(SourceDirectorySet sourceDirectorySet) {
+		Set<File> srcDirs = sourceDirectorySet.getSrcDirs();
+
+		Iterator<File> iterator = srcDirs.iterator();
+
+		return iterator.next();
 	}
 
 	private static final OsgiHelper _osgiHelper = new OsgiHelper();

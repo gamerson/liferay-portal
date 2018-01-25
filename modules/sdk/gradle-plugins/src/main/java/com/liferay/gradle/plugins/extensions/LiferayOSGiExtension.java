@@ -15,6 +15,7 @@
 package com.liferay.gradle.plugins.extensions;
 
 import aQute.bnd.osgi.Constants;
+
 import aQute.lib.spring.SpringComponent;
 
 import com.liferay.ant.bnd.jsp.JspAnalyzerPlugin;
@@ -100,8 +101,9 @@ public class LiferayOSGiExtension {
 
 			});
 
-		_bundleDefaultInstructions.put("-liferay-service-xml", "service.xml,*/service.xml");
 		_bundleDefaultInstructions.put("-jsp", "*.jsp,*.jspf");
+		_bundleDefaultInstructions.put(
+			"-liferay-service-xml", "service.xml,*/service.xml");
 		_bundleDefaultInstructions.put("-sass", "*");
 	}
 

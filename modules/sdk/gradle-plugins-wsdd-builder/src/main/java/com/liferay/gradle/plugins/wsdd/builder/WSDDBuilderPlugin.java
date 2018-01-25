@@ -17,6 +17,7 @@ package com.liferay.gradle.plugins.wsdd.builder;
 import com.liferay.gradle.util.GradleUtil;
 
 import java.io.File;
+
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -167,20 +168,6 @@ public class WSDDBuilderPlugin implements Plugin<Project> {
 		return buildWSDDTask;
 	}
 
-	private File _getResourcesDir(Project project) {
-		SourceSet sourceSet = GradleUtil.getSourceSet(
-			project, SourceSet.MAIN_SOURCE_SET_NAME);
-
-		return _getSrcDir(sourceSet.getResources());
-	}
-
-	private File _getSrcDir(SourceDirectorySet sourceDirectorySet) {
-		Set<File> srcDirs = sourceDirectorySet.getSrcDirs();
-
-		Iterator<File> iterator = srcDirs.iterator();
-
-		return iterator.next();
-	}
 	protected void configureTaskBuildWSDDClasspath(
 		BuildWSDDTask buildWSDDTask, FileCollection fileCollection) {
 
@@ -253,6 +240,21 @@ public class WSDDBuilderPlugin implements Plugin<Project> {
 			project, WarPluginConvention.class);
 
 		return warPluginConvention.getWebAppDir();
+	}
+
+	private File _getResourcesDir(Project project) {
+		SourceSet sourceSet = GradleUtil.getSourceSet(
+			project, SourceSet.MAIN_SOURCE_SET_NAME);
+
+		return _getSrcDir(sourceSet.getResources());
+	}
+
+	private File _getSrcDir(SourceDirectorySet sourceDirectorySet) {
+		Set<File> srcDirs = sourceDirectorySet.getSrcDirs();
+
+		Iterator<File> iterator = srcDirs.iterator();
+
+		return iterator.next();
 	}
 
 }
