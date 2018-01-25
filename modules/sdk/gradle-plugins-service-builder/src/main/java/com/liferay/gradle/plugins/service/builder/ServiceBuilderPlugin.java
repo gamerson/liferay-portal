@@ -122,7 +122,25 @@ public class ServiceBuilderPlugin implements Plugin<Project> {
 
 			});
 
-		buildServiceTask.setInputFile("service.xml");
+		buildServiceTask.setInputFile(
+			new Callable<File>() {
+
+				@Override
+				public File call() throws Exception {
+					File resourcesDir = getResourcesDir(
+						buildServiceTask.getProject());
+
+					File defaultServiceXml = new File(
+						resourcesDir, "META-INF/service.xml");
+
+					if (defaultServiceXml.exists()) {
+						return defaultServiceXml;
+					}
+
+					return new File("service.xml");
+				}
+
+			});
 
 		buildServiceTask.setModelHintsFile(
 			new Callable<File>() {

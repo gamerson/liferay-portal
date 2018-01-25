@@ -15,7 +15,7 @@
 			beanLocatorUtil="com.liferay.util.bean.PortletBeanLocatorUtil"
 			hbmFileName="../tmp/src/META-INF/module-hbm.xml"
 			implDirName="../tmp/src"
-			inputFileName="service.xml"
+			inputFileName="src/main/resources/META-INF/service.xml"
 			modelHintsFileName="../tmp/src/META-INF/portlet-model-hints.xml"
 			osgiModule="true"
 			propsUtil="com.liferay.sampleservicebuilder.util.ServiceProps"

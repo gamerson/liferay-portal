@@ -64,7 +64,7 @@ public class CleanServiceBuilderMojo extends AbstractMojo {
 	/**
 	 * The service.xml file.
 	 *
-	 * @parameter default-value="${project.basedir}/service.xml"
+	 * @parameter default-value="${project.basedir}/src/main/resources/META-INF/service.xml"
 	 * @required
 	 */
 	public void setServiceXmlFile(File serviceXmlFile) {

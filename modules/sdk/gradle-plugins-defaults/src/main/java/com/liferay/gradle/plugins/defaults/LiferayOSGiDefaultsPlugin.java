@@ -1443,7 +1443,9 @@ public class LiferayOSGiDefaultsPlugin implements Plugin<Project> {
 		GradleUtil.applyPlugin(project, PmdPlugin.class);
 		GradleUtil.applyPlugin(project, ProvidedBasePlugin.class);
 
-		if (FileUtil.exists(project, "service.xml")) {
+		if (new File(
+				_getResourcesDir(project), "/META-INF/service.xml").exists()) {
+
 			GradleUtil.applyPlugin(project, ServiceBuilderPlugin.class);
 			GradleUtil.applyPlugin(project, UpgradeTableBuilderPlugin.class);
 			GradleUtil.applyPlugin(project, WSDDBuilderPlugin.class);
@@ -3770,6 +3772,21 @@ public class LiferayOSGiDefaultsPlugin implements Plugin<Project> {
 
 	private String _getProjectDependency(Project project) {
 		return "project(\"" + project.getPath() + "\")";
+	}
+
+	private File _getResourcesDir(Project project) {
+		SourceSet sourceSet = GradleUtil.getSourceSet(
+			project, SourceSet.MAIN_SOURCE_SET_NAME);
+
+		return _getSrcDir(sourceSet.getResources());
+	}
+
+	private File _getSrcDir(SourceDirectorySet sourceDirectorySet) {
+		Set<File> srcDirs = sourceDirectorySet.getSrcDirs();
+
+		Iterator<File> iterator = srcDirs.iterator();
+
+		return iterator.next();
 	}
 
 	private Version _getVersion(Object version) {

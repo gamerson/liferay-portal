@@ -22,7 +22,6 @@ import com.liferay.gradle.plugins.poshi.runner.PoshiRunnerPlugin;
 import com.liferay.gradle.plugins.service.builder.ServiceBuilderPlugin;
 import com.liferay.gradle.plugins.workspace.WorkspaceExtension;
 import com.liferay.gradle.plugins.workspace.WorkspacePlugin;
-import com.liferay.gradle.plugins.workspace.internal.util.FileUtil;
 import com.liferay.gradle.plugins.workspace.internal.util.GradleUtil;
 
 import groovy.lang.Closure;
@@ -37,17 +36,20 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.file.CopySourceSpec;
+import org.gradle.api.file.SourceDirectorySet;
 import org.gradle.api.initialization.Settings;
 import org.gradle.api.plugins.BasePluginConvention;
 import org.gradle.api.plugins.ExtensionAware;
 import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.tasks.Copy;
+import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.compile.JavaCompile;
 import org.gradle.jvm.tasks.Jar;
 
@@ -157,7 +159,9 @@ public class ModulesProjectConfigurator extends BaseProjectConfigurator {
 		GradleUtil.applyPlugin(project, LiferayOSGiPlugin.class);
 		GradleUtil.applyPlugin(project, PoshiRunnerPlugin.class);
 
-		if (FileUtil.exists(project, "service.xml")) {
+		if (new File(
+				_getResourcesDir(project), "/META-INF/service.xml").exists()) {
+
 			GradleUtil.applyPlugin(project, ServiceBuilderPlugin.class);
 		}
 	}
@@ -239,6 +243,21 @@ public class ModulesProjectConfigurator extends BaseProjectConfigurator {
 
 		return "work/" + basePluginConvention.getArchivesBaseName() + "-" +
 			project.getVersion();
+	}
+
+	private File _getResourcesDir(Project project) {
+		SourceSet sourceSet = GradleUtil.getSourceSet(
+			project, SourceSet.MAIN_SOURCE_SET_NAME);
+
+		return _getSrcDir(sourceSet.getResources());
+	}
+
+	private File _getSrcDir(SourceDirectorySet sourceDirectorySet) {
+		Set<File> srcDirs = sourceDirectorySet.getSrcDirs();
+
+		Iterator<File> iterator = srcDirs.iterator();
+
+		return iterator.next();
 	}
 
 	private static final boolean _DEFAULT_JSP_PRECOMPILE_ENABLED = false;

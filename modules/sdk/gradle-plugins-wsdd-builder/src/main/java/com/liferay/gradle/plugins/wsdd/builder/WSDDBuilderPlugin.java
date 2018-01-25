@@ -122,7 +122,25 @@ public class WSDDBuilderPlugin implements Plugin<Project> {
 
 		buildWSDDTask.setDescription("Runs Liferay WSDD Builder.");
 		buildWSDDTask.setGroup(BasePlugin.BUILD_GROUP);
-		buildWSDDTask.setInputFile("service.xml");
+		buildWSDDTask.setInputFile(
+			new Callable<File>() {
+
+				@Override
+				public File call() throws Exception {
+					File resourcesDir = _getResourcesDir(
+						buildWSDDTask.getProject());
+
+					File defaultServiceXml = new File(
+						resourcesDir, "META-INF/service.xml");
+
+					if (defaultServiceXml.exists()) {
+						return defaultServiceXml;
+					}
+
+					return new File("service.xml");
+				}
+
+			});
 
 		buildWSDDTask.setOutputDir(
 			new Callable<File>() {
@@ -222,6 +240,21 @@ public class WSDDBuilderPlugin implements Plugin<Project> {
 			project, WarPluginConvention.class);
 
 		return warPluginConvention.getWebAppDir();
+	}
+
+	private File _getResourcesDir(Project project) {
+		SourceSet sourceSet = GradleUtil.getSourceSet(
+			project, SourceSet.MAIN_SOURCE_SET_NAME);
+
+		return _getSrcDir(sourceSet.getResources());
+	}
+
+	private File _getSrcDir(SourceDirectorySet sourceDirectorySet) {
+		Set<File> srcDirs = sourceDirectorySet.getSrcDirs();
+
+		Iterator<File> iterator = srcDirs.iterator();
+
+		return iterator.next();
 	}
 
 }

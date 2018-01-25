@@ -18,6 +18,10 @@ import com.liferay.gradle.plugins.db.support.internal.util.GradleUtil;
 import com.liferay.gradle.plugins.db.support.tasks.BaseDBSupportTask;
 import com.liferay.gradle.plugins.db.support.tasks.CleanServiceBuilderTask;
 
+import java.io.File;
+
+import java.util.Iterator;
+import java.util.Set;
 import java.util.concurrent.Callable;
 
 import org.gradle.api.Action;
@@ -26,9 +30,11 @@ import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.DependencySet;
 import org.gradle.api.file.FileCollection;
+import org.gradle.api.file.SourceDirectorySet;
 import org.gradle.api.internal.plugins.osgi.OsgiHelper;
 import org.gradle.api.plugins.BasePlugin;
 import org.gradle.api.plugins.PluginContainer;
+import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.TaskContainer;
 
 /**
@@ -100,9 +106,10 @@ public class DBSupportPlugin implements Plugin<Project> {
 	private CleanServiceBuilderTask _addTaskCleanServiceBuilder(
 		final Project project) {
 
-		CleanServiceBuilderTask cleanServiceBuilderTask = GradleUtil.addTask(
-			project, CLEAN_SERVICE_BUILDER_TASK_NAME,
-			CleanServiceBuilderTask.class);
+		final CleanServiceBuilderTask cleanServiceBuilderTask =
+			GradleUtil.addTask(
+				project, CLEAN_SERVICE_BUILDER_TASK_NAME,
+				CleanServiceBuilderTask.class);
 
 		cleanServiceBuilderTask.setDescription(
 			"Cleans the Liferay database from the Service Builder tables and " +
@@ -125,7 +132,25 @@ public class DBSupportPlugin implements Plugin<Project> {
 
 			});
 
-		cleanServiceBuilderTask.setServiceXmlFile("service.xml");
+		cleanServiceBuilderTask.setServiceXmlFile(
+			new Callable<File>() {
+
+				@Override
+				public File call() throws Exception {
+					File resourcesDir = _getResourcesDir(
+						cleanServiceBuilderTask.getProject());
+
+					File defaultServiceXml = new File(
+						resourcesDir, "META-INF/service.xml");
+
+					if (defaultServiceXml.exists()) {
+						return defaultServiceXml;
+					}
+
+					return new File("service.xml");
+				}
+
+			});
 
 		return cleanServiceBuilderTask;
 	}
@@ -145,6 +170,21 @@ public class DBSupportPlugin implements Plugin<Project> {
 				}
 
 			});
+	}
+
+	private File _getResourcesDir(Project project) {
+		SourceSet sourceSet = GradleUtil.getSourceSet(
+			project, SourceSet.MAIN_SOURCE_SET_NAME);
+
+		return _getSrcDir(sourceSet.getResources());
+	}
+
+	private File _getSrcDir(SourceDirectorySet sourceDirectorySet) {
+		Set<File> srcDirs = sourceDirectorySet.getSrcDirs();
+
+		Iterator<File> iterator = srcDirs.iterator();
+
+		return iterator.next();
 	}
 
 	private static final OsgiHelper _osgiHelper = new OsgiHelper();

@@ -22,7 +22,7 @@
 					<beanLocatorUtil>com.liferay.util.bean.PortletBeanLocatorUtil</beanLocatorUtil>
 					<hbmFileName>../tmp/src/META-INF/module-hbm.xml</hbmFileName>
 					<implDirName>../tmp/src</implDirName>
-					<inputFileName>service.xml</inputFileName>
+					<inputFileName>src/main/resources/META-INF/service.xml</inputFileName>
 					<modelHintsFileName>../tmp/src/META-INF/portlet-model-hints.xml</modelHintsFileName>
 					<osgiModule>true</osgiModule>
 					<propsUtil>com.liferay.sampleservicebuilder.util.ServiceProps</propsUtil>
