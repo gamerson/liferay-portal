@@ -416,6 +416,49 @@ public class ModulesStructureTest {
 		}
 	}
 
+	@Test
+	public void testServiceXmlFilesInModuleRoot() throws Exception {
+		Files.walkFileTree(
+			_modulesDirPath,
+			new SimpleFileVisitor<Path>() {
+
+				@Override
+				public FileVisitResult preVisitDirectory(
+						Path dirPath, BasicFileAttributes basicFileAttributes)
+					throws IOException {
+
+					if (dirPath.equals(_modulesDirPath)) {
+						return FileVisitResult.CONTINUE;
+					}
+
+					String dirName = String.valueOf(dirPath.getFileName());
+
+					if ((dirName.charAt(0) == '.') ||
+						dirName.equals("node_modules")) {
+
+						return FileVisitResult.SKIP_SUBTREE;
+					}
+
+					Path serviceXmlPath = dirPath.resolve("service.xml");
+
+					if (Files.exists(serviceXmlPath)) {
+						Path bndPath = serviceXmlPath.resolveSibling("bnd.bnd");
+
+						Path serviceXmlParentPath = serviceXmlPath.getParent();
+
+						File serviceXmlParentFile =
+							serviceXmlParentPath.toFile();
+
+						Assert.assertTrue(
+							"service.xml files in modules should be kept under src
+								/main/resources/META-INF. See LPS-77350",
+							!bndPath.exists() && serviceXmlParentFile.exists());
+					}
+				}
+
+			});
+	}
+
 	private void _addGradlePluginNames(
 			Set<String> pluginNames, String pluginNamePrefix,
 			Path buildGradlePath, String pluginIdPrefix,
