@@ -522,6 +522,21 @@ public class ProjectTemplatesTest {
 	}
 
 	@Test
+	public void testBuildTemplateMVCPortletWithMavenBuildType()
+		throws Exception {
+
+		File mavenProjectDir = _buildTemplateWithMaven(
+			"mvc-portlet", "foo", "com.test", "-DclassName=Foo",
+			"-Dpackage=foo");
+
+		_testExists(mavenProjectDir, "pom.xml");
+
+		_testContains(
+			mavenProjectDir, "bnd.bnd",
+			"com.liferay.ant.bnd.jsp.JspAnalyzerPlugin");
+	}
+
+	@Test
 	public void testBuildTemplateMVCPortletWithPackage() throws Exception {
 		_testBuildTemplatePortletWithPackage(
 			"mvc-portlet", "MVCPortlet", "META-INF/resources/init.jsp",
