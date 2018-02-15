@@ -112,8 +112,14 @@ public class Archetyper {
 
 		Properties properties = new Properties();
 
+		String buildType = "gradle";
+
+		if (projectTemplatesArgs.isMaven()) {
+			buildType = "maven";
+		}
+
 		_setProperty(properties, "author", author);
-		_setProperty(properties, "buildType", "gradle");
+		_setProperty(properties, "buildType", buildType);
 		_setProperty(properties, "className", className);
 		_setProperty(properties, "liferayVersion", liferayVersion);
 		_setProperty(properties, "package", packageName);
