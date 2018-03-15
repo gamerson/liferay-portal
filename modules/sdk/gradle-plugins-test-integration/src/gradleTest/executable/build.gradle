@@ -34,7 +34,7 @@ copyBundle {
 
 	from {
 		zipTree(downloadBundle.dest)
-        include 'bin/'
+        include '**/bin/'
 	}
 
 	includeEmptyDirs = false
@@ -47,7 +47,6 @@ copyTestModules {
 
 downloadBundle {
 	dest new File(buildDir, "bundle.zip")
-	onlyIfModified true
 	src bundleUrl
 }
 
@@ -65,5 +64,6 @@ runGradleTest {
 }
 
 testIntegrationTomcat {
+	dir = binDir
 	liferayHome = projectDir
 }
