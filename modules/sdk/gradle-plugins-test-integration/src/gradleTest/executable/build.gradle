@@ -1,17 +1,61 @@
-apply plugin: "com.liferay.test.integration"
+import de.undercouch.gradle.tasks.download.Download
 
+apply plugin: "com.liferay.test.integration"
+apply plugin: "de.undercouch.download"
+
+task copyBundle(type: Copy)
+task downloadBundle(type: Download)
 task runGradleTest
+
+buildscript{
+	dependencies {
+		classpath group: "de.undercouch", name: "gradle-download-task", version: "3.2.0"
+	}
+	
+	repositories {
+		mavenLocal()
+
+		maven {
+			url "https://cdn.lfrs.sl/repository.liferay.com/nexus/content/groups/public"
+		}
+	}
+}
+
+String bundleUrl = "https://cdn.lfrs.sl/releases.liferay.com/portal/7.0.4-ga5/liferay-ce-portal-tomcat-7.0-ga5-20171018150113838.zip"
+
+if (System.properties["http.proxyHost"] == "squid.lax.liferay.com") {
+	bundleUrl = "http://mirrors.liferay.com/releases.liferay.com/portal/7.0.4-ga5/liferay-ce-portal-tomcat-7.0-ga5-20171018150113838.zip"
+}
+
+File binDir = new File(projectDir, "bin")
+
+copyBundle {
+	dependsOn downloadBundle
+
+	from {
+		zipTree(downloadBundle.dest)
+        include 'bin/'
+	}
+
+	includeEmptyDirs = false
+	into binDir
+}
 
 copyTestModules {
 	enabled = false
 }
 
+downloadBundle {
+	dest new File(buildDir, "bundle.zip")
+	onlyIfModified true
+	src bundleUrl
+}
+
 runGradleTest {
+	dependsOn copyBundle
 	dependsOn setUpTestableTomcat
 
 	doLast {
-		File binDir = new File(testIntegrationTomcat.dir, "bin")
-
 		for (String fileName in ["catalina.sh", "setenv.sh", "shutdown.sh"]) {
 			File shFile = new File(binDir, fileName)
 
@@ -21,6 +65,5 @@ runGradleTest {
 }
 
 testIntegrationTomcat {
-	dir = "tomcat-8.0.32"
 	liferayHome = projectDir
 }
