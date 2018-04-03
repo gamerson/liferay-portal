@@ -3949,6 +3949,12 @@ to version 2.3.117.
 - [LPS-79192]: Update the [Liferay Source Formatter] dependency to version
 1.0.589.
 
+## 3.10.3 - 2018-04-03
+
+### Changed
+- [LPS-74110]: Suppress Bnd warning about deprecated annotations.
+- [LPS-74110]: Update the [Liferay Ant BND] dependency to version 2.0.49.
+
 [Gradle Bundle Plugin]: https://github.com/TomDmitriev/gradle-bundle-plugin
 [Liferay Alloy Taglib]: https://github.com/liferay/alloy-taglibs
 [Liferay Ant BND]: https://github.com/liferay/liferay-portal/tree/master/modules/sdk/ant-bnd
