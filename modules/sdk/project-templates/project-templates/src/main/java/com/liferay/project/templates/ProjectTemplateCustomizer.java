@@ -29,6 +29,12 @@ import org.apache.maven.archetype.ArchetypeGenerationResult;
  */
 public interface ProjectTemplateCustomizer {
 
+	public static void deleteAllFileInPath(String fileName, Path rootDirPath)
+		throws IOException {
+
+		FileUtil.deleteAllFileInPath(fileName, rootDirPath);
+	}
+
 	public static void deleteFileInPath(String fileName, Path rootDirPath)
 		throws IOException {
 

@@ -18,6 +18,9 @@
 		</fileSet>
 	</fileSets>
 	<requiredProperties>
+		<requiredProperty key="buildType">
+			<defaultValue>maven</defaultValue>
+		</requiredProperty>
 		<requiredProperty key="liferayVersion">
 			<defaultValue>7.0</defaultValue>
 		</requiredProperty>

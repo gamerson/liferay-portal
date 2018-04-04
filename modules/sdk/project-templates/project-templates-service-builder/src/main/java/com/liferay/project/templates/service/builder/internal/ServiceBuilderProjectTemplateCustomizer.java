@@ -38,6 +38,20 @@ public class ServiceBuilderProjectTemplateCustomizer
 			ProjectTemplatesArgs projectTemplatesArgs, File destinationDir,
 			ArchetypeGenerationResult archetypeGenerationResult)
 		throws Exception {
+
+		Path destinationDirPath = destinationDir.toPath();
+
+		Path projectDirPath = destinationDirPath.resolve(
+			projectTemplatesArgs.getName());
+
+		if (projectTemplatesArgs.isMaven()) {
+			ProjectTemplateCustomizer.deleteAllFileInPath(
+				"build.gradle", projectDirPath);
+		}
+		else if (projectTemplatesArgs.isGradle()) {
+			ProjectTemplateCustomizer.deleteAllFileInPath(
+				"pom.xml", projectDirPath);
+		}
 	}
 
 	@Override
