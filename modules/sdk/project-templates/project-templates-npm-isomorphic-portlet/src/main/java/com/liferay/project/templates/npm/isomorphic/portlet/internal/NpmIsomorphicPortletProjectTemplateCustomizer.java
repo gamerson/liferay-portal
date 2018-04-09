@@ -21,8 +21,6 @@ import java.io.File;
 
 import java.nio.file.Path;
 
-import java.util.Properties;
-
 import org.apache.maven.archetype.ArchetypeGenerationRequest;
 import org.apache.maven.archetype.ArchetypeGenerationResult;
 
@@ -58,10 +56,6 @@ public class NpmIsomorphicPortletProjectTemplateCustomizer
 			ProjectTemplatesArgs projectTemplatesArgs,
 			ArchetypeGenerationRequest archetypeGenerationRequest)
 		throws Exception {
-
-		Properties properties = archetypeGenerationRequest.getProperties();
-
-		properties.put("packageJsonVersion", "1.0.0");
 	}
 
 }

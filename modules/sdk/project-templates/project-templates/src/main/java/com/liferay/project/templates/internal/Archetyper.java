@@ -57,6 +57,8 @@ import org.apache.maven.archetype.generator.ArchetypeGenerator;
 import org.apache.maven.archetype.generator.DefaultArchetypeGenerator;
 import org.apache.maven.archetype.generator.DefaultFilesetArchetypeGenerator;
 import org.apache.maven.archetype.generator.FilesetArchetypeGenerator;
+import org.apache.maven.archetype.metadata.ArchetypeDescriptor;
+import org.apache.maven.archetype.metadata.RequiredProperty;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
@@ -138,13 +140,36 @@ public class Archetyper {
 		ArchetypeArtifactManager archetypeArtifactManager =
 			_createArchetypeArtifactManager(archetypesDirs);
 
+		File archetypeFile = archetypeArtifactManager.getArchetypeFile(
+			archetypeGenerationRequest.getArchetypeGroupId(),
+			archetypeGenerationRequest.getArchetypeArtifactId(),
+			archetypeGenerationRequest.getArchetypeVersion(), null, null, null);
+
+		ArchetypeDescriptor descriptor =
+			archetypeArtifactManager.getFileSetArchetypeDescriptor(
+				archetypeFile);
+
+		for (RequiredProperty r : descriptor.getRequiredProperties()) {
+			String key = r.getKey();
+
+			if (!properties.containsKey(key)) {
+				String defaultValue = r.getDefaultValue();
+
+				if (Objects.nonNull(defaultValue) &&
+					(defaultValue.length() > 0)) {
+
+					if (defaultValue.contains("${artifactId}")) {
+						defaultValue = defaultValue.replace(
+							"${artifactId}", artifactId);
+					}
+
+					_setProperty(properties, key, defaultValue);
+				}
+			}
+		}
+
 		ProjectTemplateCustomizer projectTemplateCustomizer =
-			_getProjectTemplateCustomizer(
-				archetypeArtifactManager.getArchetypeFile(
-					archetypeGenerationRequest.getArchetypeGroupId(),
-					archetypeGenerationRequest.getArchetypeArtifactId(),
-					archetypeGenerationRequest.getArchetypeVersion(), null,
-					null, null));
+			_getProjectTemplateCustomizer(archetypeFile);
 
 		if (projectTemplateCustomizer != null) {
 			projectTemplateCustomizer.onBeforeGenerateProject(

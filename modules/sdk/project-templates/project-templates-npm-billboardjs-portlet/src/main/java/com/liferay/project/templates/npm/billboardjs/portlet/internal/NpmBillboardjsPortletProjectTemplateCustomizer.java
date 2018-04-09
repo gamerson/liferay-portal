@@ -58,10 +58,6 @@ public class NpmBillboardjsPortletProjectTemplateCustomizer
 			ProjectTemplatesArgs projectTemplatesArgs,
 			ArchetypeGenerationRequest archetypeGenerationRequest)
 		throws Exception {
-
-		Properties properties = archetypeGenerationRequest.getProperties();
-
-		properties.put("packageJsonVersion", "1.0.0");
 	}
 
 }
