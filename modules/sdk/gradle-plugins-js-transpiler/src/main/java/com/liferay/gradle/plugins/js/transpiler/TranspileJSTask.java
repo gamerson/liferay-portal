@@ -19,7 +19,6 @@ import com.liferay.gradle.util.FileUtil;
 import com.liferay.gradle.util.GradleUtil;
 
 import java.io.File;
-
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -135,10 +134,18 @@ public class TranspileJSTask extends ExecuteNodeScriptTask {
 		return GradleUtil.toStringList(_srcIncludes);
 	}
 
-	@OutputDirectory
 	@Override
 	public File getWorkingDir() {
 		return super.getWorkingDir();
+	}
+
+	@OutputDirectory
+	public File getDestinationDir() {
+		return GradleUtil.toFile(getProject(), _destinationDir);
+	}
+
+	public void setDestinationDir(Object destinationDir) {
+		_destinationDir = destinationDir;
 	}
 
 	public boolean isSkipWhenEmpty() {
@@ -252,7 +259,7 @@ public class TranspileJSTask extends ExecuteNodeScriptTask {
 	protected List<String> getCompleteArgs() {
 		List<String> completeArgs = super.getCompleteArgs();
 
-		String destination = FileUtil.getAbsolutePath(getWorkingDir());
+		String destination = FileUtil.getAbsolutePath(getDestinationDir());
 
 		completeArgs.add("build");
 
@@ -324,6 +331,7 @@ public class TranspileJSTask extends ExecuteNodeScriptTask {
 	private Object _modules = "amd";
 	private boolean _skipWhenEmpty = true;
 	private Object _sourceDir;
+	private Object _destinationDir;
 	private SourceMaps _sourceMaps = SourceMaps.ENABLED;
 	private final Set<Object> _soyDependencies = new LinkedHashSet<>();
 	private boolean _soySkipMetalGeneration;
