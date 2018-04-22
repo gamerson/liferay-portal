@@ -24,8 +24,6 @@ import com.liferay.gradle.util.GradleUtil;
 import com.liferay.gradle.util.copy.RenameDependencyClosure;
 
 import java.io.File;
-
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -35,6 +33,7 @@ import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.file.CopySpec;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.file.SourceDirectorySet;
 import org.gradle.api.plugins.BasePlugin;
@@ -45,6 +44,9 @@ import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetOutput;
 import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.TaskDependency;
+import org.gradle.jvm.tasks.Jar;
+
+import groovy.lang.Closure;
 
 /**
  * @author Andrea Di Giorgi
@@ -158,6 +160,9 @@ public class JSTranspilerPlugin implements Plugin<Project> {
 		final TranspileJSTask transpileJSTask = GradleUtil.addTask(
 			project, TRANSPILE_JS_TASK_NAME, TranspileJSTask.class);
 
+		Task processResources = GradleUtil.getTask(project, "processResources");
+
+		transpileJSTask.dependsOn(processResources);
 		transpileJSTask.dependsOn(expandJSCompileDependenciesTask);
 		transpileJSTask.setDescription("Transpiles JS files.");
 		transpileJSTask.setGroup(BasePlugin.BUILD_GROUP);
@@ -204,6 +209,7 @@ public class JSTranspilerPlugin implements Plugin<Project> {
 
 		FileCollection fileCollection = transpileJSTask.getSourceFiles();
 
+		/*
 		if (!transpileJSTask.isEnabled() ||
 			(transpileJSTask.isSkipWhenEmpty() && fileCollection.isEmpty())) {
 
@@ -212,6 +218,7 @@ public class JSTranspilerPlugin implements Plugin<Project> {
 
 			return;
 		}
+		*/
 
 		transpileJSTask.dependsOn(downloadMetalCliTask, npmInstallTask);
 
@@ -248,20 +255,23 @@ public class JSTranspilerPlugin implements Plugin<Project> {
 	}
 
 	private void _configureTaskTranspileJSForJavaPlugin(
-		TranspileJSTask transpileJSTask) {
+		final TranspileJSTask transpileJSTask) {
 
 		transpileJSTask.mustRunAfter(JavaPlugin.PROCESS_RESOURCES_TASK_NAME);
 
-		Project project = transpileJSTask.getProject();
+		final Project project = transpileJSTask.getProject();
 
 		final SourceSet sourceSet = GradleUtil.getSourceSet(
 			project, SourceSet.MAIN_SOURCE_SET_NAME);
+
+		final SourceSetOutput sourceSetOutput = sourceSet.getOutput();
 
 		transpileJSTask.setSourceDir(
 			new Callable<File>() {
 
 				@Override
 				public File call() throws Exception {
+					//return new File(sourceSetOutput.getResourcesDir(), "META-INF/resources");
 					File resourcesDir = _getSrcDir(sourceSet.getResources());
 
 					return new File(resourcesDir, "META-INF/resources");
@@ -269,24 +279,36 @@ public class JSTranspilerPlugin implements Plugin<Project> {
 
 			});
 
-		transpileJSTask.setWorkingDir(
-			new Callable<File>() {
-
-				@Override
-				public File call() throws Exception {
-					SourceSetOutput sourceSetOutput = sourceSet.getOutput();
-
-					return new File(
-						sourceSetOutput.getResourcesDir(),
-						"META-INF/resources");
-				}
-
-			});
+		transpileJSTask.setDestinationDir(new File(project.getBuildDir(), TRANSPILE_JS_TASK_NAME + "/META-INF/resources"));
+		//transpileJSTask.setWorkingDir(new File(sourceSetOutput.getResourcesDir(), "META-INF/resources"));
+		transpileJSTask.setWorkingDir(new File(project.getBuildDir(), TRANSPILE_JS_TASK_NAME + "/META-INF/resources"));
 
 		Task classesTask = GradleUtil.getTask(
 			project, JavaPlugin.CLASSES_TASK_NAME);
 
 		classesTask.dependsOn(transpileJSTask);
+
+		Jar jar = (Jar) GradleUtil.getTask(project, JavaPlugin.JAR_TASK_NAME);
+
+		jar.from(
+			new Callable<File>() {
+
+				@Override
+				public File call() throws Exception {
+					return new File(project.getBuildDir(), TRANSPILE_JS_TASK_NAME);
+				}
+
+			},
+			//new File(project.getBuildDir(), TRANSPILE_JS_TASK_NAME ),
+			new Closure<Void>(project) {
+
+				@SuppressWarnings("unused")
+				public void doCall(CopySpec copySpec) {
+					copySpec.include("**/*");
+					copySpec.setIncludeEmptyDirs(false);
+				}
+
+			});
 	}
 
 	private File _getSrcDir(SourceDirectorySet sourceDirectorySet) {
@@ -296,7 +318,6 @@ public class JSTranspilerPlugin implements Plugin<Project> {
 
 		return iterator.next();
 	}
-
 	private static final String _METAL_CLI_VERSION = "1.3.1";
 
 }

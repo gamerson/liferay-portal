@@ -19,7 +19,6 @@ import com.liferay.gradle.plugins.node.tasks.DownloadNodeModuleTask;
 import com.liferay.gradle.util.GradleUtil;
 
 import java.io.File;
-
 import java.util.Collections;
 import java.util.concurrent.Callable;
 
@@ -27,12 +26,16 @@ import org.gradle.api.Action;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
+import org.gradle.api.file.CopySpec;
 import org.gradle.api.plugins.BasePlugin;
 import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.plugins.PluginContainer;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetOutput;
 import org.gradle.api.tasks.TaskContainer;
+import org.gradle.jvm.tasks.Jar;
+
+import groovy.lang.Closure;
 
 /**
  * @author Andrea Di Giorgi
@@ -176,12 +179,11 @@ public class JSModuleConfigGeneratorPlugin implements Plugin<Project> {
 	}
 
 	private void _configureTaskConfigJSModulesForJavaPlugin(
-		ConfigJSModulesTask configJSModulesTask) {
+		final ConfigJSModulesTask configJSModulesTask) {
 
-		configJSModulesTask.mustRunAfter(
-			JavaPlugin.PROCESS_RESOURCES_TASK_NAME);
+		configJSModulesTask.mustRunAfter("transpileJS");
 
-		Project project = configJSModulesTask.getProject();
+		final Project project = configJSModulesTask.getProject();
 
 		SourceSet sourceSet = GradleUtil.getSourceSet(
 			project, SourceSet.MAIN_SOURCE_SET_NAME);
@@ -194,8 +196,7 @@ public class JSModuleConfigGeneratorPlugin implements Plugin<Project> {
 				@Override
 				public File call() throws Exception {
 					return new File(
-						sourceSetOutput.getResourcesDir(),
-						"META-INF/config.json");
+						project.getBuildDir(), CONFIG_JS_MODULES_TASK_NAME + "/META-INF/config.json");
 				}
 
 			});
@@ -206,8 +207,8 @@ public class JSModuleConfigGeneratorPlugin implements Plugin<Project> {
 				@Override
 				public File call() throws Exception {
 					return new File(
-						sourceSetOutput.getResourcesDir(),
-						"META-INF/resources");
+						project.getBuildDir(),
+						"transpileJS/META-INF/resources");
 				}
 
 			});
@@ -216,6 +217,27 @@ public class JSModuleConfigGeneratorPlugin implements Plugin<Project> {
 			project, JavaPlugin.CLASSES_TASK_NAME);
 
 		classesTask.dependsOn(configJSModulesTask);
+
+		Jar jar = (Jar) GradleUtil.getTask(project, JavaPlugin.JAR_TASK_NAME);
+
+		jar.from(
+			new Callable<File>() {
+
+				@Override
+				public File call() throws Exception {
+					return new File(project.getBuildDir(), CONFIG_JS_MODULES_TASK_NAME);
+				}
+
+			},
+			//new File(project.getBuildDir(), CONFIG_JS_MODULES_TASK_NAME),
+			new Closure<Void>(project) {
+
+				@SuppressWarnings("unused")
+				public void doCall(CopySpec copySpec) {
+					copySpec.include("**/*");
+				}
+
+			});
 	}
 
 	private void _configureTasksConfigJSModules(

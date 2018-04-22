@@ -19,7 +19,6 @@ import com.liferay.gradle.plugins.soy.internal.util.GradleUtil;
 import com.liferay.gradle.plugins.soy.tasks.ReplaceSoyTranslationTask;
 
 import java.io.File;
-
 import java.util.Collections;
 import java.util.concurrent.Callable;
 
@@ -30,8 +29,6 @@ import org.gradle.api.Task;
 import org.gradle.api.plugins.BasePlugin;
 import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.plugins.PluginContainer;
-import org.gradle.api.tasks.SourceSet;
-import org.gradle.api.tasks.SourceSetOutput;
 
 /**
  * @author Andrea Di Giorgi
@@ -105,21 +102,21 @@ public class SoyTranslationPlugin implements Plugin<Project> {
 	private void _configureTaskReplaceSoyTranslationForJavaPlugin(
 		final ReplaceSoyTranslationTask replaceSoyTranslationTask) {
 
-		replaceSoyTranslationTask.dependsOn(
-			JavaPlugin.PROCESS_RESOURCES_TASK_NAME);
+		replaceSoyTranslationTask.dependsOn("transpileJS");
 
 		replaceSoyTranslationTask.setSource(
 			new Callable<File>() {
 
 				@Override
 				public File call() throws Exception {
-					SourceSet sourceSet = GradleUtil.getSourceSet(
-						replaceSoyTranslationTask.getProject(),
-						SourceSet.MAIN_SOURCE_SET_NAME);
+					//SourceSet sourceSet = GradleUtil.getSourceSet(
+					//	replaceSoyTranslationTask.getProject(),
+					//	SourceSet.MAIN_SOURCE_SET_NAME);
 
-					SourceSetOutput sourceSetOutput = sourceSet.getOutput();
+					//SourceSetOutput sourceSetOutput = sourceSet.getOutput();
 
-					return sourceSetOutput.getResourcesDir();
+					//return sourceSetOutput.getResourcesDir();
+					return new File(replaceSoyTranslationTask.getProject().getBuildDir(), "transpileJS");
 				}
 
 			});
