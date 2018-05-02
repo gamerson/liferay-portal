@@ -14,6 +14,9 @@
 
 package com.liferay.project.templates.internal;
 
+import aQute.bnd.version.Version;
+import aQute.bnd.version.VersionRange;
+
 import com.liferay.project.templates.ProjectTemplateCustomizer;
 import com.liferay.project.templates.ProjectTemplates;
 import com.liferay.project.templates.ProjectTemplatesArgs;
@@ -83,6 +86,22 @@ public class Archetyper {
 		String groupId = projectTemplatesArgs.getGroupId();
 		String liferayVersion = projectTemplatesArgs.getLiferayVersion();
 		String packageName = projectTemplatesArgs.getPackageName();
+
+		File templateFile = ProjectTemplates.getTemplateFile(
+			projectTemplatesArgs.getTemplate());
+
+		String liferayVersionRange = ProjectTemplates.getManifestProperty(
+			"Liferay-Versions", templateFile);
+
+		if (Objects.nonNull(liferayVersionRange) &&
+			Objects.isNull(liferayVersion)) {
+
+			if (!_isVersionValid(liferayVersion, liferayVersionRange)) {
+				throw new Exception(
+					"Specified Liferay Version is invalid. Must be in range " +
+						liferayVersionRange);
+			}
+		}
 
 		if (Objects.isNull(groupId)) {
 			groupId = packageName;
@@ -165,6 +184,16 @@ public class Archetyper {
 		}
 
 		return archetypeGenerationResult;
+	}
+
+	private static boolean _isVersionValid(
+		String versionString, String rangeString) {
+
+		Version version = new Version(versionString);
+
+		VersionRange versionRange = new VersionRange(rangeString);
+
+		return versionRange.includes(version);
 	}
 
 	private ArchetypeArtifactManager _createArchetypeArtifactManager(

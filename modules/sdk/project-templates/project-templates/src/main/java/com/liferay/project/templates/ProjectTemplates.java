@@ -23,6 +23,7 @@ import com.liferay.project.templates.internal.util.StringUtil;
 import com.liferay.project.templates.internal.util.Validator;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 
 import java.nio.file.DirectoryStream;
@@ -36,6 +37,7 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.jar.Attributes;
@@ -53,6 +55,68 @@ public class ProjectTemplates {
 
 	public static final String TEMPLATE_BUNDLE_PREFIX =
 		"com.liferay.project.templates.";
+
+	public static String getManifestProperty(String property, File file)
+		throws IOException {
+
+		try (JarFile jarFile = new JarFile(file)) {
+			Manifest manifest = jarFile.getManifest();
+
+			Attributes attributes = manifest.getMainAttributes();
+
+			return attributes.getValue(property);
+		}
+	}
+
+	public static String getManifestProperty(
+			String property, JarFile jarFile, JarEntry jarEntry)
+		throws IOException {
+
+		try (InputStream inputStream = jarFile.getInputStream(jarEntry);
+			JarInputStream jarInputStream = new JarInputStream(inputStream)) {
+
+			Manifest manifest = jarInputStream.getManifest();
+
+			Attributes attributes = manifest.getMainAttributes();
+
+			return attributes.getValue(property);
+		}
+	}
+
+	public static File getTemplateFile(String templateName) throws Exception {
+		Collection<File> templatesFiles = new HashSet<>();
+
+		File projectTemplatesFile = FileUtil.getJarFile(ProjectTemplates.class);
+
+		if (!templatesFiles.contains(projectTemplatesFile)) {
+			templatesFiles.add(projectTemplatesFile);
+		}
+
+		for (File templatesFile : templatesFiles) {
+			if (templatesFile.isDirectory()) {
+				try (DirectoryStream<Path> directoryStream =
+						Files.newDirectoryStream(
+							templatesFile.toPath(), "*.project.templates.*")) {
+
+					Iterator<Path> iterator = directoryStream.iterator();
+
+					while (iterator.hasNext()) {
+						Path path = iterator.next();
+
+						String template = String.valueOf(path.getFileName());
+
+						template = _getTemplateName(template);
+
+						if (Objects.equals(template, templateName)) {
+							return path.toFile();
+						}
+					}
+				}
+			}
+		}
+
+		return null;
+	}
 
 	public static Map<String, String> getTemplates() throws Exception {
 		return getTemplates(new HashSet<>());
@@ -83,24 +147,13 @@ public class ProjectTemplates {
 
 						String template = String.valueOf(path.getFileName());
 
-						template = template.substring(
-							TEMPLATE_BUNDLE_PREFIX.length(),
-							template.lastIndexOf('-'));
-
-						template = template.replace('.', '-');
+						template = _getTemplateName(template);
 
 						if (!template.startsWith(WorkspaceUtil.WORKSPACE)) {
-							try (JarFile jarFile = new JarFile(path.toFile())) {
-								Manifest manifest = jarFile.getManifest();
+							String bundleDescription = getManifestProperty(
+								"Bundle-Description", path.toFile());
 
-								Attributes attributes =
-									manifest.getMainAttributes();
-
-								String bundleDescription = attributes.getValue(
-									"Bundle-Description");
-
-								templates.put(template, bundleDescription);
-							}
+							templates.put(template, bundleDescription);
 						}
 					}
 				}
@@ -122,30 +175,13 @@ public class ProjectTemplates {
 							continue;
 						}
 
-						template = template.substring(
-							TEMPLATE_BUNDLE_PREFIX.length(),
-							template.indexOf("-"));
-
-						template = template.replace('.', '-');
+						template = _getTemplateName(template);
 
 						if (!template.startsWith(WorkspaceUtil.WORKSPACE)) {
-							try (InputStream inputStream =
-									jarFile.getInputStream(jarEntry);
+							String bundleDescription = getManifestProperty(
+								"Bundle-Description", jarFile, jarEntry);
 
-								JarInputStream jarInputStream =
-									new JarInputStream(inputStream)) {
-
-								Manifest manifest =
-									jarInputStream.getManifest();
-
-								Attributes attributes =
-									manifest.getMainAttributes();
-
-								String bundleDescription = attributes.getValue(
-									"Bundle-Description");
-
-								templates.put(template, bundleDescription);
-							}
+							templates.put(template, bundleDescription);
 						}
 					}
 				}
@@ -243,6 +279,21 @@ public class ProjectTemplates {
 		if (!projectTemplatesArgs.isMaven()) {
 			FileUtil.deleteFiles(templateDirPath, "pom.xml");
 		}
+	}
+
+	private static String _getTemplateName(String name) {
+		String projectTemplatesString = "project.templates.";
+
+		int projectTemplatesEndIndex =
+			name.indexOf(projectTemplatesString) +
+				projectTemplatesString.length();
+
+		String templateName = name.substring(
+			projectTemplatesEndIndex, name.lastIndexOf('-'));
+
+		templateName = templateName.replace('.', '-');
+
+		return templateName;
 	}
 
 	private static void _printHelp(
