@@ -20,11 +20,15 @@ import com.liferay.gradle.plugins.target.platform.internal.util.SkipIfExecutingP
 import com.liferay.gradle.plugins.target.platform.tasks.ResolveTask;
 
 import groovy.lang.Closure;
+import groovy.lang.GroovyObjectSupport;
 
 import io.spring.gradle.dependencymanagement.DependencyManagementPlugin;
+import io.spring.gradle.dependencymanagement.dsl.DependencyManagementConfigurer;
 import io.spring.gradle.dependencymanagement.dsl.DependencyManagementExtension;
 import io.spring.gradle.dependencymanagement.dsl.ImportsHandler;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
@@ -35,6 +39,7 @@ import org.gradle.api.Task;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.DependencySet;
+import org.gradle.api.artifacts.UnknownConfigurationException;
 import org.gradle.api.artifacts.dsl.DependencyHandler;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.invocation.Gradle;
@@ -90,8 +95,6 @@ public class TargetPlatformPlugin implements Plugin<Project> {
 			targetPlatformDistroConfiguration,
 			targetPlatformRequirementsConfiguration);
 
-		_configureDependencyManagement(
-			project, targetPlatformBomsConfiguration);
 		_configureTasksResolve(project, targetPlatformExtension);
 
 		PluginContainer pluginContainer = project.getPlugins();
@@ -102,6 +105,8 @@ public class TargetPlatformPlugin implements Plugin<Project> {
 
 				@Override
 				public void execute(JavaPlugin javaPlugin) {
+					_configureDependencyManagement(
+						project, targetPlatformBomsConfiguration);
 					_addDependenciesBundleAndRequirement(
 						project, JavaPlugin.JAR_TASK_NAME,
 						project.getDependencies(),
@@ -243,32 +248,77 @@ public class TargetPlatformPlugin implements Plugin<Project> {
 	}
 
 	private void _configureDependencyManagement(
-		Project project, Configuration targetPlatformBomsConfiguration) {
+		final Project project,
+		final Configuration targetPlatformBomsConfiguration) {
 
 		final DependencyManagementExtension dependencyManagementExtension =
 			GradleUtil.getExtension(
 				project, DependencyManagementExtension.class);
 
-		DependencySet dependencySet =
-			targetPlatformBomsConfiguration.getAllDependencies();
+		GroovyObjectSupport groovyObjectSupport =
+			(GroovyObjectSupport)dependencyManagementExtension;
 
-		dependencySet.all(
-			new Action<Dependency>() {
+		Configuration[] configurations = {
+			_safeGetConfiguration(project, "compile"),
+			_safeGetConfiguration(project, "compileClasspath"),
+			_safeGetConfiguration(project, "compileInclude"),
+			_safeGetConfiguration(project, "compileOnly"),
+			_safeGetConfiguration(project, "default"),
+			_safeGetConfiguration(project, "implementation"),
+			_safeGetConfiguration(project, "runtime"),
+			_safeGetConfiguration(project, "runtimeClasspath"),
+			_safeGetConfiguration(project, "runtimeImplementation"),
+			_safeGetConfiguration(project, "runtimeOnly"),
+			_safeGetConfiguration(project, "testCompileClasspath"),
+			_safeGetConfiguration(project, "testCompileOnly"),
+			_safeGetConfiguration(project, "testIntegration"),
+			_safeGetConfiguration(project, "testImplementation"),
+			_safeGetConfiguration(project, "testRuntime"),
+			_safeGetConfiguration(project, "testRuntimeClasspath"),
+			_safeGetConfiguration(project, "testRuntimeOnly")
+		};
 
-				@Override
-				public void execute(Dependency dependency) {
-					_configureDependencyManagementImportsHandler(
-						dependencyManagementExtension, dependency);
-				}
+		List<Object> args = new ArrayList<>();
 
-			});
+		for (int i = 0; i < configurations.length; i++) {
+			if (configurations[i] != null) {
+				args.add(configurations[i]);
+			}
+		}
+
+		Closure<Void> closure = new Closure<Void>(project) {
+
+			@SuppressWarnings("unused")
+			public void doCall() {
+				DependencySet dependencySet =
+					targetPlatformBomsConfiguration.getAllDependencies();
+
+				dependencySet.all(
+					new Action<Dependency>() {
+
+						@Override
+						public void execute(final Dependency dependency) {
+							_configureDependencyManagementImportsHandler(
+								(DependencyManagementConfigurer)getDelegate(),
+								dependency);
+						}
+
+					});
+			}
+
+		};
+
+		args.add(closure);
+
+		groovyObjectSupport.invokeMethod(
+			"configurations", args.toArray(new Object[0]));
 	}
 
 	private void _configureDependencyManagementImportsHandler(
-		DependencyManagementExtension dependencyManagementExtension,
+		DependencyManagementConfigurer dependencyManagementConfigurer,
 		final Dependency dependency) {
 
-		dependencyManagementExtension.imports(
+		dependencyManagementConfigurer.imports(
 			new Action<ImportsHandler>() {
 
 				@Override
@@ -376,6 +426,16 @@ public class TargetPlatformPlugin implements Plugin<Project> {
 				}
 
 			});
+	}
+
+	private Configuration _safeGetConfiguration(Project project, String name) {
+		try {
+			return GradleUtil.getConfiguration(project, name);
+		}
+		catch (UnknownConfigurationException uce) {
+		}
+
+		return null;
 	}
 
 	private static final Spec<Task> _skipIfExecutingParentTaskSpec =
