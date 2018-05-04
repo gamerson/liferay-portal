@@ -46,6 +46,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.BasicFileAttributes;
 
 import java.util.ArrayList;
@@ -2827,6 +2828,44 @@ public class ProjectTemplatesTest {
 			"src/main/java/" + packagePath + "/constants/" + className +
 				"WebKeys.java");
 
+		if (Validator.isNotNull(System.getenv("JENKINS_HOME"))) {
+			File mavenNpmBundlerRCFile = new File(
+				mavenProjectDir, "npmbundlerrc");
+
+			Path mavenNpmBundlerRCPath = mavenNpmBundlerRCFile.toPath();
+
+			String one = "nodejs.npm.ci.registry=" + _NODE_REGISTRY_CACHE_URL;
+			String two =
+				"nodejs.npm.ci.sass.binary.site=" + _NODE_SASS_BINARY_SITE;
+
+			StringBuilder sbMaven = new StringBuilder();
+
+			sbMaven.append(one + "\n");
+			sbMaven.append(two);
+
+			String mavenNpmBundlerRC = sbMaven.toString();
+
+			Files.write(
+				mavenNpmBundlerRCPath, mavenNpmBundlerRC.getBytes(),
+				StandardOpenOption.APPEND);
+
+			File gradleBuildFile = new File(gradleProjectDir, "build.gradle");
+
+			Path gradleBuildPath = gradleBuildFile.toPath();
+
+			StringBuilder sbGradle = new StringBuilder();
+
+			sbGradle.append("{\n");
+			sbGradle.append("registry, " + _NODE_REGISTRY_CACHE_URL + "\n");
+			sbGradle.append("}");
+
+			String gradleBuild = sbGradle.toString();
+
+			Files.write(
+				gradleBuildPath, gradleBuild.getBytes(),
+				StandardOpenOption.APPEND);
+		}
+
 		_buildProjects(gradleProjectDir, mavenProjectDir);
 	}
 
@@ -3158,6 +3197,13 @@ public class ProjectTemplatesTest {
 		"mvnw", "mvnw.cmd", ".mvn/wrapper/maven-wrapper.jar",
 		".mvn/wrapper/maven-wrapper.properties"
 	};
+
+	private static final String _NODE_REGISTRY_CACHE_URL =
+		"http://mirrors.lax.liferay.com:4873";
+
+	private static final String _NODE_SASS_BINARY_SITE =
+		"http://mirrors.lax.liferay.com/github.com/sass/node-sass/releases" +
+			"/download";
 
 	private static final String _OUTPUT_FILENAME_GLOB_REGEX = "*.{jar,war}";
 
