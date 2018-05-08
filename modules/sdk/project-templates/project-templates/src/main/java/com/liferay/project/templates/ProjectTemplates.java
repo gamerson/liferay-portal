@@ -81,26 +81,16 @@ public class ProjectTemplates {
 					while (iterator.hasNext()) {
 						Path path = iterator.next();
 
-						String template = String.valueOf(path.getFileName());
+						String fileName = String.valueOf(path.getFileName());
 
-						template = template.substring(
-							TEMPLATE_BUNDLE_PREFIX.length(),
-							template.lastIndexOf('-'));
-
-						template = template.replace('.', '-');
+						String template = Archetyper.getTemplateName(fileName);
 
 						if (!template.startsWith(WorkspaceUtil.WORKSPACE)) {
-							try (JarFile jarFile = new JarFile(path.toFile())) {
-								Manifest manifest = jarFile.getManifest();
+							String bundleDescription =
+								Archetyper.getManifestProperty(
+									path.toFile(), "Bundle-Description");
 
-								Attributes attributes =
-									manifest.getMainAttributes();
-
-								String bundleDescription = attributes.getValue(
-									"Bundle-Description");
-
-								templates.put(template, bundleDescription);
-							}
+							templates.put(template, bundleDescription);
 						}
 					}
 				}
@@ -122,16 +112,11 @@ public class ProjectTemplates {
 							continue;
 						}
 
-						template = template.substring(
-							TEMPLATE_BUNDLE_PREFIX.length(),
-							template.indexOf("-"));
-
-						template = template.replace('.', '-');
+						template = Archetyper.getTemplateName(template);
 
 						if (!template.startsWith(WorkspaceUtil.WORKSPACE)) {
 							try (InputStream inputStream =
 									jarFile.getInputStream(jarEntry);
-
 								JarInputStream jarInputStream =
 									new JarInputStream(inputStream)) {
 
