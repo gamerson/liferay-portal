@@ -2267,7 +2267,7 @@ public class ProjectTemplatesTest {
 
 		GradleRunner gradleRunner = GradleRunner.create();
 
-		List<String> arguments = new ArrayList<>(taskPaths.length + 3);
+		List<String> arguments = new ArrayList<>(taskPaths.length + 5);
 
 		arguments.add("--stacktrace");
 
@@ -2277,6 +2277,14 @@ public class ProjectTemplatesTest {
 		if (Validator.isNotNull(httpProxyHost) && (httpProxyPort > 0)) {
 			arguments.add("-Dhttp.proxyHost=" + httpProxyHost);
 			arguments.add("-Dhttp.proxyPort=" + httpProxyPort);
+		}
+
+		if (Validator.isNotNull(System.getenv("JENKINS_HOME"))) {
+			arguments.add(
+				"-Dnodejs.npm.ci.registry=" + _NODEJS_NPM_CI_REGISTRY);
+			arguments.add(
+				"-Dnodejs.npm.ci.sass.binary.site=" +
+					_NODEJS_NPM_CI_SASS_BINARY_SITE);
 		}
 
 		for (String taskPath : taskPaths) {
@@ -2305,11 +2313,19 @@ public class ProjectTemplatesTest {
 	private static void _executeMaven(File projectDir, String... args)
 		throws Exception {
 
-		String[] completeArgs = new String[args.length + 1];
+		String[] completeArgs = new String[args.length + 3];
 
 		completeArgs[0] = "--update-snapshots";
 
-		System.arraycopy(args, 0, completeArgs, 1, args.length);
+		if (Validator.isNotNull(System.getenv("JENKINS_HOME"))) {
+			completeArgs[1] =
+				"-Dnodejs.npm.ci.registry=" + _NODEJS_NPM_CI_REGISTRY;
+			completeArgs[2] =
+				"-Dnodejs.npm.ci.sass.binary.site=" +
+					_NODEJS_NPM_CI_SASS_BINARY_SITE;
+		}
+
+		System.arraycopy(args, 0, completeArgs, 3, args.length);
 
 		MavenExecutor.Result result = mavenExecutor.execute(projectDir, args);
 
@@ -2738,6 +2754,38 @@ public class ProjectTemplatesTest {
 		Assert.assertFalse(message.toString(), realChange);
 	}
 
+	private static void _writeNPMBuildFile(File projectDir) throws IOException {
+		String classPath = "com.liferay.gradle.plugins";
+		String applyPlugin = "com.liferay.plugin";
+
+		File buildFile = _testContains(
+			projectDir, "build.gradle", classPath, applyPlugin);
+
+		Path buildFilePath = buildFile.toPath();
+
+		List<String> lines = Files.readAllLines(
+			buildFilePath, StandardCharsets.UTF_8);
+
+		try (BufferedWriter bufferedWriter = Files.newBufferedWriter(
+				buildFilePath, StandardCharsets.UTF_8)) {
+
+			for (String line : lines) {
+				FileTestUtil.write(bufferedWriter, line);
+
+				int lastLine = lines.lastIndexOf(lines);
+
+				if (lastLine == lines.size()) {
+					FileTestUtil.write(
+						bufferedWriter,
+						"import com.liferay.gradle.plugins.node.tasks." +
+							"ExecuteNpmTask",
+						"tasks.withType(ExecuteNpmTask.class) {",
+						"registry = '" + _NODEJS_NPM_CI_REGISTRY + "'}");
+				}
+			}
+		}
+	}
+
 	private static void _writeServiceClass(File projectDir) throws IOException {
 		String importLine =
 			"import com.liferay.portal.kernel.events.LifecycleAction;";
@@ -2853,6 +2901,8 @@ public class ProjectTemplatesTest {
 		_testNotContains(
 			gradleProjectDir, ".npmbundlerrc",
 			"target/classes/META-INF/resources");
+
+		_writeNPMBuildFile(gradleProjectDir);
 
 		File mavenProjectDir = _buildTemplateWithMaven(
 			template, name, "com.test", "-DclassName=" + className,
@@ -3280,6 +3330,12 @@ public class ProjectTemplatesTest {
 		"mvnw", "mvnw.cmd", ".mvn/wrapper/maven-wrapper.jar",
 		".mvn/wrapper/maven-wrapper.properties"
 	};
+
+	private static final String _NODEJS_NPM_CI_REGISTRY = System.getProperty(
+		"nodejs.npm.ci.registry");
+
+	private static final String _NODEJS_NPM_CI_SASS_BINARY_SITE =
+		System.getProperty("nodejs.npm.ci.sass.binary.site");
 
 	private static final String _OUTPUT_FILENAME_GLOB_REGEX = "*.{jar,war}";
 
