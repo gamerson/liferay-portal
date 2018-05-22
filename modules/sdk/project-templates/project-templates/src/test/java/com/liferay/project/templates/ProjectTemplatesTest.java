@@ -47,6 +47,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.BasicFileAttributes;
 
 import java.util.ArrayList;
@@ -2754,7 +2755,9 @@ public class ProjectTemplatesTest {
 		Assert.assertFalse(message.toString(), realChange);
 	}
 
-	private static void _writeNPMBuildFile(File projectDir) throws IOException {
+	private static void _updateExecuteNpmTask(File projectDir)
+		throws Exception {
+
 		String classPath = "com.liferay.gradle.plugins";
 		String applyPlugin = "com.liferay.plugin";
 
@@ -2763,27 +2766,14 @@ public class ProjectTemplatesTest {
 
 		Path buildFilePath = buildFile.toPath();
 
-		List<String> lines = Files.readAllLines(
-			buildFilePath, StandardCharsets.UTF_8);
+		String executeNpmTaskScript =
+			"import com.liferay.gradle.plugins.node.tasks.ExecuteNpmTask\n" +
+				"tasks.withType(ExecuteNpmTask) {\n" + "registry = '" +
+					_NODEJS_NPM_CI_REGISTRY + "'}";
 
-		try (BufferedWriter bufferedWriter = Files.newBufferedWriter(
-				buildFilePath, StandardCharsets.UTF_8)) {
-
-			for (String line : lines) {
-				FileTestUtil.write(bufferedWriter, line);
-
-				int lastLine = lines.lastIndexOf(lines);
-
-				if (lastLine == lines.size()) {
-					FileTestUtil.write(
-						bufferedWriter,
-						"import com.liferay.gradle.plugins.node.tasks." +
-							"ExecuteNpmTask",
-						"tasks.withType(ExecuteNpmTask.class) {",
-						"registry = '" + _NODEJS_NPM_CI_REGISTRY + "'}");
-				}
-			}
-		}
+		Files.write(
+			buildFilePath, executeNpmTaskScript.getBytes(),
+			StandardOpenOption.APPEND);
 	}
 
 	private static void _writeServiceClass(File projectDir) throws IOException {
@@ -2902,8 +2892,6 @@ public class ProjectTemplatesTest {
 			gradleProjectDir, ".npmbundlerrc",
 			"target/classes/META-INF/resources");
 
-		_writeNPMBuildFile(gradleProjectDir);
-
 		File mavenProjectDir = _buildTemplateWithMaven(
 			template, name, "com.test", "-DclassName=" + className,
 			"-Dpackage=" + packageName, "-DliferayVersion=7.1");
@@ -2939,6 +2927,8 @@ public class ProjectTemplatesTest {
 			gradleProjectDir,
 			"src/main/java/" + packagePath + "/constants/" + className +
 				"WebKeys.java");
+
+		_updateExecuteNpmTask(gradleProjectDir);
 
 		_buildProjects(gradleProjectDir, mavenProjectDir);
 	}
