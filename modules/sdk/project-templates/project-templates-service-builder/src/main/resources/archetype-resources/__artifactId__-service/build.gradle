@@ -1,11 +1,21 @@
 #if (${projectType} != "workspace")apply plugin: "com.liferay.portal.tools.service.builder"
 #end
+
+#if (${dependencyManagementEnabled} == "true")
+dependencies {
+	compileOnly group: "biz.aQute.bnd", name: "biz.aQute.bndlib"
+	compileOnly group: "com.liferay", name: "com.liferay.portal.spring.extender"
+	compileOnly group: "com.liferay.portal", name: "com.liferay.portal.kernel"
+	compileOnly project("${apiPath}")
+}
+#else
 dependencies {
 	compileOnly group: "biz.aQute.bnd", name: "biz.aQute.bndlib", version: "3.5.0"
 	compileOnly group: "com.liferay", name: "com.liferay.portal.spring.extender", version: "2.0.0"
 	compileOnly group: "com.liferay.portal", name: "com.liferay.portal.kernel", version: "2.6.0"
 	compileOnly project("${apiPath}")
 }
+#end
 
 buildService {
 	apiDir = "../${artifactId}-api/src/main/java"

@@ -11,7 +11,16 @@ buildscript {
 }
 
 apply plugin: "com.liferay.portal.tools.theme.builder"
+#if (${dependencyManagementEnabled} == "true")
+dependencies {
+	parentThemes group: "com.liferay", name: "com.liferay.frontend.theme.styled"
+	parentThemes group: "com.liferay", name: "com.liferay.frontend.theme.unstyled"
 
+	portalCommonCSS group: "com.liferay", name: "com.liferay.frontend.css.common"
+
+	themeBuilder group: "com.liferay", name: "com.liferay.portal.tools.theme.builder"
+}
+#else
 dependencies {
 	parentThemes group: "com.liferay", name: "com.liferay.frontend.theme.styled", version: "2.0.13"
 	parentThemes group: "com.liferay", name: "com.liferay.frontend.theme.unstyled", version: "2.0.13"
@@ -20,6 +29,7 @@ dependencies {
 
 	themeBuilder group: "com.liferay", name: "com.liferay.portal.tools.theme.builder", version: "@com.liferay.portal.tools.theme.builder.version@"
 }
+#end
 #if (${projectType} != "workspace")
 
 repositories {
