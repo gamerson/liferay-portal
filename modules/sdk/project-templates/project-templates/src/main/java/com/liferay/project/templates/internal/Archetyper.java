@@ -89,6 +89,7 @@ public class Archetyper {
 		String groupId = projectTemplatesArgs.getGroupId();
 		String liferayVersion = projectTemplatesArgs.getLiferayVersion();
 		String packageName = projectTemplatesArgs.getPackageName();
+		String dependencyManagementEnabled = projectTemplatesArgs.getDependencyManagementEnabled();
 
 		File templateFile = _getTemplateFile(projectTemplatesArgs);
 
@@ -149,6 +150,7 @@ public class Archetyper {
 		_setProperty(properties, "liferayVersion", liferayVersion);
 		_setProperty(properties, "package", packageName);
 		_setProperty(properties, "projectType", projectType);
+		_setProperty(properties, "dependencyManagementEnabled", dependencyManagementEnabled);
 
 		archetypeGenerationRequest.setProperties(properties);
 
