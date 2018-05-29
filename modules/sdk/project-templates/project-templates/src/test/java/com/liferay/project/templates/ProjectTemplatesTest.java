@@ -14,21 +14,6 @@
 
 package com.liferay.project.templates;
 
-import aQute.bnd.main.bnd;
-
-import com.liferay.maven.executor.MavenExecutor;
-import com.liferay.project.templates.internal.Archetyper;
-import com.liferay.project.templates.internal.util.FileUtil;
-import com.liferay.project.templates.internal.util.Validator;
-import com.liferay.project.templates.util.DirectoryComparator;
-import com.liferay.project.templates.util.FileTestUtil;
-import com.liferay.project.templates.util.StringTestUtil;
-import com.liferay.project.templates.util.XMLTestUtil;
-
-import difflib.Delta;
-import difflib.DiffUtils;
-import difflib.Patch;
-
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -36,9 +21,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
-
 import java.net.URI;
-
 import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.FileVisitResult;
@@ -48,7 +31,6 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -64,17 +46,12 @@ import java.util.regex.Pattern;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import net.diibadaaba.zipdiff.DifferenceCalculator;
-import net.diibadaaba.zipdiff.Differences;
-
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipFile;
-
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.BuildTask;
 import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.TaskOutcome;
-
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.BeforeClass;
@@ -82,9 +59,24 @@ import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import com.liferay.maven.executor.MavenExecutor;
+import com.liferay.project.templates.internal.Archetyper;
+import com.liferay.project.templates.internal.util.FileUtil;
+import com.liferay.project.templates.internal.util.Validator;
+import com.liferay.project.templates.util.DirectoryComparator;
+import com.liferay.project.templates.util.FileTestUtil;
+import com.liferay.project.templates.util.StringTestUtil;
+import com.liferay.project.templates.util.XMLTestUtil;
+
+import aQute.bnd.main.bnd;
+import difflib.Delta;
+import difflib.DiffUtils;
+import difflib.Patch;
+import net.diibadaaba.zipdiff.DifferenceCalculator;
+import net.diibadaaba.zipdiff.Differences;
 
 /**
  * @author Lawrence Lee
@@ -2279,6 +2271,10 @@ public class ProjectTemplatesTest {
 							content = content.replace(
 								"\"" + _REPOSITORY_CDN_URL + "\"",
 								"\"" + repositoryUrl + "\"");
+
+							content = content.replace(
+								"repositories {",
+								"repositories {\n mavenLocal()\n");
 
 							Files.write(
 								path, content.getBytes(StandardCharsets.UTF_8));
