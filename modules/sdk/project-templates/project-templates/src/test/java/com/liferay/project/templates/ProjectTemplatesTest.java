@@ -36,6 +36,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.io.StringWriter;
 
 import java.net.URI;
 
@@ -56,6 +57,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Scanner;
 import java.util.TreeMap;
 import java.util.concurrent.Callable;
 import java.util.jar.JarFile;
@@ -1003,6 +1005,133 @@ public class ProjectTemplatesTest {
 			":modules:nested:path:sample");
 	}
 
+	@Test
+	public void testBuildTemplateServiceBuilderVersions() throws Exception {
+		String projectPath = ":modules:nested:path:sample";
+
+		String name = "sample";
+
+		String packageName = "com.test.sample";
+
+		File workspaceProjectDir = _buildTemplateWithGradle(
+			WorkspaceUtil.WORKSPACE, "ws-nested-path");
+
+		File destinationDir = new File(
+			workspaceProjectDir, "modules/nested/path");
+
+		Assert.assertTrue(destinationDir.mkdirs());
+
+		File gradleProjectDir = _buildTemplateWithGradle(
+			destinationDir, "service-builder", name, "--package-name",
+			packageName);
+
+		_testContains(
+			gradleProjectDir, "sample-service/build.gradle",
+			"compileOnly project(\":modules:nested:path:sample:sample-api\")");
+
+		final String serviceProjectName = name + "-service";
+
+		String[] gradleSericeBuilderVersion = new String[1];
+
+		_testChangePortletModelHintsXml(
+			gradleProjectDir, serviceProjectName,
+			new Callable<Void>() {
+
+				@Override
+				public Void call() throws Exception {
+					_executeGradle(
+						workspaceProjectDir,
+						projectPath + ":" + serviceProjectName +
+							_GRADLE_TASK_PATH_BUILD_SERVICE);
+
+					String serviceBuilderDep = null;
+
+					String result = _executeGradle(
+						workspaceProjectDir,
+						projectPath + ":" + serviceProjectName +
+							":dependencies");
+
+					Scanner scanner = new Scanner(result);
+
+					while (scanner.hasNextLine()) {
+						String line = scanner.nextLine();
+
+						if (line.contains("service.builder")) {
+							serviceBuilderDep = line;
+
+							break;
+						}
+					}
+
+					scanner.close();
+
+					if (serviceBuilderDep != null) {
+						gradleSericeBuilderVersion[0] = serviceBuilderDep.split(
+							":")[2];
+					}
+
+					return null;
+				}
+
+			});
+
+		final File mavenProjectDir = _buildTemplateWithMaven(
+			"service-builder", name, "com.test", "-Dpackage=" + packageName);
+
+		String[] mavenSericeBuilderVersion = new String[1];
+
+		_testChangePortletModelHintsXml(
+			mavenProjectDir, serviceProjectName,
+			new Callable<Void>() {
+
+				@Override
+				public Void call() throws Exception {
+					String results = _executeMaven(
+						new File(mavenProjectDir, serviceProjectName),
+						_MAVEN_GOAL_BUILD_SERVICE);
+
+					String serviceBuilderDep = null;
+
+					Scanner scanner = new Scanner(results);
+
+					while (scanner.hasNextLine()) {
+						String line = scanner.nextLine();
+
+						if (line.contains("service.builder")) {
+							serviceBuilderDep = line;
+
+							break;
+						}
+					}
+
+					scanner.close();
+
+					if (serviceBuilderDep != null) {
+						mavenSericeBuilderVersion[0] = serviceBuilderDep.split(
+							":")[1];
+					}
+
+					return null;
+				}
+
+			});
+
+		boolean versionCheck = mavenSericeBuilderVersion[0].equals(
+			gradleSericeBuilderVersion[0]);
+
+		if (!versionCheck) {
+			String message =
+				"service.builder versions must match (maven: %s, gradle: %s)";
+
+			message = String.format(
+				message, mavenSericeBuilderVersion[0],
+				gradleSericeBuilderVersion[0]);
+
+			Assert.assertTrue(message, versionCheck);
+		}
+	}
+
+	@Ignore
 	@Test
 	public void testBuildTemplateServiceBuilderWithDashes() throws Exception {
 		String name = "backend-integration";
@@ -2369,7 +2498,7 @@ public class ProjectTemplatesTest {
 		}
 	}
 
-	private static void _executeGradle(File projectDir, String... taskPaths)
+	private static String _executeGradle(File projectDir, String... taskPaths)
 		throws IOException {
 
 		final String repositoryUrl = mavenExecutor.getRepositoryUrl();
@@ -2409,6 +2538,8 @@ public class ProjectTemplatesTest {
 				});
 		}
 
+		StringWriter writer = new StringWriter();
+
 		GradleRunner gradleRunner = GradleRunner.create();
 
 		List<String> arguments = new ArrayList<>(taskPaths.length + 5);
@@ -2431,6 +2562,7 @@ public class ProjectTemplatesTest {
 
 		gradleRunner.withGradleDistribution(_gradleDistribution);
 		gradleRunner.withProjectDir(projectDir);
+		gradleRunner.forwardStdOutput(writer);
 
 		BuildResult buildResult = gradleRunner.build();
 
@@ -2444,9 +2576,11 @@ public class ProjectTemplatesTest {
 				"Unexpected outcome for task \"" + buildTask.getPath() + "\"",
 				TaskOutcome.SUCCESS, buildTask.getOutcome());
 		}
+
+		return writer.toString();
 	}
 
-	private static void _executeMaven(File projectDir, String... args)
+	private static String _executeMaven(File projectDir, String... args)
 		throws Exception {
 
 		String[] completeArgs = new String[args.length + 1];
@@ -2458,6 +2592,8 @@ public class ProjectTemplatesTest {
 		MavenExecutor.Result result = mavenExecutor.execute(projectDir, args);
 
 		Assert.assertEquals(result.output, 0, result.exitCode);
+
+		return result.output;
 	}
 
 	private static void _testArchetyper(
