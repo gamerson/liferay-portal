@@ -14,8 +14,13 @@ apply plugin: "com.liferay.plugin"
 
 #end
 dependencies {
+#if (${dependencyManagementEnabled} == "true")
+	compileOnly group: "com.liferay.portal", name: "com.liferay.portal.kernel"
+	compileOnly group: "org.osgi", name: "osgi.cmpn"
+#else
 	compileOnly group: "com.liferay.portal", name: "com.liferay.portal.kernel", version: "2.0.0"
 	compileOnly group: "org.osgi", name: "osgi.cmpn", version: "6.0.0"
+#end
 }
 #if (${projectType} != "workspace")
 
