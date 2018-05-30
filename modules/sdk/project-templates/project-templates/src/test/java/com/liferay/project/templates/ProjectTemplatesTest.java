@@ -1131,7 +1131,6 @@ public class ProjectTemplatesTest {
 		}
 	}
 
-	@Ignore
 	@Test
 	public void testBuildTemplateServiceBuilderWithDashes() throws Exception {
 		String name = "backend-integration";
