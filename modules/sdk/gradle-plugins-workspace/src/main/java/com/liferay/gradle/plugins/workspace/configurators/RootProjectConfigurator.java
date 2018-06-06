@@ -14,6 +14,11 @@
 
 package com.liferay.gradle.plugins.workspace.configurators;
 
+import com.bmuschko.gradle.docker.tasks.container.DockerStartContainer;
+import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage;
+import com.bmuschko.gradle.docker.tasks.image.Dockerfile;
+
+import com.liferay.gradle.plugins.app.docker.AppDockerPlugin;
 import com.liferay.gradle.plugins.workspace.WorkspaceExtension;
 import com.liferay.gradle.plugins.workspace.WorkspacePlugin;
 import com.liferay.gradle.plugins.workspace.internal.configurators.TargetPlatformRootProjectConfigurator;
@@ -29,6 +34,7 @@ import groovy.lang.Closure;
 
 import java.io.File;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -57,6 +63,7 @@ import org.gradle.api.logging.Logger;
 import org.gradle.api.plugins.ExtensionAware;
 import org.gradle.api.specs.Spec;
 import org.gradle.api.tasks.Copy;
+import org.gradle.api.tasks.Sync;
 import org.gradle.api.tasks.TaskOutputs;
 import org.gradle.api.tasks.bundling.AbstractArchiveTask;
 import org.gradle.api.tasks.bundling.Compression;
@@ -77,6 +84,8 @@ public class RootProjectConfigurator implements Plugin<Project> {
 	public static final String CLEAN_TASK_NAME =
 		LifecycleBasePlugin.CLEAN_TASK_NAME;
 
+	public static final String CREATE_DOCKERFILE_TASK_NAME = "createDockerfile";
+
 	public static final String CREATE_TOKEN_TASK_NAME = "createToken";
 
 	public static final String DIST_BUNDLE_TAR_TASK_NAME = "distBundleTar";
@@ -85,9 +94,14 @@ public class RootProjectConfigurator implements Plugin<Project> {
 
 	public static final String DIST_BUNDLE_ZIP_TASK_NAME = "distBundleZip";
 
+	public static final String DOCKER_GROUP = "docker";
+
 	public static final String DOWNLOAD_BUNDLE_TASK_NAME = "downloadBundle";
 
 	public static final String INIT_BUNDLE_TASK_NAME = "initBundle";
+
+	public static final String PREPARE_APP_DOCKER_IMAGE_CONFIG_DIR_TASK_NAME =
+		"prepareAppDockerImageConfigDir";
 
 	public static final String PROVIDED_MODULES_CONFIGURATION_NAME =
 		"providedModules";
@@ -112,6 +126,7 @@ public class RootProjectConfigurator implements Plugin<Project> {
 		final WorkspaceExtension workspaceExtension = GradleUtil.getExtension(
 			(ExtensionAware)project.getGradle(), WorkspaceExtension.class);
 
+		GradleUtil.applyPlugin(project, AppDockerPlugin.class);
 		GradleUtil.applyPlugin(project, LifecycleBasePlugin.class);
 
 		if (isDefaultRepositoryEnabled()) {
@@ -122,6 +137,10 @@ public class RootProjectConfigurator implements Plugin<Project> {
 			_addConfigurationProvidedModules(project);
 
 		TargetPlatformRootProjectConfigurator.INSTANCE.apply(project);
+
+		File dockerBuildDir = new File(project.getBuildDir(), "docker");
+
+		_addTaskCreateDockerfile(project, dockerBuildDir, workspaceExtension);
 
 		CreateTokenTask createTokenTask = _addTaskCreateToken(
 			project, workspaceExtension);
@@ -147,6 +166,13 @@ public class RootProjectConfigurator implements Plugin<Project> {
 		_addTaskInitBundle(
 			project, downloadBundleTask, workspaceExtension,
 			providedModulesConfiguration);
+
+		_addTaskPrepareAppDockerImageConfigDir(
+			project, dockerBuildDir, workspaceExtension);
+
+		_configureTaskBuildAppDockerImage(project, dockerBuildDir);
+		_configureTaskPrepareAppDockerImageInputDir(
+			project, dockerBuildDir, providedModulesConfiguration);
 	}
 
 	public boolean isDefaultRepositoryEnabled() {
@@ -235,6 +261,32 @@ public class RootProjectConfigurator implements Plugin<Project> {
 		copy.setDuplicatesStrategy(DuplicatesStrategy.EXCLUDE);
 
 		return copy;
+	}
+
+	private Dockerfile _addTaskCreateDockerfile(
+		Project project, File dir, final WorkspaceExtension workspaceExtension) {
+
+		Dockerfile dockerfileTask = GradleUtil.addTask(
+			project, CREATE_DOCKERFILE_TASK_NAME, Dockerfile.class);
+
+		dockerfileTask.dependsOn(
+			AppDockerPlugin.PREPARE_APP_DOCKER_IMAGE_INPUT_DIR_TASK_NAME,
+			PREPARE_APP_DOCKER_IMAGE_CONFIG_DIR_TASK_NAME);
+
+		dockerfileTask.setDescription(
+			"Creates a dockerfile to build the project Docker image.");
+		dockerfileTask.setDestFile(new File(dir, "Dockerfile"));
+
+		dockerfileTask.setGroup(DOCKER_GROUP);
+
+		dockerfileTask.from(workspaceExtension.getDockerBaseImageLiferay());
+
+		dockerfileTask.instruction(
+			"COPY --chown=liferay:liferay deploy /opt/liferay/deploy");
+		dockerfileTask.instruction(
+			"COPY --chown=liferay:liferay configs /etc/liferay/mount/files");
+
+		return dockerfileTask;
 	}
 
 	private CreateTokenTask _addTaskCreateToken(
@@ -501,6 +553,60 @@ public class RootProjectConfigurator implements Plugin<Project> {
 		return copy;
 	}
 
+	private Copy _addTaskPrepareAppDockerImageConfigDir(
+		Project project, File dir,
+		final WorkspaceExtension workspaceExtension) {
+
+		Copy copy = GradleUtil.addTask(
+			project, PREPARE_APP_DOCKER_IMAGE_CONFIG_DIR_TASK_NAME, Copy.class);
+
+		copy.setDescription(
+			"Copies all the configs to a temporary directory that will be " +
+				"used to build the Docker image of the app.");
+		copy.setDestinationDir(new File(dir, "configs"));
+
+		copy.from(
+			new Callable<File>() {
+
+				@Override
+				public File call() throws Exception {
+					return new File(
+						workspaceExtension.getConfigsDir(), "docker");
+				}
+
+			});
+
+		File file = new File(copy.getDestinationDir(), ".touch");
+
+		try {
+			file.createNewFile();
+		}
+		catch (IOException ioe) {
+			Logger logger = copy.getLogger();
+
+			logger.warn(
+				"Could not create placeholder file.  Please make " +
+				"sure you have at least one config or " +
+				"the task will fail.");
+		}
+
+		return copy;
+	}
+
+	private DockerStartContainer _addTaskStartAppDockerImage
+
+	private void _configureTaskBuildAppDockerImage(Project project, File dir) {
+		DockerBuildImage buildAppDockerImageTask =
+			(DockerBuildImage)GradleUtil.getTask(
+				project, AppDockerPlugin.BUILD_APP_DOCKER_IMAGE_TASK_NAME);
+
+		buildAppDockerImageTask.setInputDir(dir);
+
+		buildAppDockerImageTask.setGroup(DOCKER_GROUP);
+
+		buildAppDockerImageTask.dependsOn(CREATE_DOCKERFILE_TASK_NAME);
+	}
+
 	private void _configureTaskCopyBundleFromConfig(
 		Copy copy, Callable<File> dir) {
 
@@ -639,7 +745,6 @@ public class RootProjectConfigurator implements Plugin<Project> {
 				public void execute(FileCopyDetails fileCopyDetails) {
 					fileCopyDetailsSet.add(fileCopyDetails);
 				}
-
 			});
 	}
 
@@ -655,6 +760,31 @@ public class RootProjectConfigurator implements Plugin<Project> {
 				}
 
 			});
+	}
+
+	private void _configureTaskPrepareAppDockerImageInputDir(
+		Project project, File dir, Configuration providedModulesConfiguration) {
+
+		Sync sync = (Sync)GradleUtil.getTask(
+			project,
+			AppDockerPlugin.PREPARE_APP_DOCKER_IMAGE_INPUT_DIR_TASK_NAME);
+
+		sync.from(providedModulesConfiguration);
+		sync.setDestinationDir(new File(dir, "deploy"));
+
+		File file = new File(sync.getDestinationDir(), ".touch");
+
+		try {
+			file.createNewFile();
+		}
+		catch (IOException ioe) {
+			Logger logger = sync.getLogger();
+
+			logger.warn(
+				"Could not create placeholder file.  Please make " +
+					"sure you have at least one subproject or " +
+						"the task will fail.");
+		}
 	}
 
 	private List<?> _getSrcList(Download download) {

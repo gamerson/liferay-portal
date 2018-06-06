@@ -73,6 +73,10 @@ public class WorkspaceExtension {
 		_configsDir = _getProperty(
 			settings, "configs.dir",
 			BundleSupportConstants.DEFAULT_CONFIGS_DIR_NAME);
+//		_dockerBaseImageDatabase = _getProperty(
+//			settings, "docker.base.image.database", _DOCKER_BASE_IMAGE_DATABASE);
+		_dockerBaseImageLiferay = _getProperty(
+			settings, "docker.base.image.liferay", _DOCKER_BASE_IMAGE_LIFERAY);
 		_environment = _getProperty(
 			settings, "environment",
 			BundleSupportConstants.DEFAULT_ENVIRONMENT);
@@ -245,6 +249,12 @@ public class WorkspaceExtension {
 
 	private static final String _BUNDLE_TOKEN_PASSWORD = null;
 
+	private static final String _DOCKER_BASE_IMAGE_LIFERAY =
+		"liferay/portal:7.1.0-ga1";
+
+//	private static final String _DOCKER_BASE_IMAGE_DATABASE =
+//		"mdelapenya/mysql-utf8";
+
 	private static final String _BUNDLE_TOKEN_PASSWORD_FILE = null;
 
 	private Object _bundleCacheDir;
@@ -254,6 +264,25 @@ public class WorkspaceExtension {
 	private Object _bundleTokenForce;
 	private Object _bundleTokenPassword;
 	private Object _bundleTokenPasswordFile;
+	private Object _dockerBaseImageDatabase;
+
+//	public Object getDockerBaseImageDatabase() {
+//		return _dockerBaseImageDatabase;
+//	}
+//
+//	public void setDockerBaseImageDatabase(Object dockerBaseImageDatabase) {
+//		_dockerBaseImageDatabase = dockerBaseImageDatabase;
+//	}
+
+	public String getDockerBaseImageLiferay() {
+		return  GradleUtil.toString(_dockerBaseImageLiferay);
+	}
+
+	public void setDockerBaseImageLiferay(Object dockerBaseImageLiferay) {
+		_dockerBaseImageLiferay = dockerBaseImageLiferay;
+	}
+
+	private Object _dockerBaseImageLiferay;
 	private Object _bundleUrl;
 	private Object _configsDir;
 	private Object _environment;

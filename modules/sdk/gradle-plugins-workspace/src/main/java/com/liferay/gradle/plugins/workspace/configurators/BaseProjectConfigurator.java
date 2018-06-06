@@ -35,6 +35,8 @@ import org.gradle.api.initialization.Settings;
  */
 public abstract class BaseProjectConfigurator implements ProjectConfigurator {
 
+	public static final String DOCKER_DEPLOY_TASK_NAME = "dockerDeploy";
+
 	public BaseProjectConfigurator(Settings settings) {
 		String defaultRootDirNames = GradleUtil.getProperty(
 			settings, getDefaultRootDirPropertyName(), (String)null);

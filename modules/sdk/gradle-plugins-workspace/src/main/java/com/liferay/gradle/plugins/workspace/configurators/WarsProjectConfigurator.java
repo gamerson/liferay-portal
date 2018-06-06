@@ -14,6 +14,7 @@
 
 package com.liferay.gradle.plugins.workspace.configurators;
 
+import com.bmuschko.gradle.docker.tasks.container.DockerCopyFileToContainer;
 import com.liferay.gradle.plugins.LiferayBasePlugin;
 import com.liferay.gradle.plugins.workspace.WorkspaceExtension;
 import com.liferay.gradle.plugins.workspace.WorkspacePlugin;
@@ -72,6 +73,7 @@ public class WarsProjectConfigurator extends BaseProjectConfigurator {
 		}
 
 		_addTaskDeploy(war, workspaceExtension);
+		_addTaskDockerDeploy(war, workspaceExtension);
 
 		_configureRootTaskDistBundle(war);
 	}
@@ -140,6 +142,29 @@ public class WarsProjectConfigurator extends BaseProjectConfigurator {
 		copy.setGroup(BasePlugin.BUILD_GROUP);
 
 		return copy;
+	}
+
+	private DockerCopyFileToContainer _addTaskDockerDeploy(
+		War war, final WorkspaceExtension workspaceExtension) {
+
+		Project project = war.getProject();
+
+		Project rootProject = project.getRootProject();
+
+		DockerCopyFileToContainer dockerCopyFileToContainer =
+			GradleUtil.addTask(
+				project, DOCKER_DEPLOY_TASK_NAME,
+				DockerCopyFileToContainer.class);
+
+		dockerCopyFileToContainer.setContainerId(rootProject.getName());
+		dockerCopyFileToContainer.setDescription(
+			"Assembles the project and deploys it to Liferay.");
+		dockerCopyFileToContainer.setGroup(
+			RootProjectConfigurator.DOCKER_GROUP);
+
+		dockerCopyFileToContainer.withFile(war, "/opt/liferay/deploy");
+
+		return dockerCopyFileToContainer;
 	}
 
 	private void _configureRootTaskDistBundle(final War war) {
