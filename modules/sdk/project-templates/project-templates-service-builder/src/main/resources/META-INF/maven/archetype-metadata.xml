@@ -30,6 +30,9 @@
 		<requiredProperty key="buildType">
 			<defaultValue>maven</defaultValue>
 		</requiredProperty>
+		<requiredProperty key="dependencyManagementEnabled">
+			<defaultValue>false</defaultValue>
+		</requiredProperty>
 		<requiredProperty key="projectType">
 			<defaultValue>standalone</defaultValue>
 		</requiredProperty>
