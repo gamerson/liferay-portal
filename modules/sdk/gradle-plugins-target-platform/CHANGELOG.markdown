@@ -13,12 +13,13 @@
 	- configurations added by [Liferay Gradle Plugins Test Integration]
 	- configurations added by the `java` plugin
 
-## 1.1.0 - 2018-06-21
+## 1.1.0 - 2018-06-22
 
 ### Added
 - [LPS-81530]: Add the ability to configure imported BOMs to manage Java
 dependencies and the various artifacts used in resolving OSGi dependencies.
-- [LPS-82491]: Add support for configuring 'idea' plugin for integration with IntelliJ
+- [LPS-82491]: Add support for configuring the `idea` plugin for integration
+with IntelliJ.
 
 [Liferay Gradle Plugins]: https://github.com/liferay/liferay-portal/tree/master/modules/sdk/gradle-plugins
 [Liferay Gradle Plugins Test Integration]: https://github.com/liferay/liferay-portal/tree/master/modules/sdk/gradle-plugins-test-integration
