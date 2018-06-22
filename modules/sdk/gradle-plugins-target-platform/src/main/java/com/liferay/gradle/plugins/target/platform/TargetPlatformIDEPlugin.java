@@ -24,7 +24,9 @@ import io.spring.gradle.dependencymanagement.dsl.DependencyManagementConfigurer;
 import io.spring.gradle.dependencymanagement.dsl.DependencyManagementExtension;
 import io.spring.gradle.dependencymanagement.dsl.ImportsHandler;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -40,9 +42,14 @@ import org.gradle.api.plugins.JavaBasePlugin;
 import org.gradle.plugins.ide.eclipse.EclipsePlugin;
 import org.gradle.plugins.ide.eclipse.model.EclipseClasspath;
 import org.gradle.plugins.ide.eclipse.model.EclipseModel;
+import org.gradle.plugins.ide.idea.IdeaPlugin;
+import org.gradle.plugins.ide.idea.model.IdeaModel;
+import org.gradle.plugins.ide.idea.model.IdeaModule;
+import org.gradle.plugins.ide.idea.model.internal.GeneratedIdeaScope;
 
 /**
  * @author Gregory Amerson
+ * @author Simon Jiang
  */
 public class TargetPlatformIDEPlugin implements Plugin<Project> {
 
@@ -54,6 +61,7 @@ public class TargetPlatformIDEPlugin implements Plugin<Project> {
 	@Override
 	public void apply(Project project) {
 		GradleUtil.applyPlugin(project, EclipsePlugin.class);
+		GradleUtil.applyPlugin(project, IdeaPlugin.class);
 		GradleUtil.applyPlugin(project, JavaBasePlugin.class);
 		GradleUtil.applyPlugin(project, TargetPlatformPlugin.class);
 
@@ -71,6 +79,7 @@ public class TargetPlatformIDEPlugin implements Plugin<Project> {
 				targetPlatformIDEExtension);
 
 		_configureEclipseModel(project, targetPlatformIDEConfiguration);
+		_configureIdeaModel(project, targetPlatformIDEConfiguration);
 	}
 
 	private Configuration _addConfigurationTargetPlatformIDE(
@@ -215,6 +224,38 @@ public class TargetPlatformIDEPlugin implements Plugin<Project> {
 			eclipseClasspath.getPlusConfigurations();
 
 		plusConfigurations.add(targetPlatformIDEConfiguration);
+	}
+
+	private void _configureIdeaModel(
+		Project project, Configuration targetPlatformIDEConfiguration) {
+
+		IdeaModel ideaModel = GradleUtil.getExtension(project, IdeaModel.class);
+
+		IdeaModule ideaModule = ideaModel.getModule();
+
+		Map<String, Map<String, Collection<Configuration>>> scopes =
+			ideaModule.getScopes();
+
+		Map<String, Collection<Configuration>> providedScope = scopes.get(
+			GeneratedIdeaScope.PROVIDED.name());
+
+		if (providedScope == null) {
+			providedScope = new HashMap<>();
+		}
+
+		Collection<Configuration> plus = providedScope.get("plus");
+
+		if (plus == null) {
+			plus = new ArrayList<>();
+		}
+
+		plus.add(targetPlatformIDEConfiguration);
+
+		providedScope.put("plus", plus);
+
+		scopes.put(GeneratedIdeaScope.PROVIDED.name(), providedScope);
+
+		ideaModule.setScopes(scopes);
 	}
 
 }
