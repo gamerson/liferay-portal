@@ -1,3 +1,11 @@
+allprojects {
+	repositories {
+		maven {
+			url "https://repository-cdn.liferay.com/nexus/content/groups/public"
+		}
+	}
+}
+
 task runGradleTest
 
 dependencies {
@@ -8,7 +16,7 @@ runGradleTest {
 	dependsOn resolve
 
 	doLast {
-		File bndrunFile = new File(buildDir, "resolve.bndrun")
+		File bndrunFile = new File(buildDir, "tmp/resolve/resolve.bndrun")
 
 		String bndrun = bndrunFile.text
 
