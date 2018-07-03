@@ -224,12 +224,21 @@ version 3.2.5.
 3.12.46.
 
 ## 1.10.2 - 2018-06-18
+<<<<<<< HEAD
 - [LPS-74544]: Update the [Liferay Gradle Plugins] dependency to version
 3.12.48.
 
 ## 1.10.3 - 2018-06-28
 - [LPS-80660]: Support commonly used liferay versions in target platform
 version.
+=======
+- [LPS-74544]: Updated dependency to [Liferay Gradle Plugins] to version
+3.12.48.
+
+## 1.10.3 - 2018-06-21
+- [LPS-82491]: Updated dependency to [Liferay Gradle plugins Target Platform] to
+version 1.1.0.
+>>>>>>> LPS-82491 changelogs
 
 [Gradle Download Task]: https://github.com/michel-kraemer/gradle-download-task/
 [Liferay Gradle Plugins]: https://github.com/liferay/liferay-portal/tree/master/modules/sdk/gradle-plugins
@@ -284,4 +293,5 @@ version.
 [LPS-80517]: https://issues.liferay.com/browse/LPS-80517
 [LPS-80660]: https://issues.liferay.com/browse/LPS-80660
 [LPS-80950]: https://issues.liferay.com/browse/LPS-80950
+[LPS-82491]: https://issues.liferay.com/browse/LPS-82491
 [LPS-82534]: https://issues.liferay.com/browse/LPS-82534
