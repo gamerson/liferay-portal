@@ -835,6 +835,26 @@ public class ProjectTemplatesTest {
 		_buildProjects(gradleProjectDir, mavenProjectDir);
 	}
 
+	@Test
+	public void testBuildTemplateLiferayVersionDefault() throws Exception {
+		File gradleProjectDir = _buildTemplateWithGradle("mvc-portlet", "foo");
+
+		_testContains(
+			gradleProjectDir, "build.gradle",
+			"name: \"portlet-api\", version: \"3.0.0\"");
+
+		File mavenProjectDir = _buildTemplateWithMaven(
+			"mvc-portlet", "foo", "com.test", "-DclassName=Foo",
+			"-Dpackage=foo", "-DliferayVersion=7.1");
+
+		Path mavenProjectPath = mavenProjectDir.toPath();
+
+		Path pomXmlPath = mavenProjectPath.resolve("pom.xml");
+
+		_testPomXmlContainsDependency(
+			pomXmlPath, "javax.portlet", "portlet-api", "3.0.0");
+	}
+
 	@Test(expected = IllegalArgumentException.class)
 	public void testBuildTemplateLiferayVersionInvalid62() throws Exception {
 		_buildTemplateWithGradle(
