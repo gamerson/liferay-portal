@@ -21,3 +21,21 @@ Path projectPath = Paths.get(request.outputDirectory, request.artifactId)
 Path buildGradlePath = projectPath.resolve("build.gradle")
 
 Files.deleteIfExists buildGradlePath
+
+Properties properties = request.properties
+
+String liferayVersion = properties.get("liferayVersion")
+
+if (!liferayVersion.startsWith("7.1")) {
+	String artifactId = properties.get("artifactId")
+
+	List<String> filesToDelete = [".babelrc", ".npmbundlerrc", "package.json", "src/main/resources/META-INF/resources/${artifactId}.es.js"]
+
+	for (file in filesToDelete) {
+		Path resourcePath = Paths.get(file)
+
+		Path resourceFullPath = projectPath.resolve(resourcePath)
+
+		Files.deleteIfExists resourceFullPath
+	}
+}
