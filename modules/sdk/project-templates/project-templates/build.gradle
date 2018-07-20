@@ -163,6 +163,23 @@ test {
 	systemProperty "test.debug.bundle.diffs", System.properties["test.debug.bundle.diffs"]
 
 	systemProperties projectTemplateTokens
+
+	int cores = Runtime.runtime.availableProcessors()
+
+	int parallelForks = 1
+
+	if (!debug) {
+		if (cores > 4) {
+
+			parallelForks = cores - 2
+		}
+		else if (cores > 2) {
+
+			parallelForks = cores - 1
+		}
+	}
+	maxParallelForks = parallelForks
+
 }
 
 uploadProjectTemplateArchives {
