@@ -2886,6 +2886,29 @@ public class ProjectTemplatesTest {
 	}
 
 	@Test
+	public void testBuildTemplateTheme71() throws Exception {
+		File gradleProjectDir = _buildTemplateWithGradle("theme", "theme-test", "--liferayVersion", "7.1");
+
+		_testContains(
+			gradleProjectDir, "build.gradle",
+			"name: \"com.liferay.gradle.plugins.theme.builder\"",
+			"apply plugin: \"com.liferay.portal.tools.theme.builder\"");
+		_testContains(
+			gradleProjectDir,
+			"src/main/webapp/WEB-INF/liferay-plugin-package.properties",
+			"name=theme-test");
+
+		File mavenProjectDir = _buildTemplateWithMaven(
+			"theme", "theme-test", "com.test", "-DliferayVersion=7.1");
+
+		_testContains(
+			mavenProjectDir, "pom.xml",
+			"com.liferay.portal.tools.theme.builder");
+
+		_buildProjects(gradleProjectDir, mavenProjectDir);
+	}
+
+	@Test
 	public void testBuildTemplateThemeContributorCustom() throws Exception {
 		File gradleProjectDir = _buildTemplateWithGradle(
 			"theme-contributor", "my-contributor-custom", "--contributor-type",
