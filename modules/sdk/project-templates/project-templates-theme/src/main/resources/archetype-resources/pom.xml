@@ -13,6 +13,21 @@
 	<properties>
 		<com.liferay.portal.tools.theme.builder.outputDir>target/build-theme</com.liferay.portal.tools.theme.builder.outputDir>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+#if (${liferayVersion.startsWith("7.0")})	
+    	<com.liferay.frontend.css.common.version>2.0.3</com.liferay.frontend.css.common.version>
+#elseif (${liferayVersion.startsWith("7.1")})
+    	<com.liferay.frontend.css.common.version>3.0.1</com.liferay.frontend.css.common.version>
+#end
+#if (${liferayVersion.startsWith("7.0")})	    
+		<com.liferay.frontend.theme.styled.version>2.0.13</com.liferay.frontend.theme.styled.version>
+#elseif (${liferayVersion.startsWith("7.1")})
+		<com.liferay.frontend.theme.styled.version>3.0.4</com.liferay.frontend.theme.styled.version>
+#end
+#if (${liferayVersion.startsWith("7.0")})	    
+		<com.liferay.frontend.theme.unstyled.version>2.0.13</com.liferay.frontend.theme.unstyled.version>
+#elseif (${liferayVersion.startsWith("7.1")})
+		<com.liferay.frontend.theme.unstyled.version>3.0.4</com.liferay.frontend.theme.unstyled.version>
+#end
 	</properties>
 	<build>
 		<plugins>
@@ -44,6 +59,13 @@
 				<groupId>com.liferay</groupId>
 				<artifactId>com.liferay.css.builder</artifactId>
 				<version>@com.liferay.css.builder.version@</version>
+				<dependencies>
+					<dependency>
+						<groupId>com.liferay</groupId>
+						<artifactId>com.liferay.frontend.css.common</artifactId>
+						<version>${com.liferay.frontend.css.common.version}</version>
+					</dependency>
+				</dependencies>
 				<executions>
 					<execution>
 						<phase>compile</phase>
@@ -54,7 +76,7 @@
 				</executions>
 				<configuration>
 					<docrootDirName>${com.liferay.portal.tools.theme.builder.outputDir}</docrootDirName>
-					<outputDirName>./</outputDirName>
+					<outputDir>${com.liferay.portal.tools.theme.builder.outputDir}</outputDir>
 					<precision>9</precision>
 				</configuration>
 			</plugin>
@@ -62,6 +84,18 @@
 				<groupId>com.liferay</groupId>
 				<artifactId>com.liferay.portal.tools.theme.builder</artifactId>
 				<version>@com.liferay.portal.tools.theme.builder.version@</version>
+				<dependencies>
+					<dependency>
+						<groupId>com.liferay</groupId>					
+						<artifactId>com.liferay.frontend.theme.styled</artifactId>
+						<version>${com.liferay.frontend.theme.styled.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>com.liferay</groupId>
+						<artifactId>com.liferay.frontend.theme.unstyled</artifactId>
+						<version>${com.liferay.frontend.theme.unstyled.version}</version>
+					</dependency>
+				</dependencies>
 				<executions>
 					<execution>
 						<phase>generate-resources</phase>
