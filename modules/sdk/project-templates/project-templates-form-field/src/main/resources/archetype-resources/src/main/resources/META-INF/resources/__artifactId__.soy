@@ -32,12 +32,13 @@
 	</div>
 {/template}
 #elseif (${liferayVersion.startsWith("7.1")})
+#parse ("definitions.vm")
 {namespace DDM${className}}
 
 /**
  * Defines the delegated template for the form field.
  */
-{deltemplate ddm.field variant="'${artifactId}'"}
+{deltemplate ddm.field variant="'${formFieldTypeName}'"}
 	{call .render data="all" /}
 {/deltemplate}
 
