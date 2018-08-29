@@ -8,18 +8,42 @@ import java.util.List;
 
 public class CodeTemplatesArgs {
 
-	// todo add author
-
-	// todo add classname
-
-	// todo add modelClassName
-
 	public List<File> getArchetypesDirs() {
 		return _archetypesDirs;
 	}
 
 	public String getPackageName() {
 		return _packageName;
+	}
+
+	public void setClassName(String className) {
+		_className = className;
+	}
+
+	public String getClassName() {
+		return _className;
+	}
+
+	@Parameter(
+		description = "Provide the name of the class to be generated.",
+		names = "--class-name",
+		required = true
+	)
+	private String _className;
+
+	@Parameter(
+		description = "Provide the name of the model class to be generated.",
+		names = "--model-class-name"
+	)
+	private String _modelClassName;
+
+
+	public String getModelClassName() {
+		return _modelClassName;
+	}
+
+	public void setModelClassName(String modelClassName) {
+		_modelClassName = modelClassName;
 	}
 
 	public File getDestinationDir() {
@@ -41,6 +65,16 @@ public class CodeTemplatesArgs {
 	public void setTemplate(String template) {
 		_template = template;
 	}
+
+	public void setAuthor(String author) {
+		_author = author;
+	}
+
+	@Parameter(
+		description = "The name of the user associated with the code.",
+		names = "--author"
+	)
+	private String _author;
 
 	@Parameter(
 		description = "The destination package for the code generator.",
@@ -66,4 +100,8 @@ public class CodeTemplatesArgs {
 		names = "--destination"
 	)
 	private File _destinationDir;
+
+	public String getAuthor() {
+		return _author;
+	}
 }

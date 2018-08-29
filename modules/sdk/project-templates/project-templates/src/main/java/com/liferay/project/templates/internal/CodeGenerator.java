@@ -2,11 +2,13 @@ package com.liferay.project.templates.internal;
 
 import com.liferay.project.templates.CodeTemplatesArgs;
 import com.liferay.project.templates.ProjectTemplates;
+import com.liferay.project.templates.internal.util.Validator;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.List;
+import java.util.Properties;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -46,6 +48,15 @@ public class CodeGenerator {
 		archetypeGenerationRequest.setInteractiveMode(false);
 		archetypeGenerationRequest.setOutputDirectory(destinationDir.getPath());
 		archetypeGenerationRequest.setPackage(packageName);
+
+		Properties properties = new Properties();
+
+		_setProperty(properties, "author", codeTemplatesArgs.getAuthor());
+		_setProperty(properties, "className", codeTemplatesArgs.getClassName());
+		_setProperty(properties, "modelClassName", codeTemplatesArgs.getModelClassName());
+		_setProperty(properties, "package", packageName);
+
+		archetypeGenerationRequest.setProperties(properties);
 
 		VelocityComponent velocityComponent = Archetyper.createVelocityComponent();
 
@@ -90,7 +101,7 @@ public class CodeGenerator {
 						VelocityEngine velocityEngine = velocityComponent.getEngine();
 
 						VelocityContext velocityContext = new VelocityContext();
-						velocityContext.put("codeTemplate", codeTemplatesArgs.getTemplate());
+						velocityContext.put("template", codeTemplatesArgs.getTemplate());
 
 						StringWriter stringWriter = new StringWriter();
 
@@ -113,5 +124,13 @@ public class CodeGenerator {
 		ArchetypeManager archetypeManager = archetyper.createArchetypeManager();
 
 		archetypeManager.generateProjectFromArchetype(archetypeGenerationRequest);
+	}
+
+	private void _setProperty(
+		Properties properties, String name, String value) {
+
+		if (Validator.isNotNull(value)) {
+			properties.setProperty(name, value);
+		}
 	}
 }
