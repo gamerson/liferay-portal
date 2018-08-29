@@ -89,7 +89,7 @@ public class ArchetyperArchetypeArtifactManager
 					}
 				}
 				else {
-					archetypeFile = _getArchetypeFile(
+					archetypeFile = getArchetypeFile(
 						artifactId, archetypesFile);
 
 					if (archetypeFile != null) {
@@ -123,7 +123,7 @@ public class ArchetyperArchetypeArtifactManager
 		}
 	}
 
-	private static File _getArchetypeFile(String artifactId, File file)
+	public static File getArchetypeFile(String artifactId, File file)
 		throws IOException {
 
 		try (JarFile jarFile = new JarFile(file)) {
