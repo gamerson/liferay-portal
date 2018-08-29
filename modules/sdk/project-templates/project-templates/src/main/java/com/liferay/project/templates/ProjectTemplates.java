@@ -16,8 +16,7 @@ package com.liferay.project.templates;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
-
-import com.liferay.project.templates.internal.Archetyper;
+import com.liferay.project.templates.internal.ProjectGenerator;
 import com.liferay.project.templates.internal.util.FileUtil;
 import com.liferay.project.templates.internal.util.ProjectTemplatesUtil;
 import com.liferay.project.templates.internal.util.StringUtil;
@@ -25,13 +24,11 @@ import com.liferay.project.templates.internal.util.Validator;
 
 import java.io.File;
 import java.io.InputStream;
-
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
-
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -184,10 +181,10 @@ public class ProjectTemplates {
 
 		File destinationDir = projectTemplatesArgs.getDestinationDir();
 
-		Archetyper archetyper = new Archetyper();
+		ProjectGenerator projectGenerator = new ProjectGenerator();
 
 		ArchetypeGenerationResult archetypeGenerationResult =
-			archetyper.generateProject(projectTemplatesArgs, destinationDir);
+			projectGenerator.generateProject(projectTemplatesArgs, destinationDir);
 
 		if (archetypeGenerationResult != null) {
 			Exception cause = archetypeGenerationResult.getCause();
