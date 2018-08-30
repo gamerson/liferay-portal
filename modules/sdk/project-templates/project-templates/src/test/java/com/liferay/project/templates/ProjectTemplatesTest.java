@@ -4014,9 +4014,9 @@ public class ProjectTemplatesTest {
 		projectTemplatesArgs.setService(service);
 		projectTemplatesArgs.setTemplate(template);
 
-		ProjectGenerator archetyper = new ProjectGenerator();
+		ProjectGenerator projectGenerator = new ProjectGenerator();
 
-		archetyper.generateProject(
+		projectGenerator.generateProject(
 			projectTemplatesArgs, archetyperDestinationDir);
 
 		File archetyperProjectDir = new File(archetyperDestinationDir, name);
