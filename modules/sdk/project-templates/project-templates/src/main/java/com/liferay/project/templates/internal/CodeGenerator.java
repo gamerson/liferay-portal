@@ -95,8 +95,7 @@ public class CodeGenerator {
 		Archetyper archetyper = new Archetyper(archetypesDirs) {
 
 			@Override
-			protected ArchetypeArtifactManager newArchetypeArtifactManager()
-				throws Exception {
+			protected ArchetypeArtifactManager newArchetypeArtifactManager() {
 
 				return new ArchetyperArchetypeArtifactManager(archetypesDirs) {
 
