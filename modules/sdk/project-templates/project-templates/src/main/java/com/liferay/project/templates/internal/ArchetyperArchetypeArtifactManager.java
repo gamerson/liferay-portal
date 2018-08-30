@@ -38,17 +38,9 @@ import org.apache.maven.artifact.repository.ArtifactRepository;
 public class ArchetyperArchetypeArtifactManager
 	extends DefaultArchetypeArtifactManager {
 
-<<<<<<< HEAD
 	public ArchetyperArchetypeArtifactManager(List<File> archetypesFiles) {
 		_archetypesFiles = archetypesFiles;
 
-=======
-	public ArchetyperArchetypeArtifactManager(List<File> archetypesFiles)
-		throws Exception {
-
-		_archetypesFiles = archetypesFiles;
-
->>>>>>> LPS-84857 consistency
 		if (_archetypesFiles.isEmpty()) {
 			try {
 				_archetypesFiles.add(
@@ -126,9 +118,5 @@ public class ArchetyperArchetypeArtifactManager
 	}
 
 	private final List<File> _archetypesFiles;
-<<<<<<< HEAD
-
-=======
->>>>>>> LPS-84857 consistency
 
 }
