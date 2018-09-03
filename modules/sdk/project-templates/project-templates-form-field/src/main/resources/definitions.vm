@@ -1,0 +1,17 @@
+##
+## Calculate $formFieldTypeName
+##
+#set ($formFieldTypeName = "")
+##
+#if ($artifactId.contains("-"))
+#set ($artifactIdParts = $artifactId.split("-"))
+##
+#foreach ($artifactIdPart in $artifactIdParts)
+#if ($foreach.index > 0)
+#set ($artifactIdPart = $artifactIdPart.substring(0, 1).toUpperCase() + $artifactIdPart.substring(1))
+#end
+#set ($formFieldTypeName = $formFieldTypeName.concat($artifactIdPart))
+#end
+#else
+#set ($formFieldTypeName = $artifactId)
+#end
