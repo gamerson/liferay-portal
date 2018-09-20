@@ -427,8 +427,9 @@ public class ProjectTemplateFilesTest {
 		Path buildGradlePath = archetypeResourcesDirPath.resolve(
 			"build.gradle");
 
-		Assert.assertTrue(
-			"Missing " + buildGradlePath, Files.exists(buildGradlePath));
+		if (!Files.exists(buildGradlePath)) {
+			return;
+		}
 
 		String buildGradle = FileUtil.read(buildGradlePath);
 
@@ -462,6 +463,10 @@ public class ProjectTemplateFilesTest {
 			"Rename " + dotGitIgnorePath + " to " + gitIgnorePath +
 				" to bypass GRADLE-1883",
 			Files.exists(dotGitIgnorePath));
+
+		if (!Files.exists(gitIgnorePath)) {
+			return;
+		}
 
 		Assert.assertTrue(
 			"Missing " + gitIgnorePath, Files.exists(gitIgnorePath));
@@ -704,58 +709,63 @@ public class ProjectTemplateFilesTest {
 		Path buildGradlePath = archetypeResourcesDirPath.resolve(
 			"build.gradle");
 
-		List<BuildGradleDependency> buildGradleDependencies =
-			_getBuildGradleDependencies(buildGradlePath);
+		if (Files.exists(buildGradlePath)) {
+			List<BuildGradleDependency> buildGradleDependencies =
+				_getBuildGradleDependencies(buildGradlePath);
 
-		Element dependenciesElement = XMLTestUtil.getChildElement(
-			projectElement, "dependencies");
+			Element dependenciesElement = XMLTestUtil.getChildElement(
+				projectElement, "dependencies");
 
-		List<Element> dependencyElements;
+			List<Element> dependencyElements;
 
-		if (dependenciesElement != null) {
-			dependencyElements = XMLTestUtil.getChildElements(
-				dependenciesElement);
-		}
-		else {
-			dependencyElements = Collections.emptyList();
-		}
-
-		Assert.assertEquals(
-			"Number of dependencies in " + pomXmlPath + " must match " +
-				buildGradlePath,
-			buildGradleDependencies.size(), dependencyElements.size());
-
-		for (int i = 0; i < buildGradleDependencies.size(); i++) {
-			BuildGradleDependency buildGradleDependency =
-				buildGradleDependencies.get(i);
-			Element dependencyElement = dependencyElements.get(i);
-
-			List<Element> dependencyChildElements =
-				XMLTestUtil.getChildElements(dependencyElement);
-
-			String dependencyElementString = XMLTestUtil.toString(
-				dependencyElement);
-
-			XMLTestUtil.testXmlElement(
-				pomXmlPath, dependencyElementString, dependencyChildElements, 0,
-				"groupId", buildGradleDependency.group);
-			XMLTestUtil.testXmlElement(
-				pomXmlPath, dependencyElementString, dependencyChildElements, 1,
-				"artifactId", buildGradleDependency.name);
-			XMLTestUtil.testXmlElement(
-				pomXmlPath, dependencyElementString, dependencyChildElements, 2,
-				"version", buildGradleDependency.version);
-
-			if (buildGradleDependency.provided) {
-				XMLTestUtil.testXmlElement(
-					pomXmlPath, dependencyElementString,
-					dependencyChildElements, 3, "scope", "provided");
+			if (dependenciesElement != null) {
+				dependencyElements = XMLTestUtil.getChildElements(
+					dependenciesElement);
 			}
 			else {
-				Assert.assertEquals(
-					"Incorrect number of child nodes of " +
-						dependencyElementString + " in " + pomXmlPath,
-					dependencyChildElements.size(), 3);
+				dependencyElements = Collections.emptyList();
+			}
+
+			Assert.assertEquals(
+				"Number of dependencies in " + pomXmlPath + " must match " +
+					buildGradlePath,
+				buildGradleDependencies.size(), dependencyElements.size());
+
+			for (int i = 0; i < buildGradleDependencies.size(); i++) {
+				BuildGradleDependency buildGradleDependency =
+					buildGradleDependencies.get(i);
+				Element dependencyElement = dependencyElements.get(i);
+
+				List<Element> dependencyChildElements =
+					XMLTestUtil.getChildElements(dependencyElement);
+
+				String dependencyElementString = XMLTestUtil.toString(
+					dependencyElement);
+
+				XMLTestUtil.testXmlElement(
+					pomXmlPath, dependencyElementString,
+					dependencyChildElements, 0, "groupId",
+					buildGradleDependency.group);
+				XMLTestUtil.testXmlElement(
+					pomXmlPath, dependencyElementString,
+					dependencyChildElements, 1, "artifactId",
+					buildGradleDependency.name);
+				XMLTestUtil.testXmlElement(
+					pomXmlPath, dependencyElementString,
+					dependencyChildElements, 2, "version",
+					buildGradleDependency.version);
+
+				if (buildGradleDependency.provided) {
+					XMLTestUtil.testXmlElement(
+						pomXmlPath, dependencyElementString,
+						dependencyChildElements, 3, "scope", "provided");
+				}
+				else {
+					Assert.assertEquals(
+						"Incorrect number of child nodes of " +
+							dependencyElementString + " in " + pomXmlPath,
+						dependencyChildElements.size(), 3);
+				}
 			}
 		}
 
@@ -865,6 +875,10 @@ public class ProjectTemplateFilesTest {
 
 		_testProjectTemplateCustomizer(
 			projectTemplateDirName, projectTemplateDirPath);
+
+		if (projectTemplateDirName.equals("project-templates-code")) {
+			return;
+		}
 
 		final AtomicBoolean requireAuthorProperty = new AtomicBoolean();
 		final Set<String> archetypeResourceExpressions = new HashSet<>();
@@ -1047,7 +1061,7 @@ public class ProjectTemplateFilesTest {
 			".*^#if \\(\\$\\{projectType\\} != \"workspace\"\\).*",
 			Pattern.DOTALL | Pattern.MULTILINE);
 	private static final Pattern _bundleDescriptionPattern = Pattern.compile(
-		"Creates a .+\\.");
+		"(Creates|Generates) .+\\.");
 	private static final List<String> _gitIgnoreLines = Arrays.asList(
 		".gradle/", "build/", "target/");
 
