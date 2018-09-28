@@ -112,12 +112,21 @@ import org.w3c.dom.Text;
  */
 public class ProjectTemplatesTest {
 
+	public static final String BUILD_PROJECTS = System.getProperty(
+		"project.templates.test.builds");
+
 	@ClassRule
 	public static final MavenExecutor mavenExecutor = new MavenExecutor();
 
 	@ClassRule
 	public static final TemporaryFolder testCaseTemporaryFolder =
 		new TemporaryFolder();
+
+	public static void executeGradle(File projectDir, String... taskPaths)
+		throws IOException {
+
+		_executeGradle(projectDir, false, taskPaths);
+	}
 
 	@BeforeClass
 	public static void setUpClass() throws Exception {
@@ -739,7 +748,7 @@ public class ProjectTemplatesTest {
 				"\"com.liferay.login.web\", version: \"1.0.0\"",
 			"apply plugin: \"com.liferay.osgi.ext.plugin\"");
 
-		_executeGradle(gradleProjectDir, _GRADLE_TASK_PATH_BUILD);
+		executeGradle(gradleProjectDir, _GRADLE_TASK_PATH_BUILD);
 
 		_testExists(
 			gradleProjectDir, "build/libs/com.liferay.login.web-1.0.0.ext.jar");
@@ -762,7 +771,7 @@ public class ProjectTemplatesTest {
 		_testNotContains(
 			workspaceProjectDir, "build.gradle", true, "^repositories \\{.*");
 
-		_executeGradle(workspaceDir, ":ext:loginExt:build");
+		executeGradle(workspaceDir, ":ext:loginExt:build");
 
 		_testExists(
 			workspaceProjectDir,
@@ -1183,10 +1192,10 @@ public class ProjectTemplatesTest {
 			"originalModule group: \"com.liferay\", ",
 			"name: \"com.liferay.login.web\", version: \"2.0.4\"");
 
-		if (Validator.isNotNull(_BUILD_PROJECTS) &&
-			_BUILD_PROJECTS.equals("true")) {
+		if (Validator.isNotNull(BUILD_PROJECTS) &&
+			BUILD_PROJECTS.equals("true")) {
 
-			_executeGradle(gradleProjectDir, _GRADLE_TASK_PATH_BUILD);
+			executeGradle(gradleProjectDir, _GRADLE_TASK_PATH_BUILD);
 
 			File gradleOutputDir = new File(gradleProjectDir, "build/libs");
 
@@ -2155,13 +2164,13 @@ public class ProjectTemplatesTest {
 			modulesDir, "service-builder", "foo", "--package-name", "test",
 			"--liferayVersion", "7.0", "--dependency-management-enabled");
 
-		_executeGradle(
+		executeGradle(
 			workspaceProjectDir,
 			":modules:foo:foo-service" + _GRADLE_TASK_PATH_BUILD_SERVICE);
 
-		_executeGradle(workspaceProjectDir, ":modules:foo:foo-api:build");
+		executeGradle(workspaceProjectDir, ":modules:foo:foo-api:build");
 
-		_executeGradle(workspaceProjectDir, ":modules:foo:foo-service:build");
+		executeGradle(workspaceProjectDir, ":modules:foo:foo-service:build");
 	}
 
 	@Test
@@ -2185,13 +2194,13 @@ public class ProjectTemplatesTest {
 			modulesDir, "service-builder", "foo", "--package-name", "test",
 			"--liferayVersion", "7.1", "--dependency-management-enabled");
 
-		_executeGradle(
+		executeGradle(
 			workspaceProjectDir,
 			":modules:foo:foo-service" + _GRADLE_TASK_PATH_BUILD_SERVICE);
 
-		_executeGradle(workspaceProjectDir, ":modules:foo:foo-api:build");
+		executeGradle(workspaceProjectDir, ":modules:foo:foo-api:build");
 
-		_executeGradle(workspaceProjectDir, ":modules:foo:foo-service:build");
+		executeGradle(workspaceProjectDir, ":modules:foo:foo-service:build");
 	}
 
 	@Test
@@ -2270,11 +2279,11 @@ public class ProjectTemplatesTest {
 
 		_writeServiceClass(workspaceProjectDir);
 
-		_executeGradle(gradleProjectDir, _GRADLE_TASK_PATH_BUILD);
+		executeGradle(gradleProjectDir, _GRADLE_TASK_PATH_BUILD);
 
 		_testExists(gradleProjectDir, "build/libs/servicepreaction-1.0.0.jar");
 
-		_executeGradle(workspaceDir, ":modules:servicepreaction:build");
+		executeGradle(workspaceDir, ":modules:servicepreaction:build");
 
 		_testExists(
 			workspaceProjectDir, "build/libs/servicepreaction-1.0.0.jar");
@@ -2368,11 +2377,11 @@ public class ProjectTemplatesTest {
 		_testNotContains(
 			workspaceProjectDir, "build.gradle", true, "^repositories \\{.*");
 
-		_executeGradle(gradleProjectDir, _GRADLE_TASK_PATH_BUILD);
+		executeGradle(gradleProjectDir, _GRADLE_TASK_PATH_BUILD);
 
 		_testExists(gradleProjectDir, "build/libs/serviceoverride-1.0.0.jar");
 
-		_executeGradle(workspaceDir, ":modules:serviceoverride:build");
+		executeGradle(workspaceDir, ":modules:serviceoverride:build");
 
 		_testExists(
 			workspaceProjectDir, "build/libs/serviceoverride-1.0.0.jar");
@@ -2589,8 +2598,8 @@ public class ProjectTemplatesTest {
 
 		_buildProjects(gradleProjectDir, mavenProjectDir);
 
-		if (Validator.isNotNull(_BUILD_PROJECTS) &&
-			_BUILD_PROJECTS.equals("true")) {
+		if (Validator.isNotNull(BUILD_PROJECTS) &&
+			BUILD_PROJECTS.equals("true")) {
 
 			_testSoyOutputFiles(gradleProjectDir, mavenProjectDir);
 		}
@@ -2646,8 +2655,8 @@ public class ProjectTemplatesTest {
 
 		_buildProjects(gradleProjectDir, mavenProjectDir);
 
-		if (Validator.isNotNull(_BUILD_PROJECTS) &&
-			_BUILD_PROJECTS.equals("true")) {
+		if (Validator.isNotNull(BUILD_PROJECTS) &&
+			BUILD_PROJECTS.equals("true")) {
 
 			_testSoyOutputFiles(gradleProjectDir, mavenProjectDir);
 		}
@@ -2714,8 +2723,8 @@ public class ProjectTemplatesTest {
 
 		_buildProjects(gradleProjectDir, mavenProjectDir);
 
-		if (Validator.isNotNull(_BUILD_PROJECTS) &&
-			_BUILD_PROJECTS.equals("true")) {
+		if (Validator.isNotNull(BUILD_PROJECTS) &&
+			BUILD_PROJECTS.equals("true")) {
 
 			_testSpringMVCOutputs(gradleProjectDir);
 		}
@@ -2736,8 +2745,8 @@ public class ProjectTemplatesTest {
 
 		_buildProjects(gradleProjectDir, mavenProjectDir);
 
-		if (Validator.isNotNull(_BUILD_PROJECTS) &&
-			_BUILD_PROJECTS.equals("true")) {
+		if (Validator.isNotNull(BUILD_PROJECTS) &&
+			BUILD_PROJECTS.equals("true")) {
 
 			_testSpringMVCOutputs(gradleProjectDir);
 		}
@@ -3062,12 +3071,12 @@ public class ProjectTemplatesTest {
 		_testNotContains(
 			workspaceProjectDir, "build.gradle", true, "^repositories \\{.*");
 
-		_executeGradle(gradleProjectDir, _GRADLE_TASK_PATH_BUILD);
+		executeGradle(gradleProjectDir, _GRADLE_TASK_PATH_BUILD);
 
 		File gradleWarFile = _testExists(
 			gradleProjectDir, "build/libs/theme-test.war");
 
-		_executeGradle(workspaceDir, ":wars:theme-test:build");
+		executeGradle(workspaceDir, ":wars:theme-test:build");
 
 		File workspaceWarFile = _testExists(
 			workspaceProjectDir, "build/libs/theme-test.war");
@@ -3336,7 +3345,7 @@ public class ProjectTemplatesTest {
 		_testNotContains(
 			moduleProjectDir, "build.gradle", "buildscript", "repositories");
 
-		_executeGradle(
+		executeGradle(
 			workspaceProjectDir,
 			":modules:foo-portlet" + _GRADLE_TASK_PATH_BUILD);
 
@@ -3391,7 +3400,7 @@ public class ProjectTemplatesTest {
 		_buildTemplateWithGradle(
 			new File(workspaceProjectDir, modulesDirName), "", "foo-portlet");
 
-		_executeGradle(
+		executeGradle(
 			workspaceProjectDir,
 			":" + modulesDirName.replace('/', ':') + ":foo-portlet" +
 				_GRADLE_TASK_PATH_DEPLOY);
@@ -3468,7 +3477,7 @@ public class ProjectTemplatesTest {
 			"mvc-portlet", "foo-portlet", "com.test", "-DclassName=Foo",
 			"-Dpackage=foo.portlet", "-DprojectType=workspace");
 
-		_executeGradle(
+		executeGradle(
 			gradleWorkspaceProjectDir,
 			":modules:foo-portlet" + _GRADLE_TASK_PATH_BUILD);
 
@@ -3697,10 +3706,10 @@ public class ProjectTemplatesTest {
 			File mavenOutputDir, String... gradleTaskPath)
 		throws Exception {
 
-		if (Validator.isNotNull(_BUILD_PROJECTS) &&
-			_BUILD_PROJECTS.equals("true")) {
+		if (Validator.isNotNull(BUILD_PROJECTS) &&
+			BUILD_PROJECTS.equals("true")) {
 
-			_executeGradle(gradleProjectDir, gradleTaskPath);
+			executeGradle(gradleProjectDir, gradleTaskPath);
 
 			Path gradleOutputPath = FileTestUtil.getFile(
 				gradleOutputDir.toPath(), _OUTPUT_FILENAME_GLOB_REGEX, 1);
@@ -4173,12 +4182,6 @@ public class ProjectTemplatesTest {
 		throws IOException {
 
 		return _executeGradle(projectDir, debug, false, taskPaths);
-	}
-
-	private static void _executeGradle(File projectDir, String... taskPaths)
-		throws IOException {
-
-		_executeGradle(projectDir, false, taskPaths);
 	}
 
 	private static String _executeMaven(
@@ -5244,12 +5247,12 @@ public class ProjectTemplatesTest {
 		_testNotContains(
 			workspaceProjectDir, "build.gradle", true, "^repositories \\{.*");
 
-		_executeGradle(gradleProjectDir, _GRADLE_TASK_PATH_BUILD);
+		executeGradle(gradleProjectDir, _GRADLE_TASK_PATH_BUILD);
 
 		File gradleWarFile = _testExists(
 			gradleProjectDir, "build/libs/" + warFileName + ".war");
 
-		_executeGradle(workspaceDir, ":wars:" + name + ":build");
+		executeGradle(workspaceDir, ":wars:" + name + ":build");
 
 		File workspaceWarFile = _testExists(
 			workspaceProjectDir, "build/libs/" + warFileName + ".war");
@@ -5295,7 +5298,7 @@ public class ProjectTemplatesTest {
 
 				@Override
 				public Void call() throws Exception {
-					_executeGradle(
+					executeGradle(
 						rootProject,
 						projectPath + ":" + serviceProjectName +
 							_GRADLE_TASK_PATH_BUILD_SERVICE);
@@ -5305,7 +5308,7 @@ public class ProjectTemplatesTest {
 
 			});
 
-		_executeGradle(
+		executeGradle(
 			rootProject,
 			projectPath + ":" + serviceProjectName + _GRADLE_TASK_PATH_BUILD);
 
@@ -5379,14 +5382,14 @@ public class ProjectTemplatesTest {
 		_testNotContains(
 			workspaceProjectDir, "build.gradle", true, "^repositories \\{.*");
 
-		if (Validator.isNotNull(_BUILD_PROJECTS) &&
-			_BUILD_PROJECTS.equals("true")) {
+		if (Validator.isNotNull(BUILD_PROJECTS) &&
+			BUILD_PROJECTS.equals("true")) {
 
-			_executeGradle(gradleProjectDir, _GRADLE_TASK_PATH_BUILD);
+			executeGradle(gradleProjectDir, _GRADLE_TASK_PATH_BUILD);
 
 			_testExists(gradleProjectDir, jarFilePath);
 
-			_executeGradle(workspaceDir, ":modules:" + name + ":build");
+			executeGradle(workspaceDir, ":modules:" + name + ":build");
 
 			_testExists(workspaceProjectDir, jarFilePath);
 		}
@@ -5450,9 +5453,6 @@ public class ProjectTemplatesTest {
 
 		Assert.assertTrue(missingDependencyString, foundDependency);
 	}
-
-	private static final String _BUILD_PROJECTS = System.getProperty(
-		"project.templates.test.builds");
 
 	private static final String _BUNDLES_DIFF_IGNORES = StringTestUtil.merge(
 		Arrays.asList(
