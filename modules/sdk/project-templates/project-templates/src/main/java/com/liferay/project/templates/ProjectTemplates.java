@@ -65,12 +65,6 @@ public class ProjectTemplates {
 
 		Map<String, String> templates = new TreeMap<>();
 
-		File projectTemplatesFile = FileUtil.getJarFile(ProjectTemplates.class);
-
-		if (!templatesFiles.contains(projectTemplatesFile)) {
-			templatesFiles.add(projectTemplatesFile);
-		}
-
 		for (File templatesFile : templatesFiles) {
 			if (templatesFile.isDirectory()) {
 				try (DirectoryStream<Path> directoryStream =
@@ -140,6 +134,32 @@ public class ProjectTemplates {
 			}
 		}
 
+		Collection<String> archetypeJarNames =
+			ProjectTemplatesUtil.getArchetypeJarNames();
+
+		for (String projectTemplateJarName : archetypeJarNames) {
+			String templateName = ProjectTemplatesUtil.getTemplateName(
+				projectTemplateJarName);
+
+			if (!templateName.startsWith(WorkspaceUtil.WORKSPACE)) {
+				try (InputStream inputStream =
+						ProjectTemplates.class.getResourceAsStream(
+							projectTemplateJarName);
+					JarInputStream jarInputStream =
+						new JarInputStream(inputStream)) {
+
+					Manifest manifest = jarInputStream.getManifest();
+
+					Attributes attributes = manifest.getMainAttributes();
+
+					String bundleDescription = attributes.getValue(
+						"Bundle-Description");
+
+					templates.put(templateName, bundleDescription);
+				}
+			}
+		}
+
 		return templates;
 	}
 
@@ -149,13 +169,13 @@ public class ProjectTemplates {
 		JCommander jCommander = new JCommander(projectTemplatesArgs);
 
 		try {
-			File jarFile = FileUtil.getJarFile(ProjectTemplates.class);
+			Path jarPath = FileUtil.getJarPath();
 
-			if (jarFile.isFile()) {
-				jCommander.setProgramName("java -jar " + jarFile.getName());
+			if (Files.isDirectory(jarPath)) {
+				jCommander.setProgramName(ProjectTemplates.class.getName());
 			}
 			else {
-				jCommander.setProgramName(ProjectTemplates.class.getName());
+				jCommander.setProgramName("java -jar " + jarPath.getFileName());
 			}
 
 			jCommander.parse(args);
