@@ -270,6 +270,140 @@ public class ProjectTemplatesTest {
 	}
 
 	@Test
+	public void testBuildTemplateContentDTDVersionLayoutTemplate70()
+		throws Exception {
+
+		File gradleProjectDir = _buildTemplateWithGradle(
+			"layout-template", "foo-bar", "--liferayVersion", "7.0");
+
+		_testContains(
+			gradleProjectDir,
+			"src/main/webapp/WEB-INF/liferay-layout-templates.xml",
+			"DTD Layout Templates 7.0.0");
+	}
+
+	@Test
+	public void testBuildTemplateContentDTDVersionLayoutTemplate71()
+		throws Exception {
+
+		File gradleProjectDir = _buildTemplateWithGradle(
+			"layout-template", "foo-bar", "--liferayVersion", "7.1");
+
+		_testContains(
+			gradleProjectDir,
+			"src/main/webapp/WEB-INF/liferay-layout-templates.xml",
+			"DTD Layout Templates 7.1.0");
+	}
+
+	@Test
+	public void testBuildTemplateContentDTDVersionServiceBuilder70()
+		throws Exception {
+
+		File gradleProjectDir = _buildTemplateWithGradle(
+			"service-builder", "foo-bar", "--liferayVersion", "7.0");
+
+		_testContains(
+			gradleProjectDir, "foo-bar-service/service.xml",
+			"DTD Service Builder 7.0.0");
+	}
+
+	@Test
+	public void testBuildTemplateContentDTDVersionServiceBuilder71()
+		throws Exception {
+
+		File gradleProjectDir = _buildTemplateWithGradle(
+			"service-builder", "foo-bar", "--liferayVersion", "7.1");
+
+		_testContains(
+			gradleProjectDir, "foo-bar-service/service.xml",
+			"DTD Service Builder 7.1.0");
+	}
+
+	@Test
+	public void testBuildTemplateContentDTDVersionSpringMVCPortlet70()
+		throws Exception {
+
+		File gradleProjectDir = _buildTemplateWithGradle(
+			"spring-mvc-portlet", "foo-bar", "--liferayVersion", "7.0");
+
+		_testContains(
+			gradleProjectDir, "src/main/webapp/WEB-INF/liferay-display.xml",
+			"DTD Display 7.0.0");
+
+		_testContains(
+			gradleProjectDir, "src/main/webapp/WEB-INF/liferay-portlet.xml",
+			"DTD Portlet Application 7.0.0");
+	}
+
+	@Test
+	public void testBuildTemplateContentDTDVersionSpringMVCPortlet71()
+		throws Exception {
+
+		File gradleProjectDir = _buildTemplateWithGradle(
+			"spring-mvc-portlet", "foo-bar", "--liferayVersion", "7.1");
+
+		_testContains(
+			gradleProjectDir, "src/main/webapp/WEB-INF/liferay-display.xml",
+			"DTD Display 7.1.0");
+
+		_testContains(
+			gradleProjectDir, "src/main/webapp/WEB-INF/liferay-portlet.xml",
+			"DTD Portlet Application 7.1.0");
+	}
+
+	@Test
+	public void testBuildTemplateContentDTDVersionWarHook70() throws Exception {
+		File gradleProjectDir = _buildTemplateWithGradle(
+			"war-hook", "foo-bar", "--liferayVersion", "7.0");
+
+		_testContains(
+			gradleProjectDir, "src/main/webapp/WEB-INF/liferay-hook.xml",
+			"DTD Hook 7.0.0");
+	}
+
+	@Test
+	public void testBuildTemplateContentDTDVersionWarHook71() throws Exception {
+		File gradleProjectDir = _buildTemplateWithGradle(
+			"war-hook", "foo-bar", "--liferayVersion", "7.1");
+
+		_testContains(
+			gradleProjectDir, "src/main/webapp/WEB-INF/liferay-hook.xml",
+			"DTD Hook 7.1.0");
+	}
+
+	@Test
+	public void testBuildTemplateContentDTDVersionWarMVCPortlet70()
+		throws Exception {
+
+		File gradleProjectDir = _buildTemplateWithGradle(
+			"war-mvc-portlet", "foo-bar", "--liferayVersion", "7.0");
+
+		_testContains(
+			gradleProjectDir, "src/main/webapp/WEB-INF/liferay-display.xml",
+			"DTD Display 7.0.0");
+
+		_testContains(
+			gradleProjectDir, "src/main/webapp/WEB-INF/liferay-portlet.xml",
+			"DTD Portlet Application 7.0.0");
+	}
+
+	@Test
+	public void testBuildTemplateContentDTDVersionWarMVCPortlet71()
+		throws Exception {
+
+		File gradleProjectDir = _buildTemplateWithGradle(
+			"war-mvc-portlet", "foo-bar", "--liferayVersion", "7.1");
+
+		_testContains(
+			gradleProjectDir, "src/main/webapp/WEB-INF/liferay-display.xml",
+			"DTD Display 7.1.0");
+
+		_testContains(
+			gradleProjectDir, "src/main/webapp/WEB-INF/liferay-portlet.xml",
+			"DTD Portlet Application 7.1.0");
+	}
+
+	@Test
 	public void testBuildTemplateContentTargetingReport() throws Exception {
 		File gradleProjectDir = _buildTemplateWithGradle(
 			"content-targeting-report", "foo-bar");
