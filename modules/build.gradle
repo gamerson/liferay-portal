@@ -111,7 +111,7 @@ gradle.beforeProject {
 			generateSampleProject {
 				args "--archetypes-dirs", jar.archivePath.parent, "--destination", "${buildDir}", "--template", project.name.replaceFirst("project-templates-", "")
 				classpath = sourceSets.main.runtimeClasspath + configurations.compileOnly
-				dependsOn jar
+				dependsOn ":sdk:project-templates:project-templates:install"
 				main = "com.liferay.project.templates.ProjectTemplates"
 			}
 

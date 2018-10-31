@@ -113,6 +113,13 @@ dependencies {
 	testCompile group: "net.diibadaaba.zipdiff", name: "zipdiff", version: "1.0"
 }
 
+jar {
+	dependsOn projectTemplateProjects.collect {
+		"${it.path}:install"
+		"${it.path}:updateFileVersions"
+	}
+}
+
 liferayOSGi {
 	expandCompileInclude = true
 }
