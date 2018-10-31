@@ -24,6 +24,12 @@
 #elseif (${liferayVersion.startsWith("7.1")})
 		<dependency>
 			<groupId>com.liferay</groupId>
+			<artifactId>com.liferay.petra.string</artifactId>
+			<version>2.0.0</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.liferay</groupId>
 			<artifactId>com.liferay.portal.spring.extender.api</artifactId>
 			<version>3.0.0</version>
 			<scope>provided</scope>
@@ -51,7 +57,7 @@
 		<dependency>
 			<groupId>com.liferay.portal</groupId>
 			<artifactId>com.liferay.portal.kernel</artifactId>
-			<version>3.0.0</version>
+			<version>3.18.0</version>
 			<scope>provided</scope>
 		</dependency>
 #end

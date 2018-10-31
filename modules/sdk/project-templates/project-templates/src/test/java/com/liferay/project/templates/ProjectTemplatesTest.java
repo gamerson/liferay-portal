@@ -2252,7 +2252,7 @@ public class ProjectTemplatesTest {
 			_DEPENDENCY_PORTAL_KERNEL + ", version: \"3.0.0");
 		_testContains(
 			gradleProjectDir, name + "-service/build.gradle",
-			_DEPENDENCY_PORTAL_KERNEL + ", version: \"3.0.0");
+			_DEPENDENCY_PORTAL_KERNEL + ", version: \"3.18.0");
 
 		File mavenProjectDir = _buildTemplateWithMaven(
 			"service-builder", name, "com.test", "-Dpackage=" + packageName,
@@ -2470,7 +2470,7 @@ public class ProjectTemplatesTest {
 			_DEPENDENCY_PORTAL_KERNEL + ", version: \"3.0.0");
 		_testContains(
 			gradleProjectDir, name + "-service/build.gradle",
-			_DEPENDENCY_PORTAL_KERNEL + ", version: \"3.0.0");
+			_DEPENDENCY_PORTAL_KERNEL + ", version: \"3.18.0");
 
 		File mavenProjectDir = _buildTemplateWithMaven(
 			"service-builder", name, "com.test", "-Dpackage=" + packageName,
