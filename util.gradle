@@ -98,7 +98,7 @@ DEFAULT_JVM_OPTS="$DEFAULT_JVM_OPTS \\\"-Dgradle.user.home=$APP_HOME/.gradle\\\"
 			failOnNoReplacements: true,
 			file: gradlewFile,
 			token: 'org.gradle.wrapper.GradleWrapperMain "$APP_ARGS"',
-			value: 'org.gradle.wrapper.GradleWrapperMain "--init-script=$APP_HOME/modules/init.gradle" "$APP_ARGS"'
+			value: 'org.gradle.wrapper.GradleWrapperMain "--init-script=$APP_HOME/init.gradle" "$APP_ARGS"'
 		)
 
 		File gradlewBatFile = new File(wrapperDir, "gradlew.bat")
@@ -116,7 +116,7 @@ set DEFAULT_JVM_OPTS=%DEFAULT_JVM_OPTS% "-Dgradle.user.home=%APP_HOME%\\.gradle"
 			failOnNoReplacements: true,
 			file: gradlewBatFile,
 			token: 'org.gradle.wrapper.GradleWrapperMain %CMD_LINE_ARGS%',
-			value: 'org.gradle.wrapper.GradleWrapperMain "--init-script=%APP_HOME%\\modules\\init.gradle" %CMD_LINE_ARGS%'
+			value: 'org.gradle.wrapper.GradleWrapperMain "--init-script=%APP_HOME%\\init.gradle" %CMD_LINE_ARGS%'
 		)
 	}
 

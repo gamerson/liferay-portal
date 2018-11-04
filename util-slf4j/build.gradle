@@ -1,1 +1,6 @@
-apply from: "../modules/build-portal.gradle"
+apply from: "../build-portal.gradle"
+
+dependencies {
+	compileOnly group: "org.slf4j", name: "slf4j-api", transitive: false, version: "1.7.2"
+	compileOnly project(":portal-kernel")
+}

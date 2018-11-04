@@ -1,1 +1,18 @@
-apply from: "../modules/build-portal.gradle"
+apply from: "../build-portal.gradle"
+
+dependencies {
+	compileInclude group: "com.liferay.alloy-taglibs", name: "alloy-taglib", version: "1.1.13"
+	compileInclude project(":modules:core:util-taglib-compat")
+
+	compileOnly group: "biz.aQute.bnd", name: "biz.aQute.bnd", transitive: false, version: "3.5.0"
+	compileOnly group: "javax.portlet", name: "portlet-api", transitive: false, version: "3.0.1"
+	compileOnly group: "javax.servlet", name: "javax.servlet-api", transitive: false, version: "3.1.0"
+	compileOnly group: "javax.servlet.jsp", name: "jsp-api", transitive: false, version: "2.1"
+	compileOnly project(":modules:apps:petra:petra-encryptor")
+	compileOnly project(":portal-kernel")
+	compileOnly project(":util-java")
+}
+
+liferayOSGi {
+	expandCompileInclude = true
+}

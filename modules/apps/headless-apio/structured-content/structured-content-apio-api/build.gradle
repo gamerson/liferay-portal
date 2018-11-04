@@ -1,5 +1,5 @@
 dependencies {
-	compileOnly group: "com.liferay.portal", name: "com.liferay.portal.kernel", version: "default"
+	compileOnly project(":portal-kernel")
 	compileOnly group: "javax.ws.rs", name: "javax.ws.rs-api", version: "2.1"
 	compileOnly project(":apps:apio-architect:apio-architect-api")
 	compileOnly project(":apps:dynamic-data-mapping:dynamic-data-mapping-api")

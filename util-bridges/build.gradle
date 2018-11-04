@@ -1,1 +1,7 @@
-apply from: "../modules/build-portal.gradle"
+apply from: "../build-portal.gradle"
+
+dependencies {
+	compileOnly group: "javax.portlet", name: "portlet-api", transitive: false, version: "3.0.1"
+	compileOnly group: "javax.servlet", name: "javax.servlet-api", transitive: false, version: "3.1.0"
+	compileOnly project(":portal-kernel")
+}

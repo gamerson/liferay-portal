@@ -1,1 +1,28 @@
-apply from: "../modules/build-portal.gradle"
+apply from: "../build-portal.gradle"
+
+dependencies {
+	compileInclude project(":modules:core:portal-compat:petra:util-java-compat")
+
+	compileOnly group: "biz.aQute.bnd", name: "biz.aQute.bnd", transitive: false, version: "3.5.0"
+	compileOnly group: "com.liferay", name: "com.ibm.icu4j", transitive: false, version: "54.1.1.LIFERAY-PATCHED-2"
+	compileOnly group: "com.liferay", name: "com.sun.syndication", transitive: false, version: "1.0.LIFERAY-PATCHED-1"
+	compileOnly group: "com.liferay", name: "javax.xml.rpc", transitive: false, version: "1.1"
+	compileOnly group: "com.liferay", name: "org.apache.axis", transitive: false, version: "1.4.LIFERAY-PATCHED-2"
+	compileOnly group: "com.liferay", name: "org.hibernate.core", transitive: false, version: "3.6.10.LIFERAY-PATCHED-3"
+	compileOnly group: "commons-logging", name: "commons-logging", transitive: false, version: "1.2"
+	compileOnly group: "dom4j", name: "dom4j", transitive: false, version: "1.6.1"
+	compileOnly group: "javax.portlet", name: "portlet-api", transitive: false, version: "3.0.1"
+	compileOnly group: "javax.servlet", name: "javax.servlet-api", transitive: false, version: "3.1.0"
+	compileOnly group: "net.fortuna.ical4j", name: "ical4j", transitive: false, version: "1.0-rc3"
+	compileOnly group: "net.sf.jazzy", name: "jazzy", transitive: false, version: "0.5.2-rtext-1.4.1-2"
+	compileOnly group: "org.apache.ant", name: "ant", transitive: false, version: "1.8.4"
+	compileOnly group: "org.apache.axis", name: "axis-ant", transitive: false, version: "1.4"
+	compileOnly group: "org.apache.poi", name: "poi", transitive: false, version: "3.15"
+	compileOnly group: "org.aspectj", name: "aspectjrt", transitive: false, version: "1.8.13"
+	compileOnly group: "org.jopendocument", name: "jdom", transitive: false, version: "1.1.1"
+	compileOnly project(":portal-kernel")
+}
+
+liferayOSGi {
+	expandCompileInclude = true
+}

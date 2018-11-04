@@ -1,0 +1,59 @@
+buildscript {
+	apply from: "build-buildscript.gradle", to: buildscript
+}
+
+//apply plugin: "com.liferay.settings.plugin"
+
+String testClassGroupIndex = System.getProperty("test.class.group.index")
+
+if (testClassGroupIndex) {
+	Properties properties = new Properties()
+
+	File file = new File(rootDir, "../test.class.file.names.properties")
+
+	properties.load(new StringReader(file.text.replace("\\", "/")))
+
+	String testClassGroup = properties["TEST_CLASS_GROUP_" + testClassGroupIndex]
+	String testClassGroups = properties["TEST_CLASS_GROUPS"]
+
+	gradle.ext.testClasses = testClassGroup.tokenize(",")
+	gradle.ext.testClassGroupIndex = testClassGroupIndex
+	gradle.ext.testClassGroups = testClassGroups
+}
+
+include 'portal-kernel'
+include 'modules:core:petra:petra-concurrent'
+include 'modules:core:petra:petra-executor'
+include 'modules:core:petra:petra-function'
+include 'modules:core:petra:petra-io'
+include 'modules:core:petra:petra-lang'
+include 'modules:core:petra:petra-memory'
+include 'modules:core:petra:petra-nio'
+include 'modules:core:petra:petra-process'
+include 'modules:core:petra:petra-reflect'
+include 'modules:core:petra:petra-string'
+include 'modules:core:portal-compat:blogs:portal-kernel-blogs-compat'
+include 'modules:core:portal-compat:blogs:portal-impl-blogs-compat'
+include 'modules:core:portal-compat:document-library:portal-kernel-document-library-compat'
+include 'modules:core:portal-compat:document-library:portal-impl-document-library-compat'
+include 'modules:core:portal-compat:message-boards:portal-kernel-message-boards-compat'
+include 'modules:core:portal-compat:message-boards:portal-impl-message-boards-compat'
+include 'modules:core:portal-compat:trash:portal-impl-trash-compat'
+include 'modules:core:portal-compat:petra:portal-kernel-concurrent-compat'
+include 'modules:core:portal-compat:petra:portal-kernel-io-compat'
+include 'modules:core:portal-compat:petra:portal-kernel-memory-compat'
+include 'modules:core:portal-compat:petra:portal-kernel-nio-compat'
+include 'modules:core:portal-compat:petra:portal-kernel-util-compat'
+include 'modules:core:portal-compat:petra:util-java-compat'
+include 'modules:core:registry-api'
+include 'modules:core:util-taglib-compat'
+include 'util-bridges'
+include 'util-java'
+include 'util-slf4j'
+include 'util-taglib'
+include 'modules:apps:petra:petra-encryptor'
+include 'modules:apps:petra:petra-xml'
+include 'modules:apps:petra:petra-log4j'
+include 'modules:apps:petra:petra-content'
+include 'modules:apps:petra:petra-mail'
+include 'portal-impl'

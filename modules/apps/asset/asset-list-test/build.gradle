@@ -3,7 +3,7 @@ copyLibs {
 }
 
 dependencies {
-	compileOnly group: "com.liferay.portal", name: "com.liferay.portal.kernel", version: "default"
+	compileOnly project(":portal-kernel")
 
 	testIntegrationCompile project(":apps:asset:asset-list-api")
 	testIntegrationCompile project(":test:arquillian-extension-junit-bridge")

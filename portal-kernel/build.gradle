@@ -1,1 +1,32 @@
-apply from: "../modules/build-portal.gradle"
+apply from: "../build-portal.gradle"
+
+dependencies {
+	compileInclude project(":modules:core:portal-compat:blogs:portal-kernel-blogs-compat")
+	compileInclude project(":modules:core:portal-compat:document-library:portal-kernel-document-library-compat")
+	compileInclude project(":modules:core:portal-compat:message-boards:portal-kernel-message-boards-compat")
+	compileInclude project(":modules:core:portal-compat:petra:portal-kernel-concurrent-compat")
+	compileInclude project(":modules:core:portal-compat:petra:portal-kernel-io-compat")
+	compileInclude project(":modules:core:portal-compat:petra:portal-kernel-memory-compat")
+	compileInclude project(":modules:core:portal-compat:petra:portal-kernel-nio-compat")
+	compileInclude project(":modules:core:portal-compat:petra:portal-kernel-util-compat")
+
+	compileOnly group: "biz.aQute.bnd", name: "biz.aQute.bnd", transitive: false, version: "3.5.0"
+	compileOnly group: "javax.mail", name: "mail", transitive: false, version: "1.4"
+	compileOnly group: "javax.portlet", name: "portlet-api", transitive: false, version: "3.0.1"
+	compileOnly group: "javax.servlet", name: "javax.servlet-api", transitive: false, version: "3.1.0"
+	compileOnly project(":modules:core:petra:petra-concurrent")
+	compileOnly project(":modules:core:petra:petra-executor")
+	compileOnly project(":modules:core:petra:petra-function")
+	compileOnly project(":modules:core:petra:petra-io")
+	compileOnly project(":modules:core:petra:petra-lang")
+	compileOnly project(":modules:core:petra:petra-memory")
+	compileOnly project(":modules:core:petra:petra-nio")
+	compileOnly project(":modules:core:petra:petra-process")
+	compileOnly project(":modules:core:petra:petra-reflect")
+	compileOnly project(":modules:core:petra:petra-string")
+	compileOnly project(":modules:core:registry-api")
+}
+
+liferayOSGi {
+	expandCompileInclude = true
+}

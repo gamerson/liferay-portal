@@ -3,7 +3,7 @@ dependencies {
 	compileInclude group: "com.liferay", name: "org.apache.axis", version: "1.4.LIFERAY-PATCHED-2"
 
 	compileOnly group: "com.liferay.portal", name: "com.liferay.portal.impl", version: "default"
-	compileOnly group: "com.liferay.portal", name: "com.liferay.portal.kernel", version: "default"
+	compileOnly project(":portal-kernel")
 	compileOnly group: "com.liferay.portal", name: "com.liferay.util.java", version: "default"
 	compileOnly group: "commons-discovery", name: "commons-discovery", version: "0.4"
 	compileOnly group: "javax.servlet", name: "javax.servlet-api", version: "3.0.1"

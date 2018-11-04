@@ -1450,7 +1450,7 @@ artifact.url=${remote.repository.url}/com/liferay/portal/com.liferay.${processed
 	<macrodef name="setup-libs">
 		<sequential>
 			<gradle-execute task="setUpLibs">
-				<arg value="--build-file=${project.dir}/modules/util.gradle" />
+				<arg value="--build-file=${project.dir}/util.gradle" />
 			</gradle-execute>
 		</sequential>
 	</macrodef>
@@ -1458,7 +1458,7 @@ artifact.url=${remote.repository.url}/com/liferay/portal/com.liferay.${processed
 	<macrodef name="setup-sdk">
 		<sequential>
 			<gradle-execute forcedcacheenabled="true" outputproperty="sdk.zip.file" task="printDependencyPath">
-				<arg value="--build-file=${project.dir}/modules/util.gradle" />
+				<arg value="--build-file=${project.dir}/util.gradle" />
 				<arg value="--quiet" />
 				<arg value="-PdependencyNotation=com.liferay.portal:com.liferay.portal.plugins.sdk:${build.sdk.version}" />
 			</gradle-execute>
@@ -1496,7 +1496,7 @@ artifact.url=${remote.repository.url}/com/liferay/portal/com.liferay.${processed
 			<update-gradle-properties />
 
 			<gradle-execute task="setUpPortalTools">
-				<arg value="--build-file=${project.dir}/modules/util.gradle" />
+				<arg value="--build-file=${project.dir}/util.gradle" />
 			</gradle-execute>
 		</sequential>
 	</macrodef>

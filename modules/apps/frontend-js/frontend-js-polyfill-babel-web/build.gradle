@@ -27,7 +27,7 @@ classes {
 dependencies {
 	babelCore group: "org.webjars.npm", name: "babel-core", transitive: false, version: babelCoreVersion
 
-	compileOnly group: "com.liferay.portal", name: "com.liferay.portal.kernel", version: "default"
+	compileOnly project(":portal-kernel")
 	compileOnly group: "javax.servlet", name: "javax.servlet-api", version: "3.0.1"
 	compileOnly group: "org.osgi", name: "org.osgi.service.component.annotations", version: "1.3.0"
 }

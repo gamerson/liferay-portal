@@ -1,5 +1,5 @@
 dependencies {
-	compileOnly project(":core:petra:petra-concurrent")
+	compileOnly project(":modules:core:petra:petra-concurrent")
 }
 
 liferay {

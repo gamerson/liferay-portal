@@ -9,7 +9,7 @@ dependencies {
 	compileInclude group: "org.slf4j", name: "slf4j-api", version: "1.7.2"
 	compileInclude project(":apps:petra:petra-json-web-service-client")
 
-	compileOnly group: "com.liferay.portal", name: "com.liferay.portal.kernel", version: "default"
+	compileOnly project(":portal-kernel")
 	compileOnly project(":apps:analytics:analytics-api")
 	compileOnly project(":apps:analytics:analytics-data-binding-impl")
 

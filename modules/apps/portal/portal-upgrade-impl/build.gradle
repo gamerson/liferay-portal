@@ -3,7 +3,7 @@ dependencies {
 
 	compileOnly group: "biz.aQute.bnd", name: "biz.aQute.bndlib", version: "3.1.0"
 	compileOnly group: "com.liferay", name: "org.apache.felix.gogo.runtime", version: "1.1.0.LIFERAY-PATCHED-1"
-	compileOnly group: "com.liferay.portal", name: "com.liferay.portal.kernel", version: "default"
+	compileOnly project(":portal-kernel")
 	compileOnly group: "org.osgi", name: "org.osgi.core", version: "5.0.0"
 	compileOnly project(":apps:portal:portal-output-stream-container-api")
 	compileOnly project(":apps:portal:portal-upgrade-api")

@@ -1,9 +1,9 @@
-Bundle-Name: ${manifest.bundle.name}
-Bundle-SymbolicName: ${manifest.bundle.symbolic.name}
+Bundle-Name: Liferay Util Taglib
+Bundle-SymbolicName: com.liferay.util.taglib
 Bundle-Version: 4.0.0
 Export-Package:\
 	com.liferay.alloy.taglib.*;version="2.1.0",\
-	com.liferay.taglib.*
+	com.liferay.taglib.*;-split-package:=merge-first
 Import-Package:\
 	!com.liferay.portal.freemarker,\
 	\
@@ -20,8 +20,6 @@ Import-Package:\
 	*
 Include-Resource:\
 	classes,\
-	@../lib/development/alloy-taglib.jar,\
-	@../tmp/lib-pre/com.liferay.util.taglib.compat.jar,\
 	@../util-java/util-java.jar!/com/liferay/util/Encryptor.class,\
 	@../util-java/util-java.jar!/com/liferay/util/EncryptorException.class,\
 	@../util-java/util-java.jar!/com/liferay/util/JS.class,\

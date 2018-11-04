@@ -1,1 +1,112 @@
-apply from: "../modules/build-portal.gradle"
+apply from: "../build-portal.gradle"
+
+dependencies {
+	compileInclude project(":modules:core:portal-compat:blogs:portal-impl-blogs-compat")
+	compileInclude project(":modules:core:portal-compat:document-library:portal-impl-document-library-compat")
+	compileInclude project(":modules:core:portal-compat:message-boards:portal-impl-message-boards-compat")
+	compileInclude project(":modules:core:portal-compat:trash:portal-impl-trash-compat")
+
+	compileOnly group: "aopalliance", name: "aopalliance", transitive: false, version: "1.0"
+	compileOnly group: "biz.aQute.bnd", name: "biz.aQute.bnd", transitive: false, version: "3.5.0"
+	compileOnly group: "com.google.javascript", name: "closure-compiler", transitive: false, version: "v20131014"
+	compileOnly group: "com.liferay", name: "com.github.fge.json.schema.validator", transitive: false, version: "2.2.3.LIFERAY-PATCHED-1"
+	compileOnly group: "com.liferay", name: "com.sun.syndication", transitive: false, version: "1.0.LIFERAY-PATCHED-1"
+	compileOnly group: "com.liferay", name: "javax.ccpp.ccpp-ri", transitive: false, version: "1.0"
+	compileOnly group: "com.liferay", name: "net.jmge.gif.gif89", transitive: false, version: "1.0"
+	compileOnly group: "com.liferay", name: "org.apache.axis", transitive: false, version: "1.4.LIFERAY-PATCHED-2"
+	compileOnly group: "com.liferay", name: "org.hibernate.core", transitive: false, version: "3.6.10.LIFERAY-PATCHED-3"
+	compileOnly group: "com.liferay", name: "org.jabsorb", transitive: false, version: "1.3.2.LIFERAY-PATCHED-1"
+	compileOnly group: "com.liferay", name: "org.monte", transitive: false, version: "0.7.7"
+	compileOnly group: "com.liferay", name: "org.mozilla.intl.chardet", transitive: false, version: "1.1"
+	compileOnly group: "com.liferay", name: "org.outerj.daisy.daisydiff", transitive: false, version: "1.2"
+	compileOnly group: "com.liferay", name: "org.vps.crypt", transitive: false, version: "1.0"
+	compileOnly group: "com.liferay", name: "xuggle.xuggler.noarch", transitive: false, version: "5.4"
+	compileOnly group: "com.mchange", name: "c3p0", transitive: false, version: "0.9.5.2"
+	compileOnly group: "com.redhat.qe", name: "json-java", transitive: false, version: "20110202"
+	compileOnly group: "com.sun", name: "jai_core", transitive: false, version: "1.1.3"
+	compileOnly group: "com.thoughtworks.qdox", name: "qdox", transitive: false, version: "1.12.1"
+	compileOnly group: "com.thoughtworks.xstream", name: "xstream", transitive: false, version: "1.4.10"
+	compileOnly group: "com.yahoo.platform.yui", name: "yuicompressor", transitive: false, version: "2.4.8"
+	compileOnly group: "com.zaxxer", name: "HikariCP", transitive: false, version: "2.6.3"
+	compileOnly group: "commons-codec", name: "commons-codec", transitive: false, version: "1.9"
+	compileOnly group: "commons-collections", name: "commons-collections", transitive: false, version: "3.2.2"
+	compileOnly group: "commons-configuration", name: "commons-configuration", transitive: false, version: "1.10"
+	compileOnly group: "commons-dbcp", name: "commons-dbcp", transitive: false, version: "1.2.2"
+	compileOnly group: "commons-fileupload", name: "commons-fileupload", transitive: false, version: "1.3.3"
+	compileOnly group: "commons-httpclient", name: "commons-httpclient", transitive: false, version: "3.1"
+	compileOnly group: "commons-io", name: "commons-io", transitive: false, version: "2.5"
+	compileOnly group: "commons-lang", name: "commons-lang", transitive: false, version: "2.6"
+	compileOnly group: "commons-logging", name: "commons-logging", version: "1.2"
+	compileOnly group: "dom4j", name: "dom4j", transitive: false, version: "1.6.1"
+	compileOnly group: "easyconf", name: "easyconf", transitive: false, version: "0.9.5"
+	compileOnly group: "io.netty", name: "netty-all", transitive: false, version: "4.0.23.Final"
+	compileOnly group: "jalopy", name: "jalopy", transitive: false, version: "1.5rc3"
+	compileOnly group: "javax.ccpp", name: "ccpp", transitive: false, version: "1.0"
+	compileOnly group: "javax.enterprise.deploy", name: "deployment-api", transitive: false, version: "1.2-rev-1"
+	compileOnly group: "javax.mail", name: "mail", transitive: false, version: "1.4"
+	compileOnly group: "javax.portlet", name: "portlet-api", transitive: false, version: "3.0.1"
+	compileOnly group: "javax.servlet", name: "javax.servlet-api", transitive: false, version: "3.1.0"
+	compileOnly group: "javax.servlet.jsp", name: "jsp-api", transitive: false, version: "2.1"
+	compileOnly group: "jaxen", name: "jaxen", transitive: false, version: "1.1.6"
+	compileOnly group: "jfree", name: "jfreechart", transitive: false, version: "1.0.13"
+	compileOnly group: "log4j", name: "log4j", transitive: false, version: "1.2.17"
+	compileOnly group: "net.htmlparser.jericho", name: "jericho-html", transitive: false, version: "3.1"
+	compileOnly group: "net.sf.jazzy", name: "jazzy", transitive: false, version: "0.5.2-rtext-1.4.1-2"
+	compileOnly group: "org.apache.abdera", name: "abdera-bundle", transitive: false, version: "1.1.3"
+	compileOnly group: "org.apache.ant", name: "ant", transitive: false, version: "1.8.4"
+	compileOnly group: "org.apache.commons", name: "commons-compress", transitive: false, version: "1.18"
+	compileOnly group: "org.apache.httpcomponents", name: "httpclient", transitive: false, version: "4.5.5"
+	compileOnly group: "org.apache.httpcomponents", name: "httpcore", transitive: false, version: "4.4.9"
+	compileOnly group: "org.apache.httpcomponents", name: "httpmime", transitive: false, version: "4.5.5"
+	compileOnly group: "org.apache.pdfbox", name: "pdfbox", transitive: false, version: "2.0.9"
+	compileOnly group: "org.apache.poi", name: "poi", transitive: false, version: "3.15"
+	compileOnly group: "org.apache.struts", name: "struts-core", transitive: false, version: "1.3.10"
+	compileOnly group: "org.apache.tika", name: "tika-core", transitive: false, version: "1.18"
+	compileOnly group: "org.apache.tika", name: "tika-parsers", transitive: false, version: "1.18"
+	compileOnly group: "org.apache.tomcat", name: "tomcat-jdbc", transitive: false, version: "9.0.10"
+	compileOnly group: "org.aspectj", name: "aspectjrt", transitive: false, version: "1.8.13"
+	compileOnly group: "org.aspectj", name: "aspectjweaver", transitive: false, version: "1.8.13"
+	compileOnly group: "org.eclipse.jetty", name: "jetty-server", transitive: false, version: "8.1.10.v20130312"
+	compileOnly group: "org.eclipse.jetty", name: "jetty-util", version: "8.1.10.v20130312"
+	compileOnly group: "org.freemarker", name: "freemarker", transitive: false, version: "2.3.23"
+	compileOnly group: "org.htmlparser", name: "htmlparser", transitive: false, version: "1.6"
+	compileOnly group: "org.hyperic", name: "sigar", transitive: false, version: "1.6.4"
+	compileOnly group: "org.im4java", name: "im4java", transitive: false, version: "1.2.0"
+	compileOnly group: "org.incava", name: "java-diff", transitive: false, version: "1.1"
+	compileOnly group: "org.javassist", name: "javassist", transitive: false, version: "3.18.2-GA"
+	compileOnly group: "org.jodd", name: "jodd-bean", transitive: false, version: "3.6.4"
+	compileOnly group: "org.jodd", name: "jodd-core", transitive: false, version: "3.6.8"
+	compileOnly group: "org.jodd", name: "jodd-json", transitive: false, version: "3.6.4"
+	compileOnly group: "org.jodd", name: "jodd-proxetta", transitive: false, version: "3.6.4"
+	compileOnly group: "org.jodd", name: "jodd-servlet", transitive: false, version: "3.6.4"
+	compileOnly group: "org.ow2.asm", name: "asm-debug-all", transitive: false, version: "5.0.4"
+	compileOnly group: "org.postgresql", name: "postgresql", transitive: false, version: "42.0.0"
+	compileOnly group: "org.scribe", name: "scribe", transitive: false, version: "1.0.9"
+	compileOnly group: "org.springframework", name: "spring-aop", transitive: false, version: "4.1.9.RELEASE"
+	compileOnly group: "org.springframework", name: "spring-beans", transitive: false, version: "4.1.9.RELEASE"
+	compileOnly group: "org.springframework", name: "spring-context", transitive: false, version: "4.1.9.RELEASE"
+	compileOnly group: "org.springframework", name: "spring-core", transitive: false, version: "4.1.9.RELEASE"
+	compileOnly group: "org.springframework", name: "spring-jdbc", transitive: false, version: "4.1.9.RELEASE"
+	compileOnly group: "org.springframework", name: "spring-orm", transitive: false, version: "4.1.9.RELEASE"
+	compileOnly group: "org.springframework", name: "spring-test", transitive: false, version: "4.1.9.RELEASE"
+	compileOnly group: "org.springframework", name: "spring-tx", transitive: false, version: "4.1.9.RELEASE"
+	compileOnly group: "org.springframework", name: "spring-web", transitive: false, version: "4.1.9.RELEASE"
+	compileOnly group: "org.springframework", name: "spring-webmvc", transitive: false, version: "4.1.9.RELEASE"
+	compileOnly group: "org.tuckey", name: "urlrewritefilter", transitive: false, version: "4.0.4"
+	compileOnly group: "oro", name: "oro", transitive: false, version: "2.0.8"
+	compileOnly group: "truezip", name: "truezip", transitive: false, version: "6.7"
+	compileOnly group: "xerces", name: "xercesImpl", transitive: false, version: "2.11.0"
+	compileOnly project(":modules:apps:petra:petra-content")
+	compileOnly project(":modules:apps:petra:petra-encryptor")
+	compileOnly project(":modules:apps:petra:petra-log4j")
+	compileOnly project(":modules:apps:petra:petra-mail")
+	compileOnly project(":modules:apps:petra:petra-xml")
+	compileOnly project(":portal-kernel")
+	compileOnly project(":util-bridges")
+	compileOnly project(":util-java")
+	compileOnly project(":util-taglib")
+}
+
+liferayOSGi {
+	expandCompileInclude = true
+}

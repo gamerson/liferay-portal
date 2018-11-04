@@ -4,7 +4,7 @@ dependencies {
 	compileInclude group: "org.apache.cxf", name: "cxf-rt-ws-policy", version: "3.2.5"
 
 	compileOnly group: "biz.aQute.bnd", name: "biz.aQute.bndlib", version: "3.1.0"
-	compileOnly group: "com.liferay.portal", name: "com.liferay.portal.kernel", version: "default"
+	compileOnly project(":portal-kernel")
 	compileOnly group: "org.apache.cxf", name: "cxf-core", version: "3.2.5"
 	compileOnly group: "org.apache.felix", name: "org.apache.felix.dependencymanager", version: "3.2.0"
 	compileOnly group: "org.osgi", name: "org.osgi.core", version: "5.0.0"

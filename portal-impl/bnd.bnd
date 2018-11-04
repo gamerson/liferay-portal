@@ -1,5 +1,5 @@
-Bundle-Name: ${manifest.bundle.name}
-Bundle-SymbolicName: ${manifest.bundle.symbolic.name}
+Bundle-Name: Liferay Portal Impl
+Bundle-SymbolicName: com.liferay.portal.impl
 Bundle-Version: 4.0.0
 Export-Package:\
 	com.liferay.portal.bean,\
@@ -72,19 +72,14 @@ Export-Package:\
 	com.liferay.portlet.social.model,\
 	com.liferay.portlet.social.service,\
 	com.liferay.portlet.social.service.persistence,\
-	com.liferay.portlet.trash,\
+	com.liferay.portlet.trash;-split-package:=merge-first,\
 	com.liferay.portlet.trash.model,\
 	com.liferay.portlet.trash.service,\
 	com.liferay.portlet.trash.service.persistence,\
 	com.liferay.portlet.trash.util,\
 	com.liferay.portlet.usersadmin.search
 Import-Package: *
-Include-Resource:\
-	classes,\
-	@../tmp/lib-pre/com.liferay.portal.impl.blogs.compat.jar,\
-	@../tmp/lib-pre/com.liferay.portal.impl.document.library.compat.jar,\
-	@../tmp/lib-pre/com.liferay.portal.impl.message.boards.compat.jar,\
-	@../tmp/lib-pre/com.liferay.portal.impl.trash.compat.jar
+Include-Resource: classes
 Liferay-Service: true
 Private-Package: com.liferay.*.dependencies
 -donotcopy: (log4j\.properties|logging\.properties|portal-.*\.properties|system-.*\.properties|\.touch)
