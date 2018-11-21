@@ -33,8 +33,29 @@ import org.osgi.framework.Constants;
 /**
  * @author Matthew Tambara
  * @author Raymond Augé
+ * @author Simon Jiang
  */
 public class ArtifactURLUtil {
+
+	public static final Pattern symbolicNamePattern = Pattern.compile(
+		"(.*?)(-\\d+\\.\\d+\\.\\d+\\.\\d+)?");
+
+	public static String readServletContextName(Jar jar) throws Exception {
+		Resource resource = jar.getResource(
+			"WEB-INF/liferay-plugin-package.properties");
+
+		if (resource == null) {
+			return null;
+		}
+
+		Properties properties = new Properties();
+
+		try (InputStream inputStream = resource.openInputStream()) {
+			properties.load(inputStream);
+		}
+
+		return properties.getProperty("servlet-context-name");
+	}
 
 	public static URL transform(URL artifact) throws IOException {
 		String path = artifact.getPath();
@@ -44,7 +65,7 @@ public class ArtifactURLUtil {
 
 		String symbolicName = path.substring(x + 1, y);
 
-		Matcher matcher = _pattern.matcher(symbolicName);
+		Matcher matcher = symbolicNamePpattern.matcher(symbolicName);
 
 		if (matcher.matches()) {
 			symbolicName = matcher.group(1);
@@ -57,7 +78,7 @@ public class ArtifactURLUtil {
 				return artifact;
 			}
 
-			contextName = _readServletContextName(jar);
+			contextName = readServletContextName(jar);
 		}
 		catch (Exception e) {
 			ReflectionUtil.throwException(e);
@@ -80,25 +101,5 @@ public class ArtifactURLUtil {
 
 		return new URL("webbundle", null, sb.toString());
 	}
-
-	private static String _readServletContextName(Jar jar) throws Exception {
-		Resource resource = jar.getResource(
-			"WEB-INF/liferay-plugin-package.properties");
-
-		if (resource == null) {
-			return null;
-		}
-
-		Properties properties = new Properties();
-
-		try (InputStream inputStream = resource.openInputStream()) {
-			properties.load(inputStream);
-		}
-
-		return properties.getProperty("servlet-context-name");
-	}
-
-	private static final Pattern _pattern = Pattern.compile(
-		"(.*?)(-\\d+\\.\\d+\\.\\d+\\.\\d+)?");
 
 }

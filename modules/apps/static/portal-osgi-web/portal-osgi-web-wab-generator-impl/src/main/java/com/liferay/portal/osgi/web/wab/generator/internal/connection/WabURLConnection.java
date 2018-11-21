@@ -14,14 +14,20 @@
 
 package com.liferay.portal.osgi.web.wab.generator.internal.connection;
 
+import static com.liferay.portal.osgi.web.wab.generator.internal.artifact.ArtifactURLUtil.symbolicNamePpattern;
+
+import aQute.bnd.osgi.Jar;
+
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.FastDateFormatFactoryUtil;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.HttpUtil;
+import com.liferay.portal.kernel.util.ReflectionUtil;
 import com.liferay.portal.kernel.util.StreamUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.osgi.web.wab.generator.WabGenerator;
+import com.liferay.portal.osgi.web.wab.generator.internal.artifact.ArtifactURLUtil;
 import com.liferay.portal.util.FastDateFormatFactoryImpl;
 import com.liferay.portal.util.FileImpl;
 import com.liferay.portal.util.HttpImpl;
@@ -36,11 +42,13 @@ import java.net.URL;
 import java.net.URLConnection;
 
 import java.util.Map;
+import java.util.regex.Matcher;
 
 /**
  * @author Raymond Augé
  * @author Miguel Pastor
  * @author Gregory Amerson
+ * @author Simon Jiang
  */
 public class WabURLConnection extends URLConnection {
 
@@ -67,12 +75,6 @@ public class WabURLConnection extends URLConnection {
 
 		Map<String, String[]> parameters = HttpUtil.getParameterMap(query);
 
-		if (!parameters.containsKey("Web-ContextPath")) {
-			throw new IllegalArgumentException(
-				"The parameter map does not contain the required parameter " +
-					"Web-ContextPath");
-		}
-
 		String path = url.getPath();
 		String[] protocols = parameters.get("protocol");
 
@@ -98,6 +100,21 @@ public class WabURLConnection extends URLConnection {
 		}
 
 		final File file = transferToTempFile(new URL(protocols[0], null, path));
+
+		if (!parameters.containsKey("Web-ContextPath")) {
+			String contextPath = _generateContextPath(file);
+
+			if (contextPath != null) {
+				parameters.put("Web-ContextPath", new String[] {contextPath});
+			}
+			else {
+				if (!parameters.containsKey("Web-ContextPath")) {
+					throw new IllegalArgumentException(
+						"The parameter map does not contain the required " +
+							"parameter Web-ContextPath");
+				}
+			}
+		}
 
 		File processedFile = _wabGenerator.generate(
 			_classLoader, file, parameters);
@@ -149,6 +166,40 @@ public class WabURLConnection extends URLConnection {
 
 			instance.setHttp(new HttpImpl());
 		}
+	}
+
+	private String _generateContextPath(File urlFile) throws IOException {
+		String path = urlFile.getPath();
+
+		int x = path.lastIndexOf('/');
+		int y = path.lastIndexOf(".war");
+
+		String symbolicName = path.substring(x + 1, y);
+
+		Matcher matcher = symbolicNamePpattern.matcher(symbolicName);
+
+		if (matcher.matches()) {
+			symbolicName = matcher.group(1);
+		}
+
+		String contextName = null;
+
+		try (Jar jar = new Jar("WAR", urlFile)) {
+			if (jar.getBsn() != null) {
+				return contextName;
+			}
+
+			contextName = ArtifactURLUtil.readServletContextName(jar);
+		}
+		catch (Exception e) {
+			ReflectionUtil.throwException(e);
+		}
+
+		if (contextName == null) {
+			contextName = symbolicName;
+		}
+
+		return contextName;
 	}
 
 	private final ClassLoader _classLoader;
