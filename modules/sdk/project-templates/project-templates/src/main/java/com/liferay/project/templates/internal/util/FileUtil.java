@@ -282,7 +282,7 @@ public class FileUtil {
 
 		String scheme = uri.getScheme();
 
-		if (scheme.contains("jar")) {
+		if (scheme.contains("jar") && _isJarUri()) {
 			FileSystem jarFileSystem = _getJarFileSystem();
 
 			Path fileSystemPath = jarFileSystem.getPath(dirPathString);
@@ -360,6 +360,25 @@ public class FileUtil {
 		URL jarUrl = codeSource.getLocation();
 
 		return jarUrl.toURI();
+	}
+
+	private static boolean _isJarUri() {
+		ProtectionDomain protectionDomain =
+			FileUtil.class.getProtectionDomain();
+
+		CodeSource codeSource = protectionDomain.getCodeSource();
+
+		if (codeSource == null) {
+			return false;
+		}
+
+		URL jarUrl = codeSource.getLocation();
+
+		if (jarUrl == null) {
+			return false;
+		}
+
+		return true;
 	}
 
 }
