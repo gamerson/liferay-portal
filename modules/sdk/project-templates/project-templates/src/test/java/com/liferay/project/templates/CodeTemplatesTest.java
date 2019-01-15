@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 
 import java.nio.file.Files;
+import java.nio.file.Path;
 
 import java.util.AbstractMap;
 import java.util.Collections;
@@ -52,10 +53,10 @@ public class CodeTemplatesTest {
 
 		ProjectTemplatesArgs projectTemplatesArgs = new ProjectTemplatesArgs();
 
-		File archetypesDir = FileUtil.getJarFile(CodeTemplatesTest.class);
+		Path jarPath = FileUtil.getJarPath();
 
 		projectTemplatesArgs.setArchetypesDirs(
-			Collections.singletonList(archetypesDir));
+			Collections.singletonList(jarPath.toFile()));
 
 		projectTemplatesArgs.setDestinationDir(destinationDir);
 		projectTemplatesArgs.setLiferayVersion("7.1");
@@ -69,8 +70,6 @@ public class CodeTemplatesTest {
 
 		CodeTemplatesArgs codeTemplatesArgs = new CodeTemplatesArgs();
 
-		archetypesDir = FileUtil.getJarFile(CodeTemplatesTest.class);
-
 		codeTemplatesArgs.setAddtionalParameters(
 			Collections.unmodifiableMap(
 				Stream.of(
@@ -82,7 +81,7 @@ public class CodeTemplatesTest {
 						AbstractMap.SimpleEntry::getValue)
 				)));
 		codeTemplatesArgs.setArchetypesDirs(
-			Collections.singletonList(archetypesDir));
+			Collections.singletonList(jarPath.toFile()));
 		codeTemplatesArgs.setAuthor("fred");
 		codeTemplatesArgs.setClassName("Foo");
 		codeTemplatesArgs.setDestinationDir(projectDir);
@@ -120,10 +119,10 @@ public class CodeTemplatesTest {
 
 		ProjectTemplatesArgs projectTemplatesArgs = new ProjectTemplatesArgs();
 
-		File archetypesDir = FileUtil.getJarFile(CodeTemplatesTest.class);
+		Path jarPath = FileUtil.getJarPath();
 
 		projectTemplatesArgs.setArchetypesDirs(
-			Collections.singletonList(archetypesDir));
+			Collections.singletonList(jarPath.toFile()));
 
 		projectTemplatesArgs.setDestinationDir(destinationDir);
 		projectTemplatesArgs.setLiferayVersion("7.1");
@@ -137,10 +136,8 @@ public class CodeTemplatesTest {
 
 		CodeTemplatesArgs codeTemplatesArgs = new CodeTemplatesArgs();
 
-		archetypesDir = FileUtil.getJarFile(CodeTemplatesTest.class);
-
 		codeTemplatesArgs.setArchetypesDirs(
-			Collections.singletonList(archetypesDir));
+			Collections.singletonList(jarPath.toFile()));
 
 		codeTemplatesArgs.setAuthor("fred");
 		codeTemplatesArgs.setClassName("Foo");
@@ -175,10 +172,10 @@ public class CodeTemplatesTest {
 
 		ProjectTemplatesArgs projectTemplatesArgs = new ProjectTemplatesArgs();
 
-		File archetypesDir = FileUtil.getJarFile(CodeTemplatesTest.class);
+		Path jarPath = FileUtil.getJarPath();
 
 		projectTemplatesArgs.setArchetypesDirs(
-			Collections.singletonList(archetypesDir));
+			Collections.singletonList(jarPath.toFile()));
 
 		projectTemplatesArgs.setDestinationDir(destinationDir);
 		projectTemplatesArgs.setLiferayVersion("7.1");
@@ -189,8 +186,6 @@ public class CodeTemplatesTest {
 		new ProjectTemplates(projectTemplatesArgs);
 
 		File projectDir = new File(destinationDir, "foo");
-
-		archetypesDir = FileUtil.getJarFile(CodeTemplatesTest.class);
 
 		CodeTemplatesArgs codeTemplatesArgs = new CodeTemplatesArgs();
 
@@ -206,7 +201,7 @@ public class CodeTemplatesTest {
 						AbstractMap.SimpleEntry::getValue)
 				)));
 		codeTemplatesArgs.setArchetypesDirs(
-			Collections.singletonList(archetypesDir));
+			Collections.singletonList(jarPath.toFile()));
 		codeTemplatesArgs.setAuthor("fred");
 		codeTemplatesArgs.setClassName("Foo");
 		codeTemplatesArgs.setDestinationDir(projectDir);
@@ -240,10 +235,10 @@ public class CodeTemplatesTest {
 
 		ProjectTemplatesArgs projectTemplatesArgs = new ProjectTemplatesArgs();
 
-		File archetypesDir = FileUtil.getJarFile(CodeTemplatesTest.class);
+		Path jarPath = FileUtil.getJarPath();
 
 		projectTemplatesArgs.setArchetypesDirs(
-			Collections.singletonList(archetypesDir));
+			Collections.singletonList(jarPath.toFile()));
 
 		projectTemplatesArgs.setDestinationDir(destinationDir);
 		projectTemplatesArgs.setLiferayVersion("7.1");
@@ -268,7 +263,7 @@ public class CodeTemplatesTest {
 						AbstractMap.SimpleEntry::getValue)
 				)));
 		codeTemplatesArgs.setArchetypesDirs(
-			Collections.singletonList(archetypesDir));
+			Collections.singletonList(jarPath.toFile()));
 		codeTemplatesArgs.setAuthor("fred");
 		codeTemplatesArgs.setClassName("Foo");
 		codeTemplatesArgs.setDestinationDir(projectDir);
@@ -302,10 +297,10 @@ public class CodeTemplatesTest {
 
 		ProjectTemplatesArgs projectTemplatesArgs = new ProjectTemplatesArgs();
 
-		File archetypesDir = FileUtil.getJarFile(CodeTemplatesTest.class);
+		Path jarPath = FileUtil.getJarPath();
 
 		projectTemplatesArgs.setArchetypesDirs(
-			Collections.singletonList(archetypesDir));
+			Collections.singletonList(jarPath.toFile()));
 
 		projectTemplatesArgs.setDestinationDir(destinationDir);
 		projectTemplatesArgs.setLiferayVersion("7.1");
@@ -330,7 +325,7 @@ public class CodeTemplatesTest {
 						AbstractMap.SimpleEntry::getValue)
 				)));
 		codeTemplatesArgs.setArchetypesDirs(
-			Collections.singletonList(archetypesDir));
+			Collections.singletonList(jarPath.toFile()));
 		codeTemplatesArgs.setAuthor("fred");
 		codeTemplatesArgs.setClassName("Foo");
 		codeTemplatesArgs.setDestinationDir(projectDir);
@@ -379,10 +374,10 @@ public class CodeTemplatesTest {
 
 		ProjectTemplatesArgs projectTemplatesArgs = new ProjectTemplatesArgs();
 
-		File archetypesDir = FileUtil.getJarFile(CodeTemplatesTest.class);
+		Path jarPath = FileUtil.getJarPath();
 
 		projectTemplatesArgs.setArchetypesDirs(
-			Collections.singletonList(archetypesDir));
+			Collections.singletonList(jarPath.toFile()));
 
 		projectTemplatesArgs.setDestinationDir(destinationDir);
 		projectTemplatesArgs.setLiferayVersion("7.1");
@@ -397,7 +392,7 @@ public class CodeTemplatesTest {
 		CodeTemplatesArgs codeTemplatesArgs = new CodeTemplatesArgs();
 
 		codeTemplatesArgs.setArchetypesDirs(
-			Collections.singletonList(archetypesDir));
+			Collections.singletonList(jarPath.toFile()));
 		codeTemplatesArgs.setAuthor("fred");
 		codeTemplatesArgs.setClassName("Foo");
 		codeTemplatesArgs.setDestinationDir(projectDir);
@@ -446,10 +441,10 @@ public class CodeTemplatesTest {
 
 		ProjectTemplatesArgs projectTemplatesArgs = new ProjectTemplatesArgs();
 
-		File archetypesDir = FileUtil.getJarFile(CodeTemplatesTest.class);
+		Path jarPath = FileUtil.getJarPath();
 
 		projectTemplatesArgs.setArchetypesDirs(
-			Collections.singletonList(archetypesDir));
+			Collections.singletonList(jarPath.toFile()));
 
 		projectTemplatesArgs.setDestinationDir(destinationDir);
 		projectTemplatesArgs.setLiferayVersion("7.1");
@@ -464,7 +459,7 @@ public class CodeTemplatesTest {
 		CodeTemplatesArgs codeTemplatesArgs = new CodeTemplatesArgs();
 
 		codeTemplatesArgs.setArchetypesDirs(
-			Collections.singletonList(archetypesDir));
+			Collections.singletonList(jarPath.toFile()));
 		codeTemplatesArgs.setAuthor("fred");
 		codeTemplatesArgs.setClassName("Foo");
 		codeTemplatesArgs.setDestinationDir(projectDir);
@@ -514,10 +509,10 @@ public class CodeTemplatesTest {
 
 		ProjectTemplatesArgs projectTemplatesArgs = new ProjectTemplatesArgs();
 
-		File archetypesDir = FileUtil.getJarFile(CodeTemplatesTest.class);
+		Path jarPath = FileUtil.getJarPath();
 
 		projectTemplatesArgs.setArchetypesDirs(
-			Collections.singletonList(archetypesDir));
+			Collections.singletonList(jarPath.toFile()));
 
 		projectTemplatesArgs.setDestinationDir(destinationDir);
 		projectTemplatesArgs.setLiferayVersion("7.1");
@@ -532,7 +527,7 @@ public class CodeTemplatesTest {
 		CodeTemplatesArgs codeTemplatesArgs = new CodeTemplatesArgs();
 
 		codeTemplatesArgs.setArchetypesDirs(
-			Collections.singletonList(archetypesDir));
+			Collections.singletonList(jarPath.toFile()));
 		codeTemplatesArgs.setAuthor("fred");
 		codeTemplatesArgs.setClassName("Foo");
 		codeTemplatesArgs.setDestinationDir(projectDir);
@@ -580,10 +575,10 @@ public class CodeTemplatesTest {
 
 		ProjectTemplatesArgs projectTemplatesArgs = new ProjectTemplatesArgs();
 
-		File archetypesDir = FileUtil.getJarFile(CodeTemplatesTest.class);
+		Path jarPath = FileUtil.getJarPath();
 
 		projectTemplatesArgs.setArchetypesDirs(
-			Collections.singletonList(archetypesDir));
+			Collections.singletonList(jarPath.toFile()));
 
 		projectTemplatesArgs.setDestinationDir(destinationDir);
 		projectTemplatesArgs.setLiferayVersion("7.1");
@@ -611,7 +606,7 @@ public class CodeTemplatesTest {
 						AbstractMap.SimpleEntry::getValue)
 				)));
 		codeTemplatesArgs.setArchetypesDirs(
-			Collections.singletonList(archetypesDir));
+			Collections.singletonList(jarPath.toFile()));
 		codeTemplatesArgs.setAuthor("fred");
 		codeTemplatesArgs.setClassName("Foo");
 		codeTemplatesArgs.setDestinationDir(projectDir);

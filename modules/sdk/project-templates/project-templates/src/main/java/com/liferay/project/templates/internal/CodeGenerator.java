@@ -16,6 +16,8 @@ package com.liferay.project.templates.internal;
 
 import com.liferay.project.templates.CodeTemplatesArgs;
 import com.liferay.project.templates.ProjectTemplates;
+import com.liferay.project.templates.internal.util.FileUtil;
+import com.liferay.project.templates.internal.util.ProjectTemplatesUtil;
 import com.liferay.project.templates.internal.util.Validator;
 
 import java.io.File;
@@ -56,14 +58,16 @@ public class CodeGenerator {
 		ArchetypeGenerationRequest archetypeGenerationRequest =
 			new ArchetypeGenerationRequest();
 
+		archetypeGenerationRequest.setArchetypeGroupId("com.liferay");
+
 		archetypeGenerationRequest.setArchetypeArtifactId(
 			ProjectTemplates.TEMPLATE_BUNDLE_PREFIX + "code");
 
-		archetypeGenerationRequest.setArchetypeGroupId("com.liferay");
+		File codeTemplateFile = ProjectTemplatesUtil.getArchetypeFile(
+			ProjectTemplates.TEMPLATE_BUNDLE_PREFIX + "code");
 
-		// archetypeVersion is ignored
-
-		archetypeGenerationRequest.setArchetypeVersion("0");
+		archetypeGenerationRequest.setArchetypeVersion(
+			FileUtil.getManifestProperty(codeTemplateFile, "Bundle-Version"));
 
 		archetypeGenerationRequest.setArtifactId("code");
 		archetypeGenerationRequest.setGroupId("com.liferay");
@@ -102,6 +106,7 @@ public class CodeGenerator {
 			@Override
 			protected ArchetypeArtifactManager newArchetypeArtifactManager() {
 				VelocityComponent velocityComponent = createVelocityComponent();
+
 				return new ArchetyperArchetypeArtifactManager(archetypesDirs) {
 
 					@Override

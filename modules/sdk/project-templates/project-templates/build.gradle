@@ -66,9 +66,9 @@ dependencies {
 
 	mavenDistribution classifier: "bin", ext: "zip", group: "org.apache.maven", name: "apache-maven", version: mavenDistributionVersion
 
-<<<<<<< HEAD
 	projectTemplates group: "com.liferay", name: "com.liferay.project.templates.activator", version: "1.0.25"
 	projectTemplates group: "com.liferay", name: "com.liferay.project.templates.api", version: "1.0.26"
+	projectTemplates group: "com.liferay", name: "com.liferay.project.templates.code", version: "1.0.0"
 	projectTemplates group: "com.liferay", name: "com.liferay.project.templates.content.targeting.report", version: "1.0.25"
 	projectTemplates group: "com.liferay", name: "com.liferay.project.templates.content.targeting.rule", version: "1.0.25"
 	projectTemplates group: "com.liferay", name: "com.liferay.project.templates.content.targeting.tracking.action", version: "1.0.25"
@@ -107,6 +107,7 @@ dependencies {
 	testCompile group: "com.liferay", name: "com.liferay.maven.executor", version: "1.0.0"
 	testCompile group: "junit", name: "junit", version: "4.12"
 	testCompile group: "net.diibadaaba.zipdiff", name: "zipdiff", version: "1.0"
+	
 }
 
 liferayOSGi {
@@ -173,18 +174,9 @@ test {
 	systemProperty "http.proxyPort", System.properties["http.proxyPort"]
 	systemProperty "maven.debug", System.properties["maven.debug"]
 	systemProperty "maven.repo.local", System.properties["maven.repo.local"]
-<<<<<<< HEAD
 	systemProperty "nodejs.npm.ci.registry", project.findProperty("nodejs.npm.ci.registry")
 	systemProperty "nodejs.npm.ci.sass.binary.site", project.findProperty("nodejs.npm.ci.sass.binary.site")
 	systemProperty "project.templates.test.builds", project.findProperty("project.templates.test.builds")
-=======
-	systemProperty "nodejs.npm.ci.registry", project.property("nodejs.npm.ci.registry")
-	systemProperty "nodejs.npm.ci.sass.binary.site", project.property("nodejs.npm.ci.sass.binary.site")
-<<<<<<< HEAD
->>>>>>> LPS-84857 support parameter map
-=======
-	systemProperty "project.templates.test.builds", project.property("project.templates.test.builds")
->>>>>>> LPS-84857 add new code templates
 	systemProperty "repository.url", System.properties["repository.url"]
 	systemProperty "test.debug.bundle.diffs", System.properties["test.debug.bundle.diffs"]
 

@@ -730,29 +730,32 @@ public class ProjectTemplateFilesTest {
 				"Number of dependencies in " + pomXmlPath + " must match " +
 					buildGradlePath,
 				buildGradleDependencies.size(), dependencyElements.size());
-	
+
 			for (int i = 0; i < buildGradleDependencies.size(); i++) {
 				BuildGradleDependency buildGradleDependency =
 					buildGradleDependencies.get(i);
-	
+
 				Element dependencyElement = dependencyElements.get(i);
-	
+
 				List<Element> dependencyChildElements =
 					XMLTestUtil.getChildElements(dependencyElement);
-	
+
 				String dependencyElementString = XMLTestUtil.toString(
 					dependencyElement);
-	
+
 				XMLTestUtil.testXmlElement(
-					pomXmlPath, dependencyElementString, dependencyChildElements, 0,
-					"groupId", buildGradleDependency.group);
+					pomXmlPath, dependencyElementString,
+					dependencyChildElements, 0, "groupId",
+					buildGradleDependency.group);
 				XMLTestUtil.testXmlElement(
-					pomXmlPath, dependencyElementString, dependencyChildElements, 1,
-					"artifactId", buildGradleDependency.name);
+					pomXmlPath, dependencyElementString,
+					dependencyChildElements, 1, "artifactId",
+					buildGradleDependency.name);
 				XMLTestUtil.testXmlElement(
-					pomXmlPath, dependencyElementString, dependencyChildElements, 2,
-					"version", buildGradleDependency.version);
-	
+					pomXmlPath, dependencyElementString,
+					dependencyChildElements, 2, "version",
+					buildGradleDependency.version);
+
 				if (buildGradleDependency.provided) {
 					XMLTestUtil.testXmlElement(
 						pomXmlPath, dependencyElementString,

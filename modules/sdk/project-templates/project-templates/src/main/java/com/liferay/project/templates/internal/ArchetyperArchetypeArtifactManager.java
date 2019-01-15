@@ -115,4 +115,5 @@ public class ArchetyperArchetypeArtifactManager
 	}
 
 	private final List<File> _archetypesFiles;
+
 }

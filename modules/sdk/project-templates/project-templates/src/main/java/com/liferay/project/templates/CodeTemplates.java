@@ -22,6 +22,9 @@ import com.liferay.project.templates.internal.util.FileUtil;
 
 import java.io.File;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 /**
  * @author Gregory Amerson
  */
@@ -33,13 +36,13 @@ public class CodeTemplates {
 		JCommander jCommander = new JCommander(codeTemplatesArgs);
 
 		try {
-			File jarFile = FileUtil.getJarFile(CodeTemplates.class);
+			Path jarPath = FileUtil.getJarPath();
 
-			if (jarFile.isFile()) {
-				jCommander.setProgramName("java -jar " + jarFile.getName());
+			if (Files.isDirectory(jarPath)) {
+				jCommander.setProgramName(CodeTemplates.class.getName());
 			}
 			else {
-				jCommander.setProgramName(CodeTemplates.class.getName());
+				jCommander.setProgramName("java -jar " + jarPath.getFileName());
 			}
 
 			jCommander.parse(args);
