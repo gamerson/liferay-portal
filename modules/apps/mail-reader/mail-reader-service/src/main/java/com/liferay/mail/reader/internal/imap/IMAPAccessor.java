@@ -106,15 +106,14 @@ public class IMAPAccessor {
 			if (jxFolder.exists()) {
 				throw new MailException(MailException.FOLDER_ALREADY_EXISTS);
 			}
-			else {
-				if (jxFolder.create(Folder.HOLDS_MESSAGES)) {
-					return new String[] {
-						jxFolder.getFullName(), jxFolder.getName()
-					};
-				}
 
-				throw new MailException(MailException.FOLDER_CREATE_FAILED);
+			if (jxFolder.create(Folder.HOLDS_MESSAGES)) {
+				return new String[] {
+					jxFolder.getFullName(), jxFolder.getName()
+				};
 			}
+
+			throw new MailException(MailException.FOLDER_CREATE_FAILED);
 		}
 		catch (MessagingException me) {
 			throw new MailException(me);
@@ -394,9 +393,8 @@ public class IMAPAccessor {
 					jxFolder.getFullName(), jxFolder.getName()
 				};
 			}
-			else {
-				throw new MailException(MailException.FOLDER_RENAME_FAILED);
-			}
+
+			throw new MailException(MailException.FOLDER_RENAME_FAILED);
 		}
 		catch (MessagingException me) {
 			throw new MailException(me);
@@ -972,7 +970,11 @@ public class IMAPAccessor {
 				continue;
 			}
 
-			String prefix = String.valueOf(index).concat(StringPool.PERIOD);
+			String prefix = String.valueOf(
+				index
+			).concat(
+				StringPool.PERIOD
+			);
 
 			return getPart(
 				multipart.getBodyPart(i),
@@ -998,8 +1000,11 @@ public class IMAPAccessor {
 
 				getParts(
 					userId, bodyPlainSB, bodyHtmlSB,
-					contentPath.concat(StringPool.PERIOD).concat(
-						String.valueOf(i)),
+					contentPath.concat(
+						StringPool.PERIOD
+					).concat(
+						String.valueOf(i)
+					),
 					curPart, mailFiles);
 			}
 		}
@@ -1018,8 +1023,12 @@ public class IMAPAccessor {
 		}
 		else {
 			MailFile mailFile = new MailFile(
-				contentPath.concat(StringPool.PERIOD).concat("-1"), fileName,
-				part.getSize());
+				contentPath.concat(
+					StringPool.PERIOD
+				).concat(
+					"-1"
+				),
+				fileName, part.getSize());
 
 			mailFiles.add(mailFile);
 		}

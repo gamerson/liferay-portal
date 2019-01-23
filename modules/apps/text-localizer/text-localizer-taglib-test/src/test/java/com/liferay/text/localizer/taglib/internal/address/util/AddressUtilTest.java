@@ -15,8 +15,11 @@
 package com.liferay.text.localizer.taglib.internal.address.util;
 
 import com.liferay.portal.kernel.model.Address;
+import com.liferay.portal.kernel.model.AddressWrapper;
 import com.liferay.portal.kernel.model.Country;
+import com.liferay.portal.kernel.model.CountryWrapper;
 import com.liferay.portal.kernel.model.Region;
+import com.liferay.portal.kernel.model.RegionWrapper;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
@@ -27,20 +30,12 @@ import java.util.Optional;
 
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
-
-import org.mockito.Mockito;
 
 /**
  * @author Drew Brokke
  */
 public class AddressUtilTest {
-
-	@Before
-	public void setUp() {
-		_address = Mockito.mock(Address.class);
-	}
 
 	@After
 	public void tearDown() {
@@ -50,7 +45,15 @@ public class AddressUtilTest {
 	@Test
 	public void testGetCountryNameOptionalEmptyWithNoCountry() {
 		Optional<String> countryNameOptional =
-			AddressUtil.getCountryNameOptional(_address);
+			AddressUtil.getCountryNameOptional(
+				new AddressWrapper(null) {
+
+					@Override
+					public Country getCountry() {
+						return null;
+					}
+
+				});
 
 		Assert.assertFalse(countryNameOptional.isPresent());
 	}
@@ -65,8 +68,6 @@ public class AddressUtilTest {
 
 	@Test
 	public void testGetCountryNameOptionalLocalized() {
-		_address = _setCountry(_address);
-
 		ServiceContext serviceContext = new ServiceContext();
 
 		serviceContext.setLanguageId(LocaleUtil.toLanguageId(LocaleUtil.US));
@@ -74,45 +75,42 @@ public class AddressUtilTest {
 		ServiceContextThreadLocal.pushServiceContext(serviceContext);
 
 		Optional<String> countryNameOptional =
-			AddressUtil.getCountryNameOptional(_address);
+			AddressUtil.getCountryNameOptional(_getAddressWithCountry());
 
 		Assert.assertEquals(_COUNTRY_NAME_LOCALIZED, countryNameOptional.get());
 	}
 
 	@Test
 	public void testGetCountryNameOptionalNotLocalized() {
-		_address = _setCountry(_address);
-
 		Optional<String> countryNameOptional =
-			AddressUtil.getCountryNameOptional(_address);
+			AddressUtil.getCountryNameOptional(_getAddressWithCountry());
 
 		Assert.assertEquals(_COUNTRY_NAME, countryNameOptional.get());
 	}
 
 	@Test
 	public void testGetRegionNameOptional() {
-		Region region = Mockito.mock(Region.class);
-
-		Mockito.doReturn(
-			region
-		).when(
-			_address
-		).getRegion();
-
-		Mockito.doReturn(
-			_REGION_NAME
-		).when(
-			region
-		).getName();
-
-		Mockito.doReturn(
-			RandomTestUtil.randomLong()
-		).when(
-			region
-		).getRegionId();
-
 		Optional<String> regionNameOptional = AddressUtil.getRegionNameOptional(
-			_address);
+			new AddressWrapper(null) {
+
+				@Override
+				public Region getRegion() {
+					return new RegionWrapper(null) {
+
+						@Override
+						public String getName() {
+							return _REGION_NAME;
+						}
+
+						@Override
+						public long getRegionId() {
+							return RandomTestUtil.randomLong();
+						}
+
+					};
+				}
+
+			});
 
 		Assert.assertEquals(_REGION_NAME, regionNameOptional.get());
 	}
@@ -120,7 +118,14 @@ public class AddressUtilTest {
 	@Test
 	public void testGetRegionNameOptionalEmptyWithNoRegion() {
 		Optional<String> regionNameOptional = AddressUtil.getRegionNameOptional(
-			_address);
+			new AddressWrapper(null) {
+
+				@Override
+				public Region getRegion() {
+					return null;
+				}
+
+			});
 
 		Assert.assertFalse(regionNameOptional.isPresent());
 	}
@@ -133,36 +138,32 @@ public class AddressUtilTest {
 		Assert.assertFalse(regionNameOptional.isPresent());
 	}
 
-	private Address _setCountry(Address address) {
-		Country country = Mockito.mock(Country.class);
+	private Address _getAddressWithCountry() {
+		return new AddressWrapper(null) {
 
-		Mockito.doReturn(
-			country
-		).when(
-			address
-		).getCountry();
+			@Override
+			public Country getCountry() {
+				return new CountryWrapper(null) {
 
-		Mockito.doReturn(
-			RandomTestUtil.randomLong()
-		).when(
-			country
-		).getCountryId();
+					@Override
+					public long getCountryId() {
+						return RandomTestUtil.randomLong();
+					}
 
-		Mockito.doReturn(
-			_COUNTRY_NAME
-		).when(
-			country
-		).getName();
+					@Override
+					public String getName() {
+						return _COUNTRY_NAME;
+					}
 
-		Mockito.doReturn(
-			_COUNTRY_NAME_LOCALIZED
-		).when(
-			country
-		).getName(
-			Mockito.any(Locale.class)
-		);
+					@Override
+					public String getName(Locale locale) {
+						return _COUNTRY_NAME_LOCALIZED;
+					}
 
-		return address;
+				};
+			}
+
+		};
 	}
 
 	private static final String _COUNTRY_NAME = RandomTestUtil.randomString();
@@ -171,7 +172,5 @@ public class AddressUtilTest {
 		RandomTestUtil.randomString();
 
 	private static final String _REGION_NAME = RandomTestUtil.randomString();
-
-	private Address _address;
 
 }

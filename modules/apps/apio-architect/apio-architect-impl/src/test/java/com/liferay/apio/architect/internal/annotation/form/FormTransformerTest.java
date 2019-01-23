@@ -55,8 +55,8 @@ public class FormTransformerTest {
 				put("numberField1", "10");
 				put("numberField2", "20");
 				put("relativeUrl1", "/first");
-				put("relativeUrl2", "/second");
 				put("stringField1", "string1");
+				put("stringFieldOptional", "stringOptional");
 			}
 		};
 
@@ -111,7 +111,13 @@ public class FormTransformerTest {
 
 	@Test
 	public void testNotKeyInBodyShouldReturnNull() {
-		assertThat(_dummy.getStringField2(), is(nullValue()));
+		assertThat(_dummy.getRelativeUrl2(), is(nullValue()));
+	}
+
+	@Test
+	public void testOptionalFields() {
+		assertThat(
+			_dummy.getStringFieldOptional(), is(Optional.of("stringOptional")));
 	}
 
 	@Test
@@ -120,7 +126,6 @@ public class FormTransformerTest {
 			_dummy.getApplicationRelativeUrl(),
 			is("applicationRelativeUrlValue"));
 		assertThat(_dummy.getRelativeUrl1(), is("/first"));
-		assertThat(_dummy.getRelativeUrl2(), is("/second"));
 	}
 
 	private static Dummy _dummy;

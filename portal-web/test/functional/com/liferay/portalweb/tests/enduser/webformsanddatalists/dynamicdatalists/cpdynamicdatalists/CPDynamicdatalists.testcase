@@ -661,6 +661,7 @@ definition {
 	@priority = "5"
 	test AddListAndRecordWithToDoPredefinedDataDefinition {
 		property portal.acceptance = "true";
+		property test.name.skip.portal.instance = "CPDynamicdatalists#AddListAndRecordWithToDoPredefinedDataDefinition";
 
 		Navigator.openURL();
 
@@ -1752,7 +1753,7 @@ definition {
 
 		DDLRecord.populateFieldBoolean(
 			ddlRecordFieldData = "Yes",
-			fieldFieldLabel = "Boolean asterisk Required",
+			fieldFieldLabel = "Boolean Required",
 			fieldName = "Boolean"
 		);
 

@@ -11,7 +11,9 @@ describe(
 			'should render',
 			() => {
 				const {asFragment} = render(
-					<ClayToggle />
+					<ClayToggle
+						onChange={jest.fn()}
+					/>
 				);
 
 				expect(asFragment()).toMatchSnapshot();

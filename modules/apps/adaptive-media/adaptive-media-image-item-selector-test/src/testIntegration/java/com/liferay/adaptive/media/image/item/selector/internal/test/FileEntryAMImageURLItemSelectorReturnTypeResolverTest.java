@@ -44,6 +44,8 @@ import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -595,6 +597,8 @@ public class FileEntryAMImageURLItemSelectorReturnTypeResolverTest {
 
 		String srcSource = sourceJSONObject.getString("src");
 
+		Matcher matcher = _pattern.matcher(srcSource);
+
 		StringBundler sb = new StringBundler(13);
 
 		sb.append("/o/adaptive-media/image/");
@@ -611,7 +615,8 @@ public class FileEntryAMImageURLItemSelectorReturnTypeResolverTest {
 		sb.append(title);
 		sb.append(" 2x");
 
-		Assert.assertEquals(sb.toString(), srcSource);
+		Assert.assertEquals(
+			sb.toString(), matcher.replaceAll(StringPool.BLANK));
 	}
 
 	private void _assertSrcSource(
@@ -620,10 +625,12 @@ public class FileEntryAMImageURLItemSelectorReturnTypeResolverTest {
 
 		String srcSource = sourceJSONObject.getString("src");
 
+		Matcher matcher = _pattern.matcher(srcSource);
+
 		Assert.assertEquals(
 			"/o/adaptive-media/image/" + fileEntryId + "/" +
 				configurationEntryUuid + "/" + title,
-			srcSource);
+			matcher.replaceFirst(StringPool.BLANK));
 	}
 
 	private byte[] _getImageBytes() throws Exception {
@@ -631,6 +638,8 @@ public class FileEntryAMImageURLItemSelectorReturnTypeResolverTest {
 			FileEntryAMImageURLItemSelectorReturnTypeResolverTest.class,
 			"image.jpg");
 	}
+
+	private static final Pattern _pattern = Pattern.compile("\\?t=\\d+");
 
 	@Inject
 	private AMImageConfigurationHelper _amImageConfigurationHelper;

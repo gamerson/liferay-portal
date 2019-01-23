@@ -127,11 +127,10 @@ public class BasePersistenceImpl<T extends BaseModel<T>>
 		if (results.isEmpty()) {
 			return 0;
 		}
-		else {
-			Long firstResult = results.get(0);
 
-			return firstResult.longValue();
-		}
+		Long firstResult = results.get(0);
+
+		return firstResult.longValue();
 	}
 
 	@Override
@@ -683,8 +682,11 @@ public class BasePersistenceImpl<T extends BaseModel<T>>
 		}
 
 		if (type == Types.CLOB) {
-			fieldName = CAST_CLOB_TEXT_OPEN.concat(fieldName).concat(
-				StringPool.CLOSE_PARENTHESIS);
+			fieldName = CAST_CLOB_TEXT_OPEN.concat(
+				fieldName
+			).concat(
+				StringPool.CLOSE_PARENTHESIS
+			);
 		}
 
 		return fieldName;

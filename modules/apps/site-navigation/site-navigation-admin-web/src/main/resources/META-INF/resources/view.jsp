@@ -40,8 +40,6 @@ String displayStyle = siteNavigationAdminDisplayContext.getDisplayStyle();
 </portlet:actionURL>
 
 <aui:form action="<%= deleteSitaNavigationMenuURL %>" cssClass="container-fluid-1280" name="fm">
-	<liferay-ui:error exception="<%= RequiredPrimarySiteNavigationMenuException.class %>" message="the-site-must-have-a-navigation-menu-marked-as-primary-navigation" />
-
 	<liferay-ui:search-container
 		id="siteNavigationMenus"
 		searchContainer="<%= siteNavigationAdminDisplayContext.getSearchContainer() %>"

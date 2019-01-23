@@ -154,21 +154,20 @@ public class FragmentEntryLinkDisplayContext {
 
 			return layout.getName(themeDisplay.getLocale());
 		}
-		else {
-			LayoutPageTemplateEntry layoutPageTemplateEntry =
-				LayoutPageTemplateEntryLocalServiceUtil.
-					getLayoutPageTemplateEntry(fragmentEntryLink.getClassPK());
 
-			return layoutPageTemplateEntry.getName();
-		}
+		LayoutPageTemplateEntry layoutPageTemplateEntry =
+			LayoutPageTemplateEntryLocalServiceUtil.getLayoutPageTemplateEntry(
+				fragmentEntryLink.getClassPK());
+
+		return layoutPageTemplateEntry.getName();
 	}
 
 	public String getFragmentEntryLinkTypeLabel(
 			FragmentEntryLink fragmentEntryLink)
 		throws PortalException {
 
-		if (fragmentEntryLink.getClassNameId() ==
-				PortalUtil.getClassNameId(Layout.class)) {
+		if (fragmentEntryLink.getClassNameId() == PortalUtil.getClassNameId(
+				Layout.class)) {
 
 			return "page";
 		}

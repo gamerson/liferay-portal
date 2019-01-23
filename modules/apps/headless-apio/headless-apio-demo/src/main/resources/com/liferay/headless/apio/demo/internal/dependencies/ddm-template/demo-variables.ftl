@@ -8,8 +8,20 @@
 		<td>$contentSpaceId.getData()</td>
 	</tr>
 	<tr>
+		<td>documentId</td>
+		<td>$documentId.getData()</td>
+	</tr>
+	<tr>
+		<td>folderId</td>
+		<td>$folderId.getData()</td>
+	</tr>
+	<tr>
 		<td>formId</td>
 		<td>$formId.getData()</td>
+	</tr>
+	<tr>
+		<td>organizationId</td>
+		<td>$organizationId.getData()</td>
 	</tr>
 	<tr>
 		<td>roleId</td>
@@ -30,5 +42,5 @@
 </table>
 
 <p>
-	<a href="$postmanEnvironmentPropertiesDocument.getData()"> $languageUtil.format($locale, "download-x", "Download Environment Properties", false) </a>
+	<a href="$postmanEnvironmentPropertiesDocument.getData()"> $languageUtil.format($locale, "download-x", "Environment Properties", false) </a>
 </p>

@@ -61,7 +61,8 @@ DecimalFormat decimalFormat = portletConfigurationCSSPortletDisplayContext.getDe
 
 		<soy:component-renderer
 			context="<%= context %>"
-			module='<%= npmResolvedPackageName + "/js/ColorPickerInput.es" %>'
+			module="js/ColorPickerInput.es"
+			servletContext="<%= application %>"
 			templateNamespace="com.liferay.portlet.configuration.css.web.ColorPickerInput.render"
 		/>
 

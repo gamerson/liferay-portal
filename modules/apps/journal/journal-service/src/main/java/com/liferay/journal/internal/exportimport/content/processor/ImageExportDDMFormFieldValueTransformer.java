@@ -14,6 +14,7 @@
 
 package com.liferay.journal.internal.exportimport.content.processor;
 
+import com.liferay.document.library.kernel.exception.NoSuchFileEntryException;
 import com.liferay.document.library.kernel.service.DLAppService;
 import com.liferay.dynamic.data.mapping.model.DDMFormFieldType;
 import com.liferay.dynamic.data.mapping.model.Value;
@@ -24,6 +25,8 @@ import com.liferay.exportimport.kernel.lar.StagedModelDataHandlerUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.StagedModel;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -73,15 +76,22 @@ public class ImageExportDDMFormFieldValueTransformer
 				continue;
 			}
 
-			FileEntry fileEntry = _dlAppService.getFileEntryByUuidAndGroupId(
-				uuid, groupId);
+			try {
+				FileEntry fileEntry =
+					_dlAppService.getFileEntryByUuidAndGroupId(uuid, groupId);
 
-			if (_exportReferencedContent) {
-				StagedModelDataHandlerUtil.exportReferenceStagedModel(
-					_portletDataContext, _stagedModel, fileEntry,
-					_portletDataContext.REFERENCE_TYPE_DEPENDENCY);
-			}
-			else {
+				if (fileEntry.isInTrash()) {
+					continue;
+				}
+
+				if (_exportReferencedContent) {
+					StagedModelDataHandlerUtil.exportReferenceStagedModel(
+						_portletDataContext, _stagedModel, fileEntry,
+						_portletDataContext.REFERENCE_TYPE_DEPENDENCY);
+
+					return;
+				}
+
 				Element entityElement =
 					_portletDataContext.getExportDataElement(_stagedModel);
 
@@ -89,8 +99,16 @@ public class ImageExportDDMFormFieldValueTransformer
 					_stagedModel, entityElement, fileEntry,
 					PortletDataContext.REFERENCE_TYPE_DEPENDENCY, true);
 			}
+			catch (NoSuchFileEntryException nsfee) {
+				if (_log.isDebugEnabled()) {
+					_log.debug(nsfee, nsfee);
+				}
+			}
 		}
 	}
+
+	private static final Log _log = LogFactoryUtil.getLog(
+		ImageExportDDMFormFieldValueTransformer.class);
 
 	private final DLAppService _dlAppService;
 	private final boolean _exportReferencedContent;

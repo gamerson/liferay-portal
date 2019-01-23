@@ -63,6 +63,7 @@ import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.service.test.ServiceTestUtil;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
+import com.liferay.portal.test.rule.PermissionCheckerTestRule;
 
 import java.io.InputStream;
 
@@ -79,6 +80,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -93,7 +95,9 @@ public class JournalArticleServiceTest {
 	@ClassRule
 	@Rule
 	public static final AggregateTestRule aggregateTestRule =
-		new LiferayIntegrationTestRule();
+		new AggregateTestRule(
+			new LiferayIntegrationTestRule(),
+			PermissionCheckerTestRule.INSTANCE);
 
 	@BeforeClass
 	public static void setUpClass() {
@@ -183,6 +187,7 @@ public class JournalArticleServiceTest {
 			"test-journal-content-html-required-field.xml", requiredFields);
 	}
 
+	@Ignore
 	@Test(expected = StructureDefinitionException.class)
 	public void testCheckArticleWithInvalidStructure() throws Exception {
 		DDMStructure ddmStructure = DDMStructureTestUtil.addStructure(
@@ -204,6 +209,7 @@ public class JournalArticleServiceTest {
 			ddmStructure);
 	}
 
+	@Ignore
 	@Test
 	public void testCheckArticleWithValidStructure() throws Exception {
 		Group group = GroupTestUtil.addGroup();
@@ -662,9 +668,8 @@ public class JournalArticleServiceTest {
 		if (articles.isEmpty()) {
 			return addArticles(count, _keyword);
 		}
-		else {
-			createArticlesWithKeyword(count);
-		}
+
+		createArticlesWithKeyword(count);
 
 		return null;
 	}

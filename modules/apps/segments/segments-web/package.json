@@ -12,12 +12,24 @@
 				"parser": "babel-eslint",
 				"parserOptions": {
 					"ecmaVersion": 7
+				},
+				"plugins": [
+					"./node_modules/eslint-plugin-react"
+				],
+				"rules": {
+					"react/jsx-handler-names": [
+						2,
+						{
+							"eventHandlerPrefix": "_handle"
+						}
+					]
 				}
 			}
 		}
 	},
 	"dependencies": {
 		"classnames": "^2.2.6",
+		"date-fns": "^1.30.1",
 		"formik": "^1.4.1",
 		"lodash.debounce": "^4.0.8",
 		"lodash.uniqueid": "^4.0.1",
@@ -33,7 +45,7 @@
 		"babel-core": "^6.26.3",
 		"babel-eslint": "^10.0.1",
 		"babel-loader": "^7.0.0",
-		"babel-plugin-module-resolver": "^3.1.1",
+		"babel-plugin-module-resolver": "^3.1.2",
 		"babel-plugin-transform-class-properties": "^6.24.1",
 		"babel-plugin-transform-object-rest-spread": "^6.26.0",
 		"babel-preset-env": "^1.7.0",
@@ -78,10 +90,11 @@
 		"build": "babel --source-maps -d classes/META-INF/resources src/main/resources/META-INF/resources && liferay-npm-bundler",
 		"build:libs": "webpack",
 		"checkFormat": "npm run csf",
-		"csf": "csf src/**/*.{es.js,scss}",
+		"csf": "csf {src,test}/**/*.es.js src/**/*.scss",
 		"format": "npm run csf -- -i",
-		"start": "webpack-dev-server --config webpack.dev.config.js",
-		"test": "jest"
+		"start": "webpack-dev-server --config ./webpack.dev.config.js",
+		"test": "env TZ=utc jest",
+		"test:watch": "jest --watch"
 	},
 	"version": "1.0.0"
 }

@@ -14,6 +14,7 @@
 
 package com.liferay.arquillian.extension.junit.bridge.remote.processor;
 
+import com.liferay.arquillian.extension.junit.bridge.protocol.jmx.JMXTestRunner;
 import com.liferay.arquillian.extension.junit.bridge.remote.activator.ArquillianBundleActivator;
 import com.liferay.petra.io.unsync.UnsyncByteArrayOutputStream;
 import com.liferay.petra.string.CharPool;
@@ -39,7 +40,6 @@ import org.jboss.arquillian.container.test.spi.client.deployment.AuxiliaryArchiv
 import org.jboss.arquillian.core.api.Instance;
 import org.jboss.arquillian.core.api.annotation.Inject;
 import org.jboss.arquillian.core.spi.ServiceLoader;
-import org.jboss.arquillian.protocol.jmx.JMXTestRunner;
 import org.jboss.arquillian.test.spi.TestClass;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.ArchivePath;
@@ -269,9 +269,10 @@ public class OSGiAllInProcessor implements ApplicationArchiveProcessor {
 	}
 
 	private static final String[] _OSGI_IMPORTS_PACKAGES = {
-		"org.osgi.framework", "javax.management", "javax.management.*",
-		"javax.naming", "javax.naming.*", "org.osgi.service.packageadmin",
-		"org.osgi.service.startlevel", "org.osgi.util.tracker"
+		"org.osgi.framework", "org.osgi.framework.wiring", "javax.management",
+		"javax.management.*", "javax.naming", "javax.naming.*",
+		"org.osgi.service.packageadmin", "org.osgi.service.startlevel",
+		"org.osgi.util.tracker"
 	};
 
 	private static final Attributes.Name _bundleActivatorName =

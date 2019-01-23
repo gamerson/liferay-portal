@@ -18,6 +18,8 @@ class EditTags extends Component {
 	 */
 	attached() {
 		this._getCommonTags();
+
+		this._bulkStatusComponent =	Liferay.component(this.portletNamespace + 'BulkStatus');
 	}
 
 	/**
@@ -70,13 +72,12 @@ class EditTags extends Component {
 			)
 			.then(
 				response => {
-					callback(response)
+					callback(response);
 				}
 			)
 			.catch(
 				(xhr) => {
 					this.close();
-					//TODO open toast error
 				}
 			);
 	}
@@ -92,10 +93,8 @@ class EditTags extends Component {
 		this.loading = true;
 
 		let bodyData = {
-			"bulkAssetEntryCommonTagsActionModel": {
-				repositoryId: this.repositoryId,
-				selection: this.fileEntries
-			}
+			repositoryId: this.repositoryId,
+			selection: this._getSelection()
 		};
 
 		this._fetchTagsRequest(
@@ -106,10 +105,14 @@ class EditTags extends Component {
 					this.loading = false;
 					this.commonTags = response.tagNames;
 					this.description = response.description;
-					this.multiple = this.fileEntries.length > 1;
+					this.multiple = (this.fileEntries.length > 1) || this.selectAll;
 				}
 			}
 		);
+	}
+
+	_getSelection() {
+		return this.selectAll ? ['all:' + this.folderId] : this.fileEntries;
 	}
 
 	/**
@@ -148,13 +151,11 @@ class EditTags extends Component {
 		);
 
 		let bodyData = {
-			"bulkAssetEntryUpdateTagsActionModel": {
-				append: this.append,
-				repositoryId: this.repositoryId,
-				selection: this.fileEntries,
-				toAddTagNames: addedTags,
-				toRemoveTagNames: removedTags
-			}
+			append: this.append,
+			repositoryId: this.repositoryId,
+			selection: this._getSelection(),
+			toAddTagNames: addedTags,
+			toRemoveTagNames: removedTags
 		};
 
 		let instance = this;
@@ -164,9 +165,12 @@ class EditTags extends Component {
 			bodyData,
 			response => {
 				instance.close();
+
+				if (instance._bulkStatusComponent) {
+					instance._bulkStatusComponent.startWatch();
+				}
 			}
 		);
-
 	}
 
 	/**
@@ -185,8 +189,8 @@ class EditTags extends Component {
 			commonTags.forEach(
 				tag => {
 					let tagObj = {
-						"label": tag,
-						"value": tag
+						'label': tag,
+						'value': tag
 					};
 
 					commonTagsObjList.push(tagObj);
@@ -205,15 +209,23 @@ class EditTags extends Component {
  * @type {!Object}
  */
 EditTags.STATE = {
+
 	/**
 	 * Tags that want to be edited.
 	 *
+	 * @instance
+	 * @memberof EditTags
+	 * @review
 	 * @type {List<String>}
 	 */
 	commonTags: Config.array().setter('_setCommonTags').value([]),
 
 	/**
 	 * Description
+	 *
+	 * @instance
+	 * @memberof EditTags
+	 * @review
 	 * @type {String}
 	 */
 	description: Config.string(),
@@ -221,14 +233,30 @@ EditTags.STATE = {
 	/**
 	 * List of selected file entries.
 	 *
+	 * @instance
+	 * @memberof EditTags
+	 * @review
 	 * @type {List<String>}
 	 */
 	fileEntries: Config.array().required(),
 
 	/**
+	 * Folder Id
+	 *
+	 * @instance
+	 * @memberof EditTags
+	 * @review
+	 * @type {String}
+	 */
+	folderId: Config.string().required(),
+
+	/**
 	 * Flag that indicate if loading icon must
 	 * be shown.
 	 *
+	 * @instance
+	 * @memberof EditTags
+	 * @review
 	 * @type {Boolean}
 	 */
 	loading: Config.bool().value(false).internal(),
@@ -237,20 +265,50 @@ EditTags.STATE = {
 	 * Flag that indicate if multiple
 	 * file entries has been selected.
 	 *
+	 * @instance
+	 * @memberof EditTags
+	 * @review
 	 * @type {Boolean}
 	 */
 	multiple: Config.bool().value(false),
 
 	/**
+	 * Portlet's namespace
+	 *
+	 * @instance
+	 * @memberof EditTags
+	 * @review
+	 * @type {string}
+	 */
+	portletNamespace: Config.string().required(),
+
+	/**
 	 * RepositoryId
+	 *
+	 * @instance
+	 * @memberof EditTags
+	 * @review
 	 * @type {Number}
 	 */
 	repositoryId: Config.number().required(),
 
 	/**
-	 * Path to images.
+	 * Flag that indicate if "select all" checkbox
+	 * is checked.
+	 *
 	 * @instance
-	 * @memberof ManageCollaborators
+	 * @memberof EditTags
+	 * @review
+	 * @type {Boolean}
+	 */
+	selectAll: Config.bool(),
+
+	/**
+	 * Path to images.
+	 *
+	 * @instance
+	 * @memberof EditTags
+	 * @review
 	 * @type {String}
 	 */
 	spritemap: Config.string().required(),
@@ -259,6 +317,9 @@ EditTags.STATE = {
 	 * Url to backend service that provides
 	 * the common tags info.
 	 *
+	 * @instance
+	 * @memberof EditTags
+	 * @review
 	 * @type {String}
 	 */
 	urlTags: Config.string().required(),
@@ -267,10 +328,13 @@ EditTags.STATE = {
 	 * Url to backend service that updates
 	 * the tags.
 	 *
+	 * @instance
+	 * @memberof EditTags
+	 * @review
 	 * @type {String}
 	 */
 	urlUpdateTags: Config.string().required()
-}
+};
 
 // Register component
 

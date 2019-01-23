@@ -18,7 +18,9 @@ import com.liferay.arquillian.extension.junit.bridge.container.remote.LiferayRem
 import com.liferay.arquillian.extension.junit.bridge.deployment.BndDeploymentScenarioGenerator;
 import com.liferay.arquillian.extension.junit.bridge.deployment.JUnitBridgeAuxiliaryArchiveAppender;
 import com.liferay.arquillian.extension.junit.bridge.deployment.NoOpArchiveApplicationProcessor;
+import com.liferay.arquillian.extension.junit.bridge.observer.ConfigurationRegistrar;
 import com.liferay.arquillian.extension.junit.bridge.observer.JUnitBridgeObserver;
+import com.liferay.arquillian.extension.junit.bridge.protocol.osgi.JMXOSGiProtocol;
 import com.liferay.arquillian.extension.junit.bridge.remote.processor.OSGiAllInProcessor;
 
 import java.net.URL;
@@ -30,6 +32,7 @@ import org.jboss.arquillian.container.test.spi.RemoteLoadableExtension;
 import org.jboss.arquillian.container.test.spi.client.deployment.ApplicationArchiveProcessor;
 import org.jboss.arquillian.container.test.spi.client.deployment.AuxiliaryArchiveAppender;
 import org.jboss.arquillian.container.test.spi.client.deployment.DeploymentScenarioGenerator;
+import org.jboss.arquillian.container.test.spi.client.protocol.Protocol;
 import org.jboss.arquillian.junit.container.JUnitDeploymentAppender;
 
 /**
@@ -48,6 +51,7 @@ public class LiferayArquillianJUnitBridgeExtension
 				ApplicationArchiveProcessor.class,
 				OSGiApplicationArchiveProcessor.class,
 				NoOpArchiveApplicationProcessor.class);
+			extensionBuilder.observer(ConfigurationRegistrar.class);
 			extensionBuilder.observer(DeploymentObserver.class);
 			extensionBuilder.override(
 				AuxiliaryArchiveAppender.class, JUnitDeploymentAppender.class,
@@ -60,6 +64,7 @@ public class LiferayArquillianJUnitBridgeExtension
 			extensionBuilder.service(
 				DeploymentScenarioGenerator.class,
 				BndDeploymentScenarioGenerator.class);
+			extensionBuilder.service(Protocol.class, JMXOSGiProtocol.class);
 		}
 		else {
 			extensionBuilder.observer(JUnitBridgeObserver.class);

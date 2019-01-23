@@ -1,6 +1,6 @@
 .criteria-builder-root {
 	display: flex;
-	height: 800px;
+	height: 100%;
 
 	.criteria-builder-section-main {
 		flex: 1;
@@ -18,10 +18,15 @@
 	}
 
 	.criteria-builder-toolbar {
+		align-items: center;
 		display: flex;
-		justify-content: flex-end;
+		justify-content: space-between;
 		margin-bottom: 16px;
 		width: 100%;
+
+		.criteria-model-label {
+			font-weight: 600;
+		}
 	}
 
 	.drag-icon {

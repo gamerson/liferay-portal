@@ -14,13 +14,54 @@
 
 package com.liferay.frontend.js.loader.modules.extender.npm;
 
+import com.liferay.portal.kernel.portlet.PortletBag;
+import com.liferay.portal.kernel.portlet.PortletBagPool;
+import com.liferay.portal.kernel.portlet.PortletIdCodec;
+import com.liferay.portal.kernel.util.ParamUtil;
+import com.liferay.portal.kernel.util.Validator;
+
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author Iván Zaera Avellón
  */
 public class NPMResolvedPackageNameUtil {
 
+	/**
+	 * Get the NPM resolved package name associated to the current portlet.
+	 *
+	 * The current portlet is inferred from the portletResource parameter or
+	 * the {@link ServletContext} associated to the given request.
+	 * @param request
+	 * @return
+	 * @review
+	 */
+	public static String get(HttpServletRequest request) {
+		ServletContext servletContext = request.getServletContext();
+
+		String portletResource = ParamUtil.getString(
+			request, "portletResource");
+
+		if (Validator.isNotNull(portletResource)) {
+			PortletBag portletBag = PortletBagPool.get(
+				PortletIdCodec.decodePortletName(portletResource));
+
+			if (portletBag != null) {
+				servletContext = portletBag.getServletContext();
+			}
+		}
+
+		return get(servletContext);
+	}
+
+	/**
+	 * Get the NPM resolved package name associated to the bundle containing the
+	 * given servlet context.
+	 * @param servletContext
+	 * @return
+	 * @review
+	 */
 	public static String get(ServletContext servletContext) {
 		return (String)servletContext.getAttribute(
 			NPMResolvedPackageNameUtil.class.getName());
@@ -33,6 +74,10 @@ public class NPMResolvedPackageNameUtil {
 			servletContext.setAttribute(
 				NPMResolvedPackageNameUtil.class.getName(),
 				npmResolvedPackageName);
+		}
+		else {
+			servletContext.removeAttribute(
+				NPMResolvedPackageNameUtil.class.getName());
 		}
 	}
 

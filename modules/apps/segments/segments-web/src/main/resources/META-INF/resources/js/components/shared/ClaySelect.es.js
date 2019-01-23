@@ -4,6 +4,7 @@ import getCN from 'classnames';
 
 class ClaySelect extends Component {
 	static propTypes = {
+		className: PropTypes.string,
 		onChange: PropTypes.func.isRequired,
 		options: PropTypes.arrayOf(
 			PropTypes.shape(

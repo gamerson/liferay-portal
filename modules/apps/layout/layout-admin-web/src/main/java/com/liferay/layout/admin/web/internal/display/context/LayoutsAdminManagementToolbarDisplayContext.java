@@ -26,9 +26,12 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.Layout;
+import com.liferay.portal.kernel.model.LayoutSetPrototype;
 import com.liferay.portal.kernel.portlet.LiferayPortletRequest;
 import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
+import com.liferay.portal.kernel.service.ClassNameLocalServiceUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.WebKeys;
@@ -241,11 +244,32 @@ public class LayoutsAdminManagementToolbarDisplayContext
 				layout.getName(themeDisplay.getLocale()));
 		}
 
+		if (_isSiteTemplate()) {
+			return LanguageUtil.get(request, "add-site-template-page");
+		}
+
 		if (privateLayout) {
 			return LanguageUtil.get(request, "private-page");
 		}
 
 		return LanguageUtil.get(request, "public-page");
+	}
+
+	private boolean _isSiteTemplate() {
+		Group group = _layoutsAdminDisplayContext.getGroup();
+
+		if (group == null) {
+			return false;
+		}
+
+		long layoutSetPrototypeClassNameId =
+			ClassNameLocalServiceUtil.getClassNameId(LayoutSetPrototype.class);
+
+		if (layoutSetPrototypeClassNameId == group.getClassNameId()) {
+			return true;
+		}
+
+		return false;
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(

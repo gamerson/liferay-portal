@@ -64,6 +64,18 @@ definition {
 
 		User.firstLoginPG();
 
+		// LRQA-46018
+
+		ProductMenu.gotoPortlet(
+			category = "Configuration",
+			panel = "Control Panel",
+			portlet = "Search"
+		);
+
+		SearchAdministration.executeSearchActions(
+			actionsDescription = "Reindex all search indexes."
+		);
+
 		ProductMenu.gotoPortlet(
 			category = "Users",
 			panel = "Control Panel",
@@ -84,6 +96,7 @@ definition {
 	@priority = "4"
 	test ResetFieldsValueForImportedLDAPUser {
 		property apacheds.enabled = "true";
+		property custom.properties = "field.enable.com.liferay.portal.kernel.model.Contact.male=true";
 		property test.name.skip.portal.instance = "LDAP#ResetFieldsValueForImportedLDAPUser";
 
 		ProductMenu.gotoPortlet(
@@ -115,6 +128,18 @@ definition {
 		Portlet.shutdownServer();
 
 		Portlet.startServer(deleteLiferayHome = "false");
+
+		// LRQA-46018
+
+		ProductMenu.gotoPortlet(
+			category = "Configuration",
+			panel = "Control Panel",
+			portlet = "Search"
+		);
+
+		SearchAdministration.executeSearchActions(
+			actionsDescription = "Reindex all search indexes."
+		);
 
 		ProductMenu.gotoPortlet(
 			category = "Users",

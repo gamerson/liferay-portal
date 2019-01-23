@@ -523,7 +523,11 @@ public class DefaultPortalLDAP implements PortalLDAP {
 			return name;
 		}
 
-		return name.concat(StringPool.COMMA).concat(baseDN);
+		return name.concat(
+			StringPool.COMMA
+		).concat(
+			baseDN
+		);
 	}
 
 	@Override
@@ -682,6 +686,8 @@ public class DefaultPortalLDAP implements PortalLDAP {
 		PropertiesUtil.merge(userMappings, contactMappings);
 
 		Collection<Object> values = userMappings.values();
+
+		values.removeIf(object -> Validator.isNull(object));
 
 		String[] mappedUserAttributeIds = ArrayUtil.toStringArray(
 			values.toArray(new Object[userMappings.size()]));

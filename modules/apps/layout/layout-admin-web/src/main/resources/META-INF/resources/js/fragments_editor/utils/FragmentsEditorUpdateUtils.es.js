@@ -1,10 +1,11 @@
 import {
+	CLEAR_ACTIVE_ITEM,
 	CLEAR_DROP_TARGET,
 	CLEAR_HOVERED_ITEM,
 	UPDATE_LAST_SAVE_DATE,
 	UPDATE_SAVING_CHANGES_STATUS
 } from '../actions/actions.es';
-import {DROP_TARGET_ITEM_TYPES} from '../reducers/placeholders.es';
+import {FRAGMENTS_EDITOR_ITEM_TYPES} from '../utils/constants';
 
 /**
  * Inserts an element in the given position of a given array and returns
@@ -24,23 +25,25 @@ function add(array, element, position) {
 
 /**
  * @param {string} itemId
- * @param {DROP_TARGET_ITEM_TYPES} itemType
+ * @param {FRAGMENTS_EDITOR_ITEM_TYPES} itemType
  * @review
  */
 function focusItem(itemId, itemType) {
-	let attr = '';
+	if (itemId && itemType) {
+		let attr = '';
 
-	if (itemType === DROP_TARGET_ITEM_TYPES.section) {
-		attr = 'data-layout-section-id';
-	}
-	else if (itemType === DROP_TARGET_ITEM_TYPES.fragment) {
-		attr = 'data-fragment-entry-link-id';
-	}
+		if (itemType === FRAGMENTS_EDITOR_ITEM_TYPES.section) {
+			attr = 'data-layout-section-id';
+		}
+		else if (itemType === FRAGMENTS_EDITOR_ITEM_TYPES.fragment) {
+			attr = 'data-fragment-entry-link-id';
+		}
 
-	const item = document.querySelector(`[${attr}='${itemId}']`);
+		const item = document.querySelector(`[${attr}='${itemId}']`);
 
-	if (item) {
-		item.focus();
+		if (item) {
+			item.focus();
+		}
 	}
 }
 
@@ -100,6 +103,41 @@ function remove(array, position) {
 }
 
 /**
+ * Dispatches necessary actions to remove an item
+ * @param {!Object} store Store instance that dispatches the actions
+ * @param {!string} removeItemAction
+ * @param {!Object} removeItemPayload Data that is passed to the reducer
+ * @review
+ */
+function removeItem(store, removeItemAction, removeItemPayload) {
+	store
+		.dispatchAction(
+			UPDATE_SAVING_CHANGES_STATUS,
+			{
+				savingChanges: true
+			}
+		)
+		.dispatchAction(
+			removeItemAction,
+			removeItemPayload
+		)
+		.dispatchAction(
+			UPDATE_LAST_SAVE_DATE,
+			{
+				lastSaveDate: new Date()
+			}
+		)
+		.dispatchAction(
+			UPDATE_SAVING_CHANGES_STATUS,
+			{
+				savingChanges: false
+			}
+		)
+		.dispatchAction(CLEAR_HOVERED_ITEM)
+		.dispatchAction(CLEAR_ACTIVE_ITEM);
+}
+
+/**
  * Recursively inserts a value inside an object creating
  * a copy of the original target. It the object (or any in the path),
  * it's an Array, it will generate new Arrays, preserving the same structure.
@@ -131,26 +169,34 @@ function setIn(object, keyPath, value) {
  */
 function updateIn(object, keyPath, updater, defaultValue) {
 	const [nextKey] = keyPath;
-	const target = object instanceof Array ?
-		[...object] :
-		Object.assign({}, object);
+	let target = object;
 
 	if (keyPath.length > 1) {
+		target = target instanceof Array ?
+			[...target] :
+			Object.assign({}, target);
+
 		target[nextKey] = updateIn(
-			object[nextKey] || {},
+			target[nextKey] || {},
 			keyPath.slice(1),
 			updater,
 			defaultValue
 		);
 	}
 	else {
-		let nextValue = target[nextKey];
+		const nextValue = typeof target[nextKey] === 'undefined' ?
+			defaultValue :
+			target[nextKey];
 
-		if (typeof nextValue === 'undefined') {
-			nextValue = defaultValue;
+		const updatedNextValue = updater(nextValue);
+
+		if (updatedNextValue !== target[nextKey]) {
+			target = target instanceof Array ?
+				[...target] :
+				Object.assign({}, target);
+
+			target[nextKey] = updatedNextValue;
 		}
-
-		target[nextKey] = updater(nextValue);
 	}
 
 	return target;
@@ -207,6 +253,7 @@ export {
 	focusItem,
 	moveItem,
 	remove,
+	removeItem,
 	setIn,
 	updateIn,
 	updateLayoutData

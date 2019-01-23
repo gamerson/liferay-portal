@@ -45,23 +45,17 @@ public abstract class BaseUpgradePortletId extends UpgradeProcess {
 	}
 
 	protected String getNewTypeSettings(
-		String typeSettings, String oldRootPortletId, String newRootPortletId) {
+		String typeSettings, String oldPropertyId, String newPropertyId) {
 
 		UnicodeProperties typeSettingsProperties = new UnicodeProperties(true);
 
 		typeSettingsProperties.fastLoad(typeSettings);
 
-		String oldStagingPortletId = _getStagedPortletId(oldRootPortletId);
+		String value = typeSettingsProperties.remove(oldPropertyId);
 
-		if (!typeSettingsProperties.containsKey(oldStagingPortletId)) {
-			return typeSettings;
+		if (value != null) {
+			typeSettingsProperties.setProperty(newPropertyId, value);
 		}
-
-		String newStagingPortletId = _getStagedPortletId(newRootPortletId);
-
-		String value = typeSettingsProperties.remove(oldStagingPortletId);
-
-		typeSettingsProperties.setProperty(newStagingPortletId, value);
 
 		return typeSettingsProperties.toString();
 	}
@@ -139,7 +133,7 @@ public abstract class BaseUpgradePortletId extends UpgradeProcess {
 	}
 
 	protected String getTypeSettingsCriteria(String portletId) {
-		StringBundler sb = new StringBundler(23);
+		StringBundler sb = new StringBundler(21);
 
 		sb.append("typeSettings like '%=");
 		sb.append(portletId);
@@ -161,9 +155,7 @@ public abstract class BaseUpgradePortletId extends UpgradeProcess {
 		sb.append(portletId);
 		sb.append("_USER_%' OR typeSettings like '%,");
 		sb.append(portletId);
-		sb.append("_USER_%' OR typeSettings like '%");
-		sb.append(_getStagedPortletId(portletId));
-		sb.append("=%'");
+		sb.append("_USER_%'");
 
 		return sb.toString();
 	}
@@ -172,6 +164,10 @@ public abstract class BaseUpgradePortletId extends UpgradeProcess {
 		return new String[0];
 	}
 
+	/**
+	 * @deprecated As of Mueller (7.2.x), with no direct replacement
+	 */
+	@Deprecated
 	protected void updateGroup(long groupId, String typeSettings)
 		throws Exception {
 
@@ -193,9 +189,12 @@ public abstract class BaseUpgradePortletId extends UpgradeProcess {
 	protected void updateGroup(String oldRootPortletId, String newRootPortletId)
 		throws Exception {
 
-		String sql1 =
-			"select groupId, typeSettings from Group_ where " +
-				getTypeSettingsCriteria(oldRootPortletId);
+		String oldStagedPortletId = _getStagedPortletId(oldRootPortletId);
+
+		String sql1 = StringBundler.concat(
+			"select groupId, typeSettings from Group_ where typeSettings like ",
+			"'%", oldStagedPortletId, "%'");
+
 		String sql2 = "update Group_ set typeSettings = ? where groupId = ?";
 
 		try (PreparedStatement ps1 = connection.prepareStatement(sql1);
@@ -210,7 +209,8 @@ public abstract class BaseUpgradePortletId extends UpgradeProcess {
 				String typeSettings = rs.getString("typeSettings");
 
 				String newTypeSettings = getNewTypeSettings(
-					typeSettings, oldRootPortletId, newRootPortletId);
+					typeSettings, oldStagedPortletId,
+					_getStagedPortletId(newRootPortletId));
 
 				ps2.setString(1, newTypeSettings);
 
@@ -566,7 +566,6 @@ public abstract class BaseUpgradePortletId extends UpgradeProcess {
 
 				String newPortletInstanceKey = PortletIdCodec.encode(portletId);
 
-				updateGroup(portletId, newPortletInstanceKey);
 				updateInstanceablePortletPreferences(
 					portletId, newPortletInstanceKey);
 				updateResourcePermission(

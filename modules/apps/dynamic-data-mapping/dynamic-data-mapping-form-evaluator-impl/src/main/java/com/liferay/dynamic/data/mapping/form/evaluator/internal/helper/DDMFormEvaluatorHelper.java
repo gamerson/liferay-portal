@@ -247,8 +247,7 @@ public class DDMFormEvaluatorHelper {
 
 		Map<String, String> nameVisibilityExpressionMap =
 			ddmFormFieldStream.filter(
-				field ->
-					Validator.isNotNull(field.getVisibilityExpression())
+				field -> Validator.isNotNull(field.getVisibilityExpression())
 			).collect(
 				Collectors.toMap(
 					field -> field.getName(),
@@ -303,13 +302,12 @@ public class DDMFormEvaluatorHelper {
 		if (changedProperties.containsKey(booleanPropertyName)) {
 			return MapUtil.getBoolean(changedProperties, booleanPropertyName);
 		}
-		else {
-			DDMFormField ddmFormField = _ddmFormFieldsMap.get(
-				ddmFormFieldContextKey.getName());
 
-			return GetterUtil.getBoolean(
-				ddmFormField.getProperty(booleanPropertyName), defaultValue);
-		}
+		DDMFormField ddmFormField = _ddmFormFieldsMap.get(
+			ddmFormFieldContextKey.getName());
+
+		return GetterUtil.getBoolean(
+			ddmFormField.getProperty(booleanPropertyName), defaultValue);
 	}
 
 	protected Map<DDMFormEvaluatorFieldContextKey, Map<String, Object>>

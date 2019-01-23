@@ -3,11 +3,17 @@ import {PropTypes} from 'prop-types';
 import ClayButton from '../shared/ClayButton.es';
 import ClayIcon from '../shared/ClayIcon.es';
 import ClaySelect from '../shared/ClaySelect.es';
-import {CONJUNCTIONS} from '../../utils/constants.es';
+import {CONJUNCTIONS, PROPERTY_TYPES} from '../../utils/constants.es';
 import {DragSource as dragSource, DropTarget as dropTarget} from 'react-dnd';
 import {DragTypes} from '../../utils/drag-types.es';
 import getCN from 'classnames';
-import {generateGroupId, sub} from '../../utils/utils.es';
+import {
+	dateToInternationalHuman,
+	generateGroupId,
+	getSupportedOperatorsFromType,
+	sub
+} from '../../utils/utils.es';
+import TypedInput from './TypedInput.es';
 
 const acceptedDragTypes = [
 	DragTypes.CRITERIA_ROW,
@@ -42,7 +48,8 @@ function drop(props, monitor) {
 		index: destIndex,
 		onChange,
 		onMove,
-		supportedOperators
+		supportedOperators,
+		supportedPropertyTypes
 	} = props;
 
 	const {
@@ -51,14 +58,28 @@ function drop(props, monitor) {
 		index: startIndex
 	} = monitor.getItem();
 
-	const {operatorName, propertyName, value = ''} = droppedCriterion;
+	const {
+		defaultValue,
+		operatorName,
+		propertyName,
+		type,
+		value
+	} = droppedCriterion;
+
+	const droppedCriterionValue = value || defaultValue;
+
+	const operators = getSupportedOperatorsFromType(
+		supportedOperators,
+		supportedPropertyTypes,
+		type
+	);
 
 	const newCriterion = {
 		operatorName: operatorName ?
 			operatorName :
-			supportedOperators[0].name,
+			operators[0].name,
 		propertyName,
-		value
+		value: droppedCriterionValue
 	};
 
 	const newGroup = {
@@ -128,9 +149,14 @@ class CriteriaRow extends Component {
 		modelLabel,
 		propertyLabel,
 		operatorLabel,
-		value
-	) =>
-		sub(
+		value,
+		type
+	) => {
+		const parsedValue = (type === PROPERTY_TYPES.DATE) ?
+			dateToInternationalHuman(value) :
+			value;
+
+		return sub(
 			Liferay.Language.get('x-with-property-x-x-x'),
 			[
 				<span key="model-name">
@@ -139,15 +165,16 @@ class CriteriaRow extends Component {
 				<b key="property">
 					{propertyLabel}
 				</b>,
-				<span key="operator">
+				<span className="operator" key="operator">
 					{operatorLabel}
 				</span>,
 				<b key="value">
-					{value}
+					{parsedValue}
 				</b>
 			],
 			false
 		);
+	}
 
 	/**
 	 * Gets the selected item object with a `name` and `label` property for a
@@ -155,7 +182,7 @@ class CriteriaRow extends Component {
 	 * idSelected for name and label.
 	 * @param {Array} list The list of objects to search through.
 	 * @param {string} idSelected The name to match in each object in the list.
-	 * @return {object} An object with a `name` and `label` property.
+	 * @return {object} An object with a `name`, `label` and `type` property.
 	 */
 	_getSelectedItem = (list, idSelected) => {
 		const selectedItem = list.find(item => item.name === idSelected);
@@ -164,7 +191,8 @@ class CriteriaRow extends Component {
 			selectedItem :
 			{
 				label: idSelected,
-				name: idSelected
+				name: idSelected,
+				type: PROPERTY_TYPES.STRING
 			};
 	}
 
@@ -194,6 +222,18 @@ class CriteriaRow extends Component {
 			}
 		);
 	};
+
+	_handleTypedInputChange = (value, type) => {
+		const {criterion, onChange} = this.props;
+
+		onChange(
+			{
+				...criterion,
+				type,
+				value
+			}
+		);
+	}
 
 	render() {
 		const {
@@ -227,12 +267,10 @@ class CriteriaRow extends Component {
 
 		const propertyType = selectedProperty ? selectedProperty.type : '';
 
-		const filteredSupportedOperators = supportedOperators.filter(
-			operator => {
-				const validOperators = supportedPropertyTypes[propertyType];
-
-				return validOperators && validOperators.includes(operator.name);
-			}
+		const filteredSupportedOperators = getSupportedOperatorsFromType(
+			supportedOperators,
+			supportedPropertyTypes,
+			propertyType
 		);
 
 		const classes = getCN(
@@ -285,10 +323,11 @@ class CriteriaRow extends Component {
 								selected={selectedOperator && selectedOperator.name}
 							/>
 
-							<input
-								className="criterion-input form-control"
-								onChange={this._handleInputChange('value')}
-								type="text"
+							<TypedInput
+								onChange={this._handleTypedInputChange}
+								options={selectedProperty.options}
+								selectEntity={selectedProperty.selectEntity}
+								type={selectedProperty.type}
 								value={value}
 							/>
 
@@ -314,7 +353,8 @@ class CriteriaRow extends Component {
 									modelLabel,
 									propertyLabel,
 									operatorLabel,
-									value
+									value,
+									selectedProperty.type
 								)}
 							</span>
 						</div>

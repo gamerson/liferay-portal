@@ -1270,8 +1270,8 @@ public class StagingImpl implements Staging {
 
 				errorMessage = LanguageUtil.format(
 					resourceBundle,
-					"portlet's-schema-version-x-in-the-lar-is-not-valid-for-" +
-						"the-deployed-portlet-x-with-schema-version-x",
+					"applications's-schema-version-x-in-the-lar-is-not-valid-" +
+						"for-the-deployed-application-x-with-schema-version-x",
 					lie.getArguments());
 			}
 			else {
@@ -1920,8 +1920,11 @@ public class StagingImpl implements Staging {
 
 	@Override
 	public String getSchedulerGroupName(String destinationName, long groupId) {
-		return destinationName.concat(StringPool.SLASH).concat(
-			String.valueOf(groupId));
+		return destinationName.concat(
+			StringPool.SLASH
+		).concat(
+			String.valueOf(groupId)
+		);
 	}
 
 	@Override

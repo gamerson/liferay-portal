@@ -23,8 +23,11 @@ import com.liferay.asset.kernel.model.AssetRendererFactory;
 import com.liferay.layout.page.template.model.LayoutPageTemplateEntry;
 import com.liferay.layout.page.template.service.LayoutPageTemplateEntryService;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.model.Layout;
+import com.liferay.portal.kernel.model.LayoutConstants;
 import com.liferay.portal.kernel.model.SystemEventConstants;
 import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.service.LayoutLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.systemevent.SystemEvent;
 import com.liferay.portal.kernel.util.Portal;
@@ -140,6 +143,13 @@ public class AssetDisplayPageEntryLocalServiceImpl
 			layoutPageTemplateEntryId);
 		assetDisplayPageEntry.setType(type);
 
+		long plid = _getPlid(
+			assetDisplayPageEntry.getGroupId(),
+			assetDisplayPageEntry.getClassNameId(),
+			assetDisplayPageEntry.getClassPK(), layoutPageTemplateEntryId);
+
+		assetDisplayPageEntry.setPlid(plid);
+
 		assetDisplayPageEntryPersistence.update(assetDisplayPageEntry);
 
 		return assetDisplayPageEntry;
@@ -165,8 +175,29 @@ public class AssetDisplayPageEntryLocalServiceImpl
 				groupId, classNameId, assetEntry.getClassTypeId())
 		);
 
-		return layoutPageTemplateEntry.getPlid();
+		if (layoutPageTemplateEntry != null) {
+			return layoutPageTemplateEntry.getPlid();
+		}
+
+		Layout layout = _layoutLocalService.fetchLayoutByUuidAndGroupId(
+			assetEntry.getLayoutUuid(), assetEntry.getGroupId(), false);
+
+		if (layout != null) {
+			return layout.getPlid();
+		}
+
+		layout = _layoutLocalService.fetchLayoutByUuidAndGroupId(
+			assetEntry.getLayoutUuid(), assetEntry.getGroupId(), true);
+
+		if (layout != null) {
+			return layout.getPlid();
+		}
+
+		return LayoutConstants.DEFAULT_PLID;
 	}
+
+	@ServiceReference(type = LayoutLocalService.class)
+	private LayoutLocalService _layoutLocalService;
 
 	@ServiceReference(type = LayoutPageTemplateEntryService.class)
 	private LayoutPageTemplateEntryService _layoutPageTemplateEntryService;

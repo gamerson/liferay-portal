@@ -85,11 +85,7 @@ public class PropertiesBuildIncludeDirsCheck extends BaseFileCheck {
 		return StringUtil.replaceFirst(content, matcher.group(), sb.toString());
 	}
 
-	private synchronized Set<String> _getBuildIncludeDirs() throws IOException {
-		if (_buildIncludeDirs != null) {
-			return _buildIncludeDirs;
-		}
-
+	private Set<String> _getBuildIncludeDirs() throws IOException {
 		File modulesDir = new File(getPortalDir(), "modules");
 
 		final Set<String> buildIncludeDirs = new TreeSet<>();
@@ -102,45 +98,61 @@ public class PropertiesBuildIncludeDirsCheck extends BaseFileCheck {
 				public FileVisitResult preVisitDirectory(
 					Path dirPath, BasicFileAttributes basicFileAttributes) {
 
-					String dirName = String.valueOf(dirPath.getFileName());
+					if (ArrayUtil.contains(
+							_SKIP_DIR_NAMES,
+							String.valueOf(dirPath.getFileName()))) {
 
-					if (ArrayUtil.contains(_SKIP_DIR_NAMES, dirName)) {
 						return FileVisitResult.SKIP_SUBTREE;
 					}
 
-					Path path = dirPath.resolve(".lfrbuild-portal");
+					String moduleDirName = _getModuleDirName(dirPath);
 
-					if (!Files.exists(path)) {
+					if (moduleDirName == null) {
 						return FileVisitResult.CONTINUE;
 					}
 
-					String absolutePath = SourceUtil.getAbsolutePath(dirPath);
-
-					int x = absolutePath.indexOf("/modules/");
-
-					if (x != -1) {
-						String dir = absolutePath.substring(x + 9);
-						int y = absolutePath.indexOf("/", x + 9);
-
-						if (y != -1) {
-							y = absolutePath.indexOf("/", y + 1);
-
-							if (y != -1) {
-								dir = absolutePath.substring(x + 9, y);
-							}
-						}
-
-						buildIncludeDirs.add(dir);
+					if (buildIncludeDirs.contains(moduleDirName)) {
+						return FileVisitResult.SKIP_SUBTREE;
 					}
 
-					return FileVisitResult.SKIP_SUBTREE;
+					if (Files.exists(dirPath.resolve(".lfrbuild-portal")) ||
+						Files.exists(dirPath.resolve("ci-merge"))) {
+
+						buildIncludeDirs.add(moduleDirName);
+
+						return FileVisitResult.SKIP_SUBTREE;
+					}
+
+					return FileVisitResult.CONTINUE;
 				}
 
 			});
 
-		_buildIncludeDirs = buildIncludeDirs;
+		return buildIncludeDirs;
+	}
 
-		return _buildIncludeDirs;
+	private String _getModuleDirName(Path dirPath) {
+		String absolutePath = SourceUtil.getAbsolutePath(dirPath) + "/";
+
+		int x = absolutePath.indexOf("/modules/");
+
+		if (x == -1) {
+			return null;
+		}
+
+		int y = absolutePath.indexOf("/", x + 9);
+
+		if (y == -1) {
+			return null;
+		}
+
+		y = absolutePath.indexOf("/", y + 1);
+
+		if (y != -1) {
+			return absolutePath.substring(x + 9, y);
+		}
+
+		return null;
 	}
 
 	private static final String[] _SKIP_DIR_NAMES = {
@@ -151,7 +163,5 @@ public class PropertiesBuildIncludeDirsCheck extends BaseFileCheck {
 
 	private static final Pattern _pattern = Pattern.compile(
 		"([^\\S\\n]*)#build\\.include\\.dirs=\\\\(\\s*#.*)*");
-
-	private Set<String> _buildIncludeDirs;
 
 }

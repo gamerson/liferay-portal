@@ -140,9 +140,9 @@ AUI.add(
 			'<span class="lfr-status-error-label">{invalidFilesLength}</span>',
 
 			'<ul class="list-unstyled">',
-				'<tpl for="invalidFiles">',
-					'<li><b>{name}</b>: {errorMessage}</li>',
-				'</tpl>',
+			'<tpl for="invalidFiles">',
+			'<li><b>{name}</b>: {errorMessage}</li>',
+			'</tpl>',
 			'</ul>'
 		);
 

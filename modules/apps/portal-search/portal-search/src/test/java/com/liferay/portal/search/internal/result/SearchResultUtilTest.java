@@ -15,6 +15,8 @@
 package com.liferay.portal.search.internal.result;
 
 import com.liferay.asset.kernel.AssetRendererFactoryRegistryUtil;
+import com.liferay.asset.kernel.model.AssetRenderer;
+import com.liferay.asset.kernel.model.AssetRendererFactory;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.search.Document;
 import com.liferay.portal.kernel.search.DocumentImpl;
@@ -24,9 +26,9 @@ import com.liferay.portal.kernel.search.SearchResult;
 import com.liferay.portal.kernel.search.Summary;
 import com.liferay.portal.kernel.search.SummaryFactory;
 import com.liferay.portal.kernel.search.result.SearchResultTranslator;
+import com.liferay.portal.kernel.search.test.BaseSearchResultUtilTestCase;
+import com.liferay.portal.kernel.search.test.SearchTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
-import com.liferay.portal.search.test.BaseSearchResultUtilTestCase;
-import com.liferay.portal.search.test.SearchTestUtil;
 
 import java.util.List;
 import java.util.Locale;
@@ -42,6 +44,7 @@ import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
+import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -71,30 +74,30 @@ public class SearchResultUtilTest extends BaseSearchResultUtilTestCase {
 
 	@Test
 	public void testSummaryFromAssetRenderer() throws Exception {
-		when(
-			assetRenderer.getSearchSummary((Locale)Matchers.any())
+		Mockito.when(
+			_assetRenderer.getSearchSummary((Locale)Matchers.any())
 		).thenReturn(
 			SearchTestUtil.SUMMARY_CONTENT
 		);
 
-		when(
-			assetRenderer.getTitle((Locale)Matchers.any())
+		Mockito.when(
+			_assetRenderer.getTitle((Locale)Matchers.any())
 		).thenReturn(
 			SearchTestUtil.SUMMARY_TITLE
 		);
 
-		when(
-			assetRendererFactory.getAssetRenderer(Matchers.anyLong())
+		Mockito.when(
+			_assetRendererFactory.getAssetRenderer(Matchers.anyLong())
 		).thenReturn(
-			assetRenderer
+			_assetRenderer
 		);
 
-		stub(
-			method(
+		PowerMockito.stub(
+			PowerMockito.method(
 				AssetRendererFactoryRegistryUtil.class,
 				"getAssetRendererFactoryByClassName", String.class)
 		).toReturn(
-			assetRendererFactory
+			_assetRendererFactory
 		);
 
 		SearchResult searchResult = assertOneSearchResult(new DocumentImpl());
@@ -194,6 +197,13 @@ public class SearchResultUtilTest extends BaseSearchResultUtilTestCase {
 
 		return summaryFactoryImpl;
 	}
+
+	@Mock
+	@SuppressWarnings("rawtypes")
+	private AssetRenderer _assetRenderer;
+
+	@Mock
+	private AssetRendererFactory<?> _assetRendererFactory;
 
 	@Mock
 	private Indexer<Object> _indexer;

@@ -33,15 +33,24 @@ import com.liferay.layout.admin.constants.LayoutAdminPortletKeys;
 import com.liferay.layout.page.template.model.LayoutPageTemplateStructure;
 import com.liferay.layout.page.template.service.LayoutPageTemplateStructureLocalServiceUtil;
 import com.liferay.layout.type.controller.content.internal.constants.ContentLayoutTypeControllerWebKeys;
-import com.liferay.layout.type.controller.content.internal.util.SoyContextFactoryUtil;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.editor.configuration.EditorConfiguration;
 import com.liferay.portal.kernel.editor.configuration.EditorConfigurationFactoryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.language.LanguageUtil;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Layout;
+import com.liferay.portal.kernel.model.LayoutTypePortlet;
+import com.liferay.portal.kernel.model.Portlet;
+import com.liferay.portal.kernel.model.PortletApp;
+import com.liferay.portal.kernel.model.PortletCategory;
+import com.liferay.portal.kernel.portlet.PortletConfigFactoryUtil;
 import com.liferay.portal.kernel.portlet.RequestBackedPortletURLFactoryUtil;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
+import com.liferay.portal.kernel.service.PortletLocalServiceUtil;
+import com.liferay.portal.kernel.service.permission.PortletPermissionUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
@@ -49,22 +58,35 @@ import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.ResourceBundleUtil;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
+import com.liferay.portal.kernel.util.comparator.PortletCategoryComparator;
+import com.liferay.portal.kernel.util.comparator.PortletTitleComparator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
-import com.liferay.portal.template.soy.utils.SoyContext;
+import com.liferay.portal.template.soy.util.SoyContext;
+import com.liferay.portal.template.soy.util.SoyContextFactoryUtil;
+import com.liferay.portal.util.PortletCategoryUtil;
+import com.liferay.portal.util.WebAppPool;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.portlet.ActionRequest;
+import javax.portlet.PortletConfig;
 import javax.portlet.PortletURL;
 import javax.portlet.RenderResponse;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 /**
  * @author Eudaldo Alonso
@@ -83,7 +105,7 @@ public class FragmentsEditorDisplayContext {
 			WebKeys.THEME_DISPLAY);
 	}
 
-	public SoyContext getEditorContext() throws PortalException {
+	public SoyContext getEditorContext() throws Exception {
 		if (_editorSoyContext != null) {
 			return _editorSoyContext;
 		}
@@ -166,7 +188,6 @@ public class FragmentsEditorDisplayContext {
 			"sections",
 			_getSoyContextFragmentCollections(
 				FragmentEntryTypeConstants.TYPE_SECTION));
-
 		soyContext.put(
 			"spritemap",
 			_themeDisplay.getPathThemeImages() + "/lexicon/icons.svg");
@@ -174,6 +195,7 @@ public class FragmentsEditorDisplayContext {
 			"updateLayoutPageTemplateDataURL",
 			_getFragmentEntryActionURL(
 				"/content_layout/update_layout_page_template_data"));
+		soyContext.put("widgets", _getWidgetsSoyContexts());
 
 		_editorSoyContext = soyContext;
 
@@ -397,14 +419,16 @@ public class FragmentsEditorDisplayContext {
 			SoyContextFactoryUtil.createSoyContext();
 
 		availableSoyContext.put("icon", "cards");
-		availableSoyContext.put(
-			"label", LanguageUtil.get(_themeDisplay.getLocale(), "sections"));
-		availableSoyContext.put("panelId", "sections");
-
-		soyContexts.add(availableSoyContext);
 
 		ResourceBundle resourceBundle = ResourceBundleUtil.getBundle(
 			"content.Language", _request.getLocale(), getClass());
+
+		availableSoyContext.put(
+			"label", LanguageUtil.get(resourceBundle, "sections"));
+
+		availableSoyContext.put("panelId", "sections");
+
+		soyContexts.add(availableSoyContext);
 
 		availableSoyContext = SoyContextFactoryUtil.createSoyContext();
 
@@ -419,14 +443,122 @@ public class FragmentsEditorDisplayContext {
 
 		availableSoyContext.put("icon", "pages-tree");
 		availableSoyContext.put(
-			"label", LanguageUtil.get(_themeDisplay.getLocale(), "structure"));
+			"label", LanguageUtil.get(resourceBundle, "structure"));
 		availableSoyContext.put("panelId", "structure");
+
+		soyContexts.add(availableSoyContext);
+
+		availableSoyContext = SoyContextFactoryUtil.createSoyContext();
+
+		availableSoyContext.put("icon", "chip");
+		availableSoyContext.put(
+			"label", LanguageUtil.get(resourceBundle, "widgets"));
+		availableSoyContext.put("panelId", "widgets");
 
 		soyContexts.add(availableSoyContext);
 
 		_panelSoyContexts = soyContexts;
 
 		return _panelSoyContexts;
+	}
+
+	private String _getPortletCategoryTitle(PortletCategory portletCategory) {
+		String title = LanguageUtil.get(_request, portletCategory.getName());
+
+		if (Validator.isNotNull(title)) {
+			return title;
+		}
+
+		for (String portletId :
+				PortletCategoryUtil.getFirstChildPortletIds(portletCategory)) {
+
+			Portlet portlet = PortletLocalServiceUtil.getPortletById(
+				_themeDisplay.getCompanyId(), portletId);
+
+			if (portlet == null) {
+				continue;
+			}
+
+			PortletApp portletApp = portlet.getPortletApp();
+
+			if (!portletApp.isWARFile()) {
+				continue;
+			}
+
+			PortletConfig portletConfig = PortletConfigFactoryUtil.create(
+				portlet, _request.getServletContext());
+
+			ResourceBundle portletResourceBundle =
+				portletConfig.getResourceBundle(_themeDisplay.getLocale());
+
+			return ResourceBundleUtil.getString(
+				portletResourceBundle, portletCategory.getName());
+		}
+
+		return StringPool.BLANK;
+	}
+
+	private List<SoyContext> _getPortletsContexts(
+		PortletCategory portletCategory) {
+
+		Set<String> portletIds = portletCategory.getPortletIds();
+
+		Stream<String> stream = portletIds.stream();
+
+		LayoutTypePortlet layoutTypePortlet =
+			_themeDisplay.getLayoutTypePortlet();
+
+		HttpSession session = _request.getSession();
+
+		ServletContext servletContext = session.getServletContext();
+
+		return stream.map(
+			portletId -> PortletLocalServiceUtil.getPortletById(
+				_themeDisplay.getCompanyId(), portletId)
+		).filter(
+			portlet -> {
+				if (portlet == null) {
+					return false;
+				}
+
+				try {
+					return PortletPermissionUtil.contains(
+						_themeDisplay.getPermissionChecker(),
+						_themeDisplay.getLayout(), portlet,
+						ActionKeys.ADD_TO_PAGE);
+				}
+				catch (PortalException pe) {
+					_log.error(
+						"Unable to check portlet permissions for " +
+							portlet.getPortletId(),
+						pe);
+
+					return false;
+				}
+			}
+		).sorted(
+			new PortletTitleComparator(
+				servletContext, _themeDisplay.getLocale())
+		).map(
+			portlet -> {
+				SoyContext portletSoyContext =
+					SoyContextFactoryUtil.createSoyContext();
+
+				portletSoyContext.put("instanceable", portlet.isInstanceable());
+				portletSoyContext.put("portletId", portlet.getPortletId());
+				portletSoyContext.put(
+					"title",
+					PortalUtil.getPortletTitle(
+						portlet, servletContext, _themeDisplay.getLocale()));
+				portletSoyContext.put(
+					"used",
+					layoutTypePortlet.hasPortletId(portlet.getPortletId()));
+
+				return portletSoyContext;
+			}
+		).collect(
+			Collectors.toList()
+		);
 	}
 
 	private List<SoyContext> _getSoyContextFragmentCollections(int type) {
@@ -541,6 +673,56 @@ public class FragmentsEditorDisplayContext {
 
 		return _urlItemSelectorCriterion;
 	}
+
+	private List<SoyContext> _getWidgetCategoriesContexts(
+		PortletCategory portletCategory) {
+
+		Collection<PortletCategory> portletCategories =
+			portletCategory.getCategories();
+
+		Stream<PortletCategory> stream = portletCategories.stream();
+
+		return stream.sorted(
+			new PortletCategoryComparator(_themeDisplay.getLocale())
+		).filter(
+			category -> !category.isHidden()
+		).map(
+			category -> {
+				SoyContext categoryContext =
+					SoyContextFactoryUtil.createSoyContext();
+
+				categoryContext.put(
+					"categories", _getWidgetCategoriesContexts(category));
+				categoryContext.put(
+					"path",
+					StringUtil.replace(
+						category.getPath(), new String[] {"/", "."},
+						new String[] {"-", "-"}));
+				categoryContext.put("portlets", _getPortletsContexts(category));
+				categoryContext.put(
+					"title", _getPortletCategoryTitle(category));
+
+				return categoryContext;
+			}
+		).collect(
+			Collectors.toList()
+		);
+	}
+
+	private List<SoyContext> _getWidgetsSoyContexts() throws Exception {
+		PortletCategory portletCategory = (PortletCategory)WebAppPool.get(
+			_themeDisplay.getCompanyId(), WebKeys.PORTLET_CATEGORY);
+
+		portletCategory = PortletCategoryUtil.getRelevantPortletCategory(
+			_themeDisplay.getPermissionChecker(), _themeDisplay.getCompanyId(),
+			_themeDisplay.getLayout(), portletCategory,
+			_themeDisplay.getLayoutTypePortlet());
+
+		return _getWidgetCategoriesContexts(portletCategory);
+	}
+
+	private static final Log _log = LogFactoryUtil.getLog(
+		FragmentsEditorDisplayContext.class);
 
 	private Map<String, Object> _defaultConfigurations;
 	private SoyContext _editorSoyContext;

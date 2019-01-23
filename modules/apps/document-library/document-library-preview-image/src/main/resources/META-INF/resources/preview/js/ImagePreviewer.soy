@@ -24,13 +24,13 @@
 				src="{$imageURL}"
 				style="
 					{if $imageWidth and $imageHeight}
-						{sp}max-width: {$imageWidth}px;
-						{sp}width: {$imageWidth}px;
-						{sp}max-height: {$imageHeight}px;
-						{sp}height: {$imageHeight}px;
+						max-width: {$imageWidth}px;
+						width: {$imageWidth}px;
+						max-height: {$imageHeight}px;
+						height: {$imageHeight}px;
 					{/if}
 					{if $imageMargin}
-						{sp}margin: {$imageMargin};
+						margin: {$imageMargin};
 					{/if}
 				"
 			/>
@@ -52,9 +52,9 @@
 	{@param? zoomInDisabled: bool}
 	{@param? zoomOutDisabled: bool}
 
-	{let $baseButtonsToolbar:[
-		'elementClasses': 'btn-dark',
-		'events': [ 'click': $_handleToolbarClick],
+	{let $baseButtonsToolbar: [
+		'elementClasses': 'btn-floating-bar',
+		'events': ['click': $_handleToolbarClick],
 		'spritemap': $spritemap,
 		'style': false
 	] /}
@@ -63,26 +63,28 @@
 
 	{let $zoomFit: $currentZoom == 1 /}
 
-	{let $zoomBtnValue: $zoomFit ? 'fit' : 'real'/}
+	{let $zoomBtnValue: $zoomFit ? 'fit' : 'real' /}
 
 	{let $zoomBtnTitle kind="text"}
 		{if $zoomFit}
-			{msg desc=""}fit-to-screen{/msg}
+			{msg desc=""}zoom-to-fit{/msg}
 		{else}
 			{msg desc=""}real-size{/msg}
 		{/if}
 	{/let}
 
 	<div class="preview-toolbar-container">
-		<div class="btn-group" role="group">
+		<div class="btn-group floating-bar" role="group">
 			{call ClayButton.render data="$baseButtonsToolbar"}
 				{param disabled: $zoomOutDisabled /}
 				{param icon: 'hr' /}
 				{param monospaced: true /}
+				{param title kind="text"}{msg desc=""}zoom-out{/msg}{/param}
 				{param value: 'out' /}
 			{/call}
 			{call ClayButton.render data="$baseButtonsToolbar"}
-				{param label kind="text"}{$zoomLabel}%{/param}
+				{param elementClasses: $baseButtonsToolbar.elementClasses + ' btn-floating-bar-text' /}
+				{param label kind="html"}<span class="preview-toolbar-label-percent">{$zoomLabel}%</span>{/param}
 				{param value: $zoomBtnValue /}
 				{param title: $zoomBtnTitle /}
 			{/call}
@@ -90,6 +92,7 @@
 				{param disabled: $zoomInDisabled /}
 				{param icon: 'plus' /}
 				{param monospaced: true /}
+				{param title kind="text"}{msg desc=""}zoom-in{/msg}{/param}
 				{param value: 'in' /}
 			{/call}
 		</div>

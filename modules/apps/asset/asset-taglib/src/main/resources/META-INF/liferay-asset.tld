@@ -583,8 +583,14 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>Allow selecting pages with Asset Publisher configured as a default Asset Publisher for the page.</description>
+			<description>Whether to allow page selection with the default Asset Publisher for the page.</description>
 			<name>showPortletLayouts</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<description>Whether to show the asset view in a context link.</description>
+			<name>showViewInContextLink</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>

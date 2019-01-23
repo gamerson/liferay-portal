@@ -14,6 +14,9 @@
 
 package com.liferay.arquillian.extension.junit.bridge.remote.activator;
 
+import com.liferay.arquillian.extension.junit.bridge.protocol.jmx.JMXTestRunner;
+import com.liferay.arquillian.extension.junit.bridge.protocol.jmx.JMXTestRunnerMBean;
+
 import java.lang.management.ManagementFactory;
 
 import java.util.List;
@@ -21,12 +24,13 @@ import java.util.List;
 import javax.management.JMException;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
-
-import org.jboss.arquillian.protocol.jmx.JMXTestRunner;
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.wiring.BundleWiring;
 
 /**
  * @author Cristina González Castellano
@@ -35,20 +39,21 @@ public class ArquillianBundleActivator implements BundleActivator {
 
 	@Override
 	public void start(BundleContext bundleContext) throws JMException {
-		Bundle bundle = bundleContext.getBundle();
-
 		MBeanServer mBeanServer = _findOrCreateMBeanServer();
 
-		_jmxTestRunner = new JMXTestRunner(bundle::loadClass);
+		Bundle bundle = bundleContext.getBundle();
 
-		_jmxTestRunner.registerMBean(mBeanServer);
+		BundleWiring bundleWiring = bundle.adapt(BundleWiring.class);
+
+		mBeanServer.registerMBean(
+			new JMXTestRunner(bundleWiring.getClassLoader()), _objectName);
 	}
 
 	@Override
 	public void stop(BundleContext bundleContext) throws JMException {
 		MBeanServer mBeanServer = _findOrCreateMBeanServer();
 
-		_jmxTestRunner.unregisterMBean(mBeanServer);
+		mBeanServer.unregisterMBean(_objectName);
 	}
 
 	private MBeanServer _findOrCreateMBeanServer() {
@@ -68,6 +73,15 @@ public class ArquillianBundleActivator implements BundleActivator {
 		return mBeanServer;
 	}
 
-	private JMXTestRunner _jmxTestRunner;
+	private static final ObjectName _objectName;
+
+	static {
+		try {
+			_objectName = new ObjectName(JMXTestRunnerMBean.OBJECT_NAME);
+		}
+		catch (MalformedObjectNameException mone) {
+			throw new ExceptionInInitializerError(mone);
+		}
+	}
 
 }

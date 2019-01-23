@@ -34,6 +34,14 @@ public class JournalArticleBlueprint {
 		return journalArticleContent.getContentString();
 	}
 
+	public Map<Locale, String> getDescriptionMap() {
+		if (journalArticleDescription != null) {
+			return journalArticleDescription.getValues();
+		}
+
+		return null;
+	}
+
 	public long getGroupId() {
 		return groupId;
 	}
@@ -71,6 +79,7 @@ public class JournalArticleBlueprint {
 	protected boolean draft;
 	protected long groupId;
 	protected JournalArticleContent journalArticleContent;
+	protected JournalArticleDescription journalArticleDescription;
 	protected JournalArticleTitle journalArticleTitle;
 	protected long userId;
 	protected boolean workflowEnabled;

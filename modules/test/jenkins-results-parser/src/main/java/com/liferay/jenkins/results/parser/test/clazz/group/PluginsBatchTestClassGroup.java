@@ -36,6 +36,15 @@ import java.util.Properties;
  */
 public class PluginsBatchTestClassGroup extends BatchTestClassGroup {
 
+	@Override
+	public int getAxisCount() {
+		if (testRelevantIntegrationUnitOnly) {
+			return 0;
+		}
+
+		return super.getAxisCount();
+	}
+
 	public static class PluginsBatchTestClass extends BaseTestClass {
 
 		protected static PluginsBatchTestClass getInstance(

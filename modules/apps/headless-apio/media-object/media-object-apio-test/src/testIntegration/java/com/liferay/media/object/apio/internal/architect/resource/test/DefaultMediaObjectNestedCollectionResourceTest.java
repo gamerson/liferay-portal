@@ -14,20 +14,16 @@
 
 package com.liferay.media.object.apio.internal.architect.resource.test;
 
-import com.liferay.adaptive.media.AMAttribute;
-import com.liferay.adaptive.media.AdaptiveMedia;
-import com.liferay.adaptive.media.image.processor.AMImageProcessor;
 import com.liferay.apio.architect.file.BinaryFile;
 import com.liferay.apio.architect.pagination.PageItems;
 import com.liferay.apio.architect.resource.NestedCollectionResource;
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
-import com.liferay.media.object.apio.architect.model.MediaObject;
+import com.liferay.media.object.apio.internal.architect.resource.test.model.MediaObjectImpl;
 import com.liferay.portal.apio.test.util.PaginationRequest;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
-import com.liferay.portal.kernel.test.rule.Sync;
 import com.liferay.portal.kernel.test.util.GroupTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
@@ -45,9 +41,6 @@ import java.nio.charset.StandardCharsets;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.apache.commons.io.IOUtils;
 
@@ -81,7 +74,7 @@ public class DefaultMediaObjectNestedCollectionResourceTest
 	public void testAddMediaObject() throws Exception {
 		String content = RandomTestUtil.randomString(10);
 
-		FileEntry fileEntry = _addFileEntry(
+		FileEntry fileEntry = addFileEntry(
 			_group.getGroupId(),
 			new MediaObjectImpl(
 				new BinaryFile(
@@ -102,9 +95,8 @@ public class DefaultMediaObjectNestedCollectionResourceTest
 			"My media object testAddMediaObject", fileEntry.getTitle());
 	}
 
-	@Sync
 	@Test
-	public void testGetAdaptiveMedias() throws Exception {
+	public void testGetFileEntryPreviewURL() throws Exception {
 		String fileName = "image.png";
 
 		byte[] bytes = FileUtil.getBytes(
@@ -116,61 +108,7 @@ public class DefaultMediaObjectNestedCollectionResourceTest
 			new ByteArrayInputStream(bytes), (long)bytes.length, "image/jpeg",
 			fileName);
 
-		FileEntry fileEntry = _addFileEntry(
-			_group.getGroupId(),
-			new MediaObjectImpl(
-				binaryFile, "My media object testGetAdaptiveMedia", null, null,
-				null));
-
-		List<AdaptiveMedia<AMImageProcessor>> adaptiveMedias =
-			_getAdaptiveMedias(fileEntry);
-
-		Assert.assertEquals(
-			adaptiveMedias.toString(), 2, adaptiveMedias.size());
-
-		AdaptiveMedia<AMImageProcessor> adaptiveMedia1 = adaptiveMedias.get(0);
-
-		URL url1 = new URL(
-			TestPropsValues.PORTAL_URL + adaptiveMedia1.getURI());
-
-		byte[] contentBytes1 = IOUtils.toByteArray(url1.openStream());
-
-		Assert.assertTrue(contentBytes1.length > 0);
-
-		Assert.assertEquals(
-			"Preview-1000x0",
-			adaptiveMedia1.getValueOptional(
-				AMAttribute.getConfigurationUuidAMAttribute()).get());
-
-		AdaptiveMedia<AMImageProcessor> adaptiveMedia2 = adaptiveMedias.get(1);
-
-		URL url2 = new URL(
-			TestPropsValues.PORTAL_URL + adaptiveMedia2.getURI());
-
-		byte[] contentBytes2 = IOUtils.toByteArray(url2.openStream());
-
-		Assert.assertTrue(contentBytes2.length > 0);
-
-		Assert.assertEquals(
-			"Thumbnail-300x300",
-			adaptiveMedia2.getValueOptional(
-				AMAttribute.getConfigurationUuidAMAttribute()).get());
-	}
-
-	@Test
-	public void testGetFileEntryPreviewURL() throws Exception {
-		String fileName = "image.png";
-
-		byte[] bytes = FileUtil.getBytes(
-			getClass(),
-			"/com/liferay/media/object/apio/internal/architect/resource/test/" +
-				fileName);
-
-		BinaryFile binaryFile = new BinaryFile(
-			new ByteArrayInputStream(bytes), (long)bytes.length, "image/jpeg",
-			fileName);
-
-		FileEntry fileEntry = _addFileEntry(
+		FileEntry fileEntry = addFileEntry(
 			_group.getGroupId(),
 			new MediaObjectImpl(
 				binaryFile, "My media object testGetFileEntryPreviewURL", null,
@@ -180,9 +118,9 @@ public class DefaultMediaObjectNestedCollectionResourceTest
 
 		Assert.assertNotNull(fileEntryPreview);
 
-		byte[] contentBytes = IOUtils.toByteArray(
-			new URL(
-				TestPropsValues.PORTAL_URL + fileEntryPreview).openStream());
+		URL url = new URL(TestPropsValues.PORTAL_URL + fileEntryPreview);
+
+		byte[] contentBytes = IOUtils.toByteArray(url.openStream());
 
 		Assert.assertArrayEquals(bytes, contentBytes);
 	}
@@ -193,7 +131,7 @@ public class DefaultMediaObjectNestedCollectionResourceTest
 
 		List<String> keywords = Arrays.asList("keyword1", "keyword2");
 
-		FileEntry fileEntry = _addFileEntry(
+		FileEntry fileEntry = addFileEntry(
 			_group.getGroupId(),
 			new MediaObjectImpl(
 				new BinaryFile(
@@ -216,7 +154,7 @@ public class DefaultMediaObjectNestedCollectionResourceTest
 	public void testGetPageItems() throws Exception {
 		String content = RandomTestUtil.randomString(10);
 
-		_addFileEntry(
+		addFileEntry(
 			_group.getGroupId(),
 			new MediaObjectImpl(
 				new BinaryFile(
@@ -241,41 +179,6 @@ public class DefaultMediaObjectNestedCollectionResourceTest
 			"My media object description", fileEntry.getDescription());
 		Assert.assertEquals(
 			"My media object testGetPageItems", fileEntry.getTitle());
-	}
-
-	private FileEntry _addFileEntry(long groupId, MediaObject mediaObject)
-		throws Exception {
-
-		NestedCollectionResource nestedCollectionResource =
-			getNestedCollectionResource();
-
-		Class<?> clazz = nestedCollectionResource.getClass();
-
-		Method method = clazz.getDeclaredMethod(
-			"_addFileEntry", long.class, MediaObject.class);
-
-		method.setAccessible(true);
-
-		return (FileEntry)method.invoke(
-			getNestedCollectionResource(), groupId, mediaObject);
-	}
-
-	private List<AdaptiveMedia<AMImageProcessor>> _getAdaptiveMedias(
-			FileEntry fileEntry)
-		throws Exception {
-
-		NestedCollectionResource nestedCollectionResource =
-			getNestedCollectionResource();
-
-		Class<?> clazz = nestedCollectionResource.getClass();
-
-		Method method = clazz.getDeclaredMethod(
-			"_getAdaptiveMedias", FileEntry.class);
-
-		method.setAccessible(true);
-
-		return (List<AdaptiveMedia<AMImageProcessor>>)method.invoke(
-			getNestedCollectionResource(), fileEntry);
 	}
 
 	private String _getFileEntryPreviewURL(FileEntry fileEntry)
@@ -313,67 +216,5 @@ public class DefaultMediaObjectNestedCollectionResourceTest
 
 	@DeleteAfterTestRun
 	private Group _group;
-
-	private static class MediaObjectImpl implements MediaObject {
-
-		@Override
-		public BinaryFile getBinaryFile() {
-			return _binaryFile;
-		}
-
-		@Override
-		public List<Long> getCategories() {
-			return _categories;
-		}
-
-		@Override
-		public String getDescription() {
-			return _description;
-		}
-
-		@Override
-		public List<String> getKeywords() {
-			return _keywords;
-		}
-
-		@Override
-		public String getTitle() {
-			return _title;
-		}
-
-		private MediaObjectImpl(
-			BinaryFile binaryFile, String title, String description,
-			List<String> keywords, List<Long> categories) {
-
-			_binaryFile = binaryFile;
-			_title = title;
-			_description = description;
-			_keywords = Optional.ofNullable(
-				keywords
-			).map(
-				List::stream
-			).orElseGet(
-				Stream::empty
-			).collect(
-				Collectors.toList()
-			);
-			_categories = Optional.ofNullable(
-				categories
-			).map(
-				List::stream
-			).orElseGet(
-				Stream::empty
-			).collect(
-				Collectors.toList()
-			);
-		}
-
-		private final BinaryFile _binaryFile;
-		private final List<Long> _categories;
-		private final String _description;
-		private final List<String> _keywords;
-		private final String _title;
-
-	}
 
 }

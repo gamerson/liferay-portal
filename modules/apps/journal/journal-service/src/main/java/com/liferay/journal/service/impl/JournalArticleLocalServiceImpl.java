@@ -71,6 +71,8 @@ import com.liferay.petra.string.StringPool;
 import com.liferay.petra.xml.XMLUtil;
 import com.liferay.portal.kernel.bean.BeanReference;
 import com.liferay.portal.kernel.comment.CommentManager;
+import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
+import com.liferay.portal.kernel.dao.orm.DefaultActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.IndexableActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.Property;
 import com.liferay.portal.kernel.dao.orm.PropertyFactoryUtil;
@@ -1184,8 +1186,8 @@ public class JournalArticleLocalServiceImpl
 
 		// Dynamic data mapping
 
-		if (article.getClassNameId() !=
-				classNameLocalService.getClassNameId(DDMStructure.class)) {
+		if (article.getClassNameId() != classNameLocalService.getClassNameId(
+				DDMStructure.class)) {
 
 			ddmStorageLinkLocalService.deleteClassStorageLink(article.getId());
 
@@ -3690,18 +3692,17 @@ public class JournalArticleLocalServiceImpl
 			if ((article == null) || articleId.equals(article.getArticleId())) {
 				break;
 			}
-			else {
-				String suffix = StringPool.DASH + i;
 
-				String prefix = urlTitle;
+			String suffix = StringPool.DASH + i;
 
-				if (urlTitle.length() > suffix.length()) {
-					prefix = urlTitle.substring(
-						0, urlTitle.length() - suffix.length());
-				}
+			String prefix = urlTitle;
 
-				urlTitle = prefix + suffix;
+			if (urlTitle.length() > suffix.length()) {
+				prefix = urlTitle.substring(
+					0, urlTitle.length() - suffix.length());
 			}
+
+			urlTitle = prefix + suffix;
 		}
 
 		return urlTitle;
@@ -6974,82 +6975,130 @@ public class JournalArticleLocalServiceImpl
 	protected void checkArticlesByDisplayDate(Date displayDate)
 		throws PortalException {
 
-		String portletId = PortletProviderUtil.getPortletId(
-			JournalArticle.class.getName(), PortletProvider.Action.EDIT);
+		ActionableDynamicQuery actionableDynamicQuery =
+			getActionableDynamicQuery();
 
-		List<JournalArticle> articles = journalArticlePersistence.findByLtD_S(
-			displayDate, WorkflowConstants.STATUS_SCHEDULED);
+		actionableDynamicQuery.setAddCriteriaMethod(
+			dynamicQuery -> {
+				Property displayDateProperty = PropertyFactoryUtil.forName(
+					"displayDate");
 
-		for (JournalArticle article : articles) {
-			long userId = PortalUtil.getValidUserId(
-				article.getCompanyId(), article.getUserId());
+				dynamicQuery.add(displayDateProperty.lt(displayDate));
 
-			ServiceContext serviceContext = new ServiceContext();
+				Property statusProperty = PropertyFactoryUtil.forName("status");
 
-			serviceContext.setCommand(Constants.UPDATE);
+				dynamicQuery.add(
+					statusProperty.eq(WorkflowConstants.STATUS_SCHEDULED));
+			});
+		actionableDynamicQuery.setPerformActionMethod(
+			(JournalArticle article) -> {
+				long userId = PortalUtil.getValidUserId(
+					article.getCompanyId(), article.getUserId());
 
-			String layoutFullURL = PortalUtil.getLayoutFullURL(
-				article.getGroupId(), portletId);
+				ServiceContext serviceContext = new ServiceContext();
 
-			serviceContext.setLayoutFullURL(layoutFullURL);
+				serviceContext.setCommand(Constants.UPDATE);
 
-			serviceContext.setScopeGroupId(article.getGroupId());
+				String portletId = PortletProviderUtil.getPortletId(
+					JournalArticle.class.getName(),
+					PortletProvider.Action.EDIT);
 
-			journalArticleLocalService.updateStatus(
-				userId, article, WorkflowConstants.STATUS_APPROVED, null,
-				serviceContext, new HashMap<String, Serializable>());
-		}
+				String layoutFullURL = PortalUtil.getLayoutFullURL(
+					article.getGroupId(), portletId);
+
+				serviceContext.setLayoutFullURL(layoutFullURL);
+
+				serviceContext.setScopeGroupId(article.getGroupId());
+
+				journalArticleLocalService.updateStatus(
+					userId, article, WorkflowConstants.STATUS_APPROVED, null,
+					serviceContext, new HashMap<>());
+			});
+		actionableDynamicQuery.setTransactionConfig(
+			DefaultActionableDynamicQuery.REQUIRES_NEW_TRANSACTION_CONFIG);
+
+		actionableDynamicQuery.performActions();
 	}
 
 	protected void checkArticlesByExpirationDate(Date expirationDate)
 		throws PortalException {
 
-		List<JournalArticle> articles =
-			journalArticleFinder.findByExpirationDate(
-				JournalArticleConstants.CLASSNAME_ID_DEFAULT,
-				new Date(expirationDate.getTime() + getArticleCheckInterval()),
-				new QueryDefinition<JournalArticle>(
-					WorkflowConstants.STATUS_APPROVED));
+		IndexableActionableDynamicQuery indexableActionableDynamicQuery =
+			getIndexableActionableDynamicQuery();
 
-		if (_log.isDebugEnabled()) {
-			_log.debug("Expiring " + articles.size() + " articles");
-		}
+		Indexer<JournalArticle> indexer = IndexerRegistryUtil.getIndexer(
+			JournalArticle.class);
 
-		for (JournalArticle article : articles) {
-			if (isExpireAllArticleVersions(article.getCompanyId())) {
-				List<JournalArticle> currentArticles =
-					journalArticlePersistence.findByG_A(
-						article.getGroupId(), article.getArticleId(),
-						QueryUtil.ALL_POS, QueryUtil.ALL_POS,
-						new ArticleVersionComparator(true));
+		indexableActionableDynamicQuery.setAddCriteriaMethod(
+			dynamicQuery -> {
+				Property classNameIdProperty = PropertyFactoryUtil.forName(
+					"classNameId");
 
-				for (JournalArticle currentArticle : currentArticles) {
-					if ((currentArticle.getExpirationDate() == null) ||
-						(currentArticle.getVersion() > article.getVersion())) {
+				dynamicQuery.add(
+					classNameIdProperty.eq(
+						JournalArticleConstants.CLASSNAME_ID_DEFAULT));
 
-						continue;
+				Property expirationDateProperty = PropertyFactoryUtil.forName(
+					"expirationDate");
+
+				long checkInterval = getArticleCheckInterval();
+
+				dynamicQuery.add(
+					expirationDateProperty.le(
+						new Date(expirationDate.getTime() + checkInterval)));
+
+				Property statusProperty = PropertyFactoryUtil.forName("status");
+
+				dynamicQuery.add(
+					statusProperty.eq(WorkflowConstants.STATUS_APPROVED));
+			});
+		indexableActionableDynamicQuery.setPerformActionMethod(
+			(JournalArticle article) -> {
+				if (isExpireAllArticleVersions(article.getCompanyId())) {
+					List<JournalArticle> currentArticles =
+						journalArticlePersistence.findByG_A(
+							article.getGroupId(), article.getArticleId(),
+							QueryUtil.ALL_POS, QueryUtil.ALL_POS,
+							new ArticleVersionComparator(true));
+
+					for (JournalArticle currentArticle : currentArticles) {
+						if ((currentArticle.getExpirationDate() == null) ||
+							(currentArticle.getVersion() >
+								article.getVersion())) {
+
+							continue;
+						}
+
+						currentArticle.setExpirationDate(
+							article.getExpirationDate());
+						currentArticle.setStatus(
+							WorkflowConstants.STATUS_EXPIRED);
+
+						journalArticlePersistence.update(currentArticle);
 					}
-
-					currentArticle.setExpirationDate(
-						article.getExpirationDate());
-					currentArticle.setStatus(WorkflowConstants.STATUS_EXPIRED);
-
-					journalArticlePersistence.update(currentArticle);
 				}
-			}
-			else {
+
 				article.setStatus(WorkflowConstants.STATUS_EXPIRED);
 
 				journalArticlePersistence.update(article);
-			}
 
-			updatePreviousApprovedArticle(article);
+				updatePreviousApprovedArticle(article);
 
-			Indexer<JournalArticle> indexer =
-				IndexerRegistryUtil.nullSafeGetIndexer(JournalArticle.class);
+				if (indexer != null) {
+					indexableActionableDynamicQuery.addDocuments(
+						indexer.getDocument(article));
+				}
+			});
 
-			indexer.reindex(article);
+		if (indexer != null) {
+			indexableActionableDynamicQuery.setSearchEngineId(
+				indexer.getSearchEngineId());
 		}
+
+		indexableActionableDynamicQuery.setTransactionConfig(
+			DefaultActionableDynamicQuery.REQUIRES_NEW_TRANSACTION_CONFIG);
+
+		indexableActionableDynamicQuery.performActions();
 
 		if (_previousCheckDate == null) {
 			_previousCheckDate = new Date(
@@ -7060,7 +7109,7 @@ public class JournalArticleLocalServiceImpl
 	protected void checkArticlesByReviewDate(Date reviewDate)
 		throws PortalException {
 
-		List<JournalArticle> latestArticles = new ArrayList<>();
+		Set<Long> latestArticleIds = new HashSet<>();
 
 		List<JournalArticle> articles = journalArticleFinder.findByReviewDate(
 			JournalArticleConstants.CLASSNAME_ID_DEFAULT, reviewDate,
@@ -7082,14 +7131,12 @@ public class JournalArticleLocalServiceImpl
 					groupId, articleId);
 			}
 
-			if (!latestArticles.contains(article)) {
+			if (latestArticleIds.add(article.getPrimaryKey())) {
 				if (_log.isDebugEnabled()) {
 					_log.debug(
 						"Sending review notification for article " +
 							article.getId());
 				}
-
-				latestArticles.add(article);
 
 				String portletId = PortletProviderUtil.getPortletId(
 					JournalArticle.class.getName(),
@@ -7433,14 +7480,19 @@ public class JournalArticleLocalServiceImpl
 		throws PortalException {
 	}
 
-	protected long getArticleCheckInterval() throws PortalException {
-		long companyId = CompanyThreadLocal.getCompanyId();
+	protected long getArticleCheckInterval() {
+		try {
+			long companyId = CompanyThreadLocal.getCompanyId();
 
-		JournalServiceConfiguration journalServiceConfiguration =
-			configurationProvider.getCompanyConfiguration(
-				JournalServiceConfiguration.class, companyId);
+			JournalServiceConfiguration journalServiceConfiguration =
+				configurationProvider.getCompanyConfiguration(
+					JournalServiceConfiguration.class, companyId);
 
-		return journalServiceConfiguration.checkInterval() * Time.MINUTE;
+			return journalServiceConfiguration.checkInterval() * Time.MINUTE;
+		}
+		catch (PortalException pe) {
+			throw new RuntimeException(pe);
+		}
 	}
 
 	protected Locale getArticleDefaultLocale(String content) {
@@ -8783,18 +8835,17 @@ public class JournalArticleLocalServiceImpl
 
 				return i - 1;
 			}
-			else {
-				String suffix = StringPool.DASH + i;
 
-				String prefix = urlTitle;
+			String suffix = StringPool.DASH + i;
 
-				if (urlTitle.length() > suffix.length()) {
-					prefix = urlTitle.substring(
-						0, urlTitle.length() - suffix.length());
-				}
+			String prefix = urlTitle;
 
-				urlTitle = prefix + suffix;
+			if (urlTitle.length() > suffix.length()) {
+				prefix = urlTitle.substring(
+					0, urlTitle.length() - suffix.length());
 			}
+
+			urlTitle = prefix + suffix;
 		}
 	}
 

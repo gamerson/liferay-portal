@@ -14,7 +14,6 @@
 
 package com.liferay.message.boards.comment.internal.search;
 
-import com.liferay.asset.kernel.AssetRendererFactoryRegistryUtil;
 import com.liferay.message.boards.model.MBMessage;
 import com.liferay.message.boards.service.MBMessageLocalService;
 import com.liferay.portal.kernel.comment.Comment;
@@ -27,11 +26,11 @@ import com.liferay.portal.kernel.search.SearchResultManager;
 import com.liferay.portal.kernel.search.SummaryFactory;
 import com.liferay.portal.kernel.search.result.SearchResultContributor;
 import com.liferay.portal.kernel.search.result.SearchResultTranslator;
+import com.liferay.portal.kernel.search.test.BaseSearchResultUtilTestCase;
+import com.liferay.portal.kernel.search.test.SearchTestUtil;
 import com.liferay.portal.search.internal.result.SearchResultManagerImpl;
 import com.liferay.portal.search.internal.result.SearchResultTranslatorImpl;
 import com.liferay.portal.search.internal.result.SummaryFactoryImpl;
-import com.liferay.portal.search.test.BaseSearchResultUtilTestCase;
-import com.liferay.portal.search.test.SearchTestUtil;
 
 import java.util.List;
 
@@ -43,13 +42,11 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
-import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  * @author André de Oliveira
  */
-@PrepareForTest(AssetRendererFactoryRegistryUtil.class)
 @RunWith(PowerMockRunner.class)
 public class SearchResultUtilMBMessageTest
 	extends BaseSearchResultUtilTestCase {
@@ -59,31 +56,31 @@ public class SearchResultUtilMBMessageTest
 	public void setUp() throws Exception {
 		super.setUp();
 
-		when(
+		Mockito.when(
 			_commentManager.fetchComment(Mockito.anyLong())
 		).thenReturn(
 			_comment
 		);
 
-		when(
+		Mockito.when(
 			_comment.getCommentId()
 		).thenReturn(
 			SearchTestUtil.ENTRY_CLASS_PK
 		);
 
-		when(
+		Mockito.when(
 			_mbMessage.getMessageId()
 		).thenReturn(
 			SearchTestUtil.ENTRY_CLASS_PK
 		);
 
-		when(
+		Mockito.when(
 			_mbMessageLocalService.getMessage(SearchTestUtil.ENTRY_CLASS_PK)
 		).thenReturn(
 			_mbMessage
 		);
 
-		when(
+		Mockito.when(
 			_mbMessageLocalService.getMessage(SearchTestUtil.ENTRY_CLASS_PK + 1)
 		).thenReturn(
 			_mbMessage
@@ -107,7 +104,7 @@ public class SearchResultUtilMBMessageTest
 			commentRelatedSearchResults.toString(),
 			commentRelatedSearchResults.isEmpty());
 
-		verifyZeroInteractions(_mbMessageLocalService);
+		Mockito.verifyZeroInteractions(_mbMessageLocalService);
 
 		Assert.assertNull(searchResult.getSummary());
 

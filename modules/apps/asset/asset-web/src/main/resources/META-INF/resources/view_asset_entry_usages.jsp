@@ -163,13 +163,26 @@ renderResponse.setTitle(assetEntryUsagesDisplayContext.getAssetEntryTitle());
 						<liferay-ui:search-container-column-text
 							name="portlet"
 							translate="<%= true %>"
-							value="<%= PortalUtil.getPortletTitle(assetEntryUsage.getPortletId(), locale) %>"
+							value="<%= PortalUtil.getPortletTitle(PortletIdCodec.decodePortletName(assetEntryUsage.getPortletId()), locale) %>"
 						/>
 
 						<liferay-ui:search-container-column-date
 							name="modified-date"
 							value="<%= assetEntryUsage.getModifiedDate() %>"
 						/>
+
+						<%
+						List<DropdownItem> dropdownItems = assetEntryUsagesDisplayContext.getAssetEntryUsageActionDropdownItems(assetEntryUsage);
+						%>
+
+						<c:if test="<%= ListUtil.isNotEmpty(dropdownItems) %>">
+							<liferay-ui:search-container-column-text>
+								<clay:dropdown-actions
+									componentId='<%= renderResponse.getNamespace() + "actionsComponent" %>'
+									dropdownItems="<%= dropdownItems %>"
+								/>
+							</liferay-ui:search-container-column-text>
+						</c:if>
 					</liferay-ui:search-container-row>
 
 					<liferay-ui:search-iterator

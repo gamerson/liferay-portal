@@ -1,4 +1,9 @@
-import {ADD_SECTION, MOVE_SECTION, REMOVE_SECTION} from '../actions/actions.es';
+import {
+	ADD_SECTION,
+	MOVE_SECTION,
+	REMOVE_SECTION,
+	UPDATE_SECTION_CONFIG
+} from '../actions/actions.es';
 import {
 	add,
 	remove,
@@ -27,22 +32,22 @@ function addSectionReducer(state, actionType, payload) {
 		resolve => {
 			if (actionType === ADD_SECTION) {
 				const position = getDropSectionPosition(
-					state.layoutData.structure,
-					state.dropTargetItemId,
-					state.dropTargetBorder
+					nextState.layoutData.structure,
+					nextState.dropTargetItemId,
+					nextState.dropTargetBorder
 				);
 
 				const nextData = _addSection(
 					payload.layoutColumns,
-					state.layoutData,
+					nextState.layoutData,
 					position
 				);
 
 				updateLayoutData(
-					state.updateLayoutPageTemplateDataURL,
-					state.portletNamespace,
-					state.classNameId,
-					state.classPK,
+					nextState.updateLayoutPageTemplateDataURL,
+					nextState.portletNamespace,
+					nextState.classNameId,
+					nextState.classPK,
 					nextData
 				)
 					.then(
@@ -87,16 +92,16 @@ function moveSectionReducer(state, actionType, payload) {
 			if (actionType === MOVE_SECTION) {
 				const nextData = _moveSection(
 					payload.sectionId,
-					state.layoutData,
+					nextState.layoutData,
 					payload.targetItemId,
 					payload.targetBorder
 				);
 
 				updateLayoutData(
-					state.updateLayoutPageTemplateDataURL,
-					state.portletNamespace,
-					state.classNameId,
-					state.classPK,
+					nextState.updateLayoutPageTemplateDataURL,
+					nextState.portletNamespace,
+					nextState.classNameId,
+					nextState.classPK,
 					nextData
 				)
 					.then(
@@ -138,20 +143,20 @@ function removeSectionReducer(state, actionType, payload) {
 		resolve => {
 			if (actionType === REMOVE_SECTION) {
 				const nextData = _removeSection(
-					state.layoutData,
+					nextState.layoutData,
 					payload.sectionId
 				);
 
 				const fragmentEntryLinkIds = getSectionFragmentEntryLinkIds(
-					state.layoutData.structure,
+					nextState.layoutData.structure,
 					payload.sectionId
 				);
 
 				updateLayoutData(
-					state.updateLayoutPageTemplateDataURL,
-					state.portletNamespace,
-					state.classNameId,
-					state.classPK,
+					nextState.updateLayoutPageTemplateDataURL,
+					nextState.portletNamespace,
+					nextState.classNameId,
+					nextState.classPK,
 					nextData,
 					fragmentEntryLinkIds
 				)
@@ -178,6 +183,73 @@ function removeSectionReducer(state, actionType, payload) {
 		}
 	);
 }
+
+/**
+ * @param {object} state
+ * @param {string} actionType
+ * @param {object} payload
+ * @param {object} payload.config
+ * @param {string} payload.sectionId
+ * @return {object}
+ */
+const updateSectionConfigReducer = (state, actionType, payload) => new Promise(
+	resolve => {
+		let nextState = state;
+
+		if (actionType === UPDATE_SECTION_CONFIG) {
+			const sectionIndex = getSectionIndex(
+				nextState.layoutData.structure,
+				payload.sectionId
+			);
+
+			if (sectionIndex === -1) {
+				resolve(nextState);
+			}
+			else {
+				Object.entries(payload.config).forEach(
+					entry => {
+						const [key, value] = entry;
+
+						const configPath = [
+							'layoutData',
+							'structure',
+							sectionIndex,
+							'config',
+							key
+						];
+
+						nextState = setIn(
+							nextState,
+							configPath,
+							value
+						);
+					}
+				);
+
+				updateLayoutData(
+					nextState.updateLayoutPageTemplateDataURL,
+					nextState.portletNamespace,
+					nextState.classNameId,
+					nextState.classPK,
+					nextState.layoutData
+				)
+					.then(
+						() => {
+							resolve(nextState);
+						}
+					)
+					.catch(
+						() => {
+							resolve(nextState);
+						}
+					);
+			}
+		}
+		else {
+			resolve(nextState);
+		}
+	}
+);
 
 /**
  * Returns a new layoutData with the given columns inserted as a new section
@@ -212,6 +284,7 @@ function _addSection(layoutColumns, layoutData, position) {
 		layoutData.structure,
 		{
 			columns,
+			config: {},
 			rowId: `${nextRowId}`
 		},
 		position
@@ -273,4 +346,9 @@ function _removeSection(layoutData, sectionId) {
 	);
 }
 
-export {addSectionReducer, moveSectionReducer, removeSectionReducer};
+export {
+	addSectionReducer,
+	moveSectionReducer,
+	removeSectionReducer,
+	updateSectionConfigReducer
+};

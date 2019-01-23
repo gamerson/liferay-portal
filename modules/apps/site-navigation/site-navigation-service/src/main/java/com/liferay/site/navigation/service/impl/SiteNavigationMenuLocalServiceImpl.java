@@ -29,7 +29,6 @@ import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.spring.extender.service.ServiceReference;
 import com.liferay.site.navigation.constants.SiteNavigationConstants;
 import com.liferay.site.navigation.exception.DuplicateSiteNavigationMenuException;
-import com.liferay.site.navigation.exception.RequiredPrimarySiteNavigationMenuException;
 import com.liferay.site.navigation.exception.SiteNavigationMenuNameException;
 import com.liferay.site.navigation.menu.item.layout.constants.SiteNavigationMenuItemTypeConstants;
 import com.liferay.site.navigation.model.SiteNavigationMenu;
@@ -132,17 +131,9 @@ public class SiteNavigationMenuLocalServiceImpl
 			ServiceContext serviceContext)
 		throws PortalException {
 
-		int type = SiteNavigationConstants.TYPE_DEFAULT;
-
-		int siteNavigationMenusCount = getSiteNavigationMenusCount(
-			serviceContext.getScopeGroupId());
-
-		if (siteNavigationMenusCount <= 0) {
-			type = SiteNavigationConstants.TYPE_PRIMARY;
-		}
-
 		return addSiteNavigationMenu(
-			userId, groupId, name, type, serviceContext);
+			userId, groupId, name, SiteNavigationConstants.TYPE_DEFAULT,
+			serviceContext);
 	}
 
 	@Override
@@ -160,20 +151,6 @@ public class SiteNavigationMenuLocalServiceImpl
 	public SiteNavigationMenu deleteSiteNavigationMenu(
 			SiteNavigationMenu siteNavigationMenu)
 		throws PortalException {
-
-		SiteNavigationMenu primarySiteNavigationMenu =
-			fetchPrimarySiteNavigationMenu(siteNavigationMenu.getGroupId());
-
-		int siteNavigationMenuCount = getSiteNavigationMenusCount(
-			siteNavigationMenu.getGroupId());
-
-		if ((primarySiteNavigationMenu != null) &&
-			(siteNavigationMenuCount > 1) &&
-			(primarySiteNavigationMenu.getSiteNavigationMenuId() ==
-				siteNavigationMenu.getSiteNavigationMenuId())) {
-
-			throw new RequiredPrimarySiteNavigationMenuException();
-		}
 
 		// Site navigation menu
 
@@ -393,19 +370,7 @@ public class SiteNavigationMenuLocalServiceImpl
 	}
 
 	private void _updateOldSiteNavigationMenuType(
-			SiteNavigationMenu siteNavigationMenu, int type)
-		throws PortalException {
-
-		SiteNavigationMenu primarySiteNavigationMenu =
-			fetchPrimarySiteNavigationMenu(siteNavigationMenu.getGroupId());
-
-		if ((primarySiteNavigationMenu != null) &&
-			(primarySiteNavigationMenu.getSiteNavigationMenuId() ==
-				siteNavigationMenu.getSiteNavigationMenuId()) &&
-			(type != SiteNavigationConstants.TYPE_PRIMARY)) {
-
-			throw new RequiredPrimarySiteNavigationMenuException();
-		}
+		SiteNavigationMenu siteNavigationMenu, int type) {
 
 		if (type == SiteNavigationConstants.TYPE_DEFAULT) {
 			return;

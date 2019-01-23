@@ -71,7 +71,7 @@ public class MBAttachmentsTest {
 
 	@Before
 	public void setUp() throws Exception {
-		_group = GroupTestUtil.addGroup();
+		addGroup();
 	}
 
 	@Ignore
@@ -304,7 +304,7 @@ public class MBAttachmentsTest {
 
 	protected void addCategory() throws Exception {
 		if (_group == null) {
-			_group = GroupTestUtil.addGroup();
+			addGroup();
 		}
 
 		ServiceContext serviceContext =
@@ -315,6 +315,12 @@ public class MBAttachmentsTest {
 			TestPropsValues.getUserId(),
 			MBCategoryConstants.DEFAULT_PARENT_CATEGORY_ID,
 			RandomTestUtil.randomString(), StringPool.BLANK, serviceContext);
+	}
+
+	protected void addGroup() throws Exception {
+		_group = GroupTestUtil.addGroup();
+
+		_groups.add(_group);
 	}
 
 	protected void addMessage() throws Exception {
@@ -342,7 +348,7 @@ public class MBAttachmentsTest {
 			User user = TestPropsValues.getUser();
 
 			if (_group == null) {
-				_group = GroupTestUtil.addGroup();
+				addGroup();
 			}
 
 			List<ObjectValuePair<String, InputStream>> objectValuePairs =
@@ -475,9 +481,10 @@ public class MBAttachmentsTest {
 	}
 
 	private MBCategory _category;
+	private Group _group;
 
 	@DeleteAfterTestRun
-	private Group _group;
+	private final List<Group> _groups = new ArrayList<>();
 
 	private MBMessage _message;
 

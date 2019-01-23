@@ -65,6 +65,21 @@ String navigation = ParamUtil.getString(request, "navigation");
 
 		<liferay-util:include page="/document_library/toolbar.jsp" servletContext="<%= application %>" />
 
+		<%
+		BulkSelectionRunner bulkSelectionRunner = BulkSelectionRunnerUtil.getBulkSelectionRunner();
+
+		Map<String, Object> context = new HashMap<>();
+
+		context.put("bulkInProgress", bulkSelectionRunner.isBusy(user));
+		context.put("portletNamespace", liferayPortletResponse.getNamespace());
+		%>
+
+		<soy:component-renderer
+			context="<%= context %>"
+			module="document_library/bulk/BulkStatus.es"
+			templateNamespace="com.liferay.document.library.web.BulkStatus.render"
+		/>
+
 		<div id="<portlet:namespace />documentLibraryContainer">
 
 			<%
@@ -215,6 +230,7 @@ String navigation = ParamUtil.getString(request, "navigation");
 						moveEntryUrl: '<portlet:renderURL><portlet:param name="mvcRenderCommandName" value="/document_library/move_entry" /><portlet:param name="redirect" value="<%= currentURL %>" /><portlet:param name="newFolderId" value="<%= String.valueOf(folderId) %>" /></portlet:renderURL>',
 						editTagsUrl: '<portlet:renderURL><portlet:param name="mvcRenderCommandName" value="/document_library/edit_tags" /><portlet:param name="redirect" value="<%= currentURL %>" /></portlet:renderURL>',
 						namespace: '<portlet:namespace />',
+						npmResolvedPackageName: '<%= npmResolvedPackageName %>',
 						portletId: '<%= HtmlUtil.escapeJS(portletId) %>',
 						redirect: encodeURIComponent('<%= currentURL %>'),
 						repositories: [

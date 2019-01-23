@@ -20,7 +20,13 @@ class ManagementToolbarDefaultEventHandler extends PortletBase {
 	}
 
 	deleteEntries() {
-		if (this.trashEnabled || confirm(Liferay.Language.get('are-you-sure-you-want-to-delete-the-selected-entries'))) {
+		let message = 'are-you-sure-you-want-to-delete-the-selected-entries';
+
+		if (this.trashEnabled) {
+			message = 'are-you-sure-you-want-to-move-the-selected-entries-to-the-recycle-bin';
+		}
+
+		if (confirm(Liferay.Language.get(message))) {
 			Liferay.fire(
 				this.ns('editEntry'),
 				{
@@ -71,6 +77,9 @@ class ManagementToolbarDefaultEventHandler extends PortletBase {
 	}
 
 	openDDMStructuresSelector() {
+		let namespace = this.namespace;
+		let uri = this.viewDDMStructureArticlesURL;
+
 		Liferay.Util.selectEntity(
 			{
 				dialog: {
@@ -82,7 +91,7 @@ class ManagementToolbarDefaultEventHandler extends PortletBase {
 				uri: this.selectEntityURL
 			},
 			function(event) {
-				location.href = this.viewDDMStructureArticlesURL;
+				location.href = Liferay.Util.addParams(namespace + 'ddmStructureKey=' + event.ddmstructurekey, uri);
 			}
 		);
 	}

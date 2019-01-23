@@ -29,8 +29,9 @@ import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.PortletKeys;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
-import com.liferay.portal.security.sso.openid.OpenIdServiceException;
 import com.liferay.portal.security.sso.openid.OpenIdServiceHandler;
+import com.liferay.portal.security.sso.openid.exception.OpenIdServiceException;
+import com.liferay.portal.security.sso.openid.exception.StrangersNotAllowedException;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
@@ -157,9 +158,10 @@ public class OpenIdLoginMVCActionCommand extends BaseMVCActionCommand {
 
 				SessionErrors.add(actionRequest, e.getClass());
 			}
-			else if (e instanceof
-						UserEmailAddressException.MustNotBeDuplicate) {
-
+			else if (e instanceof UserEmailAddressException) {
+				SessionErrors.add(actionRequest, e.getClass());
+			}
+			else if (e instanceof StrangersNotAllowedException) {
 				SessionErrors.add(actionRequest, e.getClass());
 			}
 			else {

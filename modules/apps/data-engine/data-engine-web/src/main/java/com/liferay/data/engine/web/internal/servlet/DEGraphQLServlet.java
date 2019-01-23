@@ -24,6 +24,11 @@ import com.liferay.data.engine.web.internal.servlet.data.fetcher.DEDeleteDataDef
 import com.liferay.data.engine.web.internal.servlet.data.fetcher.DEGetDataDefinitionDataFetcher;
 import com.liferay.data.engine.web.internal.servlet.data.fetcher.DEListDataDefinitionDataFetcher;
 import com.liferay.data.engine.web.internal.servlet.data.fetcher.DESaveDataDefinitionDataFetcher;
+import com.liferay.data.engine.web.internal.servlet.data.fetcher.DESaveDataRecordCollectionDataFetcher;
+import com.liferay.data.engine.web.internal.servlet.data.fetcher.DESaveModelPermissionsDataDefinitionDataFetcher;
+import com.liferay.data.engine.web.internal.servlet.data.fetcher.DESavePermissionsDataDefinitionDataFetcher;
+import com.liferay.data.engine.web.internal.servlet.data.fetcher.DESearchCountDataDefinitionFetcher;
+import com.liferay.data.engine.web.internal.servlet.data.fetcher.DESearchDataDefinitionFetcher;
 import com.liferay.petra.string.CharPool;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.servlet.ServletResponseUtil;
@@ -156,6 +161,16 @@ public class DEGraphQLServlet extends HttpServlet {
 			typeWiring -> typeWiring.dataFetcher(
 				"saveDataDefinition", _deSaveDataDefinitionDataFetcher));
 		runtimeWiringBuilder.type(
+			"MutationType",
+			typeWiring -> typeWiring.dataFetcher(
+				"saveDataDefinitionModelPermissions",
+				_deSaveModelPermissionsDataDefinitionDataFetcher));
+		runtimeWiringBuilder.type(
+			"MutationType",
+			typeWiring -> typeWiring.dataFetcher(
+				"saveDataDefinitionPermissions",
+				_deSavePermissionsDataDefinitionDataFetcher));
+		runtimeWiringBuilder.type(
 			"QueryType",
 			typeWiring -> typeWiring.dataFetcher(
 				"countDataDefinition", _deCountDataDefinitionDataFetcher));
@@ -167,6 +182,21 @@ public class DEGraphQLServlet extends HttpServlet {
 			"QueryType",
 			typeWiring -> typeWiring.dataFetcher(
 				"listDataDefinition", _deListDataDefinitionDataFetcher));
+		runtimeWiringBuilder.type(
+			"QueryType",
+			typeWiring -> typeWiring.dataFetcher(
+				"searchCountDataDefinition",
+				_deSearchCountDataDefinitionFetcher));
+		runtimeWiringBuilder.type(
+			"QueryType",
+			typeWiring -> typeWiring.dataFetcher(
+				"searchDataDefinition", _deSearchDataDefinitionFetcher));
+
+		runtimeWiringBuilder.type(
+			"MutationType",
+			typeWiring -> typeWiring.dataFetcher(
+				"saveDataRecordCollection",
+				_deSaveDataRecordCollectionDataFetcher));
 
 		return runtimeWiringBuilder.build();
 	}
@@ -335,6 +365,25 @@ public class DEGraphQLServlet extends HttpServlet {
 
 	@Reference
 	private DESaveDataDefinitionDataFetcher _deSaveDataDefinitionDataFetcher;
+
+	@Reference
+	private DESaveDataRecordCollectionDataFetcher
+		_deSaveDataRecordCollectionDataFetcher;
+
+	@Reference
+	private DESaveModelPermissionsDataDefinitionDataFetcher
+		_deSaveModelPermissionsDataDefinitionDataFetcher;
+
+	@Reference
+	private DESavePermissionsDataDefinitionDataFetcher
+		_deSavePermissionsDataDefinitionDataFetcher;
+
+	@Reference
+	private DESearchCountDataDefinitionFetcher
+		_deSearchCountDataDefinitionFetcher;
+
+	@Reference
+	private DESearchDataDefinitionFetcher _deSearchDataDefinitionFetcher;
 
 	private transient GraphQL _graphQL;
 	private final ObjectMapper _objectMapper = new ObjectMapper() {

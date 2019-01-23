@@ -13,6 +13,7 @@
 		hasChild: bool,
 		homePage: bool,
 		homePageTitle: string,
+		parentable: bool,
 		plid: string,
 		title: string,
 		url: string
@@ -114,6 +115,7 @@
 		hasChild: bool,
 		homePage: bool,
 		homePageTitle: string,
+		parentable: bool,
 		plid: string,
 		title: string,
 		url: string
@@ -133,6 +135,9 @@
 
 		{if $layoutColumnIndex != 0}
 			{sp}layout-drag-item
+		{/if}
+
+		{if $layoutColumnItem.parentable}
 			{sp}layout-drop-target-item
 		{/if}
 

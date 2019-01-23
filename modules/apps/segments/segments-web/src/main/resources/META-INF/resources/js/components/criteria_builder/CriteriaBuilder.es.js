@@ -2,11 +2,12 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import ClayToggle from '../shared/ClayToggle.es';
 import CriteriaGroup from './CriteriaGroup.es';
-import CriteriaSidebar from '../criteria_sidebar/CriteriaSidebar.es';
-import {DragDropContext as dragDropContext} from 'react-dnd';
-import getCN from 'classnames';
-import HTML5Backend from 'react-dnd-html5-backend';
-import {insertAtIndex, removeAtIndex, replaceAtIndex, sub} from '../../utils/utils.es';
+import {
+	insertAtIndex,
+	removeAtIndex,
+	replaceAtIndex,
+	sub
+} from '../../utils/utils.es';
 
 const CRITERIA_GROUP_SHAPE = {
 	conjunctionName: PropTypes.string,
@@ -20,53 +21,53 @@ const CRITERION_SHAPE = {
 	value: PropTypes.oneOfType([PropTypes.string, PropTypes.array])
 };
 
-class CriteriaBuilder extends Component {
-	static propTypes = {
-		criteria: PropTypes.shape(
-			{
-				conjunctionName: PropTypes.string,
-				groupId: PropTypes.string,
-				items: PropTypes.arrayOf(
-					PropTypes.oneOfType(
-						[
-							PropTypes.shape(CRITERIA_GROUP_SHAPE),
-							PropTypes.shape(CRITERION_SHAPE)
-						]
-					)
+const propTypes = {
+	criteria: PropTypes.shape(
+		{
+			conjunctionName: PropTypes.string,
+			groupId: PropTypes.string,
+			items: PropTypes.arrayOf(
+				PropTypes.oneOfType(
+					[
+						PropTypes.shape(CRITERIA_GROUP_SHAPE),
+						PropTypes.shape(CRITERION_SHAPE)
+					]
 				)
+			)
+		}
+	),
+	editing: PropTypes.bool.isRequired,
+	id: PropTypes.number.isRequired,
+	modelLabel: PropTypes.string,
+	onChange: PropTypes.func,
+	onEditToggle: PropTypes.func,
+	propertyKey: PropTypes.string.isRequired,
+	supportedConjunctions: PropTypes.arrayOf(
+		PropTypes.shape(
+			{
+				label: PropTypes.string,
+				name: PropTypes.string.isRequired
 			}
-		),
-		modelLabel: PropTypes.string,
-		onChange: PropTypes.func,
-		supportedConjunctions: PropTypes.arrayOf(
-			PropTypes.shape(
-				{
-					label: PropTypes.string,
-					name: PropTypes.string.isRequired
-				}
-			)
-		),
-		supportedOperators: PropTypes.array,
-		supportedProperties: PropTypes.arrayOf(
-			PropTypes.shape(
-				{
-					entityUrl: PropTypes.string,
-					label: PropTypes.string,
-					name: PropTypes.string.isRequired,
-					options: PropTypes.array,
-					type: PropTypes.string.isRequired
-				}
-			)
-		).isRequired,
-		supportedPropertyTypes: PropTypes.object
-	};
+		)
+	),
+	supportedOperators: PropTypes.array,
+	supportedProperties: PropTypes.arrayOf(
+		PropTypes.shape(
+			{
+				entityUrl: PropTypes.string,
+				label: PropTypes.string,
+				name: PropTypes.string.isRequired,
+				options: PropTypes.array,
+				type: PropTypes.string.isRequired
+			}
+		)
+	).isRequired,
+	supportedPropertyTypes: PropTypes.object
+};
 
+class CriteriaBuilder extends Component {
 	static defaultProps = {
 		readOnly: false
-	};
-
-	state = {
-		editing: false
 	};
 
 	/**
@@ -77,9 +78,10 @@ class CriteriaBuilder extends Component {
 	 * @param {Array} criteriaItems A list of criterion and criteria groups
 	 * @param {boolean} root True if the criteriaItems are from the root group.
 	 * to clean.
+	 * @returns {*}
 	 */
 	_cleanCriteriaMapItems(criteriaItems, root) {
-		return criteriaItems
+		const criteria = criteriaItems
 			.filter(
 				({items}) => {
 					return items ? items.length : true;
@@ -115,18 +117,18 @@ class CriteriaBuilder extends Component {
 					return cleanedItem;
 				}
 			);
+
+		return criteria;
 	}
 
 	/**
 	 * Switches the edit state between true and false.
 	 */
 	_handleToggleEdit = () => {
-		this.setState(
-			{
-				editing: !this.state.editing
-			}
-		);
-	};
+		const {editing, id, onEditToggle} = this.props;
+
+		return onEditToggle && onEditToggle(id, editing);
+	}
 
 	/**
 	 * Cleans and updates the criteria with the newer criteria.
@@ -135,8 +137,8 @@ class CriteriaBuilder extends Component {
 	_handleCriteriaChange = newCriteria => {
 		const items = this._cleanCriteriaMapItems([newCriteria], true);
 
-		this.props.onChange(items[items.length - 1]);
-	};
+		this.props.onChange(items[items.length - 1], this.props.id);
+	}
 
 	/**
 	 * Moves the criterion to the specified index by removing and adding, and
@@ -243,63 +245,53 @@ class CriteriaBuilder extends Component {
 	render() {
 		const {
 			criteria,
+			editing,
 			modelLabel,
+			propertyKey,
 			supportedConjunctions,
 			supportedOperators,
 			supportedProperties,
 			supportedPropertyTypes
 		} = this.props;
 
-		const {editing} = this.state;
-
-		const classes = getCN(
-			'criteria-builder-root',
-			{
-				'read-only': !editing
-			}
-		);
-
 		return (
-			<div className={classes}>
-				<div className="criteria-builder-section-main">
-					<div className="sheet sheet-lg">
-						<div className="criteria-builder-toolbar">
-							<ClayToggle
-								checked={editing}
-								iconOff="pencil"
-								iconOn="pencil"
-								onChange={this._handleToggleEdit}
-							/>
-						</div>
-
-						<CriteriaGroup
-							criteria={criteria}
-							editing={editing}
-							groupId={criteria && criteria.groupId}
-							modelLabel={modelLabel}
-							onChange={this._handleCriteriaChange}
-							onMove={this._handleCriterionMove}
-							root
-							supportedConjunctions={supportedConjunctions}
-							supportedOperators={supportedOperators}
-							supportedProperties={supportedProperties}
-							supportedPropertyTypes={supportedPropertyTypes}
-						/>
-					</div>
-				</div>
-
-				<div className="criteria-builder-section-sidebar">
-					<CriteriaSidebar
-						supportedProperties={supportedProperties}
-						title={sub(
+			<div className="sheet sheet-lg">
+				<div className="criteria-builder-toolbar">
+					<div className="criteria-model-label">
+						{sub(
 							Liferay.Language.get('x-properties'),
 							[modelLabel]
 						)}
+					</div>
+
+					<ClayToggle
+						checked={editing}
+						className="ml-auto"
+						iconOff="pencil"
+						iconOn="pencil"
+						onChange={this._handleToggleEdit}
 					/>
 				</div>
+
+				<CriteriaGroup
+					criteria={criteria}
+					editing={editing}
+					groupId={criteria && criteria.groupId}
+					modelLabel={modelLabel}
+					onChange={this._handleCriteriaChange}
+					onMove={this._handleCriterionMove}
+					propertyKey={propertyKey}
+					root
+					supportedConjunctions={supportedConjunctions}
+					supportedOperators={supportedOperators}
+					supportedProperties={supportedProperties}
+					supportedPropertyTypes={supportedPropertyTypes}
+				/>
 			</div>
 		);
 	}
 }
 
-export default dragDropContext(HTML5Backend)(CriteriaBuilder);
+CriteriaBuilder.propTypes = propTypes;
+
+export default CriteriaBuilder;

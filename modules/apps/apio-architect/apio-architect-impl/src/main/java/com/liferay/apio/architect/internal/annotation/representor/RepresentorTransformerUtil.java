@@ -36,6 +36,7 @@ import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -77,7 +78,7 @@ public class RepresentorTransformerUtil {
 				getMethodFunction(fieldData.getMethod()));
 		}
 
-		List<FieldData> fieldDataList = filterWritableFields(
+		List<FieldData<Class<?>>> fieldDataList = filterWritableFields(
 			parsedType::getFieldDataList);
 
 		fieldDataList.forEach(
@@ -152,11 +153,19 @@ public class RepresentorTransformerUtil {
 		);
 	}
 
+	public static <T> BinaryFunction<T> getBinaryFunction(Method method) {
+		return t -> Try.fromFallible(
+			() -> (BinaryFile)_unwrapOptionalIfNeeded(method.invoke(t))
+		).orElse(
+			null
+		);
+	}
+
 	public static <A, T, S> BiFunction<T, A, S> getMethodBiFunction(
 		Method method) {
 
 		return (t, a) -> Try.fromFallible(
-			() -> (S)method.invoke(t, a)
+			() -> (S)_unwrapOptionalIfNeeded(method.invoke(t, a))
 		).orElse(
 			null
 		);
@@ -164,36 +173,35 @@ public class RepresentorTransformerUtil {
 
 	public static <T, S> Function<T, S> getMethodFunction(Method method) {
 		return t -> Try.fromFallible(
-			() -> (S)method.invoke(t)
+			() -> (S)_unwrapOptionalIfNeeded(method.invoke(t))
 		).orElse(
 			null
 		);
 	}
 
 	private static void _addBasicFields(
-		BaseRepresentor.BaseFirstStep<?, ?, ?> firstStep, FieldData fieldData) {
+		BaseRepresentor.BaseFirstStep<?, ?, ?> firstStep,
+		FieldData<Class<?>> fieldData) {
 
 		Method method = fieldData.getMethod();
-
 		Field field = fieldData.getField();
-
-		Class<?> returnType = method.getReturnType();
+		Class<?> returnTypeClass = fieldData.getData();
 
 		String key = field.value();
 
-		if (returnType == String.class) {
+		if (returnTypeClass == String.class) {
 			_addStringFields(firstStep, method, key);
 		}
-		else if (returnType == Date.class) {
+		else if (returnTypeClass == Date.class) {
 			firstStep.addDate(key, getMethodFunction(method));
 		}
-		else if (returnType == Boolean.class) {
+		else if (returnTypeClass == Boolean.class) {
 			firstStep.addBoolean(key, getMethodFunction(method));
 		}
-		else if (returnType == BinaryFile.class) {
-			firstStep.addBinary(key, (BinaryFunction)getMethodFunction(method));
+		else if (returnTypeClass == BinaryFile.class) {
+			firstStep.addBinary(key, getBinaryFunction(method));
 		}
-		else if (Number.class.isAssignableFrom(returnType)) {
+		else if (Number.class.isAssignableFrom(returnTypeClass)) {
 			firstStep.addNumber(key, getMethodFunction(method));
 		}
 	}
@@ -238,6 +246,16 @@ public class RepresentorTransformerUtil {
 		else {
 			firstStep.addString(key, getMethodFunction(method));
 		}
+	}
+
+	private static <T> T _unwrapOptionalIfNeeded(Object object) {
+		if (object.getClass() == Optional.class) {
+			Optional<T> optional = (Optional<T>)object;
+
+			return optional.orElse(null);
+		}
+
+		return (T)object;
 	}
 
 	private static final Predicate<FieldData> _isWritableField = fieldData -> {

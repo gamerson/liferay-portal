@@ -16,15 +16,9 @@
 
 <%@ include file="/init.jsp" %>
 
-<%
-SearchContainer articleSearchContainer = journalDisplayContext.getSearchContainer(true);
-
-String displayStyle = journalDisplayContext.getDisplayStyle();
-%>
-
 <liferay-ui:search-container
 	emptyResultsMessage="no-web-content-was-found"
-	searchContainer="<%= articleSearchContainer %>"
+	searchContainer="<%= journalDisplayContext.getSearchContainer(true) %>"
 >
 	<liferay-ui:search-container-row
 		className="com.liferay.journal.model.JournalArticle"
@@ -36,7 +30,7 @@ String displayStyle = journalDisplayContext.getDisplayStyle();
 		%>
 
 		<c:choose>
-			<c:when test='<%= displayStyle.equals("descriptive") %>'>
+			<c:when test='<%= Objects.equals(journalDisplayContext.getDisplayStyle(), "descriptive") %>'>
 				<liferay-ui:search-container-column-text>
 					<liferay-ui:user-portrait
 						userId="<%= articleVersion.getUserId() %>"
@@ -66,51 +60,26 @@ String displayStyle = journalDisplayContext.getDisplayStyle();
 					</h6>
 				</liferay-ui:search-container-column-text>
 
-				<liferay-ui:search-container-column-jsp
-					path="/article_version_action.jsp"
-				/>
+				<liferay-ui:search-container-column-text>
+					<clay:dropdown-actions
+						defaultEventHandler="<%= JournalWebConstants.JOURNAL_ELEMENTS_DEFAULT_EVENT_HANDLER %>"
+						dropdownItems="<%= journalDisplayContext.getArticleVersionActionDropdownItems(articleVersion) %>"
+					/>
+				</liferay-ui:search-container-column-text>
 			</c:when>
-			<c:when test='<%= displayStyle.equals("icon") %>'>
+			<c:when test='<%= Objects.equals(journalDisplayContext.getDisplayStyle(), "icon") %>'>
 
 				<%
 				row.setCssClass("entry-card lfr-asset-item");
 				%>
 
 				<liferay-ui:search-container-column-text>
-
-					<%
-					String articleImageURL = articleVersion.getArticleImageURL(themeDisplay);
-					%>
-
-					<c:choose>
-						<c:when test="<%= Validator.isNotNull(articleImageURL) %>">
-							<liferay-frontend:vertical-card
-								actionJsp="/article_version_action.jsp"
-								actionJspServletContext="<%= application %>"
-								imageUrl="<%= articleImageURL %>"
-								resultRow="<%= row %>"
-								rowChecker="<%= searchContainer.getRowChecker() %>"
-								title="<%= articleVersion.getTitle(locale) %>"
-							>
-								<%@ include file="/article_version_vertical_card.jspf" %>
-							</liferay-frontend:vertical-card>
-						</c:when>
-						<c:otherwise>
-							<liferay-frontend:icon-vertical-card
-								actionJsp="/article_version_action.jsp"
-								actionJspServletContext="<%= application %>"
-								icon="web-content"
-								resultRow="<%= row %>"
-								rowChecker="<%= searchContainer.getRowChecker() %>"
-								title="<%= articleVersion.getTitle(locale) %>"
-							>
-								<%@ include file="/article_version_vertical_card.jspf" %>
-							</liferay-frontend:icon-vertical-card>
-						</c:otherwise>
-					</c:choose>
+					<clay:vertical-card
+						verticalCard="<%= new JournalArticleVersionVerticalCard(articleVersion, renderRequest, renderResponse, searchContainer.getRowChecker(), trashHelper) %>"
+					/>
 				</liferay-ui:search-container-column-text>
 			</c:when>
-			<c:when test='<%= displayStyle.equals("list") %>'>
+			<c:when test='<%= Objects.equals(journalDisplayContext.getDisplayStyle(), "list") %>'>
 				<liferay-ui:search-container-column-text
 					name="id"
 					value="<%= HtmlUtil.escape(articleVersion.getArticleId()) %>"
@@ -150,17 +119,35 @@ String displayStyle = journalDisplayContext.getDisplayStyle();
 					value="<%= HtmlUtil.escape(PortalUtil.getUserName(articleVersion)) %>"
 				/>
 
-				<liferay-ui:search-container-column-jsp
-					path="/article_version_action.jsp"
-				/>
+				<liferay-ui:search-container-column-text>
+					<clay:dropdown-actions
+						defaultEventHandler="<%= JournalWebConstants.JOURNAL_ELEMENTS_DEFAULT_EVENT_HANDLER %>"
+						dropdownItems="<%= journalDisplayContext.getArticleVersionActionDropdownItems(articleVersion) %>"
+					/>
+				</liferay-ui:search-container-column-text>
 			</c:when>
 		</c:choose>
 	</liferay-ui:search-container-row>
 
 	<liferay-ui:search-iterator
-		displayStyle="<%= displayStyle %>"
+		displayStyle="<%= journalDisplayContext.getDisplayStyle() %>"
 		markupView="lexicon"
-		resultRowSplitter="<%= journalDisplayContext.isSearch() ? null : new JournalResultRowSplitter() %>"
-		searchContainer="<%= articleSearchContainer %>"
+		searchContainer="<%= searchContainer %>"
 	/>
 </liferay-ui:search-container>
+
+<aui:script require='<%= npmResolvedPackageName + "/js/ElementsDefaultEventHandler.es as ElementsDefaultEventHandler" %>'>
+	Liferay.component(
+		'<%= JournalWebConstants.JOURNAL_ELEMENTS_DEFAULT_EVENT_HANDLER %>',
+		new ElementsDefaultEventHandler.default(
+			{
+				namespace: '<%= renderResponse.getNamespace() %>',
+				trashEnabled: <%= trashHelper.isTrashEnabled(scopeGroupId) %>
+			}
+		),
+		{
+			destroyOnNavigate: true,
+			portletId: '<%= HtmlUtil.escapeJS(portletDisplay.getId()) %>'
+		}
+	);
+</aui:script>

@@ -86,9 +86,11 @@ definition {
 				rowEntry = "${navigationMenu}"
 			);
 
-			AssertConfirm(
-				value1 = "Do you want to replace ${navigationMenu} for ${currentPrimaryNavigationMenu} as primary navigation? This action will affect all the pages using primary navigation."
-			);
+			if (isSet(oldPrimaryNavigationMenu)) {
+				AssertConfirm(
+					value1 = "Do you want to replace ${navigationMenu} for ${oldPrimaryNavigationMenu} as primary navigation? This action will affect all the pages using primary navigation."
+				);
+			}
 		}
 		else {
 			LexiconEntry.gotoEntryMenuItem(
@@ -96,6 +98,12 @@ definition {
 				rowEntry = "${navigationMenu}"
 			);
 		}
+
+		AssertVisible(
+			locator1 = "ContentRow#ENTRY_CONTENT_ENTRY_TEXT",
+			key_rowEntry = "${navigationMenu}",
+			key_rowText = "${menuType}"
+		);
 	}
 
 	macro deleteItem {

@@ -15,6 +15,7 @@
 package com.liferay.fragment.entry.processor.editable.test;
 
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
+import com.liferay.fragment.constants.FragmentEntryLinkConstants;
 import com.liferay.fragment.exception.FragmentEntryContentException;
 import com.liferay.fragment.model.FragmentCollection;
 import com.liferay.fragment.model.FragmentEntry;
@@ -24,6 +25,8 @@ import com.liferay.fragment.service.FragmentCollectionServiceUtil;
 import com.liferay.fragment.service.FragmentEntryLinkLocalServiceUtil;
 import com.liferay.fragment.service.FragmentEntryServiceUtil;
 import com.liferay.petra.string.StringPool;
+import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.json.JSONException;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.model.Group;
@@ -33,6 +36,7 @@ import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
 import com.liferay.portal.kernel.test.util.GroupTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
+import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.test.rule.Inject;
@@ -68,58 +72,6 @@ public class FragmentEntryProcessorEditableTest {
 	@Before
 	public void setUp() throws Exception {
 		_group = GroupTestUtil.addGroup();
-	}
-
-	@Test
-	public void testFragmentEntryProcessorEditable() throws Exception {
-		ServiceContext serviceContext =
-			ServiceContextTestUtil.getServiceContext(
-				_group.getGroupId(), TestPropsValues.getUserId());
-
-		FragmentCollection fragmentCollection =
-			FragmentCollectionServiceUtil.addFragmentCollection(
-				_group.getGroupId(), "Fragment Collection", StringPool.BLANK,
-				serviceContext);
-
-		FragmentEntry fragmentEntry = FragmentEntryServiceUtil.addFragmentEntry(
-			_group.getGroupId(), fragmentCollection.getFragmentCollectionId(),
-			"Fragment Entry", null, _getFileAsString("fragment_entry.html"),
-			null, WorkflowConstants.STATUS_APPROVED, serviceContext);
-
-		FragmentEntryLink fragmentEntryLink =
-			FragmentEntryLinkLocalServiceUtil.createFragmentEntryLink(0);
-
-		fragmentEntryLink.setHtml(fragmentEntry.getHtml());
-
-		JSONObject editableFragmentEntryProcessorJSONObject =
-			JSONFactoryUtil.createJSONObject();
-
-		JSONObject editableValuesJSONObject =
-			JSONFactoryUtil.createJSONObject();
-
-		JSONObject editableImageDefaultValueJSONObject =
-			JSONFactoryUtil.createJSONObject();
-
-		editableImageDefaultValueJSONObject.put("defaultValue", "sample.jpg");
-
-		editableValuesJSONObject.put(
-			"editable_img", editableImageDefaultValueJSONObject);
-
-		JSONObject editableTextDefaultValueJSONObject =
-			JSONFactoryUtil.createJSONObject();
-
-		editableTextDefaultValueJSONObject.put("defaultValue", "test");
-
-		editableValuesJSONObject.put(
-			"editable_text", editableTextDefaultValueJSONObject);
-
-		editableFragmentEntryProcessorJSONObject.put(
-			"com.liferay.fragment.entry.processor.editable." +
-				"EditableFragmentEntryProcessor",
-			editableValuesJSONObject);
-
-		fragmentEntryLink.setEditableValues(
-			editableFragmentEntryProcessorJSONObject.toString());
 
 		Document document = Jsoup.parseBodyFragment(
 			_getFileAsString("processed_fragment_entry.html"));
@@ -132,8 +84,46 @@ public class FragmentEntryProcessorEditableTest {
 
 		Element bodyElement = document.body();
 
+		_processedHTML = bodyElement.html();
+	}
+
+	@Test
+	public void testFragmentEntryProcessorEditable() throws Exception {
+		FragmentEntry fragmentEntry = _createFragmentEntry(
+			"fragment_entry.html");
+
+		FragmentEntryLink fragmentEntryLink =
+			FragmentEntryLinkLocalServiceUtil.createFragmentEntryLink(0);
+
+		fragmentEntryLink.setHtml(fragmentEntry.getHtml());
+
+		fragmentEntryLink.setEditableValues(
+			_getJsonFileAsString("fragment_entry_link_editable_values.json"));
+
 		Assert.assertEquals(
-			bodyElement.html(),
+			_processedHTML,
+			_fragmentEntryProcessorRegistry.processFragmentEntryLinkHTML(
+				fragmentEntryLink));
+	}
+
+	@Test
+	public void testFragmentEntryProcessorEditableCompatibility()
+		throws Exception {
+
+		FragmentEntry fragmentEntry = _createFragmentEntry(
+			"fragment_entry.html");
+
+		FragmentEntryLink fragmentEntryLink =
+			FragmentEntryLinkLocalServiceUtil.createFragmentEntryLink(0);
+
+		fragmentEntryLink.setHtml(fragmentEntry.getHtml());
+
+		fragmentEntryLink.setEditableValues(
+			_getJsonFileAsString(
+				"fragment_entry_link_editable_values_compatibility.json"));
+
+		Assert.assertEquals(
+			_processedHTML,
 			_fragmentEntryProcessorRegistry.processFragmentEntryLinkHTML(
 				fragmentEntryLink));
 	}
@@ -142,47 +132,123 @@ public class FragmentEntryProcessorEditableTest {
 	public void testFragmentEntryProcessorEditableWithDuplicateIds()
 		throws Exception {
 
-		ServiceContext serviceContext =
-			ServiceContextTestUtil.getServiceContext(
-				_group.getGroupId(), TestPropsValues.getUserId());
-
-		FragmentCollection fragmentCollection =
-			FragmentCollectionServiceUtil.addFragmentCollection(
-				_group.getGroupId(), "Fragment Collection", StringPool.BLANK,
-				serviceContext);
-
-		FragmentEntryServiceUtil.addFragmentEntry(
-			_group.getGroupId(), fragmentCollection.getFragmentCollectionId(),
-			"Fragment Entry", null,
-			_getFileAsString("fragment_entry_with_duplicate_editable_ids.html"),
-			null, WorkflowConstants.STATUS_APPROVED, serviceContext);
+		_createFragmentEntry("fragment_entry_with_duplicate_editable_ids.html");
 	}
 
 	@Test(expected = FragmentEntryContentException.class)
 	public void testFragmentEntryProcessorEditableWithInvalidTypeAttribute()
 		throws Exception {
 
-		ServiceContext serviceContext =
-			ServiceContextTestUtil.getServiceContext(
-				_group.getGroupId(), TestPropsValues.getUserId());
+		_createFragmentEntry(
+			"fragment_entry_with_invalid_editable_type_attribute.html");
+	}
 
-		FragmentCollection fragmentCollection =
-			FragmentCollectionServiceUtil.addFragmentCollection(
-				_group.getGroupId(), "Fragment Collection", StringPool.BLANK,
-				serviceContext);
+	@Test
+	public void testFragmentEntryProcessorEditableWithMatchedLanguage()
+		throws Exception {
 
-		FragmentEntryServiceUtil.addFragmentEntry(
-			_group.getGroupId(), fragmentCollection.getFragmentCollectionId(),
-			"Fragment Entry", null,
-			_getFileAsString(
-				"fragment_entry_with_invalid_editable_type_attribute.html"),
-			null, WorkflowConstants.STATUS_APPROVED, serviceContext);
+		FragmentEntry fragmentEntry = _createFragmentEntry(
+			"fragment_entry.html");
+
+		FragmentEntryLink fragmentEntryLink =
+			FragmentEntryLinkLocalServiceUtil.createFragmentEntryLink(0);
+
+		fragmentEntryLink.setHtml(fragmentEntry.getHtml());
+
+		fragmentEntryLink.setEditableValues(
+			_getJsonFileAsString(
+				"fragment_entry_link_editable_values_matching_language.json"));
+
+		Assert.assertEquals(
+			_processedHTML,
+			_fragmentEntryProcessorRegistry.processFragmentEntryLinkHTML(
+				fragmentEntryLink, FragmentEntryLinkConstants.EDIT,
+				LocaleUtil.US));
+	}
+
+	@Test
+	public void testFragmentEntryProcessorEditableWithMatchedLanguageCompatibility()
+		throws Exception {
+
+		FragmentEntry fragmentEntry = _createFragmentEntry(
+			"fragment_entry.html");
+
+		FragmentEntryLink fragmentEntryLink =
+			FragmentEntryLinkLocalServiceUtil.createFragmentEntryLink(0);
+
+		fragmentEntryLink.setHtml(fragmentEntry.getHtml());
+
+		fragmentEntryLink.setEditableValues(
+			_getJsonFileAsString(
+				"fragment_entry_link_editable_values_matching_language_" +
+					"compatibility.json"));
+
+		Assert.assertEquals(
+			_processedHTML,
+			_fragmentEntryProcessorRegistry.processFragmentEntryLinkHTML(
+				fragmentEntryLink, FragmentEntryLinkConstants.EDIT,
+				LocaleUtil.US));
 	}
 
 	@Test(expected = FragmentEntryContentException.class)
 	public void testFragmentEntryProcessorEditableWithMissingAttributes()
 		throws Exception {
 
+		_createFragmentEntry(
+			"fragment_entry_with_missing_editable_attributes.html");
+	}
+
+	@Test
+	public void testFragmentEntryProcessorEditableWithUnmatchedLanguage()
+		throws Exception {
+
+		FragmentEntry fragmentEntry = _createFragmentEntry(
+			"fragment_entry.html");
+
+		FragmentEntryLink fragmentEntryLink =
+			FragmentEntryLinkLocalServiceUtil.createFragmentEntryLink(0);
+
+		fragmentEntryLink.setHtml(fragmentEntry.getHtml());
+
+		fragmentEntryLink.setEditableValues(
+			_getJsonFileAsString(
+				"fragment_entry_link_editable_values_unmatching_language." +
+					"json"));
+
+		Assert.assertEquals(
+			_processedHTML,
+			_fragmentEntryProcessorRegistry.processFragmentEntryLinkHTML(
+				fragmentEntryLink, FragmentEntryLinkConstants.EDIT,
+				LocaleUtil.CHINESE));
+	}
+
+	@Test
+	public void testFragmentEntryProcessorEditableWithUnmatchedLanguageCompatibility()
+		throws Exception {
+
+		FragmentEntry fragmentEntry = _createFragmentEntry(
+			"fragment_entry.html");
+
+		FragmentEntryLink fragmentEntryLink =
+			FragmentEntryLinkLocalServiceUtil.createFragmentEntryLink(0);
+
+		fragmentEntryLink.setHtml(fragmentEntry.getHtml());
+
+		fragmentEntryLink.setEditableValues(
+			_getJsonFileAsString(
+				"fragment_entry_link_editable_values_unmatching_language_" +
+					"compatibility.json"));
+
+		Assert.assertEquals(
+			_processedHTML,
+			_fragmentEntryProcessorRegistry.processFragmentEntryLinkHTML(
+				fragmentEntryLink, FragmentEntryLinkConstants.EDIT,
+				LocaleUtil.CHINESE));
+	}
+
+	private FragmentEntry _createFragmentEntry(String htmlFile)
+		throws IOException, PortalException {
+
 		ServiceContext serviceContext =
 			ServiceContextTestUtil.getServiceContext(
 				_group.getGroupId(), TestPropsValues.getUserId());
@@ -192,12 +258,10 @@ public class FragmentEntryProcessorEditableTest {
 				_group.getGroupId(), "Fragment Collection", StringPool.BLANK,
 				serviceContext);
 
-		FragmentEntryServiceUtil.addFragmentEntry(
+		return FragmentEntryServiceUtil.addFragmentEntry(
 			_group.getGroupId(), fragmentCollection.getFragmentCollectionId(),
-			"Fragment Entry", null,
-			_getFileAsString(
-				"fragment_entry_with_missing_editable_attributes.html"),
-			null, WorkflowConstants.STATUS_APPROVED, serviceContext);
+			"Fragment Entry", null, _getFileAsString(htmlFile), null,
+			WorkflowConstants.STATUS_APPROVED, serviceContext);
 	}
 
 	private String _getFileAsString(String fileName) throws IOException {
@@ -209,10 +273,21 @@ public class FragmentEntryProcessorEditableTest {
 				fileName);
 	}
 
+	private String _getJsonFileAsString(String jsonFileName)
+		throws IOException, JSONException {
+
+		JSONObject jsonObject = JSONFactoryUtil.createJSONObject(
+			_getFileAsString(jsonFileName));
+
+		return jsonObject.toString();
+	}
+
 	@Inject
 	private FragmentEntryProcessorRegistry _fragmentEntryProcessorRegistry;
 
 	@DeleteAfterTestRun
 	private Group _group;
+
+	private String _processedHTML;
 
 }

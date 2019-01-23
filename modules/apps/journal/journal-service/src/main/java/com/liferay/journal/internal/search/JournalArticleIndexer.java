@@ -53,7 +53,9 @@ import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.search.IndexWriterHelper;
 import com.liferay.portal.kernel.search.Indexer;
 import com.liferay.portal.kernel.search.IndexerRegistry;
+import com.liferay.portal.kernel.search.ParseException;
 import com.liferay.portal.kernel.search.Query;
+import com.liferay.portal.kernel.search.QueryConfig;
 import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.kernel.search.SearchException;
 import com.liferay.portal.kernel.search.Summary;
@@ -70,8 +72,9 @@ import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.FastDateFormatFactoryUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
-import com.liferay.portal.kernel.util.HtmlUtil;
+import com.liferay.portal.kernel.util.Html;
 import com.liferay.portal.kernel.util.LocaleUtil;
+import com.liferay.portal.kernel.util.Localization;
 import com.liferay.portal.kernel.util.LocalizationUtil;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.PropsKeys;
@@ -84,6 +87,7 @@ import com.liferay.portal.search.batch.BatchIndexingHelper;
 import com.liferay.portal.search.filter.DateRangeFilterBuilder;
 import com.liferay.portal.search.filter.FilterBuilders;
 import com.liferay.portal.search.index.IndexStatusManager;
+import com.liferay.portal.search.localization.SearchLocalizationHelper;
 import com.liferay.trash.TrashHelper;
 
 import java.io.Serializable;
@@ -289,6 +293,15 @@ public class JournalArticleIndexer
 				addSearchExpando(searchQuery, searchContext, expandoAttributes);
 			}
 		}
+
+		QueryConfig queryConfig = searchContext.getQueryConfig();
+
+		String[] localizedFieldNames =
+			_searchLocalizationHelper.getLocalizedFieldNames(
+				new String[] {Field.CONTENT, Field.DESCRIPTION, Field.TITLE},
+				searchContext);
+
+		queryConfig.addHighlightFieldNames(localizedFieldNames);
 	}
 
 	@Override
@@ -416,55 +429,73 @@ public class JournalArticleIndexer
 		}
 	}
 
+	protected Map<String, Query> addLocalizedFields(
+			BooleanQuery searchQuery, String field, String value, boolean like,
+			SearchContext searchContext)
+		throws ParseException {
+
+		String[] localizedFieldNames =
+			_searchLocalizationHelper.getLocalizedFieldNames(
+				new String[] {field}, searchContext);
+
+		Map<String, Query> queries = new HashMap<>();
+
+		for (String localizedFieldName : localizedFieldNames) {
+			Query query = searchQuery.addTerm(localizedFieldName, value, like);
+
+			queries.put(field, query);
+		}
+
+		return queries;
+	}
+
+	protected void addLocalizedQuery(
+			BooleanQuery searchQuery, BooleanQuery localizedQuery,
+			SearchContext searchContext)
+		throws ParseException {
+
+		BooleanClauseOccur booleanClauseOccur = BooleanClauseOccur.SHOULD;
+
+		if (searchContext.isAndSearch()) {
+			booleanClauseOccur = BooleanClauseOccur.MUST;
+		}
+
+		searchQuery.add(localizedQuery, booleanClauseOccur);
+	}
+
 	@Override
 	protected Map<String, Query> addSearchLocalizedTerm(
 			BooleanQuery searchQuery, SearchContext searchContext, String field,
 			boolean like)
 		throws Exception {
 
-		if (Validator.isNull(field)) {
+		if (Validator.isBlank(field)) {
 			return Collections.emptyMap();
 		}
 
-		String value = String.valueOf(searchContext.getAttribute(field));
+		String value = GetterUtil.getString(searchContext.getAttribute(field));
 
-		if (Validator.isNull(value)) {
+		if (Validator.isBlank(value)) {
 			value = searchContext.getKeywords();
 		}
 
-		if (Validator.isNull(value)) {
+		if (Validator.isBlank(value)) {
 			return Collections.emptyMap();
 		}
 
-		String localizedField = Field.getLocalizedName(
-			searchContext.getLocale(), field);
+		Map<String, Query> queries = null;
 
-		Map<String, Query> queries = new HashMap<>();
-
-		if (Validator.isNull(searchContext.getKeywords())) {
+		if (Validator.isBlank(searchContext.getKeywords())) {
 			BooleanQuery localizedQuery = new BooleanQueryImpl();
 
-			Query query = localizedQuery.addTerm(field, value, like);
+			queries = addLocalizedFields(
+				localizedQuery, field, value, like, searchContext);
 
-			queries.put(field, query);
-
-			Query localizedFieldQuery = localizedQuery.addTerm(
-				localizedField, value, like);
-
-			queries.put(field, localizedFieldQuery);
-
-			BooleanClauseOccur booleanClauseOccur = BooleanClauseOccur.SHOULD;
-
-			if (searchContext.isAndSearch()) {
-				booleanClauseOccur = BooleanClauseOccur.MUST;
-			}
-
-			searchQuery.add(localizedQuery, booleanClauseOccur);
+			addLocalizedQuery(searchQuery, localizedQuery, searchContext);
 		}
 		else {
-			Query query = searchQuery.addTerm(localizedField, value, like);
-
-			queries.put(field, query);
+			queries = addLocalizedFields(
+				searchQuery, field, value, like, searchContext);
 		}
 
 		return queries;
@@ -483,9 +514,8 @@ public class JournalArticleIndexer
 
 				return;
 			}
-			else {
-				classPK = journalArticle.getResourcePrimKey();
-			}
+
+			classPK = journalArticle.getResourcePrimKey();
 		}
 
 		deleteDocument(journalArticle.getCompanyId(), classPK);
@@ -524,10 +554,9 @@ public class JournalArticleIndexer
 
 		document.addUID(CLASS_NAME, classPK);
 
-		String articleDefaultLanguageId = LocalizationUtil.getDefaultLanguageId(
-			journalArticle.getDocument());
+		Localization localization = getLocalization();
 
-		String[] languageIds = LocalizationUtil.getAvailableLanguageIds(
+		String[] languageIds = localization.getAvailableLanguageIds(
 			journalArticle.getDocument());
 
 		for (String languageId : languageIds) {
@@ -537,22 +566,14 @@ public class JournalArticleIndexer
 
 			String title = journalArticle.getTitle(languageId);
 
-			if (languageId.equals(articleDefaultLanguageId)) {
-				document.addText(Field.CONTENT, content);
-				document.addText(Field.DESCRIPTION, description);
-				document.addText("defaultLanguageId", languageId);
-			}
-
 			document.addText(
-				LocalizationUtil.getLocalizedName(Field.CONTENT, languageId),
+				localization.getLocalizedName(Field.CONTENT, languageId),
 				content);
 			document.addText(
-				LocalizationUtil.getLocalizedName(
-					Field.DESCRIPTION, languageId),
+				localization.getLocalizedName(Field.DESCRIPTION, languageId),
 				description);
 			document.addText(
-				LocalizationUtil.getLocalizedName(Field.TITLE, languageId),
-				title);
+				localization.getLocalizedName(Field.TITLE, languageId), title);
 		}
 
 		document.addKeyword(Field.FOLDER_ID, journalArticle.getFolderId());
@@ -576,6 +597,13 @@ public class JournalArticleIndexer
 			"ddmStructureKey", journalArticle.getDDMStructureKey());
 		document.addKeyword(
 			"ddmTemplateKey", journalArticle.getDDMTemplateKey());
+
+		String defaultLanguageId = localization.getDefaultLanguageId(
+			journalArticle.getDocument());
+
+		document.addText("defaultLanguageId", defaultLanguageId);
+
+		document.addDate("displayDate", journalArticle.getDisplayDate());
 		document.addKeyword("head", JournalUtil.isHead(journalArticle));
 
 		boolean headListable = JournalUtil.isHeadListable(journalArticle);
@@ -644,7 +672,7 @@ public class JournalArticleIndexer
 			snippetLocale, Field.SNIPPET + StringPool.UNDERLINE + Field.TITLE,
 			Field.TITLE);
 
-		if (Validator.isNull(title) && !snippetLocale.equals(defaultLocale)) {
+		if (Validator.isBlank(title) && !snippetLocale.equals(defaultLocale)) {
 			title = document.get(
 				defaultLocale,
 				Field.SNIPPET + StringPool.UNDERLINE + Field.TITLE,
@@ -654,7 +682,9 @@ public class JournalArticleIndexer
 		String content = getDDMContentSummary(
 			document, snippetLocale, portletRequest, portletResponse);
 
-		if (Validator.isNull(content) && !snippetLocale.equals(defaultLocale)) {
+		if (Validator.isBlank(content) &&
+			!snippetLocale.equals(defaultLocale)) {
+
 			content = getDDMContentSummary(
 				document, defaultLocale, portletRequest, portletResponse);
 		}
@@ -819,17 +849,17 @@ public class JournalArticleIndexer
 				Field.SNIPPET + StringPool.UNDERLINE + Field.DESCRIPTION,
 				Field.DESCRIPTION);
 
-			if (Validator.isNull(description)) {
-				content = HtmlUtil.stripHtml(articleDisplay.getDescription());
+			if (Validator.isBlank(description)) {
+				content = _html.stripHtml(articleDisplay.getDescription());
 			}
 			else {
 				content = _stripAndHighlight(description);
 			}
 
-			content = HtmlUtil.replaceNewLine(content);
+			content = _html.replaceNewLine(content);
 
-			if (Validator.isNull(content)) {
-				content = HtmlUtil.extractText(articleDisplay.getContent());
+			if (Validator.isBlank(content)) {
+				content = _html.extractText(articleDisplay.getContent());
 			}
 
 			String snippet = document.get(
@@ -852,6 +882,17 @@ public class JournalArticleIndexer
 		}
 
 		return content;
+	}
+
+	protected Localization getLocalization() {
+
+		// See LPS-72507
+
+		if (_localization != null) {
+			return _localization;
+		}
+
+		return LocalizationUtil.getLocalization();
 	}
 
 	protected boolean isIndexAllArticleVersions() {
@@ -1004,7 +1045,7 @@ public class JournalArticleIndexer
 		text = StringUtil.replace(
 			text, _HIGHLIGHT_TAGS, _ESCAPE_SAFE_HIGHLIGHTS);
 
-		text = HtmlUtil.stripHtml(text);
+		text = _html.stripHtml(text);
 
 		text = StringUtil.replace(
 			text, _ESCAPE_SAFE_HIGHLIGHTS, _HIGHLIGHT_TAGS);
@@ -1035,6 +1076,9 @@ public class JournalArticleIndexer
 	private FilterBuilders _filterBuilders;
 
 	@Reference
+	private Html _html;
+
+	@Reference
 	private IndexerRegistry _indexerRegistry;
 
 	@Reference
@@ -1055,9 +1099,13 @@ public class JournalArticleIndexer
 		_journalArticleResourceLocalService;
 	private JournalContent _journalContent;
 	private JournalConverter _journalConverter;
+	private Localization _localization;
 
 	@Reference
 	private Portal _portal;
+
+	@Reference
+	private SearchLocalizationHelper _searchLocalizationHelper;
 
 	@Reference
 	private TrashHelper _trashHelper;

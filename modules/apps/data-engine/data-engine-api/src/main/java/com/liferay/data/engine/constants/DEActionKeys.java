@@ -22,4 +22,9 @@ public class DEActionKeys {
 	public static final String ADD_DATA_DEFINITION_ACTION =
 		"ADD_DATA_DEFINITION";
 
+	public static final String ADD_DATA_RECORD_COLLECTION_ACTION =
+		"ADD_DATA_RECORD_COLLECTION";
+
+	public static final String DEFINE_PERMISSIONS_ACTION = "DEFINE_PERMISSIONS";
+
 }

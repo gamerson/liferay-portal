@@ -50,6 +50,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -110,8 +111,8 @@ public class DummyFolderStagedModelRepository
 
 		_dummyFolders.removeIf(
 			dummyFolder ->
-				dummyFolder.getUuid().equals(uuid) &&
-				 dummyFolder.getGroupId() == groupId);
+				Objects.equals(dummyFolder.getUuid(), uuid) &&
+				(dummyFolder.getGroupId() == groupId));
 	}
 
 	@Override
@@ -134,7 +135,7 @@ public class DummyFolderStagedModelRepository
 
 		List<DummyFolder> dummyFolders = dummyFoldersStream.filter(
 			dummyFolder ->
-				dummyFolder.getUuid().equals(uuid) &&
+				Objects.equals(dummyFolder.getUuid(), uuid) &&
 				(dummyFolder.getGroupId() == groupId)
 		).collect(
 			Collectors.toList()
@@ -155,7 +156,7 @@ public class DummyFolderStagedModelRepository
 
 		return dummyFoldersStream.filter(
 			dummyFolder ->
-				dummyFolder.getUuid().equals(uuid) &&
+				Objects.equals(dummyFolder.getUuid(), uuid) &&
 				(dummyFolder.getCompanyId() == companyId)
 		).collect(
 			Collectors.toList()
@@ -419,8 +420,8 @@ public class DummyFolderStagedModelRepository
 		public Predicate<? super DummyFolder> getPredicate(String expression) {
 			if (expression.contains("groupId=")) {
 				return d ->
-					d.getGroupId() ==
-						Long.valueOf(expression.substring("groupId=".length()));
+					d.getGroupId() == Long.valueOf(
+						expression.substring("groupId=".length()));
 			}
 
 			if (expression.contains("id>-1")) {
@@ -429,9 +430,8 @@ public class DummyFolderStagedModelRepository
 
 			if (expression.contains("companyId=")) {
 				return d ->
-					d.getCompanyId() ==
-						Long.valueOf(
-							expression.substring("companyId=".length()));
+					d.getCompanyId() == Long.valueOf(
+						expression.substring("companyId=".length()));
 			}
 
 			return d -> true;

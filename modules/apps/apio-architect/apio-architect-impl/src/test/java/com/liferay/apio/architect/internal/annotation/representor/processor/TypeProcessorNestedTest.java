@@ -54,7 +54,7 @@ public class TypeProcessorNestedTest {
 
 	@Test
 	public void testBasicFields() {
-		List<FieldData> fieldMetadata = getOrderedList(
+		List<FieldData<Class<?>>> fieldMetadata = getOrderedList(
 			_parsedType::getFieldDataList);
 
 		testFieldData(fieldMetadata.get(0), "stringField", String.class);

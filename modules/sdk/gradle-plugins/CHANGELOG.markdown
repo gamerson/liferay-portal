@@ -6359,6 +6359,66 @@ dependency to version 2.1.40.
 - [LPS-87479]: Update the [Liferay Gradle Plugins JS Transpiler] dependency to
 version 2.4.19.
 
+## 3.13.57 - 2019-01-11
+
+### Changed
+- [LPS-84119]: Update the [Liferay Gradle Plugins Source Formatter] dependency
+to version 2.3.301.
+- [LPS-84119]: Update the [Liferay Source Formatter] dependency to version
+1.0.772.
+
+## 3.13.58 - 2019-01-13
+
+### Changed
+- [LPS-86806]: Update the [Liferay Gradle Plugins Source Formatter] dependency
+to version 2.3.302.
+- [LPS-86806]: Update the [Liferay Source Formatter] dependency to version
+1.0.773.
+
+## 3.13.59 - 2019-01-14
+
+### Changed
+- [LPS-89126]: Update the [Liferay Gradle Plugins Gulp] dependency to version
+2.0.40.
+- [LPS-89126]: Update the [Liferay Gradle Plugins JS Module Config Generator]
+dependency to version 2.1.41.
+- [LPS-89126]: Update the [Liferay Gradle Plugins JS Transpiler] dependency to
+version 2.4.20.
+
+## 3.13.60 - 2019-01-16
+
+### Changed
+- [LPS-84119]: Update the [Liferay Gradle Plugins Source Formatter] dependency
+to version 2.3.303.
+- [LPS-84119]: Update the [Liferay Source Formatter] dependency to version
+1.0.774.
+
+## 3.13.61 - 2019-01-16
+
+### Changed
+- [LPS-88909]: Update the [Liferay Gradle Plugins Gulp] dependency to version
+2.0.41.
+- [LPS-88909]: Update the [Liferay Gradle Plugins JS Module Config Generator]
+dependency to version 2.1.42.
+- [LPS-88909]: Update the [Liferay Gradle Plugins JS Transpiler] dependency to
+version 2.4.21.
+
+## 3.13.62 - 2019-01-16
+
+### Changed
+- [LPS-89228]: Update the [Liferay Gradle Plugins Service Builder] dependency to
+version 2.2.8.
+- [LPS-89228]: Update the [Liferay Portal Tools Service Builder] dependency to
+version 1.0.257.
+
+## 3.13.63 - 2019-01-17
+
+### Changed
+- [LPS-84119]: Update the [Liferay Gradle Plugins Source Formatter] dependency
+to version 2.3.304.
+- [LPS-84119]: Update the [Liferay Source Formatter] dependency to version
+1.0.775.
+
 [Gradle Bundle Plugin]: https://github.com/TomDmitriev/gradle-bundle-plugin
 [Liferay Alloy Taglib]: https://github.com/liferay/alloy-taglibs
 [Liferay Ant BND]: https://github.com/liferay/liferay-portal/tree/master/modules/sdk/ant-bnd
@@ -6853,4 +6913,6 @@ version 2.4.19.
 [LPS-88823]: https://issues.liferay.com/browse/LPS-88823
 [LPS-88903]: https://issues.liferay.com/browse/LPS-88903
 [LPS-88909]: https://issues.liferay.com/browse/LPS-88909
+[LPS-89126]: https://issues.liferay.com/browse/LPS-89126
+[LPS-89228]: https://issues.liferay.com/browse/LPS-89228
 [LRDOCS-3023]: https://issues.liferay.com/browse/LRDOCS-3023

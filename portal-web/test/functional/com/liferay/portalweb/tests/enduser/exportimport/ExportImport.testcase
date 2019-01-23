@@ -492,6 +492,64 @@ definition {
 		WebContent.viewNotPresentCP(webContentTitle = "Web Content Title");
 	}
 
+	@priority = "5"
+	test ExportImportPortlet {
+		property portal.acceptance = "false";
+
+		ProductMenu.gotoPortlet(
+			category = "Build",
+			panel = "Site Administration",
+			portlet = "Pages"
+		);
+
+		SitePages.addPublicPage(pageName = "Test Page Name");
+
+		Navigator.gotoPage(pageName = "Test Page Name");
+
+		Portlet.addPG(portletName = "Hello World");
+
+		Portlet.gotoPortletOptions(
+			portletName = "Hello World",
+			portletOption = "Look and Feel Configuration"
+		);
+
+		IFrame.selectConfigurationFrame();
+
+		Portlet.configureCustomTitleViaLookandfeelPG(portletName = "Hello World");
+
+		PortletEntry.save();
+
+		IFrame.closeFrame();
+
+		LAR.exportPortlet(larFileName = "HelloWorld.lar");
+
+		ProductMenu.gotoPortlet(
+			category = "Sites",
+			panel = "Control Panel",
+			portlet = "Sites"
+		);
+
+		Site.addBlankCP(siteName = "Test Site Name");
+
+		ProductMenu.gotoPortlet(
+			category = "Build",
+			panel = "Site Administration",
+			portlet = "Pages"
+		);
+
+		SitePages.addPublicPage(pageName = "Test Site Page");
+
+		Navigator.gotoSitePage(pageName = "Test Site Page", siteName = "Test Site Name");
+
+		Portlet.addPG(portletName = "Hello World");
+
+		LAR.importPortlet(larFileName = "HelloWorld.lar");
+
+		Navigator.gotoSitePage(pageName = "Test Site Page", siteName = "Test Site Name");
+
+		Portlet.viewTitle(portletName = "Hello World Custom");
+	}
+
 	@priority = "3"
 	test ExportImportPortletWithADT {
 		Navigator.openURL();
@@ -626,62 +684,6 @@ definition {
 		);
 
 		Navigator.gotoPrivateSitePage(pageName = "Private Page", siteName = "Site Name");
-	}
-
-	@priority = "5"
-	test ExportImportSampleLARPortlet {
-		property portal.acceptance = "false";
-		property portlet.plugins.includes = "sample-lar-portlet";
-		property portal.release = "false";
-		property test.name.skip.portal.instance = "ExportImport#ExportImportSampleLARPortlet";
-
-		ProductMenu.gotoPortlet(
-			category = "Build",
-			panel = "Site Administration",
-			portlet = "Pages"
-		);
-
-		SitePages.addPublicPage(pageName = "Test Page Name");
-
-		Navigator.gotoPage(pageName = "Test Page Name");
-
-		Portlet.addPG(portletName = "Sample LAR");
-
-		SampleLARPortlet.addSampleBooking();
-
-		var bookingNumber = selenium.getText("//tbody[@class='table-data']/tr/td[2]");
-
-		echo("Booking Number ${bookingNumber}");
-
-		SampleLARPortlet.viewSampleBookingNumber(bookingNumber = "${bookingNumber}");
-
-		LAR.exportPortlet(larFileName = "SampleLARPortlet.lar");
-
-		ProductMenu.gotoPortlet(
-			category = "Sites",
-			panel = "Control Panel",
-			portlet = "Sites"
-		);
-
-		Site.addBlankCP(siteName = "Test Site Name");
-
-		ProductMenu.gotoPortlet(
-			category = "Build",
-			panel = "Site Administration",
-			portlet = "Pages"
-		);
-
-		SitePages.addPublicPage(pageName = "Test Site Page");
-
-		Navigator.gotoSitePage(pageName = "Test Site Page", siteName = "Test Site Name");
-
-		Portlet.addPG(portletName = "Sample LAR");
-
-		LAR.importPortlet(larFileName = "SampleLARPortlet.lar");
-
-		Navigator.gotoSitePage(pageName = "Test Site Page", siteName = "Test Site Name");
-
-		SampleLARPortlet.viewSampleBookingNumber(bookingNumber = "${bookingNumber}");
 	}
 
 	@priority = "5"

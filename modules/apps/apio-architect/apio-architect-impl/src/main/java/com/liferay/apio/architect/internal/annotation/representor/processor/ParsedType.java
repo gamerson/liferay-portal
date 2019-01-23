@@ -48,7 +48,7 @@ public class ParsedType {
 	 * @return the list of field data
 	 * @review
 	 */
-	public List<FieldData> getFieldDataList() {
+	public List<FieldData<Class<?>>> getFieldDataList() {
 		return _fieldDataList;
 	}
 
@@ -187,7 +187,7 @@ public class ParsedType {
 
 	private List<FieldData<BidirectionalModel>> _bidirectionalFieldData =
 		new ArrayList<>();
-	private List<FieldData> _fieldDataList = new ArrayList<>();
+	private List<FieldData<Class<?>>> _fieldDataList = new ArrayList<>();
 	private List<FieldData<LinkTo>> _linkToFieldData = new ArrayList<>();
 	private List<FieldData<Class<?>>> _listFieldData = new ArrayList<>();
 	private List<FieldData<ParsedType>> _listParsedTypes = new ArrayList<>();

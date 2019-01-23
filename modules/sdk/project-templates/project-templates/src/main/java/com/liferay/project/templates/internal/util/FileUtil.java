@@ -270,15 +270,19 @@ public class FileUtil {
 
 		Map<String, InputStream> pathMap = new HashMap<>();
 
+		if ((dirPathString != null) && (File.separatorChar == '\\')) {
+			dirPathString = dirPathString.replace('\\', '/');
+		}
+
 		URL url = FileUtil.class.getResource(dirPathString);
 
-		URI uri = url.toURI();
-
-		if (uri == null) {
+		if (url == null) {
 			String errorMessage = String.format("%s not found", dirPathString);
 
 			throw new NoSuchElementException(errorMessage);
 		}
+
+		URI uri = url.toURI();
 
 		String scheme = uri.getScheme();
 

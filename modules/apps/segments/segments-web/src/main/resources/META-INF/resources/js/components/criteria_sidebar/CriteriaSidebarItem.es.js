@@ -11,17 +11,26 @@ import getCN from 'classnames';
  * @param {Object} props Component's current props
  * @returns {Object} The props to be passed to the drop target.
  */
-function beginDrag({name}) {
+function beginDrag({name, defaultValue, type}) {
 	return {
 		criterion: {
-			propertyName: name
+			defaultValue,
+			propertyName: name,
+			type
 		}
 	};
 }
 
 class CriteriaSidebarItem extends Component {
 	static propTypes = {
+		className: PropTypes.string,
 		connectDragSource: PropTypes.func,
+		defaultValue: PropTypes.oneOfType(
+			[
+				PropTypes.string,
+				PropTypes.number
+			]
+		),
 		dragging: PropTypes.bool,
 		label: PropTypes.string,
 		name: PropTypes.string,
@@ -38,8 +47,14 @@ class CriteriaSidebarItem extends Component {
 		case 'date':
 			returnValue = 'date';
 			break;
-		case 'number':
-			returnValue = 'number';
+		case 'double':
+			returnValue = 'decimal';
+			break;
+		case 'id':
+			returnValue = 'select';
+			break;
+		case 'integer':
+			returnValue = 'integer';
 			break;
 		case 'string':
 			returnValue = 'text';
@@ -53,6 +68,7 @@ class CriteriaSidebarItem extends Component {
 
 	render() {
 		const {
+			className,
 			connectDragSource,
 			dragging,
 			label,
@@ -61,7 +77,8 @@ class CriteriaSidebarItem extends Component {
 
 		const classes = getCN(
 			'criteria-sidebar-item-root',
-			{dragging}
+			{dragging},
+			className,
 		);
 
 		return connectDragSource(

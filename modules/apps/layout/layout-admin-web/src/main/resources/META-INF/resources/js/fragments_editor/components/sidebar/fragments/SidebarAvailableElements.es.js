@@ -13,9 +13,9 @@ import {
 	UPDATE_SAVING_CHANGES_STATUS
 } from '../../../actions/actions.es';
 import {
-	DROP_TARGET_BORDERS,
-	DROP_TARGET_ITEM_TYPES
-} from '../../../reducers/placeholders.es';
+	FRAGMENTS_EDITOR_ITEM_BORDERS,
+	FRAGMENTS_EDITOR_ITEM_TYPES
+} from '../../../utils/constants';
 import {getConnectedComponent} from '../../../store/ConnectedComponent.es';
 import templates from './SidebarAvailableElements.soy';
 
@@ -38,7 +38,7 @@ class SidebarAvailableElements extends Component {
 	 * @private
 	 * @review
 	 */
-	dispose() {
+	disposed() {
 		this._dragDrop.dispose();
 	}
 
@@ -61,13 +61,13 @@ class SidebarAvailableElements extends Component {
 			const mouseY = eventData.originalEvent.clientY;
 			const targetItemRegion = position.getRegion(targetItem);
 
-			let nearestBorder = DROP_TARGET_BORDERS.bottom;
+			let nearestBorder = FRAGMENTS_EDITOR_ITEM_BORDERS.bottom;
 
 			if (
 				Math.abs(mouseY - targetItemRegion.top) <=
 				Math.abs(mouseY - targetItemRegion.bottom)
 			) {
-				nearestBorder = DROP_TARGET_BORDERS.top;
+				nearestBorder = FRAGMENTS_EDITOR_ITEM_BORDERS.top;
 			}
 
 			let dropTargetItemId = null;
@@ -75,15 +75,15 @@ class SidebarAvailableElements extends Component {
 
 			if (targetIsColumn) {
 				dropTargetItemId = data.columnId;
-				dropTargetItemType = DROP_TARGET_ITEM_TYPES.column;
+				dropTargetItemType = FRAGMENTS_EDITOR_ITEM_TYPES.column;
 			}
 			else if (targetIsFragment) {
 				dropTargetItemId = data.fragmentEntryLinkId;
-				dropTargetItemType = DROP_TARGET_ITEM_TYPES.fragment;
+				dropTargetItemType = FRAGMENTS_EDITOR_ITEM_TYPES.fragment;
 			}
 			else if (targetIsSection) {
 				dropTargetItemId = data.layoutSectionId;
-				dropTargetItemType = DROP_TARGET_ITEM_TYPES.section;
+				dropTargetItemType = FRAGMENTS_EDITOR_ITEM_TYPES.section;
 			}
 
 			this.store.dispatchAction(

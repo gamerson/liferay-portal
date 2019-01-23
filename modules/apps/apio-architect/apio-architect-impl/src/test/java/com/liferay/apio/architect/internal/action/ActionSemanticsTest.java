@@ -18,6 +18,8 @@ import static com.liferay.apio.architect.operation.HTTPMethod.GET;
 
 import static com.spotify.hamcrest.optional.OptionalMatchers.optionalWithValue;
 
+import static in.tazj.vavr.matchers.ControlMatchers.isSuccess;
+
 import static java.lang.String.join;
 
 import static java.util.Arrays.asList;
@@ -25,11 +27,12 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
-import static org.hamcrest.core.Is.is;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -278,7 +281,34 @@ public class ActionSemanticsTest {
 	}
 
 	@Test
-	public void testToActionTransformsAnActionSemanticsIntoAnAction() {
+	public void testToActionTransformsAnActionSemanticsIntoANoContentAction() {
+		ActionSemantics actionSemantics = ActionSemantics.ofResource(
+			Resource.Paged.of("name")
+		).name(
+			"action"
+		).method(
+			GET
+		).returns(
+			Void.class
+		).permissionFunction(
+		).executeFunction(
+			__ -> null
+		).build();
+
+		Action action = actionSemantics.toAction(
+			(semantics, request, clazz) -> clazz.getSimpleName());
+
+		assertThat(action, is(instanceOf(Action.NoContent.class)));
+
+		Object object = action.execute(null);
+
+		assertThat(object, is(instanceOf(Try.class)));
+
+		assertThat((Try<Object>)object, isSuccess(nullValue()));
+	}
+
+	@Test
+	public void testToActionTransformsAnActionSemanticsIntoAnOkAction() {
 		ActionSemantics actionSemantics = ActionSemantics.ofResource(
 			Resource.Paged.of("name")
 		).name(
@@ -299,14 +329,13 @@ public class ActionSemanticsTest {
 		Action action = actionSemantics.toAction(
 			(semantics, request, clazz) -> clazz.getSimpleName());
 
-		Object object = action.apply(null);
+		assertThat(action, is(instanceOf(Action.Ok.class)));
+
+		Object object = action.execute(null);
 
 		assertThat(object, is(instanceOf(Try.class)));
 
-		@SuppressWarnings("unchecked")
-		Try<String> stringTry = (Try<String>)object;
-
-		assertThat(stringTry.get(), is("String-Long"));
+		assertThat((Try<String>)object, isSuccess(equalTo("String-Long")));
 	}
 
 	@Test

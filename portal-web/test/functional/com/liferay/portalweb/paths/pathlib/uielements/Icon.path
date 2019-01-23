@@ -30,7 +30,7 @@
 </tr>
 <tr>
 	<td>ASTERISK_DATE_FIELD</td>
-	<td>//label[contains(.,'${key_fieldFieldLabel}')]//span[contains(@class,'icon-asterisk')]</td>
+	<td>//label[contains(.,'${key_fieldFieldLabel}')]//span[*[name()='svg'][contains(@class,'icon-asterisk')]]</td>
 	<td></td>
 </tr>
 <tr>
@@ -95,12 +95,12 @@
 </tr>
 <tr>
 	<td>EXPIRE</td>
-	<td>//button[*[name()='svg'][contains(@class,'icon-time')]]</td>
+	<td>//a[@data-title='Expire'] | //a[@title='Expire']</td>
 	<td></td>
 </tr>
 <tr>
 	<td>FLAG</td>
-	<td>//div[@title='Flag']//span[//*[name()='svg'][contains(@class,'lexicon-icon')]]</td>
+	<td>//div[contains(@class,'taglib-flags')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -186,7 +186,7 @@
 <!--ELLIPSIS-->
 <tr>
 	<td>BODY_VERTICAL_ELLIPSIS</td>
-	<td>//div[contains(@class,'portlet') and contains(@class,'container')]//a[span/*[name()='svg'][contains(@class,'icon-ellipsis')]]</td>
+	<td>//div[contains(@class,'dropdown-action')]//button[contains(@class,'dropdown-toggle')] | //div[contains(@class,'portlet') and contains(@class,'container')]//a[span/*[name()='svg'][contains(@class,'icon-ellipsis')]]</td>
 	<td></td>
 </tr>
 <tr>

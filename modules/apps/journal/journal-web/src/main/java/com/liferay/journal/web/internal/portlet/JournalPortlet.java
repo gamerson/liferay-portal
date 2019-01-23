@@ -1504,10 +1504,6 @@ public class JournalPortlet extends MVCPortlet {
 			ServiceContext serviceContext)
 		throws PortalException {
 
-		if (layoutPageTemplateEntryId == 0) {
-			return;
-		}
-
 		long classNameId = _portal.getClassNameId(JournalArticle.class);
 		long classPK = article.getResourcePrimKey();
 
@@ -1533,7 +1529,7 @@ public class JournalPortlet extends MVCPortlet {
 		}
 
 		LayoutPageTemplateEntry layoutPageTemplateEntry =
-			_layoutPageTemplateEntryLocalService.getLayoutPageTemplateEntry(
+			_layoutPageTemplateEntryLocalService.fetchLayoutPageTemplateEntry(
 				layoutPageTemplateEntryId);
 
 		if (layoutPageTemplateEntry != null) {

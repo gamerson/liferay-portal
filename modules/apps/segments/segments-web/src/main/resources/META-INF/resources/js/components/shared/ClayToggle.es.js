@@ -19,6 +19,7 @@ class ClayToggle extends Component {
 	};
 
 	static defaultProps = {
+		checked: false,
 		label: '',
 		labelLeft: '',
 		labelOff: '',

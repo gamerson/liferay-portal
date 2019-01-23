@@ -15,6 +15,7 @@
 package com.liferay.document.library.internal.search;
 
 import com.liferay.asset.kernel.AssetRendererFactoryRegistryUtil;
+import com.liferay.asset.kernel.model.AssetRenderer;
 import com.liferay.asset.kernel.model.AssetRendererFactory;
 import com.liferay.document.library.kernel.model.DLFileEntry;
 import com.liferay.document.library.kernel.service.DLAppLocalService;
@@ -30,6 +31,8 @@ import com.liferay.portal.kernel.search.Summary;
 import com.liferay.portal.kernel.search.SummaryFactory;
 import com.liferay.portal.kernel.search.result.SearchResultContributor;
 import com.liferay.portal.kernel.search.result.SearchResultTranslator;
+import com.liferay.portal.kernel.search.test.BaseSearchResultUtilTestCase;
+import com.liferay.portal.kernel.search.test.SearchTestUtil;
 import com.liferay.portal.kernel.test.CaptureHandler;
 import com.liferay.portal.kernel.test.JDKLoggerTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
@@ -37,8 +40,6 @@ import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.search.internal.result.SearchResultManagerImpl;
 import com.liferay.portal.search.internal.result.SearchResultTranslatorImpl;
 import com.liferay.portal.search.internal.result.SummaryFactoryImpl;
-import com.liferay.portal.search.test.BaseSearchResultUtilTestCase;
-import com.liferay.portal.search.test.SearchTestUtil;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -59,6 +60,7 @@ import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
+import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -84,7 +86,7 @@ public class SearchResultUtilDLFileEntryTest
 
 		Assert.assertNull(searchResult.getSummary());
 
-		verifyZeroInteractions(_dlAppLocalService);
+		PowerMockito.verifyZeroInteractions(_dlAppLocalService);
 
 		assertEmptyCommentRelatedSearchResults(searchResult);
 		assertEmptyVersions(searchResult);
@@ -93,19 +95,19 @@ public class SearchResultUtilDLFileEntryTest
 	@Test
 	public void testDLFileEntryAttachment() throws Exception {
 		Mockito.when(
-			assetRenderer.getSearchSummary((Locale)Matchers.any())
+			_assetRenderer.getSearchSummary((Locale)Matchers.any())
 		).thenReturn(
 			SearchTestUtil.SUMMARY_CONTENT
 		);
 
 		Mockito.when(
-			assetRenderer.getTitle((Locale)Matchers.any())
+			_assetRenderer.getTitle((Locale)Matchers.any())
 		).thenReturn(
 			SearchTestUtil.SUMMARY_TITLE
 		);
 
-		replace(
-			method(
+		PowerMockito.replace(
+			PowerMockito.method(
 				AssetRendererFactoryRegistryUtil.class,
 				"getAssetRendererFactoryByClassName", String.class)
 		).with(
@@ -125,7 +127,7 @@ public class SearchResultUtilDLFileEntryTest
 					if (SearchTestUtil.ATTACHMENT_OWNER_CLASS_NAME.equals(
 							className)) {
 
-						return assetRendererFactory;
+						return _assetRendererFactory;
 					}
 
 					throw new IllegalArgumentException();
@@ -135,9 +137,9 @@ public class SearchResultUtilDLFileEntryTest
 		);
 
 		Mockito.doReturn(
-			assetRenderer
+			_assetRenderer
 		).when(
-			assetRendererFactory
+			_assetRendererFactory
 		).getAssetRenderer(
 			SearchTestUtil.ATTACHMENT_OWNER_CLASS_PK
 		);
@@ -230,7 +232,7 @@ public class SearchResultUtilDLFileEntryTest
 
 	@Test
 	public void testDLFileEntryMissing() throws Exception {
-		when(
+		Mockito.when(
 			_dlAppLocalService.getFileEntry(SearchTestUtil.ENTRY_CLASS_PK)
 		).thenReturn(
 			null
@@ -262,7 +264,7 @@ public class SearchResultUtilDLFileEntryTest
 			SearchTestUtil.ATTACHMENT_OWNER_CLASS_NAME
 		);
 
-		verifyStatic(Mockito.atLeastOnce());
+		PowerMockito.verifyStatic(Mockito.atLeastOnce());
 
 		AssetRendererFactoryRegistryUtil.getAssetRendererFactoryByClassName(
 			SearchTestUtil.ATTACHMENT_OWNER_CLASS_NAME);
@@ -402,6 +404,13 @@ public class SearchResultUtilDLFileEntryTest
 
 	private static final String _DL_FILE_ENTRY_CLASS_NAME =
 		DLFileEntry.class.getName();
+
+	@Mock
+	@SuppressWarnings("rawtypes")
+	private AssetRenderer _assetRenderer;
+
+	@Mock
+	private AssetRendererFactory<?> _assetRendererFactory;
 
 	@Mock
 	private DLAppLocalService _dlAppLocalService;

@@ -165,7 +165,9 @@ public class RepresentorTransformerTest {
 	public void testStringFields() {
 		_testFields(
 			_representor.getStringFunctions(),
-			asList("dateField1", "dateField2", "stringField1", "stringField2"),
+			asList(
+				"dateField1", "dateField2", "stringField1",
+				"stringFieldOptional"),
 			asList(
 				"1970-01-01T00:00Z", "1970-01-01T00:03Z", "string1",
 				"string2"));

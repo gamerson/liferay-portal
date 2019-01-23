@@ -64,23 +64,27 @@ public class SerializableObjectWrapperTest {
 				_specialTestSerializableWrapper2));
 
 		Assert.assertTrue(
-			_getDeserializedObject(_specialTestSerializableWrapper1).equals(
+			Objects.equals(
+				_getDeserializedObject(_specialTestSerializableWrapper1),
 				_getDeserializedObject(_specialTestSerializableWrapper1)));
 		Assert.assertTrue(
 			_specialTestSerializableWrapper1.equals(
 				_getDeserializedObject(_specialTestSerializableWrapper1)));
 		Assert.assertTrue(
-			_getDeserializedObject(_specialTestSerializableWrapper1).equals(
+			Objects.equals(
+				_getDeserializedObject(_specialTestSerializableWrapper1),
 				_specialTestSerializableWrapper1));
 
 		Assert.assertTrue(
 			_specialTestSerializableWrapper1.equals(
 				_getDeserializedObject(_specialTestSerializableWrapper2)));
 		Assert.assertTrue(
-			_getDeserializedObject(_specialTestSerializableWrapper1).equals(
+			Objects.equals(
+				_getDeserializedObject(_specialTestSerializableWrapper1),
 				_specialTestSerializableWrapper2));
 		Assert.assertTrue(
-			_getDeserializedObject(_specialTestSerializableWrapper1).equals(
+			Objects.equals(
+				_getDeserializedObject(_specialTestSerializableWrapper1),
 				_getDeserializedObject(_specialTestSerializableWrapper2)));
 	}
 
@@ -115,7 +119,8 @@ public class SerializableObjectWrapperTest {
 					SerializableObjectWrapper.class.getName(), Level.ALL)) {
 
 			Assert.assertTrue(
-				_getDeserializedObject(_specialTestSerializableWrapper1).equals(
+				Objects.equals(
+					_getDeserializedObject(_specialTestSerializableWrapper1),
 					_getDeserializedObject(_specialTestSerializableWrapper1)));
 
 			List<LogRecord> logRecords = captureHandler.getLogRecords();
@@ -127,7 +132,8 @@ public class SerializableObjectWrapperTest {
 			_assertLogAndClear(logRecords, cnfe);
 
 			Assert.assertTrue(
-				_getDeserializedObject(_specialTestSerializableWrapper1).equals(
+				Objects.equals(
+					_getDeserializedObject(_specialTestSerializableWrapper1),
 					_specialTestSerializableWrapper1));
 
 			_assertLogAndClear(logRecords, cnfe);
@@ -139,13 +145,15 @@ public class SerializableObjectWrapperTest {
 			_assertLogAndClear(logRecords, cnfe);
 
 			Assert.assertFalse(
-				_getDeserializedObject(_specialTestSerializableWrapper1).equals(
+				Objects.equals(
+					_getDeserializedObject(_specialTestSerializableWrapper1),
 					_specialTestSerializableWrapper2));
 
 			_assertLogAndClear(logRecords, cnfe);
 
 			Assert.assertFalse(
-				_getDeserializedObject(_specialTestSerializableWrapper1).equals(
+				Objects.equals(
+					_getDeserializedObject(_specialTestSerializableWrapper1),
 					_getDeserializedObject(_specialTestSerializableWrapper2)));
 
 			_assertLogAndClear(logRecords, cnfe);
@@ -285,25 +293,32 @@ public class SerializableObjectWrapperTest {
 			_testSerializableObjectWrapper.equals(
 				_getDeserializedObject(_testSerializableObjectWrapper)));
 		Assert.assertTrue(
-			_getDeserializedObject(_testSerializableObjectWrapper).equals(
+			Objects.equals(
+				_getDeserializedObject(_testSerializableObjectWrapper),
 				_testSerializableObjectWrapper));
 		Assert.assertTrue(
-			_getDeserializedObject(_testSerializableObjectWrapper).equals(
+			Objects.equals(
+				_getDeserializedObject(_testSerializableObjectWrapper),
 				_getDeserializedObject(_testSerializableObjectWrapper)));
 	}
 
 	private void _testHashCode() throws Exception {
 		Assert.assertNotEquals(
 			_testSerializableObjectWrapper.hashCode(),
-			new SerializableObjectWrapper(_ANOTHER_TEST_SERIALIZABLE).
-				hashCode());
+			new SerializableObjectWrapper(
+				_ANOTHER_TEST_SERIALIZABLE
+			).hashCode());
 
 		Assert.assertEquals(
 			_testSerializableObjectWrapper.hashCode(),
-			new SerializableObjectWrapper(_TEST_SERIALIZABLE).hashCode());
+			new SerializableObjectWrapper(
+				_TEST_SERIALIZABLE
+			).hashCode());
 		Assert.assertEquals(
 			_testSerializableObjectWrapper.hashCode(),
-			_getDeserializedObject(_testSerializableObjectWrapper).hashCode());
+			_getDeserializedObject(
+				_testSerializableObjectWrapper
+			).hashCode());
 	}
 
 	private static final TestSerializable _ANOTHER_TEST_SERIALIZABLE =

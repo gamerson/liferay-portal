@@ -31,6 +31,7 @@ exports[`CriteriaRow should render 1`] = `
       />
       <input
         class="criterion-input form-control"
+        data-testid="simple-string"
         type="text"
         value=""
       />

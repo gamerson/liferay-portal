@@ -1,0 +1,18 @@
+@mixin generatePropertyGroupLoop(
+	$array,
+	$cssProperty,
+	$classPrefix: 'color--'
+) {
+	@each $a in $array {
+		$className: nth($a, 1);
+		$color: nth($a, 2);
+
+		@include generatePropertyGroup($color, $cssProperty, #{$classPrefix + $className});
+	}
+}
+
+@mixin generatePropertyGroup($color, $cssProperty, $className) {
+	&.#{$className} {
+		#{$cssProperty}: $color;
+	}
+}

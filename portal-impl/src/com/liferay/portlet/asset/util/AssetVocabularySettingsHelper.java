@@ -19,7 +19,6 @@ import com.liferay.petra.string.CharPool;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
-import com.liferay.portal.kernel.util.PrefixPredicateFilter;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.portal.kernel.util.Validator;
@@ -126,13 +125,12 @@ public class AssetVocabularySettingsHelper {
 
 				break;
 			}
-			else {
-				if (required) {
-					requiredClassNameIds.add(classNameIdAndClassTypePK);
-				}
 
-				selectedClassNameIds.add(classNameIdAndClassTypePK);
+			if (required) {
+				requiredClassNameIds.add(classNameIdAndClassTypePK);
 			}
+
+			selectedClassNameIds.add(classNameIdAndClassTypePK);
 		}
 
 		_properties.setProperty(
@@ -162,8 +160,13 @@ public class AssetVocabularySettingsHelper {
 	protected String getClassNameIdAndClassTypePK(
 		long classNameId, long classTypePK) {
 
-		return String.valueOf(classNameId).concat(StringPool.COLON).concat(
-			String.valueOf(classTypePK));
+		return String.valueOf(
+			classNameId
+		).concat(
+			StringPool.COLON
+		).concat(
+			String.valueOf(classTypePK)
+		);
 	}
 
 	protected long[] getClassNameIds(String[] classNameIdsAndClassTypePKs) {
@@ -242,28 +245,28 @@ public class AssetVocabularySettingsHelper {
 		}
 
 		if (classTypePK == AssetCategoryConstants.ALL_CLASS_TYPE_PK) {
-			PrefixPredicateFilter prefixPredicateFilter =
-				new PrefixPredicateFilter(classNameId + StringPool.COLON, true);
+			String prefix = classNameId + StringPool.COLON;
 
 			return ArrayUtil.exists(
-				classNameIdsAndClassTypePKs, prefixPredicateFilter);
+				classNameIdsAndClassTypePKs,
+				classNameIdsAndClassTypePK ->
+					classNameIdsAndClassTypePK.startsWith(prefix));
 		}
-		else {
-			String classNameIdAndClassTypePK = getClassNameIdAndClassTypePK(
-				classNameId, classTypePK);
 
-			if (ArrayUtil.contains(
-					classNameIdsAndClassTypePKs, classNameIdAndClassTypePK)) {
+		String classNameIdAndClassTypePK = getClassNameIdAndClassTypePK(
+			classNameId, classTypePK);
 
-				return true;
-			}
+		if (ArrayUtil.contains(
+				classNameIdsAndClassTypePKs, classNameIdAndClassTypePK)) {
 
-			String classNameIdAndAllClassTypePK = getClassNameIdAndClassTypePK(
-				classNameId, AssetCategoryConstants.ALL_CLASS_TYPE_PK);
-
-			return ArrayUtil.contains(
-				classNameIdsAndClassTypePKs, classNameIdAndAllClassTypePK);
+			return true;
 		}
+
+		String classNameIdAndAllClassTypePK = getClassNameIdAndClassTypePK(
+			classNameId, AssetCategoryConstants.ALL_CLASS_TYPE_PK);
+
+		return ArrayUtil.contains(
+			classNameIdsAndClassTypePKs, classNameIdAndAllClassTypePK);
 	}
 
 	private static final String _KEY_MULTI_VALUED = "multiValued";

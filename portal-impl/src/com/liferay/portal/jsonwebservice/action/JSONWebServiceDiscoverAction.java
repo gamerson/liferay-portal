@@ -311,9 +311,8 @@ public class JSONWebServiceDiscoverAction implements JSONWebServiceAction {
 			if (!returnType) {
 				return "file";
 			}
-			else {
-				type = FileData.class;
-			}
+
+			type = FileData.class;
 		}
 		else if (type.equals(Locale.class) || type.equals(String.class) ||
 				 type.equals(TimeZone.class)) {
@@ -444,7 +443,11 @@ public class JSONWebServiceDiscoverAction implements JSONWebServiceAction {
 
 		Method method = jsonWebServiceActionMapping.getRealActionMethod();
 
-		return className.concat(StringPool.POUND).concat(method.getName());
+		return className.concat(
+			StringPool.POUND
+		).concat(
+			method.getName()
+		);
 	}
 
 	private final String _basePath;

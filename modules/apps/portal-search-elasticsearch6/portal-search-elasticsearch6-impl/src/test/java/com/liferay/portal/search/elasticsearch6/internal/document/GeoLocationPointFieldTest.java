@@ -21,9 +21,9 @@ import com.liferay.portal.kernel.search.Hits;
 import com.liferay.portal.kernel.search.geolocation.GeoLocationPoint;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.search.elasticsearch6.internal.ElasticsearchIndexingFixture;
+import com.liferay.portal.search.elasticsearch6.internal.connection.ElasticsearchClientResolver;
 import com.liferay.portal.search.elasticsearch6.internal.connection.ElasticsearchFixture;
 import com.liferay.portal.search.elasticsearch6.internal.connection.IndexCreator;
-import com.liferay.portal.search.elasticsearch6.internal.connection.IndicesAdminClientSupplier;
 import com.liferay.portal.search.elasticsearch6.internal.connection.LiferayIndexCreationHelper;
 import com.liferay.portal.search.elasticsearch6.internal.index.LiferayDocumentTypeFactory;
 import com.liferay.portal.search.test.util.IdempotentRetryAssert;
@@ -89,17 +89,22 @@ public class GeoLocationPointFieldTest extends BaseIndexingTestCase {
 
 	@Override
 	protected IndexingFixture createIndexingFixture() throws Exception {
-		ElasticsearchFixture elasticsearchFixture = new ElasticsearchFixture(
-			GeoLocationPointFieldTest.class.getSimpleName());
+		ElasticsearchFixture elasticsearchFixture1 = new ElasticsearchFixture(
+			getClass());
 
-		IndexCreator indexCreator = new IndexCreator(elasticsearchFixture);
-
-		indexCreator.setIndexCreationHelper(
-			new CustomFieldLiferayIndexCreationHelper(elasticsearchFixture));
-
-		return new ElasticsearchIndexingFixture(
-			elasticsearchFixture, BaseIndexingTestCase.COMPANY_ID,
-			indexCreator);
+		return new ElasticsearchIndexingFixture() {
+			{
+				companyId = BaseIndexingTestCase.COMPANY_ID;
+				elasticsearchFixture = elasticsearchFixture1;
+				indexCreator = new IndexCreator(elasticsearchFixture1) {
+					{
+						setIndexCreationHelper(
+							new CustomFieldLiferayIndexCreationHelper(
+								elasticsearchFixture1));
+					}
+				};
+			}
+		};
 	}
 
 	protected int randomLatitude() {
@@ -126,9 +131,9 @@ public class GeoLocationPointFieldTest extends BaseIndexingTestCase {
 		extends LiferayIndexCreationHelper {
 
 		public CustomFieldLiferayIndexCreationHelper(
-			IndicesAdminClientSupplier indicesAdminClientSupplier) {
+			ElasticsearchClientResolver elasticsearchClientResolver) {
 
-			super(indicesAdminClientSupplier);
+			super(elasticsearchClientResolver);
 		}
 
 		@Override

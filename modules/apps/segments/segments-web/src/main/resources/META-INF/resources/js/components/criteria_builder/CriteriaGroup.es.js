@@ -1,7 +1,6 @@
 import React, {Component, Fragment} from 'react';
 import {PropTypes} from 'prop-types';
 import CriteriaRow from './CriteriaRow.es';
-import ClayButton from '../shared/ClayButton.es';
 import ClayIcon from '../shared/ClayIcon.es';
 import {CONJUNCTIONS} from '../../utils/constants.es';
 import {DragSource as dragSource} from 'react-dnd';
@@ -12,9 +11,11 @@ import getCN from 'classnames';
 import {
 	generateGroupId,
 	getChildGroupIds,
+	getSupportedOperatorsFromType,
 	insertAtIndex,
 	replaceAtIndex
 } from '../../utils/utils.es';
+import Conjunction from './Conjunction.es';
 
 /**
  * Passes the required values to the drop target.
@@ -64,6 +65,7 @@ class CriteriaGroup extends Component {
 		onChange: PropTypes.func,
 		onMove: PropTypes.func,
 		parentGroupId: PropTypes.string,
+		propertyKey: PropTypes.string.isRequired,
 		root: PropTypes.bool,
 		supportedConjunctions: PropTypes.array,
 		supportedOperators: PropTypes.array,
@@ -79,14 +81,6 @@ class CriteriaGroup extends Component {
 		super(props);
 
 		this.NestedCriteriaGroupWithDrag = withDragSource(CriteriaGroup);
-	}
-
-	_getConjunctionLabel(conjunctionName, conjunctions) {
-		const conjunction = conjunctions.find(
-			({name}) => name === conjunctionName
-		);
-
-		return conjunction ? conjunction.label : undefined;
 	}
 
 	_handleConjunctionClick = event => {
@@ -119,16 +113,37 @@ class CriteriaGroup extends Component {
 	 * @memberof CriteriaGroup
 	 */
 	_handleCriterionAdd = (index, criterion) => {
-		const {criteria, onChange, root, supportedOperators} = this.props;
+		const {
+			criteria,
+			onChange,
+			root,
+			supportedOperators,
+			supportedPropertyTypes
+		} = this.props;
 
-		const {operatorName, propertyName, value = ''} = criterion;
+		const {
+			defaultValue,
+			operatorName,
+			propertyName,
+			type,
+			value
+		} = criterion;
+
+		const criterionValue = value || defaultValue;
+
+		const operators = getSupportedOperatorsFromType(
+			supportedOperators,
+			supportedPropertyTypes,
+			type
+		);
 
 		const newCriterion = {
 			operatorName: operatorName ?
 				operatorName :
-				supportedOperators[0].name,
+				operators[0].name,
 			propertyName,
-			value
+			type,
+			value: criterionValue
 		};
 
 		if (root && !criteria) {
@@ -155,14 +170,16 @@ class CriteriaGroup extends Component {
 	}
 
 	_handleCriterionChange = index => newCriterion => {
-		const {criteria, onChange} = this.props;
+		const {criteria, editing, onChange} = this.props;
 
-		onChange(
-			{
-				...criteria,
-				items: replaceAtIndex(newCriterion, criteria.items, index)
-			}
-		);
+		if (editing) {
+			onChange(
+				{
+					...criteria,
+					items: replaceAtIndex(newCriterion, criteria.items, index)
+				}
+			);
+		}
 	}
 
 	_handleCriterionDelete = index => {
@@ -202,22 +219,12 @@ class CriteriaGroup extends Component {
 					onMove={onMove}
 				/>
 
-				{editing ?
-					<ClayButton
-						className="btn-sm conjunction-button"
-						label={this._getConjunctionLabel(
-							criteria.conjunctionName,
-							supportedConjunctions
-						)}
-						onClick={this._handleConjunctionClick}
-					/> :
-					<div className="conjunction-label">
-						{this._getConjunctionLabel(
-							criteria.conjunctionName,
-							supportedConjunctions
-						)}
-					</div>
-				}
+				<Conjunction
+					conjunctionName={criteria.conjunctionName}
+					editing={editing}
+					onClick={this._handleConjunctionClick}
+					supportedConjunctions={supportedConjunctions}
+				/>
 
 				<DropZone
 					before
@@ -236,6 +243,7 @@ class CriteriaGroup extends Component {
 			groupId,
 			modelLabel,
 			onMove,
+			propertyKey,
 			root,
 			supportedConjunctions,
 			supportedOperators,
@@ -262,6 +270,7 @@ class CriteriaGroup extends Component {
 						onChange={this._handleCriterionChange(index)}
 						onMove={onMove}
 						parentGroupId={groupId}
+						propertyKey={propertyKey}
 						supportedConjunctions={supportedConjunctions}
 						supportedOperators={supportedOperators}
 						supportedProperties={supportedProperties}
@@ -304,12 +313,14 @@ class CriteriaGroup extends Component {
 			editing,
 			groupId,
 			onMove,
+			propertyKey,
 			root
 		} = this.props;
 
 		const classes = getCN(
 			'criteria-group-root',
 			`criteria-group-item${root ? '-root' : ''}`,
+			`color--${propertyKey}`,
 			{
 				'dnd-drag': dragging
 			}

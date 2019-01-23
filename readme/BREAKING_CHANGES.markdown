@@ -20,7 +20,7 @@ Here are some of the types of changes documented in this file:
   replaces an old API, in spite of the old API being kept in Liferay Portal for
   backwards compatibility.
 
-*This document has been reviewed through commit `67429b52ebbd`.*
+*This document has been reviewed through commit `c3b54108fcd4`.*
 
 ## Breaking Changes Contribution Guidelines
 
@@ -123,13 +123,50 @@ You should provide your own Lodash version for your custom developments to use
 following any of the possible strategies to add third party libraries.
 
 As a temporary measure, you can bring back the old behavior by setting the
-*Enable Lodash* property in *System Settings* &rarr; *Third Party* &rarr;
-*Lodash* to `true`.
+*Enable Lodash* property in Liferay Portal's *Control Panel* &rarr;
+*Configuration* &rarr; *System Settings* &rarr; *Third Party* &rarr; *Lodash* to
+`true`.
 
 #### Why was this change made?
 
 This change was made to avoid bundling and serving additional library code on
 every page that was mostly unused and redundant.
+
+---------------------------------------
+
+### Moved Two Staging Properties to OSGi Configuration
+- **Date:** 2018-Dec-12
+- **JIRA Ticket:** [LPS-88018](https://issues.liferay.com/browse/LPS-88018)
+
+#### What changed?
+
+Two Staging properties have been moved from `portal.properties` to an
+OSGi configuration named `ExportImportServiceConfiguration.java` in the
+`export-import-service` module.
+
+#### Who is affected?
+
+This affects anyone using the following portal properties:
+
+- `staging.delete.temp.lar.on.failure`
+- `staging.delete.temp.lar.on.success`
+
+#### How should I update my code?
+
+Instead of overriding the `portal.properties` file, you can manage the
+properties from Portal's configuration administrator. This can be accessed by
+navigating to Liferay Portal's *Control Panel* &rarr; *Configuration* &rarr;
+*System Settings* &rarr; *Infrastructure* &rarr; *Export/Import* and editing
+the settings there.
+
+If you would like to include the new configuration in your application, follow
+the instructions for
+[making applications configurable](https://dev.liferay.com/develop/tutorials/-/knowledge_base/7-1/making-applications-configurable).
+
+#### Why was this change made?
+
+This change was made as part of the modularization efforts to ease portal
+configuration changes.
 
 ---------------------------------------
 

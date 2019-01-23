@@ -368,17 +368,14 @@ public class LayoutPageTemplateEntryStagedModelDataHandler
 	}
 
 	private void _importAssetDisplayPages(
-		PortletDataContext portletDataContext,
-		LayoutPageTemplateEntry layoutPageTemplateEntry,
-		LayoutPageTemplateEntry importedLayoutPageTemplateEntry) {
+			PortletDataContext portletDataContext,
+			LayoutPageTemplateEntry layoutPageTemplateEntry,
+			LayoutPageTemplateEntry importedLayoutPageTemplateEntry)
+		throws PortletDataException {
 
 		List<Element> assetDisplayPageEntryElements =
 			portletDataContext.getReferenceDataElements(
 				layoutPageTemplateEntry, AssetDisplayPageEntry.class);
-
-		Map<Long, Long> assetDisplayPageEntries =
-			(Map<Long, Long>)portletDataContext.getNewPrimaryKeysMap(
-				AssetDisplayPageEntry.class);
 
 		for (Element assetDisplayPageEntryElement :
 				assetDisplayPageEntryElements) {
@@ -388,6 +385,13 @@ public class LayoutPageTemplateEntryStagedModelDataHandler
 			AssetDisplayPageEntry assetDisplayPageEntry =
 				(AssetDisplayPageEntry)portletDataContext.getZipEntryAsObject(
 					path);
+
+			StagedModelDataHandlerUtil.importStagedModel(
+				portletDataContext, assetDisplayPageEntry);
+
+			Map<Long, Long> assetDisplayPageEntries =
+				(Map<Long, Long>)portletDataContext.getNewPrimaryKeysMap(
+					AssetDisplayPageEntry.class);
 
 			long assetDisplayPageEntryId = MapUtil.getLong(
 				assetDisplayPageEntries,

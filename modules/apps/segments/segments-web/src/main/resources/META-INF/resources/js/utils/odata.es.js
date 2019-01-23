@@ -2,6 +2,8 @@ import {
 	CONJUNCTIONS,
 	FUNCTIONAL_OPERATORS,
 	GROUP,
+	NOT_OPERATORS,
+	PROPERTY_TYPES,
 	RELATIONAL_OPERATORS
 } from './constants.es';
 import {generateGroupId} from './utils.es';
@@ -14,20 +16,33 @@ const OPERATORS = {
 
 const oDataFilterFn = window.oDataParser.filter;
 
+const EXPRESSION_TYPES = {
+	AND: 'AndExpression',
+	BOOL_PAREN: 'BoolParenExpression',
+	EQUALS: 'EqualsExpression',
+	GREATER_OR_EQUALS: 'GreaterOrEqualsExpression',
+	GREATER_THAN: 'GreaterThanExpression',
+	LESSER_OR_EQUALS: 'LesserOrEqualsExpression',
+	LESSER_THAN: 'LesserThanExpression',
+	METHOD_CALL: 'MethodCallExpression',
+	NOT: 'NotExpression',
+	OR: 'OrExpression'
+};
+
 /**
  * Maps Odata-v4-parser generated AST expression names to internally used
  * constants.
  */
 const oDataV4ParserNameMap = {
-	AndExpression: CONJUNCTIONS.AND,
-	BoolParenExpression: GROUP,
-	EqualsExpression: OPERATORS.EQ,
-	GreaterOrEqualsExpression: OPERATORS.GE,
-	GreaterThanExpression: OPERATORS.GT,
-	LesserOrEqualsExpression: OPERATORS.LE,
-	LesserThanExpression: OPERATORS.LT,
-	NotEqualsExpression: OPERATORS.NE,
-	OrExpression: CONJUNCTIONS.OR
+	[EXPRESSION_TYPES.AND]: CONJUNCTIONS.AND,
+	[EXPRESSION_TYPES.BOOL_PAREN]: GROUP,
+	contains: OPERATORS.CONTAINS,
+	[EXPRESSION_TYPES.EQUALS]: OPERATORS.EQ,
+	[EXPRESSION_TYPES.GREATER_OR_EQUALS]: OPERATORS.GE,
+	[EXPRESSION_TYPES.GREATER_THAN]: OPERATORS.GT,
+	[EXPRESSION_TYPES.LESSER_OR_EQUALS]: OPERATORS.LE,
+	[EXPRESSION_TYPES.LESSER_THAN]: OPERATORS.LT,
+	[EXPRESSION_TYPES.OR]: CONJUNCTIONS.OR
 };
 
 /**
@@ -39,9 +54,57 @@ const oDataV4ParserNameMap = {
 function addNewGroup({oDataASTNode, prevConjunction}) {
 	return {
 		lastNodeWasGroup: false,
-		oDataASTNode: {type: 'BoolParenExpression', value: oDataASTNode},
+		oDataASTNode: {
+			type: EXPRESSION_TYPES.BOOL_PAREN,
+			value: oDataASTNode
+		},
 		prevConjunction
 	};
+}
+
+/**
+ * Gets the type of the property from the property name.
+ * @param {string} propertyName The property name to find.
+ * @param {array} properties The list of defined properties to search in.
+ * @returns {string} The property type.
+ */
+const getTypeByPropertyName = (propertyName, properties) => {
+	let type = null;
+
+	if (propertyName && properties) {
+		const property = properties.find(
+			property => property.name === propertyName
+		);
+
+		type = property ? property.type : null;
+	}
+
+	return type;
+};
+
+/**
+ * Decides whether to add quotes to value.
+ * @param {boolean | string} value
+ * @param {boolean | date | number | string} type
+ * @returns {string}
+ */
+function valueParser(value, type) {
+	let parsedValue;
+
+	switch (type) {
+	case PROPERTY_TYPES.BOOLEAN:
+	case PROPERTY_TYPES.DATE:
+	case PROPERTY_TYPES.INTEGER:
+	case PROPERTY_TYPES.DOUBLE:
+		parsedValue = value;
+		break;
+	case PROPERTY_TYPES.STRING:
+	default:
+		parsedValue = `'${value}'`;
+		break;
+	}
+
+	return parsedValue;
 }
 
 /**
@@ -49,9 +112,10 @@ function addNewGroup({oDataASTNode, prevConjunction}) {
  * string.
  * @param {object} criteria
  * @param {string} queryConjunction
+ * @param {array} properties
  * @returns An OData query string built from the criteria object.
  */
-function buildQueryString(criteria, queryConjunction) {
+function buildQueryString(criteria, queryConjunction, properties) {
 	return criteria
 		.filter(Boolean)
 		.reduce(
@@ -70,18 +134,41 @@ function buildQueryString(criteria, queryConjunction) {
 
 				if (conjunctionName) {
 					queryString = queryString.concat(
-						`(${buildQueryString(items, conjunctionName)})`
+						`(${buildQueryString(items, conjunctionName, properties)})`
 					);
 				}
-				else if (isValueType(RELATIONAL_OPERATORS, operatorName)) {
-					queryString = queryString.concat(
-						`${propertyName} ${operatorName} '${value}'`
-					);
-				}
-				else if (isValueType(FUNCTIONAL_OPERATORS, operatorName)) {
-					queryString = queryString.concat(
-						`${operatorName} (${propertyName}, '${value}')`
-					);
+				else {
+					const type = criterion.type ||
+						getTypeByPropertyName(propertyName, properties);
+
+					const parsedValue = valueParser(value, type);
+
+					if (isValueType(RELATIONAL_OPERATORS, operatorName)) {
+						queryString = queryString.concat(
+							`${propertyName} ${operatorName} ${parsedValue}`
+						);
+					}
+					else if (isValueType(FUNCTIONAL_OPERATORS, operatorName)) {
+						queryString = queryString.concat(
+							`${operatorName}(${propertyName}, ${parsedValue})`
+						);
+					}
+					else if (isValueType(NOT_OPERATORS, operatorName)) {
+						const baseOperator = operatorName.replace(/not-/g, '');
+
+						const baseExpression = [{
+							operatorName: baseOperator,
+							propertyName,
+							type,
+							value
+						}];
+
+						// Not is wrapped in a group to simplify AST parsing.
+
+						queryString = queryString.concat(
+							`(not (${buildQueryString(baseExpression, conjunctionName, properties)}))`
+						);
+					}
 				}
 
 				return queryString;
@@ -107,7 +194,9 @@ function getChildExpressionName(oDataASTNode) {
 function getConjunctionForGroup(oDataASTNode) {
 	const childExpressionName = getChildExpressionName(oDataASTNode);
 
-	return isValueType(CONJUNCTIONS, childExpressionName) ? childExpressionName : CONJUNCTIONS.AND;
+	return isValueType(CONJUNCTIONS, childExpressionName) ?
+		childExpressionName :
+		CONJUNCTIONS.AND;
 }
 
 /**
@@ -116,7 +205,19 @@ function getConjunctionForGroup(oDataASTNode) {
  * @returns String value of the internal name
  */
 function getExpressionName(oDataASTNode) {
-	return oDataV4ParserNameMap[oDataASTNode.type];
+	const type = oDataASTNode.type;
+
+	let returnValue = oDataV4ParserNameMap[type];
+
+	if (type == EXPRESSION_TYPES.METHOD_CALL) {
+		returnValue = oDataASTNode.value.method;
+	}
+
+	return returnValue;
+}
+
+function getFunctionName(oDataASTNode) {
+	return oDataV4ParserNameMap[oDataASTNode.value.method];
 }
 
 /**
@@ -124,11 +225,11 @@ function getExpressionName(oDataASTNode) {
  * @param {object} oDataASTNode
  * @returns String value of the internal name of the next expression.
  */
-const getNextNonGroupExpressionName = oDataASTNode => {
+const getNextNonGroupExpression = oDataASTNode => {
 	let returnValue;
 
-	if (oDataASTNode.value.type === 'BoolParentExpression') {
-		returnValue = getNextNonGroupExpressionName(oDataASTNode.value);
+	if (oDataASTNode.value.type === EXPRESSION_TYPES.BOOL_PAREN) {
+		returnValue = getNextNonGroupExpression(oDataASTNode.value);
 	}
 	else {
 		returnValue = oDataASTNode.value.left ?
@@ -136,7 +237,34 @@ const getNextNonGroupExpressionName = oDataASTNode => {
 			oDataASTNode.value;
 	}
 
-	return getExpressionName(returnValue);
+	return returnValue;
+};
+
+/**
+ * Returns the next expression in the syntax tree that is not a grouping.
+ * @param {object} oDataASTNode
+ * @returns String value of the internal name of the next expression.
+ */
+const getNextOperatorExpression = oDataASTNode => {
+	let returnValue;
+
+	const nextNode = oDataASTNode.value.left ?
+		oDataASTNode.value.left :
+		oDataASTNode.value;
+
+	const type = nextNode.type;
+
+	if (type === EXPRESSION_TYPES.BOOL_PAREN ||
+		type === EXPRESSION_TYPES.AND ||
+		type === EXPRESSION_TYPES.OR
+	) {
+		returnValue = getNextOperatorExpression(nextNode);
+	}
+	else {
+		returnValue = nextNode;
+	}
+
+	return returnValue;
 };
 
 /**
@@ -146,7 +274,13 @@ const getNextNonGroupExpressionName = oDataASTNode => {
  * @param {string} prevConjunction
  * @returns boolean of whether a grouping has different conjunctions.
  */
-function hasDifferentConjunctions({lastNodeWasGroup, oDataASTNode, prevConjunction}) {
+function hasDifferentConjunctions(
+	{
+		lastNodeWasGroup,
+		oDataASTNode,
+		prevConjunction
+	}
+) {
 	return prevConjunction !== oDataASTNode.type && !lastNodeWasGroup;
 }
 
@@ -178,11 +312,22 @@ function isValueType(types, value) {
  * @returns a boolean of whether a group is necessary.
  */
 function isRedundantGroup({lastNodeWasGroup, oDataASTNode, prevConjunction}) {
-	const nextNodeExpressionName = getNextNonGroupExpressionName(oDataASTNode);
+	const nextNodeExpressionName = getExpressionName(
+		getNextNonGroupExpression(oDataASTNode)
+	);
 
 	return lastNodeWasGroup ||
 		oDataV4ParserNameMap[prevConjunction] === nextNodeExpressionName ||
 		!isValueType(CONJUNCTIONS, nextNodeExpressionName);
+}
+
+/**
+ * Removes both single `'` and double `"` quotes from a string.
+ * @param {string} text The string to remove quotes from.
+ * @returns {string} The string without quotes.
+ */
+function removeQuotes(text) {
+	return text.replace(/['"]+/g, '');
 }
 
 /**
@@ -209,6 +354,10 @@ function translateQueryToCriteria(queryString) {
 	let criteria;
 
 	try {
+		if (queryString === '()') {
+			throw 'queryString is ()';
+		}
+
 		const oDataASTNode = oDataFilterFn(queryString);
 
 		const criteriaArray = toCriteria({oDataASTNode});
@@ -239,7 +388,13 @@ function toCriteria(context) {
 
 	let criterion;
 
-	if (isValueType(RELATIONAL_OPERATORS, expressionName)) {
+	if (oDataASTNode.type === EXPRESSION_TYPES.NOT) {
+		criterion = transformNotNode(context);
+	}
+	else if (oDataASTNode.type === EXPRESSION_TYPES.METHOD_CALL) {
+		criterion = transformFunctionalNode(context);
+	}
+	else if (isValueType(RELATIONAL_OPERATORS, expressionName)) {
 		criterion = transformOperatorNode(context);
 	}
 	else if (isValueType(CONJUNCTIONS, expressionName)) {
@@ -285,6 +440,23 @@ function transformConjunctionNode(context) {
 }
 
 /**
+ * Transform a function expression node into a criterion for the criteria
+ * builder.
+ * @param {object} oDataASTNode
+ * @returns an array containing the object representation of an operator
+ * criterion
+ */
+function transformFunctionalNode({oDataASTNode}) {
+	return [
+		{
+			operatorName: getFunctionName(oDataASTNode),
+			propertyName: oDataASTNode.value.parameters[0].raw,
+			value: removeQuotes(oDataASTNode.value.parameters[1].raw)
+		}
+	];
+}
+
+/**
  * Transforms a group expression node into a criterion for the criteria
  * builder. If it comes across a grouping that is redundant (doesn't provide
  * readability improvements, superfluous to order of operations), it will remove
@@ -319,12 +491,48 @@ function transformGroupNode(context) {
  * @returns an array containing the object representation of an operator
  * criterion
  */
+function transformNotNode({oDataASTNode}) {
+	const nextNodeExpression = getNextOperatorExpression(oDataASTNode);
+
+	const nextNodeExpressionName = getExpressionName(nextNodeExpression);
+
+	let returnValue;
+
+	if (nextNodeExpressionName == OPERATORS.CONTAINS) {
+		returnValue = [
+			{
+				operatorName: NOT_OPERATORS.NOT_CONTAINS,
+				propertyName: nextNodeExpression.value.parameters[0].raw,
+				value: removeQuotes(nextNodeExpression.value.parameters[1].raw)
+			}
+		];
+	}
+	else if (nextNodeExpressionName == OPERATORS.EQ) {
+		returnValue = [
+			{
+				operatorName: NOT_OPERATORS.NOT_EQ,
+				propertyName: nextNodeExpression.value.left.raw,
+				value: removeQuotes(nextNodeExpression.value.right.raw)
+			}
+		];
+	}
+
+	return returnValue;
+}
+
+/**
+ * Transform an operator expression node into a criterion for the criteria
+ * builder.
+ * @param {object} oDataASTNode
+ * @returns an array containing the object representation of an operator
+ * criterion
+ */
 function transformOperatorNode({oDataASTNode}) {
 	return [
 		{
 			operatorName: getExpressionName(oDataASTNode),
 			propertyName: oDataASTNode.value.left.raw,
-			value: oDataASTNode.value.right.raw.replace(/['"]+/g, '')
+			value: removeQuotes(oDataASTNode.value.right.raw)
 		}
 	];
 }

@@ -36,6 +36,7 @@ import com.liferay.oauth2.provider.model.OAuth2Application;
 import com.liferay.oauth2.provider.model.OAuth2ApplicationScopeAliases;
 import com.liferay.oauth2.provider.model.OAuth2Authorization;
 import com.liferay.oauth2.provider.service.base.OAuth2ApplicationLocalServiceBaseImpl;
+import com.liferay.oauth2.provider.util.OAuth2SecureRandomGenerator;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.ImageTypeException;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -96,7 +97,13 @@ public class OAuth2ApplicationLocalServiceImpl
 			allowedGrantTypesList = new ArrayList<>();
 		}
 
-		clientId = StringUtil.trim(clientId);
+		if (Validator.isBlank(clientId)) {
+			clientId = OAuth2SecureRandomGenerator.generateClientId();
+		}
+		else {
+			clientId = StringUtil.trim(clientId);
+		}
+
 		homePageURL = StringUtil.trim(homePageURL);
 		name = StringUtil.trim(name);
 		privacyPolicyURL = StringUtil.trim(privacyPolicyURL);
@@ -458,14 +465,16 @@ public class OAuth2ApplicationLocalServiceImpl
 			}
 		}
 
-		OAuth2Application existingOAuth2Application =
-			oAuth2ApplicationPersistence.fetchByC_C(companyId, clientId);
+		if (!Validator.isBlank(clientId)) {
+			OAuth2Application existingOAuth2Application =
+				oAuth2ApplicationPersistence.fetchByC_C(companyId, clientId);
 
-		if ((existingOAuth2Application != null) &&
-			(existingOAuth2Application.getOAuth2ApplicationId() !=
-				oAuth2ApplicationId)) {
+			if ((existingOAuth2Application != null) &&
+				(existingOAuth2Application.getOAuth2ApplicationId() !=
+					oAuth2ApplicationId)) {
 
-			throw new DuplicateOAuth2ApplicationClientIdException();
+				throw new DuplicateOAuth2ApplicationClientIdException();
+			}
 		}
 
 		if (!Validator.isBlank(homePageURL)) {

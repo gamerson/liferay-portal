@@ -1,0 +1,162 @@
+{namespace com.liferay.layout.admin.web.SidebarWidgetsPanel}
+
+/**
+ * SidebarWidgetsPanel
+ */
+{template .render}
+	{@param? _handleSearchInputKeyUp: any}
+	{@param? _keywords: string}
+	{@param? widgets: list<[
+		categories: list<[
+			categories: list<?>,
+			path: string,
+			portlets: list<?>,
+			title: string
+		]>,
+		path: string,
+		portlets: list<[
+			instanceable: bool,
+			portletId: string,
+			title: string,
+			used: bool
+		]>,
+		title: string
+	]>}
+	{@param? spritemap: string}
+
+	<div class="sidebar-fragments-section sidebar-section">
+		<nav class="management-bar navbar-light">
+			<div class="navbar-form-autofit">
+				<form role="search">
+					<div class="input-group input-group-inset search-bar">
+						<div class="input-group-input">
+							<input
+								class="form-control input-group-inset"
+								data-onkeyup="{$_handleSearchInputKeyUp}"
+								placeholder="{msg desc=""}search{/msg}..."
+								type="text"
+								value="{$_keywords ?: ''}"
+							/>
+
+							<div class="input-group-inset-item input-group-inset-item-after">
+								<button class="btn btn-unstyled" type="button">
+									<svg class="lexicon-icon">
+										<use xlink:href="{$spritemap}#search"></use>
+									</svg>
+								</button>
+							</div>
+						</div>
+					</div>
+				</form>
+			</div>
+		</nav>
+
+		{if $widgets}
+			{foreach $category in $widgets}
+				{call .category}
+					{param category: $category /}
+					{param key: $category.title /}
+					{param keywords: $_keywords /}
+					{param spritemap: $spritemap /}
+				{/call}
+			{/foreach}
+		{/if}
+	</div>
+{/template}
+
+{template .category}
+	{@param category: ?}
+	{@param key: string}
+	{@param? keywords: string}
+	{@param? spritemap: string}
+
+	{let $collapseId kind="text"}
+		widget-category-{$category.path}
+	{/let}
+
+	{let $panelClasses kind="text"}
+		fragments-editor-sidebar-section__panel
+		{sp}fragments-editor-sidebar-section__widgets-panel
+		{sp}panel
+	{/let}
+
+	<div
+		aria-orientation="vertical"
+		class="panel-group panel-group-flush"
+		key="{$key}"
+		role="tablist"
+	>
+		<div class="{$panelClasses}">
+			{let $collapseIconClasses kind="text"}
+				collapse-icon
+				{sp}sheet-subtitle
+
+				{if (not $keywords) or ($keywords == '')}
+					{sp}collapsed
+				{/if}
+			{/let}
+
+			<a
+				aria-controls="{$collapseId}"
+				aria-expanded="false"
+				class="{$collapseIconClasses}"
+				data-toggle="collapse"
+				href="#{$collapseId}"
+				role="tab"
+			>
+				<span>{$category.title}</span>
+				<span class="collapse-icon-closed">
+					<svg class="lexicon-icon lexicon-icon-angle-right">
+						<use xlink:href="{$spritemap}#angle-right"></use>
+					</svg>
+				</span>
+				<span class="collapse-icon-open">
+					<svg class="lexicon-icon lexicon-icon-angle-down">
+						<use xlink:href="{$spritemap}#angle-down"></use>
+					</svg>
+				</span>
+			</a>
+
+			{let $panelCollapseClasses kind="text"}
+				panel-collapse
+
+				{if (not $keywords) or ($keywords == '')}
+					{sp}collapse
+				{else}
+					{sp}show
+				{/if}
+			{/let}
+
+			<div
+				class="{$panelCollapseClasses}"
+				id="{$collapseId}"
+				role="tabpanel"
+			>
+				<div class="fragments-editor-sidebar-section__widgets-panel-grid">
+					{if $category.categories}
+						{foreach $subCategory in $category.categories}
+							{call .category}
+								{param category: $subCategory /}
+								{param key: $key + $subCategory.title /}
+								{param keywords: $keywords /}
+								{param spritemap: $spritemap /}
+							{/call}
+						{/foreach}
+					{/if}
+
+					<ul class="nav nav-equal-height nav-stacked">
+						{foreach $portlet in $category.portlets}
+							<li class="widget-item" role="presentation">
+								<svg class="lexicon-icon lexicon-icon-angle-down">
+									<use xlink:href="{$spritemap}#{if $portlet.instanceable}grid{else}live{/if}"></use>
+								</svg>
+
+								<span class="taglib-icon-label">{$portlet.title}</span>
+							</li>
+						{/foreach}
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+{/template}

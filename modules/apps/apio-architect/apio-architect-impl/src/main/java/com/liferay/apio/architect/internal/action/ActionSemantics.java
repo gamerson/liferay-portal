@@ -14,6 +14,9 @@
 
 package com.liferay.apio.architect.internal.action;
 
+import static io.vavr.API.$;
+import static io.vavr.API.Case;
+
 import static java.util.Collections.unmodifiableList;
 
 import com.liferay.apio.architect.annotation.Id;
@@ -205,25 +208,29 @@ public final class ActionSemantics {
 	 *         params
 	 * @review
 	 */
+	@SuppressWarnings({"Convert2MethodRef", "unchecked"})
 	public Action toAction(ProvideFunction provideFunction) {
-		return request -> Try.of(
+		Action action = request -> Try.of(
 			() -> getPermissionParams(provideFunction.apply(this, request))
 		).mapTry(
 			this::checkPermissions
 		).filter(
 			aBoolean -> aBoolean
-		).<Try<List<?>>>transform(
-			aTry -> {
-				if (aTry.isSuccess()) {
-					return Try.of(
-						() -> getParams(provideFunction.apply(this, request)));
-				}
-
-				return Try.failure(new ForbiddenException());
-			}
+		).mapFailure(
+			Case($(), () -> new ForbiddenException())
+		).mapTry(
+			__ -> provideFunction.apply(this, request)
+		).mapTry(
+			this::getParams
 		).mapTry(
 			this::execute
 		);
+
+		if (Void.class.isAssignableFrom(_returnClass)) {
+			return (Action.NoContent)action::execute;
+		}
+
+		return (Action.Ok)action::execute;
 	}
 
 	/**

@@ -55,9 +55,21 @@ public class JournalArticleAssetEntryUsageRecorder
 
 	@Override
 	public void record(AssetEntry assetEntry) throws PortalException {
+		int count = _assetEntryUsageLocalService.getAssetEntryUsagesCount(
+			assetEntry.getEntryId(), StringPool.BLANK);
+
+		if (count > 0) {
+			return;
+		}
+
 		_recordJournalContentSearches(assetEntry);
 		_recordPortletPreferences(assetEntry, true);
 		_recordPortletPreferences(assetEntry, false);
+
+		_assetEntryUsageLocalService.addAssetEntryUsage(
+			assetEntry.getUserId(), assetEntry.getGroupId(),
+			assetEntry.getEntryId(), 0, 0, StringPool.BLANK,
+			ServiceContextThreadLocal.getServiceContext());
 	}
 
 	private void _recordJournalContentSearches(AssetEntry assetEntry)

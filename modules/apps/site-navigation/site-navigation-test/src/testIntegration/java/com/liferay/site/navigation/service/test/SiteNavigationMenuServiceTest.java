@@ -24,10 +24,10 @@ import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.site.navigation.constants.SiteNavigationConstants;
-import com.liferay.site.navigation.exception.RequiredPrimarySiteNavigationMenuException;
 import com.liferay.site.navigation.model.SiteNavigationMenu;
 import com.liferay.site.navigation.service.SiteNavigationMenuLocalServiceUtil;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -48,46 +48,32 @@ public class SiteNavigationMenuServiceTest {
 	@Before
 	public void setUp() throws Exception {
 		_group = GroupTestUtil.addGroup();
-
-		ServiceContext serviceContext =
-			ServiceContextTestUtil.getServiceContext(
-				_group.getGroupId(), TestPropsValues.getUserId());
-
-		_siteNavigationMenu =
-			SiteNavigationMenuLocalServiceUtil.addSiteNavigationMenu(
-				TestPropsValues.getUserId(), _group.getGroupId(), "Menu",
-				serviceContext);
 	}
 
-	@Test(expected = RequiredPrimarySiteNavigationMenuException.class)
-	public void testDeleteSiteNavigationMenu() throws Exception {
+	@Test
+	public void testUpdateSiteNavigationMenuType() throws Exception {
 		ServiceContext serviceContext =
 			ServiceContextTestUtil.getServiceContext(
 				_group.getGroupId(), TestPropsValues.getUserId());
+
+		SiteNavigationMenu siteNavigationMenu =
+			SiteNavigationMenuLocalServiceUtil.addSiteNavigationMenu(
+				TestPropsValues.getUserId(), _group.getGroupId(), "Primary",
+				SiteNavigationConstants.TYPE_PRIMARY, false, serviceContext);
 
 		SiteNavigationMenuLocalServiceUtil.addSiteNavigationMenu(
-			TestPropsValues.getUserId(), _group.getGroupId(), "Secondary",
-			SiteNavigationConstants.TYPE_SECONDARY, false, serviceContext);
+			TestPropsValues.getUserId(), _group.getGroupId(), "New Primary",
+			SiteNavigationConstants.TYPE_PRIMARY, false, serviceContext);
 
-		SiteNavigationMenuLocalServiceUtil.deleteSiteNavigationMenu(
-			_siteNavigationMenu);
-	}
+		siteNavigationMenu =
+			SiteNavigationMenuLocalServiceUtil.fetchSiteNavigationMenu(
+				siteNavigationMenu.getSiteNavigationMenuId());
 
-	@Test(expected = RequiredPrimarySiteNavigationMenuException.class)
-	public void testUpdateSiteNavigationMenu() throws Exception {
-		ServiceContext serviceContext =
-			ServiceContextTestUtil.getServiceContext(
-				_group.getGroupId(), TestPropsValues.getUserId());
-
-		SiteNavigationMenuLocalServiceUtil.updateSiteNavigationMenu(
-			TestPropsValues.getUserId(),
-			_siteNavigationMenu.getSiteNavigationMenuId(),
-			SiteNavigationConstants.TYPE_SECONDARY, false, serviceContext);
+		Assert.assertEquals(
+			SiteNavigationConstants.TYPE_DEFAULT, siteNavigationMenu.getType());
 	}
 
 	@DeleteAfterTestRun
 	private Group _group;
-
-	private SiteNavigationMenu _siteNavigationMenu;
 
 }

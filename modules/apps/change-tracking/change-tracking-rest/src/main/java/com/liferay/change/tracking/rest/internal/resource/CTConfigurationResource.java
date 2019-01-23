@@ -15,11 +15,16 @@
 package com.liferay.change.tracking.rest.internal.resource;
 
 import com.liferay.change.tracking.CTEngineManager;
+import com.liferay.change.tracking.configuration.CTConfiguration;
 import com.liferay.change.tracking.rest.internal.model.configuration.CTConfigurationModel;
 import com.liferay.change.tracking.rest.internal.model.configuration.CTConfigurationUpdateModel;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.CompanyLocalService;
+
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Stream;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -32,17 +37,19 @@ import javax.ws.rs.core.MediaType;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.annotations.ServiceScope;
 
 /**
  * @author Máté Thurzó
  */
 @Component(
-	immediate = true,
 	property = {
 		"osgi.jaxrs.application.select=(osgi.jaxrs.name=change-tracking-application)",
 		"osgi.jaxrs.resource=true"
 	},
-	service = CTConfigurationResource.class
+	scope = ServiceScope.PROTOTYPE, service = CTConfigurationResource.class
 )
 @Path("/configurations")
 public class CTConfigurationResource {
@@ -76,15 +83,43 @@ public class CTConfigurationResource {
 		return _getCTConfigurationModel(companyId);
 	}
 
+	@Reference(
+		cardinality = ReferenceCardinality.MULTIPLE,
+		policy = ReferencePolicy.DYNAMIC, unbind = "_removeCTConfiguration"
+	)
+	private void _addCTConfiguration(CTConfiguration<?, ?> ctConfiguration) {
+		_ctConfigurations.add(ctConfiguration);
+	}
+
 	private CTConfigurationModel _getCTConfigurationModel(long companyId)
 		throws PortalException {
+
+		Set<String> supportedContentTypeLanguageKeys = new HashSet<>();
+		Set<String> supportedContentTypes = new HashSet<>();
+
+		Stream<CTConfiguration<?, ?>> stream = _ctConfigurations.stream();
+
+		stream.forEach(
+			ctConfiguration -> {
+				supportedContentTypeLanguageKeys.add(
+					ctConfiguration.getContentTypeLanguageKey());
+				supportedContentTypes.add(ctConfiguration.getContentType());
+			});
 
 		CTConfigurationModel.Builder builder = CTConfigurationModel.forCompany(
 			companyId);
 
 		return builder.setChangeTrackingEnabled(
 			_ctEngineManager.isChangeTrackingEnabled(companyId)
+		).setSupportedContentTypeLanguageKeys(
+			supportedContentTypeLanguageKeys
+		).setSupportedContentTypes(
+			supportedContentTypes
 		).build();
+	}
+
+	private void _removeCTConfiguration(CTConfiguration<?, ?> ctConfiguration) {
+		_ctConfigurations.remove(ctConfiguration);
 	}
 
 	private void _updateChangeTrackingEnabled(
@@ -106,6 +141,9 @@ public class CTConfigurationResource {
 
 	@Reference
 	private CompanyLocalService _companyLocalService;
+
+	private final Set<CTConfiguration<?, ?>> _ctConfigurations =
+		new HashSet<>();
 
 	@Reference
 	private CTEngineManager _ctEngineManager;

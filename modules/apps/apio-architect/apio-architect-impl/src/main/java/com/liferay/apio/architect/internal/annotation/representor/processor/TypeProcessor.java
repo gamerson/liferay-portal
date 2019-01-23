@@ -30,6 +30,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Class responsible of extracting the data of an annotated type and construct a
@@ -53,12 +54,23 @@ public class TypeProcessor {
 		return _processType(typeClass, false);
 	}
 
-	private static void _addListType(Builder builder, Method method) {
-		ParameterizedType parameterizedType =
-			(ParameterizedType)method.getGenericReturnType();
+	private static void _addFields(
+		Builder builder, Method method, Class<?> returnType) {
 
-		Class<?> listClass =
-			(Class<?>)parameterizedType.getActualTypeArguments()[0];
+		if (returnType.isAnnotationPresent(Type.class)) {
+			ParsedType parsedType = _processType(returnType, true);
+
+			builder.addParsedType(new FieldData<>(method, parsedType));
+		}
+		else {
+			FieldData fieldData = new FieldData<>(method, returnType);
+
+			builder.addFieldData(fieldData);
+		}
+	}
+
+	private static void _addListType(
+		Builder builder, Method method, Class<?> listClass) {
 
 		if (listClass.isAnnotationPresent(Type.class)) {
 			ParsedType parsedType = _processType(listClass, true);
@@ -71,6 +83,33 @@ public class TypeProcessor {
 
 			builder.addListFieldData(listFieldData);
 		}
+	}
+
+	private static void _addOptionalType(Builder builder, Method method) {
+		java.lang.reflect.Type type = _getGenericType(method);
+
+		if (type instanceof ParameterizedType) {
+			ParameterizedType innerParametrizedType = (ParameterizedType)type;
+
+			if (innerParametrizedType.getRawType() == List.class) {
+				_addListType(
+					builder, method,
+					(Class<?>)
+						innerParametrizedType.getActualTypeArguments()[0]);
+			}
+		}
+		else {
+			Class<?> returnTypeClass = (Class<?>)type;
+
+			_addFields(builder, method, returnTypeClass);
+		}
+	}
+
+	private static java.lang.reflect.Type _getGenericType(Method method) {
+		ParameterizedType parameterizedType =
+			(ParameterizedType)method.getGenericReturnType();
+
+		return parameterizedType.getActualTypeArguments()[0];
 	}
 
 	private static void _processMethod(Builder builder, Method method) {
@@ -105,20 +144,16 @@ public class TypeProcessor {
 			return;
 		}
 
-		Class<?> returnType = method.getReturnType();
+		Class<?> returnTypeClass = method.getReturnType();
 
-		if (returnType == List.class) {
-			_addListType(builder, method);
+		if (returnTypeClass == Optional.class) {
+			_addOptionalType(builder, method);
 		}
-		else if (returnType.isAnnotationPresent(Type.class)) {
-			ParsedType parsedType = _processType(returnType, true);
-
-			builder.addParsedType(new FieldData<>(method, parsedType));
+		else if (returnTypeClass == List.class) {
+			_addListType(builder, method, (Class<?>)_getGenericType(method));
 		}
 		else {
-			FieldData fieldData = new FieldData<>(method, null);
-
-			builder.addFieldData(fieldData);
+			_addFields(builder, method, returnTypeClass);
 		}
 	}
 

@@ -33,6 +33,38 @@ definition {
 		}
 	}
 
+	@description = "This is a use case for LPS-72088."
+	@priority = "5"
+	test ActivateStagingAfterChangingInstanceLanguageToSpanish {
+		ProductMenu.gotoPortlet(
+			category = "Configuration",
+			panel = "Control Panel",
+			portlet = "Instance Settings"
+		);
+
+		PortalSettings.configureCurrentLanguagesCP(
+			defaultPortalLanguage = "Spanish (Spain)"
+		);
+
+		User.logoutPG();
+
+		User.loginPG(
+			localization = "ES",
+			userLoginEmailAddress = "test@liferay.com",
+			userLoginFullName = "Test Test"
+		);
+
+		Navigator.openSiteURL(siteName = "Site Name");
+
+		ProductMenu.gotoPortlet(
+			category = "Publishing",
+			panel = "Site Administration",
+			portlet = "Staging"
+		);
+
+		Staging.activateStagingCP(siteName = "Site Name");
+	}
+
 	@priority = "5"
 	test ActivateStagingPageVersioningWithCustomDefaultLanguage {
 		property test.name.skip.portal.instance = "Staging#ActivateStagingPageVersioningWithCustomDefaultLanguage";
@@ -642,7 +674,7 @@ definition {
 	@priority = "5"
 	test StagingDemoDocumentsAndMedia {
 		property custom.properties = "default.layout.template.id=1_column";
-		property portal.acceptance = "false";
+		property portal.acceptance = "true";
 		property test.name.skip.portal.instance = "Staging#StagingDemoDocumentsAndMedia";
 		property testray.component.names = "Training";
 
@@ -778,6 +810,59 @@ definition {
 		DMDocument.viewDocumentTypePG(numberValue = "1234");
 
 		DMDocument.viewDocumentTypePG(textContent = "Text");
+	}
+
+	@description = "This is a use case for LPS-77728."
+	@priority = "5"
+	test StagingDraftWebContent {
+		Navigator.openSiteURL(siteName = "Site Name");
+
+		ProductMenu.gotoPortlet(
+			category = "Content",
+			panel = "Site Administration",
+			portlet = "Web Content"
+		);
+
+		WebContentNavigator.gotoAddCP();
+
+		WebContent.addDraft(
+			webContentContent = "WC WebContent Content",
+			webContentTitle = "WC WebContent Title"
+		);
+
+		WebContent.openWebContentAdmin(siteURLKey = "site-name");
+
+		WebContentNavigator.gotoViewStatus(
+			webContentStatus = "DRAFT",
+			webContentTitle = "WC WebContent Title"
+		);
+
+		WebContent.viewStatus(
+			webContentContent = "WC WebContent Content",
+			webContentStatus = "Draft",
+			webContentTitle = "WC WebContent Title"
+		);
+
+		ProductMenu.gotoPortlet(
+			category = "Publishing",
+			panel = "Site Administration",
+			portlet = "Staging"
+		);
+
+		Staging.activateStagingCP(
+			pageVersioningEnabled = "true",
+			siteName = "Site Name"
+		);
+
+		ProductMenu.gotoLiveSite();
+
+		ProductMenu.gotoPortlet(
+			category = "Content",
+			panel = "Site Administration",
+			portlet = "Web Content"
+		);
+
+		AssertTextNotPresent(value1 = "WC WebContent Title");
 	}
 
 	@description = "This is a use case for LPS-82431."
@@ -1121,7 +1206,7 @@ definition {
 
 	@priority = "5"
 	test StagingOnlyApprovedPublishToLive {
-		property portal.acceptance = "true";
+		property portal.acceptance = "false";
 		property testray.component.names = "Training";
 
 		ProductMenu.gotoSite(site = "Site Name");

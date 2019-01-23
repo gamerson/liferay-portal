@@ -35,6 +35,11 @@ import java.util.regex.Pattern;
  */
 public class ModulesJUnitBatchTestClassGroup extends JUnitBatchTestClassGroup {
 
+	@Override
+	public int getAxisCount() {
+		return super.getAxisCount();
+	}
+
 	protected ModulesJUnitBatchTestClassGroup(
 		String batchName, PortalTestClassJob portalTestClassJob) {
 

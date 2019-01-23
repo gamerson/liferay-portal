@@ -37,6 +37,7 @@ import com.liferay.portal.kernel.bean.BeanParamUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.service.WorkflowDefinitionLinkLocalServiceUtil;
@@ -218,7 +219,8 @@ public class JournalEditArticleDisplayContext {
 				ddmStructureId);
 		}
 		else if (Validator.isNotNull(getDDMStructureKey())) {
-			long groupId = _themeDisplay.getSiteGroupId();
+			long groupId = ParamUtil.getLong(
+				_request, "groupId", _themeDisplay.getSiteGroupId());
 
 			if (_article != null) {
 				groupId = _article.getGroupId();
@@ -254,7 +256,8 @@ public class JournalEditArticleDisplayContext {
 				ddmTemplateId);
 		}
 		else if (Validator.isNotNull(getDDMTemplateKey())) {
-			long groupId = _themeDisplay.getSiteGroupId();
+			long groupId = ParamUtil.getLong(
+				_request, "groupId", _themeDisplay.getSiteGroupId());
 
 			if (_article != null) {
 				groupId = _article.getGroupId();
@@ -341,7 +344,18 @@ public class JournalEditArticleDisplayContext {
 
 		Group group = _themeDisplay.getScopeGroup();
 
-		sb.append(group.getPathFriendlyURL(false, _themeDisplay));
+		boolean privateLayout = false;
+
+		if (_article != null) {
+			Layout layout = _article.getLayout();
+
+			if (layout != null) {
+				privateLayout = layout.isPrivateLayout();
+			}
+		}
+
+		sb.append(group.getPathFriendlyURL(privateLayout, _themeDisplay));
+
 		sb.append(group.getFriendlyURL());
 
 		sb.append(JournalArticleConstants.CANONICAL_URL_SEPARATOR);
@@ -402,12 +416,12 @@ public class JournalEditArticleDisplayContext {
 	}
 
 	public String getPublishButtonLabel() throws PortalException {
-		if (_isWorkflowEnabled()) {
-			return "submit-for-publication";
-		}
-
 		if (getClassNameId() > JournalArticleConstants.CLASSNAME_ID_DEFAULT) {
 			return "save";
+		}
+
+		if (_isWorkflowEnabled()) {
+			return "submit-for-publication";
 		}
 
 		return "publish";

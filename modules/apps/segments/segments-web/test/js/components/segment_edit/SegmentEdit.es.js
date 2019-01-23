@@ -11,7 +11,9 @@ describe(
 			'should render',
 			() => {
 				const {asFragment} = render(
-					<SegmentEdit locale="en_US" />
+					<SegmentEdit
+						locale="en_US"
+					/>
 				);
 
 				expect(asFragment()).toMatchSnapshot();

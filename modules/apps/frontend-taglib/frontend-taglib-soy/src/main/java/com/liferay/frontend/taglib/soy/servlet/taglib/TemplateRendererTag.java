@@ -14,8 +14,8 @@
 
 package com.liferay.frontend.taglib.soy.servlet.taglib;
 
+import com.liferay.frontend.js.loader.modules.extender.npm.NPMResolvedPackageNameUtil;
 import com.liferay.frontend.taglib.soy.internal.util.SoyComponentRendererProvider;
-import com.liferay.frontend.taglib.soy.internal.util.SoyContextFactoryUtil;
 import com.liferay.portal.kernel.theme.PortletDisplay;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ParamUtil;
@@ -24,12 +24,15 @@ import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.template.soy.renderer.ComponentDescriptor;
 import com.liferay.portal.template.soy.renderer.SoyComponentRenderer;
-import com.liferay.portal.template.soy.utils.SoyContext;
+import com.liferay.portal.template.soy.util.SoyContext;
+import com.liferay.portal.template.soy.util.SoyContextFactoryUtil;
 import com.liferay.taglib.util.ParamAndPropertyAncestorTagImpl;
 
 import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspWriter;
 
@@ -94,11 +97,31 @@ public class TemplateRendererTag extends ParamAndPropertyAncestorTagImpl {
 	}
 
 	public String getModule() {
-		return _module;
+		if (!_useNamespace) {
+			return _module;
+		}
+
+		String namespace;
+
+		if (_setServletContext) {
+			namespace = NPMResolvedPackageNameUtil.get(servletContext);
+		}
+		else {
+			HttpServletRequest httpServletRequest =
+				(HttpServletRequest)pageContext.getRequest();
+
+			namespace = NPMResolvedPackageNameUtil.get(httpServletRequest);
+		}
+
+		return namespace + "/" + _module;
 	}
 
 	public String getTemplateNamespace() {
 		return _templateNamespace;
+	}
+
+	public boolean getUseNamespace() {
+		return _useNamespace;
 	}
 
 	public void putHTMLValue(String key, String value) {
@@ -116,6 +139,13 @@ public class TemplateRendererTag extends ParamAndPropertyAncestorTagImpl {
 		Map<String, Object> context = getContext();
 
 		context.put(key, value);
+	}
+
+	@Override
+	public void release() {
+		super.release();
+
+		_setServletContext = false;
 	}
 
 	public void setComponentId(String componentId) {
@@ -143,8 +173,19 @@ public class TemplateRendererTag extends ParamAndPropertyAncestorTagImpl {
 		_module = module;
 	}
 
+	@Override
+	public void setServletContext(ServletContext servletContext) {
+		super.setServletContext(servletContext);
+
+		_setServletContext = true;
+	}
+
 	public void setTemplateNamespace(String namespace) {
 		_templateNamespace = namespace;
+	}
+
+	public void setUseNamespace(boolean useNamespace) {
+		_useNamespace = useNamespace;
 	}
 
 	public void setWrapper(boolean wrapper) {
@@ -159,6 +200,7 @@ public class TemplateRendererTag extends ParamAndPropertyAncestorTagImpl {
 			_hydrate = null;
 			_module = null;
 			_templateNamespace = null;
+			_useNamespace = true;
 			_wrapper = null;
 		}
 	}
@@ -235,7 +277,9 @@ public class TemplateRendererTag extends ParamAndPropertyAncestorTagImpl {
 	private Set<String> _dependencies;
 	private Boolean _hydrate;
 	private String _module;
+	private boolean _setServletContext;
 	private String _templateNamespace;
+	private Boolean _useNamespace = true;
 	private Boolean _wrapper;
 
 }

@@ -1,9 +1,11 @@
 .segments-root {
+	@import "mixins";
 	@import "variables";
 
 	/* ---------- Components ---------- */
 
 	@import "clay_button";
+	@import "conjunction";
 	@import "criteria_builder";
 	@import "criteria_group";
 	@import "criteria_row";

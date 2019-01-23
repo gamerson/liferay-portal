@@ -181,8 +181,11 @@ public class DLFileEntryTypeServiceTest {
 
 		Assert.assertEquals(ddmStructures.toString(), 1, ddmStructures.size());
 
+		com.liferay.dynamic.data.mapping.kernel.DDMStructure firstDDMStructure =
+			ddmStructures.get(0);
+
 		DDMStructure ddmStructure = DDMStructureLocalServiceUtil.getStructure(
-			ddmStructures.get(0).getStructureId());
+			firstDDMStructure.getStructureId());
 
 		Locale[] availableLocales = LocaleUtil.fromLanguageIds(
 			ddmStructure.getAvailableLanguageIds());

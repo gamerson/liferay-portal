@@ -36,8 +36,8 @@ public class OrganizationSearcher extends BaseSearcher {
 	public OrganizationSearcher() {
 		setDefaultSelectedFieldNames(
 			Field.COMPANY_ID, Field.ORGANIZATION_ID, Field.UID);
-		setFilterSearch(true);
 		setPermissionAware(true);
+		setStagingAware(false);
 	}
 
 	@Override

@@ -3030,11 +3030,32 @@ log.sanitizer.enabled=false</echo>
 	<target name="database-upgrade-client-jdk8">
 		<run-batch-test>
 			<test-action>
-				<for keepgoing="true" list="check-upgrade-client-gogoshell,check-upgrade-client-help,check-upgrade-client-java-version,check-upgrade-client-custom-log,check-upgrade-client-additional-settings" param="upgrade.test.target">
-					<sequential>
-						<ant antfile="build-test-db-upgrade-client.xml" target="@{upgrade.test.target}" />
-					</sequential>
-				</for>
+				<local name="junit.failure.count" />
+				<local name="junit.failure.message" />
+
+				<trycatch property="junit.failure.message">
+					<try>
+						<for keepgoing="true" list="check-upgrade-client-gogoshell,check-upgrade-client-help,check-upgrade-client-java-version,check-upgrade-client-custom-log,check-upgrade-client-additional-settings" param="upgrade.test.target">
+							<sequential>
+								<ant antfile="build-test-db-upgrade-client.xml" target="@{upgrade.test.target}" />
+							</sequential>
+						</for>
+					</try>
+					<finally>
+						<condition else="0" property="junit.failure.count" value="1">
+							<isset property="junit.failure.message" />
+						</condition>
+
+						<get-junit-failure-message-element />
+
+						<generate-backend-batch-junit-report
+							junit.failure.count="${junit.failure.count}"
+							junit.failure.message.element="${junit.failure.message.element}"
+							test.class.name="DatabaseUpgradeClient"
+							test.command.name="databaseUpgradeClient"
+						/>
+					</finally>
+				</trycatch>
 			</test-action>
 
 			<test-set-up>
@@ -3367,6 +3388,26 @@ log.sanitizer.enabled=false</echo>
 		/>
 	</target>
 
+	<target name="functional-bundle-tomcat-mysql57-open11">
+		<set-tomcat-version-number liferay.portal.bundle="${test.portal.bundle.version}" />
+
+		<run-functional-test
+			app.server.type="tomcat"
+			database.type="mysql"
+			database.version="5.7"
+			setup.proxy="false"
+			test.build.fix.pack.zip.url="${test.build.fix.pack.zip.url}"
+			test.fix.pack.base.url="${test.fix.pack.base.url}"
+			test.license.xml.url="${test.license.xml.url}"
+			test.plugin.zip.url="${test.plugin.zip.url}"
+			test.plugins.war.zip.url="${test.plugins.war.zip.url}"
+			test.portal.bundle.version="${test.portal.bundle.version}"
+			test.portal.bundle.zip.url="${test.portal.bundle.zip.url}"
+			test.portal.lpkg.name="${test.portal.lpkg.name}"
+			test.sql.zip.url="${test.sql.zip.url}"
+		/>
+	</target>
+
 	<target name="functional-bundle-tomcat-oracle121-jdk8">
 		<set-tomcat-version-number liferay.portal.bundle="${test.portal.bundle.version}" />
 
@@ -3592,6 +3633,10 @@ log.sanitizer.enabled=false</echo>
 
 	<target name="functional-smoke-bundle-tomcat-mysql57-jdk8">
 		<antcall target="functional-bundle-tomcat-mysql57-jdk8" />
+	</target>
+
+	<target name="functional-smoke-bundle-tomcat-mysql57-open11">
+		<antcall target="functional-bundle-tomcat-mysql57-open11" />
 	</target>
 
 	<target name="functional-smoke-jboss70-mysql56-jdk8">
@@ -5221,7 +5266,6 @@ ${output.content}</echo>
 						<test-action>
 							<local name="junit.failure.count" />
 							<local name="junit.failure.message" />
-							<local name="junit.timestamp" />
 
 							<trycatch property="junit.failure.message">
 								<try>
@@ -5237,49 +5281,21 @@ ${output.content}</echo>
 										<antcall inheritAll="false" target="prepare-system-ext-properties" />
 
 										<antcall inheritAll="false" target="start-app-server" />
-
-										<property name="junit.failure.count" value="0" />
 									</sequential>
 								</try>
-								<catch>
-									<property name="junit.failure.count" value="1" />
-
-									<fail message="${junit.failure.message}" />
-								</catch>
 								<finally>
-									<condition else="" property="junit.failure.count" value="${junit.failure.count}">
-										<isset property="junit.failure.count" />
-									</condition>
-
-									<if>
-										<isset property="junit.failure.message" />
-										<then>
-											<antelope:stringutil property="junit.failure.message" string="${junit.failure.message}">
-												<antelope:replace regex="&gt;" replacement="&amp;gt;" />
-												<antelope:replace regex="&lt;" replacement="&amp;lt;" />
-												<antelope:replace regex="&quot;" replacement="&apos;" />
-											</antelope:stringutil>
-										</then>
-									</if>
-
-									<condition else="" property="junit.failure.message.element" value="&lt;failure message=&quot;${junit.failure.message}&quot; /&gt;">
+									<condition else="0" property="junit.failure.count" value="1">
 										<isset property="junit.failure.message" />
 									</condition>
 
-									<tstamp>
-										<format pattern="yyyy-MM-dd_kk:mm:ss" property="junit.timestamp" />
-									</tstamp>
+									<get-junit-failure-message-element />
 
-									<echo file="TEST-PortalStartupSpaceInPath.xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
-
-<testsuite errors="${junit.failure.count}" failures="${junit.failure.count}" hostname="localhost" name="portal.startup.space.in.path" skipped="0" tests="1" time="0.0" timestamp="${junit.timestamp}">
-	<properties />
-	<testcase classname="PortalStartup" name="portalStartupSpaceInPath" time="0.0">
-		${junit.failure.message.element}
-	</testcase>
-	<system-out></system-out>
-	<system-err></system-err>
-</testsuite>]]></echo>
+									<generate-backend-batch-junit-report
+										junit.failure.count="${junit.failure.count}"
+										junit.failure.message.element="${junit.failure.message.element}"
+										test.class.name="PortalStartupSpaceInPath"
+										test.command.name="portalStartupSpaceInPath"
+									/>
 								</finally>
 							</trycatch>
 
@@ -5470,6 +5486,10 @@ ${output.content}</echo>
 
 	<target name="release-functional-smoke-bundle-tomcat-mysql57-jdk8">
 		<antcall target="functional-bundle-tomcat-mysql57-jdk8" />
+	</target>
+
+	<target name="release-functional-smoke-bundle-tomcat-mysql57-open11">
+		<antcall target="functional-bundle-tomcat-mysql57-open11" />
 	</target>
 
 	<target name="release-osgi-state-exploded-test-jdk8">

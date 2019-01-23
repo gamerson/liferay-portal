@@ -39,8 +39,25 @@ public interface DEDataDefinitionService {
 			DEDataDefinitionListRequest deDataDefinitionListRequest)
 		throws DEDataDefinitionException;
 
+	public DEDataDefinitionSaveModelPermissionsResponse execute(
+			DEDataDefinitionSaveModelPermissionsRequest
+				deDataDefinitionSaveModelPermissionsRequest)
+		throws DEDataDefinitionException;
+
+	public DEDataDefinitionSavePermissionsResponse execute(
+			DEDataDefinitionSavePermissionsRequest
+				deDataDefinitionSavePermissionsRequest)
+		throws DEDataDefinitionException;
+
 	public DEDataDefinitionSaveResponse execute(
 			DEDataDefinitionSaveRequest deDataDefinitionSaveRequest)
+		throws DEDataDefinitionException;
+
+	public DEDataDefinitionSearchCountResponse execute(
+		DEDataDefinitionSearchCountRequest deDataDefinitionSearchCountRequest);
+
+	public DEDataDefinitionSearchResponse execute(
+			DEDataDefinitionSearchRequest deDataDefinitionSearchRequest)
 		throws DEDataDefinitionException;
 
 }

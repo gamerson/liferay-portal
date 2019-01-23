@@ -24,14 +24,14 @@ import com.liferay.portal.kernel.search.SearchResult;
 import com.liferay.portal.kernel.search.SearchResultManager;
 import com.liferay.portal.kernel.search.SummaryFactory;
 import com.liferay.portal.kernel.search.result.SearchResultTranslator;
+import com.liferay.portal.kernel.search.test.BaseSearchResultUtilTestCase;
+import com.liferay.portal.kernel.search.test.SearchTestUtil;
 import com.liferay.portal.kernel.test.CaptureHandler;
 import com.liferay.portal.kernel.test.JDKLoggerTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.search.internal.result.SearchResultManagerImpl;
 import com.liferay.portal.search.internal.result.SearchResultTranslatorImpl;
 import com.liferay.portal.search.internal.result.SummaryFactoryImpl;
-import com.liferay.portal.search.test.BaseSearchResultUtilTestCase;
-import com.liferay.portal.search.test.SearchTestUtil;
 
 import java.util.List;
 import java.util.logging.Level;
@@ -41,17 +41,26 @@ import javax.portlet.PortletRequest;
 import javax.portlet.PortletResponse;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 
 /**
  * @author André de Oliveira
  */
 public class SearchResultUtilJournalArticleTest
 	extends BaseSearchResultUtilTestCase {
+
+	@Before
+	@Override
+	public void setUp() throws Exception {
+		MockitoAnnotations.initMocks(this);
+		super.setUp();
+	}
 
 	@Test
 	public void testJournalArticle() {

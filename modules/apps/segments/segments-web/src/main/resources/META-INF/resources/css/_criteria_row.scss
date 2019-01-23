@@ -33,11 +33,25 @@
 		.criterion-input {
 			flex: 1;
 			margin-right: 8px;
+			min-width: 120px;
+
+			&.date-input {
+				min-width: 180px;
+			}
+
+			&.select-entity-input {
+				min-width: 200px;
+			}
 		}
 
 		.criterion-string {
+			flex: 1;
 			margin-right: 8px;
 		}
+	}
+
+	.operator, .operator-input {
+		text-transform: lowercase;
 	}
 
 	.read-only-container {

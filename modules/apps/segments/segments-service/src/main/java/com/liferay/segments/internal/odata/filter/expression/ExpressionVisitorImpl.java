@@ -29,6 +29,8 @@ import com.liferay.portal.odata.filter.expression.PrimitivePropertyExpression;
 import com.liferay.portal.odata.filter.expression.UnaryExpression;
 import com.liferay.segments.context.Context;
 
+import java.time.LocalDate;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -48,10 +50,10 @@ public class ExpressionVisitorImpl implements ExpressionVisitor<Object> {
 	public Predicate<Context> visitBinaryExpressionOperation(
 		BinaryExpression.Operation operation, Object left, Object right) {
 
-		Optional<Predicate<Context>> filterOptional = _getPredicateOptional(
+		Optional<Predicate<Context>> predicateOptional = _getPredicateOptional(
 			operation, left, right);
 
-		return filterOptional.orElseThrow(
+		return predicateOptional.orElseThrow(
 			() -> new UnsupportedOperationException(
 				"Unsupported method visitBinaryExpressionOperation with " +
 					"operation " + operation));
@@ -60,7 +62,25 @@ public class ExpressionVisitorImpl implements ExpressionVisitor<Object> {
 	@Override
 	public Object visitLiteralExpression(LiteralExpression literalExpression) {
 		if (Objects.equals(
-				LiteralExpression.Type.STRING, literalExpression.getType())) {
+				LiteralExpression.Type.DATE, literalExpression.getType())) {
+
+			return LocalDate.parse(literalExpression.getText());
+		}
+		else if (Objects.equals(
+					LiteralExpression.Type.DOUBLE,
+					literalExpression.getType())) {
+
+			return Double.valueOf(literalExpression.getText());
+		}
+		else if (Objects.equals(
+					LiteralExpression.Type.INTEGER,
+					literalExpression.getType())) {
+
+			return Integer.valueOf(literalExpression.getText());
+		}
+		else if (Objects.equals(
+					LiteralExpression.Type.STRING,
+					literalExpression.getType())) {
 
 			return _normalizeStringLiteral(literalExpression.getText());
 		}

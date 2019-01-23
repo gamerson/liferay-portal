@@ -18,6 +18,7 @@ import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.NoSuchCountryException;
 import com.liferay.portal.kernel.exception.NoSuchRegionException;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -73,11 +74,7 @@ public class OrganizationModelDocumentContributor
 				organization.getRegionId(), organization.getCountryId());
 		}
 		catch (PortalException pe) {
-			if (_log.isWarnEnabled()) {
-				long organizationId = organization.getOrganizationId();
-
-				_log.warn("Unable to index organization " + organizationId, pe);
-			}
+			throw new SystemException(pe);
 		}
 	}
 

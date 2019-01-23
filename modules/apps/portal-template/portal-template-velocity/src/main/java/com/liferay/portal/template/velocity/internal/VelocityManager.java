@@ -14,7 +14,9 @@
 
 package com.liferay.portal.template.velocity.internal;
 
+import com.liferay.petra.lang.ClassLoaderPool;
 import com.liferay.petra.string.StringBundler;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.cache.PortalCacheManagerNames;
 import com.liferay.portal.kernel.cache.SingleVMPool;
@@ -207,9 +209,7 @@ public class VelocityManager extends BaseSingleTemplateManager {
 				LiferaySecureUberspector.class.getName());
 
 			extendedProperties.setProperty(
-				VelocityEngine.VM_LIBRARY,
-				StringUtil.merge(
-					_velocityEngineConfiguration.velocimacroLibrary()));
+				VelocityEngine.VM_LIBRARY, _getVelocimacroLibrary(clazz));
 
 			extendedProperties.setProperty(
 				VelocityEngine.VM_LIBRARY_AUTORELOAD,
@@ -274,6 +274,31 @@ public class VelocityManager extends BaseSingleTemplateManager {
 		}
 
 		return template;
+	}
+
+	private String _getVelocimacroLibrary(Class<?> clazz) {
+		String contextName = ClassLoaderPool.getContextName(
+			clazz.getClassLoader());
+
+		contextName = contextName.concat(
+			TemplateConstants.CLASS_LOADER_SEPARATOR);
+
+		String[] velocimacroLibrary =
+			_velocityEngineConfiguration.velocimacroLibrary();
+
+		StringBundler sb = new StringBundler(3 * velocimacroLibrary.length);
+
+		for (String library : velocimacroLibrary) {
+			sb.append(contextName);
+			sb.append(library);
+			sb.append(StringPool.COMMA);
+		}
+
+		if (velocimacroLibrary.length > 0) {
+			sb.setIndex(sb.index() - 1);
+		}
+
+		return sb.toString();
 	}
 
 	private static final Method _layoutIconMethod;

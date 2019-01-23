@@ -1,5 +1,6 @@
 import Component from 'metal-component';
 import {Config} from 'metal-state';
+import {contains} from 'metal-dom';
 import {Drag, DragDrop} from 'metal-drag-drop';
 import position from 'metal-position';
 import Soy from 'metal-soy';
@@ -18,9 +19,9 @@ import {
 	UPDATE_HOVERED_ITEM
 } from '../../actions/actions.es';
 import {
-	DROP_TARGET_BORDERS,
-	DROP_TARGET_ITEM_TYPES
-} from '../../reducers/placeholders.es';
+	FRAGMENTS_EDITOR_ITEM_BORDERS,
+	FRAGMENTS_EDITOR_ITEM_TYPES
+} from '../../utils/constants';
 import {
 	getFragmentColumn,
 	getItemMoveDirection,
@@ -32,6 +33,8 @@ import {
 	moveItem,
 	setIn
 } from '../../utils/FragmentsEditorUpdateUtils.es';
+import {removeItem} from '../../utils/FragmentsEditorUpdateUtils.es';
+import {shouldUpdatePureComponent} from '../../utils/FragmentsEditorComponentUtils.es';
 import state from '../../store/state.es';
 import templates from './FragmentEntryLinkList.soy';
 
@@ -49,7 +52,7 @@ class FragmentEntryLinkList extends Component {
 	 * @static
 	 */
 	static _addDropTargetItemTypesToState(_state) {
-		return setIn(_state, ['dropTargetItemTypes'], DROP_TARGET_ITEM_TYPES);
+		return setIn(_state, ['dropTargetItemTypes'], FRAGMENTS_EDITOR_ITEM_TYPES);
 	}
 
 	/**
@@ -69,13 +72,13 @@ class FragmentEntryLinkList extends Component {
 
 		let dropValid = false;
 
-		if (sourceItemData.itemType === DROP_TARGET_ITEM_TYPES.section) {
+		if (sourceItemData.itemType === FRAGMENTS_EDITOR_ITEM_TYPES.section) {
 			dropValid = (
-				(targetItemData.itemType === DROP_TARGET_ITEM_TYPES.section) &&
+				(targetItemData.itemType === FRAGMENTS_EDITOR_ITEM_TYPES.section) &&
 				(sourceItemData.itemId !== targetItemData.itemId)
 			);
 		}
-		else if (sourceItemData.itemType === DROP_TARGET_ITEM_TYPES.fragment) {
+		else if (sourceItemData.itemType === FRAGMENTS_EDITOR_ITEM_TYPES.fragment) {
 			dropValid = (
 				(targetItemData.itemType) &&
 				(sourceItemData.itemId !== targetItemData.itemId)
@@ -99,18 +102,18 @@ class FragmentEntryLinkList extends Component {
 		if (itemDataset) {
 			if ('columnId' in itemDataset) {
 				itemId = itemDataset.columnId;
-				itemType = DROP_TARGET_ITEM_TYPES.column;
+				itemType = FRAGMENTS_EDITOR_ITEM_TYPES.column;
 			}
 			else if ('fragmentEntryLinkId' in itemDataset) {
 				itemId = itemDataset.fragmentEntryLinkId;
-				itemType = DROP_TARGET_ITEM_TYPES.fragment;
+				itemType = FRAGMENTS_EDITOR_ITEM_TYPES.fragment;
 			}
 			else if ('layoutSectionId' in itemDataset) {
 				itemId = itemDataset.layoutSectionId;
-				itemType = DROP_TARGET_ITEM_TYPES.section;
+				itemType = FRAGMENTS_EDITOR_ITEM_TYPES.section;
 			}
 			else if ('fragmentEmptyList' in itemDataset) {
-				itemType = DROP_TARGET_ITEM_TYPES.fragmentList;
+				itemType = FRAGMENTS_EDITOR_ITEM_TYPES.fragmentList;
 			}
 		}
 
@@ -161,25 +164,7 @@ class FragmentEntryLinkList extends Component {
 	 * @private
 	 * @review
 	 */
-	rendered() {
-		if (this.activeItemId) {
-			requestAnimationFrame(
-				() => {
-					focusItem(
-						this.activeItemId,
-						this.activeItemType
-					);
-				}
-			);
-		}
-	}
-
-	/**
-	 * @inheritDoc
-	 * @private
-	 * @review
-	 */
-	dispose() {
+	disposed() {
 		this._dragDrop.dispose();
 	}
 
@@ -194,6 +179,31 @@ class FragmentEntryLinkList extends Component {
 		_state = FragmentEntryLinkList._setEmptySections(_state);
 
 		return _state;
+	}
+
+	/**
+	 * @inheritDoc
+	 * @private
+	 * @review
+	 */
+	rendered() {
+		requestAnimationFrame(
+			() => {
+				focusItem(
+					this.activeItemId,
+					this.activeItemType
+				);
+			}
+		);
+	}
+
+	/**
+	 * @inheritdoc
+	 * @return {boolean}
+	 * @review
+	 */
+	shouldUpdate(changes) {
+		return shouldUpdatePureComponent(changes);
 	}
 
 	/**
@@ -231,13 +241,13 @@ class FragmentEntryLinkList extends Component {
 				targetItem.dataset
 			);
 
-			let targetBorder = DROP_TARGET_BORDERS.bottom;
+			let targetBorder = FRAGMENTS_EDITOR_ITEM_BORDERS.bottom;
 
 			if (
 				Math.abs(mouseY - targetItemRegion.top) <=
 				Math.abs(mouseY - targetItemRegion.bottom)
 			) {
-				targetBorder = DROP_TARGET_BORDERS.top;
+				targetBorder = FRAGMENTS_EDITOR_ITEM_BORDERS.top;
 			}
 
 			this.store.dispatchAction(
@@ -286,7 +296,7 @@ class FragmentEntryLinkList extends Component {
 			let moveItemAction = null;
 			let moveItemPayload = null;
 
-			if (itemData.itemType === DROP_TARGET_ITEM_TYPES.section) {
+			if (itemData.itemType === FRAGMENTS_EDITOR_ITEM_TYPES.section) {
 				moveItemAction = MOVE_SECTION;
 				moveItemPayload = {
 					sectionId: itemData.itemId,
@@ -294,7 +304,7 @@ class FragmentEntryLinkList extends Component {
 					targetItemId: this.dropTargetItemId
 				};
 			}
-			else if (itemData.itemType === DROP_TARGET_ITEM_TYPES.fragment) {
+			else if (itemData.itemType === FRAGMENTS_EDITOR_ITEM_TYPES.fragment) {
 				moveItemAction = MOVE_FRAGMENT_ENTRY_LINK;
 				moveItemPayload = {
 					fragmentEntryLinkId: itemData.itemId,
@@ -342,14 +352,14 @@ class FragmentEntryLinkList extends Component {
 				fragmentEntryLinkId,
 				targetBorder: getTargetBorder(event.direction),
 				targetItemId: targetFragmentEntryLinkId,
-				targetItemType: DROP_TARGET_ITEM_TYPES.fragment
+				targetItemType: FRAGMENTS_EDITOR_ITEM_TYPES.fragment
 			};
 
 			this.store.dispatchAction(
 				UPDATE_ACTIVE_ITEM,
 				{
 					activeItemId: fragmentEntryLinkId,
-					activeItemType: DROP_TARGET_ITEM_TYPES.fragment
+					activeItemType: FRAGMENTS_EDITOR_ITEM_TYPES.fragment
 				}
 			);
 
@@ -361,8 +371,19 @@ class FragmentEntryLinkList extends Component {
 	 * Callback executed when a section lose the focus
 	 * @private
 	 */
-	_handleSectionBlur() {
-		this.store.dispatchAction(CLEAR_ACTIVE_ITEM);
+	_handleSectionFocusOut() {
+		requestAnimationFrame(
+			() => {
+				if (
+					this.element &&
+					document.activeElement &&
+					(this.element !== document.activeElement) &&
+					!contains(this.element, document.activeElement)
+				) {
+					this.store.dispatchAction(CLEAR_ACTIVE_ITEM);
+				}
+			}
+		);
 	}
 
 	/**
@@ -377,7 +398,7 @@ class FragmentEntryLinkList extends Component {
 			UPDATE_ACTIVE_ITEM,
 			{
 				activeItemId: event.delegateTarget.dataset.layoutSectionId,
-				activeItemType: DROP_TARGET_ITEM_TYPES.section
+				activeItemType: FRAGMENTS_EDITOR_ITEM_TYPES.section
 			}
 		);
 	}
@@ -393,7 +414,7 @@ class FragmentEntryLinkList extends Component {
 				UPDATE_HOVERED_ITEM,
 				{
 					hoveredItemId: event.delegateTarget.dataset.layoutSectionId,
-					hoveredItemType: DROP_TARGET_ITEM_TYPES.section
+					hoveredItemType: FRAGMENTS_EDITOR_ITEM_TYPES.section
 				}
 			);
 		}
@@ -426,7 +447,7 @@ class FragmentEntryLinkList extends Component {
 				UPDATE_ACTIVE_ITEM,
 				{
 					activeItemId: sectionId,
-					activeItemType: DROP_TARGET_ITEM_TYPES.section
+					activeItemType: FRAGMENTS_EDITOR_ITEM_TYPES.section
 				}
 			);
 
@@ -442,14 +463,13 @@ class FragmentEntryLinkList extends Component {
 	_handleSectionRemoveButtonClick(event) {
 		event.stopPropagation();
 
-		this.store
-			.dispatchAction(
-				REMOVE_SECTION,
-				{
-					sectionId: this.hoveredItemId
-				}
-			)
-			.dispatchAction(CLEAR_HOVERED_ITEM);
+		removeItem(
+			this.store,
+			REMOVE_SECTION,
+			{
+				sectionId: this.hoveredItemId
+			}
+		);
 	}
 
 	/**

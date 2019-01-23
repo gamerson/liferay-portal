@@ -14,6 +14,8 @@
 
 package com.liferay.apio.architect.internal.jaxrs.resource;
 
+import static io.vavr.API.$;
+
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singletonList;
 
@@ -23,6 +25,7 @@ import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import com.liferay.apio.architect.internal.annotation.Action;
 import com.liferay.apio.architect.internal.annotation.Action.Error;
 import com.liferay.apio.architect.internal.annotation.Action.Error.NotAllowed;
+import com.liferay.apio.architect.internal.annotation.Action.NoContent;
 import com.liferay.apio.architect.internal.annotation.ActionManager;
 import com.liferay.apio.architect.internal.documentation.Documentation;
 import com.liferay.apio.architect.internal.entrypoint.EntryPoint;
@@ -90,35 +93,36 @@ public class RootResource {
 		).build();
 	}
 
-	private static Response _toResponse(NotAllowed notAllowed) {
-		return Response.status(
-			METHOD_NOT_ALLOWED
-		).allow(
-			notAllowed.getAllowedMethods()
-		).build();
-	}
-
-	@SuppressWarnings("Convert2MethodRef")
 	private Response _getResponse(String method, List<String> params) {
 		Either<Error, Action> either = _actionManager.getAction(method, params);
 
 		return either.fold(
 			error -> {
-				if (error instanceof NotAllowed) {
-					return _toResponse((NotAllowed)error);
+				if (error instanceof Action.Error.NotAllowed) {
+					return Response.status(
+						METHOD_NOT_ALLOWED
+					).allow(
+						((Action.Error.NotAllowed)error).getAllowedMethods()
+					).build();
 				}
 
 				return _notFoundResponse;
 			},
-			action -> _toResponse(action));
+			action -> {
+				Object result = action.execute(_request);
+
+				if (action instanceof Action.NoContent) {
+					return _noContentResponse;
+				}
+
+				return Response.ok(
+					result
+				).build();
+			});
 	}
 
-	private Response _toResponse(Action action) {
-		return Response.ok(
-			action.apply(_request)
-		).build();
-	}
-
+	private static final Response _noContentResponse = Response.noContent(
+	).build();
 	private static final Response _notFoundResponse = Response.status(
 		NOT_FOUND
 	).build();

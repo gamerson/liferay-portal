@@ -15,7 +15,6 @@
 package com.liferay.apio.architect.internal.annotation;
 
 import java.util.Set;
-import java.util.function.Function;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -23,10 +22,21 @@ import javax.servlet.http.HttpServletRequest;
  * Instances of this interface represent an API action. An action is just an
  * alias for a function that receives the HTTP request and returns an object.
  *
+ * <p>Using this action class will have the same effects as using {@link Ok}.
+ *
  * @author Alejandro Hernández
  * @review
  */
-public interface Action extends Function<HttpServletRequest, Object> {
+@FunctionalInterface
+public interface Action {
+
+	/**
+	 * Executes the action and returns its output, using the current HTTP
+	 * request.
+	 *
+	 * @review
+	 */
+	public Object execute(HttpServletRequest request);
 
 	/**
 	 * Types implementing this interface represent errors relative to an action.
@@ -46,6 +56,7 @@ public interface Action extends Function<HttpServletRequest, Object> {
 		 *
 		 * @review
 		 */
+		@FunctionalInterface
 		public interface NotAllowed extends Error {
 
 			/**
@@ -66,6 +77,26 @@ public interface Action extends Function<HttpServletRequest, Object> {
 		public interface NotFound extends Error {
 		}
 
+	}
+
+	/**
+	 * Instances of this interface represent a no-content {@link Action}, a
+	 * success action that does not return anything.
+	 *
+	 * @review
+	 */
+	@FunctionalInterface
+	public interface NoContent extends Action {
+	}
+
+	/**
+	 * Instances of this interface represent a common successful {@link Action},
+	 * an action that return something.
+	 *
+	  @review
+	 */
+	@FunctionalInterface
+	public interface Ok extends Action {
 	}
 
 }

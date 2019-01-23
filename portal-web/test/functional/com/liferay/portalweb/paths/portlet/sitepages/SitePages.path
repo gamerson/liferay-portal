@@ -46,13 +46,8 @@
 	<td></td>
 </tr>
 <tr>
-	<td>LIST_GROUP_ITEM_CARET_ICON</td>
-	<td>//ul[${key_depth}]/li//*[*[name()='svg'][contains(@class,'icon-caret-right')]]</td>
-	<td></td>
-</tr>
-<tr>
-	<td>LIST_GROUP_ITEM_CARET_ICON_SPECIFIC</td>
-	<td>//li[contains(.,'${key_pageName}')]//*[*[name()='svg'][contains(@class,'icon-caret-right')]]</td>
+	<td>LIST_GROUP_ITEM_DEPTH</td>
+	<td>//ul[${key_depth}]/li[contains(@class,'list-group-item')]/button</td>
 	<td></td>
 </tr>
 <tr>

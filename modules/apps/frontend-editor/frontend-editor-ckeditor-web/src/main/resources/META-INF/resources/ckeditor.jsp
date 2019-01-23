@@ -90,7 +90,7 @@ if (editorOptions != null) {
 <%
 String textareaName = HtmlUtil.escapeAttribute(name);
 
-String modules = "aui-node-base,liferay-notification";
+String modules = "aui-node-base";
 
 if (inlineEdit && Validator.isNotNull(inlineEditSaveURL)) {
 	textareaName = textareaName + "_original";
@@ -172,21 +172,6 @@ name = HtmlUtil.escapeJS(name);
 			if (!validDropTarget) {
 				event.preventDefault();
 				event.stopImmediatePropagation();
-
-				new Liferay.Notification(
-					{
-						closeable: true,
-						delay: {
-							hide: 5000,
-							show: 0
-						},
-						duration: 500,
-						message: '<liferay-ui:message key="this-is-an-invalid-drag-and-drop-action" />',
-						render: true,
-						title: '<liferay-ui:message key="warning" />',
-						type: 'warning'
-					}
-				);
 			}
 		}
 	);

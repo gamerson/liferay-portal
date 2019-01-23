@@ -36,7 +36,6 @@ import com.liferay.item.selector.criteria.URLItemSelectorReturnType;
 import com.liferay.item.selector.criteria.image.criterion.ImageItemSelectorCriterion;
 import com.liferay.item.selector.criteria.url.criterion.URLItemSelectorCriterion;
 import com.liferay.layout.admin.web.internal.constants.LayoutAdminWebKeys;
-import com.liferay.layout.admin.web.internal.util.SoyContextFactoryUtil;
 import com.liferay.layout.page.template.model.LayoutPageTemplateEntry;
 import com.liferay.layout.page.template.model.LayoutPageTemplateStructure;
 import com.liferay.layout.page.template.service.LayoutPageTemplateEntryServiceUtil;
@@ -59,7 +58,8 @@ import com.liferay.portal.kernel.util.ResourceBundleUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
-import com.liferay.portal.template.soy.utils.SoyContext;
+import com.liferay.portal.template.soy.util.SoyContext;
+import com.liferay.portal.template.soy.util.SoyContextFactoryUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -180,8 +180,8 @@ public class FragmentsEditorDisplayContext {
 		soyContext.put("panels", _getSoyContextPanels());
 		soyContext.put("portletNamespace", _renderResponse.getNamespace());
 
-		if (_classNameId ==
-				PortalUtil.getClassNameId(LayoutPageTemplateEntry.class)) {
+		if (_classNameId == PortalUtil.getClassNameId(
+				LayoutPageTemplateEntry.class)) {
 
 			soyContext.put(
 				"publishLayoutPageTemplateEntryURL",

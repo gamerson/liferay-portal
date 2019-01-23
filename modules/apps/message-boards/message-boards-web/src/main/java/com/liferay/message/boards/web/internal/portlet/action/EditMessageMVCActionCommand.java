@@ -270,9 +270,7 @@ public class EditMessageMVCActionCommand extends BaseMVCActionCommand {
 		MBMessage message) {
 
 		if (message == null) {
-			String redirect = ParamUtil.getString(actionRequest, "redirect");
-
-			return redirect;
+			return ParamUtil.getString(actionRequest, "redirect");
 		}
 
 		int workflowAction = ParamUtil.getInteger(
@@ -281,9 +279,6 @@ public class EditMessageMVCActionCommand extends BaseMVCActionCommand {
 		if (workflowAction == WorkflowConstants.ACTION_SAVE_DRAFT) {
 			return getSaveAndContinueRedirect(
 				actionRequest, actionResponse, message);
-		}
-		else if (message == null) {
-			return ParamUtil.getString(actionRequest, "redirect");
 		}
 
 		LiferayActionResponse liferayActionResponse =
@@ -378,8 +373,6 @@ public class EditMessageMVCActionCommand extends BaseMVCActionCommand {
 			WebKeys.THEME_DISPLAY);
 
 		long messageId = ParamUtil.getLong(actionRequest, "messageId");
-
-		long groupId = themeDisplay.getScopeGroupId();
 		long categoryId = ParamUtil.getLong(actionRequest, "mbCategoryId");
 		long threadId = ParamUtil.getLong(actionRequest, "threadId");
 		long parentMessageId = ParamUtil.getLong(
@@ -388,7 +381,7 @@ public class EditMessageMVCActionCommand extends BaseMVCActionCommand {
 		String body = ParamUtil.getString(actionRequest, "body");
 
 		MBGroupServiceSettings mbGroupServiceSettings =
-			MBGroupServiceSettings.getInstance(groupId);
+			MBGroupServiceSettings.getInstance(themeDisplay.getSiteGroupId());
 
 		List<ObjectValuePair<String, InputStream>> inputStreamOVPs =
 			new ArrayList<>(5);
@@ -441,8 +434,8 @@ public class EditMessageMVCActionCommand extends BaseMVCActionCommand {
 					// Post new thread
 
 					message = _mbMessageService.addMessage(
-						groupId, categoryId, subject, body,
-						mbGroupServiceSettings.getMessageFormat(),
+						themeDisplay.getScopeGroupId(), categoryId, subject,
+						body, mbGroupServiceSettings.getMessageFormat(),
 						inputStreamOVPs, anonymous, priority, allowPingbacks,
 						serviceContext);
 
@@ -541,26 +534,25 @@ public class EditMessageMVCActionCommand extends BaseMVCActionCommand {
 		List<FileEntry> tempMBAttachmentFileEntries =
 			MBAttachmentFileEntryUtil.getTempMBAttachmentFileEntries(body);
 
-		if (!tempMBAttachmentFileEntries.isEmpty()) {
-			Folder folder = message.addAttachmentsFolder();
-
-			List<MBAttachmentFileEntryReference>
-				mbAttachmentFileEntryReferences =
-					MBAttachmentFileEntryUtil.addMBAttachmentFileEntries(
-						message.getGroupId(), themeDisplay.getUserId(),
-						message.getMessageId(), folder.getFolderId(),
-						tempMBAttachmentFileEntries);
-
-			body = formatHandler.replaceImageReferences(
-				body, mbAttachmentFileEntryReferences);
-
-			for (FileEntry tempMBAttachment : tempMBAttachmentFileEntries) {
-				PortletFileRepositoryUtil.deletePortletFileEntry(
-					tempMBAttachment.getFileEntryId());
-			}
+		if (tempMBAttachmentFileEntries.isEmpty()) {
+			return body;
 		}
 
-		return body;
+		Folder folder = message.addAttachmentsFolder();
+
+		List<MBAttachmentFileEntryReference> mbAttachmentFileEntryReferences =
+			MBAttachmentFileEntryUtil.addMBAttachmentFileEntries(
+				message.getGroupId(), themeDisplay.getUserId(),
+				message.getMessageId(), folder.getFolderId(),
+				tempMBAttachmentFileEntries);
+
+		for (FileEntry tempMBAttachment : tempMBAttachmentFileEntries) {
+			PortletFileRepositoryUtil.deletePortletFileEntry(
+				tempMBAttachment.getFileEntryId());
+		}
+
+		return formatHandler.replaceImageReferences(
+			body, mbAttachmentFileEntryReferences);
 	}
 
 	private List<FileEntry> _populateInputStreamOVPs(
@@ -574,7 +566,8 @@ public class EditMessageMVCActionCommand extends BaseMVCActionCommand {
 		String[] selectedFileNames = ParamUtil.getParameterValues(
 			actionRequest, "selectedFileName");
 
-		List<FileEntry> tempFileEntries = new ArrayList<>();
+		List<FileEntry> tempFileEntries = new ArrayList<>(
+			selectedFileNames.length);
 
 		for (String selectedFileName : selectedFileNames) {
 			FileEntry tempFileEntry = TempFileEntryUtil.getTempFileEntry(

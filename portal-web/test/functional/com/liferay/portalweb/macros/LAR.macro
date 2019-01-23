@@ -66,7 +66,7 @@ definition {
 	macro _export {
 		SelectFrame(locator1 = "IFrame#CONFIGURATION_DIALOG");
 
-		if (!(isSet(portletName))) {
+		if (isSet(portletName)) {
 			if (IsNotChecked(locator1 = "ExportImport#CONTENT")) {
 				Check(locator1 = "ExportImport#CONTENT");
 			}
@@ -98,6 +98,8 @@ definition {
 		DownloadTempFile(locator1 = "${larFileName}");
 
 		SelectFrame(value1 = "relative=top");
+
+		AssertTextNotPresent(value1 = "The requested resource could not be found");
 	}
 
 	macro _exportSite {
@@ -263,7 +265,7 @@ definition {
 				Check(locator1 = "Checkbox#DELETIONS");
 			}
 
-			if (!(isSet(portletName))) {
+			if (isSet(portletName)) {
 				if (IsNotChecked(locator1 = "ExportImport#CONTENT")) {
 					Check(locator1 = "ExportImport#CONTENT");
 				}

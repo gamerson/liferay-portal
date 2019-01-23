@@ -50,6 +50,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -110,8 +111,8 @@ public class DummyReferenceStagedModelRepository
 
 		_dummyReferences.removeIf(
 			dummyReference ->
-				dummyReference.getUuid().equals(uuid) &&
-				dummyReference.getGroupId() == groupId);
+				Objects.equals(dummyReference.getUuid(), uuid) &&
+				(dummyReference.getGroupId() == groupId));
 	}
 
 	@Override
@@ -134,7 +135,7 @@ public class DummyReferenceStagedModelRepository
 
 		List<DummyReference> dummies = dummyReferenceStream.filter(
 			dummyReference ->
-				dummyReference.getUuid().equals(uuid) &&
+				Objects.equals(dummyReference.getUuid(), uuid) &&
 				(dummyReference.getGroupId() == groupId)
 		).collect(
 			Collectors.toList()
@@ -155,7 +156,7 @@ public class DummyReferenceStagedModelRepository
 
 		return dummyReferenceStream.filter(
 			dummyReference ->
-				dummyReference.getUuid().equals(uuid) &&
+				Objects.equals(dummyReference.getUuid(), uuid) &&
 				(dummyReference.getCompanyId() == companyId)
 		).collect(
 			Collectors.toList()
@@ -399,8 +400,8 @@ public class DummyReferenceStagedModelRepository
 
 			if (expression.contains("groupId=")) {
 				return d ->
-					d.getGroupId() ==
-						Long.valueOf(expression.substring("groupId=".length()));
+					d.getGroupId() == Long.valueOf(
+						expression.substring("groupId=".length()));
 			}
 
 			if (expression.contains("id>-1")) {
@@ -409,9 +410,8 @@ public class DummyReferenceStagedModelRepository
 
 			if (expression.contains("companyId=")) {
 				return d ->
-					d.getCompanyId() ==
-						Long.valueOf(
-							expression.substring("companyId=".length()));
+					d.getCompanyId() == Long.valueOf(
+						expression.substring("companyId=".length()));
 			}
 
 			return d -> true;

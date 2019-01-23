@@ -7,6 +7,8 @@ import Soy from 'metal-soy';
 import FragmentEditableField from './FragmentEditableField.es';
 import FragmentStyleEditor from './FragmentStyleEditor.es';
 import MetalStore from '../../store/store.es';
+import {setIn} from '../../utils/FragmentsEditorUpdateUtils.es';
+import {shouldUpdateOnChangeProperties} from '../../utils/FragmentsEditorComponentUtils.es';
 import templates from './FragmentEntryLinkContent.soy';
 import {UPDATE_EDITABLE_VALUE} from '../../actions/actions.es';
 
@@ -41,12 +43,10 @@ class FragmentEntryLinkContent extends Component {
 	 * @review
 	 */
 	prepareStateForRender(state) {
-		return Object.assign(
-			{},
+		return setIn(
 			state,
-			{
-				content: this.content ? Soy.toIncDom(this.content) : null
-			}
+			['content'],
+			this.content ? Soy.toIncDom(this.content) : null
 		);
 	}
 
@@ -55,7 +55,26 @@ class FragmentEntryLinkContent extends Component {
 	 * @review
 	 */
 	rendered() {
-		this._renderContent();
+		if (this.content) {
+			this._renderContent(this.content);
+		}
+	}
+
+	/**
+	 * @inheritdoc
+	 * @return {boolean}
+	 * @review
+	 */
+	shouldUpdate(changes) {
+		return shouldUpdateOnChangeProperties(
+			changes,
+			[
+				'content',
+				'languageId',
+				'selectedMappingTypes',
+				'showMapping'
+			]
+		);
 	}
 
 	/**
@@ -139,7 +158,7 @@ class FragmentEntryLinkContent extends Component {
 
 		this._backgroundImageStyleEditors = this._styles
 			.filter(
-				style => style.css.backgroundImage
+				style => style.css && style.css.backgroundImage
 			)
 			.map(
 				style => style.nodes.map(
@@ -305,7 +324,7 @@ class FragmentEntryLinkContent extends Component {
 	 * @review
 	 */
 	_renderContent(content) {
-		if (this.refs.content) {
+		if (content && this.refs.content) {
 			AUI().use(
 				'aui-parse-content',
 				A => {

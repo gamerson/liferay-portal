@@ -171,20 +171,10 @@ public class GitWorkingDirectory {
 
 		String currentBranchName = currentLocalGitBranch.getName();
 
-		if (!currentBranchName.equals(getUpstreamBranchName())) {
-			LocalGitBranch upstreamLocalGitBranch = getLocalGitBranch(
-				getUpstreamBranchName());
+		String upstreamBranchName = getUpstreamBranchName();
 
-			if (upstreamLocalGitBranch == null) {
-				upstreamLocalGitBranch = createLocalGitBranch(
-					getUpstreamBranchName(), true,
-					currentLocalGitBranch.getSHA());
-
-				upstreamLocalGitBranch = fetch(
-					upstreamLocalGitBranch, getUpstreamRemoteGitBranch());
-			}
-
-			checkoutLocalGitBranch(upstreamLocalGitBranch);
+		if (!currentBranchName.equals(upstreamBranchName)) {
+			checkoutLocalGitBranch(getLocalGitBranch(upstreamBranchName));
 		}
 	}
 
@@ -531,12 +521,6 @@ public class GitWorkingDirectory {
 		String remoteURL = remoteGitRepository.getRemoteURL();
 
 		if (JenkinsResultsParserUtil.isCINode()) {
-			if (remoteURL.contains("github-dev.liferay.com")) {
-				executeBashCommands(
-					GitUtil.MAX_RETRIES, GitUtil.RETRY_DELAY, GitUtil.TIMEOUT,
-					"rm -f ~/.ssh/known_hosts");
-			}
-
 			if (remoteURL.contains("github.com:liferay/")) {
 				String gitHubDevRemoteURL = remoteURL.replace(
 					"github.com:liferay/", "github-dev.liferay.com:liferay/");
@@ -568,10 +552,7 @@ public class GitWorkingDirectory {
 			sb.append(" --no-tags ");
 		}
 
-		sb.append(
-			remoteURL.replace(
-				"github-dev.liferay.com",
-				JenkinsResultsParserUtil.getRandomGitHubCacheHostname()));
+		sb.append(remoteURL);
 
 		String remoteGitRefName = remoteGitRef.getName();
 
@@ -814,15 +795,17 @@ public class GitWorkingDirectory {
 			LocalGitBranch currentLocalGitBranch = getLocalGitBranch(
 				currentBranchName);
 
-			return currentLocalGitBranch;
+			if (currentLocalGitBranch != null) {
+				return currentLocalGitBranch;
+			}
 		}
 
-		LocalGitBranch currentLocalGitBranch = getLocalGitBranch(
+		LocalGitBranch upstreamLocalGitBranch = getLocalGitBranch(
 			getUpstreamBranchName());
 
-		checkoutLocalGitBranch(currentLocalGitBranch);
+		checkoutLocalGitBranch(upstreamLocalGitBranch);
 
-		return currentLocalGitBranch;
+		return upstreamLocalGitBranch;
 	}
 
 	public String getGitConfigProperty(String gitConfigPropertyName) {
@@ -1046,21 +1029,10 @@ public class GitWorkingDirectory {
 	public LocalGitBranch getLocalGitBranch(
 		String branchName, boolean required) {
 
-		if ((branchName != null) && !branchName.isEmpty()) {
-			List<LocalGitBranch> localGitBranches = getLocalGitBranches(
-				branchName);
+		List<LocalGitBranch> localGitBranches = getLocalGitBranches(branchName);
 
-			if (localGitBranches.isEmpty()) {
-				return null;
-			}
-
+		if ((localGitBranches != null) && !localGitBranches.isEmpty()) {
 			return localGitBranches.get(0);
-		}
-
-		for (LocalGitBranch localGitBranch : getLocalGitBranches(null)) {
-			if (branchName.equals(localGitBranch.getName())) {
-				return localGitBranch;
-			}
 		}
 
 		if (required) {
@@ -1074,25 +1046,30 @@ public class GitWorkingDirectory {
 	}
 
 	public List<LocalGitBranch> getLocalGitBranches(String branchName) {
-		List<String> localGitBranchNames = getLocalGitBranchNames();
-
-		List<LocalGitBranch> localGitBranches = new ArrayList<>(
-			localGitBranchNames.size());
+		String upstreamBranchName = getUpstreamBranchName();
 
 		LocalGitRepository localGitRepository =
 			GitRepositoryFactory.getLocalGitRepository(
-				getGitRepositoryName(), getUpstreamBranchName());
+				getGitRepositoryName(), upstreamBranchName);
 
 		if (branchName != null) {
-			if (localGitBranchNames.contains(branchName)) {
-				localGitBranches.add(
+			try {
+				return Arrays.asList(
 					GitBranchFactory.newLocalGitBranch(
 						localGitRepository, branchName,
 						getLocalGitBranchSHA(branchName)));
 			}
-
-			return localGitBranches;
+			catch (Exception e) {
+				if (!branchName.equals(upstreamBranchName)) {
+					return null;
+				}
+			}
 		}
+
+		List<String> localGitBranchNames = getLocalGitBranchNames();
+
+		List<LocalGitBranch> localGitBranches = new ArrayList<>(
+			localGitBranchNames.size());
 
 		for (String localGitBranchName : localGitBranchNames) {
 			localGitBranches.add(
@@ -1431,11 +1408,7 @@ public class GitWorkingDirectory {
 		}
 
 		String command = JenkinsResultsParserUtil.combine(
-			"git ls-remote -h ",
-			remoteURL.replace(
-				"github-dev.liferay.com",
-				JenkinsResultsParserUtil.getRandomGitHubCacheHostname()),
-			" ", remoteGitBranchName);
+			"git ls-remote -h ", remoteURL, " ", remoteGitBranchName);
 
 		GitUtil.ExecutionResult executionResult = executeBashCommands(
 			GitUtil.MAX_RETRIES, GitUtil.RETRY_DELAY, 1000 * 60 * 10, command);
@@ -1486,11 +1459,7 @@ public class GitWorkingDirectory {
 
 	public boolean isRemoteGitRepositoryAlive(String remoteURL) {
 		String command = JenkinsResultsParserUtil.combine(
-			"git ls-remote -h ",
-			remoteURL.replace(
-				"github-dev.liferay.com",
-				JenkinsResultsParserUtil.getRandomGitHubCacheHostname()),
-			" HEAD");
+			"git ls-remote -h ", remoteURL, " HEAD");
 
 		GitUtil.ExecutionResult executionResult = executeBashCommands(
 			GitUtil.MAX_RETRIES, GitUtil.RETRY_DELAY, 1000 * 60 * 10, command);
@@ -1825,7 +1794,22 @@ public class GitWorkingDirectory {
 
 		String standardOut = executionResult.getStandardOut();
 
-		return toShortNameList(Arrays.asList(standardOut.split("\n")));
+		List<String> localGitBranchNames = toShortNameList(
+			Arrays.asList(standardOut.split("\n")));
+
+		String upstreamBranchName = getUpstreamBranchName();
+
+		if (!localGitBranchNames.contains(upstreamBranchName)) {
+			LocalGitBranch upstreamLocalGitBranch = createLocalGitBranch(
+				getUpstreamBranchName(), true, "HEAD");
+
+			upstreamLocalGitBranch = fetch(
+				upstreamLocalGitBranch, getUpstreamRemoteGitBranch());
+
+			localGitBranchNames.add(upstreamBranchName);
+		}
+
+		return localGitBranchNames;
 	}
 
 	protected LocalGitCommit getLocalGitCommit(String gitLogEntity) {

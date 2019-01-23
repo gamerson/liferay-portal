@@ -22,5 +22,6 @@ dependencies {
 	testIntegrationCompile project(":apps:subscription:subscription-api")
 	testIntegrationCompile project(":apps:trash:trash-api")
 	testIntegrationCompile project(":apps:trash:trash-test-util")
+	testIntegrationCompile project(":apps:users-admin:users-admin-test-util")
 	testIntegrationCompile project(":test:arquillian-extension-junit-bridge")
 }

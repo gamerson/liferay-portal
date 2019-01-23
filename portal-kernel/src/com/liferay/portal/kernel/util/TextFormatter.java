@@ -198,9 +198,13 @@ public class TextFormatter {
 	}
 
 	public static String formatStorageSize(double size, Locale locale) {
-		String suffix = _STORAGE_SIZE_SUFFIX_KB;
+		String suffix = _STORAGE_SIZE_SUFFIX_B;
 
-		size = size / _STORAGE_SIZE_DENOMINATOR;
+		if (size >= _STORAGE_SIZE_DENOMINATOR) {
+			suffix = _STORAGE_SIZE_SUFFIX_KB;
+
+			size = size / _STORAGE_SIZE_DENOMINATOR;
+		}
 
 		if (size >= _STORAGE_SIZE_DENOMINATOR) {
 			suffix = _STORAGE_SIZE_SUFFIX_MB;
@@ -216,7 +220,9 @@ public class TextFormatter {
 
 		NumberFormat numberFormat = NumberFormat.getInstance(locale);
 
-		if (suffix.equals(_STORAGE_SIZE_SUFFIX_KB)) {
+		if (suffix.equals(_STORAGE_SIZE_SUFFIX_B) ||
+			suffix.equals(_STORAGE_SIZE_SUFFIX_KB)) {
+
 			numberFormat.setMaximumFractionDigits(0);
 		}
 		else {
@@ -258,8 +264,11 @@ public class TextFormatter {
 		s = StringUtil.removeChar(s, CharPool.SPACE);
 
 		if (Character.isUpperCase(s.charAt(0))) {
-			s = StringUtil.toLowerCase(s.substring(0, 1)).concat(
-				s.substring(1));
+			s = StringUtil.toLowerCase(
+				s.substring(0, 1)
+			).concat(
+				s.substring(1)
+			);
 		}
 
 		return s;
@@ -267,8 +276,11 @@ public class TextFormatter {
 
 	private static String _formatG(String s) {
 		if (Character.isLowerCase(s.charAt(0))) {
-			s = StringUtil.toUpperCase(s.substring(0, 1)).concat(
-				s.substring(1));
+			s = StringUtil.toUpperCase(
+				s.substring(0, 1)
+			).concat(
+				s.substring(1)
+			);
 		}
 
 		return s;
@@ -312,8 +324,11 @@ public class TextFormatter {
 		if (Character.isUpperCase(s.charAt(0)) &&
 			Character.isLowerCase(s.charAt(1))) {
 
-			return s = StringUtil.toLowerCase(s.substring(0, 1)).concat(
-				s.substring(1));
+			return s = StringUtil.toLowerCase(
+				s.substring(0, 1)
+			).concat(
+				s.substring(1)
+			);
 		}
 
 		StringBuilder sb = new StringBuilder(s);
@@ -324,11 +339,10 @@ public class TextFormatter {
 
 				break;
 			}
-			else {
-				char c = Character.toLowerCase(s.charAt(i));
 
-				sb.setCharAt(i, c);
-			}
+			char c = Character.toLowerCase(s.charAt(i));
+
+			sb.setCharAt(i, c);
 		}
 
 		return sb.toString();
@@ -367,8 +381,11 @@ public class TextFormatter {
 			return s;
 		}
 
-		return s = StringUtil.toLowerCase(s.substring(0, 1)).concat(
-			s.substring(1));
+		return s = StringUtil.toLowerCase(
+			s.substring(0, 1)
+		).concat(
+			s.substring(1)
+		);
 	}
 
 	private static String _formatM(String s) {
@@ -420,6 +437,8 @@ public class TextFormatter {
 	}
 
 	private static final double _STORAGE_SIZE_DENOMINATOR = 1024.0;
+
+	private static final String _STORAGE_SIZE_SUFFIX_B = "B";
 
 	private static final String _STORAGE_SIZE_SUFFIX_GB = "GB";
 

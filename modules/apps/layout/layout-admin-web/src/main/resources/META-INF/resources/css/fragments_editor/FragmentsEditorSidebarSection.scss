@@ -72,6 +72,95 @@
 		}
 	}
 
+	&__structure-panel {
+		&__item {
+			border-radius: $topperBorderRadius * 2;
+			display: flex;
+			justify-content: space-between;
+			margin: ($fragmentsEditorSpacing / 2) auto;
+			padding: $fragmentsEditorSpacing / 2;
+			position: relative;
+			transition: background-color ease 0.2s, color ease 0.2s;
+			will-change: background-color, color;
+
+			&.active,
+			&.active:hover {
+				background-color: $topperBackgroundColor;
+				color: $topperColor;
+			}
+
+			&:hover {
+				background-color: $sidebarTreeElementBackgroundColor;
+			}
+		}
+
+		&__item + .collapse,
+		&__item + .collapsing {
+			overflow: hidden;
+			padding-left: 1em;
+		}
+
+		&__item-icon {
+			left: 0;
+			position: absolute;
+			top: 0.1em;
+
+			> .collapse-icon-closed,
+			> .collapse-icon-open {
+				color: inherit;
+				display: block;
+				height: 2em;
+				left: 0;
+				position: relative;
+				top: 0;
+				transition: fill ease 0.2s;
+				width: 2em;
+				will-change: fill;
+
+				> .lexicon-icon {
+					left: 50%;
+					position: absolute;
+					top: 50%;
+					transform: translateX(-50%) translateY(-50%);
+					width: 10px;
+				}
+			}
+
+			> .collapse-icon-closed[aria-expanded="true"],
+			> .collapse-icon-open[aria-expanded="false"] {
+				display: none;
+			}
+		}
+
+		&__item-remove-btn.btn {
+			color: inherit;
+			height: 1.5em;
+			opacity: 0;
+			padding: 0;
+			position: relative;
+			transition: opacity ease 0.2s;
+			width: 1.5em;
+			will-change: opacity;
+
+			> .lexicon-icon {
+				left: 50%;
+				position: absolute;
+				top: 50%;
+				transform: translateX(-50%) translateY(-55%);
+			}
+		}
+
+		&__item:hover &__item-remove-btn {
+			opacity: 1;
+		}
+
+		&__item-name {
+			cursor: pointer;
+			flex-grow: 1;
+			margin-left: 1.6em;
+		}
+	}
+
 	&__panel {
 		background-color: transparent;
 
@@ -86,6 +175,22 @@
 		font-size: 18px;
 		font-weight: bold;
 		margin: 32px 0;
+	}
+
+	&__widgets-panel {
+		&-grid {
+			align-items: flex-start;
+			display: flex;
+			flex-wrap: wrap;
+			justify-content: space-between;
+			margin-left: 8px;
+		}
+
+		.widget-item {
+			font-size: 14px;
+			font-weight: 600;
+			margin: 9px 0;
+		}
 	}
 
 	.fragments-editor__drag-handler {
@@ -106,5 +211,21 @@
 	.sidebar-fragments-section > .navbar {
 		box-shadow: 0 1px 0 0 rgba(200, 200, 200, 0.2);
 		margin-bottom: 1.5rem;
+	}
+
+	.sidebar-fragments-section .search-bar {
+		flex-wrap: nowrap;
+
+		.input-group-input, .input-group-inset {
+			width: 100%;
+		}
+
+		.input-group-inset-item {
+			border-left-width: 0;
+			height: 100%;
+			position: absolute;
+			right: 0;
+			top: 0;
+		}
 	}
 }

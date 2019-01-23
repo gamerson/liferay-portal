@@ -11,7 +11,12 @@ describe(
 			'should render',
 			() => {
 				const {asFragment} = render(
-					<CriteriaBuilder supportedProperties={[]} />
+					<CriteriaBuilder
+						editing={false}
+						id={0}
+						propertyKey="user"
+						supportedProperties={[]}
+					/>
 				);
 
 				expect(asFragment()).toMatchSnapshot();

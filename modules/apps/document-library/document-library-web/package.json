@@ -8,9 +8,21 @@
 		"metal-state": "^2.16.7"
 	},
 	"devDependencies": {
-		"liferay-module-config-generator": "^1.3.3",
-		"metal-cli": "^4.4.0"
+		"babel-cli": "^6.26.0",
+		"babel-preset-env": "^1.7.0",
+		"check-source-formatting": "^2.0.4",
+		"cross-env": "^5.2.0",
+		"liferay-npm-bundler": "~2.5.1",
+		"liferay-npm-bundler-preset-liferay-dev": "^1.1.0",
+		"metal-tools-soy": "^4.2.9",
+		"rimraf": "^2.6.2"
 	},
 	"name": "document-library-web",
+	"scripts": {
+		"build": "npm run build:soy && npm run compile && liferay-npm-bundler && npm run cleanSoy",
+		"build:soy": "metalsoy --soyDeps \"node_modules/+(clay-*|com.liferay.frontend.js.web)/**/*.soy\"",
+		"cleanSoy": "rimraf src/**/*.soy.js",
+		"compile": "cross-env NODE_ENV=production babel --source-maps -d classes/META-INF/resources src/main/resources/META-INF/resources"
+	},
 	"version": "4.0.0"
 }

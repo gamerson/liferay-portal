@@ -1386,9 +1386,9 @@ public class ServiceBuilder {
 				for (int i = 0; i < parameters.size(); i++) {
 					JavaParameter parameter = parameters.get(i);
 
-					String arg = args.get(i);
+					if (Objects.equals(
+							getParameterType(parameter), args.get(i))) {
 
-					if (getParameterType(parameter).equals(arg)) {
 						exceptions = ListUtil.copy(exceptions);
 
 						List<JavaClass> methodExceptions =
@@ -6344,7 +6344,10 @@ public class ServiceBuilder {
 				for (Attribute attribute : columnAttributes) {
 					String attributeName = attribute.getName();
 
-					if (!Objects.equals(attributeName, "primary")) {
+					if (!attributeName.equals("primary") &&
+						!attributeName.equals("uad-anonymize-field-name") &&
+						!attributeName.equals("uad-nonanonymizable")) {
+
 						versionEntityColumnElement.addAttribute(
 							attributeName, attribute.getValue());
 					}

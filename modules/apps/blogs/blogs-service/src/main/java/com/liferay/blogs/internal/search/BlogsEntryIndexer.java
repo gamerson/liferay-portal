@@ -26,7 +26,6 @@ import com.liferay.portal.kernel.search.BaseIndexer;
 import com.liferay.portal.kernel.search.Document;
 import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.search.IndexWriterHelper;
-import com.liferay.portal.kernel.search.Indexer;
 import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.kernel.search.Summary;
 import com.liferay.portal.kernel.search.filter.BooleanFilter;
@@ -43,16 +42,14 @@ import java.util.Locale;
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletResponse;
 
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-
 /**
  * @author Brian Wing Shun Chan
  * @author Harry Mark
  * @author Bruno Farache
  * @author Raymond Augé
+ * @deprecated As of Judson (7.1.x), since 7.1.0
  */
-@Component(immediate = true, service = Indexer.class)
+@Deprecated
 public class BlogsEntryIndexer extends BaseIndexer<BlogsEntry> {
 
 	public static final String CLASS_NAME = BlogsEntry.class.getName();
@@ -193,16 +190,12 @@ public class BlogsEntryIndexer extends BaseIndexer<BlogsEntry> {
 		indexableActionableDynamicQuery.performActions();
 	}
 
-	@Reference
 	protected BlogsEntryLocalService blogsEntryLocalService;
-
-	@Reference
 	protected IndexWriterHelper indexWriterHelper;
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		BlogsEntryIndexer.class);
 
-	@Reference(target = "(model.class.name=com.liferay.blogs.model.BlogsEntry)")
 	private ModelResourcePermission<BlogsEntry>
 		_blogsEntryModelResourcePermission;
 

@@ -79,9 +79,8 @@ public class AxisServlet extends org.apache.axis.transport.http.AxisServlet {
 					if (e instanceof RuntimeException) {
 						throw (RuntimeException)e;
 					}
-					else {
-						throw new RuntimeException(e);
-					}
+
+					throw new RuntimeException(e);
 				}
 			}
 			finally {
@@ -170,9 +169,8 @@ public class AxisServlet extends org.apache.axis.transport.http.AxisServlet {
 				if (e instanceof ServletException) {
 					throw (ServletException)e;
 				}
-				else {
-					throw new ServletException(e);
-				}
+
+				throw new ServletException(e);
 			}
 		}
 	}
@@ -200,8 +198,11 @@ public class AxisServlet extends org.apache.axis.transport.http.AxisServlet {
 
 			if (_fixContent) {
 				if (contentType.contains(ContentTypes.TEXT_HTML)) {
-					content = _HTML_TOP_WRAPPER.concat(content).concat(
-						_HTML_BOTTOM_WRAPPER);
+					content = _HTML_TOP_WRAPPER.concat(
+						content
+					).concat(
+						_HTML_BOTTOM_WRAPPER
+					);
 				}
 				else if (contentType.contains(ContentTypes.TEXT_XML)) {
 					content = fixXml(content);

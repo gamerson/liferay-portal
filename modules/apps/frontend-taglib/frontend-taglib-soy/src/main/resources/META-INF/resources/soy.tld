@@ -38,10 +38,23 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
+			<description>The ServletContext object to use to resolve JS packages. The default value is to use the current portlet's ServletContext.</description>
+			<name>servletContext</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
 			<description>The Soy template's namespace.</description>
 			<name>templateNamespace</name>
 			<required>true</required>
 			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<description>Whether to use the resolved npm portlet namespace to avoid name conflicts. The default value is <![CDATA[<code>true</code>]]>.</description>
+			<name>useNamespace</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<type>boolean</type>
 		</attribute>
 		<attribute>
 			<description></description>
@@ -85,10 +98,23 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
+			<description>The ServletContext object to use to resolve JS packages. The default value is to use the current portlet's ServletContext.</description>
+			<name>servletContext</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
 			<description>The Soy template's namespace.</description>
 			<name>templateNamespace</name>
 			<required>true</required>
 			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<description>Whether to use the resolved npm portlet namespace to avoid name conflicts. The default value is <![CDATA[<code>true</code>]]>.</description>
+			<name>useNamespace</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<type>boolean</type>
 		</attribute>
 		<attribute>
 			<description></description>

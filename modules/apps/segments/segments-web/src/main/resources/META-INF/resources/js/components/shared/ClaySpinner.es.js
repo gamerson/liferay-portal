@@ -9,6 +9,10 @@ class ClaySpinner extends Component {
 		size: PropTypes.oneOf(['sm'])
 	};
 
+	static defaultProps = {
+		loading: false
+	}
+
 	render() {
 		const {light, loading, size} = this.props;
 

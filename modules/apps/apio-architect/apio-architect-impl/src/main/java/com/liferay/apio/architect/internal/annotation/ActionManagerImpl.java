@@ -280,7 +280,7 @@ public class ActionManagerImpl implements ActionManager {
 		return Either.narrow(
 			_getAction(item, isRetrieveAction)
 		).map(
-			action -> action.apply(request)
+			action -> action.execute(request)
 		).map(
 			object -> object instanceof Try ? ((Try)object).get() : object
 		).toJavaOptional(

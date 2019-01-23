@@ -148,7 +148,7 @@ class PdfPreviewer extends Component {
 	 */
 	_handleBlurPageInput(event) {
 		this.currentPage = event.delegateTarget.value;
-		this.showPageInput = false;
+		this._hidePageInput(false);
 	}
 
 	/**
@@ -161,14 +161,17 @@ class PdfPreviewer extends Component {
 	_handleClickToolbar(event) {
 		const action = event.currentTarget.value;
 
-		if (action === 'next') {
+		if (action === 'expandToggle') {
+			this.expanded = !this.expanded;
+		}
+		else if (action === 'go') {
+			this.showPageInput = true;
+		}
+		else if (action === 'next') {
 			this.currentPage++;
 		}
 		else if (action === 'previous') {
 			this.currentPage--;
-		}
-		else if (action === 'go') {
-			this.showPageInput = true;
 		}
 	}
 
@@ -184,13 +187,28 @@ class PdfPreviewer extends Component {
 
 		if (code === KEY_CODE_ENTER) {
 			this.currentPage = event.delegateTarget.value;
-			this.showPageInput = false;
+			this._hidePageInput();
 		}
 		else if (code === KEY_CODE_ESC) {
-			this.showPageInput = false;
+			this._hidePageInput();
 		}
 		else if (VALID_KEY_CODES.indexOf(code) === -1) {
 			event.preventDefault();
+		}
+	}
+
+	/**
+	 * Hide PageInput and return focus to parent button
+	 * Saves the current value.
+	 * @param {Boolean} [returnFocus=true] - flag to determine if return the focus
+	 * @private
+	 * @review
+	 */
+	_hidePageInput(returnFocus = true) {
+		this.showPageInput = false;
+
+		if (returnFocus) {
+			setTimeout(() => this.refs.showPageInputBtn.element.focus(), 100);
 		}
 	}
 
@@ -239,6 +257,12 @@ PdfPreviewer.STATE = {
 	 * @type {Boolean}
 	 */
 	currentPageLoading: Config.bool(),
+
+	/**
+	 * Flag that indicate if pdf is expanded or fit to container.
+	 * @type {Boolean}
+	 */
+	expanded: Config.bool(),
 
 	/**
 	 * Flag that indicate if 'next page' is disabled.

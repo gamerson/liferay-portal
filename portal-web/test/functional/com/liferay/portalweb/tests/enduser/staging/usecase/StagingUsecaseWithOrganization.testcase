@@ -23,6 +23,12 @@ definition {
 				userLoginFullName = "Test Test"
 			);
 
+			ProductMenu.gotoPortlet(
+				category = "Users",
+				panel = "Control Panel",
+				portlet = "Users and Organizations"
+			);
+
 			User.deactivateCP(userFirstName = "userfn");
 
 			User.deleteCP();

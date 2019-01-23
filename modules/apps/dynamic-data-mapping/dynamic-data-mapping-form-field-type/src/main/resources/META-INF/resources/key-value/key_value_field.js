@@ -112,7 +112,12 @@ AUI.add(
 							normalizedKey += item;
 						}
 
-						return normalizedKey;
+						if (isNaN(normalizedKey)) {
+							return normalizedKey;
+						}
+						else {
+							return 'F' + normalizedKey;
+						}
 					},
 
 					render: function() {

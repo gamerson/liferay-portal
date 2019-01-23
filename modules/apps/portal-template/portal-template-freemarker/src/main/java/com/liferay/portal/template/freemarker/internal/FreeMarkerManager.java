@@ -15,8 +15,10 @@
 package com.liferay.portal.template.freemarker.internal;
 
 import com.liferay.petra.concurrent.ConcurrentReferenceKeyHashMap;
+import com.liferay.petra.lang.ClassLoaderPool;
 import com.liferay.petra.memory.FinalizeManager;
 import com.liferay.petra.reflect.ReflectionUtil;
+import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.cache.SingleVMPool;
@@ -31,7 +33,6 @@ import com.liferay.portal.kernel.template.TemplateResource;
 import com.liferay.portal.kernel.template.TemplateResourceLoader;
 import com.liferay.portal.kernel.util.PropertiesUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
-import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.template.BaseSingleTemplateManager;
 import com.liferay.portal.template.RestrictedTemplate;
 import com.liferay.portal.template.TemplateContextHelper;
@@ -283,10 +284,7 @@ public class FreeMarkerManager extends BaseSingleTemplateManager {
 				_freeMarkerEngineConfiguration.restrictedClasses()));
 
 		try {
-			_configuration.setSetting(
-				"auto_import",
-				StringUtil.merge(
-					_freeMarkerEngineConfiguration.macroLibrary()));
+			_configuration.setSetting("auto_import", _getMacroLibrary());
 			_configuration.setSetting(
 				"template_exception_handler",
 				_freeMarkerEngineConfiguration.templateExceptionHandler());
@@ -433,6 +431,32 @@ public class FreeMarkerManager extends BaseSingleTemplateManager {
 	@Reference(unbind = "-")
 	protected void setSingleVMPool(SingleVMPool singleVMPool) {
 		_singleVMPool = singleVMPool;
+	}
+
+	private String _getMacroLibrary() {
+		Class<?> clazz = getClass();
+
+		String contextName = ClassLoaderPool.getContextName(
+			clazz.getClassLoader());
+
+		contextName = contextName.concat(
+			TemplateConstants.CLASS_LOADER_SEPARATOR);
+
+		String[] macroLibrary = _freeMarkerEngineConfiguration.macroLibrary();
+
+		StringBundler sb = new StringBundler(3 * macroLibrary.length);
+
+		for (String library : macroLibrary) {
+			sb.append(contextName);
+			sb.append(library);
+			sb.append(StringPool.COMMA);
+		}
+
+		if (macroLibrary.length > 0) {
+			sb.setIndex(sb.index() - 1);
+		}
+
+		return sb.toString();
 	}
 
 	private static final Class<?>[] _INTERFACES = {ServletContext.class};
