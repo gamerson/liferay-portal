@@ -18,7 +18,9 @@ import com.liferay.apio.architect.form.Form;
 import com.liferay.blog.apio.architect.model.BlogPosting;
 import com.liferay.category.apio.architect.identifier.CategoryIdentifier;
 import com.liferay.media.object.apio.architect.identifier.MediaObjectIdentifier;
-import com.liferay.person.apio.architect.identifier.PersonIdentifier;
+
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 import java.util.Date;
 import java.util.List;
@@ -48,13 +50,7 @@ public class BlogPostingForm implements BlogPosting {
 		).constructor(
 			BlogPostingForm::new
 		).addOptionalDate(
-			"dateCreated", BlogPostingForm::setCreateDate
-		).addOptionalDate(
-			"dateModified", BlogPostingForm::setModifiedDate
-		).addOptionalDate(
 			"datePublished", BlogPostingForm::setPublishedDate
-		).addOptionalLinkedModel(
-			"creator", PersonIdentifier.class, BlogPostingForm::setCreatorId
 		).addOptionalLinkedModel(
 			"image", MediaObjectIdentifier.class, BlogPostingForm::setImageId
 		).addOptionalLinkedModelList(
@@ -77,17 +73,12 @@ public class BlogPostingForm implements BlogPosting {
 	}
 
 	/**
-	 * Returns the blog posting's alternative headline, if present; otherwise,
-	 * returns an empty string.
+	 * Returns the blog posting's alternative headline.
 	 *
-	 * @return the alternative headline, if present; an empty string otherwise
+	 * @return the alternative headline
 	 */
 	public String getAlternativeHeadline() {
-		return Optional.ofNullable(
-			_alternativeHeadline
-		).orElse(
-			""
-		);
+		return _alternativeHeadline;
 	}
 
 	/**
@@ -100,17 +91,12 @@ public class BlogPostingForm implements BlogPosting {
 	}
 
 	/**
-	 * Returns the blog post's image caption, if present; otherwise, returns an
-	 * empty string.
+	 * Returns the blog post's image caption.
 	 *
-	 * @return the image caption, if present; an empty string otherwise
+	 * @return the image caption
 	 */
 	public String getCaption() {
-		return Optional.ofNullable(
-			_imageCaption
-		).orElse(
-			""
-		);
+		return _imageCaption;
 	}
 
 	@Override
@@ -118,51 +104,22 @@ public class BlogPostingForm implements BlogPosting {
 		return _categories;
 	}
 
-	@Override
-	public Date getCreatedDate() {
-		return Optional.ofNullable(
-			_createDate
-		).orElseGet(
-			Date::new
-		);
-	}
-
 	/**
-	 * Returns the blog post's creator ID, if present; otherwise, returns the
-	 * provided default ID.
+	 * Returns the blog post's description
 	 *
-	 * @return the creator ID, if present; the default ID otherwise
-	 */
-	public Long getCreatorId() {
-		return _creatorId;
-	}
-
-	/**
-	 * Returns the blog post's description, if present; otherwise, returns an
-	 * empty string.
-	 *
-	 * @return the description, if present; an empty string otherwise
+	 * @return the description
 	 */
 	public String getDescription() {
-		return Optional.ofNullable(
-			_description
-		).orElse(
-			""
-		);
+		return _description;
 	}
 
 	/**
-	 * Returns the blog post's friendly URL, if present; otherwise, returns an
-	 * empty string.
+	 * Returns the blog post's friendly URL
 	 *
-	 * @return the friendly URL if present; an empty string otherwise
+	 * @return the friendly URL
 	 */
 	public String getFriendlyURLPath() {
-		return Optional.ofNullable(
-			_friendlyURLPath
-		).orElse(
-			""
-		);
+		return _friendlyURLPath;
 	}
 
 	/**
@@ -184,27 +141,18 @@ public class BlogPostingForm implements BlogPosting {
 		return _keywords;
 	}
 
-	@Override
-	public Date getModifiedDate() {
-		return Optional.ofNullable(
-			_modifiedDate
-		).orElseGet(
-			Date::new
-		);
-	}
-
 	/**
-	 * Returns the blog post's display date, if present; otherwise, returns
-	 * today's date.
+	 * Returns the blog post's display date.
 	 *
-	 * @return the display date, if present; today's date otherwise
+	 * @return the display date
 	 */
 	@Override
-	public Date getPublishedDate() {
+	public Optional<LocalDateTime> getPublishedDateOptional() {
 		return Optional.ofNullable(
 			_publishedDate
-		).orElseGet(
-			Date::new
+		).map(
+			date -> LocalDateTime.ofInstant(
+				date.toInstant(), ZoneId.systemDefault())
 		);
 	}
 
@@ -218,14 +166,6 @@ public class BlogPostingForm implements BlogPosting {
 
 	public void setCategories(List<Long> categories) {
 		_categories = categories;
-	}
-
-	public void setCreateDate(Date createDate) {
-		_createDate = createDate;
-	}
-
-	public void setCreatorId(long creatorId) {
-		_creatorId = creatorId;
 	}
 
 	public void setDescription(String description) {
@@ -252,10 +192,6 @@ public class BlogPostingForm implements BlogPosting {
 		_keywords = keywords;
 	}
 
-	public void setModifiedDate(Date modifiedDate) {
-		_modifiedDate = modifiedDate;
-	}
-
 	public void setPublishedDate(Date publishedDate) {
 		_publishedDate = publishedDate;
 	}
@@ -263,15 +199,12 @@ public class BlogPostingForm implements BlogPosting {
 	private String _alternativeHeadline;
 	private String _articleBody;
 	private List<Long> _categories;
-	private Date _createDate;
-	private Long _creatorId;
 	private String _description;
 	private String _friendlyURLPath;
 	private String _headline;
 	private String _imageCaption;
 	private Long _imageId;
 	private List<String> _keywords;
-	private Date _modifiedDate;
 	private Date _publishedDate;
 
 }

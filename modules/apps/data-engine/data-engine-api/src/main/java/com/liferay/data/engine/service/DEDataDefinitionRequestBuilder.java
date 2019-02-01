@@ -45,15 +45,17 @@ public class DEDataDefinitionRequestBuilder {
 
 	public static DEDataDefinitionSaveModelPermissionsRequest.Builder
 		saveModelPermissionsBuilder(
-			long companyId, long scopedGroupId, long deDataDefinitionId) {
+			long companyId, long groupId, long scopedUserId, long scopedGroupId,
+			long deDataDefinitionId, String[] roleNames) {
 
 		return new DEDataDefinitionSaveModelPermissionsRequest.Builder(
-			companyId, scopedGroupId, deDataDefinitionId);
+			companyId, groupId, scopedUserId, scopedGroupId, deDataDefinitionId,
+			roleNames);
 	}
 
 	public static DEDataDefinitionSavePermissionsRequest.Builder
 		savePermissionsBuilder(
-			long companyId, long scopedGroupId, String... roleNames) {
+			long companyId, long scopedGroupId, String[] roleNames) {
 
 		return new DEDataDefinitionSavePermissionsRequest.Builder(
 			companyId, scopedGroupId, roleNames);

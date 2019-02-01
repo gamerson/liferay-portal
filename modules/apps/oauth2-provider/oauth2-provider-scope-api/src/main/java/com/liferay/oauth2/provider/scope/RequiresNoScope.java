@@ -14,6 +14,7 @@
 
 package com.liferay.oauth2.provider.scope;
 
+import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -33,6 +34,7 @@ import java.lang.annotation.RetentionPolicy;
  * @see    RequiresScope
  * @review
  */
+@Inherited
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RequiresNoScope {
 }

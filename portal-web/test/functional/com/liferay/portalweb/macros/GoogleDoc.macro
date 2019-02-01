@@ -1,9 +1,15 @@
 definition {
 	macro discardChanges {
-		AssertClick(locator1 = "Button#ANY", key_text = "Discard Changes");
+		var key_text = "Discard Changes";
+
+		AssertElementPresent(locator1 = "Button#ANY");
+
+		AssertClick(locator1 = "Button#ANY", value1="Discard Changes");
 	}
 
 	macro editTitleInGoogleDoc {
+		Click(locator1 = "GoogleDoc#TITLE");
+
 		Type(locator1 = "GoogleDoc#TITLE", value1 = "${dmDocumentTitle}");
 	}
 
@@ -15,13 +21,19 @@ definition {
 		);
 
 		MenuItem.click(menuItem = "Edit in ${dmGoogleApp}");
-	}
 
-	macro saveAndExit {
 		AssertElementPresent(
 			locator1 = "Button#ANY",
 			key_text = "Save and Return to Liferay"
 		);
+	}
+
+	macro saveAndExit {
+		var key_text = "Save and Return to Liferay";
+
+		AssertElementPresent(locator1 = "Button#ANY");
+
+		AssertClick(locator1 = "Button#ANY", value1="Save and Return to Liferay");
 
 		Navigator.openURL();
 	}

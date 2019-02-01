@@ -62,6 +62,14 @@ public class ImageCardTag extends BaseClayCardTag {
 		putValue("labelStylesMap", labelStylesMap);
 	}
 
+	public void setStickerCssClass(String stickerCssClass) {
+		putValue("stickerClasses", stickerCssClass);
+	}
+
+	public void setStickerIcon(String stickerIcon) {
+		putValue("stickerIcon", stickerIcon);
+	}
+
 	public void setStickerImageAlt(String stickerImageAlt) {
 		putValue("stickerImageAlt", stickerImageAlt);
 	}
@@ -111,6 +119,14 @@ public class ImageCardTag extends BaseClayCardTag {
 
 		if (context.get("labelStylesMap") == null) {
 			setLabelStylesMap(_imageCard.getLabelStylesMap());
+		}
+
+		if (context.get("stickerClasses") == null) {
+			setStickerCssClass(_imageCard.getStickerCssClass());
+		}
+
+		if (context.get("stickerIcon") == null) {
+			setStickerIcon(_imageCard.getStickerIcon());
 		}
 
 		if (context.get("stickerImageAlt") == null) {

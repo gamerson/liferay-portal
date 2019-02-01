@@ -33,7 +33,9 @@ import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.odata.entity.ComplexEntityField;
 import com.liferay.portal.odata.entity.EntityField;
 import com.liferay.portal.odata.entity.EntityModel;
-import com.liferay.segments.criteria.Field;
+import com.liferay.segments.field.Field;
+import com.liferay.segments.field.customizer.SegmentsFieldCustomizer;
+import com.liferay.segments.field.customizer.SegmentsFieldCustomizerRegistry;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -65,7 +67,9 @@ public class EntityModelFieldMapper {
 
 		entityFieldsMap.forEach(
 			(entityFieldName, entityField) -> fields.addAll(
-				getFields(entityField, idEntityFieldTypes, portletRequest)));
+				getFields(
+					entityModel, entityField, idEntityFieldTypes,
+					portletRequest)));
 
 		Collections.sort(fields);
 
@@ -79,13 +83,30 @@ public class EntityModelFieldMapper {
 	}
 
 	protected List<Field> getFields(
-		EntityField entityField, Map<String, String> idEntityFieldTypes,
-		PortletRequest portletRequest) {
+		EntityModel entityModel, EntityField entityField,
+		Map<String, String> idEntityFieldTypes, PortletRequest portletRequest) {
 
 		ResourceBundle resourceBundle = ResourceBundleUtil.getBundle(
 			_portal.getLocale(portletRequest), getClass());
 
-		String name = entityField.getName();
+		Optional<SegmentsFieldCustomizer> segmentsFieldCustomizerOptional =
+			_segmentsFieldCustomizerRegistry.getSegmentFieldCustomizerOptional(
+				entityModel.getName(), entityField.getName());
+
+		if (segmentsFieldCustomizerOptional.isPresent()) {
+			SegmentsFieldCustomizer segmentsFieldCustomizer =
+				segmentsFieldCustomizerOptional.get();
+
+			return Collections.singletonList(
+				new Field(
+					entityField.getName(),
+					segmentsFieldCustomizer.getLabel(
+						entityField.getName(), resourceBundle.getLocale()),
+					getType(entityField.getType()),
+					segmentsFieldCustomizer.getOptions(
+						resourceBundle.getLocale()),
+					segmentsFieldCustomizer.getSelectEntity(portletRequest)));
+		}
 
 		EntityField.Type entityFieldType = entityField.getType();
 
@@ -93,7 +114,8 @@ public class EntityModelFieldMapper {
 			Map<String, EntityField> entityFieldsMap =
 				((ComplexEntityField)entityField).getEntityFieldsMap();
 
-			return _getComplexFields(name, entityFieldsMap, resourceBundle);
+			return _getComplexFields(
+				entityField.getName(), entityFieldsMap, resourceBundle);
 		}
 
 		if (entityFieldType == EntityField.Type.ID) {
@@ -108,12 +130,11 @@ public class EntityModelFieldMapper {
 			);
 		}
 
-		String label = LanguageUtil.get(
-			resourceBundle, CamelCaseUtil.fromCamelCase(name));
-
-		String type = getType(entityField.getType());
-
-		return Collections.singletonList(new Field(name, label, type));
+		return Collections.singletonList(
+			new Field(
+				entityField.getName(),
+				_getEntityFieldLabel(entityField, resourceBundle),
+				getType(entityFieldType)));
 	}
 
 	protected String getType(EntityField.Type entityFieldType) {
@@ -190,6 +211,14 @@ public class EntityModelFieldMapper {
 		return complexFields;
 	}
 
+	private String _getEntityFieldLabel(
+		EntityField entityField, ResourceBundle resourceBundle) {
+
+		return LanguageUtil.get(
+			resourceBundle,
+			"field." + CamelCaseUtil.fromCamelCase(entityField.getName()));
+	}
+
 	private List<Field.Option> _getExpandoColumnFieldOptions(
 		ExpandoColumn expandoColumn) {
 
@@ -243,16 +272,19 @@ public class EntityModelFieldMapper {
 			portletURL.setParameter("eventName", "selectEntity");
 			portletURL.setWindowState(LiferayWindowState.POP_UP);
 
-			String label = ResourceActionsUtil.getModelResource(
+			String title = ResourceActionsUtil.getModelResource(
 				resourceBundle.getLocale(), className);
 
 			String selectEntityTitle = LanguageUtil.format(
-				resourceBundle, "select-x", label);
+				resourceBundle, "select-x", title);
 
 			Field field = new Field(
-				entityField.getName(), label, "id", Collections.emptyList(),
+				entityField.getName(),
+				_getEntityFieldLabel(entityField, resourceBundle), "id",
+				Collections.emptyList(),
 				new Field.SelectEntity(
-					"selectEntity", selectEntityTitle, portletURL.toString()));
+					"selectEntity", selectEntityTitle, portletURL.toString(),
+					false));
 
 			return Optional.of(field);
 		}
@@ -271,5 +303,8 @@ public class EntityModelFieldMapper {
 
 	@Reference
 	private Portal _portal;
+
+	@Reference
+	private SegmentsFieldCustomizerRegistry _segmentsFieldCustomizerRegistry;
 
 }

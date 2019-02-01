@@ -114,6 +114,7 @@
 /portal/commons-chain.jar
 /portal/commons-codec.jar
 /portal/commons-collections.jar
+/portal/commons-collections4.jar
 /portal/commons-compress.jar
 /portal/commons-configuration.jar
 /portal/commons-dbcp.jar
@@ -151,6 +152,9 @@
 /portal/im4java.jar
 /portal/isoparser.jar
 /portal/jabsorb.jar
+/portal/jackson-annotations.jar
+/portal/jackson-core.jar
+/portal/jackson-databind.jar
 /portal/jai_codec.jar
 /portal/jai_core.jar
 /portal/jakarta-regexp.jar
@@ -187,7 +191,6 @@
 /portal/jodd-servlet.jar
 /portal/jodd-upload.jar
 /portal/json-java.jar
-/portal/json-schema-validator.jar
 /portal/jrcs-diff.jar
 /portal/jsr107cache.jar
 /portal/jstl-api.jar

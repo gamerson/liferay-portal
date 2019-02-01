@@ -52,7 +52,6 @@ import com.liferay.apio.architect.routes.NestedCollectionRoutes.Builder;
  *             subclass of {@code Identifier<W>}.
  * @see        NestedCollectionRoutes.Builder
  * @deprecated As of 1.9.0, use {@link ActionRouter} instead
- * @review
  */
 @ConsumerType
 @Deprecated
@@ -69,7 +68,6 @@ public interface NestedCollectionRouter
 	 *             NestedCollectionRoutes} instance
 	 * @see        NestedCollectionRoutes.Builder
 	 * @deprecated As of 1.9.0, use {@link ActionRouter} instead
-	 * @review
 	 */
 	@Deprecated
 	public NestedCollectionRoutes<T, S, V> collectionRoutes(

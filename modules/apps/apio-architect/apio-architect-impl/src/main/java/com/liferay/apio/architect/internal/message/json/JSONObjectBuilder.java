@@ -16,6 +16,7 @@ package com.liferay.apio.architect.internal.message.json;
 
 import static com.fasterxml.jackson.databind.MapperFeature.SORT_PROPERTIES_ALPHABETICALLY;
 import static com.fasterxml.jackson.databind.SerializationFeature.INDENT_OUTPUT;
+import static com.fasterxml.jackson.databind.SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -96,7 +97,10 @@ public class JSONObjectBuilder {
 	 */
 	public String build() {
 		try {
-			return _OBJECT_MAPPER.writeValueAsString(_objectNode);
+			final Object obj = _OBJECT_MAPPER.treeToValue(
+				_objectNode, Object.class);
+
+			return _OBJECT_MAPPER.writeValueAsString(obj);
 		}
 		catch (JsonProcessingException jpe) {
 			return _objectNode.toString();
@@ -606,6 +610,7 @@ public class JSONObjectBuilder {
 
 	private static final ObjectMapper _OBJECT_MAPPER = new ObjectMapper() {
 		{
+			configure(ORDER_MAP_ENTRIES_BY_KEYS, true);
 			configure(SORT_PROPERTIES_ALPHABETICALLY, true);
 			enable(INDENT_OUTPUT);
 		}

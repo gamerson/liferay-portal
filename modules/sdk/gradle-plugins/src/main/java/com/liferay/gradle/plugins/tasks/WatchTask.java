@@ -19,6 +19,7 @@ import aQute.bnd.osgi.Constants;
 import com.liferay.gogo.shell.client.GogoShellClient;
 import com.liferay.gradle.plugins.internal.util.FileUtil;
 import com.liferay.gradle.plugins.internal.util.GradleUtil;
+import com.liferay.gradle.util.ArrayUtil;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -37,6 +38,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.jar.Attributes;
@@ -214,6 +216,10 @@ public class WatchTask extends DefaultTask {
 			else if (_isClassLoaderFileChanged(modifiedFiles)) {
 				_refreshBundle(installedBundleId, gogoShellClient);
 
+				if (_isFragmentModule()) {
+					_refreshFragmentHostBundle(gogoShellClient);
+				}
+
 				return;
 			}
 
@@ -249,10 +255,17 @@ public class WatchTask extends DefaultTask {
 
 				BundleDTO bundleDTO = _parseBundleDTO(gogoLine);
 
-				if ((bundleDTO != null) &&
-					bundleSymbolicName.equals(bundleDTO.symbolicName)) {
+				if (bundleDTO != null) {
+					String symbolicName = bundleDTO.symbolicName;
 
-					return bundleDTO.id;
+					if (symbolicName.indexOf('(') > 0) {
+						symbolicName = symbolicName.substring(
+							0, symbolicName.indexOf("(") - 1);
+					}
+
+					if (bundleSymbolicName.equals(symbolicName)) {
+						return bundleDTO.id;
+					}
 				}
 			}
 		}
@@ -353,6 +366,36 @@ public class WatchTask extends DefaultTask {
 		}
 
 		return response;
+	}
+
+	private String _getFragmentHost() throws IOException {
+		Project project = getProject();
+
+		FileCollection fileCollection = project.files("bnd.bnd");
+
+		if (fileCollection != null) {
+			File file = fileCollection.getSingleFile();
+
+			Properties properties = FileUtil.readProperties(file);
+
+			return properties.getProperty(Constants.FRAGMENT_HOST);
+		}
+
+		return null;
+	}
+
+	private String _getFragmentHostName() throws IOException {
+		String fragmentHost = _getFragmentHost();
+
+		if (fragmentHost != null) {
+			String[] fragmentNames = fragmentHost.split(";");
+
+			if (ArrayUtil.isNotEmpty(fragmentNames)) {
+				return fragmentNames[0];
+			}
+		}
+
+		return null;
 	}
 
 	private long _getInstalledBundleId(GogoShellClient gogoShellClient)
@@ -508,6 +551,10 @@ public class WatchTask extends DefaultTask {
 					}
 				}
 			}
+
+			if (_isFragmentModule()) {
+				_refreshFragmentHostBundle(gogoShellClient);
+			}
 		}
 
 		String bundleIdString = String.valueOf(bundleId);
@@ -529,6 +576,14 @@ public class WatchTask extends DefaultTask {
 			if (_classLoaderFileExtensions.contains(extension)) {
 				return true;
 			}
+		}
+
+		return false;
+	}
+
+	private boolean _isFragmentModule() throws IOException {
+		if (_getFragmentHost() != null) {
+			return true;
 		}
 
 		return false;
@@ -602,6 +657,17 @@ public class WatchTask extends DefaultTask {
 
 		if (logger.isQuietEnabled()) {
 			logger.quiet("Refreshed bundle {}", bundleId);
+		}
+	}
+
+	private void _refreshFragmentHostBundle(GogoShellClient gogoShellClient)
+		throws IOException {
+
+		long fragmentHostBundleId = _getBundleId(
+			_getFragmentHostName(), gogoShellClient);
+
+		if (fragmentHostBundleId > 0) {
+			_refreshBundle(fragmentHostBundleId, gogoShellClient);
 		}
 	}
 

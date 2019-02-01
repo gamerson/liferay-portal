@@ -26,16 +26,13 @@ import java.lang.annotation.Target;
  * interface's permission annotations.
  *
  * @author Javier Gamarra
- * @review
  */
 public @interface Permissions {
 
 	/**
-	 * Defines a permission to check a method that creates elements. That method
-	 * must live inside a class that implements {@link
+	 * Defines a permission check for a method that creates elements. That
+	 * method must be in a class that implements {@link
 	 * com.liferay.apio.architect.router.ActionRouter}.
-	 *
-	 * @review
 	 */
 	@HasPermission(httpMethod = "POST", name = "create")
 	@Retention(RUNTIME)
@@ -44,11 +41,9 @@ public @interface Permissions {
 	}
 
 	/**
-	 * Defines a permission to check a method that removes elements. That method
-	 * must live inside a class that implements {@link
+	 * Defines a permission check for a method that removes elements. That
+	 * method must be in a class that implements {@link
 	 * com.liferay.apio.architect.router.ActionRouter}.
-	 *
-	 * @review
 	 */
 	@HasPermission(httpMethod = "DELETE", name = "remove")
 	@Retention(RUNTIME)
@@ -57,11 +52,9 @@ public @interface Permissions {
 	}
 
 	/**
-	 * Defines a permission to check a method that replaces an element. That
-	 * method must live inside a class that implements {@link
+	 * Defines a permission check for a method that replaces an element. That
+	 * method must be in a class that implements {@link
 	 * com.liferay.apio.architect.router.ActionRouter}.
-	 *
-	 * @review
 	 */
 	@HasPermission(httpMethod = "PUT", name = "replace")
 	@Retention(RUNTIME)
@@ -70,11 +63,9 @@ public @interface Permissions {
 	}
 
 	/**
-	 * Defines a permission to check a method that retrieves elements. That
-	 * method must live inside a class that implements {@link
+	 * Defines a permission check for a method that retrieves elements. That
+	 * method must be in a class that implements {@link
 	 * com.liferay.apio.architect.router.ActionRouter}.
-	 *
-	 * @review
 	 */
 	@HasPermission(httpMethod = "GET", name = "retrieve")
 	@Retention(RUNTIME)
@@ -83,11 +74,9 @@ public @interface Permissions {
 	}
 
 	/**
-	 * Defines a permission to check a method that updates elements. That method
-	 * must live inside a class that implements {@link
+	 * Defines a permission check for a method that updates elements. That
+	 * method must be in a class that implements {@link
 	 * com.liferay.apio.architect.router.ActionRouter}.
-	 *
-	 * @review
 	 */
 	@HasPermission(httpMethod = "PATCH", name = "update")
 	@Retention(RUNTIME)
@@ -97,15 +86,13 @@ public @interface Permissions {
 
 	/**
 	 * Defines an annotation that indicates a method performs a permission check
-	 * before an action.
+	 * before an action. That method must be in a class that implements {@link
+	 * com.liferay.apio.architect.router.ActionRouter}.
 	 *
-	 * That method must live inside a class implementing {@link
-	 * com.liferay.apio.architect.router.ActionRouter}. This annotation can also
-	 * be used on other annotations for creating aliases for semantic permission
-	 * checks
-	 * (see {@link CanRetrieve}).
-	 *
-	 * @review
+	 * <p>
+	 * This annotation can also be used on other annotations for creating
+	 * aliases for semantic permission checks (see {@link CanRetrieve}).
+	 * </p>
 	 */
 	@Retention(RUNTIME)
 	@Target({METHOD, ANNOTATION_TYPE})

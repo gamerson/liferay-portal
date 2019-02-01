@@ -114,7 +114,8 @@ public class FragmentManagementToolbarDisplayContext
 
 	@Override
 	public String getComponentId() {
-		return "fragmentEntriesManagementToolbar";
+		return "fragmentEntriesManagementToolbar" +
+			_fragmentDisplayContext.getFragmentCollectionId();
 	}
 
 	@Override
@@ -132,6 +133,11 @@ public class FragmentManagementToolbarDisplayContext
 						FragmentEntryTypeConstants.TYPE_ELEMENT_LABEL));
 			}
 		};
+	}
+
+	@Override
+	public String getDefaultEventHandler() {
+		return "FRAGMENT_ENTRIES_MANAGEMENT_TOOLBAR_DEFAULT_EVENT_HANDLER";
 	}
 
 	@Override

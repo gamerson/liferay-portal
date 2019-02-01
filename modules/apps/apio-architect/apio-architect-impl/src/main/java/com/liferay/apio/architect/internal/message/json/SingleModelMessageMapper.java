@@ -84,6 +84,24 @@ public interface SingleModelMessageMapper<T>
 	}
 
 	/**
+	 * Maps an embedded resource action's target to its JSON object
+	 * representation.
+	 *
+	 * @param  singleModelJSONObjectBuilder the JSON object builder for the
+	 *         model
+	 * @param  actionJSONObjectBuilder the JSON object builder for the action
+	 * @param  embeddedPathElements the current resource's embedded path
+	 *         elements
+	 * @param  targetURL the action's target url
+	 * @review
+	 */
+	public default void mapEmbeddedActionTargetURL(
+		JSONObjectBuilder singleModelJSONObjectBuilder,
+		JSONObjectBuilder actionJSONObjectBuilder,
+		FunctionalList<String> embeddedPathElements, String targetURL) {
+	}
+
+	/**
 	 * Maps an embedded resource's boolean field to its JSON object
 	 * representation.
 	 *

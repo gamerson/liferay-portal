@@ -11,7 +11,6 @@ import core from 'metal';
 import dom from 'metal-dom';
 import FormBuilder from 'dynamic-data-mapping-form-builder/metal/js/components/FormBuilder/index.es';
 import LayoutProvider from 'dynamic-data-mapping-form-builder/metal/js/components/LayoutProvider/index.es';
-import loader from 'dynamic-data-mapping-form-builder/metal/js/components/FieldsLoader/index.es';
 import PreviewButton from './components/PreviewButton/PreviewButton.es';
 import PublishButton from './components/PublishButton/PublishButton.es';
 import RuleBuilder from 'dynamic-data-mapping-form-builder/metal/js/components/RuleBuilder/index.es';
@@ -281,7 +280,7 @@ class Form extends Component {
 
 	attached() {
 		const {layoutProvider} = this.refs;
-		const {localizedDescription, localizedName, namespace} = this.props;
+		const {localizedDescription, localizedName, namespace, published} = this.props;
 		const {paginationMode} = this.state;
 
 		this._eventHandler = new EventHandler();
@@ -315,10 +314,18 @@ class Form extends Component {
 						nameEditor: results[0],
 						namespace,
 						paginationMode,
+						published,
 						settingsDDMForm: results[2],
 						translationManager
 					},
 					this.element
+				);
+
+				this.on(
+					'publishedChanged',
+					({newVal}) => {
+						this._stateSyncronizer.props.published = newVal;
+					}
 				);
 
 				this._autoSave = new AutoSave(
@@ -650,8 +657,10 @@ class Form extends Component {
 		const shareFormIcon = document.querySelector('.share-form-icon');
 
 		this.props.published = newVal;
+
 		if (newVal && !saved) {
 			this.props.saved = true;
+
 			shareFormIcon.classList.remove('hide');
 		}
 		else if (!newVal && !saved) {
@@ -854,13 +863,5 @@ class Form extends Component {
 	}
 }
 
-const DDMForm = (props, container, callback) => {
-	loader(
-		() => callback(new Form(props, container)),
-		props.modules,
-		[...props.dependencies]
-	);
-};
-
-export default DDMForm;
-export {DDMForm};
+export default Form;
+export {Form};

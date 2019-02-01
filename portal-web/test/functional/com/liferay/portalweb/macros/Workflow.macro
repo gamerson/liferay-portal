@@ -241,6 +241,38 @@ definition {
 		);
 	}
 
+	macro configureDMWorkflowViaFolderInfo {
+		Click(locator1 = "Icon#INFO");
+
+		LexiconEntry.gotoEllipsisMenuItem(menuItem = "Edit");
+
+		Select(
+			locator1 = "AssetWorkflow#ALL_STRUCTURES_WORKFLOW_SELECT",
+			value1 = "${workflowDefinition}"
+		);
+
+		PortletEntry.save();
+	}
+
+	macro configureWCWorkflowViaFolderInfo {
+		Click(locator1 = "Icon#INFO");
+
+		Click(
+			locator1 = "Icon#VERTICAL_ELLIPSIS_BUTTON"
+		);
+
+		MenuItem.click(
+			menuItem = "Edit"
+		);
+
+		Select(
+			locator1 = "AssetWorkflow#ALL_STRUCTURES_WORKFLOW_SELECT",
+			value1 = "${workflowDefinition}"
+		);
+
+		PortletEntry.save();
+	}
+
 	macro configureWorkflow {
 		AssertClick(
 			locator1 = "Button#EDIT_ROW",
@@ -266,19 +298,6 @@ definition {
 			workflowDefinition = "${workflowDefinition}",
 			workflowResourceValue = "${workflowResourceValue}"
 		);
-	}
-
-	macro configureWorkflowViaFolderInfo {
-		Click(locator1 = "Icon#INFO");
-
-		LexiconEntry.gotoEllipsisMenuItem(menuItem = "Edit");
-
-		Select(
-			locator1 = "AssetWorkflow#ALL_STRUCTURES_WORKFLOW_SELECT",
-			value1 = "${workflowDefinition}"
-		);
-
-		PortletEntry.save();
 	}
 
 	macro configureWorkflowViaPortlet {
@@ -598,7 +617,7 @@ definition {
 			portlet = "Web Content"
 		);
 
-		Workflow.configureWorkflowViaFolderInfo(workflowDefinition = "No Workflow");
+		Workflow.configureWCWorkflowViaFolderInfo(workflowDefinition = "No Workflow");
 	}
 
 	macro tearDownSpecificWorkflowDefinition {

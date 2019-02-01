@@ -160,7 +160,8 @@
 					"DeleteAction",
 					"Operation"
 				],
-				"method": "DELETE"
+				"method": "DELETE",
+				"target": "/first/first"
 			}
 		],
 		"relatedCollection": "/first/first/models",

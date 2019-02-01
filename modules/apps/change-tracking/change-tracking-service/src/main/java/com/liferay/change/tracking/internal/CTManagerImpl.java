@@ -29,6 +29,7 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.util.ListUtil;
@@ -47,18 +48,41 @@ import org.osgi.service.component.annotations.Reference;
 public class CTManagerImpl implements CTManager {
 
 	@Override
-	public Optional<CTEntry> getLatestModelChangeCTEntryOptional(
-		long userId, long resourcePrimKey) {
+	public Optional<CTEntry> getActiveCTCollectionCTEntryOptional(
+		long userId, long classNameId, long classPK) {
 
-		User user = _userLocalService.fetchUser(userId);
+		long companyId = _getCompanyId(userId);
 
-		if (user == null) {
-			_log.error("Unable to get user " + userId);
-
+		if (companyId <= 0) {
 			return Optional.empty();
 		}
 
-		if (!_ctEngineManager.isChangeTrackingEnabled(user.getCompanyId())) {
+		Optional<CTCollection> ctCollectionOptional =
+			_ctEngineManager.getActiveCTCollectionOptional(userId);
+
+		long ctCollectionId = ctCollectionOptional.map(
+			CTCollection::getCtCollectionId
+		).orElse(
+			0L
+		);
+
+		CTEntry ctEntry = _getCTentry(
+			companyId, ctCollectionId, classNameId, classPK);
+
+		return Optional.ofNullable(ctEntry);
+	}
+
+	@Override
+	public Optional<CTEntry> getLatestModelChangeCTEntryOptional(
+		long userId, long resourcePrimKey) {
+
+		long companyId = _getCompanyId(userId);
+
+		if (companyId <= 0) {
+			return Optional.empty();
+		}
+
+		if (!_ctEngineManager.isChangeTrackingEnabled(companyId)) {
 			return Optional.empty();
 		}
 
@@ -96,15 +120,13 @@ public class CTManagerImpl implements CTManager {
 		long userId, long resourcePrimKey,
 		QueryDefinition<CTEntry> queryDefinition) {
 
-		User user = _userLocalService.fetchUser(userId);
+		long companyId = _getCompanyId(userId);
 
-		if (user == null) {
-			_log.error("Unable to get user " + userId);
-
+		if (companyId <= 0) {
 			return Collections.emptyList();
 		}
 
-		if (!_ctEngineManager.isChangeTrackingEnabled(user.getCompanyId())) {
+		if (!_ctEngineManager.isChangeTrackingEnabled(companyId)) {
 			return Collections.emptyList();
 		}
 
@@ -125,23 +147,38 @@ public class CTManagerImpl implements CTManager {
 	public Optional<CTEntry> getModelChangeCTEntryOptional(
 		long userId, long classNameId, long classPK) {
 
-		User user = _userLocalService.fetchUser(userId);
+		Optional<CTEntry> ctEntryOptional =
+			getActiveCTCollectionCTEntryOptional(userId, classNameId, classPK);
 
-		if (user == null) {
-			_log.error("Unable to find user " + userId);
+		if (ctEntryOptional.isPresent()) {
+			return ctEntryOptional;
+		}
 
+		return getProductionCTCollectionCTEntryOptional(
+			userId, classNameId, classPK);
+	}
+
+	@Override
+	public Optional<CTEntry> getProductionCTCollectionCTEntryOptional(
+		long userId, long classNameId, long classPK) {
+
+		long companyId = _getCompanyId(userId);
+
+		if (companyId <= 0) {
 			return Optional.empty();
 		}
 
-		if (!_ctEngineManager.isChangeTrackingEnabled(user.getCompanyId()) ||
-			!_ctEngineManager.isChangeTrackingSupported(
-				user.getCompanyId(), classNameId)) {
+		Optional<CTCollection> ctCollectionOptional =
+			_ctEngineManager.getProductionCTCollectionOptional(companyId);
 
-			return Optional.empty();
-		}
+		long ctCollectionId = ctCollectionOptional.map(
+			CTCollection::getCtCollectionId
+		).orElse(
+			0L
+		);
 
-		CTEntry ctEntry = _ctEntryLocalService.fetchCTEntry(
-			classNameId, classPK);
+		CTEntry ctEntry = _getCTentry(
+			companyId, ctCollectionId, classNameId, classPK);
 
 		return Optional.ofNullable(ctEntry);
 	}
@@ -151,17 +188,15 @@ public class CTManagerImpl implements CTManager {
 			long userId, long classNameId, long classPK, long resourcePrimKey)
 		throws CTException {
 
-		User user = _userLocalService.fetchUser(userId);
+		long companyId = _getCompanyId(userId);
 
-		if (user == null) {
-			_log.error("Unable to find user " + userId);
-
+		if (companyId <= 0) {
 			return Optional.empty();
 		}
 
-		if (!_ctEngineManager.isChangeTrackingEnabled(user.getCompanyId()) ||
+		if (!_ctEngineManager.isChangeTrackingEnabled(companyId) ||
 			!_ctEngineManager.isChangeTrackingSupported(
-				user.getCompanyId(), classNameId)) {
+				companyId, classNameId)) {
 
 			return Optional.empty();
 		}
@@ -170,7 +205,7 @@ public class CTManagerImpl implements CTManager {
 			_ctEngineManager.getActiveCTCollectionOptional(userId);
 
 		if (!ctCollectionOptional.isPresent()) {
-			return null;
+			return Optional.empty();
 		}
 
 		CTCollection ctCollection = ctCollectionOptional.get();
@@ -194,9 +229,8 @@ public class CTManagerImpl implements CTManager {
 			sb.append(ctCollection.getCtCollectionId());
 
 			throw new CTEntryException(
-				0L, user.getCompanyId(), userId, classNameId, classPK,
-				resourcePrimKey, ctCollection.getCtCollectionId(),
-				sb.toString(), dctee);
+				0L, companyId, userId, classNameId, classPK, resourcePrimKey,
+				ctCollection.getCtCollectionId(), sb.toString(), dctee);
 		}
 		catch (PortalException pe) {
 			StringBundler sb = new StringBundler(8);
@@ -210,8 +244,54 @@ public class CTManagerImpl implements CTManager {
 			sb.append(" in change tracking collection ");
 			sb.append(ctCollection.getCtCollectionId());
 
-			throw new CTException(user.getCompanyId(), sb.toString(), pe);
+			throw new CTException(companyId, sb.toString(), pe);
 		}
+	}
+
+	@Override
+	public Optional<CTEntry> unregisterModelChange(
+		long userId, long classNameId, long classPK) {
+
+		Optional<CTEntry> ctEntryOptional = getModelChangeCTEntryOptional(
+			userId, classNameId, classPK);
+
+		return ctEntryOptional.map(
+			ctEntry -> _ctEntryLocalService.deleteCTEntry(ctEntry));
+	}
+
+	private long _getCompanyId(long userId) {
+		long companyId = 0;
+
+		User user = _userLocalService.fetchUser(userId);
+
+		if (user == null) {
+			companyId = CompanyThreadLocal.getCompanyId();
+		}
+		else {
+			companyId = user.getCompanyId();
+		}
+
+		if (companyId <= 0) {
+			if (_log.isWarnEnabled()) {
+				_log.warn("Unable to get company ID");
+			}
+		}
+
+		return companyId;
+	}
+
+	private CTEntry _getCTentry(
+		long companyId, long ctCollectionId, long classNameId, long classPK) {
+
+		if (!_ctEngineManager.isChangeTrackingEnabled(companyId) ||
+			!_ctEngineManager.isChangeTrackingSupported(
+				companyId, classNameId)) {
+
+			return null;
+		}
+
+		return _ctEntryLocalService.fetchCTEntry(
+			ctCollectionId, classNameId, classPK);
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(CTManagerImpl.class);

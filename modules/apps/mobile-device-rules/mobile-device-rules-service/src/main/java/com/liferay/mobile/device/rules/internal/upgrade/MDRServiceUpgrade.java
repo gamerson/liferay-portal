@@ -14,6 +14,11 @@
 
 package com.liferay.mobile.device.rules.internal.upgrade;
 
+import com.liferay.mobile.device.rules.internal.upgrade.v2_0_0.util.MDRActionTable;
+import com.liferay.mobile.device.rules.internal.upgrade.v2_0_0.util.MDRRuleGroupInstanceTable;
+import com.liferay.mobile.device.rules.internal.upgrade.v2_0_0.util.MDRRuleGroupTable;
+import com.liferay.mobile.device.rules.internal.upgrade.v2_0_0.util.MDRRuleTable;
+import com.liferay.portal.kernel.upgrade.BaseUpgradeSQLServerDatetime;
 import com.liferay.portal.kernel.upgrade.DummyUpgradeStep;
 import com.liferay.portal.upgrade.registry.UpgradeStepRegistrator;
 
@@ -30,6 +35,14 @@ public class MDRServiceUpgrade implements UpgradeStepRegistrator {
 		registry.register("0.0.1", "1.0.0", new DummyUpgradeStep());
 
 		registry.register("1.0.0", "1.0.1", new DummyUpgradeStep());
+
+		registry.register(
+			"1.0.1", "2.0.0",
+			new BaseUpgradeSQLServerDatetime(
+				new Class<?>[] {
+					MDRActionTable.class, MDRRuleGroupInstanceTable.class,
+					MDRRuleGroupTable.class, MDRRuleTable.class
+				}));
 	}
 
 }

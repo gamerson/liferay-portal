@@ -40,7 +40,7 @@ import static org.osgi.service.component.annotations.ReferencePolicyOption.GREED
 import static org.slf4j.LoggerFactory.getLogger;
 
 import com.liferay.apio.architect.annotation.Actions.Action;
-import com.liferay.apio.architect.annotation.Vocabulary.Type;
+import com.liferay.apio.architect.annotation.Vocabulary;
 import com.liferay.apio.architect.credentials.Credentials;
 import com.liferay.apio.architect.form.Form;
 import com.liferay.apio.architect.internal.action.ActionSemantics;
@@ -56,6 +56,7 @@ import io.vavr.CheckedFunction1;
 import io.vavr.control.Option;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 
 import java.util.Arrays;
@@ -94,7 +95,7 @@ public class ActionRouterManager {
 		);
 	}
 
-	@SuppressWarnings("Convert2MethodRef")
+	@SuppressWarnings({"Convert2MethodRef", "unchecked"})
 	private void _computeActionSemantics() {
 		List<String> list = _providerManager.getMissingProviders(
 			_mandatoryClassNames);
@@ -108,14 +109,22 @@ public class ActionRouterManager {
 		for (ActionRouter<?> actionRouter : _actionRouters) {
 			Class<? extends ActionRouter> clazz = actionRouter.getClass();
 
+			Class<?>[] interfaceClasses = clazz.getInterfaces();
+
+			if (!interfaceClasses[0].equals(ActionRouter.class)) {
+				Type firstInterfaceType = clazz.getGenericInterfaces()[0];
+
+				clazz = (Class<? extends ActionRouter>)firstInterfaceType;
+			}
+
 			Option<String> optionName = Option.of(
 				getTypeParameter(clazz, _actionRouterTypeParameter)
 			).map(
 				type -> annotate(type)
 			).flatMap(
-				type -> Option.of(type.getAnnotation(Type.class))
+				type -> Option.of(type.getAnnotation(Vocabulary.Type.class))
 			).map(
-				Type::value
+				Vocabulary.Type::value
 			).map(
 				string -> toLowercaseSlug(string)
 			);

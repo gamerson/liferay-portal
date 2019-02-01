@@ -7,7 +7,7 @@
 	<description/>
 	<groupId>com.liferay</groupId>
 	<artifactId>com.liferay.portal.tools.rest.builder</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.5</version>
 	<goalPrefix>rest-builder</goalPrefix>
 	<mojos>
 		<mojo>
@@ -26,7 +26,21 @@
 			<threadSafe>false</threadSafe>
 			<parameters>
 				<parameter>
-					<name>inputFileName</name>
+					<name>copyrightFileName</name>
+					<type>java.lang.String</type>
+					<required>false</required>
+					<editable>true</editable>
+					<description/>
+				</parameter>
+				<parameter>
+					<name>RESTConfigFileName</name>
+					<type>java.lang.String</type>
+					<required>false</required>
+					<editable>true</editable>
+					<description/>
+				</parameter>
+				<parameter>
+					<name>RESTOpenAPIFileName</name>
 					<type>java.lang.String</type>
 					<required>false</required>
 					<editable>true</editable>

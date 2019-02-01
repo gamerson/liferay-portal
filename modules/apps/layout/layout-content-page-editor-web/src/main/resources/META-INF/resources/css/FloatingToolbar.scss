@@ -1,0 +1,71 @@
+@import "variables";
+
+.fragments-editor__floating-toolbar {
+	bottom: auto;
+	left: auto;
+	padding: $fragmentsEditorSpacing;
+	position: absolute;
+	right: 0;
+	text-align: right;
+	top: 100%;
+	z-index: $floatingToolbarZIndex;
+
+	&-buttons.popover,
+	&-panel.popover {
+		position: static;
+	}
+
+	&-buttons {
+		display: inline-block;
+
+		& .btn {
+			margin: $fragmentsEditorSpacing / 2;
+			opacity: 0.6;
+
+			&.active {
+				background-color: rgba(0, 0, 0, 0.1);
+				opacity: 1;
+			}
+		}
+	}
+
+	&-panel {
+		margin-top: $fragmentsEditorSpacing;
+		padding: $fragmentsEditorSpacing * 2;
+
+		.form-group:last-child {
+			margin: 0;
+		}
+
+		.palette-container {
+			margin-bottom: 0.25rem;
+		}
+
+		.palette-item {
+			border: 5px solid transparent;
+			border-radius: 50%;
+			transition: border-color ease 0.2s;
+			will-change: border-color;
+
+			&-hover, &-selected {
+				border-color: #F1F2F5;
+			}
+
+			&-inner {
+				border: none;
+				border-radius: 50%;
+				height: 20px;
+				width: 20px;
+			}
+
+			&-selected .palette-item-inner {
+				background-image: none;
+			}
+		}
+
+		.palette-items-container {
+			display: flex;
+			flex-wrap: wrap;
+		}
+	}
+}

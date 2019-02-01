@@ -19,7 +19,6 @@ import com.liferay.oauth2.provider.scope.RequiresNoScope;
 import com.liferay.oauth2.provider.scope.RequiresScope;
 import com.liferay.oauth2.provider.scope.ScopeChecker;
 import com.liferay.oauth2.provider.scope.spi.scope.finder.ScopeFinder;
-import com.liferay.petra.reflect.AnnotationLocator;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 
@@ -118,8 +117,8 @@ public class AnnotationFeature implements Feature {
 			RequiresNoScope requiresNoScope = resourceMethod.getAnnotation(
 				RequiresNoScope.class);
 
-			RequiresScope requiresScope = resourceMethod.getAnnotation(
-				RequiresScope.class);
+			RequiresScope requiresScope =
+				RequiresScopeAnnotationFinder.getRequiresScope(resourceMethod);
 
 			if ((requiresNoScope != null) && (requiresScope != null)) {
 				StringBundler sb = new StringBundler(6);
@@ -149,7 +148,8 @@ public class AnnotationFeature implements Feature {
 			requiresNoScope = resourceClass.getAnnotation(
 				RequiresNoScope.class);
 
-			requiresScope = resourceClass.getAnnotation(RequiresScope.class);
+			requiresScope = RequiresScopeAnnotationFinder.getRequiresScope(
+				resourceClass);
 
 			if ((requiresNoScope != null) && (requiresScope != null)) {
 				StringBundler sb = new StringBundler(4);
@@ -158,30 +158,6 @@ public class AnnotationFeature implements Feature {
 				sb.append(resourceClass.getName());
 				sb.append("has both @RequiresNoScope and @RequiresScope ");
 				sb.append("annotations defined");
-
-				throw new RuntimeException(sb.toString());
-			}
-
-			if (requiresNoScope != null) {
-				return true;
-			}
-
-			if (checkRequiresScope(requiresScope)) {
-				return true;
-			}
-
-			requiresNoScope = AnnotationLocator.locate(
-				resourceClass, RequiresNoScope.class);
-
-			requiresScope = AnnotationLocator.locate(
-				resourceClass, RequiresScope.class);
-
-			if ((requiresNoScope != null) && (requiresScope != null)) {
-				StringBundler sb = new StringBundler(3);
-
-				sb.append("Class ");
-				sb.append(resourceClass.getName());
-				sb.append("inherits both @RequiresNoScope and @RequiresScope");
 
 				throw new RuntimeException(sb.toString());
 			}

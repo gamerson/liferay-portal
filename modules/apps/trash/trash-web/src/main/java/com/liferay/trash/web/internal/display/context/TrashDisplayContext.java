@@ -15,16 +15,17 @@
 package com.liferay.trash.web.internal.display.context;
 
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItem;
-import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItemList;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.NavigationItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.NavigationItemList;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.ViewTypeItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.ViewTypeItemList;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.search.EmptyOnClickRowChecker;
+import com.liferay.portal.kernel.dao.search.SearchContainer;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.model.ContainerModel;
+import com.liferay.portal.kernel.model.TrashedModel;
 import com.liferay.portal.kernel.portlet.LiferayPortletRequest;
 import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
 import com.liferay.portal.kernel.portlet.PortalPreferences;
@@ -54,6 +55,8 @@ import com.liferay.trash.web.internal.constants.TrashPortletKeys;
 import com.liferay.trash.web.internal.constants.TrashWebKeys;
 import com.liferay.trash.web.internal.search.EntrySearch;
 import com.liferay.trash.web.internal.search.EntrySearchTerms;
+import com.liferay.trash.web.internal.servlet.taglib.util.TrashContainerActionDropdownItemsProvider;
+import com.liferay.trash.web.internal.servlet.taglib.util.TrashEntryActionDropdownItemsProvider;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -83,21 +86,6 @@ public class TrashDisplayContext {
 
 		_trashHelper = (TrashHelper)request.getAttribute(
 			TrashWebKeys.TRASH_HELPER);
-	}
-
-	public List<DropdownItem> getActionDropdownItems() {
-		return new DropdownItemList() {
-			{
-				add(
-					dropdownItem -> {
-						dropdownItem.putData("action", "deleteSelectedEntries");
-						dropdownItem.setIcon("times-circle");
-						dropdownItem.setLabel(
-							LanguageUtil.get(_request, "delete"));
-						dropdownItem.setQuickAction(true);
-					});
-			}
-		};
 	}
 
 	public List<BreadcrumbEntry> getBaseModelBreadcrumbEntries()
@@ -176,14 +164,6 @@ public class TrashDisplayContext {
 		return ParamUtil.getLong(_request, "classPK");
 	}
 
-	public String getClearResultsURL() {
-		PortletURL clearResultsURL = getPortletURL();
-
-		clearResultsURL.setParameter("keywords", StringPool.BLANK);
-
-		return clearResultsURL.toString();
-	}
-
 	public List<BreadcrumbEntry> getContainerModelBreadcrumbEntries(
 			String className, long classPK, PortletURL containerModelURL)
 		throws Exception {
@@ -225,87 +205,6 @@ public class TrashDisplayContext {
 				false));
 
 		return breadcrumbEntries;
-	}
-
-	public String getContainerModelRedirectURL() {
-		if (Validator.isNotNull(_containerModelRedirectURL)) {
-			return _containerModelRedirectURL;
-		}
-
-		String redirect = ParamUtil.getString(_request, "redirect");
-
-		if (Validator.isNull(redirect)) {
-			PortletURL redirectURL = _liferayPortletResponse.createRenderURL();
-
-			redirectURL.setParameter("mvcPath", "/view_content.jsp");
-
-			long trashEntryId = getTrashEntryId();
-
-			long classNameId = getClassNameId();
-			long classPK = getClassPK();
-
-			if (trashEntryId > 0) {
-				redirectURL.setParameter(
-					"trashEntryId", String.valueOf(trashEntryId));
-			}
-			else if ((classNameId > 0) && (classPK > 0)) {
-				redirectURL.setParameter(
-					"classNameId", String.valueOf(classNameId));
-				redirectURL.setParameter("classPK", String.valueOf(classPK));
-			}
-
-			redirect = redirectURL.toString();
-		}
-
-		_containerModelRedirectURL = redirect;
-
-		return redirect;
-	}
-
-	public String getContentClearResultsURL() {
-		PortletURL clearResultsURL = getContentPortletURL();
-
-		clearResultsURL.setParameter("keywords", StringPool.BLANK);
-
-		return clearResultsURL.toString();
-	}
-
-	public List<DropdownItem> getContentFilterDropdownItems() {
-		return new DropdownItemList() {
-			{
-				addGroup(
-					dropdownGroupItem -> {
-						dropdownGroupItem.setDropdownItems(
-							_getContentFilterNavigationDropdownItems());
-						dropdownGroupItem.setLabel(
-							LanguageUtil.get(_request, "filter-by-navigation"));
-					});
-			}
-		};
-	}
-
-	public PortletURL getContentPortletURL() {
-		PortletURL portletURL = _liferayPortletResponse.createRenderURL();
-
-		String displayStyle = getDisplayStyle();
-
-		if (Validator.isNotNull(displayStyle)) {
-			portletURL.setParameter("displayStyle", displayStyle);
-		}
-
-		String keywords = ParamUtil.getString(_request, "keywords");
-
-		if (Validator.isNotNull(keywords)) {
-			portletURL.setParameter("keywords", keywords);
-		}
-
-		return portletURL;
-	}
-
-	public String getContentSearchActionURL() {
-		PortletURL searchActionURL = getContentPortletURL();
-
-		return searchActionURL.toString();
 	}
 
 	public String getDisplayStyle() {
@@ -416,28 +315,6 @@ public class TrashDisplayContext {
 		return _entrySearch;
 	}
 
-	public List<DropdownItem> getFilterDropdownItems() {
-		return new DropdownItemList() {
-			{
-				addGroup(
-					dropdownGroupItem -> {
-						dropdownGroupItem.setDropdownItems(
-							_getFilterNavigationDropdownItems());
-						dropdownGroupItem.setLabel(
-							LanguageUtil.get(_request, "filter-by-navigation"));
-					});
-
-				addGroup(
-					dropdownGroupItem -> {
-						dropdownGroupItem.setDropdownItems(
-							_getOrderByDropdownItems());
-						dropdownGroupItem.setLabel(
-							LanguageUtil.get(_request, "order-by"));
-					});
-			}
-		};
-	}
-
 	public List<NavigationItem> getInfoPanelNavigationItems() {
 		ThemeDisplay themeDisplay = (ThemeDisplay)_request.getAttribute(
 			WebKeys.THEME_DISPLAY);
@@ -473,21 +350,6 @@ public class TrashDisplayContext {
 		_navigation = ParamUtil.getString(_request, "navigation", "all");
 
 		return _navigation;
-	}
-
-	public List<NavigationItem> getNavigationItems() {
-		return new NavigationItemList() {
-			{
-				add(
-					navigationItem -> {
-						navigationItem.setActive(true);
-						navigationItem.setHref(
-							_liferayPortletResponse.createRenderURL());
-						navigationItem.setLabel(
-							LanguageUtil.get(_request, "entries"));
-					});
-			}
-		};
 	}
 
 	public String getOrderByCol() {
@@ -559,26 +421,79 @@ public class TrashDisplayContext {
 		return portletURL;
 	}
 
-	public String getSearchActionURL() {
-		PortletURL searchActionURL = getPortletURL();
+	public List<DropdownItem> getTrashContainerActionDropdownItems(
+			TrashedModel trashedModel)
+		throws Exception {
 
-		return searchActionURL.toString();
+		TrashContainerActionDropdownItemsProvider
+			trashContainerActionDropdownItemsProvider =
+				new TrashContainerActionDropdownItemsProvider(
+					_liferayPortletRequest, _liferayPortletResponse,
+					trashedModel);
+
+		return trashContainerActionDropdownItemsProvider.
+			getActionDropdownItems();
 	}
 
-	public String getSortingURL() {
-		PortletURL sortingURL = getPortletURL();
+	public List<DropdownItem> getTrashContainerActionDropdownItems(
+			TrashEntry trashEntry)
+		throws Exception {
 
-		sortingURL.setParameter(
-			"orderByType",
-			Objects.equals(getOrderByType(), "asc") ? "desc" : "asc");
+		TrashHandler trashHandler = TrashHandlerRegistryUtil.getTrashHandler(
+			trashEntry.getClassName());
 
-		return sortingURL.toString();
+		return getTrashContainerActionDropdownItems(
+			trashHandler.getTrashedModel(trashEntry.getClassPK()));
 	}
 
-	public int getTotalItems() throws PortalException {
-		EntrySearch entrySearch = getEntrySearch();
+	public SearchContainer getTrashContainerSearchContainer()
+		throws PortalException {
 
-		return entrySearch.getTotal();
+		if (_trashContainerSearchContainer != null) {
+			return _trashContainerSearchContainer;
+		}
+
+		ThemeDisplay themeDisplay = (ThemeDisplay)_request.getAttribute(
+			WebKeys.THEME_DISPLAY);
+
+		String emptyResultsMessage = LanguageUtil.format(
+			_request, "this-x-does-not-contain-an-entry",
+			ResourceActionsUtil.getModelResource(
+				themeDisplay.getLocale(), getClassName()),
+			false);
+
+		PortletURL iteratorURL = _liferayPortletResponse.createRenderURL();
+
+		iteratorURL.setParameter("mvcPath", "/view_content.jsp");
+		iteratorURL.setParameter(
+			"classNameId", String.valueOf(getClassNameId()));
+		iteratorURL.setParameter("classPK", String.valueOf(getClassPK()));
+
+		SearchContainer searchContainer = new SearchContainer(
+			_liferayPortletRequest, iteratorURL, null, emptyResultsMessage);
+
+		searchContainer.setDeltaConfigurable(false);
+
+		TrashHandler trashHandler = getTrashHandler();
+
+		List results = trashHandler.getTrashModelTrashedModels(
+			getClassPK(), searchContainer.getStart(), searchContainer.getEnd(),
+			searchContainer.getOrderByComparator());
+
+		searchContainer.setResults(results);
+
+		searchContainer.setTotal(
+			trashHandler.getTrashModelsCount(getClassPK()));
+
+		_trashContainerSearchContainer = searchContainer;
+
+		return _trashContainerSearchContainer;
+	}
+
+	public int getTrashContainerTotalItems() throws PortalException {
+		SearchContainer searchContainer = getTrashContainerSearchContainer();
+
+		return searchContainer.getTotal();
 	}
 
 	public TrashEntry getTrashEntry() {
@@ -604,6 +519,19 @@ public class TrashDisplayContext {
 		}
 
 		return _trashEntry;
+	}
+
+	public List<DropdownItem> getTrashEntryActionDropdownItems(
+			TrashEntry trashEntry)
+		throws Exception {
+
+		TrashEntryActionDropdownItemsProvider
+			trashEntryActionDropdownItemsProvider =
+				new TrashEntryActionDropdownItemsProvider(
+					_liferayPortletRequest, _liferayPortletResponse,
+					trashEntry);
+
+		return trashEntryActionDropdownItemsProvider.getActionDropdownItems();
 	}
 
 	public long getTrashEntryId() {
@@ -703,18 +631,6 @@ public class TrashDisplayContext {
 		return false;
 	}
 
-	public boolean isDisabledManagementBar() throws PortalException {
-		if (getTotalItems() > 0) {
-			return false;
-		}
-
-		if (Validator.isNotNull(getKeywords())) {
-			return false;
-		}
-
-		return true;
-	}
-
 	public boolean isIconView() {
 		if (Objects.equals(getDisplayStyle(), "icon")) {
 			return true;
@@ -797,78 +713,7 @@ public class TrashDisplayContext {
 		return breadcrumbEntries;
 	}
 
-	private List<DropdownItem> _getContentFilterNavigationDropdownItems() {
-		return new DropdownItemList() {
-			{
-				add(
-					dropdownItem -> {
-						dropdownItem.setActive(
-							Objects.equals(getNavigation(), "all"));
-						dropdownItem.setHref(
-							getPortletURL(), "navigation", "all");
-						dropdownItem.setLabel(
-							LanguageUtil.get(_request, "all"));
-					});
-			}
-		};
-	}
-
-	private List<DropdownItem> _getFilterNavigationDropdownItems() {
-		ThemeDisplay themeDisplay = (ThemeDisplay)_request.getAttribute(
-			WebKeys.THEME_DISPLAY);
-
-		return new DropdownItemList() {
-			{
-				add(
-					dropdownItem -> {
-						dropdownItem.setActive(
-							Objects.equals(getNavigation(), "all"));
-						dropdownItem.setHref(
-							getPortletURL(), "navigation", "all");
-						dropdownItem.setLabel(
-							LanguageUtil.get(_request, "all"));
-					});
-
-				for (TrashHandler trashHandler :
-						TrashHandlerRegistryUtil.getTrashHandlers()) {
-
-					add(
-						dropdownItem -> {
-							dropdownItem.setActive(
-								Objects.equals(
-									getNavigation(),
-									trashHandler.getClassName()));
-							dropdownItem.setHref(
-								getPortletURL(), "navigation",
-								trashHandler.getClassName());
-							dropdownItem.setLabel(
-								ResourceActionsUtil.getModelResource(
-									themeDisplay.getLocale(),
-									trashHandler.getClassName()));
-						});
-				}
-			}
-		};
-	}
-
-	private List<DropdownItem> _getOrderByDropdownItems() {
-		return new DropdownItemList() {
-			{
-				add(
-					dropdownItem -> {
-						dropdownItem.setActive(
-							Objects.equals(getOrderByCol(), "removed-date"));
-						dropdownItem.setHref(
-							getPortletURL(), "orderByCol", "removed-date");
-						dropdownItem.setLabel(
-							LanguageUtil.get(_request, "removed-date"));
-					});
-			}
-		};
-	}
-
 	private boolean _approximate;
-	private String _containerModelRedirectURL;
 	private String _displayStyle;
 	private EntrySearch _entrySearch;
 	private String _keywords;
@@ -878,6 +723,7 @@ public class TrashDisplayContext {
 	private String _orderByCol;
 	private String _orderByType;
 	private final HttpServletRequest _request;
+	private SearchContainer _trashContainerSearchContainer;
 	private TrashEntry _trashEntry;
 	private TrashHandler _trashHandler;
 	private final TrashHelper _trashHelper;

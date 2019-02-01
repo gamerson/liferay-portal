@@ -1,4 +1,6 @@
 Bundle-Name: Liferay Vocabulary Apio API
 Bundle-SymbolicName: com.liferay.vocabulary.apio.api
 Bundle-Version: 2.0.0
-Export-Package: com.liferay.vocabulary.apio.architect.identifier
+Export-Package:\
+	com.liferay.vocabulary.apio.architect.identifier,\
+	com.liferay.vocabulary.apio.architect.model

@@ -27,7 +27,12 @@ module.exports = {
 					{
 						loader: 'babel-loader'
 					},
-					'liferay-lang-key-dev-loader'
+					{
+						loader: 'liferay-lang-key-dev-loader',
+						options: {
+							path: '../segments-lang/src/main/resources/content/Language.properties'
+						}
+					}
 				]
 			},
 			{

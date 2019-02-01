@@ -1,0 +1,86 @@
+{namespace com.liferay.layout.content.page.editor.web.FragmentEntryLink}
+
+/**
+ * FragmentEntryLink
+ */
+{template .render}
+	{@param fragmentEntryLinkId: string}
+	{@param? _handleFragmentFocusOut: any}
+	{@param? _handleFragmentClick: any}
+	{@param? _handleFragmentHoverStart: any}
+	{@param? _handleFragmentKeyUp: any}
+	{@param? _handleFragmentRemoveButtonClick: any}
+	{@param? content: ?}
+	{@param? defaultEditorConfigurations: ?}
+	{@param? defaultLanguageId: ?}
+	{@param? editableValues: ?}
+	{@param? imageSelectorURL: ?}
+	{@param? languageId: string}
+	{@param? name: string}
+	{@param? portletNamespace: ?}
+	{@param? selectedMappingTypes: ?}
+	{@param? showControlBar: bool}
+	{@param? showMapping: bool}
+	{@param? spritemap: string}
+	{@param? store: ?}
+	{@param? styleModifier: string}
+
+	{let $wrapperClasses kind="text"}
+		fragments-editor__drag-source
+		{sp}fragments-editor__drag-source--fragment
+		{sp}fragments-editor__drop-target
+		{sp}fragments-editor__drop-target--fragment
+		{sp}fragments-editor__drop-target--sidebar-fragment
+		{sp}fragments-editor__drop-target--sidebar-widget
+		{sp}fragment-entry-link-wrapper
+		{sp}fragments-editor__topper-wrapper
+
+		{if $styleModifier}
+			{sp}{$styleModifier}
+		{/if}
+	{/let}
+
+	<div
+		class="{$wrapperClasses}"
+		data-drag-source-label="{$name ?: ''}"
+		data-fragment-entry-link-id="{$fragmentEntryLinkId}"
+		data-onfocusout="{$_handleFragmentFocusOut}"
+		data-onclick="{$_handleFragmentClick}"
+		data-onkeyup="{$_handleFragmentKeyUp}"
+		data-onmouseover="{$_handleFragmentHoverStart}"
+		ref="fragmentEntryLinkWrapper"
+		tabindex="0"
+	>
+		{if $showControlBar}
+			<nav class="fragments-editor__topper tbar">
+				<ul class="tbar-nav">
+					<li class="fragments-editor__drag-handler fragments-editor__topper__item fragments-editor__topper__title tbar-item tbar-item-expand">
+						{$name ?: ''}
+					</li>
+					<li class="fragments-editor__topper__item tbar-item">
+						<button class="btn btn-small btn-unstyled" data-onclick="{$_handleFragmentRemoveButtonClick}">
+							<svg class="fragments-editor__topper__icon lexicon-icon">
+								<use xlink:href="{$spritemap}#times-circle"></use>
+							</svg>
+						</button>
+					</li>
+				</ul>
+			</nav>
+		{/if}
+
+		{call com.liferay.layout.content.page.editor.web.FragmentEntryLinkContent.render}
+			{param content: $content /}
+			{param defaultEditorConfigurations: $defaultEditorConfigurations /}
+			{param defaultLanguageId: $defaultLanguageId /}
+			{param editableValues: $editableValues /}
+			{param fragmentEntryLinkId: $fragmentEntryLinkId /}
+			{param imageSelectorURL: $imageSelectorURL /}
+			{param languageId: $languageId /}
+			{param portletNamespace: $portletNamespace /}
+			{param selectedMappingTypes: $selectedMappingTypes /}
+			{param showMapping: $showMapping /}
+			{param spritemap: $spritemap /}
+			{param store: $store /}
+		{/call}
+	</div>
+{/template}

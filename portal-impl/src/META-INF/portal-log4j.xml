@@ -676,10 +676,6 @@
 		<priority value="INFO" />
 	</category>
 
-	<category name="com.liferay.portal.spring.context.PortletApplicationContext">
-		<priority value="ERROR" />
-	</category>
-
 	<category name="com.liferay.portal.spring.context.TunnelApplicationContext">
 		<priority value="ERROR" />
 	</category>
@@ -938,10 +934,6 @@
 
 	<category name="com.liferay.testhook">
 		<priority value="INFO" />
-	</category>
-
-	<category name="com.liferay.util.Encryptor">
-		<priority value="WARN" />
 	</category>
 
 	<category name="com.liferay.util.JNDIUtil">

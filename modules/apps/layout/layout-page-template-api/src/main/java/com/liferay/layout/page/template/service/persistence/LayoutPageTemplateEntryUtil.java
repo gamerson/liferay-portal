@@ -767,9 +767,9 @@ public class LayoutPageTemplateEntryUtil {
 	* @param layoutPrototypeId the layout prototype ID
 	* @return the matching layout page template entries
 	*/
-	public static List<LayoutPageTemplateEntry> findByLayoutPrototype(
+	public static List<LayoutPageTemplateEntry> findByLayoutPrototypeId(
 		long layoutPrototypeId) {
-		return getPersistence().findByLayoutPrototype(layoutPrototypeId);
+		return getPersistence().findByLayoutPrototypeId(layoutPrototypeId);
 	}
 
 	/**
@@ -784,10 +784,10 @@ public class LayoutPageTemplateEntryUtil {
 	* @param end the upper bound of the range of layout page template entries (not inclusive)
 	* @return the range of matching layout page template entries
 	*/
-	public static List<LayoutPageTemplateEntry> findByLayoutPrototype(
+	public static List<LayoutPageTemplateEntry> findByLayoutPrototypeId(
 		long layoutPrototypeId, int start, int end) {
 		return getPersistence()
-				   .findByLayoutPrototype(layoutPrototypeId, start, end);
+				   .findByLayoutPrototypeId(layoutPrototypeId, start, end);
 	}
 
 	/**
@@ -803,11 +803,11 @@ public class LayoutPageTemplateEntryUtil {
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of matching layout page template entries
 	*/
-	public static List<LayoutPageTemplateEntry> findByLayoutPrototype(
+	public static List<LayoutPageTemplateEntry> findByLayoutPrototypeId(
 		long layoutPrototypeId, int start, int end,
 		OrderByComparator<LayoutPageTemplateEntry> orderByComparator) {
 		return getPersistence()
-				   .findByLayoutPrototype(layoutPrototypeId, start, end,
+				   .findByLayoutPrototypeId(layoutPrototypeId, start, end,
 			orderByComparator);
 	}
 
@@ -825,12 +825,12 @@ public class LayoutPageTemplateEntryUtil {
 	* @param retrieveFromCache whether to retrieve from the finder cache
 	* @return the ordered range of matching layout page template entries
 	*/
-	public static List<LayoutPageTemplateEntry> findByLayoutPrototype(
+	public static List<LayoutPageTemplateEntry> findByLayoutPrototypeId(
 		long layoutPrototypeId, int start, int end,
 		OrderByComparator<LayoutPageTemplateEntry> orderByComparator,
 		boolean retrieveFromCache) {
 		return getPersistence()
-				   .findByLayoutPrototype(layoutPrototypeId, start, end,
+				   .findByLayoutPrototypeId(layoutPrototypeId, start, end,
 			orderByComparator, retrieveFromCache);
 	}
 
@@ -842,12 +842,12 @@ public class LayoutPageTemplateEntryUtil {
 	* @return the first matching layout page template entry
 	* @throws NoSuchPageTemplateEntryException if a matching layout page template entry could not be found
 	*/
-	public static LayoutPageTemplateEntry findByLayoutPrototype_First(
+	public static LayoutPageTemplateEntry findByLayoutPrototypeId_First(
 		long layoutPrototypeId,
 		OrderByComparator<LayoutPageTemplateEntry> orderByComparator)
 		throws com.liferay.layout.page.template.exception.NoSuchPageTemplateEntryException {
 		return getPersistence()
-				   .findByLayoutPrototype_First(layoutPrototypeId,
+				   .findByLayoutPrototypeId_First(layoutPrototypeId,
 			orderByComparator);
 	}
 
@@ -858,11 +858,11 @@ public class LayoutPageTemplateEntryUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching layout page template entry, or <code>null</code> if a matching layout page template entry could not be found
 	*/
-	public static LayoutPageTemplateEntry fetchByLayoutPrototype_First(
+	public static LayoutPageTemplateEntry fetchByLayoutPrototypeId_First(
 		long layoutPrototypeId,
 		OrderByComparator<LayoutPageTemplateEntry> orderByComparator) {
 		return getPersistence()
-				   .fetchByLayoutPrototype_First(layoutPrototypeId,
+				   .fetchByLayoutPrototypeId_First(layoutPrototypeId,
 			orderByComparator);
 	}
 
@@ -874,12 +874,12 @@ public class LayoutPageTemplateEntryUtil {
 	* @return the last matching layout page template entry
 	* @throws NoSuchPageTemplateEntryException if a matching layout page template entry could not be found
 	*/
-	public static LayoutPageTemplateEntry findByLayoutPrototype_Last(
+	public static LayoutPageTemplateEntry findByLayoutPrototypeId_Last(
 		long layoutPrototypeId,
 		OrderByComparator<LayoutPageTemplateEntry> orderByComparator)
 		throws com.liferay.layout.page.template.exception.NoSuchPageTemplateEntryException {
 		return getPersistence()
-				   .findByLayoutPrototype_Last(layoutPrototypeId,
+				   .findByLayoutPrototypeId_Last(layoutPrototypeId,
 			orderByComparator);
 	}
 
@@ -890,11 +890,11 @@ public class LayoutPageTemplateEntryUtil {
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching layout page template entry, or <code>null</code> if a matching layout page template entry could not be found
 	*/
-	public static LayoutPageTemplateEntry fetchByLayoutPrototype_Last(
+	public static LayoutPageTemplateEntry fetchByLayoutPrototypeId_Last(
 		long layoutPrototypeId,
 		OrderByComparator<LayoutPageTemplateEntry> orderByComparator) {
 		return getPersistence()
-				   .fetchByLayoutPrototype_Last(layoutPrototypeId,
+				   .fetchByLayoutPrototypeId_Last(layoutPrototypeId,
 			orderByComparator);
 	}
 
@@ -907,12 +907,12 @@ public class LayoutPageTemplateEntryUtil {
 	* @return the previous, current, and next layout page template entry
 	* @throws NoSuchPageTemplateEntryException if a layout page template entry with the primary key could not be found
 	*/
-	public static LayoutPageTemplateEntry[] findByLayoutPrototype_PrevAndNext(
+	public static LayoutPageTemplateEntry[] findByLayoutPrototypeId_PrevAndNext(
 		long layoutPageTemplateEntryId, long layoutPrototypeId,
 		OrderByComparator<LayoutPageTemplateEntry> orderByComparator)
 		throws com.liferay.layout.page.template.exception.NoSuchPageTemplateEntryException {
 		return getPersistence()
-				   .findByLayoutPrototype_PrevAndNext(layoutPageTemplateEntryId,
+				   .findByLayoutPrototypeId_PrevAndNext(layoutPageTemplateEntryId,
 			layoutPrototypeId, orderByComparator);
 	}
 
@@ -921,8 +921,8 @@ public class LayoutPageTemplateEntryUtil {
 	*
 	* @param layoutPrototypeId the layout prototype ID
 	*/
-	public static void removeByLayoutPrototype(long layoutPrototypeId) {
-		getPersistence().removeByLayoutPrototype(layoutPrototypeId);
+	public static void removeByLayoutPrototypeId(long layoutPrototypeId) {
+		getPersistence().removeByLayoutPrototypeId(layoutPrototypeId);
 	}
 
 	/**
@@ -931,8 +931,63 @@ public class LayoutPageTemplateEntryUtil {
 	* @param layoutPrototypeId the layout prototype ID
 	* @return the number of matching layout page template entries
 	*/
-	public static int countByLayoutPrototype(long layoutPrototypeId) {
-		return getPersistence().countByLayoutPrototype(layoutPrototypeId);
+	public static int countByLayoutPrototypeId(long layoutPrototypeId) {
+		return getPersistence().countByLayoutPrototypeId(layoutPrototypeId);
+	}
+
+	/**
+	* Returns the layout page template entry where plid = &#63; or throws a {@link NoSuchPageTemplateEntryException} if it could not be found.
+	*
+	* @param plid the plid
+	* @return the matching layout page template entry
+	* @throws NoSuchPageTemplateEntryException if a matching layout page template entry could not be found
+	*/
+	public static LayoutPageTemplateEntry findByPlid(long plid)
+		throws com.liferay.layout.page.template.exception.NoSuchPageTemplateEntryException {
+		return getPersistence().findByPlid(plid);
+	}
+
+	/**
+	* Returns the layout page template entry where plid = &#63; or returns <code>null</code> if it could not be found. Uses the finder cache.
+	*
+	* @param plid the plid
+	* @return the matching layout page template entry, or <code>null</code> if a matching layout page template entry could not be found
+	*/
+	public static LayoutPageTemplateEntry fetchByPlid(long plid) {
+		return getPersistence().fetchByPlid(plid);
+	}
+
+	/**
+	* Returns the layout page template entry where plid = &#63; or returns <code>null</code> if it could not be found, optionally using the finder cache.
+	*
+	* @param plid the plid
+	* @param retrieveFromCache whether to retrieve from the finder cache
+	* @return the matching layout page template entry, or <code>null</code> if a matching layout page template entry could not be found
+	*/
+	public static LayoutPageTemplateEntry fetchByPlid(long plid,
+		boolean retrieveFromCache) {
+		return getPersistence().fetchByPlid(plid, retrieveFromCache);
+	}
+
+	/**
+	* Removes the layout page template entry where plid = &#63; from the database.
+	*
+	* @param plid the plid
+	* @return the layout page template entry that was removed
+	*/
+	public static LayoutPageTemplateEntry removeByPlid(long plid)
+		throws com.liferay.layout.page.template.exception.NoSuchPageTemplateEntryException {
+		return getPersistence().removeByPlid(plid);
+	}
+
+	/**
+	* Returns the number of layout page template entries where plid = &#63;.
+	*
+	* @param plid the plid
+	* @return the number of matching layout page template entries
+	*/
+	public static int countByPlid(long plid) {
+		return getPersistence().countByPlid(plid);
 	}
 
 	/**

@@ -33,7 +33,7 @@ import com.liferay.apio.architect.sample.internal.identifier.RatingIdentifier;
 import com.liferay.apio.architect.sample.internal.resource.BlogPostingCommentNestedCollectionResource.BlogPostingCommentIdentifier;
 import com.liferay.apio.architect.sample.internal.resource.BlogSubscriptionRepresentable.BlogSubscriptionIdentifier;
 import com.liferay.apio.architect.sample.internal.resource.PersonCollectionResource.PersonIdentifier;
-import com.liferay.apio.architect.sample.internal.router.BlogPostingActionRouter;
+import com.liferay.apio.architect.sample.internal.router.BlogPostingActionRouterImpl;
 import com.liferay.apio.architect.sample.internal.type.BlogPosting;
 import com.liferay.apio.architect.sample.internal.type.Rating;
 import com.liferay.apio.architect.sample.internal.type.Review;
@@ -63,9 +63,9 @@ public class BlogPostingCollectionResource
 		CollectionRoutes.Builder<BlogPosting, Long> builder) {
 
 		return builder.addGetter(
-			_blogPostingActionRouter::retrievePage
+			_blogPostingActionRouterImpl::retrievePage
 		).addCreator(
-			_blogPostingActionRouter::create, Credentials.class,
+			_blogPostingActionRouterImpl::create, Credentials.class,
 			PermissionChecker::hasPermission,
 			BlogPostingCollectionResource::_buildBlogPostingForm
 		).build();
@@ -81,17 +81,17 @@ public class BlogPostingCollectionResource
 		ItemRoutes.Builder<BlogPosting, Long> builder) {
 
 		return builder.addGetter(
-			_blogPostingActionRouter::retrieve
+			_blogPostingActionRouterImpl::retrieve
 		).addCustomRoute(
-			_SUBSCRIBE_CUSTOM_ROUTE, _blogPostingActionRouter::subscribe,
+			_SUBSCRIBE_CUSTOM_ROUTE, _blogPostingActionRouterImpl::subscribe,
 			BlogSubscriptionIdentifier.class,
 			(credentials, id) -> hasPermission(credentials),
 			BlogSubscriptionRepresentable::buildForm
 		).addRemover(
-			_blogPostingActionRouter::remove, Credentials.class,
+			_blogPostingActionRouterImpl::remove, Credentials.class,
 			(credentials, id) -> hasPermission(credentials)
 		).addUpdater(
-			_blogPostingActionRouter::replace, Credentials.class,
+			_blogPostingActionRouterImpl::replace, Credentials.class,
 			(credentials, id) -> hasPermission(credentials),
 			BlogPostingCollectionResource::_buildBlogPostingForm
 		).build();
@@ -233,7 +233,7 @@ public class BlogPostingCollectionResource
 	};
 
 	@Reference
-	private BlogPostingActionRouter _blogPostingActionRouter;
+	private BlogPostingActionRouterImpl _blogPostingActionRouterImpl;
 
 	private static class BlogPostingForm implements BlogPosting {
 

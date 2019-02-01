@@ -32,4 +32,8 @@
 			font-style: italic;
 		}
 	}
+
+	&.editing {
+		flex: 1;
+	}
 }

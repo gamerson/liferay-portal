@@ -14,8 +14,12 @@
 
 package com.liferay.layout.type.controller.content.internal.controller;
 
+import com.liferay.fragment.contributor.FragmentCollectionContributorTracker;
 import com.liferay.item.selector.ItemSelector;
 import com.liferay.layout.constants.LayoutConstants;
+import com.liferay.layout.content.page.editor.constants.ContentPageEditorWebKeys;
+import com.liferay.layout.page.template.model.LayoutPageTemplateEntry;
+import com.liferay.layout.page.template.service.LayoutPageTemplateEntryLocalService;
 import com.liferay.layout.type.controller.content.internal.constants.ContentLayoutTypeControllerWebKeys;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.io.unsync.UnsyncStringWriter;
@@ -90,6 +94,11 @@ public class ContentLayoutTypeController extends BaseLayoutTypeControllerImpl {
 
 		if (layoutMode.equals(Constants.EDIT)) {
 			request.setAttribute(
+				ContentPageEditorWebKeys.
+					FRAGMENT_COLLECTION_CONTRIBUTOR_TRACKER,
+				_fragmentCollectionContributorTracker);
+
+			request.setAttribute(
 				ContentLayoutTypeControllerWebKeys.ITEM_SELECTOR,
 				_itemSelector);
 		}
@@ -115,6 +124,28 @@ public class ContentLayoutTypeController extends BaseLayoutTypeControllerImpl {
 			RequestDispatcher.INCLUDE_SERVLET_PATH);
 
 		try {
+			LayoutPageTemplateEntry layoutPageTemplateEntry =
+				_layoutPageTemplateEntryLocalService.
+					fetchLayoutPageTemplateEntryByPlid(layout.getPlid());
+
+			if (layoutPageTemplateEntry != null) {
+				request.setAttribute(
+					ContentPageEditorWebKeys.CLASS_NAME,
+					LayoutPageTemplateEntry.class.getName());
+
+				request.setAttribute(
+					ContentPageEditorWebKeys.CLASS_PK,
+					layoutPageTemplateEntry.getLayoutPageTemplateEntryId());
+			}
+			else {
+				request.setAttribute(
+					ContentPageEditorWebKeys.CLASS_NAME,
+					Layout.class.getName());
+
+				request.setAttribute(
+					ContentPageEditorWebKeys.CLASS_PK, layout.getPlid());
+			}
+
 			addAttributes(request);
 
 			requestDispatcher.include(request, servletResponse);
@@ -206,6 +237,14 @@ public class ContentLayoutTypeController extends BaseLayoutTypeControllerImpl {
 	private static final String _VIEW_PAGE = "/layout/view/content.jsp";
 
 	@Reference
+	private FragmentCollectionContributorTracker
+		_fragmentCollectionContributorTracker;
+
+	@Reference
 	private ItemSelector _itemSelector;
+
+	@Reference
+	private LayoutPageTemplateEntryLocalService
+		_layoutPageTemplateEntryLocalService;
 
 }

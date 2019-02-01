@@ -14,7 +14,7 @@
 
 package com.liferay.portal.tools.java.parser;
 
-import com.liferay.portal.kernel.util.StringBundler;
+import com.liferay.petra.string.StringBundler;
 
 /**
  * @author Hugo Huijser
@@ -23,10 +23,6 @@ public class JavaIfStatement extends BaseJavaTerm {
 
 	public JavaIfStatement(JavaExpression conditionJavaExpression) {
 		_conditionJavaExpression = conditionJavaExpression;
-	}
-
-	public void setExecutionJavaTerm(JavaTerm executionJavaTerm) {
-		_executionJavaTerm = executionJavaTerm;
 	}
 
 	@Override
@@ -39,26 +35,13 @@ public class JavaIfStatement extends BaseJavaTerm {
 
 		indent = "\t" + indent;
 
-		if (_executionJavaTerm == null) {
-			append(
-				sb, _conditionJavaExpression, indent, prefix + "if (",
-				")" + suffix, maxLineLength);
-
-			return sb.toString();
-		}
-
-		indent = append(
-			sb, _conditionJavaExpression, indent, prefix + "if (", ") ",
-			maxLineLength);
-
 		append(
-			sb, _executionJavaTerm, indent, "", _executionJavaTerm.getSuffix(),
+			sb, _conditionJavaExpression, indent, prefix + "if (", ")" + suffix,
 			maxLineLength);
 
 		return sb.toString();
 	}
 
 	private final JavaExpression _conditionJavaExpression;
-	private JavaTerm _executionJavaTerm;
 
 }

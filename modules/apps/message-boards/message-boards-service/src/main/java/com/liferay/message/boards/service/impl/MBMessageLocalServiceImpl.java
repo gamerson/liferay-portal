@@ -1199,13 +1199,6 @@ public class MBMessageLocalServiceImpl extends MBMessageLocalServiceBaseImpl {
 	}
 
 	@Override
-	public MBMessage getLastThreadMessage(long threadId, int status)
-		throws PortalException {
-
-		return mbMessagePersistence.findByT_S_Last(threadId, status, null);
-	}
-
-	@Override
 	public MBMessage getMessage(long messageId) throws PortalException {
 		return mbMessagePersistence.findByPrimaryKey(messageId);
 	}
@@ -2193,7 +2186,10 @@ public class MBMessageLocalServiceImpl extends MBMessageLocalServiceBaseImpl {
 		String className = (String)serviceContext.getAttribute("className");
 		long classPK = ParamUtil.getLong(serviceContext, "classPK");
 
-		subscriptionSender.addPersistedSubscribers(className, classPK);
+		subscriptionSender.addPersistedSubscribers(
+			com.liferay.message.boards.util.MBUtil.getSubscriptionClassName(
+				className),
+			classPK);
 
 		subscriptionSender.flushNotificationsAsync();
 	}

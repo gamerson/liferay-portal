@@ -21,6 +21,7 @@ import com.liferay.change.tracking.service.CTEntryLocalService;
 import com.liferay.change.tracking.service.persistence.CTCollectionPersistence;
 import com.liferay.change.tracking.service.persistence.CTEntryFinder;
 import com.liferay.change.tracking.service.persistence.CTEntryPersistence;
+import com.liferay.change.tracking.service.persistence.CTProcessPersistence;
 
 import com.liferay.portal.kernel.bean.BeanReference;
 import com.liferay.portal.kernel.dao.db.DB;
@@ -540,6 +541,44 @@ public abstract class CTEntryLocalServiceBaseImpl extends BaseLocalServiceImpl
 	}
 
 	/**
+	 * Returns the ct process local service.
+	 *
+	 * @return the ct process local service
+	 */
+	public com.liferay.change.tracking.service.CTProcessLocalService getCTProcessLocalService() {
+		return ctProcessLocalService;
+	}
+
+	/**
+	 * Sets the ct process local service.
+	 *
+	 * @param ctProcessLocalService the ct process local service
+	 */
+	public void setCTProcessLocalService(
+		com.liferay.change.tracking.service.CTProcessLocalService ctProcessLocalService) {
+		this.ctProcessLocalService = ctProcessLocalService;
+	}
+
+	/**
+	 * Returns the ct process persistence.
+	 *
+	 * @return the ct process persistence
+	 */
+	public CTProcessPersistence getCTProcessPersistence() {
+		return ctProcessPersistence;
+	}
+
+	/**
+	 * Sets the ct process persistence.
+	 *
+	 * @param ctProcessPersistence the ct process persistence
+	 */
+	public void setCTProcessPersistence(
+		CTProcessPersistence ctProcessPersistence) {
+		this.ctProcessPersistence = ctProcessPersistence;
+	}
+
+	/**
 	 * Returns the counter local service.
 	 *
 	 * @return the counter local service
@@ -714,6 +753,10 @@ public abstract class CTEntryLocalServiceBaseImpl extends BaseLocalServiceImpl
 	protected CTEntryPersistence ctEntryPersistence;
 	@BeanReference(type = CTEntryFinder.class)
 	protected CTEntryFinder ctEntryFinder;
+	@BeanReference(type = com.liferay.change.tracking.service.CTProcessLocalService.class)
+	protected com.liferay.change.tracking.service.CTProcessLocalService ctProcessLocalService;
+	@BeanReference(type = CTProcessPersistence.class)
+	protected CTProcessPersistence ctProcessPersistence;
 	@ServiceReference(type = com.liferay.counter.kernel.service.CounterLocalService.class)
 	protected com.liferay.counter.kernel.service.CounterLocalService counterLocalService;
 	@ServiceReference(type = com.liferay.portal.kernel.service.ClassNameLocalService.class)

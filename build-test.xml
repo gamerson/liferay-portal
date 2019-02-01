@@ -428,6 +428,33 @@ jdbc.counter.connectionProperties=oracle.jdbc.ReadTimeout=0;oracle.net.CONNECT_T
 		</sequential>
 	</macrodef>
 
+	<macrodef name="get-java-jdk-bundle-type">
+		<attribute default="" name="test.batch.name" />
+
+		<sequential>
+			<local name="test.batch.name" />
+
+			<condition else="@{test.batch.name}" property="test.batch.name" value="${env.TEST_BATCH_NAME}">
+				<contains string="@{test.batch.name}" substring="{test.batch.name}" />
+			</condition>
+
+			<var name="java.jdk.bundle.type" unset="true" />
+
+			<propertyregex
+				input="${test.batch.name}"
+				property="java.jdk.bundle.type"
+				regexp="-jdk[0-9]+_(\w+)"
+				select="\1"
+			/>
+
+			<condition property="java.jdk.bundle.type" value="oracle">
+				<matches pattern="-jdk[0-9]+$" string="${test.batch.name}" />
+			</condition>
+
+			<property name="java.jdk.bundle.type" value="oracle" />
+		</sequential>
+	</macrodef>
+
 	<macrodef name="get-java-jdk-bundle-version">
 		<attribute default="" name="test.batch.name" />
 
@@ -440,66 +467,38 @@ jdbc.counter.connectionProperties=oracle.jdbc.ReadTimeout=0;oracle.net.CONNECT_T
 
 			<var name="java.jdk.bundle.version" unset="true" />
 
-			<if>
-				<contains string="${test.batch.name}" substring="-jdk7" />
-				<then>
-					<property name="java.jdk.bundle.version" value="1.7" />
-				</then>
-				<elseif>
-					<contains string="${test.batch.name}" substring="-jdk8" />
-					<then>
-						<property name="java.jdk.bundle.version" value="1.8" />
-					</then>
-				</elseif>
-				<elseif>
-					<contains string="${test.batch.name}" substring="-open11" />
-					<then>
-						<property name="java.jdk.bundle.version" value="1.11" />
-					</then>
-				</elseif>
-			</if>
+			<propertyregex
+				input="${test.batch.name}"
+				property="java.jdk.bundle.version"
+				regexp="-jdk([0-9]+)(_(adopt|open|oracle|redhat|zulu))?"
+				select="1.\1"
+			/>
 
 			<property name="java.jdk.bundle.version" value="${ant.java.version}" />
 		</sequential>
 	</macrodef>
 
 	<macrodef name="get-java-jdk-home">
-		<attribute default="x64" name="architecture" />
+		<attribute default="${java.jdk.architecture}" name="architecture" />
+		<attribute default="oracle" name="type" />
 		<attribute default="${ant.java.version}" name="version" />
 
 		<sequential>
 			<var name="java.jdk.home" unset="true" />
 
-			<if>
-				<and>
-					<equals arg1="@{version}" arg2="1.7" />
-					<isset property="java.jdk.7.@{architecture}.home" />
-				</and>
-				<then>
-					<property name="java.jdk.home" value="${java.jdk.7.@{architecture}.home}" />
-				</then>
-				<elseif>
-					<and>
-						<equals arg1="@{version}" arg2="1.8" />
-						<isset property="java.jdk.8.@{architecture}.home" />
-					</and>
-					<then>
-						<property name="java.jdk.home" value="${java.jdk.8.@{architecture}.home}" />
-					</then>
-				</elseif>
-				<elseif>
-					<and>
-						<equals arg1="@{version}" arg2="1.11" />
-						<isset property="java.jdk.11.@{architecture}.home" />
-					</and>
-					<then>
-						<property name="java.jdk.home" value="${java.jdk.11.@{architecture}.home}" />
-					</then>
-				</elseif>
-				<else>
-					<property name="java.jdk.home" value="${java.home}" />
-				</else>
-			</if>
+			<local name="version" />
+
+			<propertyregex
+				defaultValue="@{version}"
+				input="@{version}"
+				property="version"
+				regexp="1\.([0-9]+)"
+				select="\1"
+			/>
+
+			<propertycopy from="java.jdk.home[${version}][@{architecture}][@{type}]" property="java.jdk.home" silent="true" />
+
+			<property name="java.jdk.home" value="${java.home}" />
 
 			<if>
 				<not>
@@ -508,7 +507,7 @@ jdbc.counter.connectionProperties=oracle.jdbc.ReadTimeout=0;oracle.net.CONNECT_T
 				<then>
 					<var name="java.jdk.home" unset="true" />
 
-					<var name="java.jdk.home" value="${java.home}" />
+					<property name="java.jdk.home" value="${java.home}" />
 				</then>
 			</if>
 		</sequential>
@@ -3335,6 +3334,7 @@ go</echo>
 						<equals arg1="@{liferay.portal.bundle}" arg2="7.0.10.7" />
 						<equals arg1="@{liferay.portal.bundle}" arg2="7.0.10.8" />
 						<equals arg1="@{liferay.portal.bundle}" arg2="7.0.10.9" />
+						<equals arg1="@{liferay.portal.bundle}" arg2="7.0.10.10" />
 					</or>
 					<then>
 						<var name="app.server.tomcat.version" value="8.0.32" />
@@ -3923,7 +3923,9 @@ org.apache.catalina.startup.ClassLoaderFactory.level=INFO]]>
 
 					<get-java-jdk-bundle-version test.batch.name="${test.batch.name}" />
 
-					<get-java-jdk-home version="${java.jdk.bundle.version}" />
+					<get-java-jdk-bundle-type test.batch.name="${test.batch.name}" />
+
+					<get-java-jdk-home type="${java.jdk.bundle.type}" version="${java.jdk.bundle.version}" />
 
 					<if>
 						<equals arg1="${test.ant.launched.by.selenium}" arg2="true" />
@@ -4111,7 +4113,9 @@ org.apache.catalina.startup.ClassLoaderFactory.level=INFO]]>
 
 			<get-java-jdk-bundle-version test.batch.name="${test.batch.name}" />
 
-			<get-java-jdk-home version="${java.jdk.bundle.version}" />
+			<get-java-jdk-bundle-type test.batch.name="${test.batch.name}" />
+
+			<get-java-jdk-home type="${java.jdk.bundle.type}" version="${java.jdk.bundle.version}" />
 
 			<parallel>
 				<daemons>
@@ -11099,12 +11103,38 @@ module.framework.properties.blacklist.portal.profile.names=${blacklist.portal.pr
 		<uninstall-patches patching.tool.dir="${patching.tool.dir}" />
 	</target>
 
+	<target name="update-osgi-module-configuration">
+		<local name="osgi.configs.dir" />
+
+		<condition else="${app.server.parent.dir}-${install.patch.cluster.node.index}/osgi/configs" property="osgi.configs.dir" value="${app.server.parent.dir}/osgi/configs">
+			<or>
+				<not>
+					<isset property="install.patch.cluster.node.index" />
+				</not>
+				<equals arg1="${install.patch.cluster.node.index}" arg2="0" />
+			</or>
+		</condition>
+
+		<get-testcase-property property.name="osgi.module.configurations" />
+		<get-testcase-property property.name="osgi.module.configuration.file.names" />
+
+		<replace
+			file="${osgi.configs.dir}/${osgi.module.configuration.file.names}"
+			token="${osgi.module.configurations}"
+			value="${update.configuration}"
+		/>
+
+		<echo message="osgi.module.configurations= ${update.configuration}" />
+	</target>
+
 	<target name="upgrade-legacy-database">
 		<prepare-database-upgrade-configuration />
 
 		<get-java-jdk-bundle-version test.batch.name="${test.batch.name}" />
 
-		<get-java-jdk-home version="${java.jdk.bundle.version}" />
+		<get-java-jdk-bundle-type test.batch.name="${test.batch.name}" />
+
+		<get-java-jdk-home type="${java.jdk.bundle.type}" version="${java.jdk.bundle.version}" />
 
 		<trycatch property="upgrade.error">
 			<try>

@@ -74,8 +74,6 @@ public class SiteNavigationMenuItemStagedModelDataHandler
 				portletDataContext, siteNavigationMenuItemElement,
 				siteNavigationMenuItem)) {
 
-			siteNavigationMenuItemElement.detach();
-
 			return;
 		}
 

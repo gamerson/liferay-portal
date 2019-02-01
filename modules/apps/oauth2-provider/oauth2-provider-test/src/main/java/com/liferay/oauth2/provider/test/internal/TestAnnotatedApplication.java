@@ -17,6 +17,9 @@ package com.liferay.oauth2.provider.test.internal;
 import com.liferay.oauth2.provider.scope.RequiresNoScope;
 import com.liferay.oauth2.provider.scope.RequiresScope;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 import java.util.Collections;
 import java.util.Set;
 
@@ -35,7 +38,7 @@ public class TestAnnotatedApplication extends Application {
 	}
 
 	@GET
-	@RequiresScope("everything.read")
+	@RequestScopeRead
 	public String getString() {
 		return "everything.read";
 	}
@@ -45,6 +48,11 @@ public class TestAnnotatedApplication extends Application {
 	@RequiresNoScope
 	public String getStringNoScope() {
 		return "no-scope";
+	}
+
+	@RequiresScope("everything.read")
+	@Retention(RetentionPolicy.RUNTIME)
+	public static @interface RequestScopeRead {
 	}
 
 }

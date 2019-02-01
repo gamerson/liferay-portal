@@ -14,103 +14,190 @@
 
 package com.liferay.arquillian.extension.junit.bridge.container.remote;
 
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.io.IOException;
+import java.io.InputStream;
+
+import java.net.URI;
+import java.net.URL;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 import javax.management.MBeanServerConnection;
-import javax.management.MalformedObjectNameException;
+import javax.management.MBeanServerInvocationHandler;
 import javax.management.ObjectName;
+import javax.management.remote.JMXConnector;
+import javax.management.remote.JMXConnectorFactory;
+import javax.management.remote.JMXServiceURL;
 
-import org.jboss.arquillian.container.osgi.jmx.JMXDeployableContainer;
+import org.jboss.arquillian.container.spi.client.container.DeployableContainer;
 import org.jboss.arquillian.container.spi.client.container.DeploymentException;
 import org.jboss.arquillian.container.spi.client.container.LifecycleException;
+import org.jboss.arquillian.container.spi.client.protocol.ProtocolDescription;
 import org.jboss.arquillian.container.spi.client.protocol.metadata.HTTPContext;
+import org.jboss.arquillian.container.spi.client.protocol.metadata.JMXContext;
 import org.jboss.arquillian.container.spi.client.protocol.metadata.ProtocolMetaData;
 import org.jboss.shrinkwrap.api.Archive;
+import org.jboss.shrinkwrap.api.exporter.ZipExporter;
+import org.jboss.shrinkwrap.descriptor.api.Descriptor;
 
-import org.osgi.jmx.framework.BundleStateMBean;
 import org.osgi.jmx.framework.FrameworkMBean;
-import org.osgi.jmx.framework.ServiceStateMBean;
 
 /**
  * @author Preston Crary
  */
 public class LiferayRemoteDeployableContainer
-	<T extends LiferayRemoteContainerConfiguration>
-		extends JMXDeployableContainer<T> {
+	implements DeployableContainer<DefaultContainerConfiguration> {
 
 	@Override
 	public ProtocolMetaData deploy(Archive<?> archive)
 		throws DeploymentException {
 
-		ProtocolMetaData protocolMetaData = super.deploy(archive);
+		try {
+			long bundleId = _installBundle(archive);
+
+			_frameworkMBean.startBundle(bundleId);
+
+			_deployedBundleIds.put(archive.getName(), bundleId);
+		}
+		catch (Exception e) {
+			throw new DeploymentException(
+				"Unable to deploy " + archive.getName(), e);
+		}
+
+		ProtocolMetaData protocolMetaData = new ProtocolMetaData();
+
+		protocolMetaData.addContext(new JMXContext(_mBeanServerConnection));
 
 		protocolMetaData.addContext(
 			new HTTPContext(
-				_liferayRemoteContainerConfiguration.getHttpHost(),
-				_liferayRemoteContainerConfiguration.getHttpPort()));
+				_LIFERAY_DEFAULT_HTTP_HOST, _LIFERAY_DEFAULT_HTTP_PORT));
 
 		return protocolMetaData;
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public Class<T> getConfigurationClass() {
-		return (Class<T>)LiferayRemoteContainerConfiguration.class;
+	public void deploy(Descriptor descriptor) {
 	}
 
 	@Override
-	public void setup(T configuration) {
-		_liferayRemoteContainerConfiguration = configuration;
+	public Class<DefaultContainerConfiguration> getConfigurationClass() {
+		return DefaultContainerConfiguration.class;
+	}
 
-		super.setup(configuration);
+	@Override
+	public ProtocolDescription getDefaultProtocol() {
+		return _protocolDescription;
+	}
+
+	@Override
+	public void setup(
+		DefaultContainerConfiguration defaultContainerConfiguration) {
 	}
 
 	@Override
 	public void start() throws LifecycleException {
 		try {
-			MBeanServerConnection mBeanServer = getMBeanServerConnection(
-				30, TimeUnit.SECONDS);
+			JMXConnector jmxConnector = JMXConnectorFactory.connect(
+				_liferayJMXServiceURL, _liferayEnv);
 
-			mbeanServerInstance.set(mBeanServer);
+			_mBeanServerConnection = jmxConnector.getMBeanServerConnection();
 
-			frameworkMBean = getMBeanProxy(
-				mBeanServer, _frameworkObjectName, FrameworkMBean.class, 30,
-				TimeUnit.SECONDS);
+			Set<ObjectName> names = _mBeanServerConnection.queryNames(
+				_frameworkObjectName, null);
 
-			bundleStateMBean = getMBeanProxy(
-				mBeanServer, _bundleStateObjectName, BundleStateMBean.class, 30,
-				TimeUnit.SECONDS);
+			Iterator<ObjectName> iterator = names.iterator();
 
-			serviceStateMBean = getMBeanProxy(
-				mBeanServer, _serviceStateObjectName, ServiceStateMBean.class,
-				30, TimeUnit.SECONDS);
+			_frameworkMBean = MBeanServerInvocationHandler.newProxyInstance(
+				_mBeanServerConnection, iterator.next(), FrameworkMBean.class,
+				false);
 		}
-		catch (TimeoutException te) {
-			throw new LifecycleException("JMX timeout", te);
+		catch (IOException ioe) {
+			throw new LifecycleException("Unable to start", ioe);
 		}
 	}
 
-	private static final ObjectName _bundleStateObjectName;
+	@Override
+	public void stop() {
+	}
+
+	@Override
+	public void undeploy(Archive<?> archive) throws DeploymentException {
+		long bundleId = _deployedBundleIds.remove(archive.getName());
+
+		if (bundleId == 0) {
+			return;
+		}
+
+		try {
+			_frameworkMBean.uninstallBundle(bundleId);
+		}
+		catch (IOException ioe) {
+			throw new DeploymentException(
+				"Unable to uninstall bundle " + bundleId, ioe);
+		}
+	}
+
+	@Override
+	public void undeploy(Descriptor descriptor) {
+	}
+
+	private long _installBundle(Archive<?> archive) throws Exception {
+		Path tempFilePath = Files.createTempFile(null, ".jar");
+
+		ZipExporter zipExporter = archive.as(ZipExporter.class);
+
+		try (InputStream inputStream = zipExporter.exportAsInputStream()) {
+			Files.copy(
+				inputStream, tempFilePath, StandardCopyOption.REPLACE_EXISTING);
+		}
+
+		URI uri = tempFilePath.toUri();
+
+		URL url = uri.toURL();
+
+		try {
+			return _frameworkMBean.installBundleFromURL(
+				archive.getName(), url.toExternalForm());
+		}
+		finally {
+			Files.delete(tempFilePath);
+		}
+	}
+
+	private static final String _LIFERAY_DEFAULT_HTTP_HOST = "localhost";
+
+	private static final int _LIFERAY_DEFAULT_HTTP_PORT = 8080;
+
 	private static final ObjectName _frameworkObjectName;
-	private static final ObjectName _serviceStateObjectName;
+	private static final Map<String, String[]> _liferayEnv =
+		Collections.singletonMap(
+			JMXConnector.CREDENTIALS, new String[] {"", ""});
+	private static final JMXServiceURL _liferayJMXServiceURL;
+	private static final ProtocolDescription _protocolDescription =
+		new ProtocolDescription("jmx-osgi");
 
 	static {
 		try {
-			_bundleStateObjectName = new ObjectName(
-				"osgi.core:type=bundleState,*");
-
 			_frameworkObjectName = new ObjectName("osgi.core:type=framework,*");
 
-			_serviceStateObjectName = new ObjectName(
-				"osgi.core:type=serviceState,*");
+			_liferayJMXServiceURL = new JMXServiceURL(
+				"service:jmx:rmi:///jndi/rmi://localhost:8099/jmxrmi");
 		}
-		catch (MalformedObjectNameException mone) {
-			throw new ExceptionInInitializerError(mone);
+		catch (Exception e) {
+			throw new ExceptionInInitializerError(e);
 		}
 	}
 
-	private LiferayRemoteContainerConfiguration
-		_liferayRemoteContainerConfiguration;
+	private final Map<String, Long> _deployedBundleIds = new HashMap<>();
+	private FrameworkMBean _frameworkMBean;
+	private MBeanServerConnection _mBeanServerConnection;
 
 }

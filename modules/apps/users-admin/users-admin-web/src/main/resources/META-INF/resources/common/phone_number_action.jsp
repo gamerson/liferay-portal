@@ -17,8 +17,8 @@
 <%@ include file="/init.jsp" %>
 
 <%
+String className = (String)request.getAttribute("contact_information.jsp-className");
 long classPK = (long)request.getAttribute("contact_information.jsp-classPK");
-String mvcActionPath = (String)request.getAttribute("contact_information.jsp-mvcActionPath");
 
 ResultRow row = (ResultRow)request.getAttribute(WebKeys.SEARCH_CONTAINER_RESULT_ROW);
 
@@ -34,28 +34,31 @@ long phoneId = phone.getPhoneId();
 	message="<%= StringPool.BLANK %>"
 	showWhenSingleIcon="<%= true %>"
 >
+
+	<%
+	PortletURL editURL = liferayPortletResponse.createRenderURL();
+
+	editURL.setParameter("mvcPath", "/common/edit_phone_number.jsp");
+	editURL.setParameter("redirect", currentURL);
+	editURL.setParameter("className", className);
+	editURL.setParameter("classPK", String.valueOf(classPK));
+	editURL.setParameter("primaryKey", String.valueOf(phoneId));
+	%>
+
 	<liferay-ui:icon
-		cssClass="modify-phone-number-link"
-		data="<%=
-			new HashMap<String, Object>() {
-				{
-					put("title", LanguageUtil.get(request, "edit-phone-number"));
-					put("primary-key", String.valueOf(phoneId));
-				}
-			}
-		%>"
 		message="edit"
-		url="javascript:;"
+		url="<%= editURL.toString() %>"
 	/>
 
 	<%
 	PortletURL portletURL = renderResponse.createActionURL();
 
-	portletURL.setParameter(ActionRequest.ACTION_NAME, mvcActionPath);
+	portletURL.setParameter(ActionRequest.ACTION_NAME, "/users_admin/update_contact_information");
+	portletURL.setParameter("redirect", currentURL);
+	portletURL.setParameter("className", className);
 	portletURL.setParameter("classPK", String.valueOf(classPK));
 	portletURL.setParameter("listType", ListTypeConstants.PHONE);
 	portletURL.setParameter("primaryKey", String.valueOf(phoneId));
-	portletURL.setParameter("redirect", currentURL);
 
 	PortletURL makePrimaryURL = PortletURLUtil.clone(portletURL, renderResponse);
 

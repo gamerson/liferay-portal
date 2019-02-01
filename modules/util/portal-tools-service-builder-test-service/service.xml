@@ -50,7 +50,7 @@
 
 		<column name="lvEntryId" primary="true" type="long" />
 
-		<!-- Other fields -->
+		<!-- Group instance -->
 
 		<column name="groupId" type="long" />
 
@@ -67,13 +67,28 @@
 			<finder-column arrayable-operator="OR" arrayable-pagination="true" name="groupId" />
 		</finder>
 	</entity>
+	<entity local-service="true" name="UADPartialEntry">
+
+		<!-- PK fields -->
+
+		<column name="uadPartialEntryId" primary="true" type="long" />
+
+		<!-- Audit fields -->
+
+		<column name="userId" type="long" />
+		<column name="userName" type="String" />
+
+		<!-- Other fields -->
+
+		<column name="message" type="String" uad-nonanonymizable="true" />
+	</entity>
 	<entity local-service="true" name="VersionedEntry" remote-service="false" versioned="true">
 
 		<!-- PK fields -->
 
 		<column name="versionedEntryId" primary="true" type="long" />
 
-		<!-- Other fields -->
+		<!-- Group instance -->
 
 		<column name="groupId" type="long" />
 

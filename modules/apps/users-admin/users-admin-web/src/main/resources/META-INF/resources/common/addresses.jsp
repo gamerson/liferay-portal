@@ -19,7 +19,6 @@
 <%
 String className = (String)request.getAttribute("contact_information.jsp-className");
 long classPK = (long)request.getAttribute("contact_information.jsp-classPK");
-String contactInformationRequireJS = (String)request.getAttribute("contact_information.jsp-contactInformationRequireJS");
 
 String emptyResultsMessage = ParamUtil.getString(request, "emptyResultsMessage");
 
@@ -33,36 +32,26 @@ List<Address> addresses = AddressServiceUtil.getAddresses(className, classPK);
 		</span>
 		<span class="autofit-col">
 			<span class="heading-end">
+
+				<%
+				PortletURL editURL = liferayPortletResponse.createRenderURL();
+
+				editURL.setParameter("mvcPath", "/common/edit_address.jsp");
+				editURL.setParameter("redirect", currentURL);
+				editURL.setParameter("className", className);
+				editURL.setParameter("classPK", String.valueOf(classPK));
+				%>
+
 				<liferay-ui:icon
-					cssClass="modify-address-link"
-					data="<%=
-						new HashMap<String, Object>() {
-							{
-								put("title", LanguageUtil.get(request, "add-address"));
-							}
-						}
-					%>"
 					label="<%= true %>"
-					linkCssClass="btn btn-secondary btn-sm"
+					linkCssClass="add-address-link btn btn-secondary btn-sm"
 					message="add"
-					url="javascript:;"
+					url="<%= editURL.toString() %>"
 				/>
 			</span>
 		</span>
 	</h2>
 </div>
-
-<liferay-ui:error-marker
-	key="<%= WebKeys.ERROR_SECTION %>"
-	value="services"
-/>
-
-<liferay-ui:error exception="<%= AddressCityException.class %>" message="please-enter-a-valid-city" />
-<liferay-ui:error exception="<%= AddressStreetException.class %>" message="please-enter-a-valid-street" />
-<liferay-ui:error exception="<%= AddressZipException.class %>" message="please-enter-a-valid-postal-code" />
-<liferay-ui:error exception="<%= NoSuchCountryException.class %>" message="please-select-a-country" />
-<liferay-ui:error key="<%= NoSuchListTypeException.class.getName() + className + ListTypeConstants.ADDRESS %>" message="please-select-a-type" />
-<liferay-ui:error exception="<%= NoSuchRegionException.class %>" message="please-select-a-region" />
 
 <c:if test="<%= addresses.isEmpty() %>">
 	<div class="contact-information-empty-results-message-wrapper">
@@ -134,16 +123,3 @@ List<Address> addresses = AddressServiceUtil.getAddresses(className, classPK);
 		</tbody>
 	</table>
 </div>
-
-<portlet:renderURL var="editAddressRenderURL" windowState="<%= LiferayWindowState.POP_UP.toString() %>">
-	<portlet:param name="mvcPath" value="/common/edit_address.jsp" />
-	<portlet:param name="className" value="<%= className %>" />
-</portlet:renderURL>
-
-<aui:script require="<%= contactInformationRequireJS %>">
-	ContactInformation.registerContactInformationListener(
-		'.modify-address-link a',
-		'<%= editAddressRenderURL.toString() %>',
-		925
-	);
-</aui:script>

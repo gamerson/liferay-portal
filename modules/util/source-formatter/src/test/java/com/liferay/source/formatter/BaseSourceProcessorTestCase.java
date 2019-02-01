@@ -33,7 +33,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 
 import org.junit.AfterClass;
@@ -105,11 +104,19 @@ public abstract class BaseSourceProcessorTestCase {
 			String fileName, String[] expectedMessages, Integer[] lineNumbers)
 		throws Exception {
 
-		String originalExtension = FilenameUtils.getExtension(fileName);
+		int pos = fileName.lastIndexOf(CharPool.PERIOD);
+
+		if (pos == -1) {
+			throw new IllegalArgumentException(
+				"The file name " + fileName +
+					" does not end with a valid extension");
+		}
+
+		String originalExtension = fileName.substring(pos + 1);
 
 		String extension = originalExtension;
 
-		fileName = FilenameUtils.getBaseName(fileName);
+		fileName = fileName.substring(0, pos);
 
 		if (originalExtension.startsWith("test")) {
 			extension = extension.substring(4);

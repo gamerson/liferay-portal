@@ -26,7 +26,6 @@ import com.liferay.portal.kernel.search.BaseIndexer;
 import com.liferay.portal.kernel.search.Document;
 import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.search.IndexWriterHelper;
-import com.liferay.portal.kernel.search.Indexer;
 import com.liferay.portal.kernel.search.Summary;
 import com.liferay.portal.kernel.util.GetterUtil;
 
@@ -35,13 +34,11 @@ import java.util.Locale;
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletResponse;
 
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-
 /**
  * @author Lino Alves
+ * @deprecated As of Judson (7.1.x), since 7.1.0
  */
-@Component(immediate = true, service = Indexer.class)
+@Deprecated
 public class PollsQuestionIndexer extends BaseIndexer<PollsQuestion> {
 
 	public static final String CLASS_NAME = PollsQuestion.class.getName();
@@ -168,10 +165,7 @@ public class PollsQuestionIndexer extends BaseIndexer<PollsQuestion> {
 		indexableActionableDynamicQuery.performActions();
 	}
 
-	@Reference
 	protected IndexWriterHelper indexWriterHelper;
-
-	@Reference
 	protected PollsQuestionLocalService pollsQuestionLocalService;
 
 	private static final Log _log = LogFactoryUtil.getLog(

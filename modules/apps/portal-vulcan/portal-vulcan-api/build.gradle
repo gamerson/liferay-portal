@@ -1,0 +1,3 @@
+dependencies {
+	compileInclude group: "com.fasterxml.jackson.dataformat", name: "jackson-dataformat-xml", version: "2.9.8"
+}

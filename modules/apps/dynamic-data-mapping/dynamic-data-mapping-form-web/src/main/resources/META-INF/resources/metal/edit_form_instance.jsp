@@ -135,22 +135,6 @@ if (!isFormPublished && isFormSaved) {
 		<div id="<portlet:namespace />-container"></div>
 	</aui:form>
 
-	<liferay-util:html-top
-		outputKey="loadDDMFieldTypes"
-	>
-		<aui:script use="liferay-ddm-form-renderer-types,liferay-ddm-soy-template-util">
-			Liferay.DDM.SoyTemplateUtil.loadModules(
-				function() {
-					Liferay.DDM.Renderer.FieldTypes.register(<%= ddmFormAdminDisplayContext.getDDMFormFieldTypesJSONArray() %>);
-
-					Liferay.DMMFieldTypesReady = true;
-
-					Liferay.fire('DMMFieldTypesReady');
-				}
-			);
-		</aui:script>
-	</liferay-util:html-top>
-
 	<div class="container-fluid-1280 ddm-form-instance-settings hide" id="<portlet:namespace />settings">
 		<%= request.getAttribute(DDMWebKeys.DYNAMIC_DATA_MAPPING_FORM_HTML) %>
 	</div>
@@ -187,33 +171,32 @@ if (!isFormPublished && isFormSaved) {
 			if (Liferay.Forms.instance) {
 				pages = Liferay.Forms.instance.state.pages;
 			}
+
 			this.dispose();
 			this.start(pages);
 		},
-		start: function(sessionPages) {
+		start: function(initialPages) {
 			Liferay.Loader.require(
 				rawModuleName,
 				function(packageName) {
 					var context = <%= serializedFormBuilderContext %>;
 
-					if (context.pages.length === 0 && sessionPages) {
-						context.pages = sessionPages;
+					if (context.pages.length === 0 && initialPages) {
+						context.pages = initialPages;
 					}
 
-					packageName.DDMForm(
+					Liferay.Forms.instance = new packageName.Form(
 						{
 							context: context,
 							dataProviderInstanceParameterSettingsURL: '<%= dataProviderInstanceParameterSettingsURL %>',
 							dataProviderInstancesURL: '<%= dataProviderInstancesURL %>',
 							defaultLanguageId: '<%= ddmFormAdminDisplayContext.getDefaultLanguageId() %>',
-							dependencies: ['dynamic-data-mapping-form-field-type/metal'],
 							fieldTypes: <%= ddmFormAdminDisplayContext.getDDMFormFieldTypesJSONArray() %>,
 							formInstanceId: '<%= formInstanceId %>',
 							functionsMetadata: <%= functionsMetadata %>,
 							functionsURL: '<%= functionsURL %>',
 							localizedDescription: <%= ddmFormAdminDisplayContext.getFormLocalizedDescription() %>,
 							localizedName: <%= ddmFormAdminDisplayContext.getFormLocalizedName() %>,
-							modules: Liferay.MODULES,
 							namespace: '<portlet:namespace />',
 							published: !!<%= ddmFormAdminDisplayContext.isFormPublished() %>,
 							rolesURL: '<%= rolesURL %>',
@@ -222,10 +205,7 @@ if (!isFormPublished && isFormSaved) {
 							spritemap: Liferay.DDM.FormSettings.spritemap,
 							strings: Liferay.DDM.FormSettings.strings
 						},
-						'#<portlet:namespace />-container',
-						function(ddmForm) {
-							Liferay.Forms.instance = ddmForm;
-						}
+						'#<portlet:namespace />-container'
 					);
 				},
 				function(error) {
@@ -258,5 +238,15 @@ if (!isFormPublished && isFormSaved) {
 
 	Liferay.on('destroyPortlet', clearPortletHandlers);
 
-	Liferay.Forms.App.start();
+	if (Liferay.DMMFieldTypesReady) {
+		Liferay.Forms.App.start();
+	}
+	else {
+		Liferay.onceAfter(
+			'DMMFieldTypesReady',
+			function() {
+				Liferay.Forms.App.start();
+			}
+		);
+	}
 </aui:script>

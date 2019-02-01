@@ -155,62 +155,15 @@ public class ${entity.name}PersistenceImpl extends BasePersistenceImpl<${entity.
 
 	<#assign columnBitmaskEnabled = (entity.finderEntityColumns?size &gt; 0) && (entity.finderEntityColumns?size &lt; 64) />
 
-	public static final FinderPath FINDER_PATH_WITH_PAGINATION_FIND_ALL = new FinderPath(
-		${entity.name}ModelImpl.ENTITY_CACHE_ENABLED,
-		${entity.name}ModelImpl.FINDER_CACHE_ENABLED,
-		${entity.name}Impl.class,
-		FINDER_CLASS_NAME_LIST_WITH_PAGINATION,
-		"findAll",
-		new String[0]);
-
-	public static final FinderPath FINDER_PATH_WITHOUT_PAGINATION_FIND_ALL = new FinderPath(
-		${entity.name}ModelImpl.ENTITY_CACHE_ENABLED,
-		${entity.name}ModelImpl.FINDER_CACHE_ENABLED,
-		${entity.name}Impl.class,
-		FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION,
-		"findAll",
-		new String[0]);
-
-	public static final FinderPath FINDER_PATH_COUNT_ALL = new FinderPath(
-		${entity.name}ModelImpl.ENTITY_CACHE_ENABLED,
-		${entity.name}ModelImpl.FINDER_CACHE_ENABLED,
-		Long.class,
-		FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION,
-		"countAll",
-		new String[0]);
+	private FinderPath _finderPathWithPaginationFindAll;
+	private FinderPath _finderPathWithoutPaginationFindAll;
+	private FinderPath _finderPathCountAll;
 
 	<#if entity.isHierarchicalTree()>
-		public static final FinderPath FINDER_PATH_WITH_PAGINATION_COUNT_ANCESTORS = new FinderPath(
-			${entity.name}ModelImpl.ENTITY_CACHE_ENABLED,
-			${entity.name}ModelImpl.FINDER_CACHE_ENABLED,
-			Long.class,
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION,
-			"countAncestors",
-			new String[] {Long.class.getName(), Long.class.getName(), Long.class.getName()});
-
-		public static final FinderPath FINDER_PATH_WITH_PAGINATION_COUNT_DESCENDANTS = new FinderPath(
-			${entity.name}ModelImpl.ENTITY_CACHE_ENABLED,
-			${entity.name}ModelImpl.FINDER_CACHE_ENABLED,
-			Long.class,
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION,
-			"countDescendants",
-			new String[] {Long.class.getName(), Long.class.getName(), Long.class.getName()});
-
-		public static final FinderPath FINDER_PATH_WITH_PAGINATION_GET_ANCESTORS = new FinderPath(
-			${entity.name}ModelImpl.ENTITY_CACHE_ENABLED,
-			${entity.name}ModelImpl.FINDER_CACHE_ENABLED,
-			${entity.name}Impl.class,
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION,
-			"getAncestors",
-			new String[] {Long.class.getName(), Long.class.getName(), Long.class.getName()});
-
-		public static final FinderPath FINDER_PATH_WITH_PAGINATION_GET_DESCENDANTS = new FinderPath(
-			${entity.name}ModelImpl.ENTITY_CACHE_ENABLED,
-			${entity.name}ModelImpl.FINDER_CACHE_ENABLED,
-			${entity.name}Impl.class,
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION,
-			"getDescendants",
-			new String[] {Long.class.getName(), Long.class.getName(), Long.class.getName()});
+		private FinderPath _finderPathWithPaginationCountAncestors;
+		private FinderPath _finderPathWithPaginationCountDescendants;
+		private FinderPath _finderPathWithPaginationGetAncestors;
+		private FinderPath _finderPathWithPaginationGetDescendants;
 	</#if>
 
 	<#list entity.entityFinders as entityFinder>
@@ -267,7 +220,7 @@ public class ${entity.name}PersistenceImpl extends BasePersistenceImpl<${entity.
 			<#assign entityColumns = uniqueEntityFinder.entityColumns />
 
 			${finderCache}.putResult(
-				FINDER_PATH_FETCH_BY_${uniqueEntityFinder.name?upper_case},
+				_finderPathFetchBy${uniqueEntityFinder.name},
 				new Object[] {
 					<#list entityColumns as entityColumn>
 						<#if stringUtil.equals(entityColumn.type, "boolean")>
@@ -377,8 +330,8 @@ public class ${entity.name}PersistenceImpl extends BasePersistenceImpl<${entity.
 					</#list>
 				};
 
-				${finderCache}.putResult(FINDER_PATH_COUNT_BY_${uniqueEntityFinder.name?upper_case}, args, Long.valueOf(1), false);
-				${finderCache}.putResult(FINDER_PATH_FETCH_BY_${uniqueEntityFinder.name?upper_case}, args, ${entity.varName}ModelImpl, false);
+				${finderCache}.putResult(_finderPathCountBy${uniqueEntityFinder.name}, args, Long.valueOf(1), false);
+				${finderCache}.putResult(_finderPathFetchBy${uniqueEntityFinder.name}, args, ${entity.varName}ModelImpl, false);
 			</#list>
 		}
 
@@ -403,11 +356,11 @@ public class ${entity.name}PersistenceImpl extends BasePersistenceImpl<${entity.
 						</#list>
 					};
 
-					${finderCache}.removeResult(FINDER_PATH_COUNT_BY_${uniqueEntityFinder.name?upper_case}, args);
-					${finderCache}.removeResult(FINDER_PATH_FETCH_BY_${uniqueEntityFinder.name?upper_case}, args);
+					${finderCache}.removeResult(_finderPathCountBy${uniqueEntityFinder.name}, args);
+					${finderCache}.removeResult(_finderPathFetchBy${uniqueEntityFinder.name}, args);
 				}
 
-				if ((${entity.varName}ModelImpl.getColumnBitmask() & FINDER_PATH_FETCH_BY_${uniqueEntityFinder.name?upper_case}.getColumnBitmask()) != 0) {
+				if ((${entity.varName}ModelImpl.getColumnBitmask() & _finderPathFetchBy${uniqueEntityFinder.name}.getColumnBitmask()) != 0) {
 					Object[] args = new Object[] {
 						<#list entityColumns as entityColumn>
 							<#if stringUtil.equals(entityColumn.type, "Date")>
@@ -422,8 +375,8 @@ public class ${entity.name}PersistenceImpl extends BasePersistenceImpl<${entity.
 						</#list>
 					};
 
-					${finderCache}.removeResult(FINDER_PATH_COUNT_BY_${uniqueEntityFinder.name?upper_case}, args);
-					${finderCache}.removeResult(FINDER_PATH_FETCH_BY_${uniqueEntityFinder.name?upper_case}, args);
+					${finderCache}.removeResult(_finderPathCountBy${uniqueEntityFinder.name}, args);
+					${finderCache}.removeResult(_finderPathFetchBy${uniqueEntityFinder.name}, args);
 				}
 			</#list>
 		}
@@ -755,13 +708,13 @@ public class ${entity.name}PersistenceImpl extends BasePersistenceImpl<${entity.
 							</#list>
 						};
 
-						${finderCache}.removeResult(FINDER_PATH_COUNT_BY_${entityFinder.name?upper_case}, args);
-						${finderCache}.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_${entityFinder.name?upper_case}, args);
+						${finderCache}.removeResult(_finderPathCountBy${entityFinder.name}, args);
+						${finderCache}.removeResult(_finderPathWithoutPaginationFindBy${entityFinder.name}, args);
 					</#list>
 				</#if>
 
-				${finderCache}.removeResult(FINDER_PATH_COUNT_ALL, FINDER_ARGS_EMPTY);
-				${finderCache}.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_ALL, FINDER_ARGS_EMPTY);
+				${finderCache}.removeResult(_finderPathCountAll, FINDER_ARGS_EMPTY);
+				${finderCache}.removeResult(_finderPathWithoutPaginationFindAll, FINDER_ARGS_EMPTY);
 			</#if>
 		}
 
@@ -771,7 +724,7 @@ public class ${entity.name}PersistenceImpl extends BasePersistenceImpl<${entity.
 					<#assign entityColumns = entityFinder.entityColumns />
 					if (
 						<#if columnBitmaskEnabled>
-							(${entity.varName}ModelImpl.getColumnBitmask() & FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_${entityFinder.name?upper_case}.getColumnBitmask()) != 0
+							(${entity.varName}ModelImpl.getColumnBitmask() & _finderPathWithoutPaginationFindBy${entityFinder.name}.getColumnBitmask()) != 0
 						<#else>
 							<#list entityColumns as entityColumn>
 								<#if entityColumn.isPrimitiveType()>
@@ -801,8 +754,8 @@ public class ${entity.name}PersistenceImpl extends BasePersistenceImpl<${entity.
 							</#list>
 						};
 
-						${finderCache}.removeResult(FINDER_PATH_COUNT_BY_${entityFinder.name?upper_case}, args);
-						${finderCache}.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_${entityFinder.name?upper_case}, args);
+						${finderCache}.removeResult(_finderPathCountBy${entityFinder.name}, args);
+						${finderCache}.removeResult(_finderPathWithoutPaginationFindBy${entityFinder.name}, args);
 
 						args = new Object[] {
 							<#list entityColumns as entityColumn>
@@ -818,8 +771,8 @@ public class ${entity.name}PersistenceImpl extends BasePersistenceImpl<${entity.
 							</#list>
 						};
 
-						${finderCache}.removeResult(FINDER_PATH_COUNT_BY_${entityFinder.name?upper_case}, args);
-						${finderCache}.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_${entityFinder.name?upper_case}, args);
+						${finderCache}.removeResult(_finderPathCountBy${entityFinder.name}, args);
+						${finderCache}.removeResult(_finderPathWithoutPaginationFindBy${entityFinder.name}, args);
 					}
 				</#list>
 			}
@@ -1112,11 +1065,11 @@ public class ${entity.name}PersistenceImpl extends BasePersistenceImpl<${entity.
 
 		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) && (orderByComparator == null)) {
 			pagination = false;
-			finderPath = FINDER_PATH_WITHOUT_PAGINATION_FIND_ALL;
+			finderPath = _finderPathWithoutPaginationFindAll;
 			finderArgs = FINDER_ARGS_EMPTY;
 		}
 		else {
-			finderPath = FINDER_PATH_WITH_PAGINATION_FIND_ALL;
+			finderPath = _finderPathWithPaginationFindAll;
 			finderArgs = new Object[] {start, end, orderByComparator};
 		}
 
@@ -1200,7 +1153,7 @@ public class ${entity.name}PersistenceImpl extends BasePersistenceImpl<${entity.
 	 */
 	@Override
 	public int countAll() {
-		Long count = (Long)${finderCache}.getResult(FINDER_PATH_COUNT_ALL, FINDER_ARGS_EMPTY, this);
+		Long count = (Long)${finderCache}.getResult(_finderPathCountAll, FINDER_ARGS_EMPTY, this);
 
 		if (count == null) {
 			Session session = null;
@@ -1212,10 +1165,10 @@ public class ${entity.name}PersistenceImpl extends BasePersistenceImpl<${entity.
 
 				count = (Long)q.uniqueResult();
 
-				${finderCache}.putResult(FINDER_PATH_COUNT_ALL, FINDER_ARGS_EMPTY, count);
+				${finderCache}.putResult(_finderPathCountAll, FINDER_ARGS_EMPTY, count);
 			}
 			catch (Exception e) {
-				${finderCache}.removeResult(FINDER_PATH_COUNT_ALL, FINDER_ARGS_EMPTY);
+				${finderCache}.removeResult(_finderPathCountAll, FINDER_ARGS_EMPTY);
 
 				throw processException(e);
 			}
@@ -1562,16 +1515,16 @@ public class ${entity.name}PersistenceImpl extends BasePersistenceImpl<${entity.
 		public long countAncestors(${entity.name} ${entity.varName}) {
 			Object[] finderArgs = new Object[] {${entity.varName}.get${scopeEntityColumn.methodName}(), ${entity.varName}.getLeft${pkEntityColumn.methodName}(), ${entity.varName}.getRight${pkEntityColumn.methodName}()};
 
-			Long count = (Long)${finderCache}.getResult(FINDER_PATH_WITH_PAGINATION_COUNT_ANCESTORS, finderArgs, this);
+			Long count = (Long)${finderCache}.getResult(_finderPathWithPaginationCountAncestors, finderArgs, this);
 
 			if (count == null) {
 				try {
 					count = nestedSetsTreeManager.countAncestors(${entity.varName});
 
-					${finderCache}.putResult(FINDER_PATH_WITH_PAGINATION_COUNT_ANCESTORS, finderArgs, count);
+					${finderCache}.putResult(_finderPathWithPaginationCountAncestors, finderArgs, count);
 				}
 				catch (SystemException se) {
-					${finderCache}.removeResult(FINDER_PATH_WITH_PAGINATION_COUNT_ANCESTORS, finderArgs);
+					${finderCache}.removeResult(_finderPathWithPaginationCountAncestors, finderArgs);
 
 					throw se;
 				}
@@ -1584,16 +1537,16 @@ public class ${entity.name}PersistenceImpl extends BasePersistenceImpl<${entity.
 		public long countDescendants(${entity.name} ${entity.varName}) {
 			Object[] finderArgs = new Object[] {${entity.varName}.get${scopeEntityColumn.methodName}(), ${entity.varName}.getLeft${pkEntityColumn.methodName}(), ${entity.varName}.getRight${pkEntityColumn.methodName}()};
 
-			Long count = (Long)${finderCache}.getResult(FINDER_PATH_WITH_PAGINATION_COUNT_DESCENDANTS, finderArgs, this);
+			Long count = (Long)${finderCache}.getResult(_finderPathWithPaginationCountDescendants, finderArgs, this);
 
 			if (count == null) {
 				try {
 					count = nestedSetsTreeManager.countDescendants(${entity.varName});
 
-					${finderCache}.putResult(FINDER_PATH_WITH_PAGINATION_COUNT_DESCENDANTS, finderArgs, count);
+					${finderCache}.putResult(_finderPathWithPaginationCountDescendants, finderArgs, count);
 				}
 				catch (SystemException se) {
-					${finderCache}.removeResult(FINDER_PATH_WITH_PAGINATION_COUNT_DESCENDANTS, finderArgs);
+					${finderCache}.removeResult(_finderPathWithPaginationCountDescendants, finderArgs);
 
 					throw se;
 				}
@@ -1606,7 +1559,7 @@ public class ${entity.name}PersistenceImpl extends BasePersistenceImpl<${entity.
 		public List<${entity.name}> getAncestors(${entity.name} ${entity.varName}) {
 			Object[] finderArgs = new Object[] {${entity.varName}.get${scopeEntityColumn.methodName}(), ${entity.varName}.getLeft${pkEntityColumn.methodName}(), ${entity.varName}.getRight${pkEntityColumn.methodName}()};
 
-			List<${entity.name}> list = (List<${entity.name}>)${finderCache}.getResult(FINDER_PATH_WITH_PAGINATION_GET_ANCESTORS, finderArgs, this);
+			List<${entity.name}> list = (List<${entity.name}>)${finderCache}.getResult(_finderPathWithPaginationGetAncestors, finderArgs, this);
 
 			if ((list != null) && !list.isEmpty()) {
 				for (${entity.name} temp${entity.name} : list) {
@@ -1624,10 +1577,10 @@ public class ${entity.name}PersistenceImpl extends BasePersistenceImpl<${entity.
 
 					cacheResult(list);
 
-					${finderCache}.putResult(FINDER_PATH_WITH_PAGINATION_GET_ANCESTORS, finderArgs, list);
+					${finderCache}.putResult(_finderPathWithPaginationGetAncestors, finderArgs, list);
 				}
 				catch (SystemException se) {
-					${finderCache}.removeResult(FINDER_PATH_WITH_PAGINATION_GET_ANCESTORS, finderArgs);
+					${finderCache}.removeResult(_finderPathWithPaginationGetAncestors, finderArgs);
 
 					throw se;
 				}
@@ -1640,7 +1593,7 @@ public class ${entity.name}PersistenceImpl extends BasePersistenceImpl<${entity.
 		public List<${entity.name}> getDescendants(${entity.name} ${entity.varName}) {
 			Object[] finderArgs = new Object[] {${entity.varName}.get${scopeEntityColumn.methodName}(), ${entity.varName}.getLeft${pkEntityColumn.methodName}(), ${entity.varName}.getRight${pkEntityColumn.methodName}()};
 
-			List<${entity.name}> list = (List<${entity.name}>)${finderCache}.getResult(FINDER_PATH_WITH_PAGINATION_GET_DESCENDANTS, finderArgs, this);
+			List<${entity.name}> list = (List<${entity.name}>)${finderCache}.getResult(_finderPathWithPaginationGetDescendants, finderArgs, this);
 
 			if ((list != null) && !list.isEmpty()) {
 				for (${entity.name} temp${entity.name} : list) {
@@ -1658,10 +1611,10 @@ public class ${entity.name}PersistenceImpl extends BasePersistenceImpl<${entity.
 
 					cacheResult(list);
 
-					${finderCache}.putResult(FINDER_PATH_WITH_PAGINATION_GET_DESCENDANTS, finderArgs, list);
+					${finderCache}.putResult(_finderPathWithPaginationGetDescendants, finderArgs, list);
 				}
 				catch (SystemException se) {
-					${finderCache}.removeResult(FINDER_PATH_WITH_PAGINATION_GET_DESCENDANTS, finderArgs);
+					${finderCache}.removeResult(_finderPathWithPaginationGetDescendants, finderArgs);
 
 					throw se;
 				}
@@ -1788,6 +1741,189 @@ public class ${entity.name}PersistenceImpl extends BasePersistenceImpl<${entity.
 				/>
 
 				${entity.varName}To${referenceEntity.name}TableMapper = TableMapperFactory.getTableMapper("${entityColumn.mappingTableName}", "${companyEntity.PKDBName}", "${entity.PKDBName}", "${referenceEntity.PKDBName}", this, ${referenceEntity.varName}Persistence);
+			</#if>
+		</#list>
+
+		_finderPathWithPaginationFindAll = new FinderPath(
+			${entity.name}ModelImpl.ENTITY_CACHE_ENABLED,
+			${entity.name}ModelImpl.FINDER_CACHE_ENABLED,
+			${entity.name}Impl.class,
+			FINDER_CLASS_NAME_LIST_WITH_PAGINATION,
+			"findAll", new String[0]);
+
+		_finderPathWithoutPaginationFindAll = new FinderPath(
+			${entity.name}ModelImpl.ENTITY_CACHE_ENABLED,
+			${entity.name}ModelImpl.FINDER_CACHE_ENABLED,
+			${entity.name}Impl.class,
+			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION,
+			"findAll", new String[0]);
+
+		_finderPathCountAll = new FinderPath(
+			${entity.name}ModelImpl.ENTITY_CACHE_ENABLED,
+			${entity.name}ModelImpl.FINDER_CACHE_ENABLED,
+			Long.class,
+			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION,
+			"countAll", new String[0]);
+
+		<#if entity.isHierarchicalTree()>
+			_finderPathWithPaginationCountAncestors = new FinderPath(
+				${entity.name}ModelImpl.ENTITY_CACHE_ENABLED,
+				${entity.name}ModelImpl.FINDER_CACHE_ENABLED,
+				Long.class,
+				FINDER_CLASS_NAME_LIST_WITH_PAGINATION,
+				"countAncestors",
+				new String[] {Long.class.getName(), Long.class.getName(), Long.class.getName()});
+
+			_finderPathWithPaginationCountDescendants = new FinderPath(
+				${entity.name}ModelImpl.ENTITY_CACHE_ENABLED,
+				${entity.name}ModelImpl.FINDER_CACHE_ENABLED,
+				Long.class,
+				FINDER_CLASS_NAME_LIST_WITH_PAGINATION,
+				"countDescendants",
+				new String[] {Long.class.getName(), Long.class.getName(), Long.class.getName()});
+
+			_finderPathWithPaginationGetAncestors = new FinderPath(
+				${entity.name}ModelImpl.ENTITY_CACHE_ENABLED,
+				${entity.name}ModelImpl.FINDER_CACHE_ENABLED,
+				${entity.name}Impl.class,
+				FINDER_CLASS_NAME_LIST_WITH_PAGINATION,
+				"getAncestors",
+				new String[] {Long.class.getName(), Long.class.getName(), Long.class.getName()});
+
+			_finderPathWithPaginationGetDescendants = new FinderPath(
+				${entity.name}ModelImpl.ENTITY_CACHE_ENABLED,
+				${entity.name}ModelImpl.FINDER_CACHE_ENABLED,
+				${entity.name}Impl.class,
+				FINDER_CLASS_NAME_LIST_WITH_PAGINATION,
+				"getDescendants",
+				new String[] {Long.class.getName(), Long.class.getName(), Long.class.getName()});
+		</#if>
+
+		<#list entity.entityFinders as entityFinder>
+			<#assign entityColumns = entityFinder.entityColumns />
+
+			<#if entityFinder.isCollection()>
+				_finderPathWithPaginationFindBy${entityFinder.name} = new FinderPath(
+					${entity.name}ModelImpl.ENTITY_CACHE_ENABLED,
+					${entity.name}ModelImpl.FINDER_CACHE_ENABLED,
+					${entity.name}Impl.class,
+					FINDER_CLASS_NAME_LIST_WITH_PAGINATION,
+					"findBy${entityFinder.name}",
+					new String[] {
+						<#list entityColumns as entityColumn>
+							${serviceBuilder.getPrimitiveObj("${entityColumn.type}")}.class.getName(),
+						</#list>
+
+						Integer.class.getName(), Integer.class.getName(), OrderByComparator.class.getName()
+					});
+
+				<#if !entityFinder.hasCustomComparator()>
+					_finderPathWithoutPaginationFindBy${entityFinder.name} = new FinderPath(
+						${entity.name}ModelImpl.ENTITY_CACHE_ENABLED,
+						${entity.name}ModelImpl.FINDER_CACHE_ENABLED,
+						${entity.name}Impl.class,
+						FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION,
+						"findBy${entityFinder.name}",
+						new String[] {
+							<#list entityColumns as entityColumn>
+								${serviceBuilder.getPrimitiveObj("${entityColumn.type}")}.class.getName()
+
+								<#if entityColumn_has_next>
+									,
+								</#if>
+							</#list>
+						}
+
+						<#if columnBitmaskEnabled>
+							,
+
+							<#list entityColumns as entityColumn>
+								${entity.name}ModelImpl.${entityColumn.name?upper_case}_COLUMN_BITMASK
+
+								<#if entityColumn_has_next>
+									|
+								</#if>
+							</#list>
+
+							<#if entity.entityOrder??>
+								<#list entity.entityOrder.entityColumns as entityColumn>
+									<#if !entityColumns?seq_contains(entityColumn) && !entity.PKEntityColumns?seq_contains(entityColumn)>
+										| ${entity.name}ModelImpl.${entityColumn.name?upper_case}_COLUMN_BITMASK
+									</#if>
+								</#list>
+							</#if>
+						</#if>
+
+						);
+				</#if>
+			</#if>
+
+			<#if !entityFinder.isCollection() || entityFinder.isUnique()>
+				_finderPathFetchBy${entityFinder.name} = new FinderPath(
+					${entity.name}ModelImpl.ENTITY_CACHE_ENABLED,
+					${entity.name}ModelImpl.FINDER_CACHE_ENABLED,
+					${entity.name}Impl.class,
+					FINDER_CLASS_NAME_ENTITY,
+					"fetchBy${entityFinder.name}",
+					new String[] {
+						<#list entityColumns as entityColumn>
+							${serviceBuilder.getPrimitiveObj("${entityColumn.type}")}.class.getName()
+
+							<#if entityColumn_has_next>
+								,
+							</#if>
+						</#list>
+					}
+
+					<#if columnBitmaskEnabled>
+						,
+
+						<#list entityColumns as entityColumn>
+							${entity.name}ModelImpl.${entityColumn.name?upper_case}_COLUMN_BITMASK
+
+							<#if entityColumn_has_next>
+								|
+							</#if>
+						</#list>
+					</#if>
+
+					);
+			</#if>
+
+			<#if !entityFinder.hasCustomComparator()>
+				_finderPathCountBy${entityFinder.name} = new FinderPath(
+					${entity.name}ModelImpl.ENTITY_CACHE_ENABLED,
+					${entity.name}ModelImpl.FINDER_CACHE_ENABLED,
+					Long.class,
+					FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION,
+					"countBy${entityFinder.name}",
+					new String[] {
+						<#list entityColumns as entityColumn>
+							${serviceBuilder.getPrimitiveObj("${entityColumn.type}")}.class.getName()
+
+							<#if entityColumn_has_next>
+								,
+							</#if>
+						</#list>
+					});
+			</#if>
+
+			<#if entityFinder.hasArrayableOperator() || entityFinder.hasCustomComparator()>
+				_finderPathWithPaginationCountBy${entityFinder.name} = new FinderPath(
+					${entity.name}ModelImpl.ENTITY_CACHE_ENABLED,
+					${entity.name}ModelImpl.FINDER_CACHE_ENABLED,
+					Long.class,
+					FINDER_CLASS_NAME_LIST_WITH_PAGINATION,
+					"countBy${entityFinder.name}",
+					new String[] {
+						<#list entityColumns as entityColumn>
+							${serviceBuilder.getPrimitiveObj("${entityColumn.type}")}.class.getName()
+
+							<#if entityColumn_has_next>
+								,
+							</#if>
+						</#list>
+					});
 			</#if>
 		</#list>
 	}

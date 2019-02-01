@@ -17,5 +17,5 @@
 <%@ include file="/layout_editor_toolbar/init.jsp" %>
 
 <liferay-portlet:runtime
-	portletName="<%= ContentLayoutPortletKeys.CONTENT_PAGE_TOOLBAR_PORTLET %>"
+	portletName="<%= ContentPageEditorPortletKeys.CONTENT_PAGE_TOOLBAR_PORTLET %>"
 />

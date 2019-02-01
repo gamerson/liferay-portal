@@ -15,8 +15,6 @@
 package com.liferay.segments.web.internal.portlet.action;
 
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCRenderCommand;
-import com.liferay.portal.kernel.service.OrganizationLocalService;
-import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.segments.constants.SegmentsPortletKeys;
 import com.liferay.segments.criteria.contributor.SegmentsCriteriaContributorRegistry;
@@ -26,6 +24,7 @@ import com.liferay.segments.web.internal.constants.SegmentsWebKeys;
 import com.liferay.segments.web.internal.display.context.EditSegmentsEntryDisplayContext;
 
 import javax.portlet.PortletException;
+import javax.portlet.PortletSession;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 
@@ -52,6 +51,11 @@ public class EditSegmentsEntryMVCRenderCommand implements MVCRenderCommand {
 			RenderRequest renderRequest, RenderResponse renderResponse)
 		throws PortletException {
 
+		PortletSession portletSession = renderRequest.getPortletSession();
+
+		portletSession.removeAttribute(
+			SegmentsWebKeys.PREVIEW_SEGMENTS_ENTRY_CRITERIA);
+
 		HttpServletRequest httpServletRequest = _portal.getHttpServletRequest(
 			renderRequest);
 
@@ -59,8 +63,7 @@ public class EditSegmentsEntryMVCRenderCommand implements MVCRenderCommand {
 			new EditSegmentsEntryDisplayContext(
 				httpServletRequest, renderRequest, renderResponse,
 				_segmentsCriteriaContributorRegistry, _segmentsEntryProvider,
-				_organizationLocalService, _segmentsEntryService,
-				_userLocalService);
+				_segmentsEntryService);
 
 		renderRequest.setAttribute(
 			SegmentsWebKeys.EDIT_SEGMENTS_ENTRY_DISPLAY_CONTEXT,
@@ -68,9 +71,6 @@ public class EditSegmentsEntryMVCRenderCommand implements MVCRenderCommand {
 
 		return "/edit_segments_entry.jsp";
 	}
-
-	@Reference
-	private OrganizationLocalService _organizationLocalService;
 
 	@Reference
 	private Portal _portal;
@@ -84,8 +84,5 @@ public class EditSegmentsEntryMVCRenderCommand implements MVCRenderCommand {
 
 	@Reference
 	private SegmentsEntryService _segmentsEntryService;
-
-	@Reference
-	private UserLocalService _userLocalService;
 
 }

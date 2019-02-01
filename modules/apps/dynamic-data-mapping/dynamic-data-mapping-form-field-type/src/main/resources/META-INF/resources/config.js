@@ -95,6 +95,9 @@
 					filter: Liferay.AUI.getFilterConfig(),
 					modules: {
 						'liferay-ddm-form-field-editor': {
+							condition: {
+								trigger: 'liferay-ddm-form-renderer'
+							},
 							path: 'editor_field.js',
 							requires: [
 								'liferay-alloy-editor',

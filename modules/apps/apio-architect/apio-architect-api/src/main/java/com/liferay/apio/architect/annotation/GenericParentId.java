@@ -22,26 +22,28 @@ import java.lang.annotation.Target;
 
 /**
  * Defines an annotation that provides information about a generic parent ID.
+ * Use this annotation when you want to depend on one type of ID, instead of
+ * having to add implementations for all supported parents.
  *
- * <p>Use this annotation when you want to depend just on one type of ID,
- * instead of having to add implementations for all supported parents.
+ * <p>
+ * You should always use this annotation on an {@link
+ * com.liferay.apio.architect.router.ActionRouter} method parameter that
+ * represents a generic parent ID.
+ * </p>
  *
- * <p>This annotation should always be used on an {@link
- * com.liferay.apio.architect.router.ActionRouter ActionRouter} method parameter
- * representing a generic parent ID.
+ * <p>
+ * If this annotation is used in a {@link Actions.Retrieve} action, resources
+ * linking to it must use {@link
+ * Vocabulary.LinkTo.ResourceType#GENERIC_PARENT_COLLECTION} as the {@link
+ * Vocabulary.LinkTo#resourceType()} value.
+ * </p>
  *
- * <p>If this annotation is used in a {@link Actions.Retrieve Retrieve} action,
- * resources linking to it will have to use {@link
- * Vocabulary.LinkTo.ResourceType#GENERIC_PARENT_COLLECTION
- * GENERIC_PARENT_COLLECTION} as the {@link Vocabulary.LinkTo#resourceType()
- * LinkTo#resourceType} value
- *
- * <p>A {@link com.liferay.apio.architect.uri.mapper.PathIdentifierMapper
- * PathIdentifierMapper} for the ID type must exist for Apio to automatically
- * convert it from the request.
+ * <p>
+ * A {@link com.liferay.apio.architect.uri.mapper.PathIdentifierMapper} for the
+ * ID type must exist for Apio to automatically convert it from the request.
+ * </p>
  *
  * @author Alejandro Hernández
- * @review
  */
 @Retention(RUNTIME)
 @Target(PARAMETER)

@@ -1,0 +1,16 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DateInput should render type date 1`] = `
+<DocumentFragment>
+  <div
+    class="criterion-input date-input"
+  >
+    <input
+      class="form-control"
+      data-testid="date-input"
+      type="date"
+      value="2019-01-23"
+    />
+  </div>
+</DocumentFragment>
+`;

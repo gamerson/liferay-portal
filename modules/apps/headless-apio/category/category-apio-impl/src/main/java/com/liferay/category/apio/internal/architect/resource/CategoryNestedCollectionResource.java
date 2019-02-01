@@ -27,6 +27,7 @@ import com.liferay.asset.kernel.model.AssetVocabulary;
 import com.liferay.asset.kernel.service.AssetCategoryService;
 import com.liferay.asset.kernel.service.AssetVocabularyService;
 import com.liferay.category.apio.architect.identifier.CategoryIdentifier;
+import com.liferay.category.apio.architect.model.Category;
 import com.liferay.category.apio.internal.architect.form.CategoryForm;
 import com.liferay.person.apio.architect.identifier.PersonIdentifier;
 import com.liferay.portal.apio.permission.HasPermission;
@@ -51,6 +52,7 @@ import org.osgi.service.component.annotations.Reference;
  *
  * @author Javier Gamarra
  * @author Eduardo Pérez
+ * @author Rubén Pulido
  */
 @Component(immediate = true, service = NestedCollectionResource.class)
 public class CategoryNestedCollectionResource
@@ -122,7 +124,7 @@ public class CategoryNestedCollectionResource
 	}
 
 	private AssetCategory _addAssetCategory(
-			long vocabularyId, CategoryForm categoryForm)
+			long vocabularyId, Category category)
 		throws PortalException {
 
 		AssetVocabulary assetVocabulary = _assetVocabularyService.getVocabulary(
@@ -135,8 +137,8 @@ public class CategoryNestedCollectionResource
 		ServiceContext serviceContext = new ServiceContext();
 
 		return _assetCategoryService.addCategory(
-			assetVocabulary.getGroupId(), 0, categoryForm.getTitles(locale),
-			categoryForm.getDescriptions(locale), vocabularyId, null,
+			assetVocabulary.getGroupId(), 0, category.getNameMap(locale),
+			category.getDescriptionMap(locale), vocabularyId, null,
 			serviceContext);
 	}
 
@@ -165,7 +167,7 @@ public class CategoryNestedCollectionResource
 	}
 
 	private AssetCategory _updateAssetCategory(
-			long assetCategoryId, CategoryForm categoryForm)
+			long assetCategoryId, Category category)
 		throws PortalException {
 
 		AssetCategory assetCategory = _assetCategoryService.getCategory(
@@ -179,8 +181,7 @@ public class CategoryNestedCollectionResource
 
 		return _assetCategoryService.updateCategory(
 			assetCategoryId, assetCategory.getParentCategoryId(),
-			categoryForm.getTitles(locale),
-			categoryForm.getDescriptions(locale),
+			category.getNameMap(locale), category.getDescriptionMap(locale),
 			assetCategory.getVocabularyId(), null, serviceContext);
 	}
 

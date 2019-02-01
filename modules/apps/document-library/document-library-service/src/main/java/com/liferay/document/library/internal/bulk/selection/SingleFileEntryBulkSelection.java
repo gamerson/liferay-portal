@@ -14,6 +14,8 @@
 
 package com.liferay.document.library.internal.bulk.selection;
 
+import com.liferay.asset.kernel.model.AssetEntry;
+import com.liferay.asset.kernel.service.AssetEntryLocalService;
 import com.liferay.bulk.selection.BulkSelection;
 import com.liferay.bulk.selection.BulkSelectionFactory;
 import com.liferay.document.library.kernel.service.DLAppService;
@@ -39,13 +41,15 @@ public class SingleFileEntryBulkSelection implements BulkSelection<FileEntry> {
 	public SingleFileEntryBulkSelection(
 		long fileEntryId, Map<String, String[]> parameterMap,
 		ResourceBundleLoader resourceBundleLoader, Language language,
-		DLAppService dlAppService) {
+		DLAppService dlAppService,
+		AssetEntryLocalService assetEntryLocalService) {
 
 		_fileEntryId = fileEntryId;
 		_parameterMap = parameterMap;
 		_resourceBundleLoader = resourceBundleLoader;
 		_language = language;
 		_dlAppService = dlAppService;
+		_assetEntryLocalService = assetEntryLocalService;
 	}
 
 	@Override
@@ -90,6 +94,13 @@ public class SingleFileEntryBulkSelection implements BulkSelection<FileEntry> {
 		return set.stream();
 	}
 
+	@Override
+	public BulkSelection<AssetEntry> toAssetEntryBulkSelection() {
+		return new FileEntryAssetEntryBulkSelection(
+			this, _assetEntryLocalService);
+	}
+
+	private final AssetEntryLocalService _assetEntryLocalService;
 	private final DLAppService _dlAppService;
 	private final long _fileEntryId;
 	private final Language _language;

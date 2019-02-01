@@ -80,26 +80,11 @@ public class MemberRequestPersistenceImpl extends BasePersistenceImpl<MemberRequ
 		".List1";
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION = FINDER_CLASS_NAME_ENTITY +
 		".List2";
-	public static final FinderPath FINDER_PATH_WITH_PAGINATION_FIND_ALL = new FinderPath(MemberRequestModelImpl.ENTITY_CACHE_ENABLED,
-			MemberRequestModelImpl.FINDER_CACHE_ENABLED,
-			MemberRequestImpl.class, FINDER_CLASS_NAME_LIST_WITH_PAGINATION,
-			"findAll", new String[0]);
-	public static final FinderPath FINDER_PATH_WITHOUT_PAGINATION_FIND_ALL = new FinderPath(MemberRequestModelImpl.ENTITY_CACHE_ENABLED,
-			MemberRequestModelImpl.FINDER_CACHE_ENABLED,
-			MemberRequestImpl.class, FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION,
-			"findAll", new String[0]);
-	public static final FinderPath FINDER_PATH_COUNT_ALL = new FinderPath(MemberRequestModelImpl.ENTITY_CACHE_ENABLED,
-			MemberRequestModelImpl.FINDER_CACHE_ENABLED, Long.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll", new String[0]);
-	public static final FinderPath FINDER_PATH_FETCH_BY_KEY = new FinderPath(MemberRequestModelImpl.ENTITY_CACHE_ENABLED,
-			MemberRequestModelImpl.FINDER_CACHE_ENABLED,
-			MemberRequestImpl.class, FINDER_CLASS_NAME_ENTITY, "fetchByKey",
-			new String[] { String.class.getName() },
-			MemberRequestModelImpl.KEY_COLUMN_BITMASK);
-	public static final FinderPath FINDER_PATH_COUNT_BY_KEY = new FinderPath(MemberRequestModelImpl.ENTITY_CACHE_ENABLED,
-			MemberRequestModelImpl.FINDER_CACHE_ENABLED, Long.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByKey",
-			new String[] { String.class.getName() });
+	private FinderPath _finderPathWithPaginationFindAll;
+	private FinderPath _finderPathWithoutPaginationFindAll;
+	private FinderPath _finderPathCountAll;
+	private FinderPath _finderPathFetchByKey;
+	private FinderPath _finderPathCountByKey;
 
 	/**
 	 * Returns the member request where key = &#63; or throws a {@link NoSuchMemberRequestException} if it could not be found.
@@ -160,8 +145,8 @@ public class MemberRequestPersistenceImpl extends BasePersistenceImpl<MemberRequ
 		Object result = null;
 
 		if (retrieveFromCache) {
-			result = finderCache.getResult(FINDER_PATH_FETCH_BY_KEY,
-					finderArgs, this);
+			result = finderCache.getResult(_finderPathFetchByKey, finderArgs,
+					this);
 		}
 
 		if (result instanceof MemberRequest) {
@@ -206,7 +191,7 @@ public class MemberRequestPersistenceImpl extends BasePersistenceImpl<MemberRequ
 				List<MemberRequest> list = q.list();
 
 				if (list.isEmpty()) {
-					finderCache.putResult(FINDER_PATH_FETCH_BY_KEY, finderArgs,
+					finderCache.putResult(_finderPathFetchByKey, finderArgs,
 						list);
 				}
 				else {
@@ -229,7 +214,7 @@ public class MemberRequestPersistenceImpl extends BasePersistenceImpl<MemberRequ
 				}
 			}
 			catch (Exception e) {
-				finderCache.removeResult(FINDER_PATH_FETCH_BY_KEY, finderArgs);
+				finderCache.removeResult(_finderPathFetchByKey, finderArgs);
 
 				throw processException(e);
 			}
@@ -270,7 +255,7 @@ public class MemberRequestPersistenceImpl extends BasePersistenceImpl<MemberRequ
 	public int countByKey(String key) {
 		key = Objects.toString(key, "");
 
-		FinderPath finderPath = FINDER_PATH_COUNT_BY_KEY;
+		FinderPath finderPath = _finderPathCountByKey;
 
 		Object[] finderArgs = new Object[] { key };
 
@@ -326,28 +311,9 @@ public class MemberRequestPersistenceImpl extends BasePersistenceImpl<MemberRequ
 
 	private static final String _FINDER_COLUMN_KEY_KEY_2 = "memberRequest.key = ?";
 	private static final String _FINDER_COLUMN_KEY_KEY_3 = "(memberRequest.key IS NULL OR memberRequest.key = '')";
-	public static final FinderPath FINDER_PATH_WITH_PAGINATION_FIND_BY_RECEIVERUSERID =
-		new FinderPath(MemberRequestModelImpl.ENTITY_CACHE_ENABLED,
-			MemberRequestModelImpl.FINDER_CACHE_ENABLED,
-			MemberRequestImpl.class, FINDER_CLASS_NAME_LIST_WITH_PAGINATION,
-			"findByReceiverUserId",
-			new String[] {
-				Long.class.getName(),
-				
-			Integer.class.getName(), Integer.class.getName(),
-				OrderByComparator.class.getName()
-			});
-	public static final FinderPath FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_RECEIVERUSERID =
-		new FinderPath(MemberRequestModelImpl.ENTITY_CACHE_ENABLED,
-			MemberRequestModelImpl.FINDER_CACHE_ENABLED,
-			MemberRequestImpl.class, FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION,
-			"findByReceiverUserId", new String[] { Long.class.getName() },
-			MemberRequestModelImpl.RECEIVERUSERID_COLUMN_BITMASK |
-			MemberRequestModelImpl.CREATEDATE_COLUMN_BITMASK);
-	public static final FinderPath FINDER_PATH_COUNT_BY_RECEIVERUSERID = new FinderPath(MemberRequestModelImpl.ENTITY_CACHE_ENABLED,
-			MemberRequestModelImpl.FINDER_CACHE_ENABLED, Long.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByReceiverUserId",
-			new String[] { Long.class.getName() });
+	private FinderPath _finderPathWithPaginationFindByReceiverUserId;
+	private FinderPath _finderPathWithoutPaginationFindByReceiverUserId;
+	private FinderPath _finderPathCountByReceiverUserId;
 
 	/**
 	 * Returns all the member requests where receiverUserId = &#63;.
@@ -424,11 +390,11 @@ public class MemberRequestPersistenceImpl extends BasePersistenceImpl<MemberRequ
 		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
 				(orderByComparator == null)) {
 			pagination = false;
-			finderPath = FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_RECEIVERUSERID;
+			finderPath = _finderPathWithoutPaginationFindByReceiverUserId;
 			finderArgs = new Object[] { receiverUserId };
 		}
 		else {
-			finderPath = FINDER_PATH_WITH_PAGINATION_FIND_BY_RECEIVERUSERID;
+			finderPath = _finderPathWithPaginationFindByReceiverUserId;
 			finderArgs = new Object[] {
 					receiverUserId,
 					
@@ -795,7 +761,7 @@ public class MemberRequestPersistenceImpl extends BasePersistenceImpl<MemberRequ
 	 */
 	@Override
 	public int countByReceiverUserId(long receiverUserId) {
-		FinderPath finderPath = FINDER_PATH_COUNT_BY_RECEIVERUSERID;
+		FinderPath finderPath = _finderPathCountByReceiverUserId;
 
 		Object[] finderArgs = new Object[] { receiverUserId };
 
@@ -839,28 +805,9 @@ public class MemberRequestPersistenceImpl extends BasePersistenceImpl<MemberRequ
 	}
 
 	private static final String _FINDER_COLUMN_RECEIVERUSERID_RECEIVERUSERID_2 = "memberRequest.receiverUserId = ?";
-	public static final FinderPath FINDER_PATH_WITH_PAGINATION_FIND_BY_R_S = new FinderPath(MemberRequestModelImpl.ENTITY_CACHE_ENABLED,
-			MemberRequestModelImpl.FINDER_CACHE_ENABLED,
-			MemberRequestImpl.class, FINDER_CLASS_NAME_LIST_WITH_PAGINATION,
-			"findByR_S",
-			new String[] {
-				Long.class.getName(), Integer.class.getName(),
-				
-			Integer.class.getName(), Integer.class.getName(),
-				OrderByComparator.class.getName()
-			});
-	public static final FinderPath FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_R_S = new FinderPath(MemberRequestModelImpl.ENTITY_CACHE_ENABLED,
-			MemberRequestModelImpl.FINDER_CACHE_ENABLED,
-			MemberRequestImpl.class, FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION,
-			"findByR_S",
-			new String[] { Long.class.getName(), Integer.class.getName() },
-			MemberRequestModelImpl.RECEIVERUSERID_COLUMN_BITMASK |
-			MemberRequestModelImpl.STATUS_COLUMN_BITMASK |
-			MemberRequestModelImpl.CREATEDATE_COLUMN_BITMASK);
-	public static final FinderPath FINDER_PATH_COUNT_BY_R_S = new FinderPath(MemberRequestModelImpl.ENTITY_CACHE_ENABLED,
-			MemberRequestModelImpl.FINDER_CACHE_ENABLED, Long.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByR_S",
-			new String[] { Long.class.getName(), Integer.class.getName() });
+	private FinderPath _finderPathWithPaginationFindByR_S;
+	private FinderPath _finderPathWithoutPaginationFindByR_S;
+	private FinderPath _finderPathCountByR_S;
 
 	/**
 	 * Returns all the member requests where receiverUserId = &#63; and status = &#63;.
@@ -941,11 +888,11 @@ public class MemberRequestPersistenceImpl extends BasePersistenceImpl<MemberRequ
 		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
 				(orderByComparator == null)) {
 			pagination = false;
-			finderPath = FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_R_S;
+			finderPath = _finderPathWithoutPaginationFindByR_S;
 			finderArgs = new Object[] { receiverUserId, status };
 		}
 		else {
-			finderPath = FINDER_PATH_WITH_PAGINATION_FIND_BY_R_S;
+			finderPath = _finderPathWithPaginationFindByR_S;
 			finderArgs = new Object[] {
 					receiverUserId, status,
 					
@@ -1334,7 +1281,7 @@ public class MemberRequestPersistenceImpl extends BasePersistenceImpl<MemberRequ
 	 */
 	@Override
 	public int countByR_S(long receiverUserId, int status) {
-		FinderPath finderPath = FINDER_PATH_COUNT_BY_R_S;
+		FinderPath finderPath = _finderPathCountByR_S;
 
 		Object[] finderArgs = new Object[] { receiverUserId, status };
 
@@ -1383,23 +1330,8 @@ public class MemberRequestPersistenceImpl extends BasePersistenceImpl<MemberRequ
 
 	private static final String _FINDER_COLUMN_R_S_RECEIVERUSERID_2 = "memberRequest.receiverUserId = ? AND ";
 	private static final String _FINDER_COLUMN_R_S_STATUS_2 = "memberRequest.status = ?";
-	public static final FinderPath FINDER_PATH_FETCH_BY_G_R_S = new FinderPath(MemberRequestModelImpl.ENTITY_CACHE_ENABLED,
-			MemberRequestModelImpl.FINDER_CACHE_ENABLED,
-			MemberRequestImpl.class, FINDER_CLASS_NAME_ENTITY, "fetchByG_R_S",
-			new String[] {
-				Long.class.getName(), Long.class.getName(),
-				Integer.class.getName()
-			},
-			MemberRequestModelImpl.GROUPID_COLUMN_BITMASK |
-			MemberRequestModelImpl.RECEIVERUSERID_COLUMN_BITMASK |
-			MemberRequestModelImpl.STATUS_COLUMN_BITMASK);
-	public static final FinderPath FINDER_PATH_COUNT_BY_G_R_S = new FinderPath(MemberRequestModelImpl.ENTITY_CACHE_ENABLED,
-			MemberRequestModelImpl.FINDER_CACHE_ENABLED, Long.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByG_R_S",
-			new String[] {
-				Long.class.getName(), Long.class.getName(),
-				Integer.class.getName()
-			});
+	private FinderPath _finderPathFetchByG_R_S;
+	private FinderPath _finderPathCountByG_R_S;
 
 	/**
 	 * Returns the member request where groupId = &#63; and receiverUserId = &#63; and status = &#63; or throws a {@link NoSuchMemberRequestException} if it could not be found.
@@ -1473,8 +1405,8 @@ public class MemberRequestPersistenceImpl extends BasePersistenceImpl<MemberRequ
 		Object result = null;
 
 		if (retrieveFromCache) {
-			result = finderCache.getResult(FINDER_PATH_FETCH_BY_G_R_S,
-					finderArgs, this);
+			result = finderCache.getResult(_finderPathFetchByG_R_S, finderArgs,
+					this);
 		}
 
 		if (result instanceof MemberRequest) {
@@ -1518,8 +1450,8 @@ public class MemberRequestPersistenceImpl extends BasePersistenceImpl<MemberRequ
 				List<MemberRequest> list = q.list();
 
 				if (list.isEmpty()) {
-					finderCache.putResult(FINDER_PATH_FETCH_BY_G_R_S,
-						finderArgs, list);
+					finderCache.putResult(_finderPathFetchByG_R_S, finderArgs,
+						list);
 				}
 				else {
 					if (list.size() > 1) {
@@ -1541,7 +1473,7 @@ public class MemberRequestPersistenceImpl extends BasePersistenceImpl<MemberRequ
 				}
 			}
 			catch (Exception e) {
-				finderCache.removeResult(FINDER_PATH_FETCH_BY_G_R_S, finderArgs);
+				finderCache.removeResult(_finderPathFetchByG_R_S, finderArgs);
 
 				throw processException(e);
 			}
@@ -1585,7 +1517,7 @@ public class MemberRequestPersistenceImpl extends BasePersistenceImpl<MemberRequ
 	 */
 	@Override
 	public int countByG_R_S(long groupId, long receiverUserId, int status) {
-		FinderPath finderPath = FINDER_PATH_COUNT_BY_G_R_S;
+		FinderPath finderPath = _finderPathCountByG_R_S;
 
 		Object[] finderArgs = new Object[] { groupId, receiverUserId, status };
 
@@ -1659,10 +1591,10 @@ public class MemberRequestPersistenceImpl extends BasePersistenceImpl<MemberRequ
 			MemberRequestImpl.class, memberRequest.getPrimaryKey(),
 			memberRequest);
 
-		finderCache.putResult(FINDER_PATH_FETCH_BY_KEY,
+		finderCache.putResult(_finderPathFetchByKey,
 			new Object[] { memberRequest.getKey() }, memberRequest);
 
-		finderCache.putResult(FINDER_PATH_FETCH_BY_G_R_S,
+		finderCache.putResult(_finderPathFetchByG_R_S,
 			new Object[] {
 				memberRequest.getGroupId(), memberRequest.getReceiverUserId(),
 				memberRequest.getStatus()
@@ -1741,9 +1673,9 @@ public class MemberRequestPersistenceImpl extends BasePersistenceImpl<MemberRequ
 		MemberRequestModelImpl memberRequestModelImpl) {
 		Object[] args = new Object[] { memberRequestModelImpl.getKey() };
 
-		finderCache.putResult(FINDER_PATH_COUNT_BY_KEY, args, Long.valueOf(1),
+		finderCache.putResult(_finderPathCountByKey, args, Long.valueOf(1),
 			false);
-		finderCache.putResult(FINDER_PATH_FETCH_BY_KEY, args,
+		finderCache.putResult(_finderPathFetchByKey, args,
 			memberRequestModelImpl, false);
 
 		args = new Object[] {
@@ -1752,9 +1684,9 @@ public class MemberRequestPersistenceImpl extends BasePersistenceImpl<MemberRequ
 				memberRequestModelImpl.getStatus()
 			};
 
-		finderCache.putResult(FINDER_PATH_COUNT_BY_G_R_S, args,
-			Long.valueOf(1), false);
-		finderCache.putResult(FINDER_PATH_FETCH_BY_G_R_S, args,
+		finderCache.putResult(_finderPathCountByG_R_S, args, Long.valueOf(1),
+			false);
+		finderCache.putResult(_finderPathFetchByG_R_S, args,
 			memberRequestModelImpl, false);
 	}
 
@@ -1763,16 +1695,16 @@ public class MemberRequestPersistenceImpl extends BasePersistenceImpl<MemberRequ
 		if (clearCurrent) {
 			Object[] args = new Object[] { memberRequestModelImpl.getKey() };
 
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_KEY, args);
-			finderCache.removeResult(FINDER_PATH_FETCH_BY_KEY, args);
+			finderCache.removeResult(_finderPathCountByKey, args);
+			finderCache.removeResult(_finderPathFetchByKey, args);
 		}
 
 		if ((memberRequestModelImpl.getColumnBitmask() &
-				FINDER_PATH_FETCH_BY_KEY.getColumnBitmask()) != 0) {
+				_finderPathFetchByKey.getColumnBitmask()) != 0) {
 			Object[] args = new Object[] { memberRequestModelImpl.getOriginalKey() };
 
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_KEY, args);
-			finderCache.removeResult(FINDER_PATH_FETCH_BY_KEY, args);
+			finderCache.removeResult(_finderPathCountByKey, args);
+			finderCache.removeResult(_finderPathFetchByKey, args);
 		}
 
 		if (clearCurrent) {
@@ -1782,20 +1714,20 @@ public class MemberRequestPersistenceImpl extends BasePersistenceImpl<MemberRequ
 					memberRequestModelImpl.getStatus()
 				};
 
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_G_R_S, args);
-			finderCache.removeResult(FINDER_PATH_FETCH_BY_G_R_S, args);
+			finderCache.removeResult(_finderPathCountByG_R_S, args);
+			finderCache.removeResult(_finderPathFetchByG_R_S, args);
 		}
 
 		if ((memberRequestModelImpl.getColumnBitmask() &
-				FINDER_PATH_FETCH_BY_G_R_S.getColumnBitmask()) != 0) {
+				_finderPathFetchByG_R_S.getColumnBitmask()) != 0) {
 			Object[] args = new Object[] {
 					memberRequestModelImpl.getOriginalGroupId(),
 					memberRequestModelImpl.getOriginalReceiverUserId(),
 					memberRequestModelImpl.getOriginalStatus()
 				};
 
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_G_R_S, args);
-			finderCache.removeResult(FINDER_PATH_FETCH_BY_G_R_S, args);
+			finderCache.removeResult(_finderPathCountByG_R_S, args);
+			finderCache.removeResult(_finderPathFetchByG_R_S, args);
 		}
 	}
 
@@ -1977,8 +1909,8 @@ public class MemberRequestPersistenceImpl extends BasePersistenceImpl<MemberRequ
 					memberRequestModelImpl.getReceiverUserId()
 				};
 
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_RECEIVERUSERID, args);
-			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_RECEIVERUSERID,
+			finderCache.removeResult(_finderPathCountByReceiverUserId, args);
+			finderCache.removeResult(_finderPathWithoutPaginationFindByReceiverUserId,
 				args);
 
 			args = new Object[] {
@@ -1986,44 +1918,41 @@ public class MemberRequestPersistenceImpl extends BasePersistenceImpl<MemberRequ
 					memberRequestModelImpl.getStatus()
 				};
 
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_R_S, args);
-			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_R_S,
-				args);
+			finderCache.removeResult(_finderPathCountByR_S, args);
+			finderCache.removeResult(_finderPathWithoutPaginationFindByR_S, args);
 
-			finderCache.removeResult(FINDER_PATH_COUNT_ALL, FINDER_ARGS_EMPTY);
-			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_ALL,
+			finderCache.removeResult(_finderPathCountAll, FINDER_ARGS_EMPTY);
+			finderCache.removeResult(_finderPathWithoutPaginationFindAll,
 				FINDER_ARGS_EMPTY);
 		}
 
 		else {
 			if ((memberRequestModelImpl.getColumnBitmask() &
-					FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_RECEIVERUSERID.getColumnBitmask()) != 0) {
+					_finderPathWithoutPaginationFindByReceiverUserId.getColumnBitmask()) != 0) {
 				Object[] args = new Object[] {
 						memberRequestModelImpl.getOriginalReceiverUserId()
 					};
 
-				finderCache.removeResult(FINDER_PATH_COUNT_BY_RECEIVERUSERID,
-					args);
-				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_RECEIVERUSERID,
+				finderCache.removeResult(_finderPathCountByReceiverUserId, args);
+				finderCache.removeResult(_finderPathWithoutPaginationFindByReceiverUserId,
 					args);
 
 				args = new Object[] { memberRequestModelImpl.getReceiverUserId() };
 
-				finderCache.removeResult(FINDER_PATH_COUNT_BY_RECEIVERUSERID,
-					args);
-				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_RECEIVERUSERID,
+				finderCache.removeResult(_finderPathCountByReceiverUserId, args);
+				finderCache.removeResult(_finderPathWithoutPaginationFindByReceiverUserId,
 					args);
 			}
 
 			if ((memberRequestModelImpl.getColumnBitmask() &
-					FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_R_S.getColumnBitmask()) != 0) {
+					_finderPathWithoutPaginationFindByR_S.getColumnBitmask()) != 0) {
 				Object[] args = new Object[] {
 						memberRequestModelImpl.getOriginalReceiverUserId(),
 						memberRequestModelImpl.getOriginalStatus()
 					};
 
-				finderCache.removeResult(FINDER_PATH_COUNT_BY_R_S, args);
-				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_R_S,
+				finderCache.removeResult(_finderPathCountByR_S, args);
+				finderCache.removeResult(_finderPathWithoutPaginationFindByR_S,
 					args);
 
 				args = new Object[] {
@@ -2031,8 +1960,8 @@ public class MemberRequestPersistenceImpl extends BasePersistenceImpl<MemberRequ
 						memberRequestModelImpl.getStatus()
 					};
 
-				finderCache.removeResult(FINDER_PATH_COUNT_BY_R_S, args);
-				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_R_S,
+				finderCache.removeResult(_finderPathCountByR_S, args);
+				finderCache.removeResult(_finderPathWithoutPaginationFindByR_S,
 					args);
 			}
 		}
@@ -2165,11 +2094,11 @@ public class MemberRequestPersistenceImpl extends BasePersistenceImpl<MemberRequ
 		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
 				(orderByComparator == null)) {
 			pagination = false;
-			finderPath = FINDER_PATH_WITHOUT_PAGINATION_FIND_ALL;
+			finderPath = _finderPathWithoutPaginationFindAll;
 			finderArgs = FINDER_ARGS_EMPTY;
 		}
 		else {
-			finderPath = FINDER_PATH_WITH_PAGINATION_FIND_ALL;
+			finderPath = _finderPathWithPaginationFindAll;
 			finderArgs = new Object[] { start, end, orderByComparator };
 		}
 
@@ -2258,7 +2187,7 @@ public class MemberRequestPersistenceImpl extends BasePersistenceImpl<MemberRequ
 	 */
 	@Override
 	public int countAll() {
-		Long count = (Long)finderCache.getResult(FINDER_PATH_COUNT_ALL,
+		Long count = (Long)finderCache.getResult(_finderPathCountAll,
 				FINDER_ARGS_EMPTY, this);
 
 		if (count == null) {
@@ -2271,12 +2200,11 @@ public class MemberRequestPersistenceImpl extends BasePersistenceImpl<MemberRequ
 
 				count = (Long)q.uniqueResult();
 
-				finderCache.putResult(FINDER_PATH_COUNT_ALL, FINDER_ARGS_EMPTY,
+				finderCache.putResult(_finderPathCountAll, FINDER_ARGS_EMPTY,
 					count);
 			}
 			catch (Exception e) {
-				finderCache.removeResult(FINDER_PATH_COUNT_ALL,
-					FINDER_ARGS_EMPTY);
+				finderCache.removeResult(_finderPathCountAll, FINDER_ARGS_EMPTY);
 
 				throw processException(e);
 			}
@@ -2317,6 +2245,101 @@ public class MemberRequestPersistenceImpl extends BasePersistenceImpl<MemberRequ
 	 * Initializes the member request persistence.
 	 */
 	public void afterPropertiesSet() {
+		_finderPathWithPaginationFindAll = new FinderPath(MemberRequestModelImpl.ENTITY_CACHE_ENABLED,
+				MemberRequestModelImpl.FINDER_CACHE_ENABLED,
+				MemberRequestImpl.class,
+				FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0]);
+
+		_finderPathWithoutPaginationFindAll = new FinderPath(MemberRequestModelImpl.ENTITY_CACHE_ENABLED,
+				MemberRequestModelImpl.FINDER_CACHE_ENABLED,
+				MemberRequestImpl.class,
+				FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll",
+				new String[0]);
+
+		_finderPathCountAll = new FinderPath(MemberRequestModelImpl.ENTITY_CACHE_ENABLED,
+				MemberRequestModelImpl.FINDER_CACHE_ENABLED, Long.class,
+				FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
+				new String[0]);
+
+		_finderPathFetchByKey = new FinderPath(MemberRequestModelImpl.ENTITY_CACHE_ENABLED,
+				MemberRequestModelImpl.FINDER_CACHE_ENABLED,
+				MemberRequestImpl.class, FINDER_CLASS_NAME_ENTITY,
+				"fetchByKey", new String[] { String.class.getName() },
+				MemberRequestModelImpl.KEY_COLUMN_BITMASK);
+
+		_finderPathCountByKey = new FinderPath(MemberRequestModelImpl.ENTITY_CACHE_ENABLED,
+				MemberRequestModelImpl.FINDER_CACHE_ENABLED, Long.class,
+				FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByKey",
+				new String[] { String.class.getName() });
+
+		_finderPathWithPaginationFindByReceiverUserId = new FinderPath(MemberRequestModelImpl.ENTITY_CACHE_ENABLED,
+				MemberRequestModelImpl.FINDER_CACHE_ENABLED,
+				MemberRequestImpl.class,
+				FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByReceiverUserId",
+				new String[] {
+					Long.class.getName(),
+					
+				Integer.class.getName(), Integer.class.getName(),
+					OrderByComparator.class.getName()
+				});
+
+		_finderPathWithoutPaginationFindByReceiverUserId = new FinderPath(MemberRequestModelImpl.ENTITY_CACHE_ENABLED,
+				MemberRequestModelImpl.FINDER_CACHE_ENABLED,
+				MemberRequestImpl.class,
+				FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION,
+				"findByReceiverUserId", new String[] { Long.class.getName() },
+				MemberRequestModelImpl.RECEIVERUSERID_COLUMN_BITMASK |
+				MemberRequestModelImpl.CREATEDATE_COLUMN_BITMASK);
+
+		_finderPathCountByReceiverUserId = new FinderPath(MemberRequestModelImpl.ENTITY_CACHE_ENABLED,
+				MemberRequestModelImpl.FINDER_CACHE_ENABLED, Long.class,
+				FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION,
+				"countByReceiverUserId", new String[] { Long.class.getName() });
+
+		_finderPathWithPaginationFindByR_S = new FinderPath(MemberRequestModelImpl.ENTITY_CACHE_ENABLED,
+				MemberRequestModelImpl.FINDER_CACHE_ENABLED,
+				MemberRequestImpl.class,
+				FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByR_S",
+				new String[] {
+					Long.class.getName(), Integer.class.getName(),
+					
+				Integer.class.getName(), Integer.class.getName(),
+					OrderByComparator.class.getName()
+				});
+
+		_finderPathWithoutPaginationFindByR_S = new FinderPath(MemberRequestModelImpl.ENTITY_CACHE_ENABLED,
+				MemberRequestModelImpl.FINDER_CACHE_ENABLED,
+				MemberRequestImpl.class,
+				FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByR_S",
+				new String[] { Long.class.getName(), Integer.class.getName() },
+				MemberRequestModelImpl.RECEIVERUSERID_COLUMN_BITMASK |
+				MemberRequestModelImpl.STATUS_COLUMN_BITMASK |
+				MemberRequestModelImpl.CREATEDATE_COLUMN_BITMASK);
+
+		_finderPathCountByR_S = new FinderPath(MemberRequestModelImpl.ENTITY_CACHE_ENABLED,
+				MemberRequestModelImpl.FINDER_CACHE_ENABLED, Long.class,
+				FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByR_S",
+				new String[] { Long.class.getName(), Integer.class.getName() });
+
+		_finderPathFetchByG_R_S = new FinderPath(MemberRequestModelImpl.ENTITY_CACHE_ENABLED,
+				MemberRequestModelImpl.FINDER_CACHE_ENABLED,
+				MemberRequestImpl.class, FINDER_CLASS_NAME_ENTITY,
+				"fetchByG_R_S",
+				new String[] {
+					Long.class.getName(), Long.class.getName(),
+					Integer.class.getName()
+				},
+				MemberRequestModelImpl.GROUPID_COLUMN_BITMASK |
+				MemberRequestModelImpl.RECEIVERUSERID_COLUMN_BITMASK |
+				MemberRequestModelImpl.STATUS_COLUMN_BITMASK);
+
+		_finderPathCountByG_R_S = new FinderPath(MemberRequestModelImpl.ENTITY_CACHE_ENABLED,
+				MemberRequestModelImpl.FINDER_CACHE_ENABLED, Long.class,
+				FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByG_R_S",
+				new String[] {
+					Long.class.getName(), Long.class.getName(),
+					Integer.class.getName()
+				});
 	}
 
 	public void destroy() {

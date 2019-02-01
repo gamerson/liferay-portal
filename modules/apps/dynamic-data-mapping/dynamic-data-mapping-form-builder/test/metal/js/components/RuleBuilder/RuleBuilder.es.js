@@ -1,13 +1,75 @@
-import '../../components/RuleEditor/__fixtures__/RuleEditorMockField.es';
+import '../../__fixtures__/MockField.es';
 import dom from 'metal-dom';
 import RuleBuilder from 'source/components/RuleBuilder/RuleBuilder.es';
 
 const spritemap = 'icons.svg';
 let component;
 
+const functionsMetadata = {
+	radio: [
+		{name: 'contains',
+			parameterTypes: ['text', 'text'],
+			returnType: 'boolean',
+			value: 'Contains'},
+		{name: 'equals-to',
+			parameterTypes: ['text', 'text'],
+			returnType: 'boolean',
+			value: 'Is equal to'},
+		{name: 'is-empty',
+			parameterTypes: ['text'],
+			returnType: 'boolean',
+			value: 'Is empty'},
+		{name: 'not-contains',
+			parameterTypes: ['text', 'text'],
+			returnType: 'boolean',
+			value: 'Does not contain'},
+		{name: 'not-equals-to',
+			parameterTypes: ['text', 'text'],
+			returnType: 'boolean',
+			value: 'Is not equal to'},
+		{name: 'not-is-empty',
+			parameterTypes: ['text'],
+			returnType: 'boolean',
+			value: 'Is not empty'}
+	],
+	text: [
+		{name: 'contains',
+			parameterTypes: ['text', 'text'],
+			returnType: 'boolean',
+			value: 'Contains'},
+		{name: 'equals-to',
+			parameterTypes: ['text', 'text'],
+			returnType: 'boolean',
+			value: 'Is equal to'},
+		{name: 'is-empty',
+			parameterTypes: ['text'],
+			returnType: 'boolean',
+			value: 'Is empty'},
+		{name: 'not-contains',
+			parameterTypes: ['text', 'text'],
+			returnType: 'boolean',
+			value: 'Does not contain'},
+		{name: 'not-equals-to',
+			parameterTypes: ['text', 'text'],
+			returnType: 'boolean',
+			value: 'Is not equal to'},
+		{name: 'not-is-empty',
+			parameterTypes: ['text'],
+			returnType: 'boolean',
+			value: 'Is not empty'}
+	],
+	user: [
+		{name: 'belongs-to',
+			parameterTypes: ['text'],
+			returnType: 'boolean',
+			value: 'Belongs to'}
+	]
+};
+
 const baseConfig = {
 	dataProviderInstanceParameterSettingsURL: '/o/dynamic-data-mapping-form-builder-data-provider-instances/',
 	dataProviderInstancesURL: '/o/data-provider/',
+	functionsMetadata,
 	functionsURL: '/o/dynamic-data-mapping-form-builder-functions/',
 	mode: 'view',
 	pages: [
@@ -57,6 +119,30 @@ const baseConfig = {
 				}
 			],
 			['logical-operator']: 'OR'
+		},
+		{
+			actions: [
+				{
+					action: 'show',
+					target: 'text1'
+				}
+			],
+			conditions: [
+				{
+					operands: [
+						{
+							type: 'field',
+							value: 'text1'
+						},
+						{
+							type: 'field',
+							value: 'text2'
+						}
+					],
+					operator: 'not-equals-to'
+				}
+			],
+			['logical-operator']: 'AND'
 		}
 	],
 	spritemap,
@@ -73,7 +159,19 @@ describe(
 			() => {
 				jest.useFakeTimers();
 
+				fetch.mockResponse(
+					JSON.stringify(
+						[]
+					)
+				);
+
 				dom.enterDocument('<button id="addFieldButton" class="hide"></button>');
+
+				fetch.mockResponse(
+					JSON.stringify(
+						[]
+					)
+				);
 
 				component = new RuleBuilder(baseConfig);
 			}
@@ -135,6 +233,26 @@ describe(
 		);
 
 		it(
+			'should change the view mode from view to edit',
+			() => {
+				jest.runAllTimers();
+
+				jest.useFakeTimers();
+
+				component.refs.RuleList.emit(
+					'ruleEdited',
+					{
+						ruleId: 0
+					}
+				);
+
+				jest.runAllTimers();
+
+				expect(component.state.mode).toEqual('edit');
+			}
+		);
+
+		it(
 			'should receive ruleCancel event to discard a rule creation',
 			() => {
 				jest.runAllTimers();
@@ -165,6 +283,61 @@ describe(
 				component = new RuleBuilder(baseConfig);
 
 				expect(spy).toHaveBeenCalledWith(component.props.url, expect.anything());
+
+				spy.mockRestore();
+			}
+		);
+
+		it(
+			'should be able to edit a rule when more than one is available in the Rules list',
+			() => {
+
+				component = new RuleBuilder(baseConfig);
+
+				jest.useFakeTimers();
+
+				component.refs.RuleList.emit(
+					'ruleEdited',
+					{
+						ruleId: 1
+					}
+				);
+
+				jest.runAllTimers();
+
+				expect(component.state.mode).toEqual('edit');
+
+			}
+		);
+
+		it(
+			'should be able to edit a rule when there\'s only one rule available in the Rules list',
+			() => {
+
+				component = new RuleBuilder(
+					{
+						...baseConfig,
+						rules: [
+							{
+								...baseConfig.rules[0]
+							}
+						]
+					}
+				);
+
+				jest.useFakeTimers();
+
+				component.refs.RuleList.emit(
+					'ruleEdited',
+					{
+						ruleId: 0
+					}
+				);
+
+				jest.runAllTimers();
+
+				expect(component.state.mode).toEqual('edit');
+
 			}
 		);
 	}

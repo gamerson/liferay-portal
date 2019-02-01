@@ -14,6 +14,8 @@
 
 package com.liferay.change.tracking;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.change.tracking.exception.CTException;
 import com.liferay.change.tracking.model.CTEntry;
 import com.liferay.portal.kernel.dao.orm.QueryDefinition;
@@ -28,7 +30,20 @@ import java.util.Optional;
  * @author Daniel Kocsis
  * @review
  */
+@ProviderType
 public interface CTManager {
+
+	/**
+	 * Retrieves a model change in the context of the current user's active
+	 * change collection.
+	 *
+	 * @param  userId the primary key of the user
+	 * @param  classNameId the primary key of the changed version model's class
+	 * @param  classPK the primary key of the changed version model
+	 * @return the change tracking entry representing the model change
+	 */
+	public Optional<CTEntry> getActiveCTCollectionCTEntryOptional(
+		long userId, long classNameId, long classPK);
 
 	/**
 	 * Retrieves the latest model change in the context of the current user's
@@ -69,8 +84,9 @@ public interface CTManager {
 		QueryDefinition<CTEntry> queryDefinition);
 
 	/**
-	 * Retrieves a model change in the context of the current user's active
-	 * change collection.
+	 * Retrieves a model change, first looking for it in the current user's
+	 * active change collection, and if it doesn't exist, looking for it in the
+	 * production change collection
 	 *
 	 * @param  userId the primary key of the user
 	 * @param  classNameId the primary key of the changed version model's class
@@ -78,6 +94,17 @@ public interface CTManager {
 	 * @return the change tracking entry representing the model change
 	 */
 	public Optional<CTEntry> getModelChangeCTEntryOptional(
+		long userId, long classNameId, long classPK);
+
+	/**
+	 * Retrieves a model change from the production change collection.
+	 *
+	 * @param  userId the primary key of the user
+	 * @param  classNameId the primary key of the changed version model's class
+	 * @param  classPK the primary key of the changed version model
+	 * @return the change tracking entry representing the model change
+	 */
+	public Optional<CTEntry> getProductionCTCollectionCTEntryOptional(
 		long userId, long classNameId, long classPK);
 
 	/**
@@ -94,5 +121,16 @@ public interface CTManager {
 	public Optional<CTEntry> registerModelChange(
 			long userId, long classNameId, long classPK, long resourcePrimKey)
 		throws CTException;
+
+	/**
+	 * Unregisters a model change from the change tracking framework.
+	 *
+	 * @param  userId the primary key of the user
+	 * @param  classNameId the primary key of the changed version model's class
+	 * @param  classPK the primary key of the changed version model
+	 * @return the change tracking entry that was deleted
+	 */
+	public Optional<CTEntry> unregisterModelChange(
+		long userId, long classNameId, long classPK);
 
 }

@@ -13,7 +13,6 @@ allprojects {
 
 	formatSource {
 		autoFix = true
-		showDocumentation = true
 		showStatusUpdates = false
 	}
 

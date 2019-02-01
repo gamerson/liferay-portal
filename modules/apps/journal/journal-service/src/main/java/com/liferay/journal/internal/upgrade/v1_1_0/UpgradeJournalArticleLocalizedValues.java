@@ -163,20 +163,19 @@ public class UpgradeJournalArticleLocalizedValues extends UpgradeProcess {
 					if ((localizedTitle != null) &&
 						(localizedTitle.length() > _MAX_LENGTH_TITLE)) {
 
-						localizedTitle = localizedTitle.substring(
-							0, _MAX_LENGTH_TITLE);
+						localizedTitle = StringUtil.shorten(
+							localizedTitle, _MAX_LENGTH_TITLE);
 
 						_log(articleId, "title");
 					}
 
-					if ((localizedDescription != null) &&
-						(localizedDescription.length() >
-							_MAX_LENGTH_DESCRIPTION)) {
+					if (localizedDescription != null) {
+						String safeLocalizedDescription = _truncate(
+							localizedDescription, _MAX_LENGTH_DESCRIPTION);
 
-						localizedDescription = localizedDescription.substring(
-							0, _MAX_LENGTH_DESCRIPTION);
-
-						_log(articleId, "description");
+						if (localizedDescription != safeLocalizedDescription) {
+							_log(articleId, "description");
+						}
 					}
 
 					ps2.setLong(1, _increment());
@@ -221,6 +220,22 @@ public class UpgradeJournalArticleLocalizedValues extends UpgradeProcess {
 			StringBundler.concat(
 				"Truncated the ", columnName, " value for article ", articleId,
 				" because it is too long"));
+	}
+
+	private String _truncate(String text, int maxBytes) throws Exception {
+		byte[] valueBytes = text.getBytes(StringPool.UTF8);
+
+		if (valueBytes.length <= maxBytes) {
+			return text;
+		}
+
+		byte[] convertedValue = new byte[maxBytes];
+
+		System.arraycopy(valueBytes, 0, convertedValue, 0, maxBytes);
+
+		String returnValue = new String(convertedValue, StringPool.UTF8);
+
+		return StringUtil.shorten(returnValue, returnValue.length() - 1);
 	}
 
 	private static final int _MAX_LENGTH_DESCRIPTION = 4000;

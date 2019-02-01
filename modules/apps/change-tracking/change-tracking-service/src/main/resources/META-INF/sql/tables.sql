@@ -31,3 +31,12 @@ create table CTEntry (
 	classPK LONG,
 	resourcePrimKey LONG
 );
+
+create table CTProcess (
+	ctProcessId LONG not null primary key,
+	companyId LONG,
+	userId LONG,
+	createDate DATE null,
+	ctCollectionId LONG,
+	backgroundTaskId LONG
+);

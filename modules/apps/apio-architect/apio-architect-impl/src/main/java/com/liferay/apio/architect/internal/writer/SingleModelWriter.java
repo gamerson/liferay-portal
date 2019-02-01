@@ -14,6 +14,7 @@
 
 package com.liferay.apio.architect.internal.writer;
 
+import static com.liferay.apio.architect.internal.url.URLCreator.createActionURL;
 import static com.liferay.apio.architect.internal.writer.util.WriterUtil.getFieldsWriter;
 import static com.liferay.apio.architect.internal.writer.util.WriterUtil.getPathOptional;
 
@@ -211,6 +212,19 @@ public class SingleModelWriter<T> {
 					_singleModelMessageMapper.mapEmbeddedActionMethod(
 						jsonObjectBuilder, actionJSONObjectBuilder,
 						embeddedPathElements, actionSemantics.getHTTPMethod());
+
+					Optional<String> actionURLOptional = createActionURL(
+						_requestInfo.getApplicationURL(),
+						actionSemantics.getResource(),
+						actionSemantics.getActionName());
+
+					actionURLOptional.ifPresent(
+						actionUrl ->
+							_singleModelMessageMapper.
+								mapEmbeddedActionTargetURL(
+									jsonObjectBuilder, actionJSONObjectBuilder,
+									embeddedPathElements, actionUrl)
+					);
 
 					_singleModelMessageMapper.onFinishEmbeddedAction(
 						jsonObjectBuilder, actionJSONObjectBuilder,

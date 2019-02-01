@@ -14,9 +14,9 @@
 
 package com.liferay.source.formatter.util;
 
+import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.util.ArrayUtil;
-import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.source.formatter.checks.util.BNDSourceUtil;
 import com.liferay.source.formatter.checks.util.SourceUtil;
@@ -85,7 +85,13 @@ public class ModulesPropertiesUtil {
 						return FileVisitResult.SKIP_SUBTREE;
 					}
 
-					Path path = dirPath.resolve("bnd.bnd");
+					Path path = dirPath.resolve(".gitrepo");
+
+					if (Files.exists(path)) {
+						return FileVisitResult.SKIP_SUBTREE;
+					}
+
+					path = dirPath.resolve("bnd.bnd");
 
 					if (Files.exists(path)) {
 						files.add(path.toFile());

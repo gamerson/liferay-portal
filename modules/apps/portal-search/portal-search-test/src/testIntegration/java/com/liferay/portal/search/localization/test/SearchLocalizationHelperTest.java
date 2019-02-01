@@ -19,6 +19,9 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.GroupConstants;
+import com.liferay.portal.kernel.search.Document;
+import com.liferay.portal.kernel.search.DocumentImpl;
+import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
@@ -36,8 +39,10 @@ import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import org.junit.After;
@@ -69,6 +74,28 @@ public class SearchLocalizationHelperTest {
 	@After
 	public void tearDown() {
 		CompanyThreadLocal.setCompanyId(_companyId);
+	}
+
+	@Test
+	public void testAddLocalizedField() {
+		Map<Locale, String> map = new HashMap<Locale, String>() {
+			{
+				put(LocaleUtil.BRAZIL, "exemplo");
+				put(LocaleUtil.SPAIN, "ejemplo");
+			}
+		};
+		Document document = new DocumentImpl();
+
+		searchLocalizationHelper.addLocalizedField(
+			document, "test", LocaleUtil.BRAZIL, map);
+
+		Assert.assertEquals("exemplo", document.get("test"));
+		Assert.assertEquals(
+			"exemplo",
+			document.get(Field.getLocalizedName(LocaleUtil.BRAZIL, "test")));
+		Assert.assertEquals(
+			"ejemplo",
+			document.get(Field.getLocalizedName(LocaleUtil.SPAIN, "test")));
 	}
 
 	@Test

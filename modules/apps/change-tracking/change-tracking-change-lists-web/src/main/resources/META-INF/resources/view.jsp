@@ -16,10 +16,24 @@
 
 <%@ include file="/init.jsp" %>
 
-<div class="change-lists-sheet sheet sheet-lg">
-	<div class="sheet-header">
-		<h2 class="sheet-title">Change Lists</h2>
+<%
+String navigation = ParamUtil.get(renderRequest, "navigation", "overview");
+%>
 
-		<div class="sheet-text">This is only a placeholder for what's later be added to the change lists screen.</div>
-	</div>
-</div>
+<clay:navigation-bar
+	inverted="<%= true %>"
+	navigationItems="<%=
+		new JSPNavigationItemList(pageContext) {
+			{
+				add(
+					navigationItem -> {
+						navigationItem.setActive(navigation.equals("overview"));
+						navigationItem.setHref(renderResponse.createRenderURL());
+						navigationItem.setLabel(LanguageUtil.get(request, "overview"));
+					});
+			}
+		}
+	%>"
+/>
+
+<liferay-util:include page="/overview.jsp" servletContext="<%= application %>" />

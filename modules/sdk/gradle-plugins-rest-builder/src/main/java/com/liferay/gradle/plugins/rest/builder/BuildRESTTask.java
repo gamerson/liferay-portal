@@ -24,6 +24,7 @@ import java.util.List;
 
 import org.gradle.api.tasks.InputFile;
 import org.gradle.api.tasks.JavaExec;
+import org.gradle.api.tasks.Optional;
 
 /**
  * @author Peter Shin
@@ -42,28 +43,56 @@ public class BuildRESTTask extends JavaExec {
 	}
 
 	@InputFile
-	public File getInputFile() {
-		return GradleUtil.toFile(getProject(), _inputFile);
+	@Optional
+	public File getCopyrightFile() {
+		return GradleUtil.toFile(getProject(), _copyrightFile);
 	}
 
-	public void setInputFile(Object inputFile) {
-		_inputFile = inputFile;
+	@InputFile
+	@Optional
+	public File getRESTConfigFile() {
+		return GradleUtil.toFile(getProject(), _restConfigFile);
+	}
+
+	@InputFile
+	public File getRESTOpenAPIFile() {
+		return GradleUtil.toFile(getProject(), _restOpenAPIFile);
+	}
+
+	public void setCopyrightFile(Object copyrightFile) {
+		_copyrightFile = copyrightFile;
+	}
+
+	public void setRESTConfigFile(Object restConfigFile) {
+		_restConfigFile = restConfigFile;
+	}
+
+	public void setRESTOpenAPIFile(Object restOpenAPIFile) {
+		_restOpenAPIFile = restOpenAPIFile;
 	}
 
 	private List<String> _getCompleteArgs() {
 		List<String> args = new ArrayList<>(getArgs());
 
-		args.add("input.file=" + _relativize(getInputFile()));
+		args.add("copyright.file=" + _relativize(getCopyrightFile()));
+		args.add("rest.config.file=" + _relativize(getRESTConfigFile()));
+		args.add("rest.openapi.file=" + _relativize(getRESTOpenAPIFile()));
 
 		return args;
 	}
 
 	private String _relativize(File file) {
+		if (file == null) {
+			return null;
+		}
+
 		String relativePath = FileUtil.relativize(file, getWorkingDir());
 
 		return relativePath.replace('\\', '/');
 	}
 
-	private Object _inputFile;
+	private Object _copyrightFile;
+	private Object _restConfigFile;
+	private Object _restOpenAPIFile;
 
 }

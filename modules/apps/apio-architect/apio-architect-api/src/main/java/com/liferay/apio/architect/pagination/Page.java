@@ -85,9 +85,7 @@ public interface Page<T> {
 
 	/**
 	 * The page's resource. It can be either a {@link Resource.Paged} or a
-	 * {@link Resource.Nested}
-	 *
-	 * @review
+	 * {@link Resource.Nested}.
 	 */
 	public Resource getResource();
 

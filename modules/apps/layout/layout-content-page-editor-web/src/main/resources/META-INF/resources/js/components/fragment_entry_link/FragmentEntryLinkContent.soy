@@ -1,0 +1,17 @@
+{namespace com.liferay.layout.content.page.editor.web.FragmentEntryLinkContent}
+
+/**
+ * FragmentEntryLink
+ */
+{template .render}
+	{@param? fragmentEntryLinkId: string}
+
+	<div
+		class="fragment-entry-link-content"
+		data-fragment-entry-link-id="{$fragmentEntryLinkId}"
+		ref="content"
+	>
+		<div class="loading-animation"></div>
+	</div>
+
+{/template}

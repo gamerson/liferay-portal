@@ -23,6 +23,7 @@ import com.liferay.document.library.kernel.model.DLFileEntryConstants;
 import com.liferay.document.library.kernel.model.DLFolderConstants;
 import com.liferay.document.library.kernel.service.DLAppServiceUtil;
 import com.liferay.petra.function.UnsafeRunnable;
+import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.configuration.test.util.ConfigurationTemporarySwapper;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.repository.model.FileEntry;
@@ -71,7 +72,7 @@ public class DLFileEntryAutoTaggerTest {
 
 	@Test
 	public void testAutoTagsABMPImage() throws Exception {
-		_withAutoTaggerEnabled(
+		_withTensorflowAutoTagProviderEnabled(
 			() -> {
 				FileEntry fileEntry = DLAppServiceUtil.addFileEntry(
 					_serviceContext.getScopeGroupId(),
@@ -92,7 +93,7 @@ public class DLFileEntryAutoTaggerTest {
 
 	@Test
 	public void testAutoTagsAJPEGImage() throws Exception {
-		_withAutoTaggerEnabled(
+		_withTensorflowAutoTagProviderEnabled(
 			() -> {
 				FileEntry fileEntry = DLAppServiceUtil.addFileEntry(
 					_serviceContext.getScopeGroupId(),
@@ -112,7 +113,7 @@ public class DLFileEntryAutoTaggerTest {
 
 	@Test
 	public void testAutoTagsAPNGImage() throws Exception {
-		_withAutoTaggerEnabled(
+		_withTensorflowAutoTagProviderEnabled(
 			() -> {
 				FileEntry fileEntry = DLAppServiceUtil.addFileEntry(
 					_serviceContext.getScopeGroupId(),
@@ -140,19 +141,22 @@ public class DLFileEntryAutoTaggerTest {
 		throw new AssertionError("The asset entry was not tagged with " + tag);
 	}
 
-	private void _withAutoTaggerEnabled(
+	private void _withTensorflowAutoTagProviderEnabled(
 			UnsafeRunnable<Exception> unsafeRunnable)
 		throws Exception {
+
+		StringBundler sb = new StringBundler(3);
+
+		sb.append("com.liferay.document.library.asset.auto.tagger.tensorflow.");
+		sb.append("internal.configuration.");
+		sb.append("TensorFlowImageAssetAutoTagProviderCompanyConfiguration");
 
 		Dictionary<String, Object> dictionary = new HashMapDictionary<>();
 
 		dictionary.put("enabled", true);
 
 		try (ConfigurationTemporarySwapper configurationTemporarySwapper =
-				new ConfigurationTemporarySwapper(
-					"com.liferay.asset.auto.tagger.internal.configuration." +
-						"AssetAutoTaggerSystemConfiguration",
-					dictionary)) {
+				new ConfigurationTemporarySwapper(sb.toString(), dictionary)) {
 
 			unsafeRunnable.run();
 		}

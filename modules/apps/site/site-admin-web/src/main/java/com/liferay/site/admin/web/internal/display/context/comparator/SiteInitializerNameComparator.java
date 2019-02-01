@@ -15,13 +15,13 @@
 package com.liferay.site.admin.web.internal.display.context.comparator;
 
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.site.admin.web.internal.display.context.SiteInitializerItemDisplayContext;
+import com.liferay.site.admin.web.internal.util.SiteInitializerItem;
 
 /**
  * @author Marco Leo
  */
 public class SiteInitializerNameComparator
-	extends OrderByComparator<SiteInitializerItemDisplayContext> {
+	extends OrderByComparator<SiteInitializerItem> {
 
 	public SiteInitializerNameComparator() {
 		this(false);
@@ -33,11 +33,11 @@ public class SiteInitializerNameComparator
 
 	@Override
 	public int compare(
-		SiteInitializerItemDisplayContext siteInitializerItemDisplayContext1,
-		SiteInitializerItemDisplayContext siteInitializerItemDisplayContext2) {
+		SiteInitializerItem siteInitializerItem1,
+		SiteInitializerItem siteInitializerItem2) {
 
-		String name1 = siteInitializerItemDisplayContext1.getName();
-		String name2 = siteInitializerItemDisplayContext2.getName();
+		String name1 = siteInitializerItem1.getName();
+		String name2 = siteInitializerItem2.getName();
 
 		int value = name1.compareToIgnoreCase(name2);
 

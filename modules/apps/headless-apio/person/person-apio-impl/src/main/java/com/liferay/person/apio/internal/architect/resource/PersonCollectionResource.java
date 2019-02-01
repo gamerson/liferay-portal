@@ -18,7 +18,6 @@ import static com.liferay.portal.apio.idempotent.Idempotent.idempotent;
 
 import com.liferay.apio.architect.credentials.Credentials;
 import com.liferay.apio.architect.file.BinaryFile;
-import com.liferay.apio.architect.functional.Try;
 import com.liferay.apio.architect.pagination.PageItems;
 import com.liferay.apio.architect.pagination.Pagination;
 import com.liferay.apio.architect.representor.Representor;
@@ -51,13 +50,14 @@ import com.liferay.portal.kernel.transaction.Propagation;
 import com.liferay.portal.kernel.transaction.TransactionConfig;
 import com.liferay.portal.kernel.transaction.TransactionInvokerUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
+import com.liferay.portal.kernel.util.StreamUtil;
 import com.liferay.portal.kernel.util.comparator.UserLastNameComparator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.site.apio.architect.identifier.WebSiteIdentifier;
 
+import io.vavr.control.Try;
+
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 
 import java.util.Calendar;
 import java.util.List;
@@ -65,6 +65,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotFoundException;
 
 import org.osgi.service.component.annotations.Component;
@@ -139,11 +140,9 @@ public class PersonCollectionResource
 				_transactionConfig,
 				() -> {
 					long prefixId = _getPrefixId(
-						personCreatorForm.getHonorificPrefix(),
-						ListTypeConstants.CONTACT_PREFIX, 0);
-					long suffixId = _getPrefixId(
-						personCreatorForm.getHonorificSuffix(),
-						ListTypeConstants.CONTACT_SUFFIX, 0);
+						personCreatorForm.getHonorificPrefix(), 0);
+					long suffixId = _getSuffixId(
+						personCreatorForm.getHonorificSuffix(), 0);
 
 					User user = _userLocalService.addUser(
 						UserConstants.USER_ID_DEFAULT,
@@ -160,7 +159,8 @@ public class PersonCollectionResource
 						personCreatorForm.getJobTitle(), null, null, null, null,
 						false, new ServiceContext());
 
-					byte[] bytes = _getImageBytes(personCreatorForm);
+					byte[] bytes = _getImageBytes(
+						personCreatorForm.getImageBinaryFile());
 
 					_userLocalService.updatePortrait(user.getUserId(), bytes);
 
@@ -172,30 +172,20 @@ public class PersonCollectionResource
 		}
 	}
 
-	private String _getAlternateName(
-		PersonUpdaterForm personUpdaterForm, User user) {
+	@SuppressWarnings("Convert2MethodRef")
+	private byte[] _getImageBytes(BinaryFile binaryFile) {
+		return Try.of(
+			() -> binaryFile.getInputStream()
+		).mapTry(
+			inputStream -> {
+				ByteArrayOutputStream byteArrayOutputStream =
+					new ByteArrayOutputStream();
 
-		if (personUpdaterForm.getAlternateName() == null) {
-			return user.getScreenName();
-		}
+				StreamUtil.transfer(inputStream, byteArrayOutputStream);
 
-		return personUpdaterForm.getAlternateName();
-	}
-
-	private <T> T _getDefaultValue(Optional<T> optional, T defaultValue) {
-		return optional.orElse(defaultValue);
-	}
-
-	private byte[] _getImageBytes(PersonCreatorForm personCreatorForm) {
-		return Try.fromFallible(
-			personCreatorForm::getImageBinaryFile
-		).map(
-			BinaryFile::getInputStream
-		).map(
-			this::_readInputStream
-		).orElse(
-			null
-		);
+				return byteArrayOutputStream.toByteArray();
+			}
+		).getOrNull();
 	}
 
 	private PageItems<UserWrapper> _getPageItems(
@@ -243,15 +233,35 @@ public class PersonCollectionResource
 		return new PageItems<>(userWrappers, count);
 	}
 
-	private long _getPrefixId(
-		String honorificTitle, String className, long defaultTitle) {
+	private long _getPrefixId(String honorificTitle, long defaultTitle) {
+		if (honorificTitle == null) {
+			return defaultTitle;
+		}
 
-		return Try.fromFallible(
-			() -> _listTypeService.getListType(honorificTitle, className)
+		return Optional.ofNullable(
+			_listTypeService.getListType(
+				honorificTitle, ListTypeConstants.CONTACT_PREFIX)
 		).map(
 			ListTypeModel::getListTypeId
-		).orElse(
-			defaultTitle
+		).orElseThrow(
+			() -> new BadRequestException(
+				"Unable to find honorific title: " + honorificTitle)
+		);
+	}
+
+	private long _getSuffixId(String honorificTitle, long defaultTitle) {
+		if (honorificTitle == null) {
+			return defaultTitle;
+		}
+
+		return Optional.ofNullable(
+			_listTypeService.getListType(
+				honorificTitle, ListTypeConstants.CONTACT_SUFFIX)
+		).map(
+			ListTypeModel::getListTypeId
+		).orElseThrow(
+			() -> new BadRequestException(
+				"Unable to find honorific title: " + honorificTitle)
 		);
 	}
 
@@ -265,24 +275,6 @@ public class PersonCollectionResource
 		User user = _userService.getUserById(userId);
 
 		return new UserWrapper(user, themeDisplay);
-	}
-
-	private byte[] _readInputStream(InputStream inputStream)
-		throws IOException {
-
-		ByteArrayOutputStream byteArrayOutputStream =
-			new ByteArrayOutputStream();
-
-		byte[] bytes = new byte[1024];
-		int value = -1;
-
-		while ((value = inputStream.read(bytes)) != -1) {
-			byteArrayOutputStream.write(bytes, 0, value);
-		}
-
-		byteArrayOutputStream.flush();
-
-		return byteArrayOutputStream.toByteArray();
 	}
 
 	private List<UserWrapper> _toUserWrappers(
@@ -306,46 +298,44 @@ public class PersonCollectionResource
 
 		User user = _userService.getUserById(userId);
 
+		String oldAlternateName = user.getScreenName();
+
 		Contact contact = user.getContact();
 
 		long prefixId = _getPrefixId(
-			personUpdaterForm.getHonorificPrefix(),
-			ListTypeConstants.CONTACT_PREFIX, contact.getPrefixId());
-		long suffixId = _getPrefixId(
-			personUpdaterForm.getHonorificSuffix(),
-			ListTypeConstants.CONTACT_SUFFIX, contact.getSuffixId());
-
-		String alternateName = _getAlternateName(personUpdaterForm, user);
+			personUpdaterForm.getHonorificPrefix(), contact.getPrefixId());
+		long suffixId = _getSuffixId(
+			personUpdaterForm.getHonorificSuffix(), contact.getSuffixId());
 
 		Calendar calendar = Calendar.getInstance();
 
 		calendar.setTime(user.getBirthday());
 
+		int oldBirthdayMonth = calendar.get(Calendar.MONTH);
+		int oldBirthdayDay = calendar.get(Calendar.DATE);
+		int oldBirthdayYear = calendar.get(Calendar.YEAR);
+
+		String oldJobTitle = user.getJobTitle();
+
 		user = _userLocalService.updateUser(
 			user.getUserId(), user.getPassword(),
 			personUpdaterForm.getPassword(), personUpdaterForm.getPassword(),
 			false, user.getReminderQueryQuestion(),
-			user.getReminderQueryAnswer(), alternateName,
+			user.getReminderQueryAnswer(),
+			personUpdaterForm.getAlternateName(oldAlternateName),
 			personUpdaterForm.getEmail(), user.getFacebookId(),
 			user.getOpenId(), false, null, user.getLanguageId(),
 			user.getTimeZoneId(), user.getGreeting(), user.getComments(),
 			personUpdaterForm.getGivenName(), user.getMiddleName(),
 			personUpdaterForm.getFamilyName(), prefixId, suffixId, true,
-			_getDefaultValue(
-				personUpdaterForm.getBirthdayMonthOptional(),
-				calendar.get(Calendar.MONTH)),
-			_getDefaultValue(
-				personUpdaterForm.getBirthdayDayOptional(),
-				calendar.get(Calendar.DATE)),
-			_getDefaultValue(
-				personUpdaterForm.getBirthdayYearOptional(),
-				calendar.get(Calendar.YEAR)),
+			personUpdaterForm.getBirthdayMonth(oldBirthdayMonth),
+			personUpdaterForm.getBirthdayDay(oldBirthdayDay),
+			personUpdaterForm.getBirthdayYear(oldBirthdayYear),
 			contact.getSmsSn(), contact.getFacebookSn(), contact.getJabberSn(),
 			contact.getSkypeSn(), contact.getTwitterSn(),
-			_getDefaultValue(
-				personUpdaterForm.getJobTitleOptional(), user.getJobTitle()),
-			user.getGroupIds(), user.getOrganizationIds(), user.getRoleIds(),
-			null, user.getUserGroupIds(), new ServiceContext());
+			personUpdaterForm.getJobTitle(oldJobTitle), user.getGroupIds(),
+			user.getOrganizationIds(), user.getRoleIds(), null,
+			user.getUserGroupIds(), new ServiceContext());
 
 		return new UserWrapper(user, themeDisplay);
 	}

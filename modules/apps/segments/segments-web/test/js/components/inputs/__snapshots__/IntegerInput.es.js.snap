@@ -1,0 +1,12 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`IntegerInput should render type integer number 1`] = `
+<DocumentFragment>
+  <input
+    class="criterion-input form-control"
+    data-testid="integer-number"
+    type="number"
+    value="1"
+  />
+</DocumentFragment>
+`;

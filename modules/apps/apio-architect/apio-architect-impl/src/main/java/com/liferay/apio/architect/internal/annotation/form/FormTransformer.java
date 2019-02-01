@@ -27,6 +27,7 @@ import com.liferay.apio.architect.annotation.Vocabulary.RelativeURL;
 import com.liferay.apio.architect.file.BinaryFile;
 import com.liferay.apio.architect.form.Form;
 import com.liferay.apio.architect.form.Form.Builder;
+import com.liferay.apio.architect.form.Form.Builder.FieldStep;
 import com.liferay.apio.architect.internal.annotation.representor.processor.FieldData;
 import com.liferay.apio.architect.internal.annotation.representor.processor.ParsedType;
 import com.liferay.apio.architect.internal.form.FormImpl;
@@ -90,7 +91,7 @@ public class FormTransformer {
 		Function<String, BiConsumer<T, ?>> formFunction =
 			methodName -> (object, value) -> resultsMap.put(methodName, value);
 
-		Builder.FieldStep<T> fieldStep = formBuilder.title(
+		FieldStep<T> fieldStep = formBuilder.title(
 			__ -> ""
 		).description(
 			__ -> ""
@@ -107,9 +108,16 @@ public class FormTransformer {
 			relativeURLFieldData -> {
 				Method method = relativeURLFieldData.getMethod();
 
-				fieldStep.addOptionalString(
-					relativeURLFieldData.getFieldName(),
-					unsafeCast(formFunction.apply(method.getName())));
+				if (relativeURLFieldData.isRequired()) {
+					fieldStep.addRequiredString(
+						relativeURLFieldData.getFieldName(),
+						unsafeCast(formFunction.apply(method.getName())));
+				}
+				else {
+					fieldStep.addOptionalString(
+						relativeURLFieldData.getFieldName(),
+						unsafeCast(formFunction.apply(method.getName())));
+				}
 			});
 
 		List<FieldData<Class<?>>> fieldDataList = _filterReadableFields(
@@ -124,28 +132,76 @@ public class FormTransformer {
 				Class<?> returnTypeClass = fieldData.getData();
 
 				if (returnTypeClass == String.class) {
-					fieldStep.addOptionalString(
-						key, unsafeCast(formFunction.apply(method.getName())));
+					if (fieldData.isRequired()) {
+						fieldStep.addRequiredString(
+							key,
+							unsafeCast(formFunction.apply(method.getName())));
+					}
+					else {
+						fieldStep.addOptionalString(
+							key,
+							unsafeCast(formFunction.apply(method.getName())));
+					}
 				}
 				else if (returnTypeClass == Date.class) {
-					fieldStep.addOptionalDate(
-						key, unsafeCast(formFunction.apply(method.getName())));
+					if (fieldData.isRequired()) {
+						fieldStep.addRequiredDate(
+							key,
+							unsafeCast(formFunction.apply(method.getName())));
+					}
+					else {
+						fieldStep.addOptionalDate(
+							key,
+							unsafeCast(formFunction.apply(method.getName())));
+					}
 				}
 				else if (returnTypeClass == Boolean.class) {
-					fieldStep.addOptionalBoolean(
-						key, unsafeCast(formFunction.apply(method.getName())));
+					if (fieldData.isRequired()) {
+						fieldStep.addRequiredBoolean(
+							key,
+							unsafeCast(formFunction.apply(method.getName())));
+					}
+					else {
+						fieldStep.addOptionalBoolean(
+							key,
+							unsafeCast(formFunction.apply(method.getName())));
+					}
 				}
 				else if (returnTypeClass == BinaryFile.class) {
-					fieldStep.addOptionalFile(
-						key, unsafeCast(formFunction.apply(method.getName())));
+					if (fieldData.isRequired()) {
+						fieldStep.addRequiredFile(
+							key,
+							unsafeCast(formFunction.apply(method.getName())));
+					}
+					else {
+						fieldStep.addOptionalFile(
+							key,
+							unsafeCast(formFunction.apply(method.getName())));
+					}
 				}
 				else if (returnTypeClass == Double.class) {
-					fieldStep.addOptionalDouble(
-						key, unsafeCast(formFunction.apply(method.getName())));
+					if (fieldData.isRequired()) {
+						fieldStep.addRequiredDouble(
+							key,
+							unsafeCast(formFunction.apply(method.getName())));
+					}
+					else {
+						fieldStep.addOptionalDouble(
+							key,
+							unsafeCast(formFunction.apply(method.getName())));
+					}
 				}
 				else if (Number.class.isAssignableFrom(returnTypeClass)) {
-					fieldStep.addOptionalLong(
-						key, unsafeCast(formFunction.apply(method.getName())));
+					if (fieldData.isRequired()) {
+						fieldStep.addRequiredLong(
+							key,
+							unsafeCast(formFunction.apply(method.getName())));
+					}
+					else {
+						fieldStep.addOptionalLong(
+							key,
+							unsafeCast(formFunction.apply(method.getName())));
+					}
 				}
 			});
 
@@ -159,28 +215,64 @@ public class FormTransformer {
 				String methodName = listFieldData.getMethodName();
 
 				if (listClass == String.class) {
-					fieldStep.addOptionalStringList(
-						key, unsafeCast(formFunction.apply(methodName)));
+					if (listFieldData.isRequired()) {
+						fieldStep.addRequiredStringList(
+							key, unsafeCast(formFunction.apply(methodName)));
+					}
+					else {
+						fieldStep.addOptionalStringList(
+							key, unsafeCast(formFunction.apply(methodName)));
+					}
 				}
 				else if (listClass == Date.class) {
-					fieldStep.addOptionalDateList(
-						key, unsafeCast(formFunction.apply(methodName)));
+					if (listFieldData.isRequired()) {
+						fieldStep.addRequiredDateList(
+							key, unsafeCast(formFunction.apply(methodName)));
+					}
+					else {
+						fieldStep.addOptionalDateList(
+							key, unsafeCast(formFunction.apply(methodName)));
+					}
 				}
 				else if (listClass == Boolean.class) {
-					fieldStep.addOptionalBooleanList(
-						key, unsafeCast(formFunction.apply(methodName)));
+					if (listFieldData.isRequired()) {
+						fieldStep.addRequiredBooleanList(
+							key, unsafeCast(formFunction.apply(methodName)));
+					}
+					else {
+						fieldStep.addOptionalBooleanList(
+							key, unsafeCast(formFunction.apply(methodName)));
+					}
 				}
 				else if (listClass == BinaryFile.class) {
-					fieldStep.addOptionalFileList(
-						key, unsafeCast(formFunction.apply(methodName)));
+					if (listFieldData.isRequired()) {
+						fieldStep.addRequiredFileList(
+							key, unsafeCast(formFunction.apply(methodName)));
+					}
+					else {
+						fieldStep.addOptionalFileList(
+							key, unsafeCast(formFunction.apply(methodName)));
+					}
 				}
 				else if (listClass == Double.class) {
-					fieldStep.addOptionalDoubleList(
-						key, unsafeCast(formFunction.apply(methodName)));
+					if (listFieldData.isRequired()) {
+						fieldStep.addRequiredDoubleList(
+							key, unsafeCast(formFunction.apply(methodName)));
+					}
+					else {
+						fieldStep.addOptionalDoubleList(
+							key, unsafeCast(formFunction.apply(methodName)));
+					}
 				}
 				else if (Number.class.isAssignableFrom(listClass)) {
-					fieldStep.addOptionalLongList(
-						key, unsafeCast(formFunction.apply(methodName)));
+					if (listFieldData.isRequired()) {
+						fieldStep.addRequiredLongList(
+							key, unsafeCast(formFunction.apply(methodName)));
+					}
+					else {
+						fieldStep.addOptionalLongList(
+							key, unsafeCast(formFunction.apply(methodName)));
+					}
 				}
 			});
 
@@ -195,14 +287,28 @@ public class FormTransformer {
 			Method method = fieldData.getMethod();
 
 			if (SINGLE.equals(linkTo.resourceType())) {
-				fieldStep.addOptionalLinkedModel(
-					key, unsafeCast(linkTo.resource()),
-					unsafeCast(formFunction.apply(methodName)));
+				if (fieldData.isRequired()) {
+					fieldStep.addRequiredLinkedModel(
+						key, unsafeCast(linkTo.resource()),
+						unsafeCast(formFunction.apply(methodName)));
+				}
+				else {
+					fieldStep.addOptionalLinkedModel(
+						key, unsafeCast(linkTo.resource()),
+						unsafeCast(formFunction.apply(methodName)));
+				}
 			}
 			else if (method.getReturnType() == List.class) {
-				fieldStep.addOptionalLinkedModelList(
-					key, unsafeCast(linkTo.resource()),
-					unsafeCast(formFunction.apply(methodName)));
+				if (fieldData.isRequired()) {
+					fieldStep.addRequiredLinkedModelList(
+						key, unsafeCast(linkTo.resource()),
+						unsafeCast(formFunction.apply(methodName)));
+				}
+				else {
+					fieldStep.addOptionalLinkedModelList(
+						key, unsafeCast(linkTo.resource()),
+						unsafeCast(formFunction.apply(methodName)));
+				}
 			}
 		}
 
@@ -213,10 +319,18 @@ public class FormTransformer {
 			nestedParsedType -> {
 				ParsedType parsedTypeNested = nestedParsedType.getData();
 
-				fieldStep.addOptionalNestedModel(
-					nestedParsedType.getFieldName(),
-					builder -> _fillForm(parsedTypeNested, builder),
-					formFunction.apply(nestedParsedType.getMethodName()));
+				if (nestedParsedType.isRequired()) {
+					fieldStep.addRequiredNestedModel(
+						nestedParsedType.getFieldName(),
+						builder -> _fillForm(parsedTypeNested, builder),
+						formFunction.apply(nestedParsedType.getMethodName()));
+				}
+				else {
+					fieldStep.addOptionalNestedModel(
+						nestedParsedType.getFieldName(),
+						builder -> _fillForm(parsedTypeNested, builder),
+						formFunction.apply(nestedParsedType.getMethodName()));
+				}
 			});
 
 		List<FieldData<ParsedType>> nestedListParsedTypes =
@@ -228,11 +342,20 @@ public class FormTransformer {
 
 				String methodName = nestedParsedType.getMethodName();
 
-				fieldStep.addOptionalNestedModelList(
-					nestedParsedType.getFieldName(),
-					builder ->
-						_fillForm(parsedTypeNested, builder),
-					unsafeCast(formFunction.apply(methodName)));
+				if (nestedParsedType.isRequired()) {
+					fieldStep.addRequiredNestedModelList(
+						nestedParsedType.getFieldName(),
+						builder ->
+							_fillForm(parsedTypeNested, builder),
+						unsafeCast(formFunction.apply(methodName)));
+				}
+				else {
+					fieldStep.addOptionalNestedModelList(
+						nestedParsedType.getFieldName(),
+						builder ->
+							_fillForm(parsedTypeNested, builder),
+						unsafeCast(formFunction.apply(methodName)));
+				}
 			});
 
 		return fieldStep.build();

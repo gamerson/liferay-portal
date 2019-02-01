@@ -632,7 +632,9 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 
 		String content = FileUtil.read(file);
 
-		if (hasGeneratedTag(content)) {
+		if (!_sourceFormatterArgs.isIncludeGeneratedFiles() &&
+			hasGeneratedTag(content)) {
+
 			return;
 		}
 
@@ -693,7 +695,10 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 	private boolean _isModulesFile(
 		String absolutePath, boolean includePlugins) {
 
-		if (_subrepository) {
+		if (_subrepository ||
+			absolutePath.contains(
+				SourceFormatterUtil.SOURCE_FORMATTER_TEST_PATH)) {
+
 			return true;
 		}
 

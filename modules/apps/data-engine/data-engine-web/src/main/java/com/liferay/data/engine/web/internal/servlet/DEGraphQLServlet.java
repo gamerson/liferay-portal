@@ -191,7 +191,6 @@ public class DEGraphQLServlet extends HttpServlet {
 			"QueryType",
 			typeWiring -> typeWiring.dataFetcher(
 				"searchDataDefinition", _deSearchDataDefinitionFetcher));
-
 		runtimeWiringBuilder.type(
 			"MutationType",
 			typeWiring -> typeWiring.dataFetcher(

@@ -30,7 +30,7 @@ import com.liferay.apio.architect.routes.NestedCollectionRoutes.Builder;
  * </p>
  *
  * <p>
- * The type param provided for the collection ID must be unique in the whole
+ * The type parameter provided for the collection ID must be unique in the
  * application.
  * </p>
  *
@@ -49,11 +49,10 @@ import com.liferay.apio.architect.routes.NestedCollectionRoutes.Builder;
  * @param      <T> the model's type
  * @param      <S> the type of the collection item's identifier (e.g., {@code
  *             Long}, {@code String}, etc.)
- * @param      <U> the type of the collection's identifier. It must be a
+ * @param      <U> the type of the collection's identifier. This must be a
  *             subclass of {@code Identifier<S>}.
  * @see        NestedCollectionRoutes.Builder
  * @deprecated As of 1.9.0, use {@link ActionRouter} instead
- * @review
  */
 @ConsumerType
 @Deprecated
@@ -70,7 +69,6 @@ public interface ReusableNestedCollectionRouter
 	 *             NestedCollectionRoutes} instance
 	 * @see        NestedCollectionRoutes.Builder
 	 * @deprecated As of 1.9.0, use {@link ActionRouter} instead
-	 * @review
 	 */
 	@Deprecated
 	public NestedCollectionRoutes<T, S, W> collectionRoutes(

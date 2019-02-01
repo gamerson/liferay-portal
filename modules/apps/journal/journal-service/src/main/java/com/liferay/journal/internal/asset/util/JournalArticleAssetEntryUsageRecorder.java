@@ -14,7 +14,10 @@
 
 package com.liferay.journal.internal.asset.util;
 
+import com.liferay.asset.kernel.AssetRendererFactoryRegistryUtil;
 import com.liferay.asset.kernel.model.AssetEntry;
+import com.liferay.asset.kernel.model.AssetRenderer;
+import com.liferay.asset.kernel.model.AssetRendererFactory;
 import com.liferay.asset.model.AssetEntryUsage;
 import com.liferay.asset.publisher.constants.AssetPublisherPortletKeys;
 import com.liferay.asset.service.AssetEntryUsageLocalService;
@@ -78,8 +81,14 @@ public class JournalArticleAssetEntryUsageRecorder
 		ServiceContext serviceContext =
 			ServiceContextThreadLocal.getServiceContext();
 
-		JournalArticle article = _journalArticleLocalService.fetchLatestArticle(
-			assetEntry.getClassPK());
+		AssetRendererFactory assetRendererFactory =
+			AssetRendererFactoryRegistryUtil.getAssetRendererFactoryByClassName(
+				assetEntry.getClassName());
+
+		AssetRenderer<JournalArticle> assetRenderer =
+			assetRendererFactory.getAssetRenderer(assetEntry.getClassPK());
+
+		JournalArticle article = assetRenderer.getAssetObject();
 
 		List<JournalContentSearch> contentSearches =
 			_journalContentSearchLocalService.getArticleContentSearches(

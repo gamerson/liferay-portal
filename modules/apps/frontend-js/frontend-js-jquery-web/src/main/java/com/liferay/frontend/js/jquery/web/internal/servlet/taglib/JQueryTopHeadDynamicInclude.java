@@ -64,8 +64,8 @@ public class JQueryTopHeadDynamicInclude extends BaseDynamicInclude {
 			printWriter.print("<script data-senna-track=\"permanent\" src=\"");
 
 			printWriter.print(
-				absolutePortalURLBuilder.forResource(
-					"/o/frontend-js-jquery-web/" + fileName
+				absolutePortalURLBuilder.forModule(
+					"frontend-js-jquery-web/" + fileName
 				).build());
 
 			printWriter.println("\" type=\"text/javascript\"></script>");

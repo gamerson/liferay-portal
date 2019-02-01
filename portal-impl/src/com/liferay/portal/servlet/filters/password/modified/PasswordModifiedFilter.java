@@ -22,6 +22,7 @@ import com.liferay.portal.kernel.security.auth.session.AuthenticatedSessionManag
 import com.liferay.portal.kernel.servlet.HttpMethods;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.servlet.filters.BasePortalFilter;
 
 import java.util.Date;
@@ -76,6 +77,10 @@ public class PasswordModifiedFilter extends BasePortalFilter {
 				return false;
 			}
 
+			if (!_isValidRealUserId(session, user)) {
+				return false;
+			}
+
 			Date passwordModifiedDate = user.getPasswordModifiedDate();
 
 			if (passwordModifiedDate == null) {
@@ -95,6 +100,16 @@ public class PasswordModifiedFilter extends BasePortalFilter {
 
 			return false;
 		}
+	}
+
+	private boolean _isValidRealUserId(HttpSession session, User user) {
+		Long realUserId = (Long)session.getAttribute(WebKeys.USER_ID);
+
+		if ((realUserId == null) || (user.getUserId() != realUserId)) {
+			return false;
+		}
+
+		return true;
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(

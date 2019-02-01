@@ -23,16 +23,7 @@ String displayStyle = siteNavigationMenuItemSelectorViewDisplayContext.getDispla
 %>
 
 <clay:management-toolbar
-	clearResultsURL="<%= siteNavigationMenuItemSelectorViewDisplayContext.getClearResultsURL() %>"
-	componentId="siteNavigationMenuWebManagementToolbar"
-	filterDropdownItems="<%= siteNavigationMenuItemSelectorViewDisplayContext.getFilterDropdownItems() %>"
-	itemsTotal="<%= siteNavigationMenuItemSelectorViewDisplayContext.getTotalItems() %>"
-	searchActionURL="<%= siteNavigationMenuItemSelectorViewDisplayContext.getSearchActionURL() %>"
-	searchFormName="searchFm"
-	selectable="<%= false %>"
-	sortingOrder="<%= siteNavigationMenuItemSelectorViewDisplayContext.getOrderByType() %>"
-	sortingURL="<%= siteNavigationMenuItemSelectorViewDisplayContext.getSortingURL() %>"
-	viewTypeItems="<%= siteNavigationMenuItemSelectorViewDisplayContext.getViewTypeItems() %>"
+	displayContext="<%= new SiteNavigationMenuItemSelectorViewManagementToolbarDisplayContext(liferayPortletRequest, liferayPortletResponse, request, siteNavigationMenuItemSelectorViewDisplayContext) %>"
 />
 
 <aui:form action="<%= siteNavigationMenuItemSelectorViewDisplayContext.getPortletURL() %>" cssClass="container-fluid-1280" name="selectSiteNavigationMenuFm">
@@ -77,36 +68,6 @@ String displayStyle = siteNavigationMenuItemSelectorViewDisplayContext.getDispla
 						<h5 class="text-default">
 							<liferay-ui:message arguments="<%= new String[] {siteNavigationMenu.getUserName(), createDateDescription} %>" key="x-created-x-ago" />
 						</h5>
-					</liferay-ui:search-container-column-text>
-				</c:when>
-				<c:when test='<%= displayStyle.equals("icon") %>'>
-
-					<%
-					row.setCssClass("entry-card lfr-asset-item");
-					%>
-
-					<liferay-ui:search-container-column-text>
-						<liferay-frontend:icon-vertical-card
-							icon="list"
-							resultRow="<%= row %>"
-						>
-							<liferay-frontend:vertical-card-header>
-								<div class="row">
-									<h5 class="col text-truncate">
-										<aui:a cssClass="selector-button" data="<%= data %>" href="javascript:;">
-											<%= HtmlUtil.escape(siteNavigationMenu.getName()) %>
-										</aui:a>
-									</h5>
-								</div>
-							</liferay-frontend:vertical-card-header>
-
-							<liferay-frontend:vertical-card-sticker-bottom>
-								<liferay-ui:user-portrait
-									cssClass="sticker sticker-bottom"
-									userId="<%= siteNavigationMenu.getUserId() %>"
-								/>
-							</liferay-frontend:vertical-card-sticker-bottom>
-						</liferay-frontend:icon-vertical-card>
 					</liferay-ui:search-container-column-text>
 				</c:when>
 				<c:otherwise>

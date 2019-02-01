@@ -1,0 +1,7 @@
+apiDir: "../headless-form-api/src/main/java"
+apiPackagePath: "com.liferay.headless.form"
+application:
+    baseURI: "/headless-form"
+    className: "HeadlessFormApplication"
+    name: "headless-form-application"
+author: "Javier Gamarra"

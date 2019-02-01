@@ -22,10 +22,6 @@ int status = GetterUtil.getInteger(request.getAttribute("view.jsp-status"));
 String usersListView = GetterUtil.getString(request.getAttribute("view.jsp-usersListView"));
 String viewUsersRedirect = GetterUtil.getString(request.getAttribute("view.jsp-viewUsersRedirect"));
 
-if (!ParamUtil.getBoolean(renderRequest, "advancedSearch")) {
-	currentURLObj.setParameter("status", String.valueOf(status));
-}
-
 String displayStyle = ParamUtil.getString(request, "displayStyle");
 
 if (Validator.isNull(displayStyle)) {
@@ -40,10 +36,6 @@ else {
 String navigation = ParamUtil.getString(request, "navigation", "active");
 String toolbarItem = ParamUtil.getString(request, "toolbarItem", "view-all-users");
 
-ViewUsersManagementToolbarDisplayContext viewUsersManagementToolbarDisplayContext = new ViewUsersManagementToolbarDisplayContext(request, renderRequest, renderResponse, displayStyle, navigation, status);
-
-SearchContainer searchContainer = viewUsersManagementToolbarDisplayContext.getSearchContainer();
-
 if (navigation.equals("active")) {
 	status = WorkflowConstants.STATUS_APPROVED;
 }
@@ -51,7 +43,15 @@ else if (navigation.equals("inactive")) {
 	status = WorkflowConstants.STATUS_INACTIVE;
 }
 
+if (!ParamUtil.getBoolean(renderRequest, "advancedSearch")) {
+	currentURLObj.setParameter("status", String.valueOf(status));
+}
+
 request.setAttribute(UsersAdminWebKeys.STATUS, status);
+
+ViewUsersManagementToolbarDisplayContext viewUsersManagementToolbarDisplayContext = new ViewUsersManagementToolbarDisplayContext(request, renderRequest, renderResponse, displayStyle, navigation, status);
+
+SearchContainer searchContainer = viewUsersManagementToolbarDisplayContext.getSearchContainer();
 
 PortletURL portletURL = viewUsersManagementToolbarDisplayContext.getPortletURL();
 

@@ -23,7 +23,11 @@ import com.liferay.portal.kernel.search.IndexerRegistryUtil;
 import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author Lucas Marques de Paula
@@ -46,8 +50,48 @@ public class IndexerFixture<T> {
 		}
 	}
 
+	public void deleteDocuments(Document[] docs) {
+		try {
+			Stream<Document> stream = Arrays.stream(docs);
+
+			List<String> uids = stream.map(
+				document -> document.getUID()).collect(Collectors.toList());
+
+			IndexWriterHelperUtil.deleteDocuments(
+				_indexer.getSearchEngineId(), TestPropsValues.getCompanyId(),
+				uids, true);
+		}
+		catch (PortalException pe) {
+			throw new RuntimeException(pe);
+		}
+	}
+
 	public void reindex(long companyId) throws Exception {
 		_indexer.reindex(new String[] {String.valueOf(companyId)});
+	}
+
+	public Document[] search(long userId, String keywords, Locale locale) {
+		try {
+			SearchContext searchContext =
+				SearchContextTestUtil.getSearchContext(
+					userId, keywords, locale);
+
+			Hits hits = _indexer.search(searchContext);
+
+			return hits.getDocs();
+		}
+		catch (PortalException pe) {
+			throw new RuntimeException(pe);
+		}
+	}
+
+	public Document[] search(String keywords) {
+		try {
+			return search(TestPropsValues.getUserId(), keywords, null);
+		}
+		catch (PortalException pe) {
+			throw new RuntimeException(pe);
+		}
 	}
 
 	public void searchNoOne(long userId, String keywords, Locale locale) {

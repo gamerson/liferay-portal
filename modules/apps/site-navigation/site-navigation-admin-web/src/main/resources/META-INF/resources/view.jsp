@@ -17,22 +17,11 @@
 <%@ include file="/init.jsp" %>
 
 <%
-String displayStyle = siteNavigationAdminDisplayContext.getDisplayStyle();
+SiteNavigationAdminManagementToolbarDisplayContext siteNavigationAdminManagementToolbarDisplayContext = new SiteNavigationAdminManagementToolbarDisplayContext(liferayPortletRequest, liferayPortletResponse, request, siteNavigationAdminDisplayContext);
 %>
 
 <clay:management-toolbar
-	actionDropdownItems="<%= siteNavigationAdminDisplayContext.getActionDropdownItems() %>"
-	clearResultsURL="<%= siteNavigationAdminDisplayContext.getClearResultsURL() %>"
-	componentId="siteNavigationMenuWebManagementToolbar"
-	filterDropdownItems="<%= siteNavigationAdminDisplayContext.getFilterDropdownItems() %>"
-	itemsTotal="<%= siteNavigationAdminDisplayContext.getTotalItems() %>"
-	searchActionURL="<%= siteNavigationAdminDisplayContext.getSearchActionURL() %>"
-	searchContainerId="siteNavigationMenus"
-	searchFormName="searchFm"
-	showCreationMenu="<%= siteNavigationAdminDisplayContext.isShowAddButton() %>"
-	sortingOrder="<%= siteNavigationAdminDisplayContext.getOrderByType() %>"
-	sortingURL="<%= siteNavigationAdminDisplayContext.getSortingURL() %>"
-	viewTypeItems="<%= siteNavigationAdminDisplayContext.getViewTypeItems() %>"
+	displayContext="<%= siteNavigationAdminManagementToolbarDisplayContext %>"
 />
 
 <portlet:actionURL name="/navigation_menu/delete_site_navigation_menu" var="deleteSitaNavigationMenuURL">
@@ -56,7 +45,7 @@ String displayStyle = siteNavigationAdminDisplayContext.getDisplayStyle();
 			</portlet:renderURL>
 
 			<c:choose>
-				<c:when test='<%= displayStyle.equals("descriptive") %>'>
+				<c:when test='<%= Objects.equals(siteNavigationAdminDisplayContext.getDisplayStyle(), "descriptive") %>'>
 					<liferay-ui:search-container-column-user
 						showDetails="<%= false %>"
 						userId="<%= siteNavigationMenu.getUserId() %>"
@@ -98,39 +87,6 @@ String displayStyle = siteNavigationAdminDisplayContext.getDisplayStyle();
 						path="/site_navigation_menu_action.jsp"
 					/>
 				</c:when>
-				<c:when test='<%= displayStyle.equals("icon") %>'>
-
-					<%
-					row.setCssClass("entry-card lfr-asset-item");
-					%>
-
-					<liferay-ui:search-container-column-text>
-						<liferay-frontend:icon-vertical-card
-							actionJsp="/site_navigation_menu_action.jsp"
-							actionJspServletContext="<%= application %>"
-							icon="list"
-							resultRow="<%= row %>"
-							rowChecker="<%= searchContainer.getRowChecker() %>"
-							title="<%= HtmlUtil.escape(siteNavigationMenu.getName()) %>"
-							url="<%= siteNavigationAdminDisplayContext.hasEditPermission() ? editSiteNavigationMenuURL : null %>"
-						>
-							<liferay-frontend:vertical-card-sticker-bottom>
-								<liferay-ui:user-portrait
-									cssClass="sticker sticker-bottom"
-									userId="<%= siteNavigationMenu.getUserId() %>"
-								/>
-							</liferay-frontend:vertical-card-sticker-bottom>
-
-							<liferay-frontend:vertical-card-header>
-								<liferay-ui:message arguments="<%= new String[] {LanguageUtil.getTimeDescription(locale, System.currentTimeMillis() - siteNavigationMenu.getModifiedDate().getTime(), true), HtmlUtil.escape(siteNavigationMenu.getUserName())} %>" key="x-ago-by-x" translateArguments="<%= true %>" />
-							</liferay-frontend:vertical-card-header>
-
-							<liferay-frontend:vertical-card-footer>
-								<liferay-ui:message key="<%= siteNavigationMenu.getTypeKey() %>" />
-							</liferay-frontend:vertical-card-footer>
-						</liferay-frontend:icon-vertical-card>
-					</liferay-ui:search-container-column-text>
-				</c:when>
 				<c:otherwise>
 					<liferay-ui:search-container-column-text
 						cssClass="table-cell-expand table-cell-minw-200 table-list-title"
@@ -171,27 +127,13 @@ String displayStyle = siteNavigationAdminDisplayContext.getDisplayStyle();
 		</liferay-ui:search-container-row>
 
 		<liferay-ui:search-iterator
-			displayStyle="<%= displayStyle %>"
+			displayStyle="<%= siteNavigationAdminDisplayContext.getDisplayStyle() %>"
 			markupView="lexicon"
 		/>
 	</liferay-ui:search-container>
 </aui:form>
 
 <aui:script require="metal-dom/src/all/dom as dom,frontend-js-web/liferay/modal/commands/OpenSimpleInputModal.es as modalCommands" sandbox="<%= true %>">
-	var addNavigationMenuMenuItem = function(event) {
-		modalCommands.openSimpleInputModal(
-			{
-				dialogTitle: '<liferay-ui:message key="add-menu" />',
-				formSubmitURL: '<portlet:actionURL name="/navigation_menu/add_site_navigation_menu"><portlet:param name="mvcPath" value="/edit_site_navigation_menu.jsp" /><portlet:param name="redirect" value="<%= currentURL %>" /></portlet:actionURL>',
-				mainFieldLabel: '<liferay-ui:message key="name" />',
-				mainFieldName: 'name',
-				mainFieldPlaceholder: '<liferay-ui:message key="name" />',
-				namespace: '<portlet:namespace />',
-				spritemap: '<%= themeDisplay.getPathThemeImages() %>/lexicon/icons.svg'
-			}
-		);
-	};
-
 	var renameSiteNavigationMenuClickHandler = dom.delegate(
 		document.body,
 		'click',
@@ -218,34 +160,6 @@ String displayStyle = siteNavigationAdminDisplayContext.getDisplayStyle();
 		}
 	);
 
-	var deleteSelectedSiteNavigationMenus = function() {
-		if (confirm('<liferay-ui:message key="are-you-sure-you-want-to-delete-this" />')) {
-			submitForm($(document.<portlet:namespace />fm));
-		}
-	};
-
-	var ACTIONS = {
-		'addNavigationMenuMenuItem': addNavigationMenuMenuItem,
-		'deleteSelectedSiteNavigationMenus': deleteSelectedSiteNavigationMenus
-	};
-
-	Liferay.componentReady('siteNavigationMenuWebManagementToolbar').then(
-		function(managementToolbar) {
-			managementToolbar.on('creationButtonClicked', addNavigationMenuMenuItem);
-
-			managementToolbar.on(
-				'actionItemClicked',
-				function(event) {
-					var itemData = event.data.item.data;
-
-					if (itemData && itemData.action && ACTIONS[itemData.action]) {
-						ACTIONS[itemData.action]();
-					}
-				}
-			);
-		}
-	);
-
 	function handleDestroyPortlet() {
 		renameSiteNavigationMenuClickHandler.removeListener();
 
@@ -253,4 +167,21 @@ String displayStyle = siteNavigationAdminDisplayContext.getDisplayStyle();
 	}
 
 	Liferay.on('destroyPortlet', handleDestroyPortlet);
+</aui:script>
+
+<aui:script require='<%= npmResolvedPackageName + "/js/ManagementToolbarDefaultEventHandler.es as ManagementToolbarDefaultEventHandler" %>'>
+	Liferay.component(
+		'<%= siteNavigationAdminManagementToolbarDisplayContext.getDefaultEventHandler() %>',
+		new ManagementToolbarDefaultEventHandler.default(
+			{
+				addSiteNavigationMenuURL: '<portlet:actionURL name="/navigation_menu/add_site_navigation_menu"><portlet:param name="mvcPath" value="/edit_site_navigation_menu.jsp" /><portlet:param name="redirect" value="<%= currentURL %>" /></portlet:actionURL>',
+				namespace: '<portlet:namespace />',
+				spritemap: '<%= themeDisplay.getPathThemeImages() %>/lexicon/icons.svg'
+			}
+		),
+		{
+			destroyOnNavigate: true,
+			portletId: '<%= HtmlUtil.escapeJS(portletDisplay.getId()) %>'
+		}
+	);
 </aui:script>

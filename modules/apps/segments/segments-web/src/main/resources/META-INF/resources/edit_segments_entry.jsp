@@ -54,10 +54,8 @@ renderResponse.setTitle(editSegmentsEntryDisplayContext.getTitle(locale));
 
 	<div id="<%= segmentEditRootElementId %>"></div>
 
-	<portlet:renderURL var="previewMembersURL">
-		<portlet:param name="mvcRenderCommandName" value="editSegmentsEntryUsers" />
-		<portlet:param name="tabs1" value="users" />
-		<portlet:param name="redirect" value="<%= currentURL %>" />
+	<portlet:renderURL var="previewMembersURL" windowState="<%= LiferayWindowState.POP_UP.toString() %>">
+		<portlet:param name="mvcRenderCommandName" value="previewSegmentsEntryUsers" />
 		<portlet:param name="segmentsEntryId" value="<%= String.valueOf(segmentsEntryId) %>" />
 	</portlet:renderURL>
 
@@ -74,14 +72,15 @@ renderResponse.setTitle(editSegmentsEntryDisplayContext.getTitle(locale));
 				initialSegmentName: '<%= (segmentsEntry != null) ? segmentsEntry.getName(locale) : StringPool.BLANK %>',
 				locale: '<%= locale %>',
 				portletNamespace: '<portlet:namespace />',
-				previewMembersURL: '<%= (segmentsEntry != null) ? previewMembersURL : StringPool.BLANK %>',
+				previewMembersURL: '<%= previewMembersURL %>',
 				propertyGroups: <%= editSegmentsEntryDisplayContext.getPropertyGroupsJSONArray(locale) %>,
 				redirect: '<%= HtmlUtil.escape(redirect) %>',
-				requestMembersCountURL: '<%= getSegmentsEntryClassPKsCountURL %>'
+				requestMembersCountURL: '<%= getSegmentsEntryClassPKsCountURL %>',
+				source: '<%= editSegmentsEntryDisplayContext.getSource() %>'
 			},
 			{
-				assetsPath: '<%= PortalUtil.getPathContext(request) %>/assets/',
-				spritemap: '<%= themeDisplay.getPathThemeImages() %>/lexicon/icons.svg'
+				assetsPath: '<%= PortalUtil.getPathContext(request) + "/assets" %>',
+				spritemap: '<%= themeDisplay.getPathThemeImages() + "/lexicon/icons.svg" %>'
 			}
 		);
 	</aui:script>

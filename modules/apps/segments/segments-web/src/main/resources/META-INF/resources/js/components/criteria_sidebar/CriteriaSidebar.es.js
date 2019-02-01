@@ -89,7 +89,7 @@ class CriteriaSidebar extends Component {
 				<ul className="properties-list">
 					{filteredProperties.length ?
 						filteredProperties.map(
-							({label, name, options, type}, index) => {
+							({label, name, options, type}) => {
 								const defaultValue = getDefaultValue(
 									{
 										label,
@@ -103,7 +103,7 @@ class CriteriaSidebar extends Component {
 									<CriteriaSidebarItem
 										className={`color--${propertyKey}`}
 										defaultValue={defaultValue}
-										key={index}
+										key={name}
 										label={label}
 										name={name}
 										type={type}

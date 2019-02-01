@@ -7,7 +7,7 @@
 	<description/>
 	<groupId>com.liferay</groupId>
 	<artifactId>com.liferay.portal.tools.rest.builder</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.5</version>
 	<goalPrefix>rest-builder</goalPrefix>
 	<isolatedRealm>false</isolatedRealm>
 	<inheritedByDefault>true</inheritedByDefault>
@@ -28,6 +28,20 @@
 			<threadSafe>false</threadSafe>
 			<parameters>
 				<parameter>
+					<name>RESTConfigFileName</name>
+					<type>java.lang.String</type>
+					<required>false</required>
+					<editable>true</editable>
+					<description/>
+				</parameter>
+				<parameter>
+					<name>RESTOpenAPIFileName</name>
+					<type>java.lang.String</type>
+					<required>false</required>
+					<editable>true</editable>
+					<description/>
+				</parameter>
+				<parameter>
 					<name>baseDir</name>
 					<type>java.io.File</type>
 					<required>false</required>
@@ -35,7 +49,7 @@
 					<description/>
 				</parameter>
 				<parameter>
-					<name>inputFileName</name>
+					<name>copyrightFileName</name>
 					<type>java.lang.String</type>
 					<required>false</required>
 					<editable>true</editable>
@@ -48,6 +62,12 @@
 		</mojo>
 	</mojos>
 	<dependencies>
+		<dependency>
+			<groupId>org.freemarker</groupId>
+			<artifactId>freemarker</artifactId>
+			<type>jar</type>
+			<version>2.3.23</version>
+		</dependency>
 		<dependency>
 			<groupId>org.yaml</groupId>
 			<artifactId>snakeyaml</artifactId>

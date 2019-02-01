@@ -16,6 +16,8 @@ package com.liferay.notifications.web.internal.display.context;
 
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItemList;
+import com.liferay.frontend.taglib.clay.servlet.taglib.util.LabelItem;
+import com.liferay.frontend.taglib.clay.servlet.taglib.util.LabelItemList;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.SafeConsumer;
 import com.liferay.portal.kernel.dao.search.SearchContainer;
 import com.liferay.portal.kernel.language.LanguageUtil;
@@ -49,12 +51,9 @@ public class NotificationsManagementToolbarDisplayContext {
 	}
 
 	public List<DropdownItem> getActionDropdownItems() {
-		boolean actionRequired = ParamUtil.getBoolean(
-			_request, "actionRequired");
-
 		return new DropdownItemList() {
 			{
-				if (!actionRequired) {
+				if (!_isActionRequired()) {
 					add(
 						SafeConsumer.ignore(
 							dropdownItem -> {
@@ -84,7 +83,7 @@ public class NotificationsManagementToolbarDisplayContext {
 						dropdownItem -> {
 							dropdownItem.putData(
 								"action", "deleteNotifications");
-							dropdownItem.setIcon("times");
+							dropdownItem.setIcon("times-circle");
 							dropdownItem.setLabel(
 								LanguageUtil.get(_request, "delete"));
 							dropdownItem.setQuickAction(true);
@@ -93,13 +92,19 @@ public class NotificationsManagementToolbarDisplayContext {
 		};
 	}
 
+	public String getClearResultsURL() {
+		PortletURL clearResultsURL = _liferayPortletResponse.createRenderURL();
+
+		clearResultsURL.setParameter(
+			"actionRequired", String.valueOf(_isActionRequired()));
+
+		return clearResultsURL.toString();
+	}
+
 	public List<DropdownItem> getFilterDropdownItems() {
 		return new DropdownItemList() {
 			{
-				boolean actionRequired = ParamUtil.getBoolean(
-					_request, "actionRequired");
-
-				if (!actionRequired) {
+				if (!_isActionRequired()) {
 					addGroup(
 						SafeConsumer.ignore(
 							dropdownGroupItem -> {
@@ -122,6 +127,36 @@ public class NotificationsManagementToolbarDisplayContext {
 		};
 	}
 
+	public List<LabelItem> getFilterLabelItems() {
+		return new LabelItemList() {
+			{
+				String navigation = _getNavigation();
+
+				if (navigation.equals("read") || navigation.equals("unread")) {
+					add(
+						SafeConsumer.ignore(
+							labelItem -> {
+								PortletURL removeLabelURL =
+									PortletURLUtil.clone(
+										_currentURLObj,
+										_liferayPortletResponse);
+
+								removeLabelURL.setParameter(
+									"navigation", (String)null);
+
+								labelItem.putData(
+									"removeLabelURL",
+									removeLabelURL.toString());
+
+								labelItem.setCloseable(true);
+								labelItem.setLabel(
+									LanguageUtil.get(_request, navigation));
+							}));
+				}
+			}
+		};
+	}
+
 	public String getOrderByType() {
 		return ParamUtil.getString(_request, "orderByType", "desc");
 	}
@@ -140,7 +175,7 @@ public class NotificationsManagementToolbarDisplayContext {
 	}
 
 	private List<DropdownItem> _getFilterNavigationDropdownItems() {
-		String navigation = ParamUtil.getString(_request, "navigation", "all");
+		String navigation = _getNavigation();
 
 		return new DropdownItemList() {
 			{
@@ -184,6 +219,10 @@ public class NotificationsManagementToolbarDisplayContext {
 		};
 	}
 
+	private String _getNavigation() {
+		return ParamUtil.getString(_request, "navigation", "all");
+	}
+
 	private List<DropdownItem> _getOrderByDropdownItems() {
 		return new DropdownItemList() {
 			{
@@ -197,6 +236,10 @@ public class NotificationsManagementToolbarDisplayContext {
 						}));
 			}
 		};
+	}
+
+	private boolean _isActionRequired() {
+		return ParamUtil.getBoolean(_request, "actionRequired");
 	}
 
 	private final PortletURL _currentURLObj;

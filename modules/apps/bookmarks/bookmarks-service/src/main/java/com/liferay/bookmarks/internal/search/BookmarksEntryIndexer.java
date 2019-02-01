@@ -32,7 +32,6 @@ import com.liferay.portal.kernel.search.BaseIndexer;
 import com.liferay.portal.kernel.search.Document;
 import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.search.IndexWriterHelper;
-import com.liferay.portal.kernel.search.Indexer;
 import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.kernel.search.Summary;
 import com.liferay.portal.kernel.search.filter.BooleanFilter;
@@ -49,15 +48,13 @@ import java.util.Locale;
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletResponse;
 
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-
 /**
  * @author Brian Wing Shun Chan
  * @author Bruno Farache
  * @author Raymond Augé
+ * @deprecated As of Judson (7.1.x), since 7.1.0
  */
-@Component(immediate = true, service = Indexer.class)
+@Deprecated
 public class BookmarksEntryIndexer extends BaseIndexer<BookmarksEntry> {
 
 	public static final String CLASS_NAME = BookmarksEntry.class.getName();
@@ -230,21 +227,18 @@ public class BookmarksEntryIndexer extends BaseIndexer<BookmarksEntry> {
 		actionableDynamicQuery.performActions();
 	}
 
-	@Reference(unbind = "-")
 	protected void setBookmarksEntryLocalService(
 		BookmarksEntryLocalService bookmarksEntryLocalService) {
 
 		_bookmarksEntryLocalService = bookmarksEntryLocalService;
 	}
 
-	@Reference(unbind = "-")
 	protected void setBookmarksFolderLocalService(
 		BookmarksFolderLocalService bookmarksFolderLocalService) {
 
 		_bookmarksFolderLocalService = bookmarksFolderLocalService;
 	}
 
-	@Reference(unbind = "-")
 	protected void setGroupLocalService(GroupLocalService groupLocalService) {
 		_groupLocalService = groupLocalService;
 	}
@@ -253,17 +247,10 @@ public class BookmarksEntryIndexer extends BaseIndexer<BookmarksEntry> {
 		BookmarksEntryIndexer.class);
 
 	private BookmarksEntryLocalService _bookmarksEntryLocalService;
-
-	@Reference(
-		target = "(model.class.name=com.liferay.bookmarks.model.BookmarksEntry)"
-	)
 	private ModelResourcePermission<BookmarksEntry>
 		_bookmarksEntryModelResourcePermission;
-
 	private BookmarksFolderLocalService _bookmarksFolderLocalService;
 	private GroupLocalService _groupLocalService;
-
-	@Reference
 	private IndexWriterHelper _indexWriterHelper;
 
 }

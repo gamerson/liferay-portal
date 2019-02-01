@@ -43,7 +43,6 @@ import com.liferay.apio.architect.routes.CollectionRoutes.Builder;
  *             of {@code Identifier}.
  * @see        CollectionRoutes.Builder
  * @deprecated As of 1.9.0, use {@link ActionRouter} instead
- * @review
  */
 @ConsumerType
 @Deprecated
@@ -59,7 +58,6 @@ public interface CollectionRouter<T, S, U extends Identifier<S>> {
 	 *             CollectionRoutes} instance
 	 * @see        CollectionRoutes.Builder
 	 * @deprecated As of 1.9.0, use {@link ActionRouter} instead
-	 * @review
 	 */
 	@Deprecated
 	public CollectionRoutes<T, S> collectionRoutes(Builder<T, S> builder);

@@ -341,11 +341,7 @@ public final class URLCreator {
 	private static Predicate<Path> _isNotEmpty(
 		Function<Path, String> function) {
 
-		return path -> function.andThen(
-			s -> s != null && !s.isEmpty()
-		).apply(
-			path
-		);
+		return function.andThen(s -> (s != null) && !s.isEmpty())::apply;
 	}
 
 	private URLCreator() {

@@ -38,8 +38,16 @@ public class BuildRESTTask extends Task {
 		}
 	}
 
-	public void setInputFileName(String inputFileName) {
-		_restBuilderArgs.setInputFileName(inputFileName);
+	public void setCopyrightFileName(String copyrightFileName) {
+		_restBuilderArgs.setCopyrightFileName(copyrightFileName);
+	}
+
+	public void setRESTConfigFileName(String restConfigFileName) {
+		_restBuilderArgs.setRESTConfigFileName(restConfigFileName);
+	}
+
+	public void setRESTOpenAPIFileName(String restOpenAPIFileName) {
+		_restBuilderArgs.setRESTOpenAPIFileName(restOpenAPIFileName);
 	}
 
 	private final RESTBuilderArgs _restBuilderArgs = new RESTBuilderArgs();

@@ -47,7 +47,6 @@ import com.liferay.apio.architect.routes.ItemRoutes.Builder;
  * @param      <U> the type of the resource's identifier. It must be a subclass
  *             of {@code Identifier<S>}.
  * @deprecated As of 1.9.0, use {@link ActionRouter} instead
- * @review
  */
 @ConsumerType
 @Deprecated
@@ -62,7 +61,6 @@ public interface ItemRouter<T, S, U extends Identifier<S>> {
 	 *             ItemRoutes} instance
 	 * @see        ItemRoutes.Builder
 	 * @deprecated As of 1.9.0, use {@link ActionRouter} instead
-	 * @review
 	 */
 	@Deprecated
 	public ItemRoutes<T, S> itemRoutes(Builder<T, S> builder);

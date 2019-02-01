@@ -407,24 +407,22 @@ class LayoutProvider extends Component {
 	}
 
 	@autobind
-	_handleFocusedFieldChanged(focusedField) {
+	_handleFocusedFieldUpdated(focusedField) {
 		const {columnIndex, pageIndex, rowIndex} = focusedField;
-		let {pages} = this.state;
-
-		pages = this._setColumnFields(
-			pages,
-			{
-				columnIndex,
-				pageIndex,
-				rowIndex
-			},
-			[focusedField]
-		);
+		const {pages} = this.state;
 
 		this.setState(
 			{
 				focusedField,
-				pages
+				pages: this._setColumnFields(
+					pages,
+					{
+						columnIndex,
+						pageIndex,
+						rowIndex
+					},
+					[focusedField]
+				)
 			}
 		);
 	}
@@ -507,20 +505,16 @@ class LayoutProvider extends Component {
 	_handleRuleDeleted({ruleId}) {
 		const {rules} = this.state;
 
-		rules.splice(ruleId, 1);
-
 		this.setState(
 			{
-				rules
+				rules: rules.filter((rule, index) => index !== ruleId)
 			}
 		);
 	}
 
-	_handleRuleSaveEdition(event) {
+	_handleRuleSaved(event) {
 		const {actions, conditions, ruleEditedIndex} = event;
-
 		const logicalOperator = event['logical-operator'];
-
 		const {rules} = this.state;
 
 		rules.splice(
@@ -530,6 +524,12 @@ class LayoutProvider extends Component {
 				actions,
 				conditions,
 				'logical-operator': logicalOperator
+			}
+		);
+
+		this.setState(
+			{
+				rules
 			}
 		);
 	}
@@ -657,14 +657,14 @@ class LayoutProvider extends Component {
 				fieldDuplicated: this._handleFieldDuplicated.bind(this),
 				fieldEdited: this._handleFieldEdited.bind(this),
 				fieldMoved: this._handleFieldMoved.bind(this),
-				focusedFieldUpdated: this._handleFocusedFieldChanged,
+				focusedFieldUpdated: this._handleFocusedFieldUpdated,
 				pageAdded: this._handlePageAdded.bind(this),
 				pageDeleted: this._handlePageDeleted.bind(this),
 				pageReset: this._handlePageReset.bind(this),
 				paginationModeUpdated: this._handlePaginationModeUpdated.bind(this),
 				ruleAdded: this._handleRuleAdded.bind(this),
 				ruleDeleted: this._handleRuleDeleted.bind(this),
-				ruleSaveEdition: this._handleRuleSaveEdition.bind(this),
+				ruleSaved: this._handleRuleSaved.bind(this),
 				successPageChanged: this._handleSuccessPageChanged.bind(this)
 			};
 

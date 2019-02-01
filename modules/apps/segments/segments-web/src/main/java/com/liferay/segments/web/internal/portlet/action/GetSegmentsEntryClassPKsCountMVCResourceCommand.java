@@ -16,16 +16,19 @@ package com.liferay.segments.web.internal.portlet.action;
 
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMap;
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMapFactory;
+import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCResourceCommand;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
-import com.liferay.portal.kernel.util.Validator;
 import com.liferay.segments.constants.SegmentsPortletKeys;
 import com.liferay.segments.criteria.Criteria;
 import com.liferay.segments.criteria.contributor.SegmentsCriteriaContributor;
 import com.liferay.segments.criteria.contributor.SegmentsCriteriaContributorRegistry;
 import com.liferay.segments.odata.retriever.ODataRetriever;
 import com.liferay.segments.service.SegmentsEntryService;
+import com.liferay.segments.web.internal.constants.SegmentsWebKeys;
 
 import java.io.PrintWriter;
 
@@ -33,6 +36,7 @@ import java.util.List;
 import java.util.Locale;
 
 import javax.portlet.PortletException;
+import javax.portlet.PortletSession;
 import javax.portlet.ResourceRequest;
 import javax.portlet.ResourceResponse;
 
@@ -87,42 +91,8 @@ public class GetSegmentsEntryClassPKsCountMVCResourceCommand
 		}
 	}
 
-	protected Criteria getCriteria(
-		ResourceRequest resourceRequest, String type) {
-
-		Criteria criteria = new Criteria();
-
-		List<SegmentsCriteriaContributor> segmentsCriteriaContributors =
-			_segmentsCriteriaContributorRegistry.
-				getSegmentsCriteriaContributors(type, Criteria.Type.MODEL);
-
-		for (SegmentsCriteriaContributor segmentsCriteriaContributor :
-				segmentsCriteriaContributors) {
-
-			String filterString = ParamUtil.getString(
-				resourceRequest,
-				"criterionFilter" + segmentsCriteriaContributor.getKey());
-
-			if (Validator.isNull(filterString)) {
-				continue;
-			}
-
-			String conjunctionString = ParamUtil.getString(
-				resourceRequest,
-				"criterionConjunction" + segmentsCriteriaContributor.getKey(),
-				Criteria.Conjunction.AND.getValue());
-
-			segmentsCriteriaContributor.contribute(
-				criteria, filterString,
-				Criteria.Conjunction.parse(conjunctionString));
-		}
-
-		return criteria;
-	}
-
 	protected int getSegmentsEntryClassPKsCount(
-			long companyId, Criteria criteria, String type, Locale locale)
-		throws Exception {
+		long companyId, Criteria criteria, String type, Locale locale) {
 
 		ODataRetriever oDataRetriever = _serviceTrackerMap.getService(type);
 
@@ -130,13 +100,22 @@ public class GetSegmentsEntryClassPKsCountMVCResourceCommand
 			return 0;
 		}
 
-		return oDataRetriever.getResultsCount(
-			companyId, criteria.getFilterString(Criteria.Type.MODEL), locale);
+		try {
+			return oDataRetriever.getResultsCount(
+				companyId, criteria.getFilterString(Criteria.Type.MODEL),
+				locale);
+		}
+		catch (PortalException pe) {
+			if (_log.isWarnEnabled()) {
+				_log.warn("Unable to obtain the segment user count", pe);
+			}
+
+			return 0;
+		}
 	}
 
 	protected String getText(
-			ResourceRequest resourceRequest, ResourceResponse resourceResponse)
-		throws Exception {
+		ResourceRequest resourceRequest, ResourceResponse resourceResponse) {
 
 		HttpServletRequest request = _portal.getOriginalServletRequest(
 			_portal.getHttpServletRequest(resourceRequest));
@@ -145,13 +124,32 @@ public class GetSegmentsEntryClassPKsCountMVCResourceCommand
 
 		String type = ParamUtil.getString(resourceRequest, "type");
 
-		Criteria criteria = getCriteria(resourceRequest, type);
+		List<SegmentsCriteriaContributor> segmentsCriteriaContributors =
+			_segmentsCriteriaContributorRegistry.
+				getSegmentsCriteriaContributors(type, Criteria.Type.MODEL);
+
+		Criteria criteria = ActionUtil.getCriteria(
+			resourceRequest, segmentsCriteriaContributors);
+
+		saveCriteriaInSession(resourceRequest, criteria);
 
 		int count = getSegmentsEntryClassPKsCount(
 			companyId, criteria, type, _portal.getLocale(resourceRequest));
 
 		return String.valueOf(count);
 	}
+
+	protected void saveCriteriaInSession(
+		ResourceRequest resourceRequest, Criteria criteria) {
+
+		PortletSession portletSession = resourceRequest.getPortletSession();
+
+		portletSession.setAttribute(
+			SegmentsWebKeys.PREVIEW_SEGMENTS_ENTRY_CRITERIA, criteria);
+	}
+
+	private static final Log _log = LogFactoryUtil.getLog(
+		GetSegmentsEntryClassPKsCountMVCResourceCommand.class);
 
 	@Reference
 	private Portal _portal;

@@ -39,8 +39,8 @@ public class CTEntryFinderImpl
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public List<CTEntry> findByCTCollectionId(
-		long collectionId, long resourcePrimKey,
+	public List<CTEntry> findByC_R(
+		long ctCollectionId, long resourcePrimKey,
 		QueryDefinition<CTEntry> queryDefinition) {
 
 		Session session = null;
@@ -64,7 +64,7 @@ public class CTEntryFinderImpl
 
 			QueryPos qPos = QueryPos.getInstance(q);
 
-			qPos.add(collectionId);
+			qPos.add(ctCollectionId);
 
 			if (resourcePrimKey > 0) {
 				qPos.add(resourcePrimKey);
@@ -73,6 +73,51 @@ public class CTEntryFinderImpl
 			return (List<CTEntry>)QueryUtil.list(
 				q, getDialect(), queryDefinition.getStart(),
 				queryDefinition.getEnd());
+		}
+		catch (Exception e) {
+			throw new SystemException(e);
+		}
+		finally {
+			closeSession(session);
+		}
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public CTEntry findByC_C_C(
+		long ctCollectionId, long classNameId, long classPK) {
+
+		Session session = null;
+
+		try {
+			session = openSession();
+
+			String sql = _customSQL.get(getClass(), FIND_BY_CT_COLLECTION_ID);
+
+			sql = _customSQL.appendCriteria(
+				sql, "AND (CTEntry.classNameId = ?)");
+
+			sql = _customSQL.appendCriteria(sql, "AND (CTEntry.classPK = ?)");
+
+			SQLQuery q = session.createSynchronizedSQLQuery(sql);
+
+			q.addEntity("CTEntry", CTEntryImpl.class);
+
+			QueryPos qPos = QueryPos.getInstance(q);
+
+			qPos.add(ctCollectionId);
+
+			qPos.add(classNameId);
+
+			qPos.add(classPK);
+
+			List<CTEntry> ctEntries = q.list();
+
+			if (!ctEntries.isEmpty()) {
+				return ctEntries.get(0);
+			}
+
+			return null;
 		}
 		catch (Exception e) {
 			throw new SystemException(e);

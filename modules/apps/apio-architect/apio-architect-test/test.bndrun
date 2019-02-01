@@ -20,6 +20,7 @@
 	com.liferay.apio.architect.test.fragment;version='[1.0.0,1.0.1)',\
 	com.liferay.apio.architect.uri.mapper.impl;version='[2.0.0,2.0.1)',\
 	io.vavr;version='[0.9.3,0.9.4)',\
+	javax.validation.api;version='[2.0.0,2.0.1)',\
 	json;version='[20180813.0.0,20180813.0.1)',\
 	org.apache.aries.javax.jax.rs-api;version='[1.0.1,1.0.2)',\
 	org.apache.aries.jax.rs.whiteboard;version='[1.0.1,1.0.2)',\

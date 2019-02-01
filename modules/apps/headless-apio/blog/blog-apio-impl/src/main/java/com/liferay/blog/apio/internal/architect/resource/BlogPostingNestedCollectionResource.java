@@ -17,7 +17,6 @@ package com.liferay.blog.apio.internal.architect.resource;
 import static com.liferay.portal.apio.idempotent.Idempotent.idempotent;
 
 import com.liferay.aggregate.rating.apio.architect.identifier.AggregateRatingIdentifier;
-import com.liferay.apio.architect.functional.Try;
 import com.liferay.apio.architect.pagination.PageItems;
 import com.liferay.apio.architect.pagination.Pagination;
 import com.liferay.apio.architect.representor.Representor;
@@ -30,7 +29,6 @@ import com.liferay.blog.apio.architect.identifier.BlogPostingIdentifier;
 import com.liferay.blog.apio.architect.model.BlogPosting;
 import com.liferay.blog.apio.internal.architect.form.BlogPostingForm;
 import com.liferay.blogs.model.BlogsEntry;
-import com.liferay.blogs.service.BlogsEntryLocalService;
 import com.liferay.blogs.service.BlogsEntryService;
 import com.liferay.category.apio.architect.identifier.CategoryIdentifier;
 import com.liferay.comment.apio.architect.identifier.CommentIdentifier;
@@ -42,7 +40,6 @@ import com.liferay.person.apio.architect.identifier.PersonIdentifier;
 import com.liferay.portal.apio.exception.ValidationException;
 import com.liferay.portal.apio.identifier.ClassNameClassPK;
 import com.liferay.portal.apio.permission.HasPermission;
-import com.liferay.portal.apio.user.CurrentUser;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.servlet.taglib.ui.ImageSelector;
@@ -51,7 +48,10 @@ import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 
-import java.util.Date;
+import io.vavr.control.Try;
+
+import java.time.LocalDateTime;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -81,7 +81,7 @@ public class BlogPostingNestedCollectionResource
 		return builder.addGetter(
 			this::_getPageItems
 		).addCreator(
-			this::_addBlogsEntry, CurrentUser.class,
+			this::_addBlogsEntry,
 			_hasPermission.forAddingIn(ContentSpace.class),
 			BlogPostingForm::buildForm
 		).build();
@@ -102,8 +102,8 @@ public class BlogPostingNestedCollectionResource
 			idempotent(_blogsEntryService::deleteEntry),
 			_hasPermission::forDeleting
 		).addUpdater(
-			this::_updateBlogsEntry, CurrentUser.class,
-			_hasPermission::forUpdating, BlogPostingForm::buildForm
+			this::_updateBlogsEntry, _hasPermission::forUpdating,
+			BlogPostingForm::buildForm
 		).build();
 	}
 
@@ -155,17 +155,23 @@ public class BlogPostingNestedCollectionResource
 		).build();
 	}
 
-	private BlogsEntry _addBlogsEntry(
-			long groupId, BlogPosting blogPosting, CurrentUser currentUser)
+	private BlogsEntry _addBlogsEntry(long groupId, BlogPosting blogPosting)
 		throws PortalException {
 
+		Optional<LocalDateTime> publishedDateOptional =
+			blogPosting.getPublishedDateOptional();
+
+		LocalDateTime localDateTime = publishedDateOptional.orElse(
+			LocalDateTime.now());
+
 		try {
-			return _blogsEntryLocalService.addEntry(
-				_getUserId(blogPosting, currentUser), blogPosting.getHeadline(),
-				blogPosting.getAlternativeHeadline(),
+			return _blogsEntryService.addEntry(
+				blogPosting.getHeadline(), blogPosting.getAlternativeHeadline(),
 				blogPosting.getFriendlyURLPath(), blogPosting.getDescription(),
-				blogPosting.getArticleBody(), blogPosting.getPublishedDate(),
-				true, true, new String[0], blogPosting.getCaption(),
+				blogPosting.getArticleBody(), localDateTime.getMonthValue() - 1,
+				localDateTime.getDayOfMonth(), localDateTime.getYear(),
+				localDateTime.getHour(), localDateTime.getMinute(), true, true,
+				new String[0], blogPosting.getCaption(),
 				_getImageSelector(blogPosting), null,
 				_getServiceContext(groupId, blogPosting));
 		}
@@ -198,16 +204,16 @@ public class BlogPostingNestedCollectionResource
 			return null;
 		}
 
-		return Try.fromFallible(
+		return Try.of(
 			() -> _dlAppLocalService.getFileEntry(imageId)
-		).map(
+		).mapTry(
 			fileEntry -> new ImageSelector(
 				FileUtil.getBytes(fileEntry.getContentStream()),
 				fileEntry.getFileName(), fileEntry.getMimeType(),
 				"{\"height\": 0,\"width\": 0,\"x\": 0,\"y\": 0}")
-		).orElseThrow(
-			() -> new BadRequestException(
-				"Unable to find file entry with id " + imageId)
+		).getOrElseThrow(
+			t -> new BadRequestException(
+				"Unable to find file entry with id " + imageId, t)
 		);
 	}
 
@@ -244,58 +250,40 @@ public class BlogPostingNestedCollectionResource
 			serviceContext.setAssetTagNames(ArrayUtil.toStringArray(keywords));
 		}
 
-		Date createdDate = blogPosting.getCreatedDate();
-
-		if (createdDate != null) {
-			serviceContext.setCreateDate(createdDate);
-		}
-
-		Date modifiedDate = blogPosting.getModifiedDate();
-
-		if (modifiedDate != null) {
-			serviceContext.setModifiedDate(modifiedDate);
-		}
-
 		serviceContext.setScopeGroupId(groupId);
 
 		return serviceContext;
 	}
 
-	private long _getUserId(BlogPosting blogPosting, CurrentUser currentUser) {
-		return Optional.ofNullable(
-			blogPosting.getCreatorId()
-		).filter(
-			userId -> userId > 0
-		).orElse(
-			currentUser.getUserId()
-		);
-	}
-
 	private BlogsEntry _updateBlogsEntry(
-			long blogsEntryId, BlogPosting blogPosting, CurrentUser currentUser)
+			long blogsEntryId, BlogPosting blogPosting)
 		throws PortalException {
 
-		long userId = _getUserId(blogPosting, currentUser);
+		Optional<LocalDateTime> publishedDateOptional =
+			blogPosting.getPublishedDateOptional();
+
+		LocalDateTime localDateTime = publishedDateOptional.orElse(
+			LocalDateTime.now());
+
 		BlogsEntry blogsEntry = _blogsEntryService.getEntry(blogsEntryId);
 		ImageSelector imageSelector = _getImageSelector(blogPosting);
 
 		ServiceContext serviceContext = _getServiceContext(
 			blogsEntry.getGroupId(), blogPosting);
 
-		return _blogsEntryLocalService.updateEntry(
-			userId, blogsEntryId, blogPosting.getHeadline(),
+		return _blogsEntryService.updateEntry(
+			blogsEntryId, blogPosting.getHeadline(),
 			blogPosting.getAlternativeHeadline(),
 			blogPosting.getFriendlyURLPath(), blogPosting.getDescription(),
-			blogPosting.getArticleBody(), blogPosting.getPublishedDate(), true,
-			true, new String[0], blogPosting.getCaption(), imageSelector, null,
+			blogPosting.getArticleBody(), localDateTime.getMonthValue() - 1,
+			localDateTime.getDayOfMonth(), localDateTime.getYear(),
+			localDateTime.getHour(), localDateTime.getMinute(), true, true,
+			new String[0], blogPosting.getCaption(), imageSelector, null,
 			serviceContext);
 	}
 
 	@Reference
 	private AssetTagLocalService _assetTagLocalService;
-
-	@Reference
-	private BlogsEntryLocalService _blogsEntryLocalService;
 
 	@Reference
 	private BlogsEntryService _blogsEntryService;

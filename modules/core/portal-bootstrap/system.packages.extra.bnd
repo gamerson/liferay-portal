@@ -46,11 +46,9 @@ Export-Package:\
 	!com.liferay.portal.security.jaas.ext.*,\
 	!com.liferay.portal.service,\
 	!com.liferay.portal.sharepoint.*,\
-	!com.liferay.portal.spring.aop,\
 	!com.liferay.portal.spring.bean,\
 	!com.liferay.portal.spring.context,\
 	!com.liferay.portal.spring.hibernate,\
-	!com.liferay.portal.spring.transaction,\
 	!com.liferay.portal.systemevent,\
 	!com.liferay.portal.tools.comparator,\
 	!com.liferay.portal.tools.javadocformatter,\
@@ -105,6 +103,13 @@ Export-Package:\
 	!trax,\
 	\
 	!unicode-license.txt,\
+	\
+	com.fasterxml.jackson.annotation;version='2.9.8',\
+	com.fasterxml.jackson.core;version='2.9.8',\
+	com.fasterxml.jackson.databind;version='2.9.8',\
+	com.fasterxml.jackson.databind.node;version='2.9.8',\
+	com.fasterxml.jackson.databind.type;version='2.9.8',\
+	com.fasterxml.jackson.databind.util;version='2.9.8',\
 	\
 	com.ibm.crypto.provider,\
 	\
@@ -358,6 +363,9 @@ Provide-Capability:\
 	@../../../lib/portal/dom4j.jar,\
 	@../../../lib/portal/hibernate-commons-annotations.jar,\
 	@../../../lib/portal/hibernate-core.jar,\
+	@../../../lib/portal/jackson-annotations.jar,\
+	@../../../lib/portal/jackson-core.jar,\
+	@../../../lib/portal/jackson-databind.jar,\
 	@../../../lib/portal/jaxen.jar,\
 	@../../../lib/portal/jaxrpc.jar,\
 	@../../../lib/portal/jdom.jar!/org/**,\

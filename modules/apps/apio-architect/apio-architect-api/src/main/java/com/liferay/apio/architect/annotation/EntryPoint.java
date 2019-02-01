@@ -21,10 +21,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Indicates that an action must be listed in the application's entry point.
+ * Defines an annotation that indicates an action must be listed in the
+ * application's entry point.
  *
  * @author Javier Gamarra
- * @review
  */
 @Retention(RUNTIME)
 @Target(METHOD)

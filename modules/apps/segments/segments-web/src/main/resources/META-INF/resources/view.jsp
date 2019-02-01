@@ -59,26 +59,46 @@ SegmentsDisplayContext segmentsDisplayContext = (SegmentsDisplayContext)request.
 			</portlet:renderURL>
 
 			<liferay-ui:search-container-column-text
-				cssClass="important table-cell-content"
+				cssClass="table-cell-expand table-title"
 				href="<%= rowURL %>"
 				name="name"
 				value="<%= HtmlUtil.escape(segmentsEntry.getName(locale)) %>"
 			/>
 
 			<liferay-ui:search-container-column-text
-				cssClass="table-cell-content"
+				cssClass="table-cell-expand-smallest table-cell-minw-150"
 				name="type"
 				value="<%= ResourceActionsUtil.getModelResource(locale, segmentsEntry.getType()) %>"
 			/>
 
 			<liferay-ui:search-container-column-text
-				cssClass="table-cell-content"
+				cssClass="table-cell-expand-smallest table-cell-minw-150"
 				name="active"
 				value='<%= LanguageUtil.get(request, segmentsEntry.isActive() ? "yes" : "no") %>'
 			/>
 
+			<liferay-ui:search-container-column-text
+				cssClass="table-cell-expand-smallest table-cell-minw-150"
+				name="source"
+			>
+				<c:choose>
+					<c:when test="<%= segmentsEntry.getSource() == SegmentsConstants.SOURCE_ASAH_FARO_BACKEND %>">
+						<liferay-ui:icon
+							message="source.analytics-cloud"
+							src='<%= PortalUtil.getPathContext(request) + "/assets/ac-icon.svg" %>'
+						/>
+					</c:when>
+					<c:otherwise>
+						<liferay-ui:icon
+							message="source.dxp"
+							src='<%= PortalUtil.getPathContext(request) + "/assets/dxp-icon.svg" %>'
+						/>
+					</c:otherwise>
+				</c:choose>
+			</liferay-ui:search-container-column-text>
+
 			<liferay-ui:search-container-column-date
-				cssClass="table-cell-expand-smallest table-cell-ws-nowrap"
+				cssClass="table-cell-expand-smallest table-cell-minw-150 table-cell-ws-nowrap"
 				name="modified-date"
 				value="<%= segmentsEntry.getModifiedDate() %>"
 			/>

@@ -14,8 +14,12 @@
 
 package com.liferay.arquillian.extension.junit.bridge.junit.test;
 
-import com.liferay.arquillian.extension.junit.bridge.junit.test.dependencies.BeforeAfterClassTestItem;
-import com.liferay.arquillian.extension.junit.bridge.junit.test.dependencies.ClassRuleTestItem;
+import com.liferay.arquillian.extension.junit.bridge.junit.test.item.AssumeTestItem;
+import com.liferay.arquillian.extension.junit.bridge.junit.test.item.BeforeAfterClassTestItem;
+import com.liferay.arquillian.extension.junit.bridge.junit.test.item.BeforeAfterTestItem;
+import com.liferay.arquillian.extension.junit.bridge.junit.test.item.ClassRuleTestItem;
+import com.liferay.arquillian.extension.junit.bridge.junit.test.item.ExpectedExceptionTestItem;
+import com.liferay.arquillian.extension.junit.bridge.junit.test.item.IgnoreTestItem;
 import com.liferay.portal.kernel.test.junit.BridgeJUnitTestRunner;
 
 import java.io.IOException;
@@ -33,6 +37,30 @@ import org.junit.runners.model.TestClass;
  */
 @RunWith(BridgeJUnitTestRunner.class)
 public class ArquillianTest {
+
+	@Test
+	public void testAssume() throws IOException {
+		Result result = BridgeJUnitTestRunner.runBridgeTests(
+			new BridgeJUnitTestRunner.BridgeRunListener(ArquillianTest.class),
+			AssumeTestItem.class);
+
+		assertResult(result, AssumeTestItem.class);
+	}
+
+	@Test
+	public void testBeforeAfter() throws IOException {
+		try {
+			Result result = BridgeJUnitTestRunner.runBridgeTests(
+				new BridgeJUnitTestRunner.BridgeRunListener(
+					ArquillianTest.class),
+				BeforeAfterTestItem.class);
+
+			assertResult(result, BeforeAfterTestItem.class);
+		}
+		finally {
+			BeforeAfterTestItem.assertAndTearDown();
+		}
+	}
 
 	@Test
 	public void testBeforeAfterClass() throws IOException {
@@ -61,6 +89,31 @@ public class ArquillianTest {
 		}
 		finally {
 			ClassRuleTestItem.assertAndTearDown();
+		}
+	}
+
+	@Test
+	public void testExpectedException() throws IOException {
+		Result result = BridgeJUnitTestRunner.runBridgeTests(
+			new BridgeJUnitTestRunner.BridgeRunListener(ArquillianTest.class),
+			ExpectedExceptionTestItem.class);
+
+		assertResult(result, ExpectedExceptionTestItem.class);
+	}
+
+	@Test
+	public void testIgnore() throws IOException {
+		try {
+			Result result = BridgeJUnitTestRunner.runBridgeTests(
+				new BridgeJUnitTestRunner.BridgeRunListener(
+					ArquillianTest.class),
+				IgnoreTestItem.class);
+
+			Assert.assertEquals(1, result.getIgnoreCount());
+			Assert.assertEquals(0, result.getFailureCount());
+		}
+		finally {
+			IgnoreTestItem.assertAndTearDown();
 		}
 	}
 

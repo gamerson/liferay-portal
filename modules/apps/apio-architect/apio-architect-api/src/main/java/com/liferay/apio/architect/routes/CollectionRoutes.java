@@ -103,19 +103,17 @@ public interface CollectionRoutes<T, S> {
 	 * @deprecated As of 1.9.0, use {@link
 	 *             com.liferay.apio.architect.annotation.Actions} annotations
 	 *             instead
-	 * @review
 	 */
 	@Deprecated
 	public Optional<Map<String, CustomPageFunction<?>>>
 		getCustomPageFunctionsOptional();
 
 	/**
-	 * Returns the custom routes configured based on their paths
+	 * Returns the custom routes configured based on their paths.
 	 *
 	 * @deprecated As of 1.9.0, use {@link
 	 *             com.liferay.apio.architect.annotation.Actions} annotations
 	 *             instead
-	 * @review
 	 */
 	@Deprecated
 	public Map<String, CustomRoute> getCustomRoutes();
@@ -171,7 +169,7 @@ public interface CollectionRoutes<T, S> {
 		 * @param      formBuilderFunction the function that creates the form
 		 *             for this operation
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Create}
 		 *             annotation instead
 		 */
@@ -201,7 +199,7 @@ public interface CollectionRoutes<T, S> {
 		 * @param      formBuilderFunction the function that creates the form
 		 *             for this operation
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Create}
 		 *             annotation instead
 		 */
@@ -230,7 +228,7 @@ public interface CollectionRoutes<T, S> {
 		 * @param      formBuilderFunction the function that creates the form
 		 *             for this operation
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Create}
 		 *             annotation instead
 		 */
@@ -255,7 +253,7 @@ public interface CollectionRoutes<T, S> {
 		 * @param      formBuilderFunction the function that creates the form
 		 *             for this operation
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Create}
 		 *             annotation instead
 		 */
@@ -289,7 +287,7 @@ public interface CollectionRoutes<T, S> {
 		 * @param      formBuilderFunction the function that creates the form
 		 *             for this operation
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Create}
 		 *             annotation instead
 		 */
@@ -320,7 +318,7 @@ public interface CollectionRoutes<T, S> {
 		 * @param      formBuilderFunction the function that creates the form
 		 *             for this operation
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Create}
 		 *             annotation instead
 		 */
@@ -349,7 +347,7 @@ public interface CollectionRoutes<T, S> {
 		 * @param      formBuilderFunction the function that creates the form
 		 *             for this operation
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Create}
 		 *             annotation instead
 		 */
@@ -384,7 +382,7 @@ public interface CollectionRoutes<T, S> {
 		 * @param      formBuilderFunction the function that creates the form
 		 *             for this operation
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Create}
 		 *             annotation instead
 		 */
@@ -419,7 +417,7 @@ public interface CollectionRoutes<T, S> {
 		 * @param      formBuilderFunction the function that creates the form
 		 *             for this operation
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Create}
 		 *             annotation instead
 		 */
@@ -452,7 +450,7 @@ public interface CollectionRoutes<T, S> {
 		 * @param      formBuilderFunction the function that creates the form
 		 *             for this operation
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Create}
 		 *             annotation instead
 		 */
@@ -479,17 +477,16 @@ public interface CollectionRoutes<T, S> {
 		 * sets the HTTP method to use) and the custom route function {@code
 		 * throwableBiFunction}.
 		 *
-		 * @param      customRoute the name and method of the custom route
+		 * @param      customRoute the custom route's name and method
 		 * @param      throwableBiFunction the custom route function
-		 * @param      identifierClass the class of the identifier of the type R
+		 * @param      identifierClass the identifier class of type {@code R}
 		 * @param      permissionFunction the permission function for this route
 		 * @param      formBuilderFunction the function that creates the form
 		 *             for this operation
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Action}
 		 *             annotation instead
-		 * @review
 		 */
 		@Deprecated
 		public default <R, U, I extends Identifier> Builder<T, S>
@@ -511,21 +508,20 @@ public interface CollectionRoutes<T, S> {
 		 * sets the HTTP method to use) and the custom route function {@code
 		 * throwableHexaFunction}.
 		 *
-		 * @param      customRoute the name and method of the custom route
+		 * @param      customRoute the custom route's name and method
 		 * @param      throwableHexaFunction the custom route function
 		 * @param      aClass the class of the page function's second parameter
 		 * @param      bClass the class of the page function's third parameter
 		 * @param      cClass the class of the page function's fourth parameter
 		 * @param      dClass the class of the page function's fifth parameter
-		 * @param      identifierClass the class of the identifier of the type R
+		 * @param      identifierClass the identifier class of type {@code R}
 		 * @param      permissionFunction the permission function for this route
 		 * @param      formBuilderFunction the function that creates the form
 		 *             for this operation
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Action}
 		 *             annotation instead
-		 * @review
 		 */
 		@Deprecated
 		public <A, B, C, D, R, U, I extends Identifier>
@@ -543,20 +539,19 @@ public interface CollectionRoutes<T, S> {
 		 * sets the HTTP method to use) and the custom route function {@code
 		 * throwablePentaFunction}.
 		 *
-		 * @param      customRoute the name and method of the custom route
+		 * @param      customRoute the custom route's name and method
 		 * @param      throwablePentaFunction the custom route function
 		 * @param      aClass the class of the page function's second parameter
 		 * @param      bClass the class of the page function's third parameter
 		 * @param      cClass the class of the page function's fourth parameter
-		 * @param      identifierClass the class of the identifier of the type R
+		 * @param      identifierClass the identifier class of type {@code R}
 		 * @param      permissionFunction the permission function for this route
 		 * @param      formBuilderFunction the function that creates the form
 		 *             for this operation
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Action}
 		 *             annotation instead
-		 * @review
 		 */
 		@Deprecated
 		public default <A, B, C, R, U, I extends Identifier>
@@ -582,19 +577,18 @@ public interface CollectionRoutes<T, S> {
 		 * sets the HTTP method to use) and the custom route function {@code
 		 * throwableTetraFunction}.
 		 *
-		 * @param      customRoute the name and method of the custom route
+		 * @param      customRoute the custom route's name and method
 		 * @param      throwableTetraFunction the custom route function
 		 * @param      aClass the class of the page function's second parameter
 		 * @param      bClass the class of the page function's third parameter
-		 * @param      identifierClass the class of the identifier of the type R
+		 * @param      identifierClass the identifier class of type {@code R}
 		 * @param      permissionFunction the permission function for this route
 		 * @param      formBuilderFunction the function that creates the form
 		 *             for this operation
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Action}
 		 *             annotation instead
-		 * @review
 		 */
 		@Deprecated
 		public default <A, B, R, U, I extends Identifier> Builder<T, S>
@@ -619,18 +613,17 @@ public interface CollectionRoutes<T, S> {
 		 * sets the HTTP method to use) and the custom route function {@code
 		 * throwableTriFunction}.
 		 *
-		 * @param      customRoute the name and method of the custom route
+		 * @param      customRoute the custom route's name and method
 		 * @param      throwableTriFunction the custom route function
 		 * @param      aClass the class of the page function's second parameter
-		 * @param      identifierClass the class of the identifier of the type R
+		 * @param      identifierClass the identifier class of type {@code R}
 		 * @param      permissionFunction the permission function for this route
 		 * @param      formBuilderFunction the function that creates the form
 		 *             for this operation
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Action}
 		 *             annotation instead
-		 * @review
 		 */
 		@Deprecated
 		public default <A, R, U, I extends Identifier> Builder<T, S>
@@ -655,7 +648,7 @@ public interface CollectionRoutes<T, S> {
 		 *             the page
 		 * @param      aClass the class of the page function's third parameter
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Retrieve}
 		 *             annotation instead
 		 */
@@ -671,13 +664,12 @@ public interface CollectionRoutes<T, S> {
 		}
 
 		/**
-		 * Adds a route to a collection page function with none extra
-		 * parameters.
+		 * Adds a route to a collection page function with no extra parameters.
 		 *
 		 * @param      getterThrowableFunction the function that calculates the
 		 *             page
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Retrieve}
 		 *             annotation instead
 		 */
@@ -701,7 +693,7 @@ public interface CollectionRoutes<T, S> {
 		 * @param      cClass the class of the page function's fourth parameter
 		 * @param      dClass the class of the page function's fifth parameter
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Retrieve}
 		 *             annotation instead
 		 */
@@ -721,7 +713,7 @@ public interface CollectionRoutes<T, S> {
 		 * @param      bClass the class of the page function's third parameter
 		 * @param      cClass the class of the page function's fourth parameter
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Retrieve}
 		 *             annotation instead
 		 */
@@ -745,7 +737,7 @@ public interface CollectionRoutes<T, S> {
 		 * @param      aClass the class of the page function's second parameter
 		 * @param      bClass the class of the page function's third parameter
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Retrieve}
 		 *             annotation instead
 		 */

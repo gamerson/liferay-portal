@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+
+<suppressions>
+	<source-check>
+		<suppress checks="BNDBundleInformationCheck" files="source/formatter/dependencies/IncorrectBundleActivator1/bnd\.bnd" />
+		<suppress checks="BNDBundleInformationCheck" files="source/formatter/dependencies/IncorrectBundleActivator2/bnd\.bnd" />
+		<suppress checks="BNDBundleInformationCheck" files="source/formatter/dependencies/IncorrectBundleActivator3/bnd\.bnd" />
+		<suppress checks="JavaOSGiReferenceCheck" files="source/formatter/dependencies/.*" />
+	</source-check>
+</suppressions>

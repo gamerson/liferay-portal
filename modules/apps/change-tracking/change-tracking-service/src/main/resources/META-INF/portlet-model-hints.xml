@@ -26,4 +26,12 @@
 		<field name="classPK" type="long" />
 		<field name="resourcePrimKey" type="long" />
 	</model>
+	<model name="com.liferay.change.tracking.model.CTProcess">
+		<field name="ctProcessId" type="long" />
+		<field name="companyId" type="long" />
+		<field name="userId" type="long" />
+		<field name="createDate" type="Date" />
+		<field name="ctCollectionId" type="long" />
+		<field name="backgroundTaskId" type="long" />
+	</model>
 </model-hints>

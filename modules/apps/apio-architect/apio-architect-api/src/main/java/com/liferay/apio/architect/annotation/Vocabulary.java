@@ -78,31 +78,25 @@ public @interface Vocabulary {
 		public String description() default "";
 
 		/**
-		 * Returns the mode of the field
+		 * Returns the field's mode.
 		 *
-		 * @return the mode of the field
-		 * @review
+		 * @return the field's mode
 		 */
 		public FieldMode mode() default FieldMode.READ_WRITE;
 
 		/**
 		 * Returns {@code true} if a field should only be used when representing
-		 * the type. If this attribute is {@code true}, it will be ignored when
-		 * instantiating the interface from the HTTP request body. This
-		 * attribute is the opposite of {@link #writeOnly()}.
+		 * the type. If this method returns {@code true}, the field is ignored
+		 * when instantiating the interface from the HTTP request body.
 		 *
 		 * <p>
-		 * If this attribute is {@code true}, it will be ignored when
-		 * instantiating the interface out of the HTTP request body.
+		 * This method is the opposite of {@link #writeOnly()}.
 		 * </p>
 		 *
-		 * <p>
-		 * Opposite attribute to {@link #writeOnly()} ()}.
-		 * </p>
-		 *
+		 * @return     {@code true} if a field should only be used when
+		 *             representing the type; {@code false} otherwise
 		 * @see        #writeOnly()
-		 * @deprecated use {@link #mode()} instead
-		 * @review
+		 * @deprecated Replaced by {@link #mode()}
 		 */
 		@Deprecated
 		public boolean readOnly() default false;
@@ -124,22 +118,19 @@ public @interface Vocabulary {
 		/**
 		 * Returns {@code true} if a field should only be used when
 		 * instantiating the interface from the HTTP request body. If this
-		 * attribute is {@code true}, it will be ignored when representing the
-		 * type in any format. This attribute is the opposite of {@link
+		 * method returns {@code true}, the field is ignored when representing
+		 * the type in any format. This attribute is the opposite of {@link
 		 * #readOnly()}.
 		 *
 		 * <p>
-		 * If this attribute is {@code true}, it will be ignored when
-		 * representing the type in any format.
+		 * This method is the opposite of {@link #readOnly()}.
 		 * </p>
 		 *
-		 * <p>
-		 * Opposite attribute to {@link #readOnly()}.
-		 * </p>
-		 *
+		 * @return     {@code true} if a field should only be used when
+		 *             instantiating the interface from the HTTP request body;
+		 *             {@code false} otherwise
 		 * @see        #readOnly()
-		 * @deprecated use {@link #mode()} instead
-		 * @review
+		 * @deprecated Replaced by {@link #mode()}
 		 */
 		@Deprecated
 		public boolean writeOnly() default false;
@@ -148,11 +139,10 @@ public @interface Vocabulary {
 
 	/**
 	 * Defines an annotation that indicates a field should be expressed as a
-	 * link to another resource. For this to be possible, the method must
-	 * provide information about another resource's ID.
+	 * link to another resource. For this to be possible, the annotated item
+	 * must provide information about another resource's ID.
 	 *
-	 * @deprecated As of 1.9.0, use {@link LinkTo} instead
-	 * @review
+	 * @deprecated As of 1.9.0, replaced by {@link LinkTo}
 	 */
 	@Deprecated
 	@Retention(RUNTIME)
@@ -173,65 +163,51 @@ public @interface Vocabulary {
 	 * link (URI) to another resource. The linked resource class must be
 	 * provided as the value {@link #resource()}.
 	 *
-	 * <p>The value {@link #resourceType()} can be used to differentiate between
+	 * <p>
+	 * The {@link #resourceType()} value can be used to differentiate between
 	 * links to single resources ({@link ResourceType#SINGLE}) and links to
 	 * collections ({@link ResourceType#CHILD_COLLECTION}).
-	 *
-	 * @review
+	 * </p>
 	 */
 	@Retention(RUNTIME)
 	@Target(METHOD)
 	public @interface LinkTo {
 
 		/**
-		 * The class of the resource being linked to. It must be annotated with
-		 * {@link Type}.
-		 *
-		 * @review
+		 * Returns the class of the resource being linked to. It must be
+		 * annotated with {@link Type}.
 		 */
 		public Class<? extends Identifier<?>> resource();
 
 		/**
-		 * The type of the resource being linked to. This value election will
-		 * affect the way the link is created.
-		 *
-		 * @review
+		 * Returns the resource type being linked to. This value affects the way
+		 * the link is created.
 		 */
 		public ResourceType resourceType() default ResourceType.SINGLE;
 
 		/**
-		 * The different type of resources with which another resource can be
-		 * linked to via {@link LinkTo}.
-		 *
-		 * @review
+		 * Defines the types of resources that can be linked to other resources.
 		 */
 		public enum ResourceType {
 
 			/**
-			 * This resource type denotes that the linked resource is a
-			 * collection whose parent is the resource being linked.
-			 *
-			 * <p>This type should only be used on fields returning the
-			 * resource's ID.
-			 *
-			 * @review
+			 * Denotes that the linked resource is a collection whose parent is
+			 * the resource being linked to. Only use this type on fields that
+			 * return the resource's ID.
 			 */
 			CHILD_COLLECTION,
 
 			/**
-			 * This resource type denotes that the linked resource is a
-			 * collection whose "generic" parent is the ID being returned.
+			 * Denotes that the linked resource is a collection whose generic
+			 * parent is the ID being returned.
 			 *
-			 * @see    GenericParentId
-			 * @review
+			 * @see GenericParentId
 			 */
 			GENERIC_PARENT_COLLECTION,
 
 			/**
-			 * This resource type denotes that the linked resource is a single
-			 * one and the field is returning its ID.
-			 *
-			 * @review
+			 * Denotes that the linked resource is a single resource (not a
+			 * collection), and that the field returns its ID.
 			 */
 			SINGLE
 
@@ -244,9 +220,8 @@ public @interface Vocabulary {
 	 * resource's page.
 	 *
 	 * @deprecated As of 1.9.0, use {@link LinkTo} with {@link
-	 *             LinkTo.ResourceType#CHILD_COLLECTION CHILD_COLLECTION} as
-	 *             {@link LinkTo#resourceType()} instead
-	 * @review
+	 *             LinkTo.ResourceType#CHILD_COLLECTION} as {@link
+	 *             LinkTo#resourceType()} instead
 	 */
 	@Deprecated
 	@Retention(RUNTIME)
@@ -254,10 +229,10 @@ public @interface Vocabulary {
 	public @interface RelatedCollection {
 
 		/**
-		 * Returns if the action is reusable
+		 * Returns {@code true} if the action is reusable.
 		 *
-		 * @return if the action is reusable
-		 * @review
+		 * @return {@code true} if the action is reusable; <code>false</code>
+		 *         otherwise
 		 */
 		public boolean reusable() default false;
 

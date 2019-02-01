@@ -2655,17 +2655,39 @@ log.sanitizer.enabled=false</echo>
 			<if>
 				<os family="windows" />
 				<then>
-					<var name="set.env.file.name" value="${app.server.tomcat.dir}/bin/setenv.bat" />
+					<var name="set.env.file.name" value="${app.server.tomcat.bin.dir}/setenv.bat" />
 				</then>
 				<else>
-					<var name="set.env.file.name" value="${app.server.tomcat.dir}/bin/setenv.sh" />
+					<var name="set.env.file.name" value="${app.server.tomcat.bin.dir}/setenv.sh" />
 				</else>
 			</if>
 
 			<if>
-				<isset property="test.batch.app.server.tomcat.setenv.gc.old[@{test.portal.bundle.version}]" />
+				<not>
+					<equals arg1="@{test.portal.bundle.version}" arg2="" />
+				</not>
 				<then>
-					<propertycopy from="test.batch.app.server.tomcat.setenv.gc.old[@{test.portal.bundle.version}]" name="test.batch.app.server.tomcat.setenv.gc.old" override="true" />
+					<copy
+						file="tools/servers/tomcat/bin/setenv.bat"
+						overwrite="true"
+						tofile="${app.server.tomcat.bin.dir}/setenv.bat"
+					/>
+
+					<copy
+						file="tools/servers/tomcat/bin/setenv.sh"
+						overwrite="true"
+						tofile="${app.server.tomcat.bin.dir}/setenv.sh"
+					/>
+
+					<chmod
+						perm="a+x"
+					>
+						<fileset
+							dir="${app.server.tomcat.bin.dir}"
+						>
+							<include name="*.sh" />
+						</fileset>
+					</chmod>
 				</then>
 			</if>
 
@@ -2937,6 +2959,7 @@ log.sanitizer.enabled=false</echo>
 				<ant antfile="build-dist.xml" target="zip-tomcat" />
 
 				<propertyfile file="${blade.samples.dir}/liferay-workspace/gradle.properties">
+					<entry key="app.server.tomcat.version" value="${app.server.tomcat.version}" />
 					<entry key="liferay.workspace.bundle.url" value="file:///${project.dir}/dist/liferay-portal-tomcat-${lp.version}.zip" />
 				</propertyfile>
 
@@ -3388,7 +3411,7 @@ log.sanitizer.enabled=false</echo>
 		/>
 	</target>
 
-	<target name="functional-bundle-tomcat-mysql57-open11">
+	<target name="functional-bundle-tomcat-mysql57-jdk11_open">
 		<set-tomcat-version-number liferay.portal.bundle="${test.portal.bundle.version}" />
 
 		<run-functional-test
@@ -3635,8 +3658,8 @@ log.sanitizer.enabled=false</echo>
 		<antcall target="functional-bundle-tomcat-mysql57-jdk8" />
 	</target>
 
-	<target name="functional-smoke-bundle-tomcat-mysql57-open11">
-		<antcall target="functional-bundle-tomcat-mysql57-open11" />
+	<target name="functional-smoke-bundle-tomcat-mysql57-jdk11_open">
+		<antcall target="functional-bundle-tomcat-mysql57-jdk11_open" />
 	</target>
 
 	<target name="functional-smoke-jboss70-mysql56-jdk8">
@@ -3647,7 +3670,7 @@ log.sanitizer.enabled=false</echo>
 		<run-functional-test app.server.type="jboss" database.type="mysql" database.version="5.7" test.portal.log.assert="true" />
 	</target>
 
-	<target name="functional-smoke-jboss71-mysql57-open11">
+	<target name="functional-smoke-jboss71-mysql57-jdk11_open">
 		<run-functional-test app.server.type="jboss" database.type="mysql" database.version="5.7" test.portal.log.assert="true" />
 	</target>
 
@@ -3659,7 +3682,7 @@ log.sanitizer.enabled=false</echo>
 		<run-functional-test app.server.type="tcserver" database.type="mysql" database.version="5.7" test.portal.log.assert="true" />
 	</target>
 
-	<target name="functional-smoke-tcserver40-mysql57-open11">
+	<target name="functional-smoke-tcserver40-mysql57-jdk11_open">
 		<run-functional-test app.server.type="tcserver" database.type="mysql" database.version="5.7" test.portal.log.assert="true" />
 	</target>
 
@@ -3695,7 +3718,7 @@ log.sanitizer.enabled=false</echo>
 		<run-functional-test app.server.type="tomcat" database.type="db2" test.portal.log.assert="true" />
 	</target>
 
-	<target name="functional-smoke-tomcat90-db2111-open11">
+	<target name="functional-smoke-tomcat90-db2111-jdk11_open">
 		<run-functional-test app.server.type="tomcat" database.type="db2" test.portal.log.assert="true" />
 	</target>
 
@@ -3703,7 +3726,7 @@ log.sanitizer.enabled=false</echo>
 		<run-functional-test app.server.type="tomcat" database.type="mariadb" test.portal.log.assert="true" />
 	</target>
 
-	<target name="functional-smoke-tomcat90-mariadb102-open11">
+	<target name="functional-smoke-tomcat90-mariadb102-jdk11_open">
 		<run-functional-test app.server.type="tomcat" database.type="mariadb" test.portal.log.assert="true" />
 	</target>
 
@@ -3711,7 +3734,27 @@ log.sanitizer.enabled=false</echo>
 		<run-functional-test app.server.type="tomcat" database.type="mysql" database.version="5.7" test.portal.log.assert="true" />
 	</target>
 
-	<target name="functional-smoke-tomcat90-mysql57-open11">
+	<target name="functional-smoke-tomcat90-mysql57-jdk8_adopt">
+		<run-functional-test app.server.type="tomcat" database.type="mysql" database.version="5.7" test.portal.log.assert="true" />
+	</target>
+
+	<target name="functional-smoke-tomcat90-mysql57-jdk8_redhat">
+		<run-functional-test app.server.type="tomcat" database.type="mysql" database.version="5.7" test.portal.log.assert="true" />
+	</target>
+
+	<target name="functional-smoke-tomcat90-mysql57-jdk8_zulu">
+		<run-functional-test app.server.type="tomcat" database.type="mysql" database.version="5.7" test.portal.log.assert="true" />
+	</target>
+
+	<target name="functional-smoke-tomcat90-mysql57-jdk11_adopt">
+		<run-functional-test app.server.type="tomcat" database.type="mysql" database.version="5.7" test.portal.log.assert="true" />
+	</target>
+
+	<target name="functional-smoke-tomcat90-mysql57-jdk11_open">
+		<run-functional-test app.server.type="tomcat" database.type="mysql" database.version="5.7" test.portal.log.assert="true" />
+	</target>
+
+	<target name="functional-smoke-tomcat90-mysql57-jdk11_zulu">
 		<run-functional-test app.server.type="tomcat" database.type="mysql" database.version="5.7" test.portal.log.assert="true" />
 	</target>
 
@@ -3719,7 +3762,7 @@ log.sanitizer.enabled=false</echo>
 		<run-functional-test app.server.type="tomcat" database.type="oracle" test.portal.log.assert="true" />
 	</target>
 
-	<target name="functional-smoke-tomcat90-oracle122-open11">
+	<target name="functional-smoke-tomcat90-oracle122-jdk11_open">
 		<run-functional-test app.server.type="tomcat" database.type="oracle" test.portal.log.assert="true" />
 	</target>
 
@@ -3727,7 +3770,7 @@ log.sanitizer.enabled=false</echo>
 		<run-functional-test app.server.type="tomcat" database.type="postgresql" test.portal.log.assert="true" />
 	</target>
 
-	<target name="functional-smoke-tomcat90-postgresql10-open11">
+	<target name="functional-smoke-tomcat90-postgresql10-jdk11_open">
 		<run-functional-test app.server.type="tomcat" database.type="postgresql" test.portal.log.assert="true" />
 	</target>
 
@@ -3735,7 +3778,7 @@ log.sanitizer.enabled=false</echo>
 		<run-functional-test app.server.type="tomcat" database.type="sybase" test.portal.log.assert="true" />
 	</target>
 
-	<target name="functional-smoke-tomcat90-sybase160-open11">
+	<target name="functional-smoke-tomcat90-sybase160-jdk11_open">
 		<run-functional-test app.server.type="tomcat" database.type="sybase" test.portal.log.assert="true" />
 	</target>
 
@@ -3763,7 +3806,7 @@ log.sanitizer.enabled=false</echo>
 		<run-functional-test app.server.type="wildfly" database.type="mariadb" test.portal.log.assert="true" />
 	</target>
 
-	<target name="functional-smoke-wildfly110-mariadb102-open11">
+	<target name="functional-smoke-wildfly110-mariadb102-jdk11_open">
 		<run-functional-test app.server.type="wildfly" database.type="mariadb" test.portal.log.assert="true" />
 	</target>
 
@@ -3807,7 +3850,7 @@ log.sanitizer.enabled=false</echo>
 		<run-functional-test app.server.type="tomcat" database.type="db2" />
 	</target>
 
-	<target name="functional-tomcat90-db2111-open11">
+	<target name="functional-tomcat90-db2111-jdk11_open">
 		<run-functional-test app.server.type="tomcat" database.type="db2" />
 	</target>
 
@@ -3815,7 +3858,7 @@ log.sanitizer.enabled=false</echo>
 		<run-functional-test app.server.type="tomcat" database.type="hypersonic" />
 	</target>
 
-	<target name="functional-tomcat90-hypersonic20-open11">
+	<target name="functional-tomcat90-hypersonic20-jdk11_open">
 		<run-functional-test app.server.type="tomcat" database.type="hypersonic" />
 	</target>
 
@@ -3823,7 +3866,7 @@ log.sanitizer.enabled=false</echo>
 		<run-functional-test app.server.type="tomcat" database.type="mariadb" />
 	</target>
 
-	<target name="functional-tomcat90-mariadb102-open11">
+	<target name="functional-tomcat90-mariadb102-jdk11_open">
 		<run-functional-test app.server.type="tomcat" database.type="mariadb" />
 	</target>
 
@@ -3835,7 +3878,27 @@ log.sanitizer.enabled=false</echo>
 		<antcall target="functional-tomcat90-mysql57-jdk8" />
 	</target>
 
-	<target name="functional-tomcat90-mysql57-open11">
+	<target name="functional-tomcat90-mysql57-jdk8_adopt">
+		<run-functional-test app.server.type="tomcat" database.type="mysql" database.version="5.7" />
+	</target>
+
+	<target name="functional-tomcat90-mysql57-jdk8_redhat">
+		<run-functional-test app.server.type="tomcat" database.type="mysql" database.version="5.7" />
+	</target>
+
+	<target name="functional-tomcat90-mysql57-jdk8_zulu">
+		<run-functional-test app.server.type="tomcat" database.type="mysql" database.version="5.7" />
+	</target>
+
+	<target name="functional-tomcat90-mysql57-jdk11_adopt">
+		<run-functional-test app.server.type="tomcat" database.type="mysql" database.version="5.7" />
+	</target>
+
+	<target name="functional-tomcat90-mysql57-jdk11_open">
+		<run-functional-test app.server.type="tomcat" database.type="mysql" database.version="5.7" />
+	</target>
+
+	<target name="functional-tomcat90-mysql57-jdk11_zulu">
 		<run-functional-test app.server.type="tomcat" database.type="mysql" database.version="5.7" />
 	</target>
 
@@ -3843,7 +3906,7 @@ log.sanitizer.enabled=false</echo>
 		<run-functional-test app.server.type="tomcat" database.type="oracle" />
 	</target>
 
-	<target name="functional-tomcat90-oracle122-open11">
+	<target name="functional-tomcat90-oracle122-jdk11_open">
 		<run-functional-test app.server.type="tomcat" database.type="oracle" />
 	</target>
 
@@ -3851,7 +3914,7 @@ log.sanitizer.enabled=false</echo>
 		<run-functional-test app.server.type="tomcat" database.type="postgresql" />
 	</target>
 
-	<target name="functional-tomcat90-postgresql10-open11">
+	<target name="functional-tomcat90-postgresql10-jdk11_open">
 		<run-functional-test app.server.type="tomcat" database.type="postgresql" />
 	</target>
 
@@ -3859,7 +3922,7 @@ log.sanitizer.enabled=false</echo>
 		<run-functional-test app.server.type="tomcat" database.type="sybase" />
 	</target>
 
-	<target name="functional-tomcat90-sybase160-open11">
+	<target name="functional-tomcat90-sybase160-jdk11_open">
 		<run-functional-test app.server.type="tomcat" database.type="sybase" />
 	</target>
 
@@ -3871,7 +3934,7 @@ log.sanitizer.enabled=false</echo>
 		<run-functional-test app.server.type="jboss" database.type="mysql" database.version="5.7" />
 	</target>
 
-	<target name="functional-upgrade-jboss71-mysql57-open11">
+	<target name="functional-upgrade-jboss71-mysql57-jdk11_open">
 		<run-functional-test app.server.type="jboss" database.type="mysql" database.version="5.7" />
 	</target>
 
@@ -3883,7 +3946,7 @@ log.sanitizer.enabled=false</echo>
 		<run-functional-test app.server.type="tcserver" database.type="mysql" database.version="5.7" />
 	</target>
 
-	<target name="functional-upgrade-tcserver40-mysql57-open11">
+	<target name="functional-upgrade-tcserver40-mysql57-jdk11_open">
 		<run-functional-test app.server.type="tcserver" database.type="mysql" database.version="5.7" />
 	</target>
 
@@ -3915,7 +3978,7 @@ log.sanitizer.enabled=false</echo>
 		<run-functional-test app.server.type="tomcat" database.type="db2" />
 	</target>
 
-	<target name="functional-upgrade-tomcat90-db2111-open11">
+	<target name="functional-upgrade-tomcat90-db2111-jdk11_open">
 		<run-functional-test app.server.type="tomcat" database.type="db2" />
 	</target>
 
@@ -3923,7 +3986,7 @@ log.sanitizer.enabled=false</echo>
 		<run-functional-test app.server.type="tomcat" database.type="mariadb" />
 	</target>
 
-	<target name="functional-upgrade-tomcat90-mariadb102-open11">
+	<target name="functional-upgrade-tomcat90-mariadb102-jdk11_open">
 		<run-functional-test app.server.type="tomcat" database.type="mariadb" />
 	</target>
 
@@ -3931,7 +3994,7 @@ log.sanitizer.enabled=false</echo>
 		<run-functional-test app.server.type="tomcat" database.type="mysql" database.version="5.7" />
 	</target>
 
-	<target name="functional-upgrade-tomcat90-mysql57-open11">
+	<target name="functional-upgrade-tomcat90-mysql57-jdk11_open">
 		<run-functional-test app.server.type="tomcat" database.type="mysql" database.version="5.7" />
 	</target>
 
@@ -3939,7 +4002,7 @@ log.sanitizer.enabled=false</echo>
 		<run-functional-test app.server.type="tomcat" database.type="oracle" />
 	</target>
 
-	<target name="functional-upgrade-tomcat90-oracle122-open11">
+	<target name="functional-upgrade-tomcat90-oracle122-jdk11_open">
 		<run-functional-test app.server.type="tomcat" database.type="oracle" />
 	</target>
 
@@ -3951,7 +4014,7 @@ log.sanitizer.enabled=false</echo>
 		<antcall target="functional-upgrade-tomcat90-postgresql10-jdk8" />
 	</target>
 
-	<target name="functional-upgrade-tomcat90-postgresql10-open11">
+	<target name="functional-upgrade-tomcat90-postgresql10-jdk11_open">
 		<run-functional-test app.server.type="tomcat" database.type="postgresql" />
 	</target>
 
@@ -3959,7 +4022,7 @@ log.sanitizer.enabled=false</echo>
 		<run-functional-test app.server.type="tomcat" database.type="sybase" />
 	</target>
 
-	<target name="functional-upgrade-tomcat90-sybase160-open11">
+	<target name="functional-upgrade-tomcat90-sybase160-jdk11_open">
 		<run-functional-test app.server.type="tomcat" database.type="sybase" />
 	</target>
 
@@ -3983,7 +4046,7 @@ log.sanitizer.enabled=false</echo>
 		<run-functional-test app.server.type="wildfly" database.type="mariadb" />
 	</target>
 
-	<target name="functional-upgrade-wildfly110-mariadb102-open11">
+	<target name="functional-upgrade-wildfly110-mariadb102-jdk11_open">
 		<run-functional-test app.server.type="wildfly" database.type="mariadb" />
 	</target>
 
@@ -5488,8 +5551,8 @@ ${output.content}</echo>
 		<antcall target="functional-bundle-tomcat-mysql57-jdk8" />
 	</target>
 
-	<target name="release-functional-smoke-bundle-tomcat-mysql57-open11">
-		<antcall target="functional-bundle-tomcat-mysql57-open11" />
+	<target name="release-functional-smoke-bundle-tomcat-mysql57-jdk11_open">
+		<antcall target="functional-bundle-tomcat-mysql57-jdk11_open" />
 	</target>
 
 	<target name="release-osgi-state-exploded-test-jdk8">

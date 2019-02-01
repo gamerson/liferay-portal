@@ -21,11 +21,14 @@ import com.liferay.blogs.web.internal.security.permission.resource.BlogsPermissi
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.CreationMenu;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItemList;
+import com.liferay.frontend.taglib.clay.servlet.taglib.util.LabelItem;
+import com.liferay.frontend.taglib.clay.servlet.taglib.util.LabelItemList;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.SafeConsumer;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.ViewTypeItemList;
 import com.liferay.portal.kernel.dao.search.SearchContainer;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.LanguageUtil;
+import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.portlet.LiferayPortletRequest;
 import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
 import com.liferay.portal.kernel.portlet.PortalPreferences;
@@ -189,6 +192,47 @@ public class BlogEntriesManagementToolbarDisplayContext {
 		};
 	}
 
+	public List<LabelItem> getFilterLabelItems() {
+		return new LabelItemList() {
+			{
+				String entriesNavigation = _getEntriesNavigation();
+
+				if (entriesNavigation.equals("mine")) {
+					add(
+						SafeConsumer.ignore(
+							labelItem -> {
+								PortletURL removeLabelURL =
+									PortletURLUtil.clone(
+										_currentURLObj,
+										_liferayPortletResponse);
+
+								removeLabelURL.setParameter(
+									"entriesNavigation", (String)null);
+
+								labelItem.putData(
+									"removeLabelURL",
+									removeLabelURL.toString());
+
+								labelItem.setCloseable(true);
+
+								ThemeDisplay themeDisplay =
+									(ThemeDisplay)_request.getAttribute(
+										WebKeys.THEME_DISPLAY);
+
+								User user = themeDisplay.getUser();
+
+								String label = String.format(
+									"%s: %s",
+									LanguageUtil.get(_request, "owner"),
+									user.getFullName());
+
+								labelItem.setLabel(label);
+							}));
+				}
+			}
+		};
+	}
+
 	public String getOrderByCol() {
 		return ParamUtil.getString(_request, "orderByCol", "title");
 	}
@@ -243,8 +287,7 @@ public class BlogEntriesManagementToolbarDisplayContext {
 		portletURL.setParameter("orderBycol", orderByCol);
 		portletURL.setParameter("orderByType", orderByType);
 
-		String entriesNavigation = ParamUtil.getString(
-			_request, "entriesNavigation", "all");
+		String entriesNavigation = _getEntriesNavigation();
 
 		portletURL.setParameter("entriesNavigation", entriesNavigation);
 
@@ -283,9 +326,12 @@ public class BlogEntriesManagementToolbarDisplayContext {
 		return sortingURL;
 	}
 
+	private String _getEntriesNavigation() {
+		return ParamUtil.getString(_request, "entriesNavigation", "all");
+	}
+
 	private List<DropdownItem> _getFilterNavigationDropdownItems() {
-		final String entriesNavigation = ParamUtil.getString(
-			_request, "entriesNavigation", "all");
+		final String entriesNavigation = _getEntriesNavigation();
 
 		return new DropdownItemList() {
 			{

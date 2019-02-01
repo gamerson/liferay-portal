@@ -76,40 +76,12 @@ public class BigDecimalEntryPersistenceImpl extends BasePersistenceImpl<BigDecim
 		".List1";
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION = FINDER_CLASS_NAME_ENTITY +
 		".List2";
-	public static final FinderPath FINDER_PATH_WITH_PAGINATION_FIND_ALL = new FinderPath(BigDecimalEntryModelImpl.ENTITY_CACHE_ENABLED,
-			BigDecimalEntryModelImpl.FINDER_CACHE_ENABLED,
-			BigDecimalEntryImpl.class, FINDER_CLASS_NAME_LIST_WITH_PAGINATION,
-			"findAll", new String[0]);
-	public static final FinderPath FINDER_PATH_WITHOUT_PAGINATION_FIND_ALL = new FinderPath(BigDecimalEntryModelImpl.ENTITY_CACHE_ENABLED,
-			BigDecimalEntryModelImpl.FINDER_CACHE_ENABLED,
-			BigDecimalEntryImpl.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0]);
-	public static final FinderPath FINDER_PATH_COUNT_ALL = new FinderPath(BigDecimalEntryModelImpl.ENTITY_CACHE_ENABLED,
-			BigDecimalEntryModelImpl.FINDER_CACHE_ENABLED, Long.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll", new String[0]);
-	public static final FinderPath FINDER_PATH_WITH_PAGINATION_FIND_BY_BIGDECIMALVALUE =
-		new FinderPath(BigDecimalEntryModelImpl.ENTITY_CACHE_ENABLED,
-			BigDecimalEntryModelImpl.FINDER_CACHE_ENABLED,
-			BigDecimalEntryImpl.class, FINDER_CLASS_NAME_LIST_WITH_PAGINATION,
-			"findByBigDecimalValue",
-			new String[] {
-				BigDecimal.class.getName(),
-				
-			Integer.class.getName(), Integer.class.getName(),
-				OrderByComparator.class.getName()
-			});
-	public static final FinderPath FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_BIGDECIMALVALUE =
-		new FinderPath(BigDecimalEntryModelImpl.ENTITY_CACHE_ENABLED,
-			BigDecimalEntryModelImpl.FINDER_CACHE_ENABLED,
-			BigDecimalEntryImpl.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByBigDecimalValue",
-			new String[] { BigDecimal.class.getName() },
-			BigDecimalEntryModelImpl.BIGDECIMALVALUE_COLUMN_BITMASK);
-	public static final FinderPath FINDER_PATH_COUNT_BY_BIGDECIMALVALUE = new FinderPath(BigDecimalEntryModelImpl.ENTITY_CACHE_ENABLED,
-			BigDecimalEntryModelImpl.FINDER_CACHE_ENABLED, Long.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION,
-			"countByBigDecimalValue",
-			new String[] { BigDecimal.class.getName() });
+	private FinderPath _finderPathWithPaginationFindAll;
+	private FinderPath _finderPathWithoutPaginationFindAll;
+	private FinderPath _finderPathCountAll;
+	private FinderPath _finderPathWithPaginationFindByBigDecimalValue;
+	private FinderPath _finderPathWithoutPaginationFindByBigDecimalValue;
+	private FinderPath _finderPathCountByBigDecimalValue;
 
 	/**
 	 * Returns all the big decimal entries where bigDecimalValue = &#63;.
@@ -189,11 +161,11 @@ public class BigDecimalEntryPersistenceImpl extends BasePersistenceImpl<BigDecim
 		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
 				(orderByComparator == null)) {
 			pagination = false;
-			finderPath = FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_BIGDECIMALVALUE;
+			finderPath = _finderPathWithoutPaginationFindByBigDecimalValue;
 			finderArgs = new Object[] { bigDecimalValue };
 		}
 		else {
-			finderPath = FINDER_PATH_WITH_PAGINATION_FIND_BY_BIGDECIMALVALUE;
+			finderPath = _finderPathWithPaginationFindByBigDecimalValue;
 			finderArgs = new Object[] {
 					bigDecimalValue,
 					
@@ -588,7 +560,7 @@ public class BigDecimalEntryPersistenceImpl extends BasePersistenceImpl<BigDecim
 	 */
 	@Override
 	public int countByBigDecimalValue(BigDecimal bigDecimalValue) {
-		FinderPath finderPath = FINDER_PATH_COUNT_BY_BIGDECIMALVALUE;
+		FinderPath finderPath = _finderPathCountByBigDecimalValue;
 
 		Object[] finderArgs = new Object[] { bigDecimalValue };
 
@@ -646,22 +618,8 @@ public class BigDecimalEntryPersistenceImpl extends BasePersistenceImpl<BigDecim
 		"bigDecimalEntry.bigDecimalValue IS NULL";
 	private static final String _FINDER_COLUMN_BIGDECIMALVALUE_BIGDECIMALVALUE_2 =
 		"bigDecimalEntry.bigDecimalValue = ?";
-	public static final FinderPath FINDER_PATH_WITH_PAGINATION_FIND_BY_GTBIGDECIMALVALUE =
-		new FinderPath(BigDecimalEntryModelImpl.ENTITY_CACHE_ENABLED,
-			BigDecimalEntryModelImpl.FINDER_CACHE_ENABLED,
-			BigDecimalEntryImpl.class, FINDER_CLASS_NAME_LIST_WITH_PAGINATION,
-			"findByGtBigDecimalValue",
-			new String[] {
-				BigDecimal.class.getName(),
-				
-			Integer.class.getName(), Integer.class.getName(),
-				OrderByComparator.class.getName()
-			});
-	public static final FinderPath FINDER_PATH_WITH_PAGINATION_COUNT_BY_GTBIGDECIMALVALUE =
-		new FinderPath(BigDecimalEntryModelImpl.ENTITY_CACHE_ENABLED,
-			BigDecimalEntryModelImpl.FINDER_CACHE_ENABLED, Long.class,
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "countByGtBigDecimalValue",
-			new String[] { BigDecimal.class.getName() });
+	private FinderPath _finderPathWithPaginationFindByGtBigDecimalValue;
+	private FinderPath _finderPathWithPaginationCountByGtBigDecimalValue;
 
 	/**
 	 * Returns all the big decimal entries where bigDecimalValue &gt; &#63;.
@@ -738,7 +696,7 @@ public class BigDecimalEntryPersistenceImpl extends BasePersistenceImpl<BigDecim
 		FinderPath finderPath = null;
 		Object[] finderArgs = null;
 
-		finderPath = FINDER_PATH_WITH_PAGINATION_FIND_BY_GTBIGDECIMALVALUE;
+		finderPath = _finderPathWithPaginationFindByGtBigDecimalValue;
 		finderArgs = new Object[] { bigDecimalValue, start, end, orderByComparator };
 
 		List<BigDecimalEntry> list = null;
@@ -1128,7 +1086,7 @@ public class BigDecimalEntryPersistenceImpl extends BasePersistenceImpl<BigDecim
 	 */
 	@Override
 	public int countByGtBigDecimalValue(BigDecimal bigDecimalValue) {
-		FinderPath finderPath = FINDER_PATH_WITH_PAGINATION_COUNT_BY_GTBIGDECIMALVALUE;
+		FinderPath finderPath = _finderPathWithPaginationCountByGtBigDecimalValue;
 
 		Object[] finderArgs = new Object[] { bigDecimalValue };
 
@@ -1186,22 +1144,8 @@ public class BigDecimalEntryPersistenceImpl extends BasePersistenceImpl<BigDecim
 		"bigDecimalEntry.bigDecimalValue IS NULL";
 	private static final String _FINDER_COLUMN_GTBIGDECIMALVALUE_BIGDECIMALVALUE_2 =
 		"bigDecimalEntry.bigDecimalValue > ?";
-	public static final FinderPath FINDER_PATH_WITH_PAGINATION_FIND_BY_LTBIGDECIMALVALUE =
-		new FinderPath(BigDecimalEntryModelImpl.ENTITY_CACHE_ENABLED,
-			BigDecimalEntryModelImpl.FINDER_CACHE_ENABLED,
-			BigDecimalEntryImpl.class, FINDER_CLASS_NAME_LIST_WITH_PAGINATION,
-			"findByLtBigDecimalValue",
-			new String[] {
-				BigDecimal.class.getName(),
-				
-			Integer.class.getName(), Integer.class.getName(),
-				OrderByComparator.class.getName()
-			});
-	public static final FinderPath FINDER_PATH_WITH_PAGINATION_COUNT_BY_LTBIGDECIMALVALUE =
-		new FinderPath(BigDecimalEntryModelImpl.ENTITY_CACHE_ENABLED,
-			BigDecimalEntryModelImpl.FINDER_CACHE_ENABLED, Long.class,
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "countByLtBigDecimalValue",
-			new String[] { BigDecimal.class.getName() });
+	private FinderPath _finderPathWithPaginationFindByLtBigDecimalValue;
+	private FinderPath _finderPathWithPaginationCountByLtBigDecimalValue;
 
 	/**
 	 * Returns all the big decimal entries where bigDecimalValue &lt; &#63;.
@@ -1278,7 +1222,7 @@ public class BigDecimalEntryPersistenceImpl extends BasePersistenceImpl<BigDecim
 		FinderPath finderPath = null;
 		Object[] finderArgs = null;
 
-		finderPath = FINDER_PATH_WITH_PAGINATION_FIND_BY_LTBIGDECIMALVALUE;
+		finderPath = _finderPathWithPaginationFindByLtBigDecimalValue;
 		finderArgs = new Object[] { bigDecimalValue, start, end, orderByComparator };
 
 		List<BigDecimalEntry> list = null;
@@ -1668,7 +1612,7 @@ public class BigDecimalEntryPersistenceImpl extends BasePersistenceImpl<BigDecim
 	 */
 	@Override
 	public int countByLtBigDecimalValue(BigDecimal bigDecimalValue) {
-		FinderPath finderPath = FINDER_PATH_WITH_PAGINATION_COUNT_BY_LTBIGDECIMALVALUE;
+		FinderPath finderPath = _finderPathWithPaginationCountByLtBigDecimalValue;
 
 		Object[] finderArgs = new Object[] { bigDecimalValue };
 
@@ -1961,34 +1905,32 @@ public class BigDecimalEntryPersistenceImpl extends BasePersistenceImpl<BigDecim
 					bigDecimalEntryModelImpl.getBigDecimalValue()
 				};
 
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_BIGDECIMALVALUE, args);
-			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_BIGDECIMALVALUE,
+			finderCache.removeResult(_finderPathCountByBigDecimalValue, args);
+			finderCache.removeResult(_finderPathWithoutPaginationFindByBigDecimalValue,
 				args);
 
-			finderCache.removeResult(FINDER_PATH_COUNT_ALL, FINDER_ARGS_EMPTY);
-			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_ALL,
+			finderCache.removeResult(_finderPathCountAll, FINDER_ARGS_EMPTY);
+			finderCache.removeResult(_finderPathWithoutPaginationFindAll,
 				FINDER_ARGS_EMPTY);
 		}
 
 		else {
 			if ((bigDecimalEntryModelImpl.getColumnBitmask() &
-					FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_BIGDECIMALVALUE.getColumnBitmask()) != 0) {
+					_finderPathWithoutPaginationFindByBigDecimalValue.getColumnBitmask()) != 0) {
 				Object[] args = new Object[] {
 						bigDecimalEntryModelImpl.getOriginalBigDecimalValue()
 					};
 
-				finderCache.removeResult(FINDER_PATH_COUNT_BY_BIGDECIMALVALUE,
-					args);
-				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_BIGDECIMALVALUE,
+				finderCache.removeResult(_finderPathCountByBigDecimalValue, args);
+				finderCache.removeResult(_finderPathWithoutPaginationFindByBigDecimalValue,
 					args);
 
 				args = new Object[] {
 						bigDecimalEntryModelImpl.getBigDecimalValue()
 					};
 
-				finderCache.removeResult(FINDER_PATH_COUNT_BY_BIGDECIMALVALUE,
-					args);
-				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_BIGDECIMALVALUE,
+				finderCache.removeResult(_finderPathCountByBigDecimalValue, args);
+				finderCache.removeResult(_finderPathWithoutPaginationFindByBigDecimalValue,
 					args);
 			}
 		}
@@ -2260,11 +2202,11 @@ public class BigDecimalEntryPersistenceImpl extends BasePersistenceImpl<BigDecim
 		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
 				(orderByComparator == null)) {
 			pagination = false;
-			finderPath = FINDER_PATH_WITHOUT_PAGINATION_FIND_ALL;
+			finderPath = _finderPathWithoutPaginationFindAll;
 			finderArgs = FINDER_ARGS_EMPTY;
 		}
 		else {
-			finderPath = FINDER_PATH_WITH_PAGINATION_FIND_ALL;
+			finderPath = _finderPathWithPaginationFindAll;
 			finderArgs = new Object[] { start, end, orderByComparator };
 		}
 
@@ -2353,7 +2295,7 @@ public class BigDecimalEntryPersistenceImpl extends BasePersistenceImpl<BigDecim
 	 */
 	@Override
 	public int countAll() {
-		Long count = (Long)finderCache.getResult(FINDER_PATH_COUNT_ALL,
+		Long count = (Long)finderCache.getResult(_finderPathCountAll,
 				FINDER_ARGS_EMPTY, this);
 
 		if (count == null) {
@@ -2366,12 +2308,11 @@ public class BigDecimalEntryPersistenceImpl extends BasePersistenceImpl<BigDecim
 
 				count = (Long)q.uniqueResult();
 
-				finderCache.putResult(FINDER_PATH_COUNT_ALL, FINDER_ARGS_EMPTY,
+				finderCache.putResult(_finderPathCountAll, FINDER_ARGS_EMPTY,
 					count);
 			}
 			catch (Exception e) {
-				finderCache.removeResult(FINDER_PATH_COUNT_ALL,
-					FINDER_ARGS_EMPTY);
+				finderCache.removeResult(_finderPathCountAll, FINDER_ARGS_EMPTY);
 
 				throw processException(e);
 			}
@@ -2392,6 +2333,83 @@ public class BigDecimalEntryPersistenceImpl extends BasePersistenceImpl<BigDecim
 	 * Initializes the big decimal entry persistence.
 	 */
 	public void afterPropertiesSet() {
+		_finderPathWithPaginationFindAll = new FinderPath(BigDecimalEntryModelImpl.ENTITY_CACHE_ENABLED,
+				BigDecimalEntryModelImpl.FINDER_CACHE_ENABLED,
+				BigDecimalEntryImpl.class,
+				FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0]);
+
+		_finderPathWithoutPaginationFindAll = new FinderPath(BigDecimalEntryModelImpl.ENTITY_CACHE_ENABLED,
+				BigDecimalEntryModelImpl.FINDER_CACHE_ENABLED,
+				BigDecimalEntryImpl.class,
+				FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll",
+				new String[0]);
+
+		_finderPathCountAll = new FinderPath(BigDecimalEntryModelImpl.ENTITY_CACHE_ENABLED,
+				BigDecimalEntryModelImpl.FINDER_CACHE_ENABLED, Long.class,
+				FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
+				new String[0]);
+
+		_finderPathWithPaginationFindByBigDecimalValue = new FinderPath(BigDecimalEntryModelImpl.ENTITY_CACHE_ENABLED,
+				BigDecimalEntryModelImpl.FINDER_CACHE_ENABLED,
+				BigDecimalEntryImpl.class,
+				FINDER_CLASS_NAME_LIST_WITH_PAGINATION,
+				"findByBigDecimalValue",
+				new String[] {
+					BigDecimal.class.getName(),
+					
+				Integer.class.getName(), Integer.class.getName(),
+					OrderByComparator.class.getName()
+				});
+
+		_finderPathWithoutPaginationFindByBigDecimalValue = new FinderPath(BigDecimalEntryModelImpl.ENTITY_CACHE_ENABLED,
+				BigDecimalEntryModelImpl.FINDER_CACHE_ENABLED,
+				BigDecimalEntryImpl.class,
+				FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION,
+				"findByBigDecimalValue",
+				new String[] { BigDecimal.class.getName() },
+				BigDecimalEntryModelImpl.BIGDECIMALVALUE_COLUMN_BITMASK);
+
+		_finderPathCountByBigDecimalValue = new FinderPath(BigDecimalEntryModelImpl.ENTITY_CACHE_ENABLED,
+				BigDecimalEntryModelImpl.FINDER_CACHE_ENABLED, Long.class,
+				FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION,
+				"countByBigDecimalValue",
+				new String[] { BigDecimal.class.getName() });
+
+		_finderPathWithPaginationFindByGtBigDecimalValue = new FinderPath(BigDecimalEntryModelImpl.ENTITY_CACHE_ENABLED,
+				BigDecimalEntryModelImpl.FINDER_CACHE_ENABLED,
+				BigDecimalEntryImpl.class,
+				FINDER_CLASS_NAME_LIST_WITH_PAGINATION,
+				"findByGtBigDecimalValue",
+				new String[] {
+					BigDecimal.class.getName(),
+					
+				Integer.class.getName(), Integer.class.getName(),
+					OrderByComparator.class.getName()
+				});
+
+		_finderPathWithPaginationCountByGtBigDecimalValue = new FinderPath(BigDecimalEntryModelImpl.ENTITY_CACHE_ENABLED,
+				BigDecimalEntryModelImpl.FINDER_CACHE_ENABLED, Long.class,
+				FINDER_CLASS_NAME_LIST_WITH_PAGINATION,
+				"countByGtBigDecimalValue",
+				new String[] { BigDecimal.class.getName() });
+
+		_finderPathWithPaginationFindByLtBigDecimalValue = new FinderPath(BigDecimalEntryModelImpl.ENTITY_CACHE_ENABLED,
+				BigDecimalEntryModelImpl.FINDER_CACHE_ENABLED,
+				BigDecimalEntryImpl.class,
+				FINDER_CLASS_NAME_LIST_WITH_PAGINATION,
+				"findByLtBigDecimalValue",
+				new String[] {
+					BigDecimal.class.getName(),
+					
+				Integer.class.getName(), Integer.class.getName(),
+					OrderByComparator.class.getName()
+				});
+
+		_finderPathWithPaginationCountByLtBigDecimalValue = new FinderPath(BigDecimalEntryModelImpl.ENTITY_CACHE_ENABLED,
+				BigDecimalEntryModelImpl.FINDER_CACHE_ENABLED, Long.class,
+				FINDER_CLASS_NAME_LIST_WITH_PAGINATION,
+				"countByLtBigDecimalValue",
+				new String[] { BigDecimal.class.getName() });
 	}
 
 	public void destroy() {

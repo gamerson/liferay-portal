@@ -75,7 +75,6 @@ import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.auth.BasicScheme;
@@ -92,7 +91,6 @@ import org.apache.http.nio.conn.NHttpClientConnectionManager;
 import org.apache.http.nio.conn.NoopIOSessionStrategy;
 import org.apache.http.nio.conn.SchemeIOSessionStrategy;
 import org.apache.http.nio.conn.ssl.SSLIOSessionStrategy;
-import org.apache.http.nio.reactor.ConnectingIOReactor;
 import org.apache.http.nio.reactor.IOReactorException;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.ssl.SSLContexts;
@@ -1000,20 +998,11 @@ public abstract class BaseJSONWebServiceClientImpl
 		PoolingNHttpClientConnectionManager
 			poolingNHttpClientConnectionManager = null;
 
-		ConnectingIOReactor connectingIOReactor =
-			new DefaultConnectingIOReactor();
-
-		if (_keyStore != null) {
-			poolingNHttpClientConnectionManager =
-				new PoolingNHttpClientConnectionManager(
-					connectingIOReactor, null,
-					getSchemeIOSessionStrategyRegistry(), null, null, 60000,
-					TimeUnit.MILLISECONDS);
-		}
-		else {
-			poolingNHttpClientConnectionManager =
-				new PoolingNHttpClientConnectionManager(connectingIOReactor);
-		}
+		poolingNHttpClientConnectionManager =
+			new PoolingNHttpClientConnectionManager(
+				new DefaultConnectingIOReactor(), null,
+				getSchemeIOSessionStrategyRegistry(), null, null, 60000,
+				TimeUnit.MILLISECONDS);
 
 		poolingNHttpClientConnectionManager.setMaxTotal(20);
 
@@ -1027,7 +1016,14 @@ public abstract class BaseJSONWebServiceClientImpl
 			RegistryBuilder.<SchemeIOSessionStrategy>create();
 
 		registryBuilder.register("http", NoopIOSessionStrategy.INSTANCE);
-		registryBuilder.register("https", getSSLIOSessionStrategy());
+
+		if (_keyStore == null) {
+			registryBuilder.register(
+				"https", SSLIOSessionStrategy.getSystemDefaultStrategy());
+		}
+		else {
+			registryBuilder.register("https", getSSLIOSessionStrategy());
+		}
 
 		return registryBuilder.build();
 	}
@@ -1050,9 +1046,14 @@ public abstract class BaseJSONWebServiceClientImpl
 			throw new RuntimeException(e);
 		}
 
+		String[] httpProtocols = _split(System.getProperty("https.protocols"));
+
+		String[] cipherSuites = _split(
+			System.getProperty("https.cipherSuites"));
+
 		return new SSLIOSessionStrategy(
-			sslContext, new String[] {"TLSv1.1", "TLSv1.2"}, null,
-			SSLConnectionSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER);
+			sslContext, httpProtocols, cipherSuites,
+			SSLIOSessionStrategy.getDefaultHostnameVerifier());
 	}
 
 	protected int getStatus(String json) {
@@ -1165,6 +1166,28 @@ public abstract class BaseJSONWebServiceClientImpl
 		}
 
 		return json;
+	}
+
+	private static boolean _isBlank(String s) {
+		if (s == null) {
+			return true;
+		}
+
+		for (int i = 0; i < s.length(); i++) {
+			if (!Character.isWhitespace(s.charAt(i))) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	private static String[] _split(final String s) {
+		if (_isBlank(s)) {
+			return null;
+		}
+
+		return s.split(" *, *");
 	}
 
 	private CredentialsProvider _getCredentialsProvider() {

@@ -53,7 +53,6 @@ import java.util.Optional;
  * @deprecated As of 1.9.0, use {@link
  *             com.liferay.apio.architect.annotation.Actions} annotations
  *             instead
- * @review
  */
 @Deprecated
 @ProviderType
@@ -70,7 +69,6 @@ public interface NestedCollectionRoutes<T, S, U> {
 	 * @deprecated As of 1.9.0, use {@link
 	 *             com.liferay.apio.architect.annotation.Actions} annotations
 	 *             instead
-	 * @review
 	 */
 	@Deprecated
 	public Optional<Form> getFormOptional();
@@ -85,7 +83,6 @@ public interface NestedCollectionRoutes<T, S, U> {
 	 * @deprecated As of 1.9.0, use {@link
 	 *             com.liferay.apio.architect.annotation.Actions} annotations
 	 *             instead
-	 * @review
 	 */
 	@Deprecated
 	public Optional<NestedBatchCreateItemFunction<S, U>>
@@ -102,7 +99,6 @@ public interface NestedCollectionRoutes<T, S, U> {
 	 * @deprecated As of 1.9.0, use {@link
 	 *             com.liferay.apio.architect.annotation.Actions} annotations
 	 *             instead
-	 * @review
 	 */
 	@Deprecated
 	public Optional<NestedCreateItemFunction<T, U>>
@@ -118,7 +114,6 @@ public interface NestedCollectionRoutes<T, S, U> {
 	 * @deprecated As of 1.9.0, use {@link
 	 *             com.liferay.apio.architect.annotation.Actions} annotations
 	 *             instead
-	 * @review
 	 */
 	@Deprecated
 	public Optional<NestedGetPageFunction<T, U>>
@@ -136,7 +131,6 @@ public interface NestedCollectionRoutes<T, S, U> {
 	 * @deprecated As of 1.9.0, use {@link
 	 *             com.liferay.apio.architect.annotation.Actions} annotations
 	 *             instead
-	 * @review
 	 */
 	@Deprecated
 	@ProviderType
@@ -152,10 +146,9 @@ public interface NestedCollectionRoutes<T, S, U> {
 		 * @param      formBuilderFunction the function that creates the form
 		 *             for this operation
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Create}
 		 *             annotation instead
-		 * @review
 		 */
 		@Deprecated
 		public default <R> Builder<T, S, U> addCreator(
@@ -182,10 +175,9 @@ public interface NestedCollectionRoutes<T, S, U> {
 		 * @param      formBuilderFunction the function that creates the form
 		 *             for this operation
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Create}
 		 *             annotation instead
-		 * @review
 		 */
 		@Deprecated
 		public default <R> Builder<T, S, U> addCreator(
@@ -221,10 +213,9 @@ public interface NestedCollectionRoutes<T, S, U> {
 		 * @param      formBuilderFunction the function that creates the form
 		 *             for this operation
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Create}
 		 *             annotation instead
-		 * @review
 		 */
 		@Deprecated
 		public <A, B, C, D, R> Builder<T, S, U> addCreator(
@@ -255,10 +246,9 @@ public interface NestedCollectionRoutes<T, S, U> {
 		 * @param      formBuilderFunction the function that creates the form
 		 *             for this operation
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Create}
 		 *             annotation instead
-		 * @review
 		 */
 		@Deprecated
 		public <A, B, C, D, R> Builder<T, S, U> addCreator(
@@ -287,10 +277,9 @@ public interface NestedCollectionRoutes<T, S, U> {
 		 * @param      formBuilderFunction the function that creates the form
 		 *             for this operation
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Create}
 		 *             annotation instead
-		 * @review
 		 */
 		@Deprecated
 		public default <A, B, C, R> Builder<T, S, U> addCreator(
@@ -326,10 +315,9 @@ public interface NestedCollectionRoutes<T, S, U> {
 		 * @param      formBuilderFunction the function that creates the form
 		 *             for this operation
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Create}
 		 *             annotation instead
-		 * @review
 		 */
 		@Deprecated
 		public default <A, B, C, R> Builder<T, S, U> addCreator(
@@ -365,10 +353,9 @@ public interface NestedCollectionRoutes<T, S, U> {
 		 * @param      formBuilderFunction the function that creates the form
 		 *             for this operation
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Create}
 		 *             annotation instead
-		 * @review
 		 */
 		@Deprecated
 		public default <A, B, R> Builder<T, S, U> addCreator(
@@ -401,10 +388,9 @@ public interface NestedCollectionRoutes<T, S, U> {
 		 * @param      formBuilderFunction the function that creates the form
 		 *             for this operation
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Create}
 		 *             annotation instead
-		 * @review
 		 */
 		@Deprecated
 		public default <A, B, R> Builder<T, S, U> addCreator(
@@ -437,10 +423,9 @@ public interface NestedCollectionRoutes<T, S, U> {
 		 * @param      formBuilderFunction the function that creates the form
 		 *             for this operation
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Create}
 		 *             annotation instead
-		 * @review
 		 */
 		@Deprecated
 		public default <A, R> Builder<T, S, U> addCreator(
@@ -471,10 +456,9 @@ public interface NestedCollectionRoutes<T, S, U> {
 		 * @param      formBuilderFunction the function that creates the form
 		 *             for this operation
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Create}
 		 *             annotation instead
-		 * @review
 		 */
 		@Deprecated
 		public default <A, R> Builder<T, S, U> addCreator(
@@ -496,16 +480,14 @@ public interface NestedCollectionRoutes<T, S, U> {
 		}
 
 		/**
-		 * Adds a route to a collection page function with none extra
-		 * parameters.
+		 * Adds a route to a collection page function with no extra parameters.
 		 *
 		 * @param      getterThrowableBiFunction the function that calculates
 		 *             the page
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Retrieve}
 		 *             annotation instead
-		 * @review
 		 */
 		@Deprecated
 		public default Builder<T, S, U> addGetter(
@@ -528,10 +510,9 @@ public interface NestedCollectionRoutes<T, S, U> {
 		 * @param      cClass the class of the page function's fourth parameter
 		 * @param      dClass the class of the page function's fifth parameter
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Retrieve}
 		 *             annotation instead
-		 * @review
 		 */
 		@Deprecated
 		public <A, B, C, D> Builder<T, S, U> addGetter(
@@ -549,10 +530,9 @@ public interface NestedCollectionRoutes<T, S, U> {
 		 * @param      bClass the class of the page function's third parameter
 		 * @param      cClass the class of the page function's fourth parameter
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Retrieve}
 		 *             annotation instead
-		 * @review
 		 */
 		@Deprecated
 		public default <A, B, C> Builder<T, S, U> addGetter(
@@ -574,10 +554,9 @@ public interface NestedCollectionRoutes<T, S, U> {
 		 * @param      aClass the class of the page function's second parameter
 		 * @param      bClass the class of the page function's third parameter
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Retrieve}
 		 *             annotation instead
-		 * @review
 		 */
 		@Deprecated
 		public default <A, B> Builder<T, S, U> addGetter(
@@ -598,10 +577,9 @@ public interface NestedCollectionRoutes<T, S, U> {
 		 *             the page
 		 * @param      aClass the class of the page function's second parameter
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Retrieve}
 		 *             annotation instead
-		 * @review
 		 */
 		@Deprecated
 		public default <A> Builder<T, S, U> addGetter(
@@ -622,7 +600,6 @@ public interface NestedCollectionRoutes<T, S, U> {
 		 * @deprecated As of 1.9.0, use {@link
 		 *             com.liferay.apio.architect.annotation.Actions}
 		 *             annotations instead
-		 * @review
 		 */
 		@Deprecated
 		public NestedCollectionRoutes<T, S, U> build();

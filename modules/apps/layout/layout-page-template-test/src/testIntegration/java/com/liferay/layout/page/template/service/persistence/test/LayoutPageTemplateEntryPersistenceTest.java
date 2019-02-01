@@ -257,10 +257,17 @@ public class LayoutPageTemplateEntryPersistenceTest {
 	}
 
 	@Test
-	public void testCountByLayoutPrototype() throws Exception {
-		_persistence.countByLayoutPrototype(RandomTestUtil.nextLong());
+	public void testCountByLayoutPrototypeId() throws Exception {
+		_persistence.countByLayoutPrototypeId(RandomTestUtil.nextLong());
 
-		_persistence.countByLayoutPrototype(0L);
+		_persistence.countByLayoutPrototypeId(0L);
+	}
+
+	@Test
+	public void testCountByPlid() throws Exception {
+		_persistence.countByPlid(RandomTestUtil.nextLong());
+
+		_persistence.countByPlid(0L);
 	}
 
 	@Test
@@ -682,6 +689,11 @@ public class LayoutPageTemplateEntryPersistenceTest {
 				existingLayoutPageTemplateEntry.getGroupId()),
 			ReflectionTestUtil.<Long>invoke(existingLayoutPageTemplateEntry,
 				"getOriginalGroupId", new Class<?>[0]));
+
+		Assert.assertEquals(Long.valueOf(
+				existingLayoutPageTemplateEntry.getPlid()),
+			ReflectionTestUtil.<Long>invoke(existingLayoutPageTemplateEntry,
+				"getOriginalPlid", new Class<?>[0]));
 
 		Assert.assertEquals(Long.valueOf(
 				existingLayoutPageTemplateEntry.getGroupId()),

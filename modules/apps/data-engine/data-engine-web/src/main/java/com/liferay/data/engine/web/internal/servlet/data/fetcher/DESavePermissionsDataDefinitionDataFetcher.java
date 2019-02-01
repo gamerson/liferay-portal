@@ -20,8 +20,6 @@ import com.liferay.data.engine.service.DEDataDefinitionSavePermissionsRequest;
 import com.liferay.data.engine.service.DEDataDefinitionSavePermissionsResponse;
 import com.liferay.data.engine.service.DEDataDefinitionService;
 import com.liferay.data.engine.web.internal.graphql.model.SavePermissionsDataDefinitionType;
-import com.liferay.petra.string.StringPool;
-import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.Portal;
@@ -31,9 +29,6 @@ import graphql.schema.DataFetchingEnvironment;
 
 import java.util.List;
 import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -63,12 +58,13 @@ public class DESavePermissionsDataDefinitionDataFetcher
 				dataFetchingEnvironment.getArgument(
 					"saveDataDefinitionPermissionsInput");
 
+			List<String> roleNames = (List<String>)properties.get("roleNames");
+
 			DEDataDefinitionSavePermissionsRequest.Builder builder =
 				DEDataDefinitionRequestBuilder.savePermissionsBuilder(
 					MapUtil.getLong(properties, "companyId"),
 					MapUtil.getLong(properties, "scopedGroupId"),
-					ArrayUtil.toStringArray(
-						(List<String>)properties.get("roleNames")));
+					ArrayUtil.toStringArray(roleNames));
 
 			if (MapUtil.getBoolean(properties, "addDataDefinition")) {
 				builder = builder.allowAddDataDefinition();
@@ -87,7 +83,7 @@ public class DESavePermissionsDataDefinitionDataFetcher
 		}
 		catch (DEDataDefinitionException.MustHavePermission mhp) {
 			errorMessage = getMessage(
-				languageId, "the-user-must-have-data-definition-permission",
+				languageId, "the-user-must-have-permission",
 				getActionMessage(languageId, mhp.getActionId()));
 		}
 		catch (DEDataDefinitionException.PrincipalException deddepe) {
@@ -115,18 +111,6 @@ public class DESavePermissionsDataDefinitionDataFetcher
 	@Override
 	protected Portal getPortal() {
 		return portal;
-	}
-
-	protected String getRolesMessage(String languageId, String... roleNames) {
-		ResourceBundle resourceBundle = getResourceBundle(languageId);
-
-		return Stream.of(
-			roleNames
-		).map(
-			roleName -> LanguageUtil.get(resourceBundle, roleName)
-		).collect(
-			Collectors.joining(StringPool.COMMA_AND_SPACE)
-		);
 	}
 
 	@Reference

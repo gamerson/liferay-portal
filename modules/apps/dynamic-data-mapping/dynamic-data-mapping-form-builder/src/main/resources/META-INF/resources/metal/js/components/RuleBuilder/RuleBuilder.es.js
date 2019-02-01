@@ -1,10 +1,11 @@
 import {Config} from 'metal-state';
-import dom from 'metal-dom';
 import {EventHandler} from 'metal-events';
-import Component from 'metal-jsx';
-import RuleList from '../../components/RuleList/index.es';
-import RuleEditor from '../../components/RuleEditor/index.es';
 import {makeFetch} from '../../util/fetch.es';
+import autobind from 'autobind-decorator';
+import Component from 'metal-jsx';
+import dom from 'metal-dom';
+import RuleEditor from '../../components/RuleEditor/index.es';
+import RuleList from '../../components/RuleList/index.es';
 
 /**
  * Builder.
@@ -58,8 +59,6 @@ class RuleBuilder extends Component {
 
 		rolesURL: Config.string().required(),
 
-		originalRule: Config.object(),
-
 		rules: Config.arrayOf(
 			Config.shapeOf(
 				{
@@ -92,7 +91,7 @@ class RuleBuilder extends Component {
 					logicalOperator: Config.string()
 				}
 			)
-		),
+		).value([]),
 
 		/**
 		 * The path to the SVG spritemap file containing the icons.
@@ -126,6 +125,8 @@ class RuleBuilder extends Component {
 		index: Config.number(),
 
 		mode: Config.oneOf(['view', 'edit', 'create']).value('view'),
+
+		originalRule: Config.object(),
 
 		roles: Config.arrayOf(
 			Config.shapeOf(
@@ -168,7 +169,7 @@ class RuleBuilder extends Component {
 					logicalOperator: Config.string()
 				}
 			)
-		)
+		).valueFn('_setRulesValueFn')
 	};
 
 	/**
@@ -184,37 +185,55 @@ class RuleBuilder extends Component {
 		this._fetchRoles();
 	}
 
-	_fetchRoles() {
-		const {rolesURL} = this.props;
+	/**
+	 * Continues the propagation of event.
+	 * @param {!Event} event
+	 * @private
+	 */
 
-		makeFetch(
-			{
-				method: 'GET',
-				url: rolesURL
+	disposeInternal() {
+		super.disposeInternal();
+
+		this._eventHandler.removeAllListeners();
+	}
+
+	rendered() {
+		const {mode} = this.state;
+		const {visible} = this.props;
+
+		if (visible) {
+			const addButton = document.querySelector('#addFieldButton');
+
+			if (mode === 'create' || mode === 'edit') {
+				addButton.classList.add('hide');
 			}
-		).then(
-			responseData => {
-				if (!this.isDisposed()) {
-					this.setState(
-						{
-							roles: responseData.map(
-								data => {
-									return {
-										...data,
-										label: data.name,
-										value: data.id
-									};
-								}
-							)
-						}
-					);
+			else {
+				addButton.classList.remove('hide');
+			}
+		}
+	}
+
+	willReceiveProps({rules}) {
+		if (rules && rules.newVal) {
+			this.setState(
+				{
+					rules: rules.newVal
 				}
-			}
-		).catch(
-			error => {
-				throw new Error(error);
-			}
-		);
+			);
+		}
+	}
+
+	syncVisible(visible) {
+		super.syncVisible(visible);
+
+		if (visible) {
+			this._eventHandler.add(
+				dom.on('#addFieldButton', 'click', this._handleAddRuleClick)
+			);
+		}
+		else {
+			this._eventHandler.removeAllListeners();
+		}
 	}
 
 	_fetchDataProvider() {
@@ -250,33 +269,35 @@ class RuleBuilder extends Component {
 		);
 	}
 
-	/**
-	 * Continues the propagation of event.
-	 * @param {!Event} event
-	 * @private
-	 */
+	_fetchRoles() {
+		const {rolesURL} = this.props;
 
-	_showRuleEdition() {
-		this.setState(
+		makeFetch(
 			{
-				mode: 'edit'
+				method: 'GET',
+				url: rolesURL
 			}
-		);
-	}
-
-	_showRuleCreation() {
-		this.setState(
-			{
-				mode: 'create',
-				rules: []
+		).then(
+			responseData => {
+				if (!this.isDisposed()) {
+					this.setState(
+						{
+							roles: responseData.map(
+								data => {
+									return {
+										...data,
+										label: data.name,
+										value: data.id
+									};
+								}
+							)
+						}
+					);
+				}
 			}
-		);
-	}
-
-	_showRuleList() {
-		this.setState(
-			{
-				mode: 'view'
+		).catch(
+			error => {
+				throw new Error(error);
 			}
 		);
 	}
@@ -287,12 +308,14 @@ class RuleBuilder extends Component {
 	 * @private
 	 */
 
+	@autobind
 	_handleAddRuleClick(event) {
 		this._showRuleCreation();
 
 		this._hideAddRuleButton(event.delegateTarget);
 	}
 
+	@autobind
 	_handleRuleAdded(event) {
 		this.emit(
 			'ruleAdded',
@@ -304,10 +327,12 @@ class RuleBuilder extends Component {
 		this._showRuleList();
 	}
 
+	@autobind
 	_handleRuleCanceled(event) {
-		const rules = this.props.rules.map(
+		const {index} = this.state;
+		const rules = this.state.rules.map(
 			(rule, ruleIndex) => {
-				return this.index === ruleIndex ? this.originalRule : rule;
+				return index === ruleIndex ? this.state.originalRule : rule;
 			}
 		);
 
@@ -319,6 +344,7 @@ class RuleBuilder extends Component {
 		);
 	}
 
+	@autobind
 	_handleRuleDeleted({ruleId}) {
 		this.emit(
 			'ruleDeleted',
@@ -328,24 +354,25 @@ class RuleBuilder extends Component {
 		);
 	}
 
+	@autobind
 	_handleRuleEdited({ruleId}) {
-		const {rules} = this.props;
+		const {rules} = this.state;
 
 		ruleId = parseInt(ruleId, 10);
 
 		this.setState(
 			{
 				index: ruleId,
-				originalRule: rules[ruleId]
+				mode: 'edit',
+				originalRule: JSON.parse(JSON.stringify(rules[ruleId]))
 			}
 		);
-
-		this._showRuleEdition();
 	}
 
-	_handleRuleSaveEdition(event) {
+	@autobind
+	_handleRuleSaved(event) {
 		this.emit(
-			'ruleSaveEdition',
+			'ruleSaved',
 			{
 				...event,
 				ruleId: event.ruleEditedIndex
@@ -365,45 +392,24 @@ class RuleBuilder extends Component {
 		dom.addClasses(element, 'hide');
 	}
 
-	syncVisible(visible) {
-		super.syncVisible(visible);
-
-		if (visible) {
-			this._eventHandler.add(
-				dom.on('#addFieldButton', 'click', this._handleAddRuleClick.bind(this))
-			);
-		}
-		else {
-			this._eventHandler.removeAllListeners();
-		}
+	_setRulesValueFn() {
+		return this.props.rules;
 	}
 
-	/**
-	 * Continues the propagation of event.
-	 * @param {!Event} event
-	 * @private
-	 */
-
-	disposeInternal() {
-		super.disposeInternal();
-
-		this._eventHandler.removeAllListeners();
+	_showRuleCreation() {
+		this.setState(
+			{
+				mode: 'create'
+			}
+		);
 	}
 
-	rendered() {
-		const {mode} = this.state;
-		const {visible} = this.props;
-
-		if (visible) {
-			const addButton = document.querySelector('#addFieldButton');
-
-			if (mode === 'create' || mode === 'edit') {
-				addButton.classList.add('hide');
+	_showRuleList() {
+		this.setState(
+			{
+				mode: 'view'
 			}
-			else {
-				addButton.classList.remove('hide');
-			}
-		}
+		);
 	}
 
 	/**
@@ -413,43 +419,38 @@ class RuleBuilder extends Component {
 	 */
 
 	render() {
-		const RuleBuilderEvents = {
-			ruleAdded: this._handleRuleAdded.bind(this),
-			ruleCancel: this._handleRuleCanceled.bind(this),
-			ruleDeleted: this._handleRuleDeleted.bind(this),
-			ruleEdited: this._handleRuleEdited.bind(this)
-		};
-
-		const RuleEditionEvents = {
-			ruleAdded: this._handleRuleSaveEdition.bind(this),
-			ruleCancel: this._handleRuleCanceled.bind(this)
-		};
-
 		const {
 			dataProviderInstanceParameterSettingsURL,
 			dataProviderInstancesURL,
 			functionsMetadata,
 			functionsURL,
 			pages,
-			rules,
 			spritemap
 		} = this.props;
 
 		const {
 			dataProvider,
-			roles
+			index,
+			mode,
+			roles,
+			rules
 		} = this.state;
 
 		return (
 			<div class="container">
-				{this.state.mode === 'create' && (
+				{mode === 'create' && (
 					<RuleEditor
 						actions={[]}
 						conditions={[]}
 						dataProvider={dataProvider}
 						dataProviderInstanceParameterSettingsURL={dataProviderInstanceParameterSettingsURL}
 						dataProviderInstancesURL={dataProviderInstancesURL}
-						events={RuleBuilderEvents}
+						events={{
+							ruleAdded: this._handleRuleAdded,
+							ruleCancel: this._handleRuleCanceled,
+							ruleDeleted: this._handleRuleDeleted,
+							ruleEdited: this._handleRuleEdited
+						}}
 						functionsMetadata={functionsMetadata}
 						functionsURL={functionsURL}
 						key={'create'}
@@ -459,28 +460,37 @@ class RuleBuilder extends Component {
 						spritemap={spritemap}
 					/>
 				)}
-				{this.state.mode === 'edit' && (
+				{mode === 'edit' && (
 					<RuleEditor
-
+						dataProvider={dataProvider}
 						dataProviderInstanceParameterSettingsURL={dataProviderInstanceParameterSettingsURL}
 						dataProviderInstancesURL={dataProviderInstancesURL}
-						events={RuleEditionEvents}
+						events={{
+							ruleAdded: this._handleRuleSaved,
+							ruleCancel: this._handleRuleCanceled
+						}}
 						functionsMetadata={functionsMetadata}
 						functionsURL={functionsURL}
 						key={'edit'}
 						pages={pages}
 						ref="RuleEditor"
 						roles={roles}
-						rule={rules[this.state.index]}
-						ruleEditedIndex={this.state.index}
+						rule={rules[index]}
+						ruleEditedIndex={index}
 						spritemap={spritemap}
 					/>
 				)}
-				{this.state.mode === 'view' && (
+				{mode === 'view' && (
 					<RuleList
 						dataProvider={dataProvider}
-						events={RuleBuilderEvents}
+						events={{
+							ruleAdded: this._handleRuleAdded,
+							ruleCancel: this._handleRuleCanceled,
+							ruleDeleted: this._handleRuleDeleted,
+							ruleEdited: this._handleRuleEdited
+						}}
 						pages={pages}
+						ref="RuleList"
 						roles={roles}
 						rules={rules}
 						spritemap={spritemap}

@@ -9,7 +9,71 @@ import {buildQueryString, translateQueryToCriteria} from '../../utils/odata.es';
 import {CONJUNCTIONS} from '../../utils/constants.es';
 import Conjunction from './Conjunction.es';
 
+const conjunctionShape = PropTypes.shape(
+	{
+		label: PropTypes.string.isRequired,
+		name: PropTypes.string.isRequired
+	}
+);
+
+const initialContributorShape = PropTypes.shape(
+	{
+		conjunctionId: PropTypes.string.isRequired,
+		conjunctionInputId: PropTypes.string.isRequired,
+		initialQuery: PropTypes.string.isRequired,
+		inputId: PropTypes.string.isRequired,
+		propertyKey: PropTypes.string.isRequired
+	}
+);
+
+const operatorShape = PropTypes.shape(
+	{
+		label: PropTypes.string.isRequired,
+		name: PropTypes.string.isRequired
+	}
+);
+
+const propertyShape = PropTypes.shape(
+	{
+		label: PropTypes.string.isRequired,
+		name: PropTypes.string.isRequired,
+		type: PropTypes.string.isRequired
+	}
+);
+
+const propertyGroupShape = PropTypes.shape(
+	{
+		name: PropTypes.string.isRequired,
+		properties: PropTypes.arrayOf(propertyShape),
+		propertyKey: PropTypes.string.isRequired
+	}
+);
+
+const propertyTypeShape = PropTypes.shape(
+	{
+		boolean: PropTypes.arrayOf(PropTypes.string).isRequired,
+		date: PropTypes.arrayOf(PropTypes.string).isRequired,
+		double: PropTypes.arrayOf(PropTypes.string).isRequired,
+		id: PropTypes.arrayOf(PropTypes.string).isRequired,
+		integer: PropTypes.arrayOf(PropTypes.string).isRequired,
+		string: PropTypes.arrayOf(PropTypes.string).isRequired
+	}
+);
+
 class ContributorBuilder extends React.Component {
+	static propTypes = {
+		initialContributors: PropTypes.arrayOf(initialContributorShape),
+		onQueryChange: PropTypes.func,
+		propertyGroups: PropTypes.arrayOf(propertyGroupShape),
+		supportedConjunctions: PropTypes.arrayOf(conjunctionShape).isRequired,
+		supportedOperators: PropTypes.arrayOf(operatorShape).isRequired,
+		supportedPropertyTypes: propertyTypeShape.isRequired
+	};
+
+	static defaultProps = {
+		onQueryChange: () => {}
+	};
+
 	constructor(props) {
 		super(props);
 
@@ -46,6 +110,8 @@ class ContributorBuilder extends React.Component {
 	}
 
 	_handleCriteriaChange = (criteriaChange, index) => {
+		const {onQueryChange} = this.props;
+
 		this.setState(
 			prevState => {
 				let diffState = null;
@@ -69,7 +135,8 @@ class ContributorBuilder extends React.Component {
 				}
 
 				return diffState;
-			}
+			},
+			onQueryChange
 		);
 	}
 
@@ -93,6 +160,8 @@ class ContributorBuilder extends React.Component {
 
 	_handleRootConjunctionClick = event => {
 		event.preventDefault();
+
+		const {onQueryChange} = this.props;
 
 		this.setState(
 			(prevState, props) => {
@@ -121,7 +190,8 @@ class ContributorBuilder extends React.Component {
 				return {
 					contributors
 				};
-			}
+			},
+			onQueryChange
 		);
 	}
 
@@ -221,63 +291,5 @@ class ContributorBuilder extends React.Component {
 		);
 	}
 }
-
-const conjunctionShape = PropTypes.shape(
-	{
-		label: PropTypes.string.isRequired,
-		name: PropTypes.string.isRequired
-	}
-);
-
-const initialContributorShape = PropTypes.shape(
-	{
-		conjunctionId: PropTypes.string.isRequired,
-		conjunctionInputId: PropTypes.string.isRequired,
-		initialQuery: PropTypes.string.isRequired,
-		inputId: PropTypes.string.isRequired,
-		propertyKey: PropTypes.string.isRequired
-	}
-);
-
-const operatorShape = PropTypes.shape(
-	{
-		label: PropTypes.string.isRequired,
-		name: PropTypes.string.isRequired
-	}
-);
-
-const propertyShape = PropTypes.shape(
-	{
-		label: PropTypes.string.isRequired,
-		name: PropTypes.string.isRequired,
-		type: PropTypes.string.isRequired
-	}
-);
-
-const propertyGroupShape = PropTypes.shape(
-	{
-		name: PropTypes.string.isRequired,
-		properties: PropTypes.arrayOf(propertyShape),
-		propertyKey: PropTypes.string.isRequired
-	}
-);
-
-const propertyTypeShape = PropTypes.shape(
-	{
-		boolean: PropTypes.arrayOf(PropTypes.string).isRequired,
-		date: PropTypes.arrayOf(PropTypes.string).isRequired,
-		double: PropTypes.arrayOf(PropTypes.string).isRequired,
-		integer: PropTypes.arrayOf(PropTypes.string).isRequired,
-		string: PropTypes.arrayOf(PropTypes.string).isRequired
-	}
-);
-
-ContributorBuilder.propTypes = {
-	initialContributors: PropTypes.arrayOf(initialContributorShape),
-	propertyGroups: PropTypes.arrayOf(propertyGroupShape),
-	supportedConjunctions: PropTypes.arrayOf(conjunctionShape).isRequired,
-	supportedOperators: PropTypes.arrayOf(operatorShape).isRequired,
-	supportedPropertyTypes: propertyTypeShape.isRequired
-};
 
 export default dragDropContext(HTML5Backend)(ContributorBuilder);

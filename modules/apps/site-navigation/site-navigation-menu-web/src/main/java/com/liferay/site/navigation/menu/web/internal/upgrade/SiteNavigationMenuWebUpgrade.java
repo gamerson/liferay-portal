@@ -18,6 +18,7 @@ import com.liferay.portal.kernel.upgrade.DummyUpgradeStep;
 import com.liferay.portal.upgrade.registry.UpgradeStepRegistrator;
 import com.liferay.site.navigation.menu.web.internal.upgrade.v1_0_0.UpgradePortletId;
 import com.liferay.site.navigation.menu.web.internal.upgrade.v1_0_0.UpgradePortletPreferences;
+import com.liferay.site.navigation.menu.web.internal.upgrade.v1_0_1.RenameUpgradePortletPreferences;
 
 import org.osgi.service.component.annotations.Component;
 
@@ -34,6 +35,9 @@ public class SiteNavigationMenuWebUpgrade implements UpgradeStepRegistrator {
 		registry.register(
 			"0.0.1", "1.0.0", new UpgradePortletId(),
 			new UpgradePortletPreferences());
+
+		registry.register(
+			"1.0.0", "1.0.1", new RenameUpgradePortletPreferences());
 	}
 
 }

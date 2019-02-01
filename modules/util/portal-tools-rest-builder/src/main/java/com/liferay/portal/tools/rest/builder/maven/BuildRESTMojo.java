@@ -43,8 +43,22 @@ public class BuildRESTMojo extends AbstractMojo {
 	/**
 	 * @parameter
 	 */
-	public void setInputFileName(String inputFileName) {
-		_restBuilderArgs.setInputFileName(inputFileName);
+	public void setCopyrightFileName(String copyrightFileName) {
+		_restBuilderArgs.setCopyrightFileName(copyrightFileName);
+	}
+
+	/**
+	 * @parameter
+	 */
+	public void setRESTConfigFileName(String restConfigFileName) {
+		_restBuilderArgs.setRESTConfigFileName(restConfigFileName);
+	}
+
+	/**
+	 * @parameter
+	 */
+	public void setRESTOpenAPIFileName(String restOpenAPIFileName) {
+		_restBuilderArgs.setRESTOpenAPIFileName(restOpenAPIFileName);
 	}
 
 	/**

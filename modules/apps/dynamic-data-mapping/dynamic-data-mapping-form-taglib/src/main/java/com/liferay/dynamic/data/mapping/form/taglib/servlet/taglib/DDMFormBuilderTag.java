@@ -91,6 +91,9 @@ public class DDMFormBuilderTag extends BaseDDMFormBuilderTag {
 			request, "functionsURL",
 			ddmFormBuilderSettingsResponse.getFunctionsURL());
 		setNamespacedAttribute(
+			request, "npmResolvedPackageName",
+			DDMFormTaglibUtil.getNPMResolvedPackageName());
+		setNamespacedAttribute(
 			request, "rolesURL", ddmFormBuilderSettingsResponse.getRolesURL());
 		setNamespacedAttribute(
 			request, "serializedDDMFormRules",

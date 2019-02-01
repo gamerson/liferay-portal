@@ -1,0 +1,109 @@
+/**
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License as published by the Free
+ * Software Foundation; either version 2.1 of the License, or (at your option)
+ * any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+ * details.
+ */
+
+package com.liferay.change.tracking.service.impl;
+
+import com.liferay.change.tracking.internal.background.task.CTPublishBackgroundTaskExecutor;
+import com.liferay.change.tracking.model.CTProcess;
+import com.liferay.change.tracking.service.base.CTProcessLocalServiceBaseImpl;
+import com.liferay.portal.kernel.backgroundtask.BackgroundTask;
+import com.liferay.portal.kernel.backgroundtask.BackgroundTaskManagerUtil;
+import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.model.Company;
+import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.service.ServiceContext;
+
+import java.io.Serializable;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * @author Daniel Kocsis
+ */
+public class CTProcessLocalServiceImpl extends CTProcessLocalServiceBaseImpl {
+
+	@Override
+	public CTProcess addCTProcess(
+			long userId, long ctCollectionId, ServiceContext serviceContext)
+		throws PortalException {
+
+		_validate(ctCollectionId);
+
+		long ctProcessId = counterLocalService.increment();
+
+		CTProcess ctProcess = ctProcessPersistence.create(ctProcessId);
+
+		User user = userLocalService.getUser(userId);
+
+		ctProcess.setCompanyId(user.getCompanyId());
+		ctProcess.setUserId(user.getUserId());
+
+		ctProcess.setCreateDate(serviceContext.getCreateDate(new Date()));
+		ctProcess.setCtCollectionId(ctCollectionId);
+
+		long backgroundTaskId = _addBackgroundTask(
+			user, ctCollectionId, ctProcessId, serviceContext);
+
+		ctProcess.setBackgroundTaskId(backgroundTaskId);
+
+		return ctProcessPersistence.update(ctProcess);
+	}
+
+	@Override
+	public CTProcess deleteCTProcess(CTProcess ctProcess)
+		throws PortalException {
+
+		if (ctProcess.getBackgroundTaskId() > 0) {
+			BackgroundTaskManagerUtil.deleteBackgroundTask(
+				ctProcess.getBackgroundTaskId());
+		}
+
+		return ctProcessPersistence.remove(ctProcess);
+	}
+
+	@Override
+	public List<CTProcess> getCTProcesses(long ctCollectionId) {
+		return ctProcessPersistence.findByCollectionId(ctCollectionId);
+	}
+
+	private long _addBackgroundTask(
+			User user, long ctCollectionId, long ctProcessId,
+			ServiceContext serviceContext)
+		throws PortalException {
+
+		Company company = companyLocalService.getCompany(user.getCompanyId());
+
+		Map<String, Serializable> taskContextMap = new HashMap<>();
+
+		taskContextMap.put("ctCollectionId", ctCollectionId);
+		taskContextMap.put("ctProcessId", ctProcessId);
+
+		BackgroundTask backgroundTask =
+			BackgroundTaskManagerUtil.addBackgroundTask(
+				user.getUserId(), company.getGroupId(),
+				String.valueOf(ctCollectionId), null,
+				CTPublishBackgroundTaskExecutor.class, taskContextMap,
+				serviceContext);
+
+		return backgroundTask.getBackgroundTaskId();
+	}
+
+	private void _validate(long ctCollectionId) throws PortalException {
+		ctCollectionLocalService.getCTCollection(ctCollectionId);
+	}
+
+}

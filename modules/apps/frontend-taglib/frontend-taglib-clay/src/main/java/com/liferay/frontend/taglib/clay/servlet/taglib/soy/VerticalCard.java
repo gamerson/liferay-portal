@@ -44,6 +44,14 @@ public interface VerticalCard extends BaseClayCard {
 		return null;
 	}
 
+	public default String getStickerCssClass() {
+		return null;
+	}
+
+	public default String getStickerIcon() {
+		return null;
+	}
+
 	public default String getStickerImageAlt() {
 		return null;
 	}

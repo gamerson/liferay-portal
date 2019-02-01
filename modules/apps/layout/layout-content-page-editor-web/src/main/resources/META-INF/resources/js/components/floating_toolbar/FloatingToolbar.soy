@@ -1,0 +1,92 @@
+{namespace com.liferay.layout.content.page.editor.web.FloatingToolbar}
+
+/**
+ * FloatingToolbar
+ */
+{template .render}
+	{@param item: ?}
+	{@param itemId: string}
+	{@param? _panels: list<[
+		icon: string,
+		panelId: string,
+		title: string
+	]>}
+	{@param? _handleButtonClick: any}
+	{@param? _selectedPanelId: string}
+	{@param? spritemap: string}
+	{@param? store: ?}
+
+	<div class="fragments-editor__floating-toolbar">
+		{if $spritemap and $_panels and (length($_panels) > 0)}
+			<div class="fragments-editor__floating-toolbar-buttons popover">
+				{foreach $panel in $_panels}
+					{call .panelButton}
+						{param handleButtonClick: $_handleButtonClick /}
+						{param key: $panel.panelId /}
+						{param panel: $panel /}
+						{param selectedPanelId: $_selectedPanelId /}
+						{param spritemap: $spritemap /}
+					{/call}
+				{/foreach}
+			</div>
+		{/if}
+
+		{if $_selectedPanelId}
+			<div class="fragments-editor__floating-toolbar-panel popover">
+				{delcall com.liferay.layout.content.page.editor.web.FloatingToolbarPanel variant="$_selectedPanelId"}
+					{param item: $item /}
+					{param itemId: $itemId /}
+					{param store: $store /}
+				{/delcall}
+			</div>
+		{/if}
+	</div>
+{/template}
+
+/**
+ * Panel button
+ */
+{template .panelButton}
+	{@param panel: [
+		icon: string,
+		panelId: string,
+		title: string
+	]}
+	{@param spritemap: string}
+	{@param? handleButtonClick: any}
+	{@param? selectedPanelId: string}
+
+	{let $panelButtonClasses kind="text"}
+		btn
+		{sp}btn-sm
+		{sp}btn-monospaced
+		{sp}btn-unstyled
+
+		{if $panel.panelId == $selectedPanelId}
+			{sp}active
+		{/if}
+	{/let}
+
+	<button
+		class="{$panelButtonClasses}"
+		data-onclick="{$handleButtonClick}"
+		data-panel-id="{$panel.panelId}"
+		title="{$panel.title}"
+		type="button"
+	>
+		<svg class="lexicon-icon">
+			<use xlink:href="{$spritemap}#{$panel.icon}"></use>
+		</svg>
+	</button>
+{/template}
+
+/**
+ * FloatingToolbarPanel
+ */
+{deltemplate com.liferay.layout.content.page.editor.web.FloatingToolbarPanel}
+	{@param item: ?}
+	{@param itemId: string}
+	{@param? store: ?}
+
+	<div id="{$itemId}"></div>
+{/deltemplate}

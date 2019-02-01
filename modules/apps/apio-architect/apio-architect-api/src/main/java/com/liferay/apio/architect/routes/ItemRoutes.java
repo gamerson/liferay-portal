@@ -48,7 +48,7 @@ import java.util.function.BiFunction;
  * com.liferay.apio.architect.router.ItemRouter}.
  *
  * <p>
- * This interface's methods return functions to get the item resource's
+ * This interface's methods return functions that get the item resource's
  * different endpoints. You should always use a {@link Builder} to create
  * instances of this interface.
  * </p>
@@ -61,7 +61,6 @@ import java.util.function.BiFunction;
  * @deprecated As of 1.9.0, use {@link
  *             com.liferay.apio.architect.annotation.Actions} annotations
  *             instead
- * @review
  */
 @Deprecated
 @ProviderType
@@ -78,7 +77,6 @@ public interface ItemRoutes<T, S> {
 	 * @deprecated As of 1.9.0, use {@link
 	 *             com.liferay.apio.architect.annotation.Actions} annotations
 	 *             instead
-	 * @review
 	 */
 	@Deprecated
 	public Optional<Map<String, CustomItemFunction<?, S>>>
@@ -90,7 +88,6 @@ public interface ItemRoutes<T, S> {
 	 * @deprecated As of 1.9.0, use {@link
 	 *             com.liferay.apio.architect.annotation.Actions} annotations
 	 *             instead
-	 * @review
 	 */
 	@Deprecated
 	public Map<String, CustomRoute> getCustomRoutes();
@@ -103,7 +100,6 @@ public interface ItemRoutes<T, S> {
 	 * @return     the function that deletes the item, if the function exists;
 	 *             {@code Optional#empty()} otherwise
 	 * @deprecated use annotation builder instead
-	 * @review
 	 */
 	@Deprecated
 	public Optional<DeleteItemConsumer<S>> getDeleteConsumerOptional();
@@ -118,7 +114,6 @@ public interface ItemRoutes<T, S> {
 	 * @deprecated As of 1.9.0, use {@link
 	 *             com.liferay.apio.architect.annotation.Actions} annotations
 	 *             instead
-	 * @review
 	 */
 	@Deprecated
 	public Optional<Form> getFormOptional();
@@ -133,7 +128,6 @@ public interface ItemRoutes<T, S> {
 	 * @deprecated As of 1.9.0, use {@link
 	 *             com.liferay.apio.architect.annotation.Actions} annotations
 	 *             instead
-	 * @review
 	 */
 	@Deprecated
 	public Optional<GetItemFunction<T, S>> getItemFunctionOptional();
@@ -148,7 +142,6 @@ public interface ItemRoutes<T, S> {
 	 * @deprecated As of 1.9.0, use {@link
 	 *             com.liferay.apio.architect.annotation.Actions} annotations
 	 *             instead
-	 * @review
 	 */
 	@Deprecated
 	public Optional<UpdateItemFunction<T, S>> getUpdateItemFunctionOptional();
@@ -163,7 +156,6 @@ public interface ItemRoutes<T, S> {
 	 * @deprecated As of 1.9.0, use {@link
 	 *             com.liferay.apio.architect.annotation.Actions} annotations
 	 *             instead
-	 * @review
 	 */
 	@Deprecated
 	@ProviderType
@@ -174,18 +166,17 @@ public interface ItemRoutes<T, S> {
 		 * sets the HTTP method to use) and the custom route function {@code
 		 * throwableBiFunction}.
 		 *
-		 * @param      customRoute the name and method of the custom route
+		 * @param      customRoute the custom route's name and method
 		 * @param      throwableBiFunction the custom route function
-		 * @param      identifierClass the class of the identifier of the type R
+		 * @param      identifierClass the identifier class of type {@code R}
 		 * @param      permissionBiFunction the permission function for this
 		 *             route
 		 * @param      formBuilderFunction the function that creates the form
 		 *             for this operation
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Action}
 		 *             annotation instead
-		 * @review
 		 */
 		@Deprecated
 		public default <R, U, I extends Identifier<?>> Builder<T, S>
@@ -207,22 +198,21 @@ public interface ItemRoutes<T, S> {
 		 * sets the HTTP method to use) and the custom route function {@code
 		 * throwableHexaFunction}.
 		 *
-		 * @param      customRoute the name and method of the custom route
+		 * @param      customRoute the custom route's name and method
 		 * @param      throwableHexaFunction the custom route function
-		 * @param      aClass the class of the page function's second parameter
+		 * @param      aClass the class of the item function's second parameter
 		 * @param      bClass the class of the item function's third parameter
 		 * @param      cClass the class of the item function's fourth parameter
 		 * @param      dClass the class of the item function's fifth parameter
-		 * @param      identifierClass the class of the identifier of the type R
+		 * @param      identifierClass the identifier class of type {@code R}
 		 * @param      permissionBiFunction the permission function for this
 		 *             route
 		 * @param      formBuilderFunction the function that creates the form
 		 *             for this operation
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Action}
 		 *             annotation instead
-		 * @review
 		 */
 		@Deprecated
 		public <A, B, C, D, R, U, I extends Identifier<?>> Builder<T, S>
@@ -240,21 +230,20 @@ public interface ItemRoutes<T, S> {
 		 * sets the HTTP method to use) and the custom route function {@code
 		 * throwablePentaFunction}.
 		 *
-		 * @param      customRoute the name and method of the custom route
+		 * @param      customRoute the custom route's name and method
 		 * @param      throwablePentaFunction the custom route function
-		 * @param      aClass the class of the page function's second parameter
+		 * @param      aClass the class of the item function's second parameter
 		 * @param      bClass the class of the item function's third parameter
 		 * @param      cClass the class of the item function's fourth parameter
-		 * @param      identifierClass the class of the identifier of the type R
+		 * @param      identifierClass the identifier class of type {@code R}
 		 * @param      permissionBiFunction the permission function for this
 		 *             route
 		 * @param      formBuilderFunction the function that creates the form
 		 *             for this operation
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Action}
 		 *             annotation instead
-		 * @review
 		 */
 		@Deprecated
 		public default <A, B, C, R, U, I extends Identifier<?>> Builder<T, S>
@@ -279,20 +268,19 @@ public interface ItemRoutes<T, S> {
 		 * sets the HTTP method to use) and the custom route function {@code
 		 * throwableTetraFunction}.
 		 *
-		 * @param      customRoute the name and method of the custom route
+		 * @param      customRoute the custom route's name and method
 		 * @param      throwableTetraFunction the custom route function
-		 * @param      aClass the class of the page function's second parameter
+		 * @param      aClass the class of the item function's second parameter
 		 * @param      bClass the class of the item function's third parameter
-		 * @param      identifierClass the class of the identifier of the type R
+		 * @param      identifierClass the identifier class of type {@code R}
 		 * @param      permissionBiFunction the permission function for this
 		 *             route
 		 * @param      formBuilderFunction the function that creates the form
 		 *             for this operation
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Action}
 		 *             annotation instead
-		 * @review
 		 */
 		@Deprecated
 		public default <A, B, R, U, I extends Identifier<?>> Builder<T, S>
@@ -316,19 +304,18 @@ public interface ItemRoutes<T, S> {
 		 * sets the HTTP method to use) and the custom route function {@code
 		 * throwableTriFunction}.
 		 *
-		 * @param      customRoute the name and method of the custom route
+		 * @param      customRoute the custom route's name and method
 		 * @param      throwableTriFunction the custom route function
-		 * @param      aClass the class of the page function's second parameter
-		 * @param      identifierClass the class of the identifier of the type R
+		 * @param      aClass the class of the item function's second parameter
+		 * @param      identifierClass the identifier class of type {@code R}
 		 * @param      permissionBiFunction the permission function for this
 		 *             route
 		 * @param      formBuilderFunction the function that creates the form
 		 *             for this operation
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Action}
 		 *             annotation instead
-		 * @review
 		 */
 		@Deprecated
 		public default <A, R, U, I extends Identifier<?>> Builder<T, S>
@@ -353,10 +340,9 @@ public interface ItemRoutes<T, S> {
 		 *             the item
 		 * @param      aClass the class of the item function's second parameter
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Retrieve}
 		 *             annotation instead
-		 * @review
 		 */
 		@Deprecated
 		public default <A> Builder<T, S> addGetter(
@@ -374,10 +360,9 @@ public interface ItemRoutes<T, S> {
 		 * @param      getterThrowableFunction the function that calculates the
 		 *             item
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Retrieve}
 		 *             annotation instead
-		 * @review
 		 */
 		@Deprecated
 		public default Builder<T, S> addGetter(
@@ -397,10 +382,9 @@ public interface ItemRoutes<T, S> {
 		 * @param      cClass the class of the item function's fourth parameter
 		 * @param      dClass the class of the item function's fifth parameter
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Retrieve}
 		 *             annotation instead
-		 * @review
 		 */
 		@Deprecated
 		public <A, B, C, D> Builder<T, S> addGetter(
@@ -417,10 +401,9 @@ public interface ItemRoutes<T, S> {
 		 * @param      bClass the class of the item function's third parameter
 		 * @param      cClass the class of the item function's fourth parameter
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Retrieve}
 		 *             annotation instead
-		 * @review
 		 */
 		@Deprecated
 		public default <A, B, C> Builder<T, S> addGetter(
@@ -441,10 +424,9 @@ public interface ItemRoutes<T, S> {
 		 * @param      aClass the class of the item function's second parameter
 		 * @param      bClass the class of the item function's third parameter
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Retrieve}
 		 *             annotation instead
-		 * @review
 		 */
 		@Deprecated
 		public default <A, B> Builder<T, S> addGetter(
@@ -465,10 +447,9 @@ public interface ItemRoutes<T, S> {
 		 * @param      hasRemovePermissionFunction the permission function for
 		 *             this route
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Remove}
 		 *             annotation instead
-		 * @review
 		 */
 		@Deprecated
 		public default <A> Builder<T, S> addRemover(
@@ -488,10 +469,9 @@ public interface ItemRoutes<T, S> {
 		 * @param      hasRemovePermissionFunction the permission function for
 		 *             this route
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Remove}
 		 *             annotation instead
-		 * @review
 		 */
 		@Deprecated
 		public default Builder<T, S> addRemover(
@@ -518,10 +498,9 @@ public interface ItemRoutes<T, S> {
 		 * @param      hasRemovePermissionFunction the permission function for
 		 *             this route
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Remove}
 		 *             annotation instead
-		 * @review
 		 */
 		@Deprecated
 		public <A, B, C, D> Builder<T, S> addRemover(
@@ -542,10 +521,9 @@ public interface ItemRoutes<T, S> {
 		 * @param      hasRemovePermissionFunction the permission function for
 		 *             this route
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Remove}
 		 *             annotation instead
-		 * @review
 		 */
 		@Deprecated
 		public default <A, B, C> Builder<T, S> addRemover(
@@ -571,10 +549,9 @@ public interface ItemRoutes<T, S> {
 		 * @param      hasRemovePermissionFunction the permission function for
 		 *             this route
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Remove}
 		 *             annotation instead
-		 * @review
 		 */
 		@Deprecated
 		public default <A, B> Builder<T, S> addRemover(
@@ -597,10 +574,9 @@ public interface ItemRoutes<T, S> {
 		 * @param      formBuilderFunction the function that creates the form
 		 *             for this operation
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Replace}
 		 *             annotation instead
-		 * @review
 		 */
 		@Deprecated
 		public default <R> Builder<T, S> addUpdater(
@@ -630,10 +606,9 @@ public interface ItemRoutes<T, S> {
 		 * @param      formBuilderFunction the function that creates the form
 		 *             for this operation
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Replace}
 		 *             annotation instead
-		 * @review
 		 */
 		@Deprecated
 		public <A, B, C, D, R> Builder<T, S> addUpdater(
@@ -659,10 +634,9 @@ public interface ItemRoutes<T, S> {
 		 * @param      formBuilderFunction the function that creates the form
 		 *             for this operation
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Replace}
 		 *             annotation instead
-		 * @review
 		 */
 		@Deprecated
 		public default <A, B, C, R> Builder<T, S> addUpdater(
@@ -692,10 +666,9 @@ public interface ItemRoutes<T, S> {
 		 * @param      formBuilderFunction the function that creates the form
 		 *             for this operation
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Replace}
 		 *             annotation instead
-		 * @review
 		 */
 		@Deprecated
 		public default <A, B, R> Builder<T, S> addUpdater(
@@ -723,10 +696,9 @@ public interface ItemRoutes<T, S> {
 		 * @param      formBuilderFunction the function that creates the form
 		 *             for this operation
 		 * @return     the updated builder
-		 * @deprecated As of 1.9.0, use {@link
+		 * @deprecated As of 1.9.0, use the {@link
 		 *             com.liferay.apio.architect.annotation.Actions.Replace}
 		 *             annotation instead
-		 * @review
 		 */
 		@Deprecated
 		public default <A, R> Builder<T, S> addUpdater(
@@ -749,7 +721,6 @@ public interface ItemRoutes<T, S> {
 		 * @deprecated As of 1.9.0, use {@link
 		 *             com.liferay.apio.architect.annotation.Actions}
 		 *             annotations instead
-		 * @review
 		 */
 		@Deprecated
 		public ItemRoutes<T, S> build();

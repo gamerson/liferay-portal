@@ -580,7 +580,7 @@ public interface LayoutPageTemplateEntryPersistence extends BasePersistence<Layo
 	* @param layoutPrototypeId the layout prototype ID
 	* @return the matching layout page template entries
 	*/
-	public java.util.List<LayoutPageTemplateEntry> findByLayoutPrototype(
+	public java.util.List<LayoutPageTemplateEntry> findByLayoutPrototypeId(
 		long layoutPrototypeId);
 
 	/**
@@ -595,7 +595,7 @@ public interface LayoutPageTemplateEntryPersistence extends BasePersistence<Layo
 	* @param end the upper bound of the range of layout page template entries (not inclusive)
 	* @return the range of matching layout page template entries
 	*/
-	public java.util.List<LayoutPageTemplateEntry> findByLayoutPrototype(
+	public java.util.List<LayoutPageTemplateEntry> findByLayoutPrototypeId(
 		long layoutPrototypeId, int start, int end);
 
 	/**
@@ -611,7 +611,7 @@ public interface LayoutPageTemplateEntryPersistence extends BasePersistence<Layo
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of matching layout page template entries
 	*/
-	public java.util.List<LayoutPageTemplateEntry> findByLayoutPrototype(
+	public java.util.List<LayoutPageTemplateEntry> findByLayoutPrototypeId(
 		long layoutPrototypeId, int start, int end,
 		com.liferay.portal.kernel.util.OrderByComparator<LayoutPageTemplateEntry> orderByComparator);
 
@@ -629,7 +629,7 @@ public interface LayoutPageTemplateEntryPersistence extends BasePersistence<Layo
 	* @param retrieveFromCache whether to retrieve from the finder cache
 	* @return the ordered range of matching layout page template entries
 	*/
-	public java.util.List<LayoutPageTemplateEntry> findByLayoutPrototype(
+	public java.util.List<LayoutPageTemplateEntry> findByLayoutPrototypeId(
 		long layoutPrototypeId, int start, int end,
 		com.liferay.portal.kernel.util.OrderByComparator<LayoutPageTemplateEntry> orderByComparator,
 		boolean retrieveFromCache);
@@ -642,7 +642,7 @@ public interface LayoutPageTemplateEntryPersistence extends BasePersistence<Layo
 	* @return the first matching layout page template entry
 	* @throws NoSuchPageTemplateEntryException if a matching layout page template entry could not be found
 	*/
-	public LayoutPageTemplateEntry findByLayoutPrototype_First(
+	public LayoutPageTemplateEntry findByLayoutPrototypeId_First(
 		long layoutPrototypeId,
 		com.liferay.portal.kernel.util.OrderByComparator<LayoutPageTemplateEntry> orderByComparator)
 		throws NoSuchPageTemplateEntryException;
@@ -654,7 +654,7 @@ public interface LayoutPageTemplateEntryPersistence extends BasePersistence<Layo
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching layout page template entry, or <code>null</code> if a matching layout page template entry could not be found
 	*/
-	public LayoutPageTemplateEntry fetchByLayoutPrototype_First(
+	public LayoutPageTemplateEntry fetchByLayoutPrototypeId_First(
 		long layoutPrototypeId,
 		com.liferay.portal.kernel.util.OrderByComparator<LayoutPageTemplateEntry> orderByComparator);
 
@@ -666,7 +666,7 @@ public interface LayoutPageTemplateEntryPersistence extends BasePersistence<Layo
 	* @return the last matching layout page template entry
 	* @throws NoSuchPageTemplateEntryException if a matching layout page template entry could not be found
 	*/
-	public LayoutPageTemplateEntry findByLayoutPrototype_Last(
+	public LayoutPageTemplateEntry findByLayoutPrototypeId_Last(
 		long layoutPrototypeId,
 		com.liferay.portal.kernel.util.OrderByComparator<LayoutPageTemplateEntry> orderByComparator)
 		throws NoSuchPageTemplateEntryException;
@@ -678,7 +678,7 @@ public interface LayoutPageTemplateEntryPersistence extends BasePersistence<Layo
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching layout page template entry, or <code>null</code> if a matching layout page template entry could not be found
 	*/
-	public LayoutPageTemplateEntry fetchByLayoutPrototype_Last(
+	public LayoutPageTemplateEntry fetchByLayoutPrototypeId_Last(
 		long layoutPrototypeId,
 		com.liferay.portal.kernel.util.OrderByComparator<LayoutPageTemplateEntry> orderByComparator);
 
@@ -691,7 +691,7 @@ public interface LayoutPageTemplateEntryPersistence extends BasePersistence<Layo
 	* @return the previous, current, and next layout page template entry
 	* @throws NoSuchPageTemplateEntryException if a layout page template entry with the primary key could not be found
 	*/
-	public LayoutPageTemplateEntry[] findByLayoutPrototype_PrevAndNext(
+	public LayoutPageTemplateEntry[] findByLayoutPrototypeId_PrevAndNext(
 		long layoutPageTemplateEntryId, long layoutPrototypeId,
 		com.liferay.portal.kernel.util.OrderByComparator<LayoutPageTemplateEntry> orderByComparator)
 		throws NoSuchPageTemplateEntryException;
@@ -701,7 +701,7 @@ public interface LayoutPageTemplateEntryPersistence extends BasePersistence<Layo
 	*
 	* @param layoutPrototypeId the layout prototype ID
 	*/
-	public void removeByLayoutPrototype(long layoutPrototypeId);
+	public void removeByLayoutPrototypeId(long layoutPrototypeId);
 
 	/**
 	* Returns the number of layout page template entries where layoutPrototypeId = &#63;.
@@ -709,7 +709,52 @@ public interface LayoutPageTemplateEntryPersistence extends BasePersistence<Layo
 	* @param layoutPrototypeId the layout prototype ID
 	* @return the number of matching layout page template entries
 	*/
-	public int countByLayoutPrototype(long layoutPrototypeId);
+	public int countByLayoutPrototypeId(long layoutPrototypeId);
+
+	/**
+	* Returns the layout page template entry where plid = &#63; or throws a {@link NoSuchPageTemplateEntryException} if it could not be found.
+	*
+	* @param plid the plid
+	* @return the matching layout page template entry
+	* @throws NoSuchPageTemplateEntryException if a matching layout page template entry could not be found
+	*/
+	public LayoutPageTemplateEntry findByPlid(long plid)
+		throws NoSuchPageTemplateEntryException;
+
+	/**
+	* Returns the layout page template entry where plid = &#63; or returns <code>null</code> if it could not be found. Uses the finder cache.
+	*
+	* @param plid the plid
+	* @return the matching layout page template entry, or <code>null</code> if a matching layout page template entry could not be found
+	*/
+	public LayoutPageTemplateEntry fetchByPlid(long plid);
+
+	/**
+	* Returns the layout page template entry where plid = &#63; or returns <code>null</code> if it could not be found, optionally using the finder cache.
+	*
+	* @param plid the plid
+	* @param retrieveFromCache whether to retrieve from the finder cache
+	* @return the matching layout page template entry, or <code>null</code> if a matching layout page template entry could not be found
+	*/
+	public LayoutPageTemplateEntry fetchByPlid(long plid,
+		boolean retrieveFromCache);
+
+	/**
+	* Removes the layout page template entry where plid = &#63; from the database.
+	*
+	* @param plid the plid
+	* @return the layout page template entry that was removed
+	*/
+	public LayoutPageTemplateEntry removeByPlid(long plid)
+		throws NoSuchPageTemplateEntryException;
+
+	/**
+	* Returns the number of layout page template entries where plid = &#63;.
+	*
+	* @param plid the plid
+	* @return the number of matching layout page template entries
+	*/
+	public int countByPlid(long plid);
 
 	/**
 	* Returns all the layout page template entries where groupId = &#63; and layoutPageTemplateCollectionId = &#63;.

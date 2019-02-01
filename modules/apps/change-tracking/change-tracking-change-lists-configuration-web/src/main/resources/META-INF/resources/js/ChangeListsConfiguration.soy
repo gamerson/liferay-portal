@@ -1,0 +1,80 @@
+{namespace com.liferay.change.tracking.change.lists.configuration.web.ChangeListsConfiguration}
+
+/**
+ * This renders the Configuration Window element.
+ */
+{template .render}
+	{@param spritemap: string}
+	{@param? changeTrackingEnabled: bool}
+	{@param? initialFetch: bool}
+	{@param? tooltipBody: string}
+	{@param? _handleCheck: any}
+	{@param? _handleSave: any}
+	{@param? _handleSaveAndGoToOverview: any}
+
+	<div class="change-lists-configuration-sheet sheet sheet-lg">
+		{if not $initialFetch}
+			{call .loading}{/call}
+		{/if}
+
+		<div class="sheet-header">
+			<h2 class="float-left sheet-title ">{msg desc=""}enable-change-lists{/msg}</h2>
+
+			{let $changeListsHelperAttributes kind="attributes"}
+				class="change-lists-helper float-right
+					{if $tooltipBody}
+						{sp}lfr-portal-tooltip
+					{/if}
+				"
+
+				{if $tooltipBody}
+					title="{$tooltipBody}"
+				{/if}
+			{/let}
+
+			<span {$changeListsHelperAttributes}>
+				<svg class="lexicon-icon">
+					<use href="{$spritemap}#info-circle-open" />
+				</svg>
+
+				<span class="helper-text">{msg desc=""}supported-content-types{/msg}</span>
+			</span>
+		</div>
+
+		<div class="sheet-text">{msg desc=""}change-lists-help{/msg}</div>
+
+		<div class="form-group">
+			<label class="toggle-switch">
+				<input class="toggle-switch-check" data-onchange="{$_handleCheck}" data-qa-id="changelist-toggle" {if $changeTrackingEnabled}checked{/if} type="checkbox"/>
+				<span aria-hidden="true" class="toggle-switch-bar">
+					<span class="toggle-switch-handle"></span>
+				</span>
+				<span class="toggle-label-text">
+					<span class="custom-control-label-text">
+						{msg desc=""}yes{/msg}
+					</span>
+				</span>
+			</label>
+		</div>
+
+		<div class="sheet-footer sheet-footer-btn-block-sm-down">
+			<div class="btn-group">
+				<div class="btn-group-item">
+					<button class="btn btn-primary" data-onclick="{$_handleSave}" type="button">
+						{msg desc=""}save{/msg}
+					</button>
+				</div>
+
+				<div class="btn-group-item">
+					<button class="btn btn-secondary" data-onclick="{$_handleSaveAndGoToOverview}" {if not $changeTrackingEnabled}disabled{/if} type="button">{msg desc=""}save-and-go-to-overview{/msg}</button>
+				</div>
+			</div>
+		</div>
+	</div>
+{/template}
+
+{template .loading}
+	<div class="loading-indicator">
+		<span aria-hidden="true" class="loading-animation"></span>
+	</div>
+{/template}

@@ -20,60 +20,58 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * Instances of this class represent an API resource.
+ * Represents an API resource. Only three implementations are allowed: {@link
+ * Item}, {@link Paged}, and {@link Nested}.
  *
- * <p>Only three implementations are allowed: {@link Item}, {@link Paged} and
- * {@link Nested}.
- *
- * <p>This class should never be directly instantiated. Use one of its
- * descendants
+ * <p>
+ * This class should never be directly instantiated. Use one of its descendants'
  * static methods ({@link Paged#of}, {@link Item#of} and {@link Nested#of})
  * instead.
+ * </p>
  *
  * @author Alejandro Hernández
  * @see    Item
  * @see    Paged
  * @see    Nested
- * @review
  */
 @ProviderType
 public class Resource {
 
 	/**
-	 * The resource's name
-	 *
-	 * @review
+	 * Returns the resource's name.
 	 */
 	public String getName() {
 		return _name;
 	}
 
 	/**
-	 * Instances of this class represent a generic parent resource.
+	 * Represents a generic parent resource. This class should never be directly
+	 * instantiated. Always use the {@link #of} method to create a new instance.
 	 *
-	 * <p>This class is intended for those kind of resources that must be
-	 * scoped,
-	 * but that scope (a.k.a. parent) cannot be another resource.
+	 * <p>
+	 * This class is intended for resources that must be scoped, but that scope
+	 * (e.g., parent) can't be another resource. For example:
+	 * </p>
 	 *
-	 * <p>Example:
-	 *
-	 * <p>- Comments of a blog post ({@link Nested}): {@code
-	 * /blog-post/42/comment}
-	 *
-	 * <p>- Comments by generic parent ({@link GenericParent}: {@code
+	 * <ul>
+	 * <li>
+	 * Blog post comments ({@link Nested}): {@code /blog-post/42/comment}
+	 * </li>
+	 * <li>
+	 * Comments by a generic parent ({@link GenericParent}: {@code
 	 * /comment/by-generic-parent/blog-post:42}
-	 *
-	 * <p>This class should never be directly instantiated. Always use {@link
-	 * #of} method to create a new instance.
-	 *
-	 * @review
+	 * </li>
+	 * </ul>
 	 */
 	public static class GenericParent extends Resource {
 
 		/**
-		 * Creates a new {@link GenericParent} with the provided parent and
-		 * {@code name} information.
+		 * Creates a new {@code GenericParent} with the parent name, parent ID,
+		 * and name.
 		 *
+		 * @param  parentName the parent name
+		 * @param  parentId the parent ID
+		 * @param  name the name
 		 * @review
 		 */
 		public static GenericParent of(
@@ -83,9 +81,10 @@ public class Resource {
 		}
 
 		/**
-		 * Creates a new {@link GenericParent} with the provided parent and
-		 * {@code name} information.
+		 * Creates a new {@code GenericParent} with the parent name and name.
 		 *
+		 * @param  parentName the parent name
+		 * @param  name the name
 		 * @review
 		 */
 		public static GenericParent of(String parentName, String name) {
@@ -114,18 +113,14 @@ public class Resource {
 		}
 
 		/**
-		 * The resource's generic parent ID.
-		 *
-		 * @review
+		 * Returns the resource's generic parent ID.
 		 */
 		public Optional<Id> getParentIdOptional() {
 			return Optional.ofNullable(_parentId);
 		}
 
 		/**
-		 * The resource's generic parent name.
-		 *
-		 * @review
+		 * Returns the resource's generic parent name.
 		 */
 		public String getParentName() {
 			return _parentName;
@@ -151,13 +146,14 @@ public class Resource {
 		}
 
 		/**
-		 * Copies the current {@link GenericParent} by setting a value for the
-		 * generic parent's ID attribute. A shallow reference equality check is
-		 * used to prevent copying of the same value by returning {@code this}.
+		 * Copies the current {@code GenericParent} by setting a new value for
+		 * the generic parent's ID attribute. If the same ID is supplied, a
+		 * shallow reference equality check prevents the copy and the method
+		 * returns {@code this}.
 		 *
 		 * @param  id the new ID
-		 * @return A modified copy of {@code this} object
-		 * @review
+		 * @return the generic parent copy, if the new ID is different from the
+		 *         current generic parent's ID; {@code this} otherwise
 		 */
 		public GenericParent withParentId(Id id) {
 			if ((_parentId != null) && _parentId.equals(id)) {
@@ -180,40 +176,36 @@ public class Resource {
 	}
 
 	/**
-	 * Instances of this class represent an item's ID.
-	 *
-	 * <p>This class should never be directly instantiated. Always use {@link
-	 * #of} method to create a new instance.
-	 *
-	 * @review
+	 * Represents an item's ID. You should never instantiate this class
+	 * directly. Always use the {@link Id#of} method to create a new instance.
 	 */
 	public static class Id {
 
 		/**
-		 * Creates a new {@link Id} with the provided {@code object}-{@code
-		 * string} pair.
+		 * Creates a new {@code ID} with the provided object-string pair.
 		 *
-		 * @review
+		 * @param  objectVersion the object
+		 * @return the new {@code ID}
 		 */
 		public static Id of(Object objectVersion, String stringVersion) {
 			return new Id(objectVersion, stringVersion);
 		}
 
 		/**
-		 * The {@link Id} as an object instance. The result of this method can
-		 * be any class supported by a {@link
+		 * Returns the {@code ID} as an {@code Object} instance. This can be any
+		 * class supported by a {@link
 		 * com.liferay.apio.architect.uri.mapper.PathIdentifierMapper}.
 		 *
-		 * @review
+		 * @return the {@code ID} as an {@code Object} instance
 		 */
 		public Object asObject() {
 			return _objectVersion;
 		}
 
 		/**
-		 * The {@link Id} as an string instance.
+		 * Returns the {@code ID} as a {@code String} instance.
 		 *
-		 * @review
+		 * @return the {@code ID} as a {@code String} instance
 		 */
 		public String asString() {
 			return _stringVersion;
@@ -266,30 +258,27 @@ public class Resource {
 	}
 
 	/**
-	 * Instances of this class represent an item resource.
-	 *
-	 * <p>This class should never be directly instantiated. Always use {@link
-	 * #of}
-	 * method to create a new instance.
-	 *
-	 * @review
+	 * Represents an item resource. You should never instantiate this class
+	 * directly. Always use an {@link Item#of} method to create a new instance.
 	 */
 	public static class Item extends Resource {
 
 		/**
-		 * Creates a new {@link Item} with the provided {@code name}.
+		 * Creates a new {@code Item} with the provided name.
 		 *
-		 * @review
+		 * @param  name the name
+		 * @return the new {@code Item}
 		 */
 		public static Item of(String name) {
 			return new Item(name, null);
 		}
 
 		/**
-		 * Creates a new {@link Item} with the provided {@code name} and {@code
+		 * Creates a new {@code Item} with the provided {@code name} and {@code
 		 * ID}.
 		 *
-		 * @review
+		 * @param  name the name
+		 * @return the new {@code Item}
 		 */
 		public static Item of(String name, Id id) {
 			return new Item(name, id);
@@ -315,11 +304,12 @@ public class Resource {
 		}
 
 		/**
-		 * The resource's ID, if present; {@code Optional#empty} otherwise. This
-		 * component is not taken into account when performing an {@link
-		 * #equals)} check.
+		 * Returns the resource's ID if it exists, or an empty {@code Optional}
+		 * otherwise. This component is not taken into account when performing
+		 * an {@link #equals)} check.
 		 *
-		 * @review
+		 * @return the resource's ID if it exists; an empty {@code Optional}
+		 *         otherwise
 		 */
 		public Optional<Id> getIdOptional() {
 			return Optional.ofNullable(_id);
@@ -346,14 +336,13 @@ public class Resource {
 		}
 
 		/**
-		 * Copies the current {@link Item} by setting a value for the {@link
-		 * Item#getIdOptional() ID} attribute. A shallow reference equality
-		 * check is used to prevent copying of the same value by returning
-		 * {@code this}.
+		 * Copies the current {@code Item} by setting a new value for the item's
+		 * ID. If the same ID is supplied, a shallow reference equality check
+		 * prevents the copy and the method returns {@code this}.
 		 *
 		 * @param  id the new ID
-		 * @return A modified copy of {@code this} object
-		 * @review
+		 * @return the {@code Item} copy, if the new ID is different from the
+		 *         current item's ID; {@code this} otherwise
 		 */
 		public Item withId(Id id) {
 			if ((_id != null) && _id.equals(id)) {
@@ -374,19 +363,18 @@ public class Resource {
 	}
 
 	/**
-	 * Instances of this class represent a nested resource.
-	 *
-	 * <p>This class should never be directly instantiated. Always use {@link
-	 * #of} method to create a new instance.
-	 *
-	 * @review
+	 * Represents a nested resource. You should never instantiate this class
+	 * directly. Always use the {@link Nested#of} method to create a new
+	 * instance.
 	 */
 	public static class Nested extends Resource {
 
 		/**
-		 * Creates a new {@link Nested} with the provided {@link Item parent}
-		 * and {@code name} information.
+		 * Creates a new {@code Nested} with the provided parent item and name.
 		 *
+		 * @param  parentItem the parent item
+		 * @param  name the name
+		 * @return the new {@code Nested}
 		 * @review
 		 */
 		public static Nested of(Item parentItem, String name) {
@@ -421,9 +409,9 @@ public class Resource {
 		}
 
 		/**
-		 * The resource's parent {@link Item}
+		 * The resource's parent item.
 		 *
-		 * @review
+		 * @return the parent item
 		 */
 		public Item getParentItem() {
 			return _parentItem;
@@ -448,14 +436,13 @@ public class Resource {
 		}
 
 		/**
-		 * Copies the current {@link Nested} by setting a value for the parent's
-		 * {@link Item#getIdOptional() ID} attribute. A shallow reference
-		 * equality check is used to prevent copying of the same value by
-		 * returning {@code this}.
+		 * Copies the current {@code Nested} by setting a new value for its ID.
+		 * If the same ID is supplied, a shallow reference equality check
+		 * prevents the copy and the method returns {@code this}.
 		 *
 		 * @param  id the new ID
-		 * @return A modified copy of {@code this} object
-		 * @review
+		 * @return the {@code Nested} copy, if the new ID is different from the
+		 *         current {@code Nested} object's ID; {@code this} otherwise
 		 */
 		public Nested withParentId(Id id) {
 			if ((_parentItem._id != null) && _parentItem._id.equals(id)) {
@@ -470,20 +457,17 @@ public class Resource {
 	}
 
 	/**
-	 * Instances of this class represent a paged resource.
-	 *
-	 * <p>
-	 * This class should never be directly instantiated. Always use {@link #of}
-	 * method to create a new instance.
-	 * </p>
-	 *
-	 * @review
+	 * Represents a paged resource. You should never instantiate this class
+	 * directly. Always use the {@link Paged#of} method to create a new
+	 * instance.
 	 */
 	public static class Paged extends Resource {
 
 		/**
-		 * Creates a new {@link Paged} with the provided {@code name}.
+		 * Creates a new {@code Paged} with the provided name.
 		 *
+		 * @param  name the name
+		 * @return the new {@code Paged}
 		 * @review
 		 */
 		public static Paged of(String name) {

@@ -1,5 +1,7 @@
+import '../../__fixtures__/MockField.es';
 import Sidebar from 'source/components/Sidebar/Sidebar.es';
 import {dom as MetalTestUtil} from 'metal-dom';
+import {PagesVisitor} from 'source/util/visitors.es';
 
 let component;
 const focusedField = {
@@ -12,6 +14,100 @@ const focusedField = {
 	type: 'date'
 };
 const spritemap = 'icons.svg';
+
+const getFieldValue = (pages, fieldName) => {
+	const visitor = new PagesVisitor(pages);
+	let fieldValue;
+
+	visitor.mapFields(
+		field => {
+			if (field.fieldName === fieldName) {
+				fieldValue = field.value;
+			}
+		}
+	);
+
+	return fieldValue;
+};
+
+const fillField = (pages, fieldName, value) => {
+	const visitor = new PagesVisitor(pages);
+
+	return visitor.mapFields(
+		field => {
+			if (field.fieldName === fieldName) {
+				field = {
+					...field,
+					value
+				};
+			}
+
+			return field;
+		}
+	);
+};
+
+const mockFieldType = {
+	description: 'Single line or multiline text area.',
+	icon: 'text',
+	initialConfig_: {
+		locale: 'en_US'
+	},
+	label: 'Text Field',
+	name: 'text',
+	settingsContext: {
+		pages: [
+			{
+				rows: [
+					{
+						columns: [
+							{
+								fields: [
+									{
+										fieldName: 'label',
+										localizable: true,
+										type: 'text',
+										value: 'Mock Field',
+										visible: true
+									},
+									{
+										fieldName: 'name',
+										type: 'text',
+										visible: true
+									},
+									{
+										fieldName: 'showLabel',
+										type: 'checkbox',
+										value: true,
+										visible: true
+									},
+									{
+										fieldName: 'required',
+										type: 'checkbox',
+										visible: true
+									},
+									{
+										fieldName: 'type',
+										type: 'text',
+										value: 'text',
+										visible: false
+									},
+									{
+										fieldName: 'validation',
+										type: 'validation',
+										value: 'expression=1',
+										visible: false
+									}
+								]
+							}
+						]
+					}
+				]
+			}
+		]
+	},
+	type: 'text'
+};
 
 const fieldTypes = [
 	{
@@ -56,46 +152,14 @@ const fieldTypes = [
 		label: 'Multiple Selection',
 		name: 'checkbox'
 	}
-];
-const mockFieldType = {
-	description: 'Single line or multiline text area.',
-	icon: 'text',
-	initialConfig_: {
-		locale: 'en_US'
-	},
-	label: 'Text Field',
-	name: 'text',
-	settingsContext: {
-		pages: [
-			{
-				rows: [
-					{
-						columns: [
-							{
-								fields: [
-									{
-										fieldName: 'label',
-										localizable: true
-									},
-									{
-										fieldName: 'name'
-									},
-									{
-										fieldName: 'required'
-									},
-									{
-										fieldName: 'type'
-									}
-								]
-							}
-						]
-					}
-				]
-			}
-		]
-	},
-	type: 'text'
-};
+].map(
+	fieldType => (
+		{
+			...mockFieldType,
+			...fieldType
+		}
+	)
+);
 
 describe(
 	'Sidebar',
@@ -467,14 +531,146 @@ describe(
 						expect(component.state.open).toBeTruthy();
 
 						const spy = jest.spyOn(component, 'close');
-						const {close} = component.refs;
+						const {closeButton} = component.refs;
 
-						close.click();
+						closeButton.click();
 
 						jest.runAllTimers();
 
 						expect(component.state.open).toBeFalsy();
 						expect(spy).toHaveBeenCalled();
+					}
+				);
+			}
+		);
+
+		describe(
+			'Changing field type',
+			() => {
+				it(
+					'should always be enabled',
+					() => {
+						component = new Sidebar(
+							{
+								fieldTypes,
+								focusedField: mockFieldType,
+								spritemap
+							}
+						);
+
+						jest.runAllTimers();
+
+						expect(component.isChangeFieldTypeEnabled()).toBeTruthy();
+					}
+				);
+
+				it(
+					'should keep basic properties after changing field type',
+					done => {
+						const {settingsContext} = mockFieldType;
+						let {pages} = settingsContext;
+
+						pages = fillField(pages, 'label', 'my field');
+						pages = fillField(pages, 'showLabel', false);
+
+						component = new Sidebar(
+							{
+								fieldTypes,
+								focusedField: {
+									...mockFieldType,
+									settingsContext: {
+										...mockFieldType.settingsContext,
+										pages
+									}
+								},
+								spritemap
+							}
+						);
+
+						jest.runAllTimers();
+
+						component.once(
+							'focusedFieldUpdated',
+							({type, settingsContext}) => {
+								expect(type).toBe('checkbox');
+								expect(getFieldValue(settingsContext.pages, 'type')).toBe('checkbox');
+								expect(getFieldValue(settingsContext.pages, 'label')).toBe('my field');
+								expect(getFieldValue(settingsContext.pages, 'showLabel')).toBe(false);
+
+								done();
+							}
+						);
+
+						component.changeFieldType('checkbox');
+					}
+				);
+
+				it(
+					'should not keep validation settings between field type',
+					done => {
+						const {settingsContext} = mockFieldType;
+						let {pages} = settingsContext;
+
+						pages = fillField(pages, 'validation', 'a=b');
+
+						expect(getFieldValue(pages, 'validation')).toEqual('a=b');
+
+						component = new Sidebar(
+							{
+								fieldTypes,
+								focusedField: {
+									...mockFieldType,
+									settingsContext: {
+										...mockFieldType.settingsContext,
+										pages
+									}
+								},
+								spritemap
+							}
+						);
+
+						jest.runAllTimers();
+
+						component.once(
+							'focusedFieldUpdated',
+							({settingsContext}) => {
+								expect(getFieldValue(settingsContext.pages, 'validation')).not.toEqual('a=b');
+
+								done();
+							}
+						);
+
+						component.changeFieldType('checkbox');
+					}
+				);
+
+				it(
+					'should emit an event with new field type settings',
+					done => {
+						component = new Sidebar(
+							{
+								fieldTypes,
+								focusedField: mockFieldType,
+								spritemap
+							}
+						);
+
+						jest.runAllTimers();
+
+						component.once(
+							'focusedFieldUpdated',
+							({type, settingsContext}) => {
+								expect(type).toBe('checkbox');
+
+								expect(settingsContext).toMatchSnapshot();
+
+								done();
+							}
+						);
+
+						component.changeFieldType('checkbox');
+
+						jest.runAllTimers();
 					}
 				);
 			}

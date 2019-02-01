@@ -15,6 +15,7 @@
 package com.liferay.vocabulary.apio.internal.architect.form;
 
 import com.liferay.apio.architect.form.Form;
+import com.liferay.vocabulary.apio.architect.model.Vocabulary;
 
 import java.util.Collections;
 import java.util.Locale;
@@ -26,7 +27,7 @@ import java.util.Map;
  * @author Eduardo Pérez
  * @author Javier Gamarra
  */
-public class VocabularyForm {
+public class VocabularyForm implements Vocabulary {
 
 	/**
 	 * Builds a {@code Form} that generates a {@code VocabularyForm} that
@@ -51,21 +52,13 @@ public class VocabularyForm {
 		).build();
 	}
 
-	/**
-	 * Returns the vocabulary's description map.
-	 *
-	 * @return the description map
-	 */
-	public Map<Locale, String> getDescriptions(Locale locale) {
+	@Override
+	public Map<Locale, String> getDescriptionMap(Locale locale) {
 		return Collections.singletonMap(locale, _description);
 	}
 
-	/**
-	 * Returns the vocabulary's title map.
-	 *
-	 * @return the title map
-	 */
-	public Map<Locale, String> getTitles(Locale locale) {
+	@Override
+	public Map<Locale, String> getNameMap(Locale locale) {
 		return Collections.singletonMap(locale, _name);
 	}
 

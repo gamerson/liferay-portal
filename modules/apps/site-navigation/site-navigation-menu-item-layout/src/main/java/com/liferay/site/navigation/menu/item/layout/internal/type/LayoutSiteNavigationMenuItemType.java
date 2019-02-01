@@ -30,7 +30,6 @@ import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.service.LayoutLocalService;
 import com.liferay.portal.kernel.service.permission.LayoutPermissionUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
-import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.MapUtil;
@@ -76,21 +75,12 @@ public class LayoutSiteNavigationMenuItemType
 
 	@Override
 	public boolean exportData(
-		PortletDataContext portletDataContext,
-		Element siteNavigationMenuItemElement,
-		SiteNavigationMenuItem siteNavigationMenuItem) {
+			PortletDataContext portletDataContext,
+			Element siteNavigationMenuItemElement,
+			SiteNavigationMenuItem siteNavigationMenuItem)
+		throws PortalException {
 
 		Layout layout = _getLayout(siteNavigationMenuItem);
-
-		if (layout == null) {
-			return false;
-		}
-
-		if (!ArrayUtil.contains(
-				portletDataContext.getLayoutIds(), layout.getLayoutId())) {
-
-			return false;
-		}
 
 		LayoutRevision layoutRevision = _layoutStaging.getLayoutRevision(
 			layout);
@@ -134,7 +124,7 @@ public class LayoutSiteNavigationMenuItemType
 
 	@Override
 	public Layout getLayout(SiteNavigationMenuItem siteNavigationMenuItem) {
-		return _getLayout(siteNavigationMenuItem);
+		return _fetchLayout(siteNavigationMenuItem);
 	}
 
 	@Override
@@ -143,7 +133,7 @@ public class LayoutSiteNavigationMenuItemType
 			SiteNavigationMenuItem siteNavigationMenuItem)
 		throws Exception {
 
-		Layout layout = _getLayout(siteNavigationMenuItem);
+		Layout layout = _fetchLayout(siteNavigationMenuItem);
 
 		return layout.getRegularURL(request);
 	}
@@ -154,7 +144,7 @@ public class LayoutSiteNavigationMenuItemType
 			SiteNavigationMenuItem siteNavigationMenuItem)
 		throws Exception {
 
-		Layout layout = _getLayout(siteNavigationMenuItem);
+		Layout layout = _fetchLayout(siteNavigationMenuItem);
 
 		return layout.getResetLayoutURL(request);
 	}
@@ -165,7 +155,7 @@ public class LayoutSiteNavigationMenuItemType
 			SiteNavigationMenuItem siteNavigationMenuItem)
 		throws Exception {
 
-		Layout layout = _getLayout(siteNavigationMenuItem);
+		Layout layout = _fetchLayout(siteNavigationMenuItem);
 
 		return layout.getResetMaxStateURL(request);
 	}
@@ -174,7 +164,7 @@ public class LayoutSiteNavigationMenuItemType
 	public String getSubtitle(
 		SiteNavigationMenuItem siteNavigationMenuItem, Locale locale) {
 
-		Layout layout = _getLayout(siteNavigationMenuItem);
+		Layout layout = _fetchLayout(siteNavigationMenuItem);
 
 		if (layout.isPublicLayout()) {
 			return LanguageUtil.get(locale, "public-pages");
@@ -185,7 +175,7 @@ public class LayoutSiteNavigationMenuItemType
 
 	@Override
 	public String getTarget(SiteNavigationMenuItem siteNavigationMenuItem) {
-		Layout layout = _getLayout(siteNavigationMenuItem);
+		Layout layout = _fetchLayout(siteNavigationMenuItem);
 
 		return layout.getTarget();
 	}
@@ -200,7 +190,7 @@ public class LayoutSiteNavigationMenuItemType
 			return label;
 		}
 
-		Layout layout = _getLayout(siteNavigationMenuItem);
+		Layout layout = _fetchLayout(siteNavigationMenuItem);
 
 		if (layout != null) {
 			return layout.getName(locale);
@@ -238,7 +228,7 @@ public class LayoutSiteNavigationMenuItemType
 			return title;
 		}
 
-		Layout layout = _getLayout(siteNavigationMenuItem);
+		Layout layout = _fetchLayout(siteNavigationMenuItem);
 
 		return layout.getName(languageId);
 	}
@@ -249,7 +239,7 @@ public class LayoutSiteNavigationMenuItemType
 			SiteNavigationMenuItem siteNavigationMenuItem)
 		throws PortalException {
 
-		Layout layout = _getLayout(siteNavigationMenuItem);
+		Layout layout = _fetchLayout(siteNavigationMenuItem);
 
 		return LayoutPermissionUtil.contains(
 			permissionChecker, layout.getPlid(), ActionKeys.VIEW);
@@ -259,7 +249,7 @@ public class LayoutSiteNavigationMenuItemType
 	public String iconURL(
 		SiteNavigationMenuItem siteNavigationMenuItem, String pathImage) {
 
-		Layout layout = _getLayout(siteNavigationMenuItem);
+		Layout layout = _fetchLayout(siteNavigationMenuItem);
 
 		if ((layout == null) || !layout.isIconImage()) {
 			return StringPool.BLANK;
@@ -278,15 +268,12 @@ public class LayoutSiteNavigationMenuItemType
 
 	@Override
 	public boolean importData(
-		PortletDataContext portletDataContext,
-		SiteNavigationMenuItem siteNavigationMenuItem,
-		SiteNavigationMenuItem importedSiteNavigationMenuItem) {
+			PortletDataContext portletDataContext,
+			SiteNavigationMenuItem siteNavigationMenuItem,
+			SiteNavigationMenuItem importedSiteNavigationMenuItem)
+		throws PortalException {
 
 		Layout layout = _getLayout(importedSiteNavigationMenuItem);
-
-		if (layout == null) {
-			return false;
-		}
 
 		LayoutRevision layoutRevision = _layoutStaging.getLayoutRevision(
 			layout);
@@ -328,7 +315,7 @@ public class LayoutSiteNavigationMenuItemType
 
 	@Override
 	public boolean isBrowsable(SiteNavigationMenuItem siteNavigationMenuItem) {
-		Layout layout = _getLayout(siteNavigationMenuItem);
+		Layout layout = _fetchLayout(siteNavigationMenuItem);
 
 		LayoutType layoutType = layout.getLayoutType();
 
@@ -341,7 +328,7 @@ public class LayoutSiteNavigationMenuItemType
 			Layout curLayout)
 		throws PortalException {
 
-		Layout layout = _getLayout(siteNavigationMenuItem);
+		Layout layout = _fetchLayout(siteNavigationMenuItem);
 
 		return layout.isChildSelected(selectable, curLayout);
 	}
@@ -352,7 +339,7 @@ public class LayoutSiteNavigationMenuItemType
 			Layout curLayout)
 		throws Exception {
 
-		Layout layout = _getLayout(siteNavigationMenuItem);
+		Layout layout = _fetchLayout(siteNavigationMenuItem);
 
 		return layout.isSelected(
 			selectable, curLayout, curLayout.getAncestorPlid());
@@ -385,7 +372,7 @@ public class LayoutSiteNavigationMenuItemType
 			_itemSelector);
 
 		request.setAttribute(
-			WebKeys.SEL_LAYOUT, _getLayout(siteNavigationMenuItem));
+			WebKeys.SEL_LAYOUT, _fetchLayout(siteNavigationMenuItem));
 		request.setAttribute(
 			WebKeys.TITLE,
 			getTitle(siteNavigationMenuItem, themeDisplay.getLocale()));
@@ -394,7 +381,7 @@ public class LayoutSiteNavigationMenuItemType
 			_servletContext, request, response, "/edit_layout.jsp");
 	}
 
-	private Layout _getLayout(SiteNavigationMenuItem siteNavigationMenuItem) {
+	private Layout _fetchLayout(SiteNavigationMenuItem siteNavigationMenuItem) {
 		UnicodeProperties typeSettingsProperties = new UnicodeProperties();
 
 		typeSettingsProperties.fastLoad(
@@ -406,6 +393,23 @@ public class LayoutSiteNavigationMenuItemType
 			typeSettingsProperties.get("privateLayout"));
 
 		return _layoutLocalService.fetchLayoutByUuidAndGroupId(
+			layoutUuid, siteNavigationMenuItem.getGroupId(), privateLayout);
+	}
+
+	private Layout _getLayout(SiteNavigationMenuItem siteNavigationMenuItem)
+		throws PortalException {
+
+		UnicodeProperties typeSettingsProperties = new UnicodeProperties();
+
+		typeSettingsProperties.fastLoad(
+			siteNavigationMenuItem.getTypeSettings());
+
+		String layoutUuid = typeSettingsProperties.get("layoutUuid");
+
+		boolean privateLayout = GetterUtil.getBoolean(
+			typeSettingsProperties.get("privateLayout"));
+
+		return _layoutLocalService.getLayoutByUuidAndGroupId(
 			layoutUuid, siteNavigationMenuItem.getGroupId(), privateLayout);
 	}
 

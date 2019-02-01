@@ -19,16 +19,36 @@ package com.liferay.portal.tools.rest.builder;
  */
 public class RESTBuilderArgs {
 
-	public static final String INPUT_FILE_NAME = "rest.yaml";
+	public static final String REST_CONFIG_FILE_NAME = "rest-config.yaml";
 
-	public String getInputFileName() {
-		return _inputFileName;
+	public static final String REST_OPENAPI_FILE_NAME = "rest-openapi.yaml";
+
+	public String getCopyrightFileName() {
+		return _copyrightFileName;
 	}
 
-	public void setInputFileName(String inputFileName) {
-		_inputFileName = inputFileName;
+	public String getRESTConfigFileName() {
+		return _restConfigFileName;
 	}
 
-	private String _inputFileName = INPUT_FILE_NAME;
+	public String getRESTOpenAPIFileName() {
+		return _restOpenAPIFileName;
+	}
+
+	public void setCopyrightFileName(String copyrightFileName) {
+		_copyrightFileName = copyrightFileName;
+	}
+
+	public void setRESTConfigFileName(String restConfigFileName) {
+		_restConfigFileName = restConfigFileName;
+	}
+
+	public void setRESTOpenAPIFileName(String restOpenAPIFileName) {
+		_restOpenAPIFileName = restOpenAPIFileName;
+	}
+
+	private String _copyrightFileName;
+	private String _restConfigFileName = REST_CONFIG_FILE_NAME;
+	private String _restOpenAPIFileName = REST_OPENAPI_FILE_NAME;
 
 }

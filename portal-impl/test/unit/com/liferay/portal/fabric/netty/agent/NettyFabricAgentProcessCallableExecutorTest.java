@@ -67,8 +67,8 @@ public class NettyFabricAgentProcessCallableExecutorTest {
 
 				});
 
-		embeddedChannel.writeInbound(embeddedChannel.readOutbound());
-		embeddedChannel.writeInbound(embeddedChannel.readOutbound());
+		embeddedChannel.writeOneInbound(embeddedChannel.readOutbound());
+		embeddedChannel.writeOneInbound(embeddedChannel.readOutbound());
 
 		Assert.assertEquals(StringPool.BLANK, noticeableFuture.get());
 
@@ -84,8 +84,8 @@ public class NettyFabricAgentProcessCallableExecutorTest {
 
 			});
 
-		embeddedChannel.writeInbound(embeddedChannel.readOutbound());
-		embeddedChannel.writeInbound(embeddedChannel.readOutbound());
+		embeddedChannel.writeOneInbound(embeddedChannel.readOutbound());
+		embeddedChannel.writeOneInbound(embeddedChannel.readOutbound());
 
 		try {
 			noticeableFuture.get();

@@ -30,6 +30,7 @@ dependencies {
 
 	compileOnly group: "io.vavr", name: "vavr", version: "0.9.3"
 	compileOnly group: "javax.servlet", name: "javax.servlet-api", version: "3.0.1"
+	compileOnly group: "javax.validation", name: "validation-api", version: "2.0.0.Final"
 	compileOnly group: "org.apache.aries.spec", name: "org.apache.aries.javax.jax.rs-api", version: "1.0.1"
 	compileOnly group: "org.apache.felix", name: "org.apache.felix.scr", version: "2.0.8"
 	compileOnly group: "org.json", name: "json", version: "20180813"

@@ -17,7 +17,6 @@ package com.liferay.structured.content.apio.internal.architect.resource;
 import static com.liferay.portal.apio.idempotent.Idempotent.idempotent;
 
 import com.liferay.aggregate.rating.apio.architect.identifier.AggregateRatingIdentifier;
-import com.liferay.apio.architect.functional.Try;
 import com.liferay.apio.architect.language.AcceptLanguage;
 import com.liferay.apio.architect.pagination.PageItems;
 import com.liferay.apio.architect.pagination.Pagination;
@@ -35,6 +34,8 @@ import com.liferay.category.apio.architect.identifier.CategoryIdentifier;
 import com.liferay.comment.apio.architect.identifier.CommentIdentifier;
 import com.liferay.content.space.apio.architect.model.ContentSpace;
 import com.liferay.document.library.kernel.service.DLAppService;
+import com.liferay.dynamic.data.mapping.exception.StorageFieldNameException;
+import com.liferay.dynamic.data.mapping.exception.StorageFieldRequiredException;
 import com.liferay.dynamic.data.mapping.kernel.DDMFormFieldValue;
 import com.liferay.dynamic.data.mapping.kernel.DDMFormValues;
 import com.liferay.dynamic.data.mapping.kernel.Value;
@@ -42,6 +43,8 @@ import com.liferay.dynamic.data.mapping.model.DDMFormFieldType;
 import com.liferay.dynamic.data.mapping.model.DDMStructure;
 import com.liferay.dynamic.data.mapping.model.DDMTemplate;
 import com.liferay.dynamic.data.mapping.service.DDMStructureService;
+import com.liferay.journal.exception.ArticleContentException;
+import com.liferay.journal.exception.ArticleTitleException;
 import com.liferay.journal.model.JournalArticle;
 import com.liferay.journal.model.JournalArticleConstants;
 import com.liferay.journal.model.JournalArticleDisplay;
@@ -105,7 +108,8 @@ import com.liferay.structured.content.apio.internal.model.JournalArticleWrapper;
 import com.liferay.structured.content.apio.internal.model.RenderedJournalArticle;
 import com.liferay.structured.content.apio.internal.util.JournalArticleContentHelper;
 
-import java.util.ArrayList;
+import io.vavr.control.Try;
+
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
@@ -118,6 +122,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.InternalServerErrorException;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -252,16 +259,7 @@ public class StructuredContentNestedCollectionResource
 			fieldValuesBuilder -> fieldValuesBuilder.types(
 				"ContentFieldValue"
 			).addLinkedModel(
-				"document", MediaObjectIdentifier.class,
-				structuredContentField -> Try.fromFallible(
-					() -> structuredContentField.getLocalizedValue(
-						LocaleUtil.getDefault())
-				).map(
-					value -> StructuredContentUtil.getFileEntryId(
-						value, _dlAppService)
-				).orElse(
-					null
-				)
+				"document", MediaObjectIdentifier.class, this::_getDocument
 			).addLinkedModel(
 				"structuredContent", StructuredContentIdentifier.class,
 				this::_getStructuredContentId
@@ -327,21 +325,28 @@ public class StructuredContentNestedCollectionResource
 	}
 
 	private JournalArticleWrapper _addJournalArticle(
-			long contentSpaceId, StructuredContent structuredContent,
-			AcceptLanguage acceptLanguage, ThemeDisplay themeDisplay)
-		throws PortalException {
+		long contentSpaceId, StructuredContent structuredContent,
+		AcceptLanguage acceptLanguage, ThemeDisplay themeDisplay) {
 
-		DDMStructure ddmStructure = _ddmStructureService.getStructure(
-			structuredContent.getContentStructureId());
+		DDMStructure ddmStructure;
+
+		try {
+			ddmStructure = _ddmStructureService.getStructure(
+				structuredContent.getContentStructureId());
+		}
+		catch (PortalException pe) {
+			throw new BadRequestException(
+				"Unable to add Structured Content with invalid Structure" +
+					pe.getMessage());
+		}
 
 		Locale locale = acceptLanguage.getPreferredLocale();
 
 		String content =
 			_journalArticleContentHelper.createJournalArticleContent(
-				structuredContent.getStructuredContentValues(), ddmStructure,
-				LocaleUtil.toLanguageId(locale),
-				Collections.singletonList(LocaleUtil.toLanguageId(locale)),
-				LocaleUtil.toLanguageId(locale));
+				ddmStructure,
+				Collections.singletonMap(
+					locale, structuredContent.getStructuredContentValues()));
 
 		String ddmStructureKey = ddmStructure.getStructureKey();
 		String ddmTemplateKey = _getDDMTemplateKey(ddmStructure);
@@ -350,32 +355,38 @@ public class StructuredContentNestedCollectionResource
 		ServiceContext serviceContext = getServiceContext(
 			contentSpaceId, structuredContent);
 
-		JournalArticle journalArticle = _journalArticleService.addArticle(
-			contentSpaceId, 0, 0, 0, null, true,
-			structuredContent.getTitleMap(locale),
-			_getDefaultValue(
-				structuredContent.getDescriptionMapOptional(locale),
-				Collections.emptyMap()),
-			content, ddmStructureKey, ddmTemplateKey, null,
-			_getDefaultValue(
-				structuredContent.getPublishedDateMonthOptional(),
-				calendar.get(Calendar.MONTH)),
-			_getDefaultValue(
-				structuredContent.getPublishedDateDayOptional(),
-				calendar.get(Calendar.DATE)),
-			_getDefaultValue(
-				structuredContent.getPublishedDateYearOptional(),
-				calendar.get(Calendar.YEAR)),
-			_getDefaultValue(
-				structuredContent.getPublishedDateHourOptional(),
-				calendar.get(Calendar.HOUR)),
-			_getDefaultValue(
-				structuredContent.getPublishedDateMinuteOptional(),
-				calendar.get(Calendar.MINUTE)),
-			0, 0, 0, 0, 0, true, 0, 0, 0, 0, 0, true, true, null,
-			serviceContext);
+		try {
+			JournalArticle journalArticle = _journalArticleService.addArticle(
+				contentSpaceId, 0, 0, 0, null, true,
+				structuredContent.getTitleMap(locale),
+				_getDefaultValue(
+					structuredContent.getDescriptionMapOptional(locale),
+					Collections.emptyMap()),
+				content, ddmStructureKey, ddmTemplateKey, null,
+				_getDefaultValue(
+					structuredContent.getPublishedDateMonthOptional(),
+					calendar.get(Calendar.MONTH)),
+				_getDefaultValue(
+					structuredContent.getPublishedDateDayOptional(),
+					calendar.get(Calendar.DATE)),
+				_getDefaultValue(
+					structuredContent.getPublishedDateYearOptional(),
+					calendar.get(Calendar.YEAR)),
+				_getDefaultValue(
+					structuredContent.getPublishedDateHourOptional(),
+					calendar.get(Calendar.HOUR)),
+				_getDefaultValue(
+					structuredContent.getPublishedDateMinuteOptional(),
+					calendar.get(Calendar.MINUTE)),
+				0, 0, 0, 0, 0, true, 0, 0, 0, 0, 0, true, true, null,
+				serviceContext);
 
-		return new JournalArticleWrapper(journalArticle, locale, themeDisplay);
+			return new JournalArticleWrapper(
+				journalArticle, locale, themeDisplay);
+		}
+		catch (PortalException pe) {
+			throw _getBadRequestException(pe);
+		}
 	}
 
 	private ClassNameClassPK _createClassNameClassPK(
@@ -432,6 +443,34 @@ public class StructuredContentNestedCollectionResource
 			journalArticle.getArticleResourceUuid(), new ServiceContext());
 	}
 
+	private BadRequestException _getBadRequestException(PortalException pe) {
+		if (pe instanceof ArticleTitleException.MustNotExceedMaximumLength) {
+			return new BadRequestException(
+				"Unable to add Structured Content: the title exceeds the " +
+					"maximum length",
+				pe);
+		}
+		else if (pe instanceof ArticleTitleException) {
+			return new BadRequestException(
+				"Unable to add Structured Content without title in default " +
+					"language",
+				pe);
+		}
+		else if (pe instanceof ArticleContentException ||
+				 pe instanceof StorageFieldNameException ||
+				 pe instanceof StorageFieldRequiredException) {
+
+			throw new BadRequestException(
+				"Unable to add Structured Content with invalid Structured " +
+					"Content Values",
+				pe);
+		}
+		else {
+			throw new BadRequestException(
+				"Unable to add Structured Content ", pe);
+		}
+	}
+
 	private String _getDDMTemplateKey(DDMStructure ddmStructure) {
 		List<DDMTemplate> ddmTemplates = ddmStructure.getTemplates();
 
@@ -442,6 +481,20 @@ public class StructuredContentNestedCollectionResource
 
 	private <T> T _getDefaultValue(Optional<T> optional, T defaultValue) {
 		return optional.orElse(defaultValue);
+	}
+
+	private Long _getDocument(StructuredContentField structuredContentField) {
+		String localizedValue = structuredContentField.getLocalizedValue(
+			LocaleUtil.getDefault());
+
+		Long fileEntryId = StructuredContentUtil.getFileEntryId(
+			localizedValue, _dlAppService);
+
+		if (fileEntryId > 0) {
+			return fileEntryId;
+		}
+
+		return null;
 	}
 
 	private Query _getFullQuery(
@@ -468,17 +521,17 @@ public class StructuredContentNestedCollectionResource
 	private JSONObject _getGeoJSONObject(
 		StructuredContentField structuredContentField) {
 
-		return Try.fromFallible(
+		return Try.of(
 			() -> structuredContentField.getLocalizedValue(
 				LocaleUtil.getDefault())
 		).filter(
 			StructuredContentUtil::isJSONObject
 		).filter(
 			string -> string.contains("latitude")
-		).map(
+		).mapTry(
 			JSONFactoryUtil::createJSONObject
-		).orElse(
-			null
+		).getOrElse(
+			() -> null
 		);
 	}
 
@@ -520,22 +573,6 @@ public class StructuredContentNestedCollectionResource
 			journalArticle, acceptLanguage.getPreferredLocale(), themeDisplay);
 	}
 
-	private List<String> _getLanguagesIds(
-		List<String> languagesIds, Locale locale) {
-
-		String languageId = LocaleUtil.toLanguageId(locale);
-
-		if (!languagesIds.contains(languageId)) {
-			return Stream.concat(
-				languagesIds.stream(), Stream.of(languageId)
-			).collect(
-				Collectors.toList()
-			);
-		}
-
-		return new ArrayList(languagesIds);
-	}
-
 	private String _getLayoutLink(JSONObject jsonObject)
 		throws PortalException {
 
@@ -550,19 +587,19 @@ public class StructuredContentNestedCollectionResource
 	}
 
 	private String _getLink(StructuredContentField structuredContentField) {
-		return Try.fromFallible(
+		return Try.of(
 			() -> structuredContentField.getLocalizedValue(
 				LocaleUtil.getDefault())
 		).filter(
 			StructuredContentUtil::isJSONObject
 		).filter(
 			string -> string.contains("layoutId")
-		).map(
+		).mapTry(
 			JSONFactoryUtil::createJSONObject
-		).map(
+		).mapTry(
 			this::_getLayoutLink
-		).orElse(
-			null
+		).getOrElse(
+			() -> null
 		);
 	}
 
@@ -621,19 +658,16 @@ public class StructuredContentNestedCollectionResource
 
 		Locale locale = journalArticleWrapper.getLocale();
 
-		return Try.fromFallible(
-			() -> _journalContent.getDisplay(
+		JournalArticleDisplay journalArticleDisplay =
+			_journalContent.getDisplay(
 				journalArticleWrapper.getGroupId(),
 				journalArticleWrapper.getArticleId(),
 				ddmTemplate.getTemplateKey(), null, locale.toString(),
-				journalArticleWrapper.getThemeDisplay())
-		).map(
-			JournalArticleDisplay::getContent
-		).map(
-			content -> content.replaceAll("[\\t\\n]", "")
-		).orElse(
-			null
-		);
+				journalArticleWrapper.getThemeDisplay());
+
+		String content = journalArticleDisplay.getContent();
+
+		return content.replaceAll("[\\t\\n]", "");
 	}
 
 	private List<RenderedJournalArticle> _getRenderedJournalArticles(
@@ -690,27 +724,34 @@ public class StructuredContentNestedCollectionResource
 	private List<StructuredContentField> _getStructuredContentFields(
 		JournalArticle journalArticle) {
 
-		return Try.fromFallible(
-			() ->
-				AssetRendererFactoryRegistryUtil.getAssetRendererFactoryByClass(
-					JournalArticle.class)
-		).map(
-			assetRendererFactory -> assetRendererFactory.getAssetRenderer(
-				journalArticle, AssetRendererFactory.TYPE_LATEST_APPROVED)
-		).map(
-			AssetRenderer::getDDMFormValuesReader
-		).map(
-			DDMFormValuesReader::getDDMFormValues
-		).map(
-			DDMFormValues::getDDMFormFieldValues
-		).map(
-			ddmFormFieldValueList -> _toStructuredContentFields(
-				ddmFormFieldValueList, journalArticle.getDDMStructure())
-		).map(
-			this::_getStructuredContentFields
-		).orElse(
-			null
-		);
+		AssetRendererFactory<JournalArticle> assetRendererFactory =
+			AssetRendererFactoryRegistryUtil.getAssetRendererFactoryByClass(
+				JournalArticle.class);
+
+		try {
+			AssetRenderer<JournalArticle> assetRenderer =
+				assetRendererFactory.getAssetRenderer(
+					journalArticle, AssetRendererFactory.TYPE_LATEST_APPROVED);
+
+			DDMFormValuesReader ddmFormValuesReader =
+				assetRenderer.getDDMFormValuesReader();
+
+			DDMFormValues ddmFormValues =
+				ddmFormValuesReader.getDDMFormValues();
+
+			List<DDMFormFieldValue> ddmFormFieldValues =
+				ddmFormValues.getDDMFormFieldValues();
+
+			List<StructuredContentField> structuredContentFields =
+				_toStructuredContentFields(
+					ddmFormFieldValues, journalArticle.getDDMStructure());
+
+			return _getStructuredContentFields(structuredContentFields);
+		}
+		catch (PortalException pe) {
+			throw new InternalServerErrorException(
+				"Error while retrieving structured content fields", pe);
+		}
 	}
 
 	private List<StructuredContentField> _getStructuredContentFields(
@@ -736,19 +777,19 @@ public class StructuredContentNestedCollectionResource
 	private Long _getStructuredContentId(
 		StructuredContentField structuredContentField) {
 
-		return Try.fromFallible(
+		return Try.of(
 			() -> structuredContentField.getLocalizedValue(
 				LocaleUtil.getDefault())
 		).filter(
 			StructuredContentUtil::isJSONObject
-		).map(
+		).mapTry(
 			JSONFactoryUtil::createJSONObject
-		).map(
+		).mapTry(
 			this::_getJournalArticle
 		).map(
 			JournalArticle::getResourcePrimKey
-		).orElse(
-			null
+		).getOrElse(
+			() -> null
 		);
 	}
 
@@ -785,12 +826,9 @@ public class StructuredContentNestedCollectionResource
 
 		String content =
 			_journalArticleContentHelper.createJournalArticleContent(
-				structuredContent.getStructuredContentValues(), ddmStructure,
-				journalArticle.getDefaultLanguageId(),
-				_getLanguagesIds(
-					Arrays.asList(journalArticle.getAvailableLanguageIds()),
-					locale),
-				LocaleUtil.toLanguageId(locale));
+				ddmStructure,
+				Collections.singletonMap(
+					locale, structuredContent.getStructuredContentValues()));
 
 		String ddmTemplateKey = _getDDMTemplateKey(ddmStructure);
 
@@ -960,23 +998,22 @@ public class StructuredContentNestedCollectionResource
 
 		@Override
 		public String getInputControl() {
-			return Try.fromFallible(
-				() -> _ddmStructure.getFieldType(_ddmFormFieldValue.getName())
-			).map(
-				fieldType -> _structureFieldConverter.getFieldInputControl(
-					fieldType)
-			).recover(
-				pe -> {
-					if (_log.isWarnEnabled()) {
-						_log.warn(
-							"Unable to get input control for field name " +
-								_ddmFormFieldValue.getName(),
-							pe);
-					}
+			try {
+				String fieldType = _ddmStructure.getFieldType(
+					_ddmFormFieldValue.getName());
 
-					return null;
+				return _structureFieldConverter.getFieldInputControl(fieldType);
+			}
+			catch (PortalException pe) {
+				if (_log.isWarnEnabled()) {
+					_log.warn(
+						"Unable to get input control for field name " +
+							_ddmFormFieldValue.getName(),
+						pe);
 				}
-			);
+
+				return null;
+			}
 		}
 
 		@Override

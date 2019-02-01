@@ -110,6 +110,19 @@ public class JSONLDSingleModelMessageMapper<T>
 	}
 
 	@Override
+	public void mapEmbeddedActionTargetURL(
+		JSONObjectBuilder singleModelJSONObjectBuilder,
+		JSONObjectBuilder actionJSONObjectBuilder,
+		FunctionalList<String> embeddedPathElements, String targetURL) {
+
+		actionJSONObjectBuilder.field(
+			"target"
+		).stringValue(
+			targetURL
+		);
+	}
+
+	@Override
 	public void mapEmbeddedResourceBooleanField(
 		JSONObjectBuilder jsonObjectBuilder,
 		FunctionalList<String> embeddedPathElements, String fieldName,

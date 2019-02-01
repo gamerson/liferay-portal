@@ -83,33 +83,12 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 		".List1";
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION = FINDER_CLASS_NAME_ENTITY +
 		".List2";
-	public static final FinderPath FINDER_PATH_WITH_PAGINATION_FIND_ALL = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
-			SharingEntryModelImpl.FINDER_CACHE_ENABLED, SharingEntryImpl.class,
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0]);
-	public static final FinderPath FINDER_PATH_WITHOUT_PAGINATION_FIND_ALL = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
-			SharingEntryModelImpl.FINDER_CACHE_ENABLED, SharingEntryImpl.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0]);
-	public static final FinderPath FINDER_PATH_COUNT_ALL = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
-			SharingEntryModelImpl.FINDER_CACHE_ENABLED, Long.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll", new String[0]);
-	public static final FinderPath FINDER_PATH_WITH_PAGINATION_FIND_BY_UUID = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
-			SharingEntryModelImpl.FINDER_CACHE_ENABLED, SharingEntryImpl.class,
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByUuid",
-			new String[] {
-				String.class.getName(),
-				
-			Integer.class.getName(), Integer.class.getName(),
-				OrderByComparator.class.getName()
-			});
-	public static final FinderPath FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_UUID = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
-			SharingEntryModelImpl.FINDER_CACHE_ENABLED, SharingEntryImpl.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid",
-			new String[] { String.class.getName() },
-			SharingEntryModelImpl.UUID_COLUMN_BITMASK);
-	public static final FinderPath FINDER_PATH_COUNT_BY_UUID = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
-			SharingEntryModelImpl.FINDER_CACHE_ENABLED, Long.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid",
-			new String[] { String.class.getName() });
+	private FinderPath _finderPathWithPaginationFindAll;
+	private FinderPath _finderPathWithoutPaginationFindAll;
+	private FinderPath _finderPathCountAll;
+	private FinderPath _finderPathWithPaginationFindByUuid;
+	private FinderPath _finderPathWithoutPaginationFindByUuid;
+	private FinderPath _finderPathCountByUuid;
 
 	/**
 	 * Returns all the sharing entries where uuid = &#63;.
@@ -185,11 +164,11 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
 				(orderByComparator == null)) {
 			pagination = false;
-			finderPath = FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_UUID;
+			finderPath = _finderPathWithoutPaginationFindByUuid;
 			finderArgs = new Object[] { uuid };
 		}
 		else {
-			finderPath = FINDER_PATH_WITH_PAGINATION_FIND_BY_UUID;
+			finderPath = _finderPathWithPaginationFindByUuid;
 			finderArgs = new Object[] { uuid, start, end, orderByComparator };
 		}
 
@@ -574,7 +553,7 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 	public int countByUuid(String uuid) {
 		uuid = Objects.toString(uuid, "");
 
-		FinderPath finderPath = FINDER_PATH_COUNT_BY_UUID;
+		FinderPath finderPath = _finderPathCountByUuid;
 
 		Object[] finderArgs = new Object[] { uuid };
 
@@ -630,16 +609,8 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 
 	private static final String _FINDER_COLUMN_UUID_UUID_2 = "sharingEntry.uuid = ?";
 	private static final String _FINDER_COLUMN_UUID_UUID_3 = "(sharingEntry.uuid IS NULL OR sharingEntry.uuid = '')";
-	public static final FinderPath FINDER_PATH_FETCH_BY_UUID_G = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
-			SharingEntryModelImpl.FINDER_CACHE_ENABLED, SharingEntryImpl.class,
-			FINDER_CLASS_NAME_ENTITY, "fetchByUUID_G",
-			new String[] { String.class.getName(), Long.class.getName() },
-			SharingEntryModelImpl.UUID_COLUMN_BITMASK |
-			SharingEntryModelImpl.GROUPID_COLUMN_BITMASK);
-	public static final FinderPath FINDER_PATH_COUNT_BY_UUID_G = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
-			SharingEntryModelImpl.FINDER_CACHE_ENABLED, Long.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUUID_G",
-			new String[] { String.class.getName(), Long.class.getName() });
+	private FinderPath _finderPathFetchByUUID_G;
+	private FinderPath _finderPathCountByUUID_G;
 
 	/**
 	 * Returns the sharing entry where uuid = &#63; and groupId = &#63; or throws a {@link NoSuchEntryException} if it could not be found.
@@ -707,7 +678,7 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 		Object result = null;
 
 		if (retrieveFromCache) {
-			result = finderCache.getResult(FINDER_PATH_FETCH_BY_UUID_G,
+			result = finderCache.getResult(_finderPathFetchByUUID_G,
 					finderArgs, this);
 		}
 
@@ -758,8 +729,8 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 				List<SharingEntry> list = q.list();
 
 				if (list.isEmpty()) {
-					finderCache.putResult(FINDER_PATH_FETCH_BY_UUID_G,
-						finderArgs, list);
+					finderCache.putResult(_finderPathFetchByUUID_G, finderArgs,
+						list);
 				}
 				else {
 					SharingEntry sharingEntry = list.get(0);
@@ -770,7 +741,7 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 				}
 			}
 			catch (Exception e) {
-				finderCache.removeResult(FINDER_PATH_FETCH_BY_UUID_G, finderArgs);
+				finderCache.removeResult(_finderPathFetchByUUID_G, finderArgs);
 
 				throw processException(e);
 			}
@@ -813,7 +784,7 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 	public int countByUUID_G(String uuid, long groupId) {
 		uuid = Objects.toString(uuid, "");
 
-		FinderPath finderPath = FINDER_PATH_COUNT_BY_UUID_G;
+		FinderPath finderPath = _finderPathCountByUUID_G;
 
 		Object[] finderArgs = new Object[] { uuid, groupId };
 
@@ -874,26 +845,9 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 	private static final String _FINDER_COLUMN_UUID_G_UUID_2 = "sharingEntry.uuid = ? AND ";
 	private static final String _FINDER_COLUMN_UUID_G_UUID_3 = "(sharingEntry.uuid IS NULL OR sharingEntry.uuid = '') AND ";
 	private static final String _FINDER_COLUMN_UUID_G_GROUPID_2 = "sharingEntry.groupId = ?";
-	public static final FinderPath FINDER_PATH_WITH_PAGINATION_FIND_BY_UUID_C = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
-			SharingEntryModelImpl.FINDER_CACHE_ENABLED, SharingEntryImpl.class,
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByUuid_C",
-			new String[] {
-				String.class.getName(), Long.class.getName(),
-				
-			Integer.class.getName(), Integer.class.getName(),
-				OrderByComparator.class.getName()
-			});
-	public static final FinderPath FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_UUID_C =
-		new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
-			SharingEntryModelImpl.FINDER_CACHE_ENABLED, SharingEntryImpl.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid_C",
-			new String[] { String.class.getName(), Long.class.getName() },
-			SharingEntryModelImpl.UUID_COLUMN_BITMASK |
-			SharingEntryModelImpl.COMPANYID_COLUMN_BITMASK);
-	public static final FinderPath FINDER_PATH_COUNT_BY_UUID_C = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
-			SharingEntryModelImpl.FINDER_CACHE_ENABLED, Long.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid_C",
-			new String[] { String.class.getName(), Long.class.getName() });
+	private FinderPath _finderPathWithPaginationFindByUuid_C;
+	private FinderPath _finderPathWithoutPaginationFindByUuid_C;
+	private FinderPath _finderPathCountByUuid_C;
 
 	/**
 	 * Returns all the sharing entries where uuid = &#63; and companyId = &#63;.
@@ -975,11 +929,11 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
 				(orderByComparator == null)) {
 			pagination = false;
-			finderPath = FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_UUID_C;
+			finderPath = _finderPathWithoutPaginationFindByUuid_C;
 			finderArgs = new Object[] { uuid, companyId };
 		}
 		else {
-			finderPath = FINDER_PATH_WITH_PAGINATION_FIND_BY_UUID_C;
+			finderPath = _finderPathWithPaginationFindByUuid_C;
 			finderArgs = new Object[] {
 					uuid, companyId,
 					
@@ -1394,7 +1348,7 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 	public int countByUuid_C(String uuid, long companyId) {
 		uuid = Objects.toString(uuid, "");
 
-		FinderPath finderPath = FINDER_PATH_COUNT_BY_UUID_C;
+		FinderPath finderPath = _finderPathCountByUuid_C;
 
 		Object[] finderArgs = new Object[] { uuid, companyId };
 
@@ -1455,25 +1409,9 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 	private static final String _FINDER_COLUMN_UUID_C_UUID_2 = "sharingEntry.uuid = ? AND ";
 	private static final String _FINDER_COLUMN_UUID_C_UUID_3 = "(sharingEntry.uuid IS NULL OR sharingEntry.uuid = '') AND ";
 	private static final String _FINDER_COLUMN_UUID_C_COMPANYID_2 = "sharingEntry.companyId = ?";
-	public static final FinderPath FINDER_PATH_WITH_PAGINATION_FIND_BY_GROUPID = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
-			SharingEntryModelImpl.FINDER_CACHE_ENABLED, SharingEntryImpl.class,
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByGroupId",
-			new String[] {
-				Long.class.getName(),
-				
-			Integer.class.getName(), Integer.class.getName(),
-				OrderByComparator.class.getName()
-			});
-	public static final FinderPath FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_GROUPID =
-		new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
-			SharingEntryModelImpl.FINDER_CACHE_ENABLED, SharingEntryImpl.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByGroupId",
-			new String[] { Long.class.getName() },
-			SharingEntryModelImpl.GROUPID_COLUMN_BITMASK);
-	public static final FinderPath FINDER_PATH_COUNT_BY_GROUPID = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
-			SharingEntryModelImpl.FINDER_CACHE_ENABLED, Long.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByGroupId",
-			new String[] { Long.class.getName() });
+	private FinderPath _finderPathWithPaginationFindByGroupId;
+	private FinderPath _finderPathWithoutPaginationFindByGroupId;
+	private FinderPath _finderPathCountByGroupId;
 
 	/**
 	 * Returns all the sharing entries where groupId = &#63;.
@@ -1547,11 +1485,11 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
 				(orderByComparator == null)) {
 			pagination = false;
-			finderPath = FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_GROUPID;
+			finderPath = _finderPathWithoutPaginationFindByGroupId;
 			finderArgs = new Object[] { groupId };
 		}
 		else {
-			finderPath = FINDER_PATH_WITH_PAGINATION_FIND_BY_GROUPID;
+			finderPath = _finderPathWithPaginationFindByGroupId;
 			finderArgs = new Object[] { groupId, start, end, orderByComparator };
 		}
 
@@ -1912,7 +1850,7 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 	 */
 	@Override
 	public int countByGroupId(long groupId) {
-		FinderPath finderPath = FINDER_PATH_COUNT_BY_GROUPID;
+		FinderPath finderPath = _finderPathCountByGroupId;
 
 		Object[] finderArgs = new Object[] { groupId };
 
@@ -1956,26 +1894,9 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 	}
 
 	private static final String _FINDER_COLUMN_GROUPID_GROUPID_2 = "sharingEntry.groupId = ?";
-	public static final FinderPath FINDER_PATH_WITH_PAGINATION_FIND_BY_FROMUSERID =
-		new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
-			SharingEntryModelImpl.FINDER_CACHE_ENABLED, SharingEntryImpl.class,
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByFromUserId",
-			new String[] {
-				Long.class.getName(),
-				
-			Integer.class.getName(), Integer.class.getName(),
-				OrderByComparator.class.getName()
-			});
-	public static final FinderPath FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_FROMUSERID =
-		new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
-			SharingEntryModelImpl.FINDER_CACHE_ENABLED, SharingEntryImpl.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByFromUserId",
-			new String[] { Long.class.getName() },
-			SharingEntryModelImpl.FROMUSERID_COLUMN_BITMASK);
-	public static final FinderPath FINDER_PATH_COUNT_BY_FROMUSERID = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
-			SharingEntryModelImpl.FINDER_CACHE_ENABLED, Long.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByFromUserId",
-			new String[] { Long.class.getName() });
+	private FinderPath _finderPathWithPaginationFindByFromUserId;
+	private FinderPath _finderPathWithoutPaginationFindByFromUserId;
+	private FinderPath _finderPathCountByFromUserId;
 
 	/**
 	 * Returns all the sharing entries where fromUserId = &#63;.
@@ -2051,11 +1972,11 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
 				(orderByComparator == null)) {
 			pagination = false;
-			finderPath = FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_FROMUSERID;
+			finderPath = _finderPathWithoutPaginationFindByFromUserId;
 			finderArgs = new Object[] { fromUserId };
 		}
 		else {
-			finderPath = FINDER_PATH_WITH_PAGINATION_FIND_BY_FROMUSERID;
+			finderPath = _finderPathWithPaginationFindByFromUserId;
 			finderArgs = new Object[] { fromUserId, start, end, orderByComparator };
 		}
 
@@ -2417,7 +2338,7 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 	 */
 	@Override
 	public int countByFromUserId(long fromUserId) {
-		FinderPath finderPath = FINDER_PATH_COUNT_BY_FROMUSERID;
+		FinderPath finderPath = _finderPathCountByFromUserId;
 
 		Object[] finderArgs = new Object[] { fromUserId };
 
@@ -2461,25 +2382,9 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 	}
 
 	private static final String _FINDER_COLUMN_FROMUSERID_FROMUSERID_2 = "sharingEntry.fromUserId = ?";
-	public static final FinderPath FINDER_PATH_WITH_PAGINATION_FIND_BY_TOUSERID = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
-			SharingEntryModelImpl.FINDER_CACHE_ENABLED, SharingEntryImpl.class,
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByToUserId",
-			new String[] {
-				Long.class.getName(),
-				
-			Integer.class.getName(), Integer.class.getName(),
-				OrderByComparator.class.getName()
-			});
-	public static final FinderPath FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_TOUSERID =
-		new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
-			SharingEntryModelImpl.FINDER_CACHE_ENABLED, SharingEntryImpl.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByToUserId",
-			new String[] { Long.class.getName() },
-			SharingEntryModelImpl.TOUSERID_COLUMN_BITMASK);
-	public static final FinderPath FINDER_PATH_COUNT_BY_TOUSERID = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
-			SharingEntryModelImpl.FINDER_CACHE_ENABLED, Long.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByToUserId",
-			new String[] { Long.class.getName() });
+	private FinderPath _finderPathWithPaginationFindByToUserId;
+	private FinderPath _finderPathWithoutPaginationFindByToUserId;
+	private FinderPath _finderPathCountByToUserId;
 
 	/**
 	 * Returns all the sharing entries where toUserId = &#63;.
@@ -2554,11 +2459,11 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
 				(orderByComparator == null)) {
 			pagination = false;
-			finderPath = FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_TOUSERID;
+			finderPath = _finderPathWithoutPaginationFindByToUserId;
 			finderArgs = new Object[] { toUserId };
 		}
 		else {
-			finderPath = FINDER_PATH_WITH_PAGINATION_FIND_BY_TOUSERID;
+			finderPath = _finderPathWithPaginationFindByToUserId;
 			finderArgs = new Object[] { toUserId, start, end, orderByComparator };
 		}
 
@@ -2920,7 +2825,7 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 	 */
 	@Override
 	public int countByToUserId(long toUserId) {
-		FinderPath finderPath = FINDER_PATH_COUNT_BY_TOUSERID;
+		FinderPath finderPath = _finderPathCountByToUserId;
 
 		Object[] finderArgs = new Object[] { toUserId };
 
@@ -2964,21 +2869,8 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 	}
 
 	private static final String _FINDER_COLUMN_TOUSERID_TOUSERID_2 = "sharingEntry.toUserId = ?";
-	public static final FinderPath FINDER_PATH_WITH_PAGINATION_FIND_BY_EXPIRATIONDATE =
-		new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
-			SharingEntryModelImpl.FINDER_CACHE_ENABLED, SharingEntryImpl.class,
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByExpirationDate",
-			new String[] {
-				Date.class.getName(),
-				
-			Integer.class.getName(), Integer.class.getName(),
-				OrderByComparator.class.getName()
-			});
-	public static final FinderPath FINDER_PATH_WITH_PAGINATION_COUNT_BY_EXPIRATIONDATE =
-		new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
-			SharingEntryModelImpl.FINDER_CACHE_ENABLED, Long.class,
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "countByExpirationDate",
-			new String[] { Date.class.getName() });
+	private FinderPath _finderPathWithPaginationFindByExpirationDate;
+	private FinderPath _finderPathWithPaginationCountByExpirationDate;
 
 	/**
 	 * Returns all the sharing entries where expirationDate &lt; &#63;.
@@ -3052,7 +2944,7 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 		FinderPath finderPath = null;
 		Object[] finderArgs = null;
 
-		finderPath = FINDER_PATH_WITH_PAGINATION_FIND_BY_EXPIRATIONDATE;
+		finderPath = _finderPathWithPaginationFindByExpirationDate;
 		finderArgs = new Object[] {
 				_getTime(expirationDate),
 				
@@ -3441,7 +3333,7 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 	 */
 	@Override
 	public int countByExpirationDate(Date expirationDate) {
-		FinderPath finderPath = FINDER_PATH_WITH_PAGINATION_COUNT_BY_EXPIRATIONDATE;
+		FinderPath finderPath = _finderPathWithPaginationCountByExpirationDate;
 
 		Object[] finderArgs = new Object[] { _getTime(expirationDate) };
 
@@ -3497,25 +3389,9 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 
 	private static final String _FINDER_COLUMN_EXPIRATIONDATE_EXPIRATIONDATE_1 = "sharingEntry.expirationDate IS NULL";
 	private static final String _FINDER_COLUMN_EXPIRATIONDATE_EXPIRATIONDATE_2 = "sharingEntry.expirationDate < ?";
-	public static final FinderPath FINDER_PATH_WITH_PAGINATION_FIND_BY_TU_C = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
-			SharingEntryModelImpl.FINDER_CACHE_ENABLED, SharingEntryImpl.class,
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByTU_C",
-			new String[] {
-				Long.class.getName(), Long.class.getName(),
-				
-			Integer.class.getName(), Integer.class.getName(),
-				OrderByComparator.class.getName()
-			});
-	public static final FinderPath FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_TU_C = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
-			SharingEntryModelImpl.FINDER_CACHE_ENABLED, SharingEntryImpl.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByTU_C",
-			new String[] { Long.class.getName(), Long.class.getName() },
-			SharingEntryModelImpl.TOUSERID_COLUMN_BITMASK |
-			SharingEntryModelImpl.CLASSNAMEID_COLUMN_BITMASK);
-	public static final FinderPath FINDER_PATH_COUNT_BY_TU_C = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
-			SharingEntryModelImpl.FINDER_CACHE_ENABLED, Long.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByTU_C",
-			new String[] { Long.class.getName(), Long.class.getName() });
+	private FinderPath _finderPathWithPaginationFindByTU_C;
+	private FinderPath _finderPathWithoutPaginationFindByTU_C;
+	private FinderPath _finderPathCountByTU_C;
 
 	/**
 	 * Returns all the sharing entries where toUserId = &#63; and classNameId = &#63;.
@@ -3596,11 +3472,11 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
 				(orderByComparator == null)) {
 			pagination = false;
-			finderPath = FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_TU_C;
+			finderPath = _finderPathWithoutPaginationFindByTU_C;
 			finderArgs = new Object[] { toUserId, classNameId };
 		}
 		else {
-			finderPath = FINDER_PATH_WITH_PAGINATION_FIND_BY_TU_C;
+			finderPath = _finderPathWithPaginationFindByTU_C;
 			finderArgs = new Object[] {
 					toUserId, classNameId,
 					
@@ -3989,7 +3865,7 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 	 */
 	@Override
 	public int countByTU_C(long toUserId, long classNameId) {
-		FinderPath finderPath = FINDER_PATH_COUNT_BY_TU_C;
+		FinderPath finderPath = _finderPathCountByTU_C;
 
 		Object[] finderArgs = new Object[] { toUserId, classNameId };
 
@@ -4038,25 +3914,9 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 
 	private static final String _FINDER_COLUMN_TU_C_TOUSERID_2 = "sharingEntry.toUserId = ? AND ";
 	private static final String _FINDER_COLUMN_TU_C_CLASSNAMEID_2 = "sharingEntry.classNameId = ?";
-	public static final FinderPath FINDER_PATH_WITH_PAGINATION_FIND_BY_C_C = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
-			SharingEntryModelImpl.FINDER_CACHE_ENABLED, SharingEntryImpl.class,
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByC_C",
-			new String[] {
-				Long.class.getName(), Long.class.getName(),
-				
-			Integer.class.getName(), Integer.class.getName(),
-				OrderByComparator.class.getName()
-			});
-	public static final FinderPath FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_C_C = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
-			SharingEntryModelImpl.FINDER_CACHE_ENABLED, SharingEntryImpl.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByC_C",
-			new String[] { Long.class.getName(), Long.class.getName() },
-			SharingEntryModelImpl.CLASSNAMEID_COLUMN_BITMASK |
-			SharingEntryModelImpl.CLASSPK_COLUMN_BITMASK);
-	public static final FinderPath FINDER_PATH_COUNT_BY_C_C = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
-			SharingEntryModelImpl.FINDER_CACHE_ENABLED, Long.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByC_C",
-			new String[] { Long.class.getName(), Long.class.getName() });
+	private FinderPath _finderPathWithPaginationFindByC_C;
+	private FinderPath _finderPathWithoutPaginationFindByC_C;
+	private FinderPath _finderPathCountByC_C;
 
 	/**
 	 * Returns all the sharing entries where classNameId = &#63; and classPK = &#63;.
@@ -4137,11 +3997,11 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
 				(orderByComparator == null)) {
 			pagination = false;
-			finderPath = FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_C_C;
+			finderPath = _finderPathWithoutPaginationFindByC_C;
 			finderArgs = new Object[] { classNameId, classPK };
 		}
 		else {
-			finderPath = FINDER_PATH_WITH_PAGINATION_FIND_BY_C_C;
+			finderPath = _finderPathWithPaginationFindByC_C;
 			finderArgs = new Object[] {
 					classNameId, classPK,
 					
@@ -4530,7 +4390,7 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 	 */
 	@Override
 	public int countByC_C(long classNameId, long classPK) {
-		FinderPath finderPath = FINDER_PATH_COUNT_BY_C_C;
+		FinderPath finderPath = _finderPathCountByC_C;
 
 		Object[] finderArgs = new Object[] { classNameId, classPK };
 
@@ -4579,31 +4439,9 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 
 	private static final String _FINDER_COLUMN_C_C_CLASSNAMEID_2 = "sharingEntry.classNameId = ? AND ";
 	private static final String _FINDER_COLUMN_C_C_CLASSPK_2 = "sharingEntry.classPK = ?";
-	public static final FinderPath FINDER_PATH_WITH_PAGINATION_FIND_BY_FU_C_C = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
-			SharingEntryModelImpl.FINDER_CACHE_ENABLED, SharingEntryImpl.class,
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByFU_C_C",
-			new String[] {
-				Long.class.getName(), Long.class.getName(), Long.class.getName(),
-				
-			Integer.class.getName(), Integer.class.getName(),
-				OrderByComparator.class.getName()
-			});
-	public static final FinderPath FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_FU_C_C =
-		new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
-			SharingEntryModelImpl.FINDER_CACHE_ENABLED, SharingEntryImpl.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByFU_C_C",
-			new String[] {
-				Long.class.getName(), Long.class.getName(), Long.class.getName()
-			},
-			SharingEntryModelImpl.FROMUSERID_COLUMN_BITMASK |
-			SharingEntryModelImpl.CLASSNAMEID_COLUMN_BITMASK |
-			SharingEntryModelImpl.CLASSPK_COLUMN_BITMASK);
-	public static final FinderPath FINDER_PATH_COUNT_BY_FU_C_C = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
-			SharingEntryModelImpl.FINDER_CACHE_ENABLED, Long.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByFU_C_C",
-			new String[] {
-				Long.class.getName(), Long.class.getName(), Long.class.getName()
-			});
+	private FinderPath _finderPathWithPaginationFindByFU_C_C;
+	private FinderPath _finderPathWithoutPaginationFindByFU_C_C;
+	private FinderPath _finderPathCountByFU_C_C;
 
 	/**
 	 * Returns all the sharing entries where fromUserId = &#63; and classNameId = &#63; and classPK = &#63;.
@@ -4691,11 +4529,11 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
 				(orderByComparator == null)) {
 			pagination = false;
-			finderPath = FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_FU_C_C;
+			finderPath = _finderPathWithoutPaginationFindByFU_C_C;
 			finderArgs = new Object[] { fromUserId, classNameId, classPK };
 		}
 		else {
-			finderPath = FINDER_PATH_WITH_PAGINATION_FIND_BY_FU_C_C;
+			finderPath = _finderPathWithPaginationFindByFU_C_C;
 			finderArgs = new Object[] {
 					fromUserId, classNameId, classPK,
 					
@@ -5107,7 +4945,7 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 	 */
 	@Override
 	public int countByFU_C_C(long fromUserId, long classNameId, long classPK) {
-		FinderPath finderPath = FINDER_PATH_COUNT_BY_FU_C_C;
+		FinderPath finderPath = _finderPathCountByFU_C_C;
 
 		Object[] finderArgs = new Object[] { fromUserId, classNameId, classPK };
 
@@ -5161,31 +4999,9 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 	private static final String _FINDER_COLUMN_FU_C_C_FROMUSERID_2 = "sharingEntry.fromUserId = ? AND ";
 	private static final String _FINDER_COLUMN_FU_C_C_CLASSNAMEID_2 = "sharingEntry.classNameId = ? AND ";
 	private static final String _FINDER_COLUMN_FU_C_C_CLASSPK_2 = "sharingEntry.classPK = ?";
-	public static final FinderPath FINDER_PATH_WITH_PAGINATION_FIND_BY_TU_C_C = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
-			SharingEntryModelImpl.FINDER_CACHE_ENABLED, SharingEntryImpl.class,
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByTU_C_C",
-			new String[] {
-				Long.class.getName(), Long.class.getName(), Long.class.getName(),
-				
-			Integer.class.getName(), Integer.class.getName(),
-				OrderByComparator.class.getName()
-			});
-	public static final FinderPath FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_TU_C_C =
-		new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
-			SharingEntryModelImpl.FINDER_CACHE_ENABLED, SharingEntryImpl.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByTU_C_C",
-			new String[] {
-				Long.class.getName(), Long.class.getName(), Long.class.getName()
-			},
-			SharingEntryModelImpl.TOUSERID_COLUMN_BITMASK |
-			SharingEntryModelImpl.CLASSNAMEID_COLUMN_BITMASK |
-			SharingEntryModelImpl.CLASSPK_COLUMN_BITMASK);
-	public static final FinderPath FINDER_PATH_COUNT_BY_TU_C_C = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
-			SharingEntryModelImpl.FINDER_CACHE_ENABLED, Long.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByTU_C_C",
-			new String[] {
-				Long.class.getName(), Long.class.getName(), Long.class.getName()
-			});
+	private FinderPath _finderPathWithPaginationFindByTU_C_C;
+	private FinderPath _finderPathWithoutPaginationFindByTU_C_C;
+	private FinderPath _finderPathCountByTU_C_C;
 
 	/**
 	 * Returns all the sharing entries where toUserId = &#63; and classNameId = &#63; and classPK = &#63;.
@@ -5273,11 +5089,11 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
 				(orderByComparator == null)) {
 			pagination = false;
-			finderPath = FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_TU_C_C;
+			finderPath = _finderPathWithoutPaginationFindByTU_C_C;
 			finderArgs = new Object[] { toUserId, classNameId, classPK };
 		}
 		else {
-			finderPath = FINDER_PATH_WITH_PAGINATION_FIND_BY_TU_C_C;
+			finderPath = _finderPathWithPaginationFindByTU_C_C;
 			finderArgs = new Object[] {
 					toUserId, classNameId, classPK,
 					
@@ -5689,7 +5505,7 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 	 */
 	@Override
 	public int countByTU_C_C(long toUserId, long classNameId, long classPK) {
-		FinderPath finderPath = FINDER_PATH_COUNT_BY_TU_C_C;
+		FinderPath finderPath = _finderPathCountByTU_C_C;
 
 		Object[] finderArgs = new Object[] { toUserId, classNameId, classPK };
 
@@ -5743,24 +5559,8 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 	private static final String _FINDER_COLUMN_TU_C_C_TOUSERID_2 = "sharingEntry.toUserId = ? AND ";
 	private static final String _FINDER_COLUMN_TU_C_C_CLASSNAMEID_2 = "sharingEntry.classNameId = ? AND ";
 	private static final String _FINDER_COLUMN_TU_C_C_CLASSPK_2 = "sharingEntry.classPK = ?";
-	public static final FinderPath FINDER_PATH_FETCH_BY_FU_TU_C_C = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
-			SharingEntryModelImpl.FINDER_CACHE_ENABLED, SharingEntryImpl.class,
-			FINDER_CLASS_NAME_ENTITY, "fetchByFU_TU_C_C",
-			new String[] {
-				Long.class.getName(), Long.class.getName(), Long.class.getName(),
-				Long.class.getName()
-			},
-			SharingEntryModelImpl.FROMUSERID_COLUMN_BITMASK |
-			SharingEntryModelImpl.TOUSERID_COLUMN_BITMASK |
-			SharingEntryModelImpl.CLASSNAMEID_COLUMN_BITMASK |
-			SharingEntryModelImpl.CLASSPK_COLUMN_BITMASK);
-	public static final FinderPath FINDER_PATH_COUNT_BY_FU_TU_C_C = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
-			SharingEntryModelImpl.FINDER_CACHE_ENABLED, Long.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByFU_TU_C_C",
-			new String[] {
-				Long.class.getName(), Long.class.getName(), Long.class.getName(),
-				Long.class.getName()
-			});
+	private FinderPath _finderPathFetchByFU_TU_C_C;
+	private FinderPath _finderPathCountByFU_TU_C_C;
 
 	/**
 	 * Returns the sharing entry where fromUserId = &#63; and toUserId = &#63; and classNameId = &#63; and classPK = &#63; or throws a {@link NoSuchEntryException} if it could not be found.
@@ -5842,7 +5642,7 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 		Object result = null;
 
 		if (retrieveFromCache) {
-			result = finderCache.getResult(FINDER_PATH_FETCH_BY_FU_TU_C_C,
+			result = finderCache.getResult(_finderPathFetchByFU_TU_C_C,
 					finderArgs, this);
 		}
 
@@ -5892,7 +5692,7 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 				List<SharingEntry> list = q.list();
 
 				if (list.isEmpty()) {
-					finderCache.putResult(FINDER_PATH_FETCH_BY_FU_TU_C_C,
+					finderCache.putResult(_finderPathFetchByFU_TU_C_C,
 						finderArgs, list);
 				}
 				else {
@@ -5904,8 +5704,7 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 				}
 			}
 			catch (Exception e) {
-				finderCache.removeResult(FINDER_PATH_FETCH_BY_FU_TU_C_C,
-					finderArgs);
+				finderCache.removeResult(_finderPathFetchByFU_TU_C_C, finderArgs);
 
 				throw processException(e);
 			}
@@ -5952,7 +5751,7 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 	@Override
 	public int countByFU_TU_C_C(long fromUserId, long toUserId,
 		long classNameId, long classPK) {
-		FinderPath finderPath = FINDER_PATH_COUNT_BY_FU_TU_C_C;
+		FinderPath finderPath = _finderPathCountByFU_TU_C_C;
 
 		Object[] finderArgs = new Object[] {
 				fromUserId, toUserId, classNameId, classPK
@@ -6032,11 +5831,11 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 		entityCache.putResult(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
 			SharingEntryImpl.class, sharingEntry.getPrimaryKey(), sharingEntry);
 
-		finderCache.putResult(FINDER_PATH_FETCH_BY_UUID_G,
+		finderCache.putResult(_finderPathFetchByUUID_G,
 			new Object[] { sharingEntry.getUuid(), sharingEntry.getGroupId() },
 			sharingEntry);
 
-		finderCache.putResult(FINDER_PATH_FETCH_BY_FU_TU_C_C,
+		finderCache.putResult(_finderPathFetchByFU_TU_C_C,
 			new Object[] {
 				sharingEntry.getFromUserId(), sharingEntry.getToUserId(),
 				sharingEntry.getClassNameId(), sharingEntry.getClassPK()
@@ -6118,9 +5917,9 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 				sharingEntryModelImpl.getGroupId()
 			};
 
-		finderCache.putResult(FINDER_PATH_COUNT_BY_UUID_G, args,
-			Long.valueOf(1), false);
-		finderCache.putResult(FINDER_PATH_FETCH_BY_UUID_G, args,
+		finderCache.putResult(_finderPathCountByUUID_G, args, Long.valueOf(1),
+			false);
+		finderCache.putResult(_finderPathFetchByUUID_G, args,
 			sharingEntryModelImpl, false);
 
 		args = new Object[] {
@@ -6130,9 +5929,9 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 				sharingEntryModelImpl.getClassPK()
 			};
 
-		finderCache.putResult(FINDER_PATH_COUNT_BY_FU_TU_C_C, args,
+		finderCache.putResult(_finderPathCountByFU_TU_C_C, args,
 			Long.valueOf(1), false);
-		finderCache.putResult(FINDER_PATH_FETCH_BY_FU_TU_C_C, args,
+		finderCache.putResult(_finderPathFetchByFU_TU_C_C, args,
 			sharingEntryModelImpl, false);
 	}
 
@@ -6144,19 +5943,19 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 					sharingEntryModelImpl.getGroupId()
 				};
 
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_UUID_G, args);
-			finderCache.removeResult(FINDER_PATH_FETCH_BY_UUID_G, args);
+			finderCache.removeResult(_finderPathCountByUUID_G, args);
+			finderCache.removeResult(_finderPathFetchByUUID_G, args);
 		}
 
 		if ((sharingEntryModelImpl.getColumnBitmask() &
-				FINDER_PATH_FETCH_BY_UUID_G.getColumnBitmask()) != 0) {
+				_finderPathFetchByUUID_G.getColumnBitmask()) != 0) {
 			Object[] args = new Object[] {
 					sharingEntryModelImpl.getOriginalUuid(),
 					sharingEntryModelImpl.getOriginalGroupId()
 				};
 
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_UUID_G, args);
-			finderCache.removeResult(FINDER_PATH_FETCH_BY_UUID_G, args);
+			finderCache.removeResult(_finderPathCountByUUID_G, args);
+			finderCache.removeResult(_finderPathFetchByUUID_G, args);
 		}
 
 		if (clearCurrent) {
@@ -6167,12 +5966,12 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 					sharingEntryModelImpl.getClassPK()
 				};
 
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_FU_TU_C_C, args);
-			finderCache.removeResult(FINDER_PATH_FETCH_BY_FU_TU_C_C, args);
+			finderCache.removeResult(_finderPathCountByFU_TU_C_C, args);
+			finderCache.removeResult(_finderPathFetchByFU_TU_C_C, args);
 		}
 
 		if ((sharingEntryModelImpl.getColumnBitmask() &
-				FINDER_PATH_FETCH_BY_FU_TU_C_C.getColumnBitmask()) != 0) {
+				_finderPathFetchByFU_TU_C_C.getColumnBitmask()) != 0) {
 			Object[] args = new Object[] {
 					sharingEntryModelImpl.getOriginalFromUserId(),
 					sharingEntryModelImpl.getOriginalToUserId(),
@@ -6180,8 +5979,8 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 					sharingEntryModelImpl.getOriginalClassPK()
 				};
 
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_FU_TU_C_C, args);
-			finderCache.removeResult(FINDER_PATH_FETCH_BY_FU_TU_C_C, args);
+			finderCache.removeResult(_finderPathCountByFU_TU_C_C, args);
+			finderCache.removeResult(_finderPathFetchByFU_TU_C_C, args);
 		}
 	}
 
@@ -6369,8 +6168,8 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 		 if (isNew) {
 			Object[] args = new Object[] { sharingEntryModelImpl.getUuid() };
 
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_UUID, args);
-			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_UUID,
+			finderCache.removeResult(_finderPathCountByUuid, args);
+			finderCache.removeResult(_finderPathWithoutPaginationFindByUuid,
 				args);
 
 			args = new Object[] {
@@ -6378,26 +6177,26 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 					sharingEntryModelImpl.getCompanyId()
 				};
 
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_UUID_C, args);
-			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_UUID_C,
+			finderCache.removeResult(_finderPathCountByUuid_C, args);
+			finderCache.removeResult(_finderPathWithoutPaginationFindByUuid_C,
 				args);
 
 			args = new Object[] { sharingEntryModelImpl.getGroupId() };
 
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_GROUPID, args);
-			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_GROUPID,
+			finderCache.removeResult(_finderPathCountByGroupId, args);
+			finderCache.removeResult(_finderPathWithoutPaginationFindByGroupId,
 				args);
 
 			args = new Object[] { sharingEntryModelImpl.getFromUserId() };
 
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_FROMUSERID, args);
-			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_FROMUSERID,
+			finderCache.removeResult(_finderPathCountByFromUserId, args);
+			finderCache.removeResult(_finderPathWithoutPaginationFindByFromUserId,
 				args);
 
 			args = new Object[] { sharingEntryModelImpl.getToUserId() };
 
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_TOUSERID, args);
-			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_TOUSERID,
+			finderCache.removeResult(_finderPathCountByToUserId, args);
+			finderCache.removeResult(_finderPathWithoutPaginationFindByToUserId,
 				args);
 
 			args = new Object[] {
@@ -6405,8 +6204,8 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 					sharingEntryModelImpl.getClassNameId()
 				};
 
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_TU_C, args);
-			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_TU_C,
+			finderCache.removeResult(_finderPathCountByTU_C, args);
+			finderCache.removeResult(_finderPathWithoutPaginationFindByTU_C,
 				args);
 
 			args = new Object[] {
@@ -6414,9 +6213,8 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 					sharingEntryModelImpl.getClassPK()
 				};
 
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_C_C, args);
-			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_C_C,
-				args);
+			finderCache.removeResult(_finderPathCountByC_C, args);
+			finderCache.removeResult(_finderPathWithoutPaginationFindByC_C, args);
 
 			args = new Object[] {
 					sharingEntryModelImpl.getFromUserId(),
@@ -6424,8 +6222,8 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 					sharingEntryModelImpl.getClassPK()
 				};
 
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_FU_C_C, args);
-			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_FU_C_C,
+			finderCache.removeResult(_finderPathCountByFU_C_C, args);
+			finderCache.removeResult(_finderPathWithoutPaginationFindByFU_C_C,
 				args);
 
 			args = new Object[] {
@@ -6434,42 +6232,42 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 					sharingEntryModelImpl.getClassPK()
 				};
 
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_TU_C_C, args);
-			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_TU_C_C,
+			finderCache.removeResult(_finderPathCountByTU_C_C, args);
+			finderCache.removeResult(_finderPathWithoutPaginationFindByTU_C_C,
 				args);
 
-			finderCache.removeResult(FINDER_PATH_COUNT_ALL, FINDER_ARGS_EMPTY);
-			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_ALL,
+			finderCache.removeResult(_finderPathCountAll, FINDER_ARGS_EMPTY);
+			finderCache.removeResult(_finderPathWithoutPaginationFindAll,
 				FINDER_ARGS_EMPTY);
 		}
 
 		else {
 			if ((sharingEntryModelImpl.getColumnBitmask() &
-					FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_UUID.getColumnBitmask()) != 0) {
+					_finderPathWithoutPaginationFindByUuid.getColumnBitmask()) != 0) {
 				Object[] args = new Object[] {
 						sharingEntryModelImpl.getOriginalUuid()
 					};
 
-				finderCache.removeResult(FINDER_PATH_COUNT_BY_UUID, args);
-				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_UUID,
+				finderCache.removeResult(_finderPathCountByUuid, args);
+				finderCache.removeResult(_finderPathWithoutPaginationFindByUuid,
 					args);
 
 				args = new Object[] { sharingEntryModelImpl.getUuid() };
 
-				finderCache.removeResult(FINDER_PATH_COUNT_BY_UUID, args);
-				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_UUID,
+				finderCache.removeResult(_finderPathCountByUuid, args);
+				finderCache.removeResult(_finderPathWithoutPaginationFindByUuid,
 					args);
 			}
 
 			if ((sharingEntryModelImpl.getColumnBitmask() &
-					FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_UUID_C.getColumnBitmask()) != 0) {
+					_finderPathWithoutPaginationFindByUuid_C.getColumnBitmask()) != 0) {
 				Object[] args = new Object[] {
 						sharingEntryModelImpl.getOriginalUuid(),
 						sharingEntryModelImpl.getOriginalCompanyId()
 					};
 
-				finderCache.removeResult(FINDER_PATH_COUNT_BY_UUID_C, args);
-				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_UUID_C,
+				finderCache.removeResult(_finderPathCountByUuid_C, args);
+				finderCache.removeResult(_finderPathWithoutPaginationFindByUuid_C,
 					args);
 
 				args = new Object[] {
@@ -6477,71 +6275,71 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 						sharingEntryModelImpl.getCompanyId()
 					};
 
-				finderCache.removeResult(FINDER_PATH_COUNT_BY_UUID_C, args);
-				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_UUID_C,
+				finderCache.removeResult(_finderPathCountByUuid_C, args);
+				finderCache.removeResult(_finderPathWithoutPaginationFindByUuid_C,
 					args);
 			}
 
 			if ((sharingEntryModelImpl.getColumnBitmask() &
-					FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_GROUPID.getColumnBitmask()) != 0) {
+					_finderPathWithoutPaginationFindByGroupId.getColumnBitmask()) != 0) {
 				Object[] args = new Object[] {
 						sharingEntryModelImpl.getOriginalGroupId()
 					};
 
-				finderCache.removeResult(FINDER_PATH_COUNT_BY_GROUPID, args);
-				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_GROUPID,
+				finderCache.removeResult(_finderPathCountByGroupId, args);
+				finderCache.removeResult(_finderPathWithoutPaginationFindByGroupId,
 					args);
 
 				args = new Object[] { sharingEntryModelImpl.getGroupId() };
 
-				finderCache.removeResult(FINDER_PATH_COUNT_BY_GROUPID, args);
-				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_GROUPID,
+				finderCache.removeResult(_finderPathCountByGroupId, args);
+				finderCache.removeResult(_finderPathWithoutPaginationFindByGroupId,
 					args);
 			}
 
 			if ((sharingEntryModelImpl.getColumnBitmask() &
-					FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_FROMUSERID.getColumnBitmask()) != 0) {
+					_finderPathWithoutPaginationFindByFromUserId.getColumnBitmask()) != 0) {
 				Object[] args = new Object[] {
 						sharingEntryModelImpl.getOriginalFromUserId()
 					};
 
-				finderCache.removeResult(FINDER_PATH_COUNT_BY_FROMUSERID, args);
-				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_FROMUSERID,
+				finderCache.removeResult(_finderPathCountByFromUserId, args);
+				finderCache.removeResult(_finderPathWithoutPaginationFindByFromUserId,
 					args);
 
 				args = new Object[] { sharingEntryModelImpl.getFromUserId() };
 
-				finderCache.removeResult(FINDER_PATH_COUNT_BY_FROMUSERID, args);
-				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_FROMUSERID,
+				finderCache.removeResult(_finderPathCountByFromUserId, args);
+				finderCache.removeResult(_finderPathWithoutPaginationFindByFromUserId,
 					args);
 			}
 
 			if ((sharingEntryModelImpl.getColumnBitmask() &
-					FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_TOUSERID.getColumnBitmask()) != 0) {
+					_finderPathWithoutPaginationFindByToUserId.getColumnBitmask()) != 0) {
 				Object[] args = new Object[] {
 						sharingEntryModelImpl.getOriginalToUserId()
 					};
 
-				finderCache.removeResult(FINDER_PATH_COUNT_BY_TOUSERID, args);
-				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_TOUSERID,
+				finderCache.removeResult(_finderPathCountByToUserId, args);
+				finderCache.removeResult(_finderPathWithoutPaginationFindByToUserId,
 					args);
 
 				args = new Object[] { sharingEntryModelImpl.getToUserId() };
 
-				finderCache.removeResult(FINDER_PATH_COUNT_BY_TOUSERID, args);
-				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_TOUSERID,
+				finderCache.removeResult(_finderPathCountByToUserId, args);
+				finderCache.removeResult(_finderPathWithoutPaginationFindByToUserId,
 					args);
 			}
 
 			if ((sharingEntryModelImpl.getColumnBitmask() &
-					FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_TU_C.getColumnBitmask()) != 0) {
+					_finderPathWithoutPaginationFindByTU_C.getColumnBitmask()) != 0) {
 				Object[] args = new Object[] {
 						sharingEntryModelImpl.getOriginalToUserId(),
 						sharingEntryModelImpl.getOriginalClassNameId()
 					};
 
-				finderCache.removeResult(FINDER_PATH_COUNT_BY_TU_C, args);
-				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_TU_C,
+				finderCache.removeResult(_finderPathCountByTU_C, args);
+				finderCache.removeResult(_finderPathWithoutPaginationFindByTU_C,
 					args);
 
 				args = new Object[] {
@@ -6549,20 +6347,20 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 						sharingEntryModelImpl.getClassNameId()
 					};
 
-				finderCache.removeResult(FINDER_PATH_COUNT_BY_TU_C, args);
-				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_TU_C,
+				finderCache.removeResult(_finderPathCountByTU_C, args);
+				finderCache.removeResult(_finderPathWithoutPaginationFindByTU_C,
 					args);
 			}
 
 			if ((sharingEntryModelImpl.getColumnBitmask() &
-					FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_C_C.getColumnBitmask()) != 0) {
+					_finderPathWithoutPaginationFindByC_C.getColumnBitmask()) != 0) {
 				Object[] args = new Object[] {
 						sharingEntryModelImpl.getOriginalClassNameId(),
 						sharingEntryModelImpl.getOriginalClassPK()
 					};
 
-				finderCache.removeResult(FINDER_PATH_COUNT_BY_C_C, args);
-				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_C_C,
+				finderCache.removeResult(_finderPathCountByC_C, args);
+				finderCache.removeResult(_finderPathWithoutPaginationFindByC_C,
 					args);
 
 				args = new Object[] {
@@ -6570,21 +6368,21 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 						sharingEntryModelImpl.getClassPK()
 					};
 
-				finderCache.removeResult(FINDER_PATH_COUNT_BY_C_C, args);
-				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_C_C,
+				finderCache.removeResult(_finderPathCountByC_C, args);
+				finderCache.removeResult(_finderPathWithoutPaginationFindByC_C,
 					args);
 			}
 
 			if ((sharingEntryModelImpl.getColumnBitmask() &
-					FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_FU_C_C.getColumnBitmask()) != 0) {
+					_finderPathWithoutPaginationFindByFU_C_C.getColumnBitmask()) != 0) {
 				Object[] args = new Object[] {
 						sharingEntryModelImpl.getOriginalFromUserId(),
 						sharingEntryModelImpl.getOriginalClassNameId(),
 						sharingEntryModelImpl.getOriginalClassPK()
 					};
 
-				finderCache.removeResult(FINDER_PATH_COUNT_BY_FU_C_C, args);
-				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_FU_C_C,
+				finderCache.removeResult(_finderPathCountByFU_C_C, args);
+				finderCache.removeResult(_finderPathWithoutPaginationFindByFU_C_C,
 					args);
 
 				args = new Object[] {
@@ -6593,21 +6391,21 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 						sharingEntryModelImpl.getClassPK()
 					};
 
-				finderCache.removeResult(FINDER_PATH_COUNT_BY_FU_C_C, args);
-				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_FU_C_C,
+				finderCache.removeResult(_finderPathCountByFU_C_C, args);
+				finderCache.removeResult(_finderPathWithoutPaginationFindByFU_C_C,
 					args);
 			}
 
 			if ((sharingEntryModelImpl.getColumnBitmask() &
-					FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_TU_C_C.getColumnBitmask()) != 0) {
+					_finderPathWithoutPaginationFindByTU_C_C.getColumnBitmask()) != 0) {
 				Object[] args = new Object[] {
 						sharingEntryModelImpl.getOriginalToUserId(),
 						sharingEntryModelImpl.getOriginalClassNameId(),
 						sharingEntryModelImpl.getOriginalClassPK()
 					};
 
-				finderCache.removeResult(FINDER_PATH_COUNT_BY_TU_C_C, args);
-				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_TU_C_C,
+				finderCache.removeResult(_finderPathCountByTU_C_C, args);
+				finderCache.removeResult(_finderPathWithoutPaginationFindByTU_C_C,
 					args);
 
 				args = new Object[] {
@@ -6616,8 +6414,8 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 						sharingEntryModelImpl.getClassPK()
 					};
 
-				finderCache.removeResult(FINDER_PATH_COUNT_BY_TU_C_C, args);
-				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_TU_C_C,
+				finderCache.removeResult(_finderPathCountByTU_C_C, args);
+				finderCache.removeResult(_finderPathWithoutPaginationFindByTU_C_C,
 					args);
 			}
 		}
@@ -6750,11 +6548,11 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
 				(orderByComparator == null)) {
 			pagination = false;
-			finderPath = FINDER_PATH_WITHOUT_PAGINATION_FIND_ALL;
+			finderPath = _finderPathWithoutPaginationFindAll;
 			finderArgs = FINDER_ARGS_EMPTY;
 		}
 		else {
-			finderPath = FINDER_PATH_WITH_PAGINATION_FIND_ALL;
+			finderPath = _finderPathWithPaginationFindAll;
 			finderArgs = new Object[] { start, end, orderByComparator };
 		}
 
@@ -6843,7 +6641,7 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 	 */
 	@Override
 	public int countAll() {
-		Long count = (Long)finderCache.getResult(FINDER_PATH_COUNT_ALL,
+		Long count = (Long)finderCache.getResult(_finderPathCountAll,
 				FINDER_ARGS_EMPTY, this);
 
 		if (count == null) {
@@ -6856,12 +6654,11 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 
 				count = (Long)q.uniqueResult();
 
-				finderCache.putResult(FINDER_PATH_COUNT_ALL, FINDER_ARGS_EMPTY,
+				finderCache.putResult(_finderPathCountAll, FINDER_ARGS_EMPTY,
 					count);
 			}
 			catch (Exception e) {
-				finderCache.removeResult(FINDER_PATH_COUNT_ALL,
-					FINDER_ARGS_EMPTY);
+				finderCache.removeResult(_finderPathCountAll, FINDER_ARGS_EMPTY);
 
 				throw processException(e);
 			}
@@ -6902,6 +6699,299 @@ public class SharingEntryPersistenceImpl extends BasePersistenceImpl<SharingEntr
 	 * Initializes the sharing entry persistence.
 	 */
 	public void afterPropertiesSet() {
+		_finderPathWithPaginationFindAll = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
+				SharingEntryModelImpl.FINDER_CACHE_ENABLED,
+				SharingEntryImpl.class, FINDER_CLASS_NAME_LIST_WITH_PAGINATION,
+				"findAll", new String[0]);
+
+		_finderPathWithoutPaginationFindAll = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
+				SharingEntryModelImpl.FINDER_CACHE_ENABLED,
+				SharingEntryImpl.class,
+				FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll",
+				new String[0]);
+
+		_finderPathCountAll = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
+				SharingEntryModelImpl.FINDER_CACHE_ENABLED, Long.class,
+				FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
+				new String[0]);
+
+		_finderPathWithPaginationFindByUuid = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
+				SharingEntryModelImpl.FINDER_CACHE_ENABLED,
+				SharingEntryImpl.class, FINDER_CLASS_NAME_LIST_WITH_PAGINATION,
+				"findByUuid",
+				new String[] {
+					String.class.getName(),
+					
+				Integer.class.getName(), Integer.class.getName(),
+					OrderByComparator.class.getName()
+				});
+
+		_finderPathWithoutPaginationFindByUuid = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
+				SharingEntryModelImpl.FINDER_CACHE_ENABLED,
+				SharingEntryImpl.class,
+				FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid",
+				new String[] { String.class.getName() },
+				SharingEntryModelImpl.UUID_COLUMN_BITMASK);
+
+		_finderPathCountByUuid = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
+				SharingEntryModelImpl.FINDER_CACHE_ENABLED, Long.class,
+				FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid",
+				new String[] { String.class.getName() });
+
+		_finderPathFetchByUUID_G = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
+				SharingEntryModelImpl.FINDER_CACHE_ENABLED,
+				SharingEntryImpl.class, FINDER_CLASS_NAME_ENTITY,
+				"fetchByUUID_G",
+				new String[] { String.class.getName(), Long.class.getName() },
+				SharingEntryModelImpl.UUID_COLUMN_BITMASK |
+				SharingEntryModelImpl.GROUPID_COLUMN_BITMASK);
+
+		_finderPathCountByUUID_G = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
+				SharingEntryModelImpl.FINDER_CACHE_ENABLED, Long.class,
+				FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUUID_G",
+				new String[] { String.class.getName(), Long.class.getName() });
+
+		_finderPathWithPaginationFindByUuid_C = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
+				SharingEntryModelImpl.FINDER_CACHE_ENABLED,
+				SharingEntryImpl.class, FINDER_CLASS_NAME_LIST_WITH_PAGINATION,
+				"findByUuid_C",
+				new String[] {
+					String.class.getName(), Long.class.getName(),
+					
+				Integer.class.getName(), Integer.class.getName(),
+					OrderByComparator.class.getName()
+				});
+
+		_finderPathWithoutPaginationFindByUuid_C = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
+				SharingEntryModelImpl.FINDER_CACHE_ENABLED,
+				SharingEntryImpl.class,
+				FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid_C",
+				new String[] { String.class.getName(), Long.class.getName() },
+				SharingEntryModelImpl.UUID_COLUMN_BITMASK |
+				SharingEntryModelImpl.COMPANYID_COLUMN_BITMASK);
+
+		_finderPathCountByUuid_C = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
+				SharingEntryModelImpl.FINDER_CACHE_ENABLED, Long.class,
+				FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid_C",
+				new String[] { String.class.getName(), Long.class.getName() });
+
+		_finderPathWithPaginationFindByGroupId = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
+				SharingEntryModelImpl.FINDER_CACHE_ENABLED,
+				SharingEntryImpl.class, FINDER_CLASS_NAME_LIST_WITH_PAGINATION,
+				"findByGroupId",
+				new String[] {
+					Long.class.getName(),
+					
+				Integer.class.getName(), Integer.class.getName(),
+					OrderByComparator.class.getName()
+				});
+
+		_finderPathWithoutPaginationFindByGroupId = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
+				SharingEntryModelImpl.FINDER_CACHE_ENABLED,
+				SharingEntryImpl.class,
+				FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByGroupId",
+				new String[] { Long.class.getName() },
+				SharingEntryModelImpl.GROUPID_COLUMN_BITMASK);
+
+		_finderPathCountByGroupId = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
+				SharingEntryModelImpl.FINDER_CACHE_ENABLED, Long.class,
+				FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByGroupId",
+				new String[] { Long.class.getName() });
+
+		_finderPathWithPaginationFindByFromUserId = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
+				SharingEntryModelImpl.FINDER_CACHE_ENABLED,
+				SharingEntryImpl.class, FINDER_CLASS_NAME_LIST_WITH_PAGINATION,
+				"findByFromUserId",
+				new String[] {
+					Long.class.getName(),
+					
+				Integer.class.getName(), Integer.class.getName(),
+					OrderByComparator.class.getName()
+				});
+
+		_finderPathWithoutPaginationFindByFromUserId = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
+				SharingEntryModelImpl.FINDER_CACHE_ENABLED,
+				SharingEntryImpl.class,
+				FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByFromUserId",
+				new String[] { Long.class.getName() },
+				SharingEntryModelImpl.FROMUSERID_COLUMN_BITMASK);
+
+		_finderPathCountByFromUserId = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
+				SharingEntryModelImpl.FINDER_CACHE_ENABLED, Long.class,
+				FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByFromUserId",
+				new String[] { Long.class.getName() });
+
+		_finderPathWithPaginationFindByToUserId = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
+				SharingEntryModelImpl.FINDER_CACHE_ENABLED,
+				SharingEntryImpl.class, FINDER_CLASS_NAME_LIST_WITH_PAGINATION,
+				"findByToUserId",
+				new String[] {
+					Long.class.getName(),
+					
+				Integer.class.getName(), Integer.class.getName(),
+					OrderByComparator.class.getName()
+				});
+
+		_finderPathWithoutPaginationFindByToUserId = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
+				SharingEntryModelImpl.FINDER_CACHE_ENABLED,
+				SharingEntryImpl.class,
+				FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByToUserId",
+				new String[] { Long.class.getName() },
+				SharingEntryModelImpl.TOUSERID_COLUMN_BITMASK);
+
+		_finderPathCountByToUserId = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
+				SharingEntryModelImpl.FINDER_CACHE_ENABLED, Long.class,
+				FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByToUserId",
+				new String[] { Long.class.getName() });
+
+		_finderPathWithPaginationFindByExpirationDate = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
+				SharingEntryModelImpl.FINDER_CACHE_ENABLED,
+				SharingEntryImpl.class, FINDER_CLASS_NAME_LIST_WITH_PAGINATION,
+				"findByExpirationDate",
+				new String[] {
+					Date.class.getName(),
+					
+				Integer.class.getName(), Integer.class.getName(),
+					OrderByComparator.class.getName()
+				});
+
+		_finderPathWithPaginationCountByExpirationDate = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
+				SharingEntryModelImpl.FINDER_CACHE_ENABLED, Long.class,
+				FINDER_CLASS_NAME_LIST_WITH_PAGINATION,
+				"countByExpirationDate", new String[] { Date.class.getName() });
+
+		_finderPathWithPaginationFindByTU_C = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
+				SharingEntryModelImpl.FINDER_CACHE_ENABLED,
+				SharingEntryImpl.class, FINDER_CLASS_NAME_LIST_WITH_PAGINATION,
+				"findByTU_C",
+				new String[] {
+					Long.class.getName(), Long.class.getName(),
+					
+				Integer.class.getName(), Integer.class.getName(),
+					OrderByComparator.class.getName()
+				});
+
+		_finderPathWithoutPaginationFindByTU_C = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
+				SharingEntryModelImpl.FINDER_CACHE_ENABLED,
+				SharingEntryImpl.class,
+				FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByTU_C",
+				new String[] { Long.class.getName(), Long.class.getName() },
+				SharingEntryModelImpl.TOUSERID_COLUMN_BITMASK |
+				SharingEntryModelImpl.CLASSNAMEID_COLUMN_BITMASK);
+
+		_finderPathCountByTU_C = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
+				SharingEntryModelImpl.FINDER_CACHE_ENABLED, Long.class,
+				FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByTU_C",
+				new String[] { Long.class.getName(), Long.class.getName() });
+
+		_finderPathWithPaginationFindByC_C = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
+				SharingEntryModelImpl.FINDER_CACHE_ENABLED,
+				SharingEntryImpl.class, FINDER_CLASS_NAME_LIST_WITH_PAGINATION,
+				"findByC_C",
+				new String[] {
+					Long.class.getName(), Long.class.getName(),
+					
+				Integer.class.getName(), Integer.class.getName(),
+					OrderByComparator.class.getName()
+				});
+
+		_finderPathWithoutPaginationFindByC_C = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
+				SharingEntryModelImpl.FINDER_CACHE_ENABLED,
+				SharingEntryImpl.class,
+				FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByC_C",
+				new String[] { Long.class.getName(), Long.class.getName() },
+				SharingEntryModelImpl.CLASSNAMEID_COLUMN_BITMASK |
+				SharingEntryModelImpl.CLASSPK_COLUMN_BITMASK);
+
+		_finderPathCountByC_C = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
+				SharingEntryModelImpl.FINDER_CACHE_ENABLED, Long.class,
+				FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByC_C",
+				new String[] { Long.class.getName(), Long.class.getName() });
+
+		_finderPathWithPaginationFindByFU_C_C = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
+				SharingEntryModelImpl.FINDER_CACHE_ENABLED,
+				SharingEntryImpl.class, FINDER_CLASS_NAME_LIST_WITH_PAGINATION,
+				"findByFU_C_C",
+				new String[] {
+					Long.class.getName(), Long.class.getName(),
+					Long.class.getName(),
+					
+				Integer.class.getName(), Integer.class.getName(),
+					OrderByComparator.class.getName()
+				});
+
+		_finderPathWithoutPaginationFindByFU_C_C = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
+				SharingEntryModelImpl.FINDER_CACHE_ENABLED,
+				SharingEntryImpl.class,
+				FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByFU_C_C",
+				new String[] {
+					Long.class.getName(), Long.class.getName(),
+					Long.class.getName()
+				},
+				SharingEntryModelImpl.FROMUSERID_COLUMN_BITMASK |
+				SharingEntryModelImpl.CLASSNAMEID_COLUMN_BITMASK |
+				SharingEntryModelImpl.CLASSPK_COLUMN_BITMASK);
+
+		_finderPathCountByFU_C_C = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
+				SharingEntryModelImpl.FINDER_CACHE_ENABLED, Long.class,
+				FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByFU_C_C",
+				new String[] {
+					Long.class.getName(), Long.class.getName(),
+					Long.class.getName()
+				});
+
+		_finderPathWithPaginationFindByTU_C_C = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
+				SharingEntryModelImpl.FINDER_CACHE_ENABLED,
+				SharingEntryImpl.class, FINDER_CLASS_NAME_LIST_WITH_PAGINATION,
+				"findByTU_C_C",
+				new String[] {
+					Long.class.getName(), Long.class.getName(),
+					Long.class.getName(),
+					
+				Integer.class.getName(), Integer.class.getName(),
+					OrderByComparator.class.getName()
+				});
+
+		_finderPathWithoutPaginationFindByTU_C_C = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
+				SharingEntryModelImpl.FINDER_CACHE_ENABLED,
+				SharingEntryImpl.class,
+				FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByTU_C_C",
+				new String[] {
+					Long.class.getName(), Long.class.getName(),
+					Long.class.getName()
+				},
+				SharingEntryModelImpl.TOUSERID_COLUMN_BITMASK |
+				SharingEntryModelImpl.CLASSNAMEID_COLUMN_BITMASK |
+				SharingEntryModelImpl.CLASSPK_COLUMN_BITMASK);
+
+		_finderPathCountByTU_C_C = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
+				SharingEntryModelImpl.FINDER_CACHE_ENABLED, Long.class,
+				FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByTU_C_C",
+				new String[] {
+					Long.class.getName(), Long.class.getName(),
+					Long.class.getName()
+				});
+
+		_finderPathFetchByFU_TU_C_C = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
+				SharingEntryModelImpl.FINDER_CACHE_ENABLED,
+				SharingEntryImpl.class, FINDER_CLASS_NAME_ENTITY,
+				"fetchByFU_TU_C_C",
+				new String[] {
+					Long.class.getName(), Long.class.getName(),
+					Long.class.getName(), Long.class.getName()
+				},
+				SharingEntryModelImpl.FROMUSERID_COLUMN_BITMASK |
+				SharingEntryModelImpl.TOUSERID_COLUMN_BITMASK |
+				SharingEntryModelImpl.CLASSNAMEID_COLUMN_BITMASK |
+				SharingEntryModelImpl.CLASSPK_COLUMN_BITMASK);
+
+		_finderPathCountByFU_TU_C_C = new FinderPath(SharingEntryModelImpl.ENTITY_CACHE_ENABLED,
+				SharingEntryModelImpl.FINDER_CACHE_ENABLED, Long.class,
+				FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByFU_TU_C_C",
+				new String[] {
+					Long.class.getName(), Long.class.getName(),
+					Long.class.getName(), Long.class.getName()
+				});
 	}
 
 	public void destroy() {

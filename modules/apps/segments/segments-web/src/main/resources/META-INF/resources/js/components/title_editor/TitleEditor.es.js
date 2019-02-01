@@ -51,6 +51,11 @@ class TitleEditor extends Component {
 
 		const {editing} = this.state;
 
+		const rootClasses = getCN(
+			'title-editor-root',
+			{editing}
+		);
+
 		const inputClasses = getCN(
 			'title-input',
 			{
@@ -67,7 +72,7 @@ class TitleEditor extends Component {
 		);
 
 		return (
-			<div className="title-editor-root">
+			<div className={rootClasses}>
 				<input
 					autoFocus
 					className={inputClasses}
@@ -89,11 +94,12 @@ class TitleEditor extends Component {
 
 					<ClayButton
 						borderless
-						className="edit-icon"
+						className="edit-icon ml-1"
 						data-testid="edit-button"
 						iconName="pencil"
 						monospaced
 						onClick={this._handleEdit}
+						size="sm"
 					/>
 				</div>
 			</div>

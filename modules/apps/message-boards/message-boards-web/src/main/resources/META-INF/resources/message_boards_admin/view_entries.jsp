@@ -55,7 +55,7 @@ SearchContainer entriesSearchContainer = (SearchContainer)request.getAttribute("
 
 		<%
 		portletDisplay.setShowBackIcon(true);
-		portletDisplay.setURLBack(backURL);
+		portletDisplay.setURLBack(backURL.toString());
 
 		renderResponse.setTitle(category.getName());
 		%>
@@ -91,7 +91,7 @@ SearchContainer entriesSearchContainer = (SearchContainer)request.getAttribute("
 					<c:when test="<%= curCategory != null %>">
 
 						<%
-						Map<String, Object> rowData = new HashMap<>();
+						Map<String, Object> rowData = new HashMap<String, Object>();
 
 						rowData.put("actions", String.join(StringPool.COMMA, mbEntriesManagementToolbarDisplayContext.getAvailableActionDropdownItems(curCategory)));
 
@@ -158,7 +158,7 @@ SearchContainer entriesSearchContainer = (SearchContainer)request.getAttribute("
 							row.setRestricted(!MBMessagePermission.contains(permissionChecker, message, ActionKeys.VIEW));
 						}
 
-						Map<String, Object> rowData = new HashMap<>();
+						Map<String, Object> rowData = new HashMap<String, Object>();
 
 						rowData.put("actions", String.join(StringPool.COMMA, mbEntriesManagementToolbarDisplayContext.getAvailableActionDropdownItems(message)));
 
@@ -204,9 +204,7 @@ SearchContainer entriesSearchContainer = (SearchContainer)request.getAttribute("
 									String messageUserName = "anonymous";
 
 									if (thread.getLastPostByUserId() != 0) {
-										MBMessage lastThreadMessage = MBMessageLocalServiceUtil.getLastThreadMessage(thread.getThreadId(), thread.getStatus());
-
-										messageUserName = HtmlUtil.escape(PortalUtil.getUserName(lastThreadMessage.getUserId(), lastThreadMessage.getUserName()));
+										messageUserName = HtmlUtil.escape(PortalUtil.getUserName(thread.getLastPostByUserId(), StringPool.BLANK));
 									}
 
 									Date lastPostDate = thread.getLastPostDate();

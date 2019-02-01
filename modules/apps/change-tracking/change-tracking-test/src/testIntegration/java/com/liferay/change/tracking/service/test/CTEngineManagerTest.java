@@ -27,6 +27,7 @@ import com.liferay.change.tracking.service.CTCollectionLocalService;
 import com.liferay.change.tracking.service.CTEntryLocalService;
 import com.liferay.expando.kernel.model.ExpandoBridge;
 import com.liferay.petra.string.StringPool;
+import com.liferay.portal.kernel.backgroundtask.BackgroundTaskManager;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.BaseModel;
 import com.liferay.portal.kernel.model.CacheModel;
@@ -38,6 +39,7 @@ import com.liferay.portal.kernel.service.ClassNameLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
+import com.liferay.portal.kernel.test.rule.SynchronousDestinationTestRule;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.test.util.UserTestUtil;
@@ -72,7 +74,9 @@ public class CTEngineManagerTest {
 	@ClassRule
 	@Rule
 	public static final AggregateTestRule aggregateTestRule =
-		new LiferayIntegrationTestRule();
+		new AggregateTestRule(
+			new LiferayIntegrationTestRule(),
+			SynchronousDestinationTestRule.INSTANCE);
 
 	@Before
 	public void setUp() throws Exception {
@@ -86,6 +90,8 @@ public class CTEngineManagerTest {
 		if (_ctEngineManager.isChangeTrackingEnabled(
 				TestPropsValues.getCompanyId())) {
 
+			_originallyEnabled = true;
+
 			_ctEngineManager.disableChangeTracking(
 				TestPropsValues.getCompanyId());
 		}
@@ -93,7 +99,18 @@ public class CTEngineManagerTest {
 
 	@After
 	public void tearDown() throws Exception {
-		_ctEngineManager.disableChangeTracking(TestPropsValues.getCompanyId());
+
+		// If the change tracking was enabled originally, then leave it in the
+		// same state
+
+		if (_originallyEnabled) {
+			_ctEngineManager.enableChangeTracking(
+				TestPropsValues.getCompanyId(), TestPropsValues.getUserId());
+		}
+		else {
+			_ctEngineManager.disableChangeTracking(
+				TestPropsValues.getCompanyId());
+		}
 	}
 
 	@Test
@@ -684,6 +701,9 @@ public class CTEngineManagerTest {
 	}
 
 	@Inject
+	private BackgroundTaskManager _backgroundTaskManager;
+
+	@Inject
 	private ClassNameLocalService _classNameLocalService;
 
 	@Inject
@@ -701,6 +721,8 @@ public class CTEngineManagerTest {
 
 	@Inject
 	private CTEntryLocalService _ctEntryLocalService;
+
+	private boolean _originallyEnabled;
 
 	@DeleteAfterTestRun
 	private User _user;

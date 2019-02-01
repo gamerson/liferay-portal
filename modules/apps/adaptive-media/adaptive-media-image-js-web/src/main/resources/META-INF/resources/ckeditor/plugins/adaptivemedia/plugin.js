@@ -132,7 +132,7 @@
 
 				if (instance._isEmptySelection(editor)) {
 					if (IE9) {
-						editor.insertHtml(el.getOuterHtml() + ' <br /> ');
+						editor.insertHtml('<br />');
 					}
 					else {
 						editor.execCommand('enter');

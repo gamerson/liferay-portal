@@ -16,9 +16,10 @@
 			<plugin>
 				<groupId>com.liferay</groupId>
 				<artifactId>com.liferay.portal.tools.rest.builder</artifactId>
-				<version>1.0.0</version>
+				<version>1.0.5</version>
 				<configuration>
-					<inputFileName>rest.yaml</inputFileName>
+					<restConfigFileName>rest-config.yaml</restConfigFileName>
+					<restOpenAPIFileName>rest-openapi.yaml</restOpenAPIFileName>
 				</configuration>
 			</plugin>
 		</plugins>

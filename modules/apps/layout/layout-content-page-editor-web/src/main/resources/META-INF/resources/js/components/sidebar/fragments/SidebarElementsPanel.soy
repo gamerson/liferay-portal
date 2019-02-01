@@ -1,0 +1,15 @@
+{namespace com.liferay.layout.content.page.editor.web.SidebarElementsPanel}
+
+/**
+ * SidebarElementsPanel
+ */
+{template .render}
+	{@param? store: ?}
+
+	<div class="sidebar-fragments-section sidebar-section">
+		{call com.liferay.layout.content.page.editor.web.SidebarAvailableElements.render}
+			{param ref: 'sidebarTab' /}
+			{param store: $store /}
+		{/call}
+	</div>
+{/template}

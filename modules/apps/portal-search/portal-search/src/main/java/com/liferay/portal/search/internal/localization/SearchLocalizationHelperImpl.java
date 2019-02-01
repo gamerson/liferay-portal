@@ -15,6 +15,7 @@
 package com.liferay.portal.search.internal.localization;
 
 import com.liferay.portal.kernel.language.Language;
+import com.liferay.portal.kernel.search.Document;
 import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.kernel.util.ArrayUtil;
@@ -23,6 +24,7 @@ import com.liferay.portal.search.localization.SearchLocalizationHelper;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.LongStream;
 
@@ -34,6 +36,23 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(immediate = true, service = SearchLocalizationHelper.class)
 public class SearchLocalizationHelperImpl implements SearchLocalizationHelper {
+
+	@Override
+	public void addLocalizedField(
+		Document document, String field, Locale defaultLocale,
+		Map<Locale, String> map) {
+
+		for (Map.Entry<Locale, String> entry : map.entrySet()) {
+			Locale locale = entry.getKey();
+
+			if (locale.equals(defaultLocale)) {
+				document.addText(field, entry.getValue());
+			}
+
+			document.addText(
+				Field.getLocalizedName(locale, field), entry.getValue());
+		}
+	}
 
 	@Override
 	public Locale[] getLocales(SearchContext searchContext) {

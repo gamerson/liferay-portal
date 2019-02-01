@@ -24,7 +24,7 @@ definition {
 			configurationScope = "Virtual Instance Scope"
 		);
 
-		var googleClientID = PropsUtil.get("google.client.id.1");
+		var googleClientID = PropsUtil.get("google.client.id.2");
 
 		Type(
 			locator1 = "TextArea#ANY",
@@ -32,7 +32,7 @@ definition {
 			key_text = "clientId"
 		);
 
-		var googleClientSecret = PropsUtil.get("google.client.secret.1");
+		var googleClientSecret = PropsUtil.get("google.client.secret.2");
 
 		Type(
 			locator1 = "TextArea#ANY",
@@ -112,6 +112,8 @@ definition {
 
 		GoogleDoc.saveAndExit();
 
+		Navigator.gotoPage(pageName = "Documents and Media Page");
+
 		GoogleDoc.gotoEdit(dmDocumentTitle = "Untitled", dmGoogleApp = "Google Docs");
 
 		GoogleDoc.editTitleInGoogleDoc(
@@ -163,6 +165,8 @@ definition {
 
 		GoogleDoc.saveAndExit();
 
+		Navigator.gotoPage(pageName = "Documents and Media Page");
+
 		GoogleDoc.gotoEdit(dmDocumentTitle = "Untitled", dmGoogleApp = "Google Sheets");
 
 		GoogleDoc.editTitleInGoogleDoc(
@@ -213,6 +217,8 @@ definition {
 		);
 
 		GoogleDoc.saveAndExit();
+
+		Navigator.gotoPage(pageName = "Documents and Media Page");
 
 		GoogleDoc.gotoEdit(dmDocumentTitle = "Untitled", dmGoogleApp = "Google Slides");
 

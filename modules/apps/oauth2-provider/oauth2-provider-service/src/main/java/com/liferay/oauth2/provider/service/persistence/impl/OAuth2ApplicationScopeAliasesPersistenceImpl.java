@@ -76,38 +76,12 @@ public class OAuth2ApplicationScopeAliasesPersistenceImpl
 		".List1";
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION = FINDER_CLASS_NAME_ENTITY +
 		".List2";
-	public static final FinderPath FINDER_PATH_WITH_PAGINATION_FIND_ALL = new FinderPath(OAuth2ApplicationScopeAliasesModelImpl.ENTITY_CACHE_ENABLED,
-			OAuth2ApplicationScopeAliasesModelImpl.FINDER_CACHE_ENABLED,
-			OAuth2ApplicationScopeAliasesImpl.class,
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0]);
-	public static final FinderPath FINDER_PATH_WITHOUT_PAGINATION_FIND_ALL = new FinderPath(OAuth2ApplicationScopeAliasesModelImpl.ENTITY_CACHE_ENABLED,
-			OAuth2ApplicationScopeAliasesModelImpl.FINDER_CACHE_ENABLED,
-			OAuth2ApplicationScopeAliasesImpl.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0]);
-	public static final FinderPath FINDER_PATH_COUNT_ALL = new FinderPath(OAuth2ApplicationScopeAliasesModelImpl.ENTITY_CACHE_ENABLED,
-			OAuth2ApplicationScopeAliasesModelImpl.FINDER_CACHE_ENABLED,
-			Long.class, FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0]);
-	public static final FinderPath FINDER_PATH_WITH_PAGINATION_FIND_BY_C = new FinderPath(OAuth2ApplicationScopeAliasesModelImpl.ENTITY_CACHE_ENABLED,
-			OAuth2ApplicationScopeAliasesModelImpl.FINDER_CACHE_ENABLED,
-			OAuth2ApplicationScopeAliasesImpl.class,
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByC",
-			new String[] {
-				Long.class.getName(),
-				
-			Integer.class.getName(), Integer.class.getName(),
-				OrderByComparator.class.getName()
-			});
-	public static final FinderPath FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_C = new FinderPath(OAuth2ApplicationScopeAliasesModelImpl.ENTITY_CACHE_ENABLED,
-			OAuth2ApplicationScopeAliasesModelImpl.FINDER_CACHE_ENABLED,
-			OAuth2ApplicationScopeAliasesImpl.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByC",
-			new String[] { Long.class.getName() },
-			OAuth2ApplicationScopeAliasesModelImpl.COMPANYID_COLUMN_BITMASK);
-	public static final FinderPath FINDER_PATH_COUNT_BY_C = new FinderPath(OAuth2ApplicationScopeAliasesModelImpl.ENTITY_CACHE_ENABLED,
-			OAuth2ApplicationScopeAliasesModelImpl.FINDER_CACHE_ENABLED,
-			Long.class, FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByC",
-			new String[] { Long.class.getName() });
+	private FinderPath _finderPathWithPaginationFindAll;
+	private FinderPath _finderPathWithoutPaginationFindAll;
+	private FinderPath _finderPathCountAll;
+	private FinderPath _finderPathWithPaginationFindByC;
+	private FinderPath _finderPathWithoutPaginationFindByC;
+	private FinderPath _finderPathCountByC;
 
 	/**
 	 * Returns all the o auth2 application scope aliaseses where companyId = &#63;.
@@ -184,11 +158,11 @@ public class OAuth2ApplicationScopeAliasesPersistenceImpl
 		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
 				(orderByComparator == null)) {
 			pagination = false;
-			finderPath = FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_C;
+			finderPath = _finderPathWithoutPaginationFindByC;
 			finderArgs = new Object[] { companyId };
 		}
 		else {
-			finderPath = FINDER_PATH_WITH_PAGINATION_FIND_BY_C;
+			finderPath = _finderPathWithPaginationFindByC;
 			finderArgs = new Object[] { companyId, start, end, orderByComparator };
 		}
 
@@ -556,7 +530,7 @@ public class OAuth2ApplicationScopeAliasesPersistenceImpl
 	 */
 	@Override
 	public int countByC(long companyId) {
-		FinderPath finderPath = FINDER_PATH_COUNT_BY_C;
+		FinderPath finderPath = _finderPathCountByC;
 
 		Object[] finderArgs = new Object[] { companyId };
 
@@ -600,29 +574,9 @@ public class OAuth2ApplicationScopeAliasesPersistenceImpl
 	}
 
 	private static final String _FINDER_COLUMN_C_COMPANYID_2 = "oAuth2ApplicationScopeAliases.companyId = ?";
-	public static final FinderPath FINDER_PATH_WITH_PAGINATION_FIND_BY_OAUTH2APPLICATIONID =
-		new FinderPath(OAuth2ApplicationScopeAliasesModelImpl.ENTITY_CACHE_ENABLED,
-			OAuth2ApplicationScopeAliasesModelImpl.FINDER_CACHE_ENABLED,
-			OAuth2ApplicationScopeAliasesImpl.class,
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION,
-			"findByOAuth2ApplicationId",
-			new String[] {
-				Long.class.getName(),
-				
-			Integer.class.getName(), Integer.class.getName(),
-				OrderByComparator.class.getName()
-			});
-	public static final FinderPath FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_OAUTH2APPLICATIONID =
-		new FinderPath(OAuth2ApplicationScopeAliasesModelImpl.ENTITY_CACHE_ENABLED,
-			OAuth2ApplicationScopeAliasesModelImpl.FINDER_CACHE_ENABLED,
-			OAuth2ApplicationScopeAliasesImpl.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION,
-			"findByOAuth2ApplicationId", new String[] { Long.class.getName() },
-			OAuth2ApplicationScopeAliasesModelImpl.OAUTH2APPLICATIONID_COLUMN_BITMASK);
-	public static final FinderPath FINDER_PATH_COUNT_BY_OAUTH2APPLICATIONID = new FinderPath(OAuth2ApplicationScopeAliasesModelImpl.ENTITY_CACHE_ENABLED,
-			OAuth2ApplicationScopeAliasesModelImpl.FINDER_CACHE_ENABLED,
-			Long.class, FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION,
-			"countByOAuth2ApplicationId", new String[] { Long.class.getName() });
+	private FinderPath _finderPathWithPaginationFindByOAuth2ApplicationId;
+	private FinderPath _finderPathWithoutPaginationFindByOAuth2ApplicationId;
+	private FinderPath _finderPathCountByOAuth2ApplicationId;
 
 	/**
 	 * Returns all the o auth2 application scope aliaseses where oAuth2ApplicationId = &#63;.
@@ -702,11 +656,11 @@ public class OAuth2ApplicationScopeAliasesPersistenceImpl
 		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
 				(orderByComparator == null)) {
 			pagination = false;
-			finderPath = FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_OAUTH2APPLICATIONID;
+			finderPath = _finderPathWithoutPaginationFindByOAuth2ApplicationId;
 			finderArgs = new Object[] { oAuth2ApplicationId };
 		}
 		else {
-			finderPath = FINDER_PATH_WITH_PAGINATION_FIND_BY_OAUTH2APPLICATIONID;
+			finderPath = _finderPathWithPaginationFindByOAuth2ApplicationId;
 			finderArgs = new Object[] {
 					oAuth2ApplicationId,
 					
@@ -1082,7 +1036,7 @@ public class OAuth2ApplicationScopeAliasesPersistenceImpl
 	 */
 	@Override
 	public int countByOAuth2ApplicationId(long oAuth2ApplicationId) {
-		FinderPath finderPath = FINDER_PATH_COUNT_BY_OAUTH2APPLICATIONID;
+		FinderPath finderPath = _finderPathCountByOAuth2ApplicationId;
 
 		Object[] finderArgs = new Object[] { oAuth2ApplicationId };
 
@@ -1127,28 +1081,9 @@ public class OAuth2ApplicationScopeAliasesPersistenceImpl
 
 	private static final String _FINDER_COLUMN_OAUTH2APPLICATIONID_OAUTH2APPLICATIONID_2 =
 		"oAuth2ApplicationScopeAliases.oAuth2ApplicationId = ?";
-	public static final FinderPath FINDER_PATH_WITH_PAGINATION_FIND_BY_O_S = new FinderPath(OAuth2ApplicationScopeAliasesModelImpl.ENTITY_CACHE_ENABLED,
-			OAuth2ApplicationScopeAliasesModelImpl.FINDER_CACHE_ENABLED,
-			OAuth2ApplicationScopeAliasesImpl.class,
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByO_S",
-			new String[] {
-				Long.class.getName(), Long.class.getName(),
-				
-			Integer.class.getName(), Integer.class.getName(),
-				OrderByComparator.class.getName()
-			});
-	public static final FinderPath FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_O_S = new FinderPath(OAuth2ApplicationScopeAliasesModelImpl.ENTITY_CACHE_ENABLED,
-			OAuth2ApplicationScopeAliasesModelImpl.FINDER_CACHE_ENABLED,
-			OAuth2ApplicationScopeAliasesImpl.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByO_S",
-			new String[] { Long.class.getName(), Long.class.getName() },
-			OAuth2ApplicationScopeAliasesModelImpl.OAUTH2APPLICATIONID_COLUMN_BITMASK |
-			OAuth2ApplicationScopeAliasesModelImpl.SCOPEALIASESHASH_COLUMN_BITMASK);
-	public static final FinderPath FINDER_PATH_COUNT_BY_O_S = new FinderPath(OAuth2ApplicationScopeAliasesModelImpl.ENTITY_CACHE_ENABLED,
-			OAuth2ApplicationScopeAliasesModelImpl.FINDER_CACHE_ENABLED,
-			Long.class, FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION,
-			"countByO_S",
-			new String[] { Long.class.getName(), Long.class.getName() });
+	private FinderPath _finderPathWithPaginationFindByO_S;
+	private FinderPath _finderPathWithoutPaginationFindByO_S;
+	private FinderPath _finderPathCountByO_S;
 
 	/**
 	 * Returns all the o auth2 application scope aliaseses where oAuth2ApplicationId = &#63; and scopeAliasesHash = &#63;.
@@ -1232,11 +1167,11 @@ public class OAuth2ApplicationScopeAliasesPersistenceImpl
 		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
 				(orderByComparator == null)) {
 			pagination = false;
-			finderPath = FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_O_S;
+			finderPath = _finderPathWithoutPaginationFindByO_S;
 			finderArgs = new Object[] { oAuth2ApplicationId, scopeAliasesHash };
 		}
 		else {
-			finderPath = FINDER_PATH_WITH_PAGINATION_FIND_BY_O_S;
+			finderPath = _finderPathWithPaginationFindByO_S;
 			finderArgs = new Object[] {
 					oAuth2ApplicationId, scopeAliasesHash,
 					
@@ -1636,7 +1571,7 @@ public class OAuth2ApplicationScopeAliasesPersistenceImpl
 	 */
 	@Override
 	public int countByO_S(long oAuth2ApplicationId, long scopeAliasesHash) {
-		FinderPath finderPath = FINDER_PATH_COUNT_BY_O_S;
+		FinderPath finderPath = _finderPathCountByO_S;
 
 		Object[] finderArgs = new Object[] { oAuth2ApplicationId, scopeAliasesHash };
 
@@ -1938,17 +1873,15 @@ public class OAuth2ApplicationScopeAliasesPersistenceImpl
 					oAuth2ApplicationScopeAliasesModelImpl.getCompanyId()
 				};
 
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_C, args);
-			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_C,
-				args);
+			finderCache.removeResult(_finderPathCountByC, args);
+			finderCache.removeResult(_finderPathWithoutPaginationFindByC, args);
 
 			args = new Object[] {
 					oAuth2ApplicationScopeAliasesModelImpl.getOAuth2ApplicationId()
 				};
 
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_OAUTH2APPLICATIONID,
-				args);
-			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_OAUTH2APPLICATIONID,
+			finderCache.removeResult(_finderPathCountByOAuth2ApplicationId, args);
+			finderCache.removeResult(_finderPathWithoutPaginationFindByOAuth2ApplicationId,
 				args);
 
 			args = new Object[] {
@@ -1956,65 +1889,64 @@ public class OAuth2ApplicationScopeAliasesPersistenceImpl
 					oAuth2ApplicationScopeAliasesModelImpl.getScopeAliasesHash()
 				};
 
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_O_S, args);
-			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_O_S,
-				args);
+			finderCache.removeResult(_finderPathCountByO_S, args);
+			finderCache.removeResult(_finderPathWithoutPaginationFindByO_S, args);
 
-			finderCache.removeResult(FINDER_PATH_COUNT_ALL, FINDER_ARGS_EMPTY);
-			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_ALL,
+			finderCache.removeResult(_finderPathCountAll, FINDER_ARGS_EMPTY);
+			finderCache.removeResult(_finderPathWithoutPaginationFindAll,
 				FINDER_ARGS_EMPTY);
 		}
 
 		else {
 			if ((oAuth2ApplicationScopeAliasesModelImpl.getColumnBitmask() &
-					FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_C.getColumnBitmask()) != 0) {
+					_finderPathWithoutPaginationFindByC.getColumnBitmask()) != 0) {
 				Object[] args = new Object[] {
 						oAuth2ApplicationScopeAliasesModelImpl.getOriginalCompanyId()
 					};
 
-				finderCache.removeResult(FINDER_PATH_COUNT_BY_C, args);
-				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_C,
+				finderCache.removeResult(_finderPathCountByC, args);
+				finderCache.removeResult(_finderPathWithoutPaginationFindByC,
 					args);
 
 				args = new Object[] {
 						oAuth2ApplicationScopeAliasesModelImpl.getCompanyId()
 					};
 
-				finderCache.removeResult(FINDER_PATH_COUNT_BY_C, args);
-				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_C,
+				finderCache.removeResult(_finderPathCountByC, args);
+				finderCache.removeResult(_finderPathWithoutPaginationFindByC,
 					args);
 			}
 
 			if ((oAuth2ApplicationScopeAliasesModelImpl.getColumnBitmask() &
-					FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_OAUTH2APPLICATIONID.getColumnBitmask()) != 0) {
+					_finderPathWithoutPaginationFindByOAuth2ApplicationId.getColumnBitmask()) != 0) {
 				Object[] args = new Object[] {
 						oAuth2ApplicationScopeAliasesModelImpl.getOriginalOAuth2ApplicationId()
 					};
 
-				finderCache.removeResult(FINDER_PATH_COUNT_BY_OAUTH2APPLICATIONID,
+				finderCache.removeResult(_finderPathCountByOAuth2ApplicationId,
 					args);
-				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_OAUTH2APPLICATIONID,
+				finderCache.removeResult(_finderPathWithoutPaginationFindByOAuth2ApplicationId,
 					args);
 
 				args = new Object[] {
 						oAuth2ApplicationScopeAliasesModelImpl.getOAuth2ApplicationId()
 					};
 
-				finderCache.removeResult(FINDER_PATH_COUNT_BY_OAUTH2APPLICATIONID,
+				finderCache.removeResult(_finderPathCountByOAuth2ApplicationId,
 					args);
-				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_OAUTH2APPLICATIONID,
+				finderCache.removeResult(_finderPathWithoutPaginationFindByOAuth2ApplicationId,
 					args);
 			}
 
 			if ((oAuth2ApplicationScopeAliasesModelImpl.getColumnBitmask() &
-					FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_O_S.getColumnBitmask()) != 0) {
+					_finderPathWithoutPaginationFindByO_S.getColumnBitmask()) != 0) {
 				Object[] args = new Object[] {
 						oAuth2ApplicationScopeAliasesModelImpl.getOriginalOAuth2ApplicationId(),
 						oAuth2ApplicationScopeAliasesModelImpl.getOriginalScopeAliasesHash()
 					};
 
-				finderCache.removeResult(FINDER_PATH_COUNT_BY_O_S, args);
-				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_O_S,
+				finderCache.removeResult(_finderPathCountByO_S, args);
+				finderCache.removeResult(_finderPathWithoutPaginationFindByO_S,
 					args);
 
 				args = new Object[] {
@@ -2022,8 +1954,8 @@ public class OAuth2ApplicationScopeAliasesPersistenceImpl
 						oAuth2ApplicationScopeAliasesModelImpl.getScopeAliasesHash()
 					};
 
-				finderCache.removeResult(FINDER_PATH_COUNT_BY_O_S, args);
-				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_O_S,
+				finderCache.removeResult(_finderPathCountByO_S, args);
+				finderCache.removeResult(_finderPathWithoutPaginationFindByO_S,
 					args);
 			}
 		}
@@ -2157,11 +2089,11 @@ public class OAuth2ApplicationScopeAliasesPersistenceImpl
 		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
 				(orderByComparator == null)) {
 			pagination = false;
-			finderPath = FINDER_PATH_WITHOUT_PAGINATION_FIND_ALL;
+			finderPath = _finderPathWithoutPaginationFindAll;
 			finderArgs = FINDER_ARGS_EMPTY;
 		}
 		else {
-			finderPath = FINDER_PATH_WITH_PAGINATION_FIND_ALL;
+			finderPath = _finderPathWithPaginationFindAll;
 			finderArgs = new Object[] { start, end, orderByComparator };
 		}
 
@@ -2250,7 +2182,7 @@ public class OAuth2ApplicationScopeAliasesPersistenceImpl
 	 */
 	@Override
 	public int countAll() {
-		Long count = (Long)finderCache.getResult(FINDER_PATH_COUNT_ALL,
+		Long count = (Long)finderCache.getResult(_finderPathCountAll,
 				FINDER_ARGS_EMPTY, this);
 
 		if (count == null) {
@@ -2263,12 +2195,11 @@ public class OAuth2ApplicationScopeAliasesPersistenceImpl
 
 				count = (Long)q.uniqueResult();
 
-				finderCache.putResult(FINDER_PATH_COUNT_ALL, FINDER_ARGS_EMPTY,
+				finderCache.putResult(_finderPathCountAll, FINDER_ARGS_EMPTY,
 					count);
 			}
 			catch (Exception e) {
-				finderCache.removeResult(FINDER_PATH_COUNT_ALL,
-					FINDER_ARGS_EMPTY);
+				finderCache.removeResult(_finderPathCountAll, FINDER_ARGS_EMPTY);
 
 				throw processException(e);
 			}
@@ -2309,6 +2240,95 @@ public class OAuth2ApplicationScopeAliasesPersistenceImpl
 	 * Initializes the o auth2 application scope aliases persistence.
 	 */
 	public void afterPropertiesSet() {
+		_finderPathWithPaginationFindAll = new FinderPath(OAuth2ApplicationScopeAliasesModelImpl.ENTITY_CACHE_ENABLED,
+				OAuth2ApplicationScopeAliasesModelImpl.FINDER_CACHE_ENABLED,
+				OAuth2ApplicationScopeAliasesImpl.class,
+				FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0]);
+
+		_finderPathWithoutPaginationFindAll = new FinderPath(OAuth2ApplicationScopeAliasesModelImpl.ENTITY_CACHE_ENABLED,
+				OAuth2ApplicationScopeAliasesModelImpl.FINDER_CACHE_ENABLED,
+				OAuth2ApplicationScopeAliasesImpl.class,
+				FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll",
+				new String[0]);
+
+		_finderPathCountAll = new FinderPath(OAuth2ApplicationScopeAliasesModelImpl.ENTITY_CACHE_ENABLED,
+				OAuth2ApplicationScopeAliasesModelImpl.FINDER_CACHE_ENABLED,
+				Long.class, FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION,
+				"countAll", new String[0]);
+
+		_finderPathWithPaginationFindByC = new FinderPath(OAuth2ApplicationScopeAliasesModelImpl.ENTITY_CACHE_ENABLED,
+				OAuth2ApplicationScopeAliasesModelImpl.FINDER_CACHE_ENABLED,
+				OAuth2ApplicationScopeAliasesImpl.class,
+				FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByC",
+				new String[] {
+					Long.class.getName(),
+					
+				Integer.class.getName(), Integer.class.getName(),
+					OrderByComparator.class.getName()
+				});
+
+		_finderPathWithoutPaginationFindByC = new FinderPath(OAuth2ApplicationScopeAliasesModelImpl.ENTITY_CACHE_ENABLED,
+				OAuth2ApplicationScopeAliasesModelImpl.FINDER_CACHE_ENABLED,
+				OAuth2ApplicationScopeAliasesImpl.class,
+				FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByC",
+				new String[] { Long.class.getName() },
+				OAuth2ApplicationScopeAliasesModelImpl.COMPANYID_COLUMN_BITMASK);
+
+		_finderPathCountByC = new FinderPath(OAuth2ApplicationScopeAliasesModelImpl.ENTITY_CACHE_ENABLED,
+				OAuth2ApplicationScopeAliasesModelImpl.FINDER_CACHE_ENABLED,
+				Long.class, FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION,
+				"countByC", new String[] { Long.class.getName() });
+
+		_finderPathWithPaginationFindByOAuth2ApplicationId = new FinderPath(OAuth2ApplicationScopeAliasesModelImpl.ENTITY_CACHE_ENABLED,
+				OAuth2ApplicationScopeAliasesModelImpl.FINDER_CACHE_ENABLED,
+				OAuth2ApplicationScopeAliasesImpl.class,
+				FINDER_CLASS_NAME_LIST_WITH_PAGINATION,
+				"findByOAuth2ApplicationId",
+				new String[] {
+					Long.class.getName(),
+					
+				Integer.class.getName(), Integer.class.getName(),
+					OrderByComparator.class.getName()
+				});
+
+		_finderPathWithoutPaginationFindByOAuth2ApplicationId = new FinderPath(OAuth2ApplicationScopeAliasesModelImpl.ENTITY_CACHE_ENABLED,
+				OAuth2ApplicationScopeAliasesModelImpl.FINDER_CACHE_ENABLED,
+				OAuth2ApplicationScopeAliasesImpl.class,
+				FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION,
+				"findByOAuth2ApplicationId",
+				new String[] { Long.class.getName() },
+				OAuth2ApplicationScopeAliasesModelImpl.OAUTH2APPLICATIONID_COLUMN_BITMASK);
+
+		_finderPathCountByOAuth2ApplicationId = new FinderPath(OAuth2ApplicationScopeAliasesModelImpl.ENTITY_CACHE_ENABLED,
+				OAuth2ApplicationScopeAliasesModelImpl.FINDER_CACHE_ENABLED,
+				Long.class, FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION,
+				"countByOAuth2ApplicationId",
+				new String[] { Long.class.getName() });
+
+		_finderPathWithPaginationFindByO_S = new FinderPath(OAuth2ApplicationScopeAliasesModelImpl.ENTITY_CACHE_ENABLED,
+				OAuth2ApplicationScopeAliasesModelImpl.FINDER_CACHE_ENABLED,
+				OAuth2ApplicationScopeAliasesImpl.class,
+				FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByO_S",
+				new String[] {
+					Long.class.getName(), Long.class.getName(),
+					
+				Integer.class.getName(), Integer.class.getName(),
+					OrderByComparator.class.getName()
+				});
+
+		_finderPathWithoutPaginationFindByO_S = new FinderPath(OAuth2ApplicationScopeAliasesModelImpl.ENTITY_CACHE_ENABLED,
+				OAuth2ApplicationScopeAliasesModelImpl.FINDER_CACHE_ENABLED,
+				OAuth2ApplicationScopeAliasesImpl.class,
+				FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByO_S",
+				new String[] { Long.class.getName(), Long.class.getName() },
+				OAuth2ApplicationScopeAliasesModelImpl.OAUTH2APPLICATIONID_COLUMN_BITMASK |
+				OAuth2ApplicationScopeAliasesModelImpl.SCOPEALIASESHASH_COLUMN_BITMASK);
+
+		_finderPathCountByO_S = new FinderPath(OAuth2ApplicationScopeAliasesModelImpl.ENTITY_CACHE_ENABLED,
+				OAuth2ApplicationScopeAliasesModelImpl.FINDER_CACHE_ENABLED,
+				Long.class, FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION,
+				"countByO_S",
+				new String[] { Long.class.getName(), Long.class.getName() });
 	}
 
 	public void destroy() {

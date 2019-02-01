@@ -1,0 +1,83 @@
+$fragmentsEditorSpacing: 8px;
+
+$controlMenuHeight: 49px;
+$desktopControlMenuHeight: 56px;
+
+$managementBarHeight: 50px;
+$desktopManagementBarHeight: 50px;
+
+$productMenuTransitionDuration: 0.5s;
+
+$dragSourceZIndex: 997;
+$draggableItemZIndex: 997;
+$floatingToolbarZIndex: 996;
+$fragmentEditableFieldTooltipZIndex: 995;
+$fragmentEntryLinkContentHoverZIndex: auto;
+$fragmentEntryLinkContentZIndex: 0;
+$fragmentEntryLinkZIndex: 5;
+$managementBarZIndex: 991;
+$portletTopperZIndex: 1;
+$sidebarCardPlusButtonZIndex: 6;
+$sidebarCardZIndex: 5;
+$sidebarSectionZIndex: 4;
+$sidebarZIndex: 992;
+$topperActiveZIndex: 3;
+$topperHoverZIndex: 2;
+$topperZIndex: 1;
+$translationStatusListZIndex: 997;
+
+$fragmentEditableFieldGridAccentColor: #80ACFF;
+$fragmentEditableFieldGridDefaultColor: #A7A9BC;
+$fragmentEditableFieldGridSize: $fragmentsEditorSpacing;
+$fragmentEditableFieldGridTranslatedColor: #3DC513;
+
+$fragmentEntryLinkListPadding: 28px;
+$sectionMinimumHeight: $fragmentsEditorSpacing * 20;
+
+$fragmentEntryLinkSectionBorderColor: #CDCED9;
+$fragmentEntryLinkColumnBorderColor: rgba(38, 38, 52, 0.06);
+
+$dragSourceBackgroundColor: #E1EBFF;
+$dragSourceColor: #0B5FFF;
+$dropTargetColor:#0B5FFF;
+$dropTargetWidth: 5px;
+
+$topperBorderColor: #0B5FFF;
+$topperBorderRadius: 2px;
+$topperBorderWidth: 1px;
+$topperFocusedBorderWidth: 2px;
+$topperBackgroundColor: #0B5FFF;
+$topperColor: #FFF;
+$topperShowDelay: 0.3s;
+$topperShowDuration: 0.3s;
+
+$portletColor: #0B5FFF;
+$portletBorderColor: #89A7E0;
+$portletBorderRadius: 3px;
+$portletBorderWidth: 1px;
+
+$sidebarButtonsBackgroundColor: #393A4A;
+$sidebarButtonsColor: #A7A9BC;
+$sidebarButtonsHeight: 40px;
+$sidebarButtonsHoverColor: #FFF;
+$sidebarButtonsWidth: 40px;
+
+$sidebarCardImageBorderColor: #E7E7ED;
+$sidebarCardImageMaxHeight: 200px;
+$sidebarCardMarginBottom: $fragmentsEditorSpacing * 2;
+$sidebarCardMarginBottom: 16px;
+$sidebarCardNoPreviewBackgroundColor: #E7E7ED;
+$sidebarCardNoPreviewIconColor: #A7A9BC;
+$sidebarCardPadding: $fragmentsEditorSpacing;
+$sidebarCardPadding: 8px;
+$sidebarCardTitleColor: #6B6C7E;
+
+$sidebarCollapsiblePanelLineColor: #DFDFE9;
+$sidebarContentBackgroundColor: #F4F5F8;
+$sidebarElementCardWidth: calc(50% - #{$fragmentsEditorSpacing});
+$sidebarLeftBorderColor: #E7E7ED;
+$sidebarLeftBorderWidth: 1px;
+$sidebarTransitionDuration: 0.5s;
+$sidebarTransitionTimingFunction: ease;
+$sidebarTreeElementBackgroundColor: rgba(39, 40, 51, 0.03);
+$sidebarWidth: 320px;

@@ -33,8 +33,8 @@ import org.cometd.client.BayeuxClient;
 import org.cometd.client.transport.ClientTransport;
 import org.cometd.client.transport.LongPollingTransport;
 
-import org.eclipse.jetty.client.ContentExchange;
 import org.eclipse.jetty.client.HttpClient;
+import org.eclipse.jetty.client.api.Request;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -135,7 +135,8 @@ public class SalesforceStreamingClientImpl
 			Map<String, Object> options = new HashMap<>();
 
 			options.put(
-				ClientTransport.TIMEOUT_OPTION, _transportTimeout * 6000);
+				ClientTransport.MAX_NETWORK_DELAY_OPTION,
+				_transportTimeout * 6000);
 
 			_httpClient.start();
 
@@ -219,10 +220,10 @@ public class SalesforceStreamingClientImpl
 		}
 
 		@Override
-		protected void customize(ContentExchange exchange) {
-			super.customize(exchange);
+		protected void customize(Request request) {
+			super.customize(request);
 
-			exchange.addRequestHeader("Authorization", "OAuth " + _sessionId);
+			request.header("Authorization", "OAuth " + _sessionId);
 		}
 
 		private final String _sessionId;

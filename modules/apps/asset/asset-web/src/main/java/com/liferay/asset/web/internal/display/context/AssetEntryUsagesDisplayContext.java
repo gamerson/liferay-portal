@@ -22,14 +22,20 @@ import com.liferay.asset.service.AssetEntryUsageLocalServiceUtil;
 import com.liferay.asset.util.AssetEntryUsageActionMenuContributor;
 import com.liferay.asset.util.AssetEntryUsageActionMenuContributorRegistryUtil;
 import com.liferay.asset.util.comparator.AssetEntryUsageModifiedDateComparator;
+import com.liferay.fragment.constants.FragmentEntryTypeConstants;
+import com.liferay.fragment.model.FragmentEntry;
 import com.liferay.fragment.model.FragmentEntryLink;
+import com.liferay.fragment.service.FragmentEntryLinkLocalServiceUtil;
+import com.liferay.fragment.service.FragmentEntryLocalServiceUtil;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItem;
 import com.liferay.layout.page.template.model.LayoutPageTemplateEntry;
 import com.liferay.layout.page.template.service.LayoutPageTemplateEntryLocalServiceUtil;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.search.SearchContainer;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.model.Layout;
+import com.liferay.portal.kernel.portlet.PortletIdCodec;
 import com.liferay.portal.kernel.service.LayoutLocalServiceUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.OrderByComparator;
@@ -45,6 +51,8 @@ import java.util.Objects;
 import javax.portlet.PortletURL;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author Pavel Savinov
@@ -164,6 +172,45 @@ public class AssetEntryUsagesDisplayContext {
 		}
 
 		return "page-template";
+	}
+
+	public String getAssetEntryUsageWhereLabel(AssetEntryUsage assetEntryUsage)
+		throws PortalException {
+
+		ThemeDisplay themeDisplay = (ThemeDisplay)_renderRequest.getAttribute(
+			WebKeys.THEME_DISPLAY);
+
+		HttpServletRequest request = PortalUtil.getHttpServletRequest(
+			_renderRequest);
+
+		if (assetEntryUsage.getClassNameId() !=
+				PortalUtil.getClassNameId(FragmentEntryLink.class)) {
+
+			String portletTitle = PortalUtil.getPortletTitle(
+				PortletIdCodec.decodePortletName(
+					assetEntryUsage.getPortletId()),
+				themeDisplay.getLocale());
+
+			return LanguageUtil.format(request, "x-widget", portletTitle);
+		}
+
+		FragmentEntryLink fragmentEntryLink =
+			FragmentEntryLinkLocalServiceUtil.getFragmentEntryLink(
+				assetEntryUsage.getClassPK());
+
+		FragmentEntry fragmentEntry =
+			FragmentEntryLocalServiceUtil.getFragmentEntry(
+				fragmentEntryLink.getFragmentEntryId());
+
+		if (fragmentEntry.getType() ==
+				FragmentEntryTypeConstants.TYPE_ELEMENT) {
+
+			return LanguageUtil.format(
+				request, "x-element", fragmentEntry.getName());
+		}
+
+		return LanguageUtil.format(
+			request, "x-section", fragmentEntry.getName());
 	}
 
 	public int getDisplayPagesUsageCount() {

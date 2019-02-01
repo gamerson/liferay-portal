@@ -17,6 +17,7 @@ package com.liferay.oauth2.provider.rest.internal.jaxrs.feature;
 import com.liferay.oauth2.provider.scope.RequiresScope;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 
 import java.util.Arrays;
@@ -44,12 +45,37 @@ public class RequiresScopeAnnotationFinder {
 		return scopes;
 	}
 
+	public static RequiresScope getRequiresScope(
+		AnnotatedElement annotatedElement) {
+
+		RequiresScope requiresScope = annotatedElement.getAnnotation(
+			RequiresScope.class);
+
+		if (requiresScope != null) {
+			return requiresScope;
+		}
+
+		Annotation[] annotations = annotatedElement.getAnnotations();
+
+		for (Annotation annotation : annotations) {
+			Class<? extends Annotation> annotationClass =
+				annotation.annotationType();
+
+			requiresScope = annotationClass.getAnnotation(RequiresScope.class);
+
+			if (requiresScope != null) {
+				return requiresScope;
+			}
+		}
+
+		return null;
+	}
+
 	private static void _find(
 		Set<Class<?>> classes, Set<String> scopes, boolean recurse,
 		Class<?> clazz) {
 
-		RequiresScope requiresScope = clazz.getDeclaredAnnotation(
-			RequiresScope.class);
+		RequiresScope requiresScope = getRequiresScope(clazz);
 
 		if (requiresScope != null) {
 			Collections.addAll(scopes, requiresScope.value());
@@ -74,8 +100,7 @@ public class RequiresScopeAnnotationFinder {
 		Set<Class<?>> visited, Set<String> scopes, boolean recurse,
 		Method method) {
 
-		RequiresScope requiresScope = method.getDeclaredAnnotation(
-			RequiresScope.class);
+		RequiresScope requiresScope = getRequiresScope(method);
 
 		if (requiresScope != null) {
 			Collections.addAll(scopes, requiresScope.value());

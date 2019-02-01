@@ -24,7 +24,6 @@ import com.liferay.portal.kernel.search.BooleanQuery;
 import com.liferay.portal.kernel.search.Document;
 import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.search.IndexWriterHelper;
-import com.liferay.portal.kernel.search.Indexer;
 import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.kernel.search.Summary;
 import com.liferay.portal.kernel.search.filter.BooleanFilter;
@@ -33,7 +32,6 @@ import com.liferay.portal.kernel.service.UserGroupLocalService;
 import com.liferay.portal.kernel.service.permission.UserGroupPermission;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.user.groups.admin.constants.UserGroupsAdminPortletKeys;
 
 import java.util.LinkedHashMap;
 import java.util.Locale;
@@ -41,17 +39,11 @@ import java.util.Locale;
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletResponse;
 
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-
 /**
  * @author Hugo Huijser
+ * @deprecated As of Judson (7.1.x), since 7.1.0
  */
-@Component(
-	immediate = true,
-	property = "javax.portlet.name=" + UserGroupsAdminPortletKeys.USER_GROUPS_ADMIN,
-	service = Indexer.class
-)
+@Deprecated
 public class UserGroupIndexer extends BaseIndexer<UserGroup> {
 
 	public static final String CLASS_NAME = UserGroup.class.getName();
@@ -183,13 +175,8 @@ public class UserGroupIndexer extends BaseIndexer<UserGroup> {
 	private static final Log _log = LogFactoryUtil.getLog(
 		UserGroupIndexer.class);
 
-	@Reference
 	private IndexWriterHelper _indexWriterHelper;
-
-	@Reference
 	private UserGroupLocalService _userGroupLocalService;
-
-	@Reference
 	private UserGroupPermission _userGroupPermission;
 
 }

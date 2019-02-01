@@ -74,7 +74,7 @@ class RuleList extends Component {
 					['logical-operator']: Config.string()
 				}
 			)
-		),
+		).value([]),
 
 		roles: Config.arrayOf(
 			Config.shapeOf(
@@ -137,16 +137,16 @@ class RuleList extends Component {
 	created() {
 		this._eventHandler = new EventHandler();
 
-		const newRules = this.rules;
-
-		this._setRules(newRules);
-
-		this.setState({rules: newRules});
+		this.setState(
+			{
+				rules: this._formatRules(this.rules)
+			}
+		);
 	}
 
 	attached() {
 		this._eventHandler.add(
-			dom.on(document, 'mousedown', this._handleDocumentMouseDown.bind(this), true)
+			dom.on(document, 'mouseup', this._handleDocumentMouseDown.bind(this), true)
 		);
 	}
 
@@ -160,11 +160,183 @@ class RuleList extends Component {
 		this._eventHandler.removeAllListeners();
 	}
 
+	prepareStateForRender(states) {
+		const {roles} = this;
+		const rules = this._setDataProviderNames(states);
+
+		return {
+			...states,
+			rules: this._formatRules(
+				rules.map(
+					rule => {
+						return {
+							...rule,
+							actions: rule.actions.map(
+								actionItem => {
+									return {
+										...actionItem,
+										label: this._getFieldLabel(actionItem.target),
+										target: this._getFieldLabel(actionItem.target)
+									};
+								}
+							),
+							conditions: rule.conditions.map(
+								condition => {
+									return {
+										...condition,
+										operands: condition.operands.map(
+											(operand, index) => {
+												let {label} = operand;
+
+												if (operand.type === 'field') {
+													label = this._getFieldLabel(operand.value);
+												}
+												else if (index == 1 && condition.operands[0].type === 'user' && roles.length) {
+													label = roles.find(role => role.id === operand.value).label;
+												}
+
+												return {
+													...operand,
+													label,
+													value: this._setOperandValue(operand)
+												};
+											}
+										)
+									};
+								}
+							)
+						};
+					}
+				)
+			),
+			rulesCardOptions: this._getRulesCardOptions()
+		};
+	}
+
+	_formatActions(actions) {
+		actions.forEach(
+			action => {
+				action.label = this._getFieldLabel(action.target);
+
+				const expression = action.expression;
+
+				if (expression) {
+					action.expression = expression.replace(/\[|\]/g, '');
+				}
+			}
+		);
+
+		return actions;
+	}
+
+	_formatRules(rules) {
+		return rules.map(
+			rule => {
+				const {actions, conditions} = rule;
+
+				let logicalOperator;
+
+				if (rule['logical-operator']) {
+					logicalOperator = rule['logical-operator'].toLowerCase();
+				}
+				else if (rule.logicalOperator) {
+					logicalOperator = rule.logicalOperator.toLowerCase();
+				}
+
+				return {
+					actions: actions.map(
+						action => {
+							if (action.action === 'auto-fill') {
+								const {inputs, outputs} = action;
+
+								const inputLabel = Object.values(inputs).map(input => this._getFieldLabel(input));
+								const outputLabel = Object.values(outputs).map(output => this._getFieldLabel(output));
+
+								action = {
+									...action,
+									inputLabel,
+									outputLabel
+								};
+							}
+
+							return action;
+						}
+					),
+					conditions: conditions.map(
+						condition => {
+							if (condition.operands.length < 2 && condition.operands[0].type === 'list') {
+								condition.operands = [
+									{
+										label: 'user',
+										repeatable: false,
+										type: 'user',
+										value: 'user'
+									},
+									{
+										...condition.operands[0],
+										label: condition.operands[0].value
+									}
+								];
+							}
+
+							return condition;
+						}
+					),
+					logicalOperator
+				};
+			}
+		);
+	}
+
+	_getDataProviderName(id) {
+		const {dataProvider} = this;
+
+		return dataProvider.find(data => data.uuid == id).label;
+	}
+
+	/**
+	 * Find a field label based on fieldName
+	 * @param {string} fieldName
+	 * @return {string} the field label
+	 */
+
+	_getFieldLabel(fieldName) {
+		const pages = this.pages;
+
+		let fieldLabel = null;
+
+		if (pages && fieldName) {
+			const visitor = new PagesVisitor(pages);
+
+			const field = visitor.findField(field => field.fieldName == fieldName);
+
+			if (field) {
+				fieldLabel = field.label;
+			}
+		}
+
+		return fieldLabel;
+	}
+
+	_getRulesCardOptions() {
+		const rulesCardOptions = [
+			{
+				'label': Liferay.Language.get('edit'),
+				'settingsItem': 'edit'
+			},
+			{
+				'label': Liferay.Language.get('delete'),
+				'settingsItem': 'delete'
+			}
+		];
+
+		return rulesCardOptions;
+	}
+
 	_handleDocumentMouseDown({target}) {
-		const dropdownNode = dom.closest(target, '.dropdown-menu');
 		const dropdownSettings = dom.closest(target, '.ddm-rule-list-settings');
 
-		if (dropdownNode || dropdownSettings) {
+		if (dropdownSettings) {
 			return;
 		}
 
@@ -173,48 +345,6 @@ class RuleList extends Component {
 				dropdownExpandedIndex: -1
 			}
 		);
-	}
-
-	/**
-	 * Find a field label based on fieldName
-	 * @param {string} fieldName
-	 * @return {string} the field label
-	 */
-	_getFieldLabel(fieldName) {
-		const pages = this.pages;
-
-		let labelField = null;
-
-		if (pages && fieldName) {
-			const visitor = new PagesVisitor(pages);
-
-			const {label} = visitor.findField(field => field.fieldName == fieldName);
-
-			labelField = label;
-		}
-
-		return labelField;
-	}
-
-	_handleRuleCardClicked({data, target}) {
-		const cardId = target.element.closest('[data-card-id]').getAttribute('data-card-id');
-
-		if (data.item.settingsItem == 'edit') {
-			this.emit(
-				'ruleEdited',
-				{
-					ruleId: cardId
-				}
-			);
-		}
-		else if (data.item.settingsItem == 'delete') {
-			this.emit(
-				'ruleDeleted',
-				{
-					ruleId: cardId
-				}
-			);
-		}
 	}
 
 	_handleDropdownClicked(event) {
@@ -236,89 +366,34 @@ class RuleList extends Component {
 		);
 	}
 
-	_formatActions(actions) {
-		actions.forEach(
-			action => {
-				action.label = this._getFieldLabel(action.target);
+	_handleRuleCardClicked({data, target}) {
+		const cardElement = target.element.closest('[data-card-id]');
+		const cardId = parseInt(cardElement.getAttribute('data-card-id'), 10);
 
-				const expression = action.expression;
-
-				if (expression) {
-					action.expression = expression.replace(/\[|\]/g, '');
-				}
-			}
-		);
-
-		return actions;
-	}
-
-	_getDataProviderName(id) {
-		const {dataProvider} = this;
-
-		return dataProvider.find(data => data.uuid == id).label;
-	}
-
-	_setRules(newRules) {
-		for (let rule = 0; rule < newRules.length; rule++) {
-			const actions = newRules[rule].actions;
-			const conditions = newRules[rule].conditions;
-
-			actions.forEach(
-				action => {
-					if (action.action === 'auto-fill') {
-						const inputValue = Object.values(action.inputs).map(fieldName => this._getFieldLabel(fieldName));
-
-						action.inputValue = inputValue.toString();
-						const outputValue = Object.values(action.outputs).map(fieldName => this._getFieldLabel(fieldName));
-
-						action.outputValue = outputValue.toString();
-					}
+		if (data.item.settingsItem == 'edit') {
+			this.emit(
+				'ruleEdited',
+				{
+					ruleId: cardId
 				}
 			);
-
-			newRules[rule].conditions = conditions.map(
-				condition => {
-					if (condition.operands.length < 2 && condition.operands[0].type === 'list') {
-						condition.operands = [
-							{
-								label: 'user',
-								repeatable: false,
-								type: 'user',
-								value: 'user'
-							},
-							{
-								...condition.operands[0],
-								label: condition.operands[0].value
-							}
-						];
-					}
-
-					return condition;
-				}
-			);
-
-			let logicalOperator;
-
-			if (newRules[rule]['logical-operator']) {
-				logicalOperator = newRules[rule]['logical-operator'].toLowerCase();
-				newRules[rule].logicalOperator = logicalOperator;
-
-			}
-			else if (newRules[rule].logicalOperator) {
-				logicalOperator = newRules[rule].logicalOperator.toLowerCase();
-				newRules[rule].logicalOperator = logicalOperator;
-			}
 		}
-
-		return newRules;
+		else if (data.item.settingsItem == 'delete') {
+			this.emit(
+				'ruleDeleted',
+				{
+					ruleId: cardId
+				}
+			);
+		}
 	}
 
 	_setDataProviderNames(states) {
-		const newRules = states.rules;
+		const {rules} = states;
 
 		if (this.dataProvider) {
-			for (let rule = 0; rule < newRules.length; rule++) {
-				const actions = newRules[rule].actions;
+			for (let rule = 0; rule < rules.length; rule++) {
+				const actions = rules[rule].actions;
 
 				actions.forEach(
 					action => {
@@ -332,73 +407,7 @@ class RuleList extends Component {
 			}
 		}
 
-		return newRules;
-	}
-
-	_getRulesCardOptions() {
-		const rulesCardOptions = [
-			{
-				'label': Liferay.Language.get('edit'),
-				'settingsItem': 'edit'
-			},
-			{
-				'label': Liferay.Language.get('delete'),
-				'settingsItem': 'delete'
-			}
-		];
-
-		return rulesCardOptions;
-	}
-
-	prepareStateForRender(states) {
-		const {roles} = this;
-		const rules = this._setDataProviderNames(states);
-
-		return {
-			...states,
-			rules: rules.map(
-				rule => {
-					return {
-						...rule,
-						actions: rule.actions.map(
-							actionItem => {
-								return {
-									...actionItem,
-									label: this._getFieldLabel(actionItem.target),
-									target: this._getFieldLabel(actionItem.target)
-								};
-							}
-						),
-						conditions: rule.conditions.map(
-							condition => {
-								return {
-									...condition,
-									operands: condition.operands.map(
-										(operand, index) => {
-											let {label} = operand;
-
-											if (operand.type === 'field') {
-												label = this._getFieldLabel(operand.value);
-											}
-											else if (index == 1 && condition.operands[0].type === 'user' && roles.length) {
-												label = roles.find(role => role.id === operand.value).label;
-											}
-
-											return {
-												...operand,
-												label,
-												value: this._setOperandValue(operand)
-											};
-										}
-									)
-								};
-							}
-						)
-					};
-				}
-			),
-			rulesCardOptions: this._getRulesCardOptions()
-		};
+		return rules;
 	}
 
 	_setOperandValue(operand) {

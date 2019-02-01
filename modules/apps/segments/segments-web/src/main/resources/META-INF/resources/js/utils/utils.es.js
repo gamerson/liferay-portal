@@ -1,8 +1,20 @@
 import uniqueId from 'lodash.uniqueid';
+import {CONJUNCTIONS} from 'utils/constants.es';
 
 const GROUP_ID_NAMESPACE = 'group_';
 
 const SPLIT_REGEX = /({\d+})/g;
+
+/**
+ * Creates a new group object with items.
+ * @param {Array} items The items to add to the new group.
+ * @return {Object} The new group object.
+ */
+export const createNewGroup = items => ({
+	conjunctionName: CONJUNCTIONS.AND,
+	groupId: generateGroupId(),
+	items
+});
 
 /**
  * Generates a unique group id.

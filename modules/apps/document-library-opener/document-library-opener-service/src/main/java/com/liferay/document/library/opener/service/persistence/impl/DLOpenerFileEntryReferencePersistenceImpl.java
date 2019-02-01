@@ -79,27 +79,11 @@ public class DLOpenerFileEntryReferencePersistenceImpl
 		".List1";
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION = FINDER_CLASS_NAME_ENTITY +
 		".List2";
-	public static final FinderPath FINDER_PATH_WITH_PAGINATION_FIND_ALL = new FinderPath(DLOpenerFileEntryReferenceModelImpl.ENTITY_CACHE_ENABLED,
-			DLOpenerFileEntryReferenceModelImpl.FINDER_CACHE_ENABLED,
-			DLOpenerFileEntryReferenceImpl.class,
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0]);
-	public static final FinderPath FINDER_PATH_WITHOUT_PAGINATION_FIND_ALL = new FinderPath(DLOpenerFileEntryReferenceModelImpl.ENTITY_CACHE_ENABLED,
-			DLOpenerFileEntryReferenceModelImpl.FINDER_CACHE_ENABLED,
-			DLOpenerFileEntryReferenceImpl.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0]);
-	public static final FinderPath FINDER_PATH_COUNT_ALL = new FinderPath(DLOpenerFileEntryReferenceModelImpl.ENTITY_CACHE_ENABLED,
-			DLOpenerFileEntryReferenceModelImpl.FINDER_CACHE_ENABLED,
-			Long.class, FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0]);
-	public static final FinderPath FINDER_PATH_FETCH_BY_FILEENTRYID = new FinderPath(DLOpenerFileEntryReferenceModelImpl.ENTITY_CACHE_ENABLED,
-			DLOpenerFileEntryReferenceModelImpl.FINDER_CACHE_ENABLED,
-			DLOpenerFileEntryReferenceImpl.class, FINDER_CLASS_NAME_ENTITY,
-			"fetchByFileEntryId", new String[] { Long.class.getName() },
-			DLOpenerFileEntryReferenceModelImpl.FILEENTRYID_COLUMN_BITMASK);
-	public static final FinderPath FINDER_PATH_COUNT_BY_FILEENTRYID = new FinderPath(DLOpenerFileEntryReferenceModelImpl.ENTITY_CACHE_ENABLED,
-			DLOpenerFileEntryReferenceModelImpl.FINDER_CACHE_ENABLED,
-			Long.class, FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION,
-			"countByFileEntryId", new String[] { Long.class.getName() });
+	private FinderPath _finderPathWithPaginationFindAll;
+	private FinderPath _finderPathWithoutPaginationFindAll;
+	private FinderPath _finderPathCountAll;
+	private FinderPath _finderPathFetchByFileEntryId;
+	private FinderPath _finderPathCountByFileEntryId;
 
 	/**
 	 * Returns the dl opener file entry reference where fileEntryId = &#63; or throws a {@link NoSuchFileEntryReferenceException} if it could not be found.
@@ -159,7 +143,7 @@ public class DLOpenerFileEntryReferencePersistenceImpl
 		Object result = null;
 
 		if (retrieveFromCache) {
-			result = finderCache.getResult(FINDER_PATH_FETCH_BY_FILEENTRYID,
+			result = finderCache.getResult(_finderPathFetchByFileEntryId,
 					finderArgs, this);
 		}
 
@@ -194,7 +178,7 @@ public class DLOpenerFileEntryReferencePersistenceImpl
 				List<DLOpenerFileEntryReference> list = q.list();
 
 				if (list.isEmpty()) {
-					finderCache.putResult(FINDER_PATH_FETCH_BY_FILEENTRYID,
+					finderCache.putResult(_finderPathFetchByFileEntryId,
 						finderArgs, list);
 				}
 				else {
@@ -206,7 +190,7 @@ public class DLOpenerFileEntryReferencePersistenceImpl
 				}
 			}
 			catch (Exception e) {
-				finderCache.removeResult(FINDER_PATH_FETCH_BY_FILEENTRYID,
+				finderCache.removeResult(_finderPathFetchByFileEntryId,
 					finderArgs);
 
 				throw processException(e);
@@ -246,7 +230,7 @@ public class DLOpenerFileEntryReferencePersistenceImpl
 	 */
 	@Override
 	public int countByFileEntryId(long fileEntryId) {
-		FinderPath finderPath = FINDER_PATH_COUNT_BY_FILEENTRYID;
+		FinderPath finderPath = _finderPathCountByFileEntryId;
 
 		Object[] finderArgs = new Object[] { fileEntryId };
 
@@ -312,7 +296,7 @@ public class DLOpenerFileEntryReferencePersistenceImpl
 			dlOpenerFileEntryReference.getPrimaryKey(),
 			dlOpenerFileEntryReference);
 
-		finderCache.putResult(FINDER_PATH_FETCH_BY_FILEENTRYID,
+		finderCache.putResult(_finderPathFetchByFileEntryId,
 			new Object[] { dlOpenerFileEntryReference.getFileEntryId() },
 			dlOpenerFileEntryReference);
 
@@ -399,9 +383,9 @@ public class DLOpenerFileEntryReferencePersistenceImpl
 				dlOpenerFileEntryReferenceModelImpl.getFileEntryId()
 			};
 
-		finderCache.putResult(FINDER_PATH_COUNT_BY_FILEENTRYID, args,
+		finderCache.putResult(_finderPathCountByFileEntryId, args,
 			Long.valueOf(1), false);
-		finderCache.putResult(FINDER_PATH_FETCH_BY_FILEENTRYID, args,
+		finderCache.putResult(_finderPathFetchByFileEntryId, args,
 			dlOpenerFileEntryReferenceModelImpl, false);
 	}
 
@@ -413,18 +397,18 @@ public class DLOpenerFileEntryReferencePersistenceImpl
 					dlOpenerFileEntryReferenceModelImpl.getFileEntryId()
 				};
 
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_FILEENTRYID, args);
-			finderCache.removeResult(FINDER_PATH_FETCH_BY_FILEENTRYID, args);
+			finderCache.removeResult(_finderPathCountByFileEntryId, args);
+			finderCache.removeResult(_finderPathFetchByFileEntryId, args);
 		}
 
 		if ((dlOpenerFileEntryReferenceModelImpl.getColumnBitmask() &
-				FINDER_PATH_FETCH_BY_FILEENTRYID.getColumnBitmask()) != 0) {
+				_finderPathFetchByFileEntryId.getColumnBitmask()) != 0) {
 			Object[] args = new Object[] {
 					dlOpenerFileEntryReferenceModelImpl.getOriginalFileEntryId()
 				};
 
-			finderCache.removeResult(FINDER_PATH_COUNT_BY_FILEENTRYID, args);
-			finderCache.removeResult(FINDER_PATH_FETCH_BY_FILEENTRYID, args);
+			finderCache.removeResult(_finderPathCountByFileEntryId, args);
+			finderCache.removeResult(_finderPathFetchByFileEntryId, args);
 		}
 	}
 
@@ -605,8 +589,8 @@ public class DLOpenerFileEntryReferencePersistenceImpl
 		}
 		else
 		 if (isNew) {
-			finderCache.removeResult(FINDER_PATH_COUNT_ALL, FINDER_ARGS_EMPTY);
-			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_ALL,
+			finderCache.removeResult(_finderPathCountAll, FINDER_ARGS_EMPTY);
+			finderCache.removeResult(_finderPathWithoutPaginationFindAll,
 				FINDER_ARGS_EMPTY);
 		}
 
@@ -741,11 +725,11 @@ public class DLOpenerFileEntryReferencePersistenceImpl
 		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
 				(orderByComparator == null)) {
 			pagination = false;
-			finderPath = FINDER_PATH_WITHOUT_PAGINATION_FIND_ALL;
+			finderPath = _finderPathWithoutPaginationFindAll;
 			finderArgs = FINDER_ARGS_EMPTY;
 		}
 		else {
-			finderPath = FINDER_PATH_WITH_PAGINATION_FIND_ALL;
+			finderPath = _finderPathWithPaginationFindAll;
 			finderArgs = new Object[] { start, end, orderByComparator };
 		}
 
@@ -834,7 +818,7 @@ public class DLOpenerFileEntryReferencePersistenceImpl
 	 */
 	@Override
 	public int countAll() {
-		Long count = (Long)finderCache.getResult(FINDER_PATH_COUNT_ALL,
+		Long count = (Long)finderCache.getResult(_finderPathCountAll,
 				FINDER_ARGS_EMPTY, this);
 
 		if (count == null) {
@@ -847,12 +831,11 @@ public class DLOpenerFileEntryReferencePersistenceImpl
 
 				count = (Long)q.uniqueResult();
 
-				finderCache.putResult(FINDER_PATH_COUNT_ALL, FINDER_ARGS_EMPTY,
+				finderCache.putResult(_finderPathCountAll, FINDER_ARGS_EMPTY,
 					count);
 			}
 			catch (Exception e) {
-				finderCache.removeResult(FINDER_PATH_COUNT_ALL,
-					FINDER_ARGS_EMPTY);
+				finderCache.removeResult(_finderPathCountAll, FINDER_ARGS_EMPTY);
 
 				throw processException(e);
 			}
@@ -893,6 +876,32 @@ public class DLOpenerFileEntryReferencePersistenceImpl
 	 * Initializes the dl opener file entry reference persistence.
 	 */
 	public void afterPropertiesSet() {
+		_finderPathWithPaginationFindAll = new FinderPath(DLOpenerFileEntryReferenceModelImpl.ENTITY_CACHE_ENABLED,
+				DLOpenerFileEntryReferenceModelImpl.FINDER_CACHE_ENABLED,
+				DLOpenerFileEntryReferenceImpl.class,
+				FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0]);
+
+		_finderPathWithoutPaginationFindAll = new FinderPath(DLOpenerFileEntryReferenceModelImpl.ENTITY_CACHE_ENABLED,
+				DLOpenerFileEntryReferenceModelImpl.FINDER_CACHE_ENABLED,
+				DLOpenerFileEntryReferenceImpl.class,
+				FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll",
+				new String[0]);
+
+		_finderPathCountAll = new FinderPath(DLOpenerFileEntryReferenceModelImpl.ENTITY_CACHE_ENABLED,
+				DLOpenerFileEntryReferenceModelImpl.FINDER_CACHE_ENABLED,
+				Long.class, FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION,
+				"countAll", new String[0]);
+
+		_finderPathFetchByFileEntryId = new FinderPath(DLOpenerFileEntryReferenceModelImpl.ENTITY_CACHE_ENABLED,
+				DLOpenerFileEntryReferenceModelImpl.FINDER_CACHE_ENABLED,
+				DLOpenerFileEntryReferenceImpl.class, FINDER_CLASS_NAME_ENTITY,
+				"fetchByFileEntryId", new String[] { Long.class.getName() },
+				DLOpenerFileEntryReferenceModelImpl.FILEENTRYID_COLUMN_BITMASK);
+
+		_finderPathCountByFileEntryId = new FinderPath(DLOpenerFileEntryReferenceModelImpl.ENTITY_CACHE_ENABLED,
+				DLOpenerFileEntryReferenceModelImpl.FINDER_CACHE_ENABLED,
+				Long.class, FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION,
+				"countByFileEntryId", new String[] { Long.class.getName() });
 	}
 
 	public void destroy() {
