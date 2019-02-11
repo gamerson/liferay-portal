@@ -42,6 +42,8 @@ public class BundleSupportConstants {
 	public static final boolean DEFAULT_INCLUDE_FOLDER = true;
 
 	public static final String DEFAULT_LIFERAY_HOME_DIR_NAME = "bundles";
+	
+	public static final String DEFAULT_TAGET_PLALTFORM_VERSION = "7.1";
 
 	public static final int DEFAULT_STRIP_COMPONENTS = 1;
 

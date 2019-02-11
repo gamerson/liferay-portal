@@ -15,10 +15,37 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 #if (${liferayVersion.startsWith("7.0")})
 		<liferay.workspace.bundle.url>https://releases-cdn.liferay.com/portal/7.0.6-ga7/liferay-ce-portal-tomcat-7.0-ga7-20180507111753223.zip</liferay.workspace.bundle.url>
+		<targetPlatformVersion>7.0.6</targetPlatformVersion>
 #elseif (${liferayVersion.startsWith("7.1")})
 		<liferay.workspace.bundle.url>https://releases-cdn.liferay.com/portal/7.1.2-ga3/liferay-ce-portal-tomcat-7.1.2-ga3-20190107144105508.tar.gz</liferay.workspace.bundle.url>
+		<targetPlatformVersion>7.1.1</targetPlatformVersion>
 #end
 	</properties>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>com.liferay.portal</groupId>
+				<artifactId>release.portal.bom</artifactId>
+				<version>${targetPlatformVersion}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>com.liferay.portal</groupId>
+				<artifactId>release.portal.bom.compile.only</artifactId>
+				<version>${targetPlatformVersion}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>com.liferay.portal</groupId>
+				<artifactId>release.portal.bom.third.party</artifactId>
+				<version>${targetPlatformVersion}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 	<build>
 		<plugins>
 			<plugin>
