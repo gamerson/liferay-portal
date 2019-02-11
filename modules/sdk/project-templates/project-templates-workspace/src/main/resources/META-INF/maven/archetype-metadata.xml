@@ -20,5 +20,8 @@
 	<requiredProperties>
 		<requiredProperty key="liferayVersion">
 		</requiredProperty>
+		<requiredProperty key="targetPlatformVersion">
+			<defaultValue>7.1.2</defaultValue>
+		</requiredProperty>
 	</requiredProperties>
 </archetype-descriptor>
