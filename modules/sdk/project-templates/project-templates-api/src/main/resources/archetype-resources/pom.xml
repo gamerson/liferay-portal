@@ -13,6 +13,18 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	<dependencies>
+#if (${dependencyManagementEnabled} == "true")
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.core</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.service.component.annotations</artifactId>
+			<scope>provided</scope>
+		</dependency>
+#else
 		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.core</artifactId>
@@ -25,6 +37,7 @@
 			<version>1.3.0</version>
 			<scope>provided</scope>
 		</dependency>
+#end
 	</dependencies>
 	<build>
 		<plugins>

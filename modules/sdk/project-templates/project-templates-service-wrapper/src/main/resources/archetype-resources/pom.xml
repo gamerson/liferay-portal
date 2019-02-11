@@ -13,6 +13,18 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	<dependencies>
+#if (${dependencyManagementEnabled} == "true")
+		<dependency>
+			<groupId>com.liferay.portal</groupId>
+			<artifactId>com.liferay.portal.kernel</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>osgi.cmpn</artifactId>
+			<scope>provided</scope>
+		</dependency>
+#else
 #if (${liferayVersion.startsWith("7.0")})
 		<dependency>
 			<groupId>com.liferay.portal</groupId>
@@ -34,6 +46,7 @@
 			<version>6.0.0</version>
 			<scope>provided</scope>
 		</dependency>
+#end
 	</dependencies>
 	<build>
 		<plugins>

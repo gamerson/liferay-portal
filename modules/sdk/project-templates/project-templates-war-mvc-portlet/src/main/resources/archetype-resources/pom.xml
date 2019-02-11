@@ -14,6 +14,23 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	<dependencies>
+#if (${dependencyManagementEnabled} == "true")
+	<dependency>
+		<groupId>com.liferay.portal</groupId>
+		<artifactId>com.liferay.portal.kernel</artifactId>
+		<scope>provided</scope>
+	</dependency>
+	<dependency>
+		<groupId>javax.portlet</groupId>
+		<artifactId>portlet-api</artifactId>
+		<scope>provided</scope>
+	</dependency>
+	<dependency>
+		<groupId>javax.servlet</groupId>
+		<artifactId>javax.servlet-api</artifactId>
+		<scope>provided</scope>
+	</dependency>
+#else
 #if (${liferayVersion.startsWith("7.0")})
 		<dependency>
 			<groupId>com.liferay.portal</groupId>
@@ -47,6 +64,7 @@
 			<version>3.0.1</version>
 			<scope>provided</scope>
 		</dependency>
+#end
 	</dependencies>
 	<build>
 		<plugins>

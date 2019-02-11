@@ -32,6 +32,10 @@ public abstract class AbstractLiferayMojo extends AbstractMojo {
 		return _liferayHome;
 	}
 
+	protected String getTargetPlatformVersion() {
+		return _targetPlatformVersion;
+	}	
+	
 	protected File getLiferayHomeDir() {
 		if (_liferayHomeDir != null) {
 			return _liferayHomeDir;
@@ -52,6 +56,10 @@ public abstract class AbstractLiferayMojo extends AbstractMojo {
 		_liferayHome = liferayHome;
 	}
 
+	protected void setTargetPlatformVersion(String targetPlatformVersion) {
+		_targetPlatformVersion = targetPlatformVersion;
+	}
+	
 	@Parameter(defaultValue = "${project}", readonly = true, required = true)
 	protected MavenProject project;
 
@@ -61,6 +69,14 @@ public abstract class AbstractLiferayMojo extends AbstractMojo {
 		property = "liferayHome", required = true
 	)
 	private String _liferayHome;
+	
+	@Parameter(
+			alias = "targetPlatformVersion",
+			defaultValue = BundleSupportConstants.DEFAULT_TAGET_PLALTFORM_VERSION,
+			property = "targetPlatformVersion", required = true
+	)
+	private String _targetPlatformVersion;
+	
 
 	private File _liferayHomeDir;
 
