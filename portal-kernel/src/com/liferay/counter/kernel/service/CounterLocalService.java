@@ -33,8 +33,6 @@ import java.util.List;
  *
  * @author Brian Wing Shun Chan
  * @see CounterLocalServiceUtil
- * @see com.liferay.counter.service.base.CounterLocalServiceBaseImpl
- * @see com.liferay.counter.service.impl.CounterLocalServiceImpl
  * @generated
  */
 @ProviderType
@@ -44,7 +42,7 @@ public interface CounterLocalService extends BaseLocalService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link CounterLocalServiceUtil} to access the counter local service. Add custom service methods to {@link com.liferay.counter.service.impl.CounterLocalServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link CounterLocalServiceUtil} to access the counter local service. Add custom service methods to <code>com.liferay.counter.service.impl.CounterLocalServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public List<String> getNames();

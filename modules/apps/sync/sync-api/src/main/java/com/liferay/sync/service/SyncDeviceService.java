@@ -34,8 +34,6 @@ import com.liferay.sync.model.SyncDevice;
  *
  * @author Brian Wing Shun Chan
  * @see SyncDeviceServiceUtil
- * @see com.liferay.sync.service.base.SyncDeviceServiceBaseImpl
- * @see com.liferay.sync.service.impl.SyncDeviceServiceImpl
  * @generated
  */
 @AccessControlled
@@ -49,7 +47,7 @@ public interface SyncDeviceService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link SyncDeviceServiceUtil} to access the sync device remote service. Add custom service methods to {@link com.liferay.sync.service.impl.SyncDeviceServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link SyncDeviceServiceUtil} to access the sync device remote service. Add custom service methods to <code>com.liferay.sync.service.impl.SyncDeviceServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 
 	/**

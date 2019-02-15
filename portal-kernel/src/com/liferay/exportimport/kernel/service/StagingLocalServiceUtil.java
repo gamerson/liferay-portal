@@ -21,16 +21,14 @@ import com.liferay.portal.kernel.util.ReferenceRegistry;
 
 /**
  * Provides the local service utility for Staging. This utility wraps
- * {@link com.liferay.portlet.exportimport.service.impl.StagingLocalServiceImpl} and is the
- * primary access point for service operations in application layer code running
+ * <code>com.liferay.portlet.exportimport.service.impl.StagingLocalServiceImpl</code> and
+ * is an access point for service operations in application layer code running
  * on the local server. Methods of this service will not have security checks
  * based on the propagated JAAS credentials because this service can only be
  * accessed from within the same VM.
  *
  * @author Brian Wing Shun Chan
  * @see StagingLocalService
- * @see com.liferay.portlet.exportimport.service.base.StagingLocalServiceBaseImpl
- * @see com.liferay.portlet.exportimport.service.impl.StagingLocalServiceImpl
  * @generated
  */
 @ProviderType
@@ -38,7 +36,7 @@ public class StagingLocalServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this class directly. Add custom service methods to {@link com.liferay.portlet.exportimport.service.impl.StagingLocalServiceImpl} and rerun ServiceBuilder to regenerate this class.
+	 * Never modify this class directly. Add custom service methods to <code>com.liferay.portlet.exportimport.service.impl.StagingLocalServiceImpl</code> and rerun ServiceBuilder to regenerate this class.
 	 */
 	public static void checkDefaultLayoutSetBranches(long userId,
 		com.liferay.portal.kernel.model.Group liveGroup,

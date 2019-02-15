@@ -43,7 +43,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.portal.security.service.access.policy.service.impl.SAPEntryServiceImpl
- * @see com.liferay.portal.security.service.access.policy.service.SAPEntryServiceUtil
  * @generated
  */
 public abstract class SAPEntryServiceBaseImpl extends BaseServiceImpl
@@ -51,7 +50,7 @@ public abstract class SAPEntryServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.portal.security.service.access.policy.service.SAPEntryServiceUtil} to access the sap entry remote service.
+	 * Never modify or reference this class directly. Use <code>SAPEntryService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.portal.security.service.access.policy.service.SAPEntryServiceUtil</code>.
 	 */
 
 	/**

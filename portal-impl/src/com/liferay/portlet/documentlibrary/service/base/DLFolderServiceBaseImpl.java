@@ -61,7 +61,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.portlet.documentlibrary.service.impl.DLFolderServiceImpl
- * @see com.liferay.document.library.kernel.service.DLFolderServiceUtil
  * @generated
  */
 public abstract class DLFolderServiceBaseImpl extends BaseServiceImpl
@@ -69,7 +68,7 @@ public abstract class DLFolderServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.document.library.kernel.service.DLFolderServiceUtil} to access the document library folder remote service.
+	 * Never modify or reference this class directly. Use <code>DLFolderService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.document.library.kernel.service.DLFolderServiceUtil</code>.
 	 */
 
 	/**

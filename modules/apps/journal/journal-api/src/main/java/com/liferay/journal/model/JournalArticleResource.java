@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see JournalArticleResourceModel
- * @see com.liferay.journal.model.impl.JournalArticleResourceImpl
- * @see com.liferay.journal.model.impl.JournalArticleResourceModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.journal.model.impl.JournalArticleResourceImpl")
@@ -36,7 +34,7 @@ public interface JournalArticleResource extends JournalArticleResourceModel,
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.journal.model.impl.JournalArticleResourceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.journal.model.impl.JournalArticleResourceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<JournalArticleResource, Long> RESOURCE_PRIM_KEY_ACCESSOR =
 		new Accessor<JournalArticleResource, Long>() {

@@ -39,8 +39,6 @@ import java.util.Date;
  *
  * @author Brian Wing Shun Chan
  * @see SharingEntryServiceUtil
- * @see com.liferay.sharing.service.base.SharingEntryServiceBaseImpl
- * @see com.liferay.sharing.service.impl.SharingEntryServiceImpl
  * @generated
  */
 @AccessControlled
@@ -54,7 +52,7 @@ public interface SharingEntryService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link SharingEntryServiceUtil} to access the sharing entry remote service. Add custom service methods to {@link com.liferay.sharing.service.impl.SharingEntryServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link SharingEntryServiceUtil} to access the sharing entry remote service. Add custom service methods to <code>com.liferay.sharing.service.impl.SharingEntryServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 
 	/**

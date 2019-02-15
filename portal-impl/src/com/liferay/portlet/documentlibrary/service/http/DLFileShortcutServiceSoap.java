@@ -25,19 +25,20 @@ import java.rmi.RemoteException;
 
 /**
  * Provides the SOAP utility for the
- * {@link DLFileShortcutServiceUtil} service utility. The
- * static methods of this class calls the same methods of the service utility.
- * However, the signatures are different because it is difficult for SOAP to
- * support certain types.
+ * <code>DLFileShortcutServiceUtil</code> service
+ * utility. The static methods of this class call the same methods of the
+ * service utility. However, the signatures are different because it is
+ * difficult for SOAP to support certain types.
  *
  * <p>
  * ServiceBuilder follows certain rules in translating the methods. For example,
- * if the method in the service utility returns a {@link java.util.List}, that
- * is translated to an array of {@link com.liferay.document.library.kernel.model.DLFileShortcutSoap}.
- * If the method in the service utility returns a
- * {@link com.liferay.document.library.kernel.model.DLFileShortcut}, that is translated to a
- * {@link com.liferay.document.library.kernel.model.DLFileShortcutSoap}. Methods that SOAP cannot
- * safely wire are skipped.
+ * if the method in the service utility returns a <code>java.util.List</code>,
+ * that is translated to an array of
+ * <code>com.liferay.document.library.kernel.model.DLFileShortcutSoap</code>. If the method in the
+ * service utility returns a
+ * <code>com.liferay.document.library.kernel.model.DLFileShortcut</code>, that is translated to a
+ * <code>com.liferay.document.library.kernel.model.DLFileShortcutSoap</code>. Methods that SOAP
+ * cannot safely wire are skipped.
  * </p>
  *
  * <p>
@@ -59,8 +60,6 @@ import java.rmi.RemoteException;
  *
  * @author Brian Wing Shun Chan
  * @see DLFileShortcutServiceHttp
- * @see com.liferay.document.library.kernel.model.DLFileShortcutSoap
- * @see DLFileShortcutServiceUtil
  * @generated
  */
 @ProviderType

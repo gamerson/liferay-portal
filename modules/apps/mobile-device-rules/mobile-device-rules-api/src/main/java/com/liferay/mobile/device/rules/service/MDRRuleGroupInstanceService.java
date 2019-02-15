@@ -39,8 +39,6 @@ import java.util.List;
  *
  * @author Edward C. Han
  * @see MDRRuleGroupInstanceServiceUtil
- * @see com.liferay.mobile.device.rules.service.base.MDRRuleGroupInstanceServiceBaseImpl
- * @see com.liferay.mobile.device.rules.service.impl.MDRRuleGroupInstanceServiceImpl
  * @generated
  */
 @AccessControlled
@@ -54,7 +52,7 @@ public interface MDRRuleGroupInstanceService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link MDRRuleGroupInstanceServiceUtil} to access the mdr rule group instance remote service. Add custom service methods to {@link com.liferay.mobile.device.rules.service.impl.MDRRuleGroupInstanceServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link MDRRuleGroupInstanceServiceUtil} to access the mdr rule group instance remote service. Add custom service methods to <code>com.liferay.mobile.device.rules.service.impl.MDRRuleGroupInstanceServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public MDRRuleGroupInstance addRuleGroupInstance(long groupId,
 		String className, long classPK, long ruleGroupId, int priority,

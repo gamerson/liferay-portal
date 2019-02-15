@@ -38,8 +38,6 @@ import java.util.List;
  *
  * @author Brian Wing Shun Chan
  * @see AuditEventServiceUtil
- * @see com.liferay.portal.security.audit.storage.service.base.AuditEventServiceBaseImpl
- * @see com.liferay.portal.security.audit.storage.service.impl.AuditEventServiceImpl
  * @generated
  */
 @AccessControlled
@@ -53,7 +51,7 @@ public interface AuditEventService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link AuditEventServiceUtil} to access the audit event remote service. Add custom service methods to {@link com.liferay.portal.security.audit.storage.service.impl.AuditEventServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link AuditEventServiceUtil} to access the audit event remote service. Add custom service methods to <code>com.liferay.portal.security.audit.storage.service.impl.AuditEventServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public List<AuditEvent> getAuditEvents(long companyId, int start, int end)

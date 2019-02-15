@@ -37,7 +37,7 @@ public abstract class PollsVoteBaseImpl extends PollsVoteModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a polls vote model instance should use the {@link PollsVote} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a polls vote model instance should use the <code>PollsVote</code> interface instead.
 	 */
 	@Override
 	public void persist() {

@@ -26,8 +26,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see BookmarksEntryModel
- * @see com.liferay.bookmarks.model.impl.BookmarksEntryImpl
- * @see com.liferay.bookmarks.model.impl.BookmarksEntryModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.bookmarks.model.impl.BookmarksEntryImpl")
@@ -37,7 +35,7 @@ public interface BookmarksEntry extends BookmarksEntryModel, PersistedModel,
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.bookmarks.model.impl.BookmarksEntryImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.bookmarks.model.impl.BookmarksEntryImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<BookmarksEntry, Long> ENTRY_ID_ACCESSOR = new Accessor<BookmarksEntry, Long>() {
 			@Override

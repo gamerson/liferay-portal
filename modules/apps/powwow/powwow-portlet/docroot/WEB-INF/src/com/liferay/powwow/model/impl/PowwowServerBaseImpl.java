@@ -37,7 +37,7 @@ public abstract class PowwowServerBaseImpl extends PowwowServerModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a powwow server model instance should use the {@link PowwowServer} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a powwow server model instance should use the <code>PowwowServer</code> interface instead.
 	 */
 	@Override
 	public void persist() {

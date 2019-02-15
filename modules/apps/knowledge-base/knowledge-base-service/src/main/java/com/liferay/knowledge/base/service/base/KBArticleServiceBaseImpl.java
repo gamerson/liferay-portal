@@ -58,7 +58,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.knowledge.base.service.impl.KBArticleServiceImpl
- * @see com.liferay.knowledge.base.service.KBArticleServiceUtil
  * @generated
  */
 public abstract class KBArticleServiceBaseImpl extends BaseServiceImpl
@@ -66,7 +65,7 @@ public abstract class KBArticleServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.knowledge.base.service.KBArticleServiceUtil} to access the kb article remote service.
+	 * Never modify or reference this class directly. Use <code>KBArticleService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.knowledge.base.service.KBArticleServiceUtil</code>.
 	 */
 
 	/**

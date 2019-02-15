@@ -24,8 +24,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see UserNotificationDeliveryModel
- * @see com.liferay.portal.model.impl.UserNotificationDeliveryImpl
- * @see com.liferay.portal.model.impl.UserNotificationDeliveryModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portal.model.impl.UserNotificationDeliveryImpl")
@@ -35,7 +33,7 @@ public interface UserNotificationDelivery extends UserNotificationDeliveryModel,
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portal.model.impl.UserNotificationDeliveryImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portal.model.impl.UserNotificationDeliveryImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<UserNotificationDelivery, Long> USER_NOTIFICATION_DELIVERY_ID_ACCESSOR =
 		new Accessor<UserNotificationDelivery, Long>() {

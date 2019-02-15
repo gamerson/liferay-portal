@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see KaleoTaskFormInstanceModel
- * @see com.liferay.portal.workflow.kaleo.model.impl.KaleoTaskFormInstanceImpl
- * @see com.liferay.portal.workflow.kaleo.model.impl.KaleoTaskFormInstanceModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portal.workflow.kaleo.model.impl.KaleoTaskFormInstanceImpl")
@@ -36,7 +34,7 @@ public interface KaleoTaskFormInstance extends KaleoTaskFormInstanceModel,
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portal.workflow.kaleo.model.impl.KaleoTaskFormInstanceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portal.workflow.kaleo.model.impl.KaleoTaskFormInstanceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<KaleoTaskFormInstance, Long> KALEO_TASK_FORM_INSTANCE_ID_ACCESSOR =
 		new Accessor<KaleoTaskFormInstance, Long>() {

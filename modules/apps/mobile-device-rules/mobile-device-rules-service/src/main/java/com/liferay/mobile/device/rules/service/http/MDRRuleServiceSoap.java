@@ -29,19 +29,20 @@ import java.util.Map;
 
 /**
  * Provides the SOAP utility for the
- * {@link MDRRuleServiceUtil} service utility. The
- * static methods of this class calls the same methods of the service utility.
- * However, the signatures are different because it is difficult for SOAP to
- * support certain types.
+ * <code>MDRRuleServiceUtil</code> service
+ * utility. The static methods of this class call the same methods of the
+ * service utility. However, the signatures are different because it is
+ * difficult for SOAP to support certain types.
  *
  * <p>
  * ServiceBuilder follows certain rules in translating the methods. For example,
- * if the method in the service utility returns a {@link java.util.List}, that
- * is translated to an array of {@link com.liferay.mobile.device.rules.model.MDRRuleSoap}.
- * If the method in the service utility returns a
- * {@link com.liferay.mobile.device.rules.model.MDRRule}, that is translated to a
- * {@link com.liferay.mobile.device.rules.model.MDRRuleSoap}. Methods that SOAP cannot
- * safely wire are skipped.
+ * if the method in the service utility returns a <code>java.util.List</code>,
+ * that is translated to an array of
+ * <code>com.liferay.mobile.device.rules.model.MDRRuleSoap</code>. If the method in the
+ * service utility returns a
+ * <code>com.liferay.mobile.device.rules.model.MDRRule</code>, that is translated to a
+ * <code>com.liferay.mobile.device.rules.model.MDRRuleSoap</code>. Methods that SOAP
+ * cannot safely wire are skipped.
  * </p>
  *
  * <p>
@@ -63,8 +64,6 @@ import java.util.Map;
  *
  * @author Edward C. Han
  * @see MDRRuleServiceHttp
- * @see com.liferay.mobile.device.rules.model.MDRRuleSoap
- * @see MDRRuleServiceUtil
  * @generated
  */
 @ProviderType

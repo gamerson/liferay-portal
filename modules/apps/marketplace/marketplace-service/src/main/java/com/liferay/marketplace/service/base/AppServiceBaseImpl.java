@@ -43,7 +43,6 @@ import javax.sql.DataSource;
  *
  * @author Ryan Park
  * @see com.liferay.marketplace.service.impl.AppServiceImpl
- * @see com.liferay.marketplace.service.AppServiceUtil
  * @generated
  */
 public abstract class AppServiceBaseImpl extends BaseServiceImpl
@@ -51,7 +50,7 @@ public abstract class AppServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.marketplace.service.AppServiceUtil} to access the app remote service.
+	 * Never modify or reference this class directly. Use <code>AppService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.marketplace.service.AppServiceUtil</code>.
 	 */
 
 	/**

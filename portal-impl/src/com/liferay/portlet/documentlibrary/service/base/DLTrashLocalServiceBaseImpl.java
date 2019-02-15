@@ -40,7 +40,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.portlet.documentlibrary.service.impl.DLTrashLocalServiceImpl
- * @see com.liferay.document.library.kernel.service.DLTrashLocalServiceUtil
  * @generated
  */
 @ProviderType
@@ -49,7 +48,7 @@ public abstract class DLTrashLocalServiceBaseImpl extends BaseLocalServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.document.library.kernel.service.DLTrashLocalServiceUtil} to access the dl trash local service.
+	 * Never modify or reference this class directly. Use <code>DLTrashLocalService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.document.library.kernel.service.DLTrashLocalServiceUtil</code>.
 	 */
 
 	/**

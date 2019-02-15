@@ -30,7 +30,6 @@ import java.io.ObjectOutput;
  * The cache model class for representing VersionedEntryVersion in entity cache.
  *
  * @author Brian Wing Shun Chan
- * @see VersionedEntryVersion
  * @generated
  */
 @ProviderType

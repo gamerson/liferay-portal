@@ -37,7 +37,7 @@ public abstract class MBMessageBaseImpl extends MBMessageModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a message-boards message model instance should use the {@link MBMessage} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a message-boards message model instance should use the <code>MBMessage</code> interface instead.
 	 */
 	@Override
 	public void persist() {

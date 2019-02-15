@@ -23,16 +23,14 @@ import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Provides the remote service utility for CalendarResource. This utility wraps
- * {@link com.liferay.calendar.service.impl.CalendarResourceServiceImpl} and is the
- * primary access point for service operations in application layer code running
- * on a remote server. Methods of this service are expected to have security
- * checks based on the propagated JAAS credentials because this service can be
+ * <code>com.liferay.calendar.service.impl.CalendarResourceServiceImpl</code> and is an
+ * access point for service operations in application layer code running on a
+ * remote server. Methods of this service are expected to have security checks
+ * based on the propagated JAAS credentials because this service can be
  * accessed remotely.
  *
  * @author Eduardo Lundgren
  * @see CalendarResourceService
- * @see com.liferay.calendar.service.base.CalendarResourceServiceBaseImpl
- * @see com.liferay.calendar.service.impl.CalendarResourceServiceImpl
  * @generated
  */
 @ProviderType
@@ -40,7 +38,7 @@ public class CalendarResourceServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this class directly. Add custom service methods to {@link com.liferay.calendar.service.impl.CalendarResourceServiceImpl} and rerun ServiceBuilder to regenerate this class.
+	 * Never modify this class directly. Add custom service methods to <code>com.liferay.calendar.service.impl.CalendarResourceServiceImpl</code> and rerun ServiceBuilder to regenerate this class.
 	 */
 	public static com.liferay.calendar.model.CalendarResource addCalendarResource(
 		long groupId, long classNameId, long classPK, String classUuid,

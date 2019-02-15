@@ -38,7 +38,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.portal.service.impl.CountryServiceImpl
- * @see com.liferay.portal.kernel.service.CountryServiceUtil
  * @generated
  */
 public abstract class CountryServiceBaseImpl extends BaseServiceImpl
@@ -46,7 +45,7 @@ public abstract class CountryServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.portal.kernel.service.CountryServiceUtil} to access the country remote service.
+	 * Never modify or reference this class directly. Use <code>CountryService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.portal.kernel.service.CountryServiceUtil</code>.
 	 */
 
 	/**

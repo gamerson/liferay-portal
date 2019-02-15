@@ -38,8 +38,6 @@ import java.util.Map;
  *
  * @author Brian Wing Shun Chan
  * @see ExportImportLocalServiceUtil
- * @see com.liferay.portlet.exportimport.service.base.ExportImportLocalServiceBaseImpl
- * @see com.liferay.portlet.exportimport.service.impl.ExportImportLocalServiceImpl
  * @generated
  */
 @ProviderType
@@ -49,7 +47,7 @@ public interface ExportImportLocalService extends BaseLocalService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link ExportImportLocalServiceUtil} to access the export import local service. Add custom service methods to {@link com.liferay.portlet.exportimport.service.impl.ExportImportLocalServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link ExportImportLocalServiceUtil} to access the export import local service. Add custom service methods to <code>com.liferay.portlet.exportimport.service.impl.ExportImportLocalServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public File exportLayoutsAsFile(
 		ExportImportConfiguration exportImportConfiguration)

@@ -21,16 +21,14 @@ import com.liferay.portal.kernel.util.ReferenceRegistry;
 
 /**
  * Provides the remote service utility for ExportImport. This utility wraps
- * {@link com.liferay.portlet.exportimport.service.impl.ExportImportServiceImpl} and is the
- * primary access point for service operations in application layer code running
- * on a remote server. Methods of this service are expected to have security
- * checks based on the propagated JAAS credentials because this service can be
+ * <code>com.liferay.portlet.exportimport.service.impl.ExportImportServiceImpl</code> and is an
+ * access point for service operations in application layer code running on a
+ * remote server. Methods of this service are expected to have security checks
+ * based on the propagated JAAS credentials because this service can be
  * accessed remotely.
  *
  * @author Brian Wing Shun Chan
  * @see ExportImportService
- * @see com.liferay.portlet.exportimport.service.base.ExportImportServiceBaseImpl
- * @see com.liferay.portlet.exportimport.service.impl.ExportImportServiceImpl
  * @generated
  */
 @ProviderType
@@ -38,7 +36,7 @@ public class ExportImportServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this class directly. Add custom service methods to {@link com.liferay.portlet.exportimport.service.impl.ExportImportServiceImpl} and rerun ServiceBuilder to regenerate this class.
+	 * Never modify this class directly. Add custom service methods to <code>com.liferay.portlet.exportimport.service.impl.ExportImportServiceImpl</code> and rerun ServiceBuilder to regenerate this class.
 	 */
 	public static java.io.File exportLayoutsAsFile(
 		com.liferay.exportimport.kernel.model.ExportImportConfiguration exportImportConfiguration)

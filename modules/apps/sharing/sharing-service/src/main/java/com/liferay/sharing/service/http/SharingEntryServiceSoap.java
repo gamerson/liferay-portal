@@ -25,19 +25,20 @@ import java.rmi.RemoteException;
 
 /**
  * Provides the SOAP utility for the
- * {@link SharingEntryServiceUtil} service utility. The
- * static methods of this class calls the same methods of the service utility.
- * However, the signatures are different because it is difficult for SOAP to
- * support certain types.
+ * <code>SharingEntryServiceUtil</code> service
+ * utility. The static methods of this class call the same methods of the
+ * service utility. However, the signatures are different because it is
+ * difficult for SOAP to support certain types.
  *
  * <p>
  * ServiceBuilder follows certain rules in translating the methods. For example,
- * if the method in the service utility returns a {@link java.util.List}, that
- * is translated to an array of {@link com.liferay.sharing.model.SharingEntrySoap}.
- * If the method in the service utility returns a
- * {@link com.liferay.sharing.model.SharingEntry}, that is translated to a
- * {@link com.liferay.sharing.model.SharingEntrySoap}. Methods that SOAP cannot
- * safely wire are skipped.
+ * if the method in the service utility returns a <code>java.util.List</code>,
+ * that is translated to an array of
+ * <code>com.liferay.sharing.model.SharingEntrySoap</code>. If the method in the
+ * service utility returns a
+ * <code>com.liferay.sharing.model.SharingEntry</code>, that is translated to a
+ * <code>com.liferay.sharing.model.SharingEntrySoap</code>. Methods that SOAP
+ * cannot safely wire are skipped.
  * </p>
  *
  * <p>
@@ -59,8 +60,6 @@ import java.rmi.RemoteException;
  *
  * @author Brian Wing Shun Chan
  * @see SharingEntryServiceHttp
- * @see com.liferay.sharing.model.SharingEntrySoap
- * @see SharingEntryServiceUtil
  * @generated
  */
 @ProviderType

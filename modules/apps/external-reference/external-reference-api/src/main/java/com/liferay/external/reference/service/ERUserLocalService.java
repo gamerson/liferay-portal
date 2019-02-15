@@ -36,8 +36,6 @@ import java.util.Locale;
  *
  * @author Brian Wing Shun Chan
  * @see ERUserLocalServiceUtil
- * @see com.liferay.external.reference.service.base.ERUserLocalServiceBaseImpl
- * @see com.liferay.external.reference.service.impl.ERUserLocalServiceImpl
  * @generated
  */
 @ProviderType
@@ -47,7 +45,7 @@ public interface ERUserLocalService extends BaseLocalService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link ERUserLocalServiceUtil} to access the er user local service. Add custom service methods to {@link com.liferay.external.reference.service.impl.ERUserLocalServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link ERUserLocalServiceUtil} to access the er user local service. Add custom service methods to <code>com.liferay.external.reference.service.impl.ERUserLocalServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public User addOrUpdateUser(String externalReferenceCode,
 		long creatorUserId, long companyId, boolean autoPassword,

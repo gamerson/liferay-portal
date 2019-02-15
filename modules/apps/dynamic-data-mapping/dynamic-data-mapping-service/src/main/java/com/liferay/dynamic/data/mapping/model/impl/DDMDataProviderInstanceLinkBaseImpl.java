@@ -38,7 +38,7 @@ public abstract class DDMDataProviderInstanceLinkBaseImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a ddm data provider instance link model instance should use the {@link DDMDataProviderInstanceLink} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a ddm data provider instance link model instance should use the <code>DDMDataProviderInstanceLink</code> interface instead.
 	 */
 	@Override
 	public void persist() {

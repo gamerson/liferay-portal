@@ -49,7 +49,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.microblogs.service.impl.MicroblogsEntryServiceImpl
- * @see com.liferay.microblogs.service.MicroblogsEntryServiceUtil
  * @generated
  */
 public abstract class MicroblogsEntryServiceBaseImpl extends BaseServiceImpl
@@ -57,7 +56,7 @@ public abstract class MicroblogsEntryServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.microblogs.service.MicroblogsEntryServiceUtil} to access the microblogs entry remote service.
+	 * Never modify or reference this class directly. Use <code>MicroblogsEntryService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.microblogs.service.MicroblogsEntryServiceUtil</code>.
 	 */
 
 	/**

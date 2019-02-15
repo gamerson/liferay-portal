@@ -23,16 +23,14 @@ import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Provides the remote service utility for SiteNavigationMenuItem. This utility wraps
- * {@link com.liferay.site.navigation.service.impl.SiteNavigationMenuItemServiceImpl} and is the
- * primary access point for service operations in application layer code running
- * on a remote server. Methods of this service are expected to have security
- * checks based on the propagated JAAS credentials because this service can be
+ * <code>com.liferay.site.navigation.service.impl.SiteNavigationMenuItemServiceImpl</code> and is an
+ * access point for service operations in application layer code running on a
+ * remote server. Methods of this service are expected to have security checks
+ * based on the propagated JAAS credentials because this service can be
  * accessed remotely.
  *
  * @author Brian Wing Shun Chan
  * @see SiteNavigationMenuItemService
- * @see com.liferay.site.navigation.service.base.SiteNavigationMenuItemServiceBaseImpl
- * @see com.liferay.site.navigation.service.impl.SiteNavigationMenuItemServiceImpl
  * @generated
  */
 @ProviderType
@@ -40,7 +38,7 @@ public class SiteNavigationMenuItemServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this class directly. Add custom service methods to {@link com.liferay.site.navigation.service.impl.SiteNavigationMenuItemServiceImpl} and rerun ServiceBuilder to regenerate this class.
+	 * Never modify this class directly. Add custom service methods to <code>com.liferay.site.navigation.service.impl.SiteNavigationMenuItemServiceImpl</code> and rerun ServiceBuilder to regenerate this class.
 	 */
 	public static com.liferay.site.navigation.model.SiteNavigationMenuItem addSiteNavigationMenuItem(
 		long groupId, long siteNavigationMenuId,

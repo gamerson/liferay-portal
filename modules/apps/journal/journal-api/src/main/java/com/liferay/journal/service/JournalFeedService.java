@@ -36,8 +36,6 @@ import com.liferay.portal.kernel.transaction.Transactional;
  *
  * @author Brian Wing Shun Chan
  * @see JournalFeedServiceUtil
- * @see com.liferay.journal.service.base.JournalFeedServiceBaseImpl
- * @see com.liferay.journal.service.impl.JournalFeedServiceImpl
  * @generated
  */
 @AccessControlled
@@ -51,7 +49,7 @@ public interface JournalFeedService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link JournalFeedServiceUtil} to access the journal feed remote service. Add custom service methods to {@link com.liferay.journal.service.impl.JournalFeedServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link JournalFeedServiceUtil} to access the journal feed remote service. Add custom service methods to <code>com.liferay.journal.service.impl.JournalFeedServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public JournalFeed addFeed(long groupId, String feedId, boolean autoFeedId,
 		String name, String description, String ddmStructureKey,

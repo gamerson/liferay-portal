@@ -14,6 +14,8 @@
 
 package com.liferay.headless.collaboration.dto.v1_0;
 
+import com.liferay.petra.function.UnsafeSupplier;
+
 import javax.annotation.Generated;
 
 import javax.xml.bind.annotation.XmlRootElement;
@@ -46,16 +48,56 @@ public class Comment {
 		_comments = comments;
 	}
 
+	public void setComments(
+		UnsafeSupplier<Comment[], Throwable> commentsUnsafeSupplier) {
+
+		try {
+			_comments = commentsUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setCreator(Creator creator) {
 		_creator = creator;
+	}
+
+	public void setCreator(
+		UnsafeSupplier<Creator, Throwable> creatorUnsafeSupplier) {
+
+		try {
+			_creator = creatorUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	public void setId(Long id) {
 		_id = id;
 	}
 
+	public void setId(UnsafeSupplier<Long, Throwable> idUnsafeSupplier) {
+		try {
+			_id = idUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setText(String text) {
 		_text = text;
+	}
+
+	public void setText(UnsafeSupplier<String, Throwable> textUnsafeSupplier) {
+		try {
+			_text = textUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	private Comment[] _comments;

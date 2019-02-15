@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see KaleoTimerInstanceTokenModel
- * @see com.liferay.portal.workflow.kaleo.model.impl.KaleoTimerInstanceTokenImpl
- * @see com.liferay.portal.workflow.kaleo.model.impl.KaleoTimerInstanceTokenModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portal.workflow.kaleo.model.impl.KaleoTimerInstanceTokenImpl")
@@ -36,7 +34,7 @@ public interface KaleoTimerInstanceToken extends KaleoTimerInstanceTokenModel,
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portal.workflow.kaleo.model.impl.KaleoTimerInstanceTokenImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portal.workflow.kaleo.model.impl.KaleoTimerInstanceTokenImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<KaleoTimerInstanceToken, Long> KALEO_TIMER_INSTANCE_TOKEN_ID_ACCESSOR =
 		new Accessor<KaleoTimerInstanceToken, Long>() {

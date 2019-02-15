@@ -39,7 +39,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.portal.tools.service.builder.test.service.impl.UADPartialEntryServiceImpl
- * @see com.liferay.portal.tools.service.builder.test.service.UADPartialEntryServiceUtil
  * @generated
  */
 public abstract class UADPartialEntryServiceBaseImpl extends BaseServiceImpl
@@ -47,7 +46,7 @@ public abstract class UADPartialEntryServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.portal.tools.service.builder.test.service.UADPartialEntryServiceUtil} to access the uad partial entry remote service.
+	 * Never modify or reference this class directly. Use <code>UADPartialEntryService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.portal.tools.service.builder.test.service.UADPartialEntryServiceUtil</code>.
 	 */
 
 	/**

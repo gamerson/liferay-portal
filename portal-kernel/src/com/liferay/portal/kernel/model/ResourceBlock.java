@@ -24,8 +24,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see ResourceBlockModel
- * @see com.liferay.portal.model.impl.ResourceBlockImpl
- * @see com.liferay.portal.model.impl.ResourceBlockModelImpl
  * @deprecated As of Judson (7.1.x), with no direct replacement
  * @generated
  */
@@ -36,7 +34,7 @@ public interface ResourceBlock extends ResourceBlockModel, PermissionedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portal.model.impl.ResourceBlockImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portal.model.impl.ResourceBlockImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<ResourceBlock, Long> RESOURCE_BLOCK_ID_ACCESSOR =
 		new Accessor<ResourceBlock, Long>() {

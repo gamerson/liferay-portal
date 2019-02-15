@@ -36,6 +36,6 @@ public abstract class CountryBaseImpl extends CountryModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a country model instance should use the {@link Country} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a country model instance should use the <code>Country</code> interface instead.
 	 */
 }

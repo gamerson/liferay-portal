@@ -36,8 +36,6 @@ import java.util.Map;
  *
  * @author Brian Wing Shun Chan
  * @see ERAssetCategoryLocalServiceUtil
- * @see com.liferay.external.reference.service.base.ERAssetCategoryLocalServiceBaseImpl
- * @see com.liferay.external.reference.service.impl.ERAssetCategoryLocalServiceImpl
  * @generated
  */
 @ProviderType
@@ -47,7 +45,7 @@ public interface ERAssetCategoryLocalService extends BaseLocalService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link ERAssetCategoryLocalServiceUtil} to access the er asset category local service. Add custom service methods to {@link com.liferay.external.reference.service.impl.ERAssetCategoryLocalServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link ERAssetCategoryLocalServiceUtil} to access the er asset category local service. Add custom service methods to <code>com.liferay.external.reference.service.impl.ERAssetCategoryLocalServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public AssetCategory addOrUpdateCategory(String externalReferenceCode,
 		long userId, long groupId, long parentCategoryId,

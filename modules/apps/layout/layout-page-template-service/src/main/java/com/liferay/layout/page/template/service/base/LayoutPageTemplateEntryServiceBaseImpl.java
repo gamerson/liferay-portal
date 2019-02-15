@@ -43,7 +43,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.layout.page.template.service.impl.LayoutPageTemplateEntryServiceImpl
- * @see com.liferay.layout.page.template.service.LayoutPageTemplateEntryServiceUtil
  * @generated
  */
 public abstract class LayoutPageTemplateEntryServiceBaseImpl
@@ -52,7 +51,7 @@ public abstract class LayoutPageTemplateEntryServiceBaseImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.layout.page.template.service.LayoutPageTemplateEntryServiceUtil} to access the layout page template entry remote service.
+	 * Never modify or reference this class directly. Use <code>LayoutPageTemplateEntryService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.layout.page.template.service.LayoutPageTemplateEntryServiceUtil</code>.
 	 */
 
 	/**

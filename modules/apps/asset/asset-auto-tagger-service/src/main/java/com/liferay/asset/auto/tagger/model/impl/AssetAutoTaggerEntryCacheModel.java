@@ -34,7 +34,6 @@ import java.util.Date;
  * The cache model class for representing AssetAutoTaggerEntry in entity cache.
  *
  * @author Brian Wing Shun Chan
- * @see AssetAutoTaggerEntry
  * @generated
  */
 @ProviderType

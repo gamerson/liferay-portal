@@ -40,8 +40,6 @@ import java.util.List;
  *
  * @author Brian Wing Shun Chan
  * @see AssetTagServiceUtil
- * @see com.liferay.portlet.asset.service.base.AssetTagServiceBaseImpl
- * @see com.liferay.portlet.asset.service.impl.AssetTagServiceImpl
  * @generated
  */
 @AccessControlled
@@ -53,7 +51,7 @@ public interface AssetTagService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link AssetTagServiceUtil} to access the asset tag remote service. Add custom service methods to {@link com.liferay.portlet.asset.service.impl.AssetTagServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link AssetTagServiceUtil} to access the asset tag remote service. Add custom service methods to <code>com.liferay.portlet.asset.service.impl.AssetTagServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public AssetTag addTag(long groupId, String name,
 		ServiceContext serviceContext) throws PortalException;

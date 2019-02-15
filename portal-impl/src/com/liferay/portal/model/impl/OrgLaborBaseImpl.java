@@ -37,7 +37,7 @@ public abstract class OrgLaborBaseImpl extends OrgLaborModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a org labor model instance should use the {@link OrgLabor} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a org labor model instance should use the <code>OrgLabor</code> interface instead.
 	 */
 	@Override
 	public void persist() {

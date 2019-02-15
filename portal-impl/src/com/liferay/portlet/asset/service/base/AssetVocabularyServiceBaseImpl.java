@@ -46,7 +46,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.portlet.asset.service.impl.AssetVocabularyServiceImpl
- * @see com.liferay.asset.kernel.service.AssetVocabularyServiceUtil
  * @generated
  */
 public abstract class AssetVocabularyServiceBaseImpl extends BaseServiceImpl
@@ -54,7 +53,7 @@ public abstract class AssetVocabularyServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.asset.kernel.service.AssetVocabularyServiceUtil} to access the asset vocabulary remote service.
+	 * Never modify or reference this class directly. Use <code>AssetVocabularyService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.asset.kernel.service.AssetVocabularyServiceUtil</code>.
 	 */
 
 	/**

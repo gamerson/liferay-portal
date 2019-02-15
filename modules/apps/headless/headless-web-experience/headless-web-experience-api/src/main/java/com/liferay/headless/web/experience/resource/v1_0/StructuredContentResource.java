@@ -92,12 +92,6 @@ public interface StructuredContentResource {
 	@RequiresScope("everything.write")
 	public StructuredContent postContentSpaceStructuredContentBatchCreate( @PathParam("content-space-id") Long contentSpaceId , StructuredContent structuredContent ) throws Exception;
 
-	@GET
-	@Path("/content-structures/{content-structure-id}")
-	@Produces("application/json")
-	@RequiresScope("everything.read")
-	public ContentStructure getContentStructure( @PathParam("content-structure-id") Long contentStructureId ) throws Exception;
-
 	@DELETE
 	@Path("/structured-contents/{structured-content-id}")
 	@Produces("application/json")

@@ -52,7 +52,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.portal.service.impl.UserGroupServiceImpl
- * @see com.liferay.portal.kernel.service.UserGroupServiceUtil
  * @generated
  */
 public abstract class UserGroupServiceBaseImpl extends BaseServiceImpl
@@ -60,7 +59,7 @@ public abstract class UserGroupServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.portal.kernel.service.UserGroupServiceUtil} to access the user group remote service.
+	 * Never modify or reference this class directly. Use <code>UserGroupService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.portal.kernel.service.UserGroupServiceUtil</code>.
 	 */
 
 	/**

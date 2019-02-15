@@ -26,7 +26,6 @@ import java.util.List;
  * This class is used by SOAP remote services, specifically {@link com.liferay.mobile.device.rules.service.http.MDRRuleGroupInstanceServiceSoap}.
  *
  * @author Edward C. Han
- * @see com.liferay.mobile.device.rules.service.http.MDRRuleGroupInstanceServiceSoap
  * @generated
  */
 @ProviderType

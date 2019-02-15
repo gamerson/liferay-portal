@@ -37,7 +37,7 @@ public abstract class HtmlPreviewEntryBaseImpl extends HtmlPreviewEntryModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a html preview entry model instance should use the {@link HtmlPreviewEntry} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a html preview entry model instance should use the <code>HtmlPreviewEntry</code> interface instead.
 	 */
 	@Override
 	public void persist() {

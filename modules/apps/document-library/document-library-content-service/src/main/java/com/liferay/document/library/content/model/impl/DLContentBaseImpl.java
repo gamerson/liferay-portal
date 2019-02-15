@@ -37,7 +37,7 @@ public abstract class DLContentBaseImpl extends DLContentModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a document library content model instance should use the {@link DLContent} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a document library content model instance should use the <code>DLContent</code> interface instead.
 	 */
 	@Override
 	public void persist() {

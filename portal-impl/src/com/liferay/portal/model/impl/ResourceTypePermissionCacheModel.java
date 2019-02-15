@@ -32,7 +32,6 @@ import java.io.ObjectOutput;
  * The cache model class for representing ResourceTypePermission in entity cache.
  *
  * @author Brian Wing Shun Chan
- * @see ResourceTypePermission
  * @deprecated As of Judson (7.1.x), with no direct replacement
  * @generated
  */

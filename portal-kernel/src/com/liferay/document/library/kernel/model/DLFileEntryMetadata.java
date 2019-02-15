@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see DLFileEntryMetadataModel
- * @see com.liferay.portlet.documentlibrary.model.impl.DLFileEntryMetadataImpl
- * @see com.liferay.portlet.documentlibrary.model.impl.DLFileEntryMetadataModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portlet.documentlibrary.model.impl.DLFileEntryMetadataImpl")
@@ -36,7 +34,7 @@ public interface DLFileEntryMetadata extends DLFileEntryMetadataModel,
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portlet.documentlibrary.model.impl.DLFileEntryMetadataImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portlet.documentlibrary.model.impl.DLFileEntryMetadataImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<DLFileEntryMetadata, Long> FILE_ENTRY_METADATA_ID_ACCESSOR =
 		new Accessor<DLFileEntryMetadata, Long>() {

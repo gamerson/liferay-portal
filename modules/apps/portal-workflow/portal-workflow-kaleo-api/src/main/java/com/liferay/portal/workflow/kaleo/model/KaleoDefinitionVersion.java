@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see KaleoDefinitionVersionModel
- * @see com.liferay.portal.workflow.kaleo.model.impl.KaleoDefinitionVersionImpl
- * @see com.liferay.portal.workflow.kaleo.model.impl.KaleoDefinitionVersionModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portal.workflow.kaleo.model.impl.KaleoDefinitionVersionImpl")
@@ -36,7 +34,7 @@ public interface KaleoDefinitionVersion extends KaleoDefinitionVersionModel,
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portal.workflow.kaleo.model.impl.KaleoDefinitionVersionImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portal.workflow.kaleo.model.impl.KaleoDefinitionVersionImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<KaleoDefinitionVersion, Long> KALEO_DEFINITION_VERSION_ID_ACCESSOR =
 		new Accessor<KaleoDefinitionVersion, Long>() {

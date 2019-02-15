@@ -44,8 +44,6 @@ import java.util.Map;
  *
  * @author Brian Wing Shun Chan
  * @see DDMFormInstanceServiceUtil
- * @see com.liferay.dynamic.data.mapping.service.base.DDMFormInstanceServiceBaseImpl
- * @see com.liferay.dynamic.data.mapping.service.impl.DDMFormInstanceServiceImpl
  * @generated
  */
 @AccessControlled
@@ -59,7 +57,7 @@ public interface DDMFormInstanceService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link DDMFormInstanceServiceUtil} to access the ddm form instance remote service. Add custom service methods to {@link com.liferay.dynamic.data.mapping.service.impl.DDMFormInstanceServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link DDMFormInstanceServiceUtil} to access the ddm form instance remote service. Add custom service methods to <code>com.liferay.dynamic.data.mapping.service.impl.DDMFormInstanceServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public DDMFormInstance addFormInstance(long groupId, long ddmStructureId,
 		Map<Locale, String> nameMap, Map<Locale, String> descriptionMap,

@@ -38,7 +38,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.portal.service.impl.AccountServiceImpl
- * @see com.liferay.portal.kernel.service.AccountServiceUtil
  * @generated
  */
 public abstract class AccountServiceBaseImpl extends BaseServiceImpl
@@ -46,7 +45,7 @@ public abstract class AccountServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.portal.kernel.service.AccountServiceUtil} to access the account remote service.
+	 * Never modify or reference this class directly. Use <code>AccountService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.portal.kernel.service.AccountServiceUtil</code>.
 	 */
 
 	/**

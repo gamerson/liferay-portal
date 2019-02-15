@@ -44,7 +44,7 @@ public abstract class BookmarksFolderBaseImpl extends BookmarksFolderModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a bookmarks folder model instance should use the {@link BookmarksFolder} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a bookmarks folder model instance should use the <code>BookmarksFolder</code> interface instead.
 	 */
 	@Override
 	public void persist() {

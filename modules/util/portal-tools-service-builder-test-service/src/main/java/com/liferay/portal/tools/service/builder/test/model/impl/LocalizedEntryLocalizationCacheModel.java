@@ -31,7 +31,6 @@ import java.io.ObjectOutput;
  * The cache model class for representing LocalizedEntryLocalization in entity cache.
  *
  * @author Brian Wing Shun Chan
- * @see LocalizedEntryLocalization
  * @generated
  */
 @ProviderType

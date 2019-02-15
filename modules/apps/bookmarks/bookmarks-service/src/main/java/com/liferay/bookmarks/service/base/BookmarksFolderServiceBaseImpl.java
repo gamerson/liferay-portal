@@ -54,7 +54,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.bookmarks.service.impl.BookmarksFolderServiceImpl
- * @see com.liferay.bookmarks.service.BookmarksFolderServiceUtil
  * @generated
  */
 public abstract class BookmarksFolderServiceBaseImpl extends BaseServiceImpl
@@ -62,7 +61,7 @@ public abstract class BookmarksFolderServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.bookmarks.service.BookmarksFolderServiceUtil} to access the bookmarks folder remote service.
+	 * Never modify or reference this class directly. Use <code>BookmarksFolderService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.bookmarks.service.BookmarksFolderServiceUtil</code>.
 	 */
 
 	/**

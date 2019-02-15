@@ -44,7 +44,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.polls.service.impl.PollsQuestionServiceImpl
- * @see com.liferay.polls.service.PollsQuestionServiceUtil
  * @generated
  */
 public abstract class PollsQuestionServiceBaseImpl extends BaseServiceImpl
@@ -52,7 +51,7 @@ public abstract class PollsQuestionServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.polls.service.PollsQuestionServiceUtil} to access the polls question remote service.
+	 * Never modify or reference this class directly. Use <code>PollsQuestionService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.polls.service.PollsQuestionServiceUtil</code>.
 	 */
 
 	/**

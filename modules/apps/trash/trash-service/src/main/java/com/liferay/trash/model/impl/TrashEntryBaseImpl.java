@@ -37,7 +37,7 @@ public abstract class TrashEntryBaseImpl extends TrashEntryModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a trash entry model instance should use the {@link TrashEntry} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a trash entry model instance should use the <code>TrashEntry</code> interface instead.
 	 */
 	@Override
 	public void persist() {

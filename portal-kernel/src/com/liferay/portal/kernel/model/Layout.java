@@ -24,8 +24,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see LayoutModel
- * @see com.liferay.portal.model.impl.LayoutImpl
- * @see com.liferay.portal.model.impl.LayoutModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portal.model.impl.LayoutImpl")
@@ -35,7 +33,7 @@ public interface Layout extends LayoutModel, NestedSetsTreeNodeModel,
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portal.model.impl.LayoutImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portal.model.impl.LayoutImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<Layout, Long> PLID_ACCESSOR = new Accessor<Layout, Long>() {
 			@Override

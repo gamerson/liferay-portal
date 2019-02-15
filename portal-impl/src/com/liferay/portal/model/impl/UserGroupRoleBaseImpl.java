@@ -37,7 +37,7 @@ public abstract class UserGroupRoleBaseImpl extends UserGroupRoleModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a user group role model instance should use the {@link UserGroupRole} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a user group role model instance should use the <code>UserGroupRole</code> interface instead.
 	 */
 	@Override
 	public void persist() {

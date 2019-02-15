@@ -24,8 +24,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see TeamModel
- * @see com.liferay.portal.model.impl.TeamImpl
- * @see com.liferay.portal.model.impl.TeamModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portal.model.impl.TeamImpl")
@@ -34,7 +32,7 @@ public interface Team extends TeamModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portal.model.impl.TeamImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portal.model.impl.TeamImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<Team, Long> TEAM_ID_ACCESSOR = new Accessor<Team, Long>() {
 			@Override

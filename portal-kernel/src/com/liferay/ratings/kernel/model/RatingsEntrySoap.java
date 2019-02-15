@@ -26,7 +26,6 @@ import java.util.List;
  * This class is used by SOAP remote services, specifically {@link com.liferay.portlet.ratings.service.http.RatingsEntryServiceSoap}.
  *
  * @author Brian Wing Shun Chan
- * @see com.liferay.portlet.ratings.service.http.RatingsEntryServiceSoap
  * @generated
  */
 @ProviderType

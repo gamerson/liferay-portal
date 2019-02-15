@@ -45,7 +45,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.portlet.documentlibrary.service.impl.DLAppLocalServiceImpl
- * @see com.liferay.document.library.kernel.service.DLAppLocalServiceUtil
  * @generated
  */
 @ProviderType
@@ -54,7 +53,7 @@ public abstract class DLAppLocalServiceBaseImpl extends BaseLocalServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.document.library.kernel.service.DLAppLocalServiceUtil} to access the dl app local service.
+	 * Never modify or reference this class directly. Use <code>DLAppLocalService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.document.library.kernel.service.DLAppLocalServiceUtil</code>.
 	 */
 
 	/**

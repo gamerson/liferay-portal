@@ -37,7 +37,7 @@ public abstract class MBCategoryBaseImpl extends MBCategoryModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a message boards category model instance should use the {@link MBCategory} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a message boards category model instance should use the <code>MBCategory</code> interface instead.
 	 */
 	@Override
 	public void persist() {

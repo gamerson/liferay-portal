@@ -14,6 +14,8 @@
 
 package com.liferay.headless.web.experience.dto.v1_0;
 
+import com.liferay.petra.function.UnsafeSupplier;
+
 import javax.annotation.Generated;
 
 import javax.xml.bind.annotation.XmlRootElement;
@@ -58,28 +60,103 @@ public class Values {
 		_dataType = dataType;
 	}
 
+	public void setDataType(
+		UnsafeSupplier<String, Throwable> dataTypeUnsafeSupplier) {
+
+		try {
+			_dataType = dataTypeUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setFilterAndSortIdentifier(String filterAndSortIdentifier) {
 		_filterAndSortIdentifier = filterAndSortIdentifier;
+	}
+
+	public void setFilterAndSortIdentifier(
+		UnsafeSupplier<String, Throwable>
+			filterAndSortIdentifierUnsafeSupplier) {
+
+		try {
+			_filterAndSortIdentifier =
+				filterAndSortIdentifierUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	public void setId(Long id) {
 		_id = id;
 	}
 
+	public void setId(UnsafeSupplier<Long, Throwable> idUnsafeSupplier) {
+		try {
+			_id = idUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setInputControl(String inputControl) {
 		_inputControl = inputControl;
+	}
+
+	public void setInputControl(
+		UnsafeSupplier<String, Throwable> inputControlUnsafeSupplier) {
+
+		try {
+			_inputControl = inputControlUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	public void setLabel(String label) {
 		_label = label;
 	}
 
+	public void setLabel(
+		UnsafeSupplier<String, Throwable> labelUnsafeSupplier) {
+
+		try {
+			_label = labelUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setName(String name) {
 		_name = name;
 	}
 
+	public void setName(UnsafeSupplier<String, Throwable> nameUnsafeSupplier) {
+		try {
+			_name = nameUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setValue(Object value) {
 		_value = value;
+	}
+
+	public void setValue(
+		UnsafeSupplier<Object, Throwable> valueUnsafeSupplier) {
+
+		try {
+			_value = valueUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	private String _dataType;

@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see TestEntityModel
- * @see com.liferay.external.data.source.test.model.impl.TestEntityImpl
- * @see com.liferay.external.data.source.test.model.impl.TestEntityModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.external.data.source.test.model.impl.TestEntityImpl")
@@ -35,7 +33,7 @@ public interface TestEntity extends TestEntityModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.external.data.source.test.model.impl.TestEntityImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.external.data.source.test.model.impl.TestEntityImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<TestEntity, Long> ID_ACCESSOR = new Accessor<TestEntity, Long>() {
 			@Override

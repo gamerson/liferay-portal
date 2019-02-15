@@ -42,7 +42,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.external.reference.service.impl.ERUserLocalServiceImpl
- * @see com.liferay.external.reference.service.ERUserLocalServiceUtil
  * @generated
  */
 @ProviderType
@@ -51,7 +50,7 @@ public abstract class ERUserLocalServiceBaseImpl extends BaseLocalServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.external.reference.service.ERUserLocalServiceUtil} to access the er user local service.
+	 * Never modify or reference this class directly. Use <code>ERUserLocalService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.external.reference.service.ERUserLocalServiceUtil</code>.
 	 */
 
 	/**

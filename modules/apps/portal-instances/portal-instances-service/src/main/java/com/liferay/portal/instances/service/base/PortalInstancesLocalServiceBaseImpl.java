@@ -40,7 +40,6 @@ import javax.sql.DataSource;
  *
  * @author Michael C. Han
  * @see com.liferay.portal.instances.service.impl.PortalInstancesLocalServiceImpl
- * @see com.liferay.portal.instances.service.PortalInstancesLocalServiceUtil
  * @generated
  */
 @ProviderType
@@ -50,7 +49,7 @@ public abstract class PortalInstancesLocalServiceBaseImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.portal.instances.service.PortalInstancesLocalServiceUtil} to access the portal instances local service.
+	 * Never modify or reference this class directly. Use <code>PortalInstancesLocalService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.portal.instances.service.PortalInstancesLocalServiceUtil</code>.
 	 */
 
 	/**

@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see KaleoConditionModel
- * @see com.liferay.portal.workflow.kaleo.model.impl.KaleoConditionImpl
- * @see com.liferay.portal.workflow.kaleo.model.impl.KaleoConditionModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portal.workflow.kaleo.model.impl.KaleoConditionImpl")
@@ -35,7 +33,7 @@ public interface KaleoCondition extends KaleoConditionModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portal.workflow.kaleo.model.impl.KaleoConditionImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portal.workflow.kaleo.model.impl.KaleoConditionImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<KaleoCondition, Long> KALEO_CONDITION_ID_ACCESSOR =
 		new Accessor<KaleoCondition, Long>() {

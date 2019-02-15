@@ -34,7 +34,6 @@ import java.util.Date;
  * The cache model class for representing WikiPage in entity cache.
  *
  * @author Brian Wing Shun Chan
- * @see WikiPage
  * @generated
  */
 @ProviderType

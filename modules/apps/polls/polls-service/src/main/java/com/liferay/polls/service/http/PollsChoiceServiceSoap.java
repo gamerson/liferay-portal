@@ -18,19 +18,20 @@ import aQute.bnd.annotation.ProviderType;
 
 /**
  * Provides the SOAP utility for the
- * {@link com.liferay.polls.service.PollsChoiceServiceUtil} service utility. The
- * static methods of this class calls the same methods of the service utility.
- * However, the signatures are different because it is difficult for SOAP to
- * support certain types.
+ * <code>com.liferay.polls.service.PollsChoiceServiceUtil</code> service
+ * utility. The static methods of this class call the same methods of the
+ * service utility. However, the signatures are different because it is
+ * difficult for SOAP to support certain types.
  *
  * <p>
  * ServiceBuilder follows certain rules in translating the methods. For example,
- * if the method in the service utility returns a {@link java.util.List}, that
- * is translated to an array of {@link com.liferay.polls.model.PollsChoiceSoap}.
- * If the method in the service utility returns a
- * {@link com.liferay.polls.model.PollsChoice}, that is translated to a
- * {@link com.liferay.polls.model.PollsChoiceSoap}. Methods that SOAP cannot
- * safely wire are skipped.
+ * if the method in the service utility returns a <code>java.util.List</code>,
+ * that is translated to an array of
+ * <code>com.liferay.polls.model.PollsChoiceSoap</code>. If the method in the
+ * service utility returns a
+ * <code>com.liferay.polls.model.PollsChoice</code>, that is translated to a
+ * <code>com.liferay.polls.model.PollsChoiceSoap</code>. Methods that SOAP
+ * cannot safely wire are skipped.
  * </p>
  *
  * <p>
@@ -52,8 +53,6 @@ import aQute.bnd.annotation.ProviderType;
  *
  * @author Brian Wing Shun Chan
  * @see PollsChoiceServiceHttp
- * @see com.liferay.polls.model.PollsChoiceSoap
- * @see com.liferay.polls.service.PollsChoiceServiceUtil
  * @generated
  */
 @ProviderType

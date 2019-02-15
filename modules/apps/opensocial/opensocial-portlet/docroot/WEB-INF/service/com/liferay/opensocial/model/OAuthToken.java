@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see OAuthTokenModel
- * @see com.liferay.opensocial.model.impl.OAuthTokenImpl
- * @see com.liferay.opensocial.model.impl.OAuthTokenModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.opensocial.model.impl.OAuthTokenImpl")
@@ -35,7 +33,7 @@ public interface OAuthToken extends OAuthTokenModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.opensocial.model.impl.OAuthTokenImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.opensocial.model.impl.OAuthTokenImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<OAuthToken, Long> O_AUTH_TOKEN_ID_ACCESSOR = new Accessor<OAuthToken, Long>() {
 			@Override

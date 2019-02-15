@@ -14,7 +14,7 @@
 
 package com.liferay.headless.form.resource.v1_0.test;
 
-import org.jboss.arquillian.junit.Arquillian;
+import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 
 import org.junit.Ignore;
 import org.junit.runner.RunWith;

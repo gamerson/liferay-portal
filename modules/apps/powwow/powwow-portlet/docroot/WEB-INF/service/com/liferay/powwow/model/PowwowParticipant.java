@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Shinn Lok
  * @see PowwowParticipantModel
- * @see com.liferay.powwow.model.impl.PowwowParticipantImpl
- * @see com.liferay.powwow.model.impl.PowwowParticipantModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.powwow.model.impl.PowwowParticipantImpl")
@@ -35,7 +33,7 @@ public interface PowwowParticipant extends PowwowParticipantModel, PersistedMode
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.powwow.model.impl.PowwowParticipantImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.powwow.model.impl.PowwowParticipantImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<PowwowParticipant, Long> POWWOW_PARTICIPANT_ID_ACCESSOR =
 		new Accessor<PowwowParticipant, Long>() {

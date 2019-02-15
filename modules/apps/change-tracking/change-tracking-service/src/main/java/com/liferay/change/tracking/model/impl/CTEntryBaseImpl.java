@@ -37,7 +37,7 @@ public abstract class CTEntryBaseImpl extends CTEntryModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a ct entry model instance should use the {@link CTEntry} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a ct entry model instance should use the <code>CTEntry</code> interface instead.
 	 */
 	@Override
 	public void persist() {

@@ -34,7 +34,6 @@ import java.util.Date;
  * The cache model class for representing MBMailingList in entity cache.
  *
  * @author Brian Wing Shun Chan
- * @see MBMailingList
  * @generated
  */
 @ProviderType

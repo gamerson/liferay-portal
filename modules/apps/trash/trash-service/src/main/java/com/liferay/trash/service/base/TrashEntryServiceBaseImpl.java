@@ -45,7 +45,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.trash.service.impl.TrashEntryServiceImpl
- * @see com.liferay.trash.service.TrashEntryServiceUtil
  * @generated
  */
 public abstract class TrashEntryServiceBaseImpl extends BaseServiceImpl
@@ -53,7 +52,7 @@ public abstract class TrashEntryServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.trash.service.TrashEntryServiceUtil} to access the trash entry remote service.
+	 * Never modify or reference this class directly. Use <code>TrashEntryService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.trash.service.TrashEntryServiceUtil</code>.
 	 */
 
 	/**

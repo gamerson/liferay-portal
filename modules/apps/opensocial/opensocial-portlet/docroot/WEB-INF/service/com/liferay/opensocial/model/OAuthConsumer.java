@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see OAuthConsumerModel
- * @see com.liferay.opensocial.model.impl.OAuthConsumerImpl
- * @see com.liferay.opensocial.model.impl.OAuthConsumerModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.opensocial.model.impl.OAuthConsumerImpl")
@@ -35,7 +33,7 @@ public interface OAuthConsumer extends OAuthConsumerModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.opensocial.model.impl.OAuthConsumerImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.opensocial.model.impl.OAuthConsumerImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<OAuthConsumer, Long> O_AUTH_CONSUMER_ID_ACCESSOR =
 		new Accessor<OAuthConsumer, Long>() {

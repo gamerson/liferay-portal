@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see SocialActivitySetModel
- * @see com.liferay.portlet.social.model.impl.SocialActivitySetImpl
- * @see com.liferay.portlet.social.model.impl.SocialActivitySetModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portlet.social.model.impl.SocialActivitySetImpl")
@@ -35,7 +33,7 @@ public interface SocialActivitySet extends SocialActivitySetModel, PersistedMode
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portlet.social.model.impl.SocialActivitySetImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portlet.social.model.impl.SocialActivitySetImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<SocialActivitySet, Long> ACTIVITY_SET_ID_ACCESSOR =
 		new Accessor<SocialActivitySet, Long>() {

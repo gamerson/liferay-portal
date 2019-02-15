@@ -32,8 +32,6 @@ import com.liferay.portal.kernel.transaction.Transactional;
  *
  * @author Brian Wing Shun Chan
  * @see EROrganizationLocalServiceUtil
- * @see com.liferay.external.reference.service.base.EROrganizationLocalServiceBaseImpl
- * @see com.liferay.external.reference.service.impl.EROrganizationLocalServiceImpl
  * @generated
  */
 @ProviderType
@@ -43,7 +41,7 @@ public interface EROrganizationLocalService extends BaseLocalService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link EROrganizationLocalServiceUtil} to access the er organization local service. Add custom service methods to {@link com.liferay.external.reference.service.impl.EROrganizationLocalServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link EROrganizationLocalServiceUtil} to access the er organization local service. Add custom service methods to <code>com.liferay.external.reference.service.impl.EROrganizationLocalServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public Organization addOrUpdateOrganization(String externalReferenceCode,
 		long userId, long parentOrganizationId, String name, String type,

@@ -14,6 +14,8 @@
 
 package com.liferay.headless.form.dto.v1_0;
 
+import com.liferay.petra.function.UnsafeSupplier;
+
 import javax.annotation.Generated;
 
 import javax.xml.bind.annotation.XmlRootElement;
@@ -134,100 +136,378 @@ public class Fields {
 		_autocomplete = autocomplete;
 	}
 
+	public void setAutocomplete(
+		UnsafeSupplier<Boolean, Throwable> autocompleteUnsafeSupplier) {
+
+		try {
+			_autocomplete = autocompleteUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setDataSourceType(String dataSourceType) {
 		_dataSourceType = dataSourceType;
+	}
+
+	public void setDataSourceType(
+		UnsafeSupplier<String, Throwable> dataSourceTypeUnsafeSupplier) {
+
+		try {
+			_dataSourceType = dataSourceTypeUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	public void setDataType(String dataType) {
 		_dataType = dataType;
 	}
 
+	public void setDataType(
+		UnsafeSupplier<String, Throwable> dataTypeUnsafeSupplier) {
+
+		try {
+			_dataType = dataTypeUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setDisplayStyle(String displayStyle) {
 		_displayStyle = displayStyle;
+	}
+
+	public void setDisplayStyle(
+		UnsafeSupplier<String, Throwable> displayStyleUnsafeSupplier) {
+
+		try {
+			_displayStyle = displayStyleUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	public void setGrid(Grid grid) {
 		_grid = grid;
 	}
 
+	public void setGrid(UnsafeSupplier<Grid, Throwable> gridUnsafeSupplier) {
+		try {
+			_grid = gridUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setHasFormRules(Boolean hasFormRules) {
 		_hasFormRules = hasFormRules;
+	}
+
+	public void setHasFormRules(
+		UnsafeSupplier<Boolean, Throwable> hasFormRulesUnsafeSupplier) {
+
+		try {
+			_hasFormRules = hasFormRulesUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	public void setId(Long id) {
 		_id = id;
 	}
 
+	public void setId(UnsafeSupplier<Long, Throwable> idUnsafeSupplier) {
+		try {
+			_id = idUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setImmutable(Boolean immutable) {
 		_immutable = immutable;
+	}
+
+	public void setImmutable(
+		UnsafeSupplier<Boolean, Throwable> immutableUnsafeSupplier) {
+
+		try {
+			_immutable = immutableUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	public void setInline(Boolean inline) {
 		_inline = inline;
 	}
 
+	public void setInline(
+		UnsafeSupplier<Boolean, Throwable> inlineUnsafeSupplier) {
+
+		try {
+			_inline = inlineUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setInputControl(String inputControl) {
 		_inputControl = inputControl;
+	}
+
+	public void setInputControl(
+		UnsafeSupplier<String, Throwable> inputControlUnsafeSupplier) {
+
+		try {
+			_inputControl = inputControlUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	public void setLabel(String label) {
 		_label = label;
 	}
 
+	public void setLabel(
+		UnsafeSupplier<String, Throwable> labelUnsafeSupplier) {
+
+		try {
+			_label = labelUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setLocalizable(Boolean localizable) {
 		_localizable = localizable;
+	}
+
+	public void setLocalizable(
+		UnsafeSupplier<Boolean, Throwable> localizableUnsafeSupplier) {
+
+		try {
+			_localizable = localizableUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	public void setMultiple(Boolean multiple) {
 		_multiple = multiple;
 	}
 
+	public void setMultiple(
+		UnsafeSupplier<Boolean, Throwable> multipleUnsafeSupplier) {
+
+		try {
+			_multiple = multipleUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setName(String name) {
 		_name = name;
+	}
+
+	public void setName(UnsafeSupplier<String, Throwable> nameUnsafeSupplier) {
+		try {
+			_name = nameUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	public void setOptions(Options options) {
 		_options = options;
 	}
 
+	public void setOptions(
+		UnsafeSupplier<Options, Throwable> optionsUnsafeSupplier) {
+
+		try {
+			_options = optionsUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setPlaceholder(String placeholder) {
 		_placeholder = placeholder;
+	}
+
+	public void setPlaceholder(
+		UnsafeSupplier<String, Throwable> placeholderUnsafeSupplier) {
+
+		try {
+			_placeholder = placeholderUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	public void setPredefinedValue(String predefinedValue) {
 		_predefinedValue = predefinedValue;
 	}
 
+	public void setPredefinedValue(
+		UnsafeSupplier<String, Throwable> predefinedValueUnsafeSupplier) {
+
+		try {
+			_predefinedValue = predefinedValueUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setReadOnly(Boolean readOnly) {
 		_readOnly = readOnly;
+	}
+
+	public void setReadOnly(
+		UnsafeSupplier<Boolean, Throwable> readOnlyUnsafeSupplier) {
+
+		try {
+			_readOnly = readOnlyUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	public void setRepeatable(Boolean repeatable) {
 		_repeatable = repeatable;
 	}
 
+	public void setRepeatable(
+		UnsafeSupplier<Boolean, Throwable> repeatableUnsafeSupplier) {
+
+		try {
+			_repeatable = repeatableUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setRequired(Boolean required) {
 		_required = required;
+	}
+
+	public void setRequired(
+		UnsafeSupplier<Boolean, Throwable> requiredUnsafeSupplier) {
+
+		try {
+			_required = requiredUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	public void setShowAsSwitcher(Boolean showAsSwitcher) {
 		_showAsSwitcher = showAsSwitcher;
 	}
 
+	public void setShowAsSwitcher(
+		UnsafeSupplier<Boolean, Throwable> showAsSwitcherUnsafeSupplier) {
+
+		try {
+			_showAsSwitcher = showAsSwitcherUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setShowLabel(Boolean showLabel) {
 		_showLabel = showLabel;
+	}
+
+	public void setShowLabel(
+		UnsafeSupplier<Boolean, Throwable> showLabelUnsafeSupplier) {
+
+		try {
+			_showLabel = showLabelUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	public void setStyle(String style) {
 		_style = style;
 	}
 
+	public void setStyle(
+		UnsafeSupplier<String, Throwable> styleUnsafeSupplier) {
+
+		try {
+			_style = styleUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setText(String text) {
 		_text = text;
 	}
 
+	public void setText(UnsafeSupplier<String, Throwable> textUnsafeSupplier) {
+		try {
+			_text = textUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setTooltip(String tooltip) {
 		_tooltip = tooltip;
+	}
+
+	public void setTooltip(
+		UnsafeSupplier<String, Throwable> tooltipUnsafeSupplier) {
+
+		try {
+			_tooltip = tooltipUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
+	public void setValidation(
+		UnsafeSupplier<Validation, Throwable> validationUnsafeSupplier) {
+
+		try {
+			_validation = validationUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	public void setValidation(Validation validation) {

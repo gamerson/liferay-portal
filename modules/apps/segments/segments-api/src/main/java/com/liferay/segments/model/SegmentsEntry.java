@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Eduardo Garcia
  * @see SegmentsEntryModel
- * @see com.liferay.segments.model.impl.SegmentsEntryImpl
- * @see com.liferay.segments.model.impl.SegmentsEntryModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.segments.model.impl.SegmentsEntryImpl")
@@ -35,7 +33,7 @@ public interface SegmentsEntry extends SegmentsEntryModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.segments.model.impl.SegmentsEntryImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.segments.model.impl.SegmentsEntryImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<SegmentsEntry, Long> SEGMENTS_ENTRY_ID_ACCESSOR =
 		new Accessor<SegmentsEntry, Long>() {

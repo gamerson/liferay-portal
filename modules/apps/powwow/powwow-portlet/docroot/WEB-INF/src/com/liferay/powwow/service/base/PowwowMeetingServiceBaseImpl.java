@@ -44,7 +44,6 @@ import javax.sql.DataSource;
  *
  * @author Shinn Lok
  * @see com.liferay.powwow.service.impl.PowwowMeetingServiceImpl
- * @see com.liferay.powwow.service.PowwowMeetingServiceUtil
  * @generated
  */
 public abstract class PowwowMeetingServiceBaseImpl extends BaseServiceImpl
@@ -52,7 +51,7 @@ public abstract class PowwowMeetingServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.powwow.service.PowwowMeetingServiceUtil} to access the powwow meeting remote service.
+	 * Never modify or reference this class directly. Use <code>PowwowMeetingService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.powwow.service.PowwowMeetingServiceUtil</code>.
 	 */
 
 	/**

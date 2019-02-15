@@ -39,7 +39,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.portal.service.impl.ListTypeServiceImpl
- * @see com.liferay.portal.kernel.service.ListTypeServiceUtil
  * @generated
  */
 public abstract class ListTypeServiceBaseImpl extends BaseServiceImpl
@@ -47,7 +46,7 @@ public abstract class ListTypeServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.portal.kernel.service.ListTypeServiceUtil} to access the list type remote service.
+	 * Never modify or reference this class directly. Use <code>ListTypeService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.portal.kernel.service.ListTypeServiceUtil</code>.
 	 */
 
 	/**

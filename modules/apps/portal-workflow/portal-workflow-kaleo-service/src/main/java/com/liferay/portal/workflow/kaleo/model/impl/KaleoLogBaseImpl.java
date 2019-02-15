@@ -37,7 +37,7 @@ public abstract class KaleoLogBaseImpl extends KaleoLogModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a kaleo log model instance should use the {@link KaleoLog} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a kaleo log model instance should use the <code>KaleoLog</code> interface instead.
 	 */
 	@Override
 	public void persist() {

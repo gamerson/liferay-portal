@@ -23,16 +23,14 @@ import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Provides the remote service utility for BlogsEntry. This utility wraps
- * {@link com.liferay.blogs.service.impl.BlogsEntryServiceImpl} and is the
- * primary access point for service operations in application layer code running
- * on a remote server. Methods of this service are expected to have security
- * checks based on the propagated JAAS credentials because this service can be
+ * <code>com.liferay.blogs.service.impl.BlogsEntryServiceImpl</code> and is an
+ * access point for service operations in application layer code running on a
+ * remote server. Methods of this service are expected to have security checks
+ * based on the propagated JAAS credentials because this service can be
  * accessed remotely.
  *
  * @author Brian Wing Shun Chan
  * @see BlogsEntryService
- * @see com.liferay.blogs.service.base.BlogsEntryServiceBaseImpl
- * @see com.liferay.blogs.service.impl.BlogsEntryServiceImpl
  * @generated
  */
 @ProviderType
@@ -40,7 +38,7 @@ public class BlogsEntryServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this class directly. Add custom service methods to {@link com.liferay.blogs.service.impl.BlogsEntryServiceImpl} and rerun ServiceBuilder to regenerate this class.
+	 * Never modify this class directly. Add custom service methods to <code>com.liferay.blogs.service.impl.BlogsEntryServiceImpl</code> and rerun ServiceBuilder to regenerate this class.
 	 */
 
 	/**

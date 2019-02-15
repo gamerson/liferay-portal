@@ -36,7 +36,7 @@ public abstract class ModuleBaseImpl extends ModuleModelImpl implements Module {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a module model instance should use the {@link Module} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a module model instance should use the <code>Module</code> interface instead.
 	 */
 	@Override
 	public void persist() {

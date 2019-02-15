@@ -37,7 +37,7 @@ public abstract class DDMFormInstanceVersionBaseImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a ddm form instance version model instance should use the {@link DDMFormInstanceVersion} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a ddm form instance version model instance should use the <code>DDMFormInstanceVersion</code> interface instead.
 	 */
 	@Override
 	public void persist() {

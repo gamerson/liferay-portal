@@ -35,8 +35,6 @@ import com.liferay.portal.kernel.transaction.Transactional;
  *
  * @author Brian Wing Shun Chan
  * @see PollsVoteServiceUtil
- * @see com.liferay.polls.service.base.PollsVoteServiceBaseImpl
- * @see com.liferay.polls.service.impl.PollsVoteServiceImpl
  * @generated
  */
 @AccessControlled
@@ -50,7 +48,7 @@ public interface PollsVoteService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link PollsVoteServiceUtil} to access the polls vote remote service. Add custom service methods to {@link com.liferay.polls.service.impl.PollsVoteServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link PollsVoteServiceUtil} to access the polls vote remote service. Add custom service methods to <code>com.liferay.polls.service.impl.PollsVoteServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public PollsVote addVote(long questionId, long choiceId,
 		ServiceContext serviceContext) throws PortalException;

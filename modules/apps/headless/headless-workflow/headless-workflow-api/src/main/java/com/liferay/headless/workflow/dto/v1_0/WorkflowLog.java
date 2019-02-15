@@ -14,6 +14,8 @@
 
 package com.liferay.headless.workflow.dto.v1_0;
 
+import com.liferay.petra.function.UnsafeSupplier;
+
 import java.util.Date;
 
 import javax.annotation.Generated;
@@ -76,32 +78,129 @@ public class WorkflowLog {
 		_auditPerson = auditPerson;
 	}
 
+	public void setAuditPerson(
+		UnsafeSupplier<String, Throwable> auditPersonUnsafeSupplier) {
+
+		try {
+			_auditPerson = auditPersonUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setCommentLog(String commentLog) {
 		_commentLog = commentLog;
+	}
+
+	public void setCommentLog(
+		UnsafeSupplier<String, Throwable> commentLogUnsafeSupplier) {
+
+		try {
+			_commentLog = commentLogUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	public void setDateCreated(Date dateCreated) {
 		_dateCreated = dateCreated;
 	}
 
+	public void setDateCreated(
+		UnsafeSupplier<Date, Throwable> dateCreatedUnsafeSupplier) {
+
+		try {
+			_dateCreated = dateCreatedUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setId(Long id) {
 		_id = id;
+	}
+
+	public void setId(UnsafeSupplier<Long, Throwable> idUnsafeSupplier) {
+		try {
+			_id = idUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	public void setPerson(String person) {
 		_person = person;
 	}
 
+	public void setPerson(
+		UnsafeSupplier<String, Throwable> personUnsafeSupplier) {
+
+		try {
+			_person = personUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setPreviousPerson(String previousPerson) {
 		_previousPerson = previousPerson;
+	}
+
+	public void setPreviousPerson(
+		UnsafeSupplier<String, Throwable> previousPersonUnsafeSupplier) {
+
+		try {
+			_previousPerson = previousPersonUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	public void setPreviousState(String previousState) {
 		_previousState = previousState;
 	}
 
+	public void setPreviousState(
+		UnsafeSupplier<String, Throwable> previousStateUnsafeSupplier) {
+
+		try {
+			_previousState = previousStateUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setState(String state) {
 		_state = state;
+	}
+
+	public void setState(
+		UnsafeSupplier<String, Throwable> stateUnsafeSupplier) {
+
+		try {
+			_state = stateUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
+	public void setTask(
+		UnsafeSupplier<WorkflowTask, Throwable> taskUnsafeSupplier) {
+
+		try {
+			_task = taskUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	public void setTask(WorkflowTask task) {
@@ -112,8 +211,28 @@ public class WorkflowLog {
 		_taskId = taskId;
 	}
 
+	public void setTaskId(
+		UnsafeSupplier<Long, Throwable> taskIdUnsafeSupplier) {
+
+		try {
+			_taskId = taskIdUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setType(String type) {
 		_type = type;
+	}
+
+	public void setType(UnsafeSupplier<String, Throwable> typeUnsafeSupplier) {
+		try {
+			_type = typeUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	private String _auditPerson;

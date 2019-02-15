@@ -24,8 +24,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see PhoneModel
- * @see com.liferay.portal.model.impl.PhoneImpl
- * @see com.liferay.portal.model.impl.PhoneModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portal.model.impl.PhoneImpl")
@@ -34,7 +32,7 @@ public interface Phone extends PhoneModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portal.model.impl.PhoneImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portal.model.impl.PhoneImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<Phone, Long> PHONE_ID_ACCESSOR = new Accessor<Phone, Long>() {
 			@Override

@@ -23,16 +23,14 @@ import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Provides the remote service utility for CalendarNotificationTemplate. This utility wraps
- * {@link com.liferay.calendar.service.impl.CalendarNotificationTemplateServiceImpl} and is the
- * primary access point for service operations in application layer code running
- * on a remote server. Methods of this service are expected to have security
- * checks based on the propagated JAAS credentials because this service can be
+ * <code>com.liferay.calendar.service.impl.CalendarNotificationTemplateServiceImpl</code> and is an
+ * access point for service operations in application layer code running on a
+ * remote server. Methods of this service are expected to have security checks
+ * based on the propagated JAAS credentials because this service can be
  * accessed remotely.
  *
  * @author Eduardo Lundgren
  * @see CalendarNotificationTemplateService
- * @see com.liferay.calendar.service.base.CalendarNotificationTemplateServiceBaseImpl
- * @see com.liferay.calendar.service.impl.CalendarNotificationTemplateServiceImpl
  * @generated
  */
 @ProviderType
@@ -40,7 +38,7 @@ public class CalendarNotificationTemplateServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this class directly. Add custom service methods to {@link com.liferay.calendar.service.impl.CalendarNotificationTemplateServiceImpl} and rerun ServiceBuilder to regenerate this class.
+	 * Never modify this class directly. Add custom service methods to <code>com.liferay.calendar.service.impl.CalendarNotificationTemplateServiceImpl</code> and rerun ServiceBuilder to regenerate this class.
 	 */
 	public static com.liferay.calendar.model.CalendarNotificationTemplate addCalendarNotificationTemplate(
 		long calendarId,

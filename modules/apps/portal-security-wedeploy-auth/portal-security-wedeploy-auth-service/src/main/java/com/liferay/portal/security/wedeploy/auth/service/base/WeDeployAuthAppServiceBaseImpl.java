@@ -42,7 +42,6 @@ import javax.sql.DataSource;
  *
  * @author Supritha Sundaram
  * @see com.liferay.portal.security.wedeploy.auth.service.impl.WeDeployAuthAppServiceImpl
- * @see com.liferay.portal.security.wedeploy.auth.service.WeDeployAuthAppServiceUtil
  * @generated
  */
 public abstract class WeDeployAuthAppServiceBaseImpl extends BaseServiceImpl
@@ -50,7 +49,7 @@ public abstract class WeDeployAuthAppServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.portal.security.wedeploy.auth.service.WeDeployAuthAppServiceUtil} to access the we deploy auth app remote service.
+	 * Never modify or reference this class directly. Use <code>WeDeployAuthAppService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.portal.security.wedeploy.auth.service.WeDeployAuthAppServiceUtil</code>.
 	 */
 
 	/**

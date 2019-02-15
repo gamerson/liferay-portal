@@ -56,7 +56,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.blogs.service.impl.BlogsEntryServiceImpl
- * @see com.liferay.blogs.service.BlogsEntryServiceUtil
  * @generated
  */
 public abstract class BlogsEntryServiceBaseImpl extends BaseServiceImpl
@@ -64,7 +63,7 @@ public abstract class BlogsEntryServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.blogs.service.BlogsEntryServiceUtil} to access the blogs entry remote service.
+	 * Never modify or reference this class directly. Use <code>BlogsEntryService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.blogs.service.BlogsEntryServiceUtil</code>.
 	 */
 
 	/**

@@ -43,7 +43,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.portal.service.impl.PasswordPolicyServiceImpl
- * @see com.liferay.portal.kernel.service.PasswordPolicyServiceUtil
  * @generated
  */
 public abstract class PasswordPolicyServiceBaseImpl extends BaseServiceImpl
@@ -51,7 +50,7 @@ public abstract class PasswordPolicyServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.portal.kernel.service.PasswordPolicyServiceUtil} to access the password policy remote service.
+	 * Never modify or reference this class directly. Use <code>PasswordPolicyService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.portal.kernel.service.PasswordPolicyServiceUtil</code>.
 	 */
 
 	/**

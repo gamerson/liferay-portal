@@ -35,8 +35,6 @@ import java.util.List;
  *
  * @author Brian Wing Shun Chan
  * @see PasswordPolicyServiceUtil
- * @see com.liferay.portal.service.base.PasswordPolicyServiceBaseImpl
- * @see com.liferay.portal.service.impl.PasswordPolicyServiceImpl
  * @generated
  */
 @AccessControlled
@@ -48,7 +46,7 @@ public interface PasswordPolicyService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link PasswordPolicyServiceUtil} to access the password policy remote service. Add custom service methods to {@link com.liferay.portal.service.impl.PasswordPolicyServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link PasswordPolicyServiceUtil} to access the password policy remote service. Add custom service methods to <code>com.liferay.portal.service.impl.PasswordPolicyServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public PasswordPolicy addPasswordPolicy(String name, String description,
 		boolean changeable, boolean changeRequired, long minAge,

@@ -39,8 +39,6 @@ import java.util.List;
  *
  * @author Brian Wing Shun Chan
  * @see SocialActivitySettingServiceUtil
- * @see com.liferay.portlet.social.service.base.SocialActivitySettingServiceBaseImpl
- * @see com.liferay.portlet.social.service.impl.SocialActivitySettingServiceImpl
  * @generated
  */
 @AccessControlled
@@ -52,7 +50,7 @@ public interface SocialActivitySettingService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link SocialActivitySettingServiceUtil} to access the social activity setting remote service. Add custom service methods to {@link com.liferay.portlet.social.service.impl.SocialActivitySettingServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link SocialActivitySettingServiceUtil} to access the social activity setting remote service. Add custom service methods to <code>com.liferay.portlet.social.service.impl.SocialActivitySettingServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public SocialActivityDefinition getActivityDefinition(long groupId,

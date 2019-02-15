@@ -24,8 +24,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see WorkflowDefinitionLinkModel
- * @see com.liferay.portal.model.impl.WorkflowDefinitionLinkImpl
- * @see com.liferay.portal.model.impl.WorkflowDefinitionLinkModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portal.model.impl.WorkflowDefinitionLinkImpl")
@@ -35,7 +33,7 @@ public interface WorkflowDefinitionLink extends WorkflowDefinitionLinkModel,
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portal.model.impl.WorkflowDefinitionLinkImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portal.model.impl.WorkflowDefinitionLinkImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<WorkflowDefinitionLink, Long> WORKFLOW_DEFINITION_LINK_ID_ACCESSOR =
 		new Accessor<WorkflowDefinitionLink, Long>() {

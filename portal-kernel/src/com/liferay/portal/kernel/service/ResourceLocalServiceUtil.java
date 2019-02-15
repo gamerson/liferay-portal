@@ -21,16 +21,14 @@ import com.liferay.portal.kernel.util.ReferenceRegistry;
 
 /**
  * Provides the local service utility for Resource. This utility wraps
- * {@link com.liferay.portal.service.impl.ResourceLocalServiceImpl} and is the
- * primary access point for service operations in application layer code running
+ * <code>com.liferay.portal.service.impl.ResourceLocalServiceImpl</code> and
+ * is an access point for service operations in application layer code running
  * on the local server. Methods of this service will not have security checks
  * based on the propagated JAAS credentials because this service can only be
  * accessed from within the same VM.
  *
  * @author Brian Wing Shun Chan
  * @see ResourceLocalService
- * @see com.liferay.portal.service.base.ResourceLocalServiceBaseImpl
- * @see com.liferay.portal.service.impl.ResourceLocalServiceImpl
  * @generated
  */
 @ProviderType
@@ -38,7 +36,7 @@ public class ResourceLocalServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this class directly. Add custom service methods to {@link com.liferay.portal.service.impl.ResourceLocalServiceImpl} and rerun ServiceBuilder to regenerate this class.
+	 * Never modify this class directly. Add custom service methods to <code>com.liferay.portal.service.impl.ResourceLocalServiceImpl</code> and rerun ServiceBuilder to regenerate this class.
 	 */
 
 	/**

@@ -36,7 +36,6 @@ import java.util.Map;
  * The cache model class for representing BackgroundTask in entity cache.
  *
  * @author Brian Wing Shun Chan
- * @see BackgroundTask
  * @generated
  */
 @ProviderType

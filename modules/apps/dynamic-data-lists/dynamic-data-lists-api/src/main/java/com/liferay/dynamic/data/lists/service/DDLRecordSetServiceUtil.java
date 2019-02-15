@@ -23,16 +23,14 @@ import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Provides the remote service utility for DDLRecordSet. This utility wraps
- * {@link com.liferay.dynamic.data.lists.service.impl.DDLRecordSetServiceImpl} and is the
- * primary access point for service operations in application layer code running
- * on a remote server. Methods of this service are expected to have security
- * checks based on the propagated JAAS credentials because this service can be
+ * <code>com.liferay.dynamic.data.lists.service.impl.DDLRecordSetServiceImpl</code> and is an
+ * access point for service operations in application layer code running on a
+ * remote server. Methods of this service are expected to have security checks
+ * based on the propagated JAAS credentials because this service can be
  * accessed remotely.
  *
  * @author Brian Wing Shun Chan
  * @see DDLRecordSetService
- * @see com.liferay.dynamic.data.lists.service.base.DDLRecordSetServiceBaseImpl
- * @see com.liferay.dynamic.data.lists.service.impl.DDLRecordSetServiceImpl
  * @generated
  */
 @ProviderType
@@ -40,7 +38,7 @@ public class DDLRecordSetServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this class directly. Add custom service methods to {@link com.liferay.dynamic.data.lists.service.impl.DDLRecordSetServiceImpl} and rerun ServiceBuilder to regenerate this class.
+	 * Never modify this class directly. Add custom service methods to <code>com.liferay.dynamic.data.lists.service.impl.DDLRecordSetServiceImpl</code> and rerun ServiceBuilder to regenerate this class.
 	 */
 
 	/**

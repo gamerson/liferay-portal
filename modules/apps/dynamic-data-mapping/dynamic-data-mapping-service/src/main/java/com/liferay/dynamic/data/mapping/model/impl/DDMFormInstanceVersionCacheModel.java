@@ -34,7 +34,6 @@ import java.util.Date;
  * The cache model class for representing DDMFormInstanceVersion in entity cache.
  *
  * @author Brian Wing Shun Chan
- * @see DDMFormInstanceVersion
  * @generated
  */
 @ProviderType

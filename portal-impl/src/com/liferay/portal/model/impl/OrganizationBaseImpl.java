@@ -43,7 +43,7 @@ public abstract class OrganizationBaseImpl extends OrganizationModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a organization model instance should use the {@link Organization} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a organization model instance should use the <code>Organization</code> interface instead.
 	 */
 	@Override
 	public void persist() {

@@ -38,7 +38,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.portal.service.impl.ImageServiceImpl
- * @see com.liferay.portal.kernel.service.ImageServiceUtil
  * @generated
  */
 public abstract class ImageServiceBaseImpl extends BaseServiceImpl
@@ -46,7 +45,7 @@ public abstract class ImageServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.portal.kernel.service.ImageServiceUtil} to access the image remote service.
+	 * Never modify or reference this class directly. Use <code>ImageService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.portal.kernel.service.ImageServiceUtil</code>.
 	 */
 
 	/**

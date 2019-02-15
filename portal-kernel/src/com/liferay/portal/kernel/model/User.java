@@ -24,8 +24,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see UserModel
- * @see com.liferay.portal.model.impl.UserImpl
- * @see com.liferay.portal.model.impl.UserModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portal.model.impl.UserImpl")
@@ -34,7 +32,7 @@ public interface User extends UserModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portal.model.impl.UserImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portal.model.impl.UserImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<User, Long> USER_ID_ACCESSOR = new Accessor<User, Long>() {
 			@Override

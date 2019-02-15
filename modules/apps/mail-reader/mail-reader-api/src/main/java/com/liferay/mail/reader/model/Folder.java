@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see FolderModel
- * @see com.liferay.mail.reader.model.impl.FolderImpl
- * @see com.liferay.mail.reader.model.impl.FolderModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.mail.reader.model.impl.FolderImpl")
@@ -35,7 +33,7 @@ public interface Folder extends FolderModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.mail.reader.model.impl.FolderImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.mail.reader.model.impl.FolderImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<Folder, Long> FOLDER_ID_ACCESSOR = new Accessor<Folder, Long>() {
 			@Override

@@ -34,7 +34,6 @@ import java.util.Date;
  * The cache model class for representing SegmentsEntryRel in entity cache.
  *
  * @author Eduardo Garcia
- * @see SegmentsEntryRel
  * @generated
  */
 @ProviderType

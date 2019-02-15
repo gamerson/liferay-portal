@@ -35,27 +35,12 @@
 			align-items: center;
 			display: flex;
 
-			.active-toggle,
-			.members-count {
-				margin-right: 16px;
-			}
-
-			.active-toggle {
-				margin-bottom: 0;
-
-				.toggle-switch-text {
-					font-size: 14px;
-				}
+			.members-count-button {
+				margin-right: 24px;
 			}
 
 			.loading-animation {
 				margin: 0 8px 0 0;
-			}
-
-			.members-count {
-				color: #2E5AAC;
-				font-size: 0.875rem;
-				font-weight: 600;
 			}
 		}
 
@@ -66,7 +51,9 @@
 
 	.form-body {
 		flex: 1;
-		overflow: auto;
+		height: 100%;
+		min-height: 0;
+		position: relative;
 	}
 
 	.title-editor-root.editing + .source-icon {

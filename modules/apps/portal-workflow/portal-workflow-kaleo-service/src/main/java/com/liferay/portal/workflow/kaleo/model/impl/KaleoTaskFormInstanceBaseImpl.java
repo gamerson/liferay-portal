@@ -37,7 +37,7 @@ public abstract class KaleoTaskFormInstanceBaseImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a kaleo task form instance model instance should use the {@link KaleoTaskFormInstance} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a kaleo task form instance model instance should use the <code>KaleoTaskFormInstance</code> interface instead.
 	 */
 	@Override
 	public void persist() {

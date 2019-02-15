@@ -35,8 +35,6 @@ import java.util.List;
  *
  * @author Brian Wing Shun Chan
  * @see ThemeServiceUtil
- * @see com.liferay.portal.service.base.ThemeServiceBaseImpl
- * @see com.liferay.portal.service.impl.ThemeServiceImpl
  * @generated
  */
 @AccessControlled
@@ -48,7 +46,7 @@ public interface ThemeService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link ThemeServiceUtil} to access the theme remote service. Add custom service methods to {@link com.liferay.portal.service.impl.ThemeServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link ThemeServiceUtil} to access the theme remote service. Add custom service methods to <code>com.liferay.portal.service.impl.ThemeServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 
 	/**

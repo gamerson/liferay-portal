@@ -42,7 +42,6 @@ import javax.sql.DataSource;
  *
  * @author Bruno Farache
  * @see com.liferay.push.notifications.service.impl.PushNotificationsDeviceServiceImpl
- * @see com.liferay.push.notifications.service.PushNotificationsDeviceServiceUtil
  * @generated
  */
 public abstract class PushNotificationsDeviceServiceBaseImpl
@@ -51,7 +50,7 @@ public abstract class PushNotificationsDeviceServiceBaseImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.push.notifications.service.PushNotificationsDeviceServiceUtil} to access the push notifications device remote service.
+	 * Never modify or reference this class directly. Use <code>PushNotificationsDeviceService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.push.notifications.service.PushNotificationsDeviceServiceUtil</code>.
 	 */
 
 	/**

@@ -57,7 +57,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.journal.service.impl.JournalFolderServiceImpl
- * @see com.liferay.journal.service.JournalFolderServiceUtil
  * @generated
  */
 public abstract class JournalFolderServiceBaseImpl extends BaseServiceImpl
@@ -65,7 +64,7 @@ public abstract class JournalFolderServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.journal.service.JournalFolderServiceUtil} to access the journal folder remote service.
+	 * Never modify or reference this class directly. Use <code>JournalFolderService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.journal.service.JournalFolderServiceUtil</code>.
 	 */
 
 	/**

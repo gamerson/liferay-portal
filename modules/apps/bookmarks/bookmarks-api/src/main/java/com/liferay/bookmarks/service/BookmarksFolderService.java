@@ -38,8 +38,6 @@ import java.util.List;
  *
  * @author Brian Wing Shun Chan
  * @see BookmarksFolderServiceUtil
- * @see com.liferay.bookmarks.service.base.BookmarksFolderServiceBaseImpl
- * @see com.liferay.bookmarks.service.impl.BookmarksFolderServiceImpl
  * @generated
  */
 @AccessControlled
@@ -53,7 +51,7 @@ public interface BookmarksFolderService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link BookmarksFolderServiceUtil} to access the bookmarks folder remote service. Add custom service methods to {@link com.liferay.bookmarks.service.impl.BookmarksFolderServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link BookmarksFolderServiceUtil} to access the bookmarks folder remote service. Add custom service methods to <code>com.liferay.bookmarks.service.impl.BookmarksFolderServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public BookmarksFolder addFolder(long parentFolderId, String name,
 		String description, ServiceContext serviceContext)

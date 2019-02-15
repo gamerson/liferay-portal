@@ -37,7 +37,7 @@ public abstract class LayoutPageTemplateEntryBaseImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a layout page template entry model instance should use the {@link LayoutPageTemplateEntry} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a layout page template entry model instance should use the <code>LayoutPageTemplateEntry</code> interface instead.
 	 */
 	@Override
 	public void persist() {

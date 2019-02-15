@@ -73,7 +73,7 @@ public abstract class Base${schemaName}ResourceImpl implements ${schemaName}Reso
 		return responseBuilder.build();
 	}
 
-	protected <T, R> List<R> transform(List<T> list, UnsafeFunction<T, R, Exception> unsafeFunction) {
+	protected <T, R> List<R> transform(List<T> list, UnsafeFunction<T, R, Throwable> unsafeFunction) {
 		return TransformUtil.transform(list, unsafeFunction);
 	}
 

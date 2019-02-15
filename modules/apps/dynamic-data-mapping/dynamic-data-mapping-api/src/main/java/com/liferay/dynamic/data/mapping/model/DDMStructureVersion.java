@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see DDMStructureVersionModel
- * @see com.liferay.dynamic.data.mapping.model.impl.DDMStructureVersionImpl
- * @see com.liferay.dynamic.data.mapping.model.impl.DDMStructureVersionModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.dynamic.data.mapping.model.impl.DDMStructureVersionImpl")
@@ -36,7 +34,7 @@ public interface DDMStructureVersion extends DDMStructureVersionModel,
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.dynamic.data.mapping.model.impl.DDMStructureVersionImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.dynamic.data.mapping.model.impl.DDMStructureVersionImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<DDMStructureVersion, Long> STRUCTURE_VERSION_ID_ACCESSOR =
 		new Accessor<DDMStructureVersion, Long>() {

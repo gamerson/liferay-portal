@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see DLSyncEventModel
- * @see com.liferay.document.library.sync.model.impl.DLSyncEventImpl
- * @see com.liferay.document.library.sync.model.impl.DLSyncEventModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.document.library.sync.model.impl.DLSyncEventImpl")
@@ -35,7 +33,7 @@ public interface DLSyncEvent extends DLSyncEventModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.document.library.sync.model.impl.DLSyncEventImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.document.library.sync.model.impl.DLSyncEventImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<DLSyncEvent, Long> SYNC_EVENT_ID_ACCESSOR = new Accessor<DLSyncEvent, Long>() {
 			@Override

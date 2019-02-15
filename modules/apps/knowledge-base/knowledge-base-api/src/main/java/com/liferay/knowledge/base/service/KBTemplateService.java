@@ -41,8 +41,6 @@ import java.util.List;
  *
  * @author Brian Wing Shun Chan
  * @see KBTemplateServiceUtil
- * @see com.liferay.knowledge.base.service.base.KBTemplateServiceBaseImpl
- * @see com.liferay.knowledge.base.service.impl.KBTemplateServiceImpl
  * @generated
  */
 @AccessControlled
@@ -56,7 +54,7 @@ public interface KBTemplateService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link KBTemplateServiceUtil} to access the kb template remote service. Add custom service methods to {@link com.liferay.knowledge.base.service.impl.KBTemplateServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link KBTemplateServiceUtil} to access the kb template remote service. Add custom service methods to <code>com.liferay.knowledge.base.service.impl.KBTemplateServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public KBTemplate addKBTemplate(String portletId, String title,
 		String content, ServiceContext serviceContext)

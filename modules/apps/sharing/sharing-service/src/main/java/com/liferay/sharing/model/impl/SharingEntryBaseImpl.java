@@ -37,7 +37,7 @@ public abstract class SharingEntryBaseImpl extends SharingEntryModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a sharing entry model instance should use the {@link SharingEntry} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a sharing entry model instance should use the <code>SharingEntry</code> interface instead.
 	 */
 	@Override
 	public void persist() {

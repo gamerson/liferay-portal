@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see KBArticleModel
- * @see com.liferay.knowledge.base.model.impl.KBArticleImpl
- * @see com.liferay.knowledge.base.model.impl.KBArticleModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.knowledge.base.model.impl.KBArticleImpl")
@@ -35,7 +33,7 @@ public interface KBArticle extends KBArticleModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.knowledge.base.model.impl.KBArticleImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.knowledge.base.model.impl.KBArticleImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<KBArticle, Long> KB_ARTICLE_ID_ACCESSOR = new Accessor<KBArticle, Long>() {
 			@Override

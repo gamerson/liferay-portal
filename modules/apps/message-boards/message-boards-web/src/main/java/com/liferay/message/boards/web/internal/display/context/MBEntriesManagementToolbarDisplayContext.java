@@ -17,6 +17,8 @@ package com.liferay.message.boards.web.internal.display.context;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.CreationMenu;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItemList;
+import com.liferay.frontend.taglib.clay.servlet.taglib.util.LabelItem;
+import com.liferay.frontend.taglib.clay.servlet.taglib.util.LabelItemList;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.SafeConsumer;
 import com.liferay.message.boards.constants.MBCategoryConstants;
 import com.liferay.message.boards.constants.MBPortletKeys;
@@ -120,6 +122,7 @@ public class MBEntriesManagementToolbarDisplayContext {
 
 							dropdownItem.setQuickAction(true);
 						}));
+
 				add(
 					SafeConsumer.ignore(
 						dropdownItem -> {
@@ -267,6 +270,39 @@ public class MBEntriesManagementToolbarDisplayContext {
 		};
 	}
 
+	public List<LabelItem> getFilterLabelItems() {
+		return new LabelItemList() {
+			{
+				String entriesNavigation = _getEntriesNavigation();
+
+				if (entriesNavigation.equals("threads") ||
+					entriesNavigation.equals("categories")) {
+
+					add(
+						SafeConsumer.ignore(
+							labelItem -> {
+								PortletURL removeLabelURL =
+									PortletURLUtil.clone(
+										_currentURLObj,
+										_liferayPortletResponse);
+
+								removeLabelURL.setParameter(
+									"entriesNavigation", (String)null);
+
+								labelItem.putData(
+									"removeLabelURL",
+									removeLabelURL.toString());
+
+								labelItem.setCloseable(true);
+								labelItem.setLabel(
+									LanguageUtil.get(
+										_request, entriesNavigation));
+							}));
+				}
+			}
+		};
+	}
+
 	public String getOrderByCol() {
 		if (_orderByCol != null) {
 			return _orderByCol;
@@ -392,8 +428,7 @@ public class MBEntriesManagementToolbarDisplayContext {
 			orderByAsc = true;
 		}
 
-		String entriesNavigation = ParamUtil.getString(
-			_request, "entriesNavigation", "all");
+		String entriesNavigation = _getEntriesNavigation();
 
 		if (entriesNavigation.equals("all")) {
 			if (orderByCol.equals("modified-date")) {
@@ -458,9 +493,12 @@ public class MBEntriesManagementToolbarDisplayContext {
 		return sortingURL;
 	}
 
+	private String _getEntriesNavigation() {
+		return ParamUtil.getString(_request, "entriesNavigation", "all");
+	}
+
 	private List<DropdownItem> _getFilterNavigationDropdownItems() {
-		final String entriesNavigation = ParamUtil.getString(
-			_request, "entriesNavigation", "all");
+		String entriesNavigation = _getEntriesNavigation();
 
 		return new DropdownItemList() {
 			{

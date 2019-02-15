@@ -37,7 +37,7 @@ public abstract class PasswordPolicyBaseImpl extends PasswordPolicyModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a password policy model instance should use the {@link PasswordPolicy} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a password policy model instance should use the <code>PasswordPolicy</code> interface instead.
 	 */
 	@Override
 	public void persist() {

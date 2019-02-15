@@ -39,7 +39,7 @@ public abstract class ResourceBlockBaseImpl extends ResourceBlockModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a resource block model instance should use the {@link ResourceBlock} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a resource block model instance should use the <code>ResourceBlock</code> interface instead.
 	 */
 	@Override
 	public void persist() {

@@ -37,7 +37,7 @@ public abstract class PowwowMeetingBaseImpl extends PowwowMeetingModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a powwow meeting model instance should use the {@link PowwowMeeting} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a powwow meeting model instance should use the <code>PowwowMeeting</code> interface instead.
 	 */
 	@Override
 	public void persist() {

@@ -22,6 +22,7 @@ import com.liferay.portal.odata.entity.ComplexEntityField;
 import com.liferay.portal.odata.entity.DateTimeEntityField;
 import com.liferay.portal.odata.entity.EntityField;
 import com.liferay.portal.odata.entity.EntityModel;
+import com.liferay.portal.odata.entity.IntegerEntityField;
 import com.liferay.portal.odata.entity.StringEntityField;
 
 import java.util.List;
@@ -55,9 +56,9 @@ public class StructuredContentEntityModel implements EntityModel {
 				"datePublished",
 				locale -> Field.getSortableFieldName(Field.DISPLAY_DATE),
 				locale -> Field.DISPLAY_DATE),
-			new StringEntityField(
+			new IntegerEntityField(
 				"contentStructureId", locale -> Field.CLASS_TYPE_ID),
-			new StringEntityField("creatorId", locale -> Field.USER_ID),
+			new IntegerEntityField("creatorId", locale -> Field.USER_ID),
 			new StringEntityField(
 				"title",
 				locale -> Field.getSortableFieldName(

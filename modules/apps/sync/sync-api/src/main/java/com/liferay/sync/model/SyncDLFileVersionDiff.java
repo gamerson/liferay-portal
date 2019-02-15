@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see SyncDLFileVersionDiffModel
- * @see com.liferay.sync.model.impl.SyncDLFileVersionDiffImpl
- * @see com.liferay.sync.model.impl.SyncDLFileVersionDiffModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.sync.model.impl.SyncDLFileVersionDiffImpl")
@@ -36,7 +34,7 @@ public interface SyncDLFileVersionDiff extends SyncDLFileVersionDiffModel,
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.sync.model.impl.SyncDLFileVersionDiffImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.sync.model.impl.SyncDLFileVersionDiffImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<SyncDLFileVersionDiff, Long> SYNC_DL_FILE_VERSION_DIFF_ID_ACCESSOR =
 		new Accessor<SyncDLFileVersionDiff, Long>() {

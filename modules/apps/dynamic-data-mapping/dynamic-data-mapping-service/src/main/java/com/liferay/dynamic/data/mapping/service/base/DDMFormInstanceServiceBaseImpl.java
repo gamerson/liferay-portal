@@ -49,7 +49,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.dynamic.data.mapping.service.impl.DDMFormInstanceServiceImpl
- * @see com.liferay.dynamic.data.mapping.service.DDMFormInstanceServiceUtil
  * @generated
  */
 public abstract class DDMFormInstanceServiceBaseImpl extends BaseServiceImpl
@@ -57,7 +56,7 @@ public abstract class DDMFormInstanceServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.dynamic.data.mapping.service.DDMFormInstanceServiceUtil} to access the ddm form instance remote service.
+	 * Never modify or reference this class directly. Use <code>DDMFormInstanceService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.dynamic.data.mapping.service.DDMFormInstanceServiceUtil</code>.
 	 */
 
 	/**

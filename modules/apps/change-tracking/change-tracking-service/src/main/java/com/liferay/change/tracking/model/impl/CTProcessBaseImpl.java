@@ -37,7 +37,7 @@ public abstract class CTProcessBaseImpl extends CTProcessModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a ct process model instance should use the {@link CTProcess} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a ct process model instance should use the <code>CTProcess</code> interface instead.
 	 */
 	@Override
 	public void persist() {

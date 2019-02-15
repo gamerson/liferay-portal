@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see LayoutPageTemplateEntryModel
- * @see com.liferay.layout.page.template.model.impl.LayoutPageTemplateEntryImpl
- * @see com.liferay.layout.page.template.model.impl.LayoutPageTemplateEntryModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.layout.page.template.model.impl.LayoutPageTemplateEntryImpl")
@@ -36,7 +34,7 @@ public interface LayoutPageTemplateEntry extends LayoutPageTemplateEntryModel,
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.layout.page.template.model.impl.LayoutPageTemplateEntryImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.layout.page.template.model.impl.LayoutPageTemplateEntryImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<LayoutPageTemplateEntry, Long> LAYOUT_PAGE_TEMPLATE_ENTRY_ID_ACCESSOR =
 		new Accessor<LayoutPageTemplateEntry, Long>() {

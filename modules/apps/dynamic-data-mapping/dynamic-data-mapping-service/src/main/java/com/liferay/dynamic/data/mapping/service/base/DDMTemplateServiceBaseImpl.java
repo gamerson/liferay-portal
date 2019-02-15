@@ -45,7 +45,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.dynamic.data.mapping.service.impl.DDMTemplateServiceImpl
- * @see com.liferay.dynamic.data.mapping.service.DDMTemplateServiceUtil
  * @generated
  */
 public abstract class DDMTemplateServiceBaseImpl extends BaseServiceImpl
@@ -53,7 +52,7 @@ public abstract class DDMTemplateServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.dynamic.data.mapping.service.DDMTemplateServiceUtil} to access the ddm template remote service.
+	 * Never modify or reference this class directly. Use <code>DDMTemplateService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.dynamic.data.mapping.service.DDMTemplateServiceUtil</code>.
 	 */
 
 	/**

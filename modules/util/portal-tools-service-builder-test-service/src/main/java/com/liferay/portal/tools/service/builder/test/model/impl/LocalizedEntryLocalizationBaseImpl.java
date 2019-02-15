@@ -37,6 +37,6 @@ public abstract class LocalizedEntryLocalizationBaseImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a localized entry localization model instance should use the {@link LocalizedEntryLocalization} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a localized entry localization model instance should use the <code>LocalizedEntryLocalization</code> interface instead.
 	 */
 }

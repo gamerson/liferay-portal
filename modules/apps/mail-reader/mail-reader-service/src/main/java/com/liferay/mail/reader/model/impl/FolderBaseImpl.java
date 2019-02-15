@@ -36,7 +36,7 @@ public abstract class FolderBaseImpl extends FolderModelImpl implements Folder {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a folder model instance should use the {@link Folder} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a folder model instance should use the <code>Folder</code> interface instead.
 	 */
 	@Override
 	public void persist() {

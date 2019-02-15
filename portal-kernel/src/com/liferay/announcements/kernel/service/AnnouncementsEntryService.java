@@ -36,8 +36,6 @@ import java.util.Date;
  *
  * @author Brian Wing Shun Chan
  * @see AnnouncementsEntryServiceUtil
- * @see com.liferay.portlet.announcements.service.base.AnnouncementsEntryServiceBaseImpl
- * @see com.liferay.portlet.announcements.service.impl.AnnouncementsEntryServiceImpl
  * @generated
  */
 @AccessControlled
@@ -49,7 +47,7 @@ public interface AnnouncementsEntryService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link AnnouncementsEntryServiceUtil} to access the announcements entry remote service. Add custom service methods to {@link com.liferay.portlet.announcements.service.impl.AnnouncementsEntryServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link AnnouncementsEntryServiceUtil} to access the announcements entry remote service. Add custom service methods to <code>com.liferay.portlet.announcements.service.impl.AnnouncementsEntryServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 
 	/**

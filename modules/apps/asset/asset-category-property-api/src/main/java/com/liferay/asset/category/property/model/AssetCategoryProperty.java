@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see AssetCategoryPropertyModel
- * @see com.liferay.asset.category.property.model.impl.AssetCategoryPropertyImpl
- * @see com.liferay.asset.category.property.model.impl.AssetCategoryPropertyModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.asset.category.property.model.impl.AssetCategoryPropertyImpl")
@@ -36,7 +34,7 @@ public interface AssetCategoryProperty extends AssetCategoryPropertyModel,
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.asset.category.property.model.impl.AssetCategoryPropertyImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.asset.category.property.model.impl.AssetCategoryPropertyImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<AssetCategoryProperty, Long> CATEGORY_PROPERTY_ID_ACCESSOR =
 		new Accessor<AssetCategoryProperty, Long>() {

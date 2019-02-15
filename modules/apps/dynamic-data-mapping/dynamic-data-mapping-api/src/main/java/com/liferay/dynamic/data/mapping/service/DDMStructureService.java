@@ -43,8 +43,6 @@ import java.util.Map;
  *
  * @author Brian Wing Shun Chan
  * @see DDMStructureServiceUtil
- * @see com.liferay.dynamic.data.mapping.service.base.DDMStructureServiceBaseImpl
- * @see com.liferay.dynamic.data.mapping.service.impl.DDMStructureServiceImpl
  * @generated
  */
 @AccessControlled
@@ -58,7 +56,7 @@ public interface DDMStructureService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link DDMStructureServiceUtil} to access the ddm structure remote service. Add custom service methods to {@link com.liferay.dynamic.data.mapping.service.impl.DDMStructureServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link DDMStructureServiceUtil} to access the ddm structure remote service. Add custom service methods to <code>com.liferay.dynamic.data.mapping.service.impl.DDMStructureServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public DDMStructure addStructure(long userId, long groupId,
 		long classNameId, Map<Locale, String> nameMap,

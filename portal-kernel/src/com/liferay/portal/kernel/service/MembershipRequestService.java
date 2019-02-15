@@ -32,8 +32,6 @@ import com.liferay.portal.kernel.transaction.Transactional;
  *
  * @author Brian Wing Shun Chan
  * @see MembershipRequestServiceUtil
- * @see com.liferay.portal.service.base.MembershipRequestServiceBaseImpl
- * @see com.liferay.portal.service.impl.MembershipRequestServiceImpl
  * @generated
  */
 @AccessControlled
@@ -45,7 +43,7 @@ public interface MembershipRequestService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link MembershipRequestServiceUtil} to access the membership request remote service. Add custom service methods to {@link com.liferay.portal.service.impl.MembershipRequestServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link MembershipRequestServiceUtil} to access the membership request remote service. Add custom service methods to <code>com.liferay.portal.service.impl.MembershipRequestServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public MembershipRequest addMembershipRequest(long groupId,
 		String comments, ServiceContext serviceContext)

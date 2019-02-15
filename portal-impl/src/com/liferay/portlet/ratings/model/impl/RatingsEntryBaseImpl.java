@@ -37,7 +37,7 @@ public abstract class RatingsEntryBaseImpl extends RatingsEntryModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a ratings entry model instance should use the {@link RatingsEntry} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a ratings entry model instance should use the <code>RatingsEntry</code> interface instead.
 	 */
 	@Override
 	public void persist() {

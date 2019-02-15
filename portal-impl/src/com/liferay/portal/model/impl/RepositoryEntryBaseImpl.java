@@ -37,7 +37,7 @@ public abstract class RepositoryEntryBaseImpl extends RepositoryEntryModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a repository entry model instance should use the {@link RepositoryEntry} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a repository entry model instance should use the <code>RepositoryEntry</code> interface instead.
 	 */
 	@Override
 	public void persist() {

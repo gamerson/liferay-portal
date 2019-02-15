@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see DDMTemplateVersionModel
- * @see com.liferay.dynamic.data.mapping.model.impl.DDMTemplateVersionImpl
- * @see com.liferay.dynamic.data.mapping.model.impl.DDMTemplateVersionModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.dynamic.data.mapping.model.impl.DDMTemplateVersionImpl")
@@ -36,7 +34,7 @@ public interface DDMTemplateVersion extends DDMTemplateVersionModel,
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.dynamic.data.mapping.model.impl.DDMTemplateVersionImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.dynamic.data.mapping.model.impl.DDMTemplateVersionImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<DDMTemplateVersion, Long> TEMPLATE_VERSION_ID_ACCESSOR =
 		new Accessor<DDMTemplateVersion, Long>() {

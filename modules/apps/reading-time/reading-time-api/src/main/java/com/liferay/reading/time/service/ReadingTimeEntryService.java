@@ -32,8 +32,6 @@ import com.liferay.portal.kernel.transaction.Transactional;
  *
  * @author Brian Wing Shun Chan
  * @see ReadingTimeEntryServiceUtil
- * @see com.liferay.reading.time.service.base.ReadingTimeEntryServiceBaseImpl
- * @see com.liferay.reading.time.service.impl.ReadingTimeEntryServiceImpl
  * @generated
  */
 @AccessControlled
@@ -47,7 +45,7 @@ public interface ReadingTimeEntryService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link ReadingTimeEntryServiceUtil} to access the reading time entry remote service. Add custom service methods to {@link com.liferay.reading.time.service.impl.ReadingTimeEntryServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link ReadingTimeEntryServiceUtil} to access the reading time entry remote service. Add custom service methods to <code>com.liferay.reading.time.service.impl.ReadingTimeEntryServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 
 	/**

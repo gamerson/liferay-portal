@@ -24,8 +24,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see ServiceComponentModel
- * @see com.liferay.portal.model.impl.ServiceComponentImpl
- * @see com.liferay.portal.model.impl.ServiceComponentModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portal.model.impl.ServiceComponentImpl")
@@ -34,7 +32,7 @@ public interface ServiceComponent extends ServiceComponentModel, PersistedModel 
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portal.model.impl.ServiceComponentImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portal.model.impl.ServiceComponentImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<ServiceComponent, Long> SERVICE_COMPONENT_ID_ACCESSOR =
 		new Accessor<ServiceComponent, Long>() {

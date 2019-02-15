@@ -34,8 +34,6 @@ import java.util.List;
  *
  * @author Brian Wing Shun Chan
  * @see ListTypeServiceUtil
- * @see com.liferay.portal.service.base.ListTypeServiceBaseImpl
- * @see com.liferay.portal.service.impl.ListTypeServiceImpl
  * @generated
  */
 @AccessControlled
@@ -47,7 +45,7 @@ public interface ListTypeService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link ListTypeServiceUtil} to access the list type remote service. Add custom service methods to {@link com.liferay.portal.service.impl.ListTypeServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link ListTypeServiceUtil} to access the list type remote service. Add custom service methods to <code>com.liferay.portal.service.impl.ListTypeServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public ListType getListType(long listTypeId) throws PortalException;

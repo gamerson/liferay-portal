@@ -24,8 +24,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see FriendlyURLEntryLocalizationModel
- * @see com.liferay.friendly.url.model.impl.FriendlyURLEntryLocalizationImpl
- * @see com.liferay.friendly.url.model.impl.FriendlyURLEntryLocalizationModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.friendly.url.model.impl.FriendlyURLEntryLocalizationImpl")
@@ -35,7 +33,7 @@ public interface FriendlyURLEntryLocalization
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.friendly.url.model.impl.FriendlyURLEntryLocalizationImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.friendly.url.model.impl.FriendlyURLEntryLocalizationImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<FriendlyURLEntryLocalization, Long> FRIENDLY_URL_ENTRY_LOCALIZATION_ID_ACCESSOR =
 		new Accessor<FriendlyURLEntryLocalization, Long>() {

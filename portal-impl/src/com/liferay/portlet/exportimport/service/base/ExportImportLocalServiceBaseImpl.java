@@ -47,7 +47,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.portlet.exportimport.service.impl.ExportImportLocalServiceImpl
- * @see com.liferay.exportimport.kernel.service.ExportImportLocalServiceUtil
  * @generated
  */
 @ProviderType
@@ -57,7 +56,7 @@ public abstract class ExportImportLocalServiceBaseImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.exportimport.kernel.service.ExportImportLocalServiceUtil} to access the export import local service.
+	 * Never modify or reference this class directly. Use <code>ExportImportLocalService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.exportimport.kernel.service.ExportImportLocalServiceUtil</code>.
 	 */
 
 	/**

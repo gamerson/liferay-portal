@@ -83,11 +83,6 @@ public abstract class BaseStructuredContentResourceTestCase {
 	}
 
 	@Test
-	public void testGetContentStructure() throws Exception {
-		Assert.assertTrue(true);
-	}
-
-	@Test
 	public void testGetStructuredContent() throws Exception {
 		Assert.assertTrue(true);
 	}
@@ -163,16 +158,6 @@ public abstract class BaseStructuredContentResourceTestCase {
 
 			requestSpecification.post(
 				"/content-spaces/{content-space-id}/structured-contents");
-	}
-
-	protected void invokeGetContentStructure(Long contentStructureId)
-		throws Exception {
-
-			RequestSpecification requestSpecification =
-				_createRequestRequestSpecification();
-
-			requestSpecification.post(
-				"/content-structures/{content-structure-id}");
 	}
 
 	protected void invokeGetStructuredContent(Long structuredContentId)

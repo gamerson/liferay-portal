@@ -23,6 +23,7 @@ import com.liferay.portal.kernel.comment.CommentManager;
 import com.liferay.portal.kernel.comment.DiscussionPermission;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.vulcan.pagination.Page;
 import com.liferay.portal.vulcan.pagination.Pagination;
@@ -51,7 +52,7 @@ public class CommentResourceImpl extends BaseCommentResourceImpl {
 
 		_checkViewPermission(comment);
 
-		return CommentUtil.toComment(comment);
+		return CommentUtil.toComment(comment, _portal);
 	}
 
 	@Override
@@ -66,7 +67,7 @@ public class CommentResourceImpl extends BaseCommentResourceImpl {
 				_commentManager.getChildComments(
 					commentId, WorkflowConstants.STATUS_APPROVED,
 					pagination.getStartPosition(), pagination.getEndPosition()),
-				CommentUtil::toComment),
+				comment -> CommentUtil.toComment(comment, _portal)),
 			pagination,
 			_commentManager.getChildCommentsCount(
 				commentId, WorkflowConstants.STATUS_APPROVED));
@@ -98,7 +99,7 @@ public class CommentResourceImpl extends BaseCommentResourceImpl {
 					journalArticle.getModelClassName(), structuredContentId,
 					WorkflowConstants.STATUS_APPROVED,
 					pagination.getStartPosition(), pagination.getEndPosition()),
-				CommentUtil::toComment),
+				comment -> CommentUtil.toComment(comment, _portal)),
 			pagination, count);
 	}
 
@@ -140,5 +141,8 @@ public class CommentResourceImpl extends BaseCommentResourceImpl {
 
 	@Reference
 	private JournalArticleService _journalArticleService;
+
+	@Reference
+	private Portal _portal;
 
 }

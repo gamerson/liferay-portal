@@ -37,7 +37,7 @@ public abstract class SocialActivitySetBaseImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a social activity set model instance should use the {@link SocialActivitySet} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a social activity set model instance should use the <code>SocialActivitySet</code> interface instead.
 	 */
 	@Override
 	public void persist() {

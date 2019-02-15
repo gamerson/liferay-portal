@@ -21,16 +21,14 @@ import com.liferay.portal.kernel.util.ReferenceRegistry;
 
 /**
  * Provides the remote service utility for DLFileVersion. This utility wraps
- * {@link com.liferay.portlet.documentlibrary.service.impl.DLFileVersionServiceImpl} and is the
- * primary access point for service operations in application layer code running
- * on a remote server. Methods of this service are expected to have security
- * checks based on the propagated JAAS credentials because this service can be
+ * <code>com.liferay.portlet.documentlibrary.service.impl.DLFileVersionServiceImpl</code> and is an
+ * access point for service operations in application layer code running on a
+ * remote server. Methods of this service are expected to have security checks
+ * based on the propagated JAAS credentials because this service can be
  * accessed remotely.
  *
  * @author Brian Wing Shun Chan
  * @see DLFileVersionService
- * @see com.liferay.portlet.documentlibrary.service.base.DLFileVersionServiceBaseImpl
- * @see com.liferay.portlet.documentlibrary.service.impl.DLFileVersionServiceImpl
  * @generated
  */
 @ProviderType
@@ -38,7 +36,7 @@ public class DLFileVersionServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this class directly. Add custom service methods to {@link com.liferay.portlet.documentlibrary.service.impl.DLFileVersionServiceImpl} and rerun ServiceBuilder to regenerate this class.
+	 * Never modify this class directly. Add custom service methods to <code>com.liferay.portlet.documentlibrary.service.impl.DLFileVersionServiceImpl</code> and rerun ServiceBuilder to regenerate this class.
 	 */
 	public static com.liferay.document.library.kernel.model.DLFileVersion getFileVersion(
 		long fileVersionId)

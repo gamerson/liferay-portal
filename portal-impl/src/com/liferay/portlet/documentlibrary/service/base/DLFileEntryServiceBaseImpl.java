@@ -65,7 +65,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.portlet.documentlibrary.service.impl.DLFileEntryServiceImpl
- * @see com.liferay.document.library.kernel.service.DLFileEntryServiceUtil
  * @generated
  */
 public abstract class DLFileEntryServiceBaseImpl extends BaseServiceImpl
@@ -73,7 +72,7 @@ public abstract class DLFileEntryServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.document.library.kernel.service.DLFileEntryServiceUtil} to access the document library file entry remote service.
+	 * Never modify or reference this class directly. Use <code>DLFileEntryService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.document.library.kernel.service.DLFileEntryServiceUtil</code>.
 	 */
 
 	/**

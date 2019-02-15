@@ -33,7 +33,6 @@ import java.util.Date;
  * The cache model class for representing AuditEvent in entity cache.
  *
  * @author Brian Wing Shun Chan
- * @see AuditEvent
  * @generated
  */
 @ProviderType

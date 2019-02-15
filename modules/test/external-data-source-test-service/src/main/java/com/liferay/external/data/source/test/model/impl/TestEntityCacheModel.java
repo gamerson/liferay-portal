@@ -31,7 +31,6 @@ import java.io.ObjectOutput;
  * The cache model class for representing TestEntity in entity cache.
  *
  * @author Brian Wing Shun Chan
- * @see TestEntity
  * @generated
  */
 @ProviderType

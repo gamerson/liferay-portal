@@ -43,7 +43,6 @@ import javax.sql.DataSource;
  *
  * @author José Manuel Navarro
  * @see com.liferay.screens.service.impl.ScreensDDMStructureVersionServiceImpl
- * @see com.liferay.screens.service.ScreensDDMStructureVersionServiceUtil
  * @generated
  */
 public abstract class ScreensDDMStructureVersionServiceBaseImpl
@@ -52,7 +51,7 @@ public abstract class ScreensDDMStructureVersionServiceBaseImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.screens.service.ScreensDDMStructureVersionServiceUtil} to access the screens ddm structure version remote service.
+	 * Never modify or reference this class directly. Use <code>ScreensDDMStructureVersionService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.screens.service.ScreensDDMStructureVersionServiceUtil</code>.
 	 */
 
 	/**

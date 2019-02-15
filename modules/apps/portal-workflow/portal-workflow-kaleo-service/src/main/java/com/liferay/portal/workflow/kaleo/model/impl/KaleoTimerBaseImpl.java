@@ -37,7 +37,7 @@ public abstract class KaleoTimerBaseImpl extends KaleoTimerModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a kaleo timer model instance should use the {@link KaleoTimer} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a kaleo timer model instance should use the <code>KaleoTimer</code> interface instead.
 	 */
 	@Override
 	public void persist() {

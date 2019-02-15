@@ -37,7 +37,7 @@ public abstract class LayoutRevisionBaseImpl extends LayoutRevisionModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a layout revision model instance should use the {@link LayoutRevision} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a layout revision model instance should use the <code>LayoutRevision</code> interface instead.
 	 */
 	@Override
 	public void persist() {

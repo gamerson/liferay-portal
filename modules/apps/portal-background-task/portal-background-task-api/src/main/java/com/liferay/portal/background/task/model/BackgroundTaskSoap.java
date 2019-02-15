@@ -27,7 +27,6 @@ import java.util.Map;
  * This class is used by SOAP remote services, specifically {@link com.liferay.portal.background.task.service.http.BackgroundTaskServiceSoap}.
  *
  * @author Brian Wing Shun Chan
- * @see com.liferay.portal.background.task.service.http.BackgroundTaskServiceSoap
  * @generated
  */
 @ProviderType

@@ -41,7 +41,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.flags.service.impl.FlagsEntryServiceImpl
- * @see com.liferay.flags.service.FlagsEntryServiceUtil
  * @generated
  */
 public abstract class FlagsEntryServiceBaseImpl extends BaseServiceImpl
@@ -49,7 +48,7 @@ public abstract class FlagsEntryServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.flags.service.FlagsEntryServiceUtil} to access the flags entry remote service.
+	 * Never modify or reference this class directly. Use <code>FlagsEntryService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.flags.service.FlagsEntryServiceUtil</code>.
 	 */
 
 	/**

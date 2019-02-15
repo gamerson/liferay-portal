@@ -34,7 +34,6 @@ import java.util.Date;
  * The cache model class for representing App in entity cache.
  *
  * @author Ryan Park
- * @see App
  * @generated
  */
 @ProviderType

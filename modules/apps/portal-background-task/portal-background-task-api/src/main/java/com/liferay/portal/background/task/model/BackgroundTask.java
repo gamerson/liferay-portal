@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see BackgroundTaskModel
- * @see com.liferay.portal.background.task.model.impl.BackgroundTaskImpl
- * @see com.liferay.portal.background.task.model.impl.BackgroundTaskModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portal.background.task.model.impl.BackgroundTaskImpl")
@@ -35,7 +33,7 @@ public interface BackgroundTask extends BackgroundTaskModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portal.background.task.model.impl.BackgroundTaskImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portal.background.task.model.impl.BackgroundTaskImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<BackgroundTask, Long> BACKGROUND_TASK_ID_ACCESSOR =
 		new Accessor<BackgroundTask, Long>() {

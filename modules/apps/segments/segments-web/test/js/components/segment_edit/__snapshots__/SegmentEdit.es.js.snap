@@ -83,11 +83,12 @@ exports[`SegmentEdit should render 1`] = `
             <div
               class="btn-group-item"
             >
-              <div
-                class="members-count mr-3"
+              <button
+                class="btn btn-secondary btn-sm members-count-button"
+                type="button"
               >
                 x-members
-              </div>
+              </button>
             </div>
           </div>
           <div

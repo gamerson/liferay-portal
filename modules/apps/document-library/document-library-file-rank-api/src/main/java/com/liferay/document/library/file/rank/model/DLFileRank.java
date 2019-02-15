@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see DLFileRankModel
- * @see com.liferay.document.library.file.rank.model.impl.DLFileRankImpl
- * @see com.liferay.document.library.file.rank.model.impl.DLFileRankModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.document.library.file.rank.model.impl.DLFileRankImpl")
@@ -35,7 +33,7 @@ public interface DLFileRank extends DLFileRankModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.document.library.file.rank.model.impl.DLFileRankImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.document.library.file.rank.model.impl.DLFileRankImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<DLFileRank, Long> FILE_RANK_ID_ACCESSOR = new Accessor<DLFileRank, Long>() {
 			@Override

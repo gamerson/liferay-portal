@@ -41,8 +41,6 @@ import java.util.Map;
  *
  * @author Edward C. Han
  * @see MDRRuleServiceUtil
- * @see com.liferay.mobile.device.rules.service.base.MDRRuleServiceBaseImpl
- * @see com.liferay.mobile.device.rules.service.impl.MDRRuleServiceImpl
  * @generated
  */
 @AccessControlled
@@ -56,7 +54,7 @@ public interface MDRRuleService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link MDRRuleServiceUtil} to access the mdr rule remote service. Add custom service methods to {@link com.liferay.mobile.device.rules.service.impl.MDRRuleServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link MDRRuleServiceUtil} to access the mdr rule remote service. Add custom service methods to <code>com.liferay.mobile.device.rules.service.impl.MDRRuleServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public MDRRule addRule(long ruleGroupId, Map<Locale, String> nameMap,
 		Map<Locale, String> descriptionMap, String type, String typeSettings,

@@ -27,10 +27,11 @@ import com.liferay.powwow.service.PowwowParticipantServiceUtil;
 
 /**
  * Provides the HTTP utility for the
- * {@link PowwowParticipantServiceUtil} service utility. The
+ * <code>PowwowParticipantServiceUtil</code> service
+ * utility. The
  * static methods of this class calls the same methods of the service utility.
  * However, the signatures are different because it requires an additional
- * {@link HttpPrincipal} parameter.
+ * <code>HttpPrincipal</code> parameter.
  *
  * <p>
  * The benefits of using the HTTP utility is that it is fast and allows for
@@ -49,8 +50,6 @@ import com.liferay.powwow.service.PowwowParticipantServiceUtil;
  *
  * @author Shinn Lok
  * @see PowwowParticipantServiceSoap
- * @see HttpPrincipal
- * @see PowwowParticipantServiceUtil
  * @generated
  */
 @ProviderType

@@ -14,6 +14,8 @@
 
 package com.liferay.headless.document.library.dto.v1_0;
 
+import com.liferay.petra.function.UnsafeSupplier;
+
 import java.util.Date;
 
 import javax.annotation.Generated;
@@ -72,40 +74,146 @@ public class Folder {
 		_dateCreated = dateCreated;
 	}
 
+	public void setDateCreated(
+		UnsafeSupplier<Date, Throwable> dateCreatedUnsafeSupplier) {
+
+		try {
+			_dateCreated = dateCreatedUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setDateModified(Date dateModified) {
 		_dateModified = dateModified;
+	}
+
+	public void setDateModified(
+		UnsafeSupplier<Date, Throwable> dateModifiedUnsafeSupplier) {
+
+		try {
+			_dateModified = dateModifiedUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	public void setDescription(String description) {
 		_description = description;
 	}
 
+	public void setDescription(
+		UnsafeSupplier<String, Throwable> descriptionUnsafeSupplier) {
+
+		try {
+			_description = descriptionUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setDocuments(Document[] documents) {
 		_documents = documents;
+	}
+
+	public void setDocuments(
+		UnsafeSupplier<Document[], Throwable> documentsUnsafeSupplier) {
+
+		try {
+			_documents = documentsUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	public void setDocumentsIds(Long[] documentsIds) {
 		_documentsIds = documentsIds;
 	}
 
+	public void setDocumentsIds(
+		UnsafeSupplier<Long[], Throwable> documentsIdsUnsafeSupplier) {
+
+		try {
+			_documentsIds = documentsIdsUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setDocumentsRepository(Folder documentsRepository) {
 		_documentsRepository = documentsRepository;
+	}
+
+	public void setDocumentsRepository(
+		UnsafeSupplier<Folder, Throwable> documentsRepositoryUnsafeSupplier) {
+
+		try {
+			_documentsRepository = documentsRepositoryUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	public void setDocumentsRepositoryId(Long documentsRepositoryId) {
 		_documentsRepositoryId = documentsRepositoryId;
 	}
 
+	public void setDocumentsRepositoryId(
+		UnsafeSupplier<Long, Throwable> documentsRepositoryIdUnsafeSupplier) {
+
+		try {
+			_documentsRepositoryId = documentsRepositoryIdUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setId(Long id) {
 		_id = id;
+	}
+
+	public void setId(UnsafeSupplier<Long, Throwable> idUnsafeSupplier) {
+		try {
+			_id = idUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	public void setName(String name) {
 		_name = name;
 	}
 
+	public void setName(UnsafeSupplier<String, Throwable> nameUnsafeSupplier) {
+		try {
+			_name = nameUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setSubFolders(Folder[] subFolders) {
 		_subFolders = subFolders;
+	}
+
+	public void setSubFolders(
+		UnsafeSupplier<Folder[], Throwable> subFoldersUnsafeSupplier) {
+
+		try {
+			_subFolders = subFoldersUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	private Date _dateCreated;

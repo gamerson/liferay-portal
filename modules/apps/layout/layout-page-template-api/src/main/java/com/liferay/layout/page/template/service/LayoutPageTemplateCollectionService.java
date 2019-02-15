@@ -39,8 +39,6 @@ import java.util.List;
  *
  * @author Brian Wing Shun Chan
  * @see LayoutPageTemplateCollectionServiceUtil
- * @see com.liferay.layout.page.template.service.base.LayoutPageTemplateCollectionServiceBaseImpl
- * @see com.liferay.layout.page.template.service.impl.LayoutPageTemplateCollectionServiceImpl
  * @generated
  */
 @AccessControlled
@@ -54,7 +52,7 @@ public interface LayoutPageTemplateCollectionService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link LayoutPageTemplateCollectionServiceUtil} to access the layout page template collection remote service. Add custom service methods to {@link com.liferay.layout.page.template.service.impl.LayoutPageTemplateCollectionServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link LayoutPageTemplateCollectionServiceUtil} to access the layout page template collection remote service. Add custom service methods to <code>com.liferay.layout.page.template.service.impl.LayoutPageTemplateCollectionServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public LayoutPageTemplateCollection addLayoutPageTemplateCollection(
 		long groupId, String name, String description,

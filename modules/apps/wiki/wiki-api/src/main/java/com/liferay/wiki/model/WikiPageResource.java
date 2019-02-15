@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see WikiPageResourceModel
- * @see com.liferay.wiki.model.impl.WikiPageResourceImpl
- * @see com.liferay.wiki.model.impl.WikiPageResourceModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.wiki.model.impl.WikiPageResourceImpl")
@@ -35,7 +33,7 @@ public interface WikiPageResource extends WikiPageResourceModel, PersistedModel 
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.wiki.model.impl.WikiPageResourceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.wiki.model.impl.WikiPageResourceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<WikiPageResource, Long> RESOURCE_PRIM_KEY_ACCESSOR =
 		new Accessor<WikiPageResource, Long>() {

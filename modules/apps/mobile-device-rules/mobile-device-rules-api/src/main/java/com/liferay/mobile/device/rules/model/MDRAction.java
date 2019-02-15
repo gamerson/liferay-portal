@@ -26,8 +26,6 @@ import com.liferay.portal.kernel.util.LocaleThreadLocal;
  *
  * @author Edward C. Han
  * @see MDRActionModel
- * @see com.liferay.mobile.device.rules.model.impl.MDRActionImpl
- * @see com.liferay.mobile.device.rules.model.impl.MDRActionModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.mobile.device.rules.model.impl.MDRActionImpl")
@@ -36,7 +34,7 @@ public interface MDRAction extends MDRActionModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.mobile.device.rules.model.impl.MDRActionImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.mobile.device.rules.model.impl.MDRActionImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<MDRAction, Long> ACTION_ID_ACCESSOR = new Accessor<MDRAction, Long>() {
 			@Override

@@ -23,16 +23,14 @@ import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Provides the remote service utility for OAuth2Application. This utility wraps
- * {@link com.liferay.oauth2.provider.service.impl.OAuth2ApplicationServiceImpl} and is the
- * primary access point for service operations in application layer code running
- * on a remote server. Methods of this service are expected to have security
- * checks based on the propagated JAAS credentials because this service can be
+ * <code>com.liferay.oauth2.provider.service.impl.OAuth2ApplicationServiceImpl</code> and is an
+ * access point for service operations in application layer code running on a
+ * remote server. Methods of this service are expected to have security checks
+ * based on the propagated JAAS credentials because this service can be
  * accessed remotely.
  *
  * @author Brian Wing Shun Chan
  * @see OAuth2ApplicationService
- * @see com.liferay.oauth2.provider.service.base.OAuth2ApplicationServiceBaseImpl
- * @see com.liferay.oauth2.provider.service.impl.OAuth2ApplicationServiceImpl
  * @generated
  */
 @ProviderType
@@ -40,7 +38,7 @@ public class OAuth2ApplicationServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this class directly. Add custom service methods to {@link com.liferay.oauth2.provider.service.impl.OAuth2ApplicationServiceImpl} and rerun ServiceBuilder to regenerate this class.
+	 * Never modify this class directly. Add custom service methods to <code>com.liferay.oauth2.provider.service.impl.OAuth2ApplicationServiceImpl</code> and rerun ServiceBuilder to regenerate this class.
 	 */
 	public static com.liferay.oauth2.provider.model.OAuth2Application addOAuth2Application(
 		java.util.List<com.liferay.oauth2.provider.constants.GrantType> allowedGrantTypesList,

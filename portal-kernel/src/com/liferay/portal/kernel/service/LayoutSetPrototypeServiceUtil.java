@@ -21,16 +21,14 @@ import com.liferay.portal.kernel.util.ReferenceRegistry;
 
 /**
  * Provides the remote service utility for LayoutSetPrototype. This utility wraps
- * {@link com.liferay.portal.service.impl.LayoutSetPrototypeServiceImpl} and is the
- * primary access point for service operations in application layer code running
- * on a remote server. Methods of this service are expected to have security
- * checks based on the propagated JAAS credentials because this service can be
+ * <code>com.liferay.portal.service.impl.LayoutSetPrototypeServiceImpl</code> and is an
+ * access point for service operations in application layer code running on a
+ * remote server. Methods of this service are expected to have security checks
+ * based on the propagated JAAS credentials because this service can be
  * accessed remotely.
  *
  * @author Brian Wing Shun Chan
  * @see LayoutSetPrototypeService
- * @see com.liferay.portal.service.base.LayoutSetPrototypeServiceBaseImpl
- * @see com.liferay.portal.service.impl.LayoutSetPrototypeServiceImpl
  * @generated
  */
 @ProviderType
@@ -38,7 +36,7 @@ public class LayoutSetPrototypeServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this class directly. Add custom service methods to {@link com.liferay.portal.service.impl.LayoutSetPrototypeServiceImpl} and rerun ServiceBuilder to regenerate this class.
+	 * Never modify this class directly. Add custom service methods to <code>com.liferay.portal.service.impl.LayoutSetPrototypeServiceImpl</code> and rerun ServiceBuilder to regenerate this class.
 	 */
 	public static com.liferay.portal.kernel.model.LayoutSetPrototype addLayoutSetPrototype(
 		java.util.Map<java.util.Locale, String> nameMap,

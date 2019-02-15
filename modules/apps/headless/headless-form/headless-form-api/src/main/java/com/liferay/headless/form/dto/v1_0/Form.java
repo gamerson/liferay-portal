@@ -14,6 +14,8 @@
 
 package com.liferay.headless.form.dto.v1_0;
 
+import com.liferay.petra.function.UnsafeSupplier;
+
 import java.util.Date;
 
 import javax.annotation.Generated;
@@ -88,56 +90,206 @@ public class Form {
 		_availableLanguages = availableLanguages;
 	}
 
+	public void setAvailableLanguages(
+		UnsafeSupplier<String[], Throwable> availableLanguagesUnsafeSupplier) {
+
+		try {
+			_availableLanguages = availableLanguagesUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setContentSpace(Long contentSpace) {
 		_contentSpace = contentSpace;
+	}
+
+	public void setContentSpace(
+		UnsafeSupplier<Long, Throwable> contentSpaceUnsafeSupplier) {
+
+		try {
+			_contentSpace = contentSpaceUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	public void setCreator(Creator creator) {
 		_creator = creator;
 	}
 
+	public void setCreator(
+		UnsafeSupplier<Creator, Throwable> creatorUnsafeSupplier) {
+
+		try {
+			_creator = creatorUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setDateCreated(Date dateCreated) {
 		_dateCreated = dateCreated;
+	}
+
+	public void setDateCreated(
+		UnsafeSupplier<Date, Throwable> dateCreatedUnsafeSupplier) {
+
+		try {
+			_dateCreated = dateCreatedUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	public void setDateModified(Date dateModified) {
 		_dateModified = dateModified;
 	}
 
+	public void setDateModified(
+		UnsafeSupplier<Date, Throwable> dateModifiedUnsafeSupplier) {
+
+		try {
+			_dateModified = dateModifiedUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setDatePublished(Date datePublished) {
 		_datePublished = datePublished;
+	}
+
+	public void setDatePublished(
+		UnsafeSupplier<Date, Throwable> datePublishedUnsafeSupplier) {
+
+		try {
+			_datePublished = datePublishedUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	public void setDefaultLanguage(String defaultLanguage) {
 		_defaultLanguage = defaultLanguage;
 	}
 
+	public void setDefaultLanguage(
+		UnsafeSupplier<String, Throwable> defaultLanguageUnsafeSupplier) {
+
+		try {
+			_defaultLanguage = defaultLanguageUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setDescription(String description) {
 		_description = description;
+	}
+
+	public void setDescription(
+		UnsafeSupplier<String, Throwable> descriptionUnsafeSupplier) {
+
+		try {
+			_description = descriptionUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	public void setFormRecords(FormRecord[] formRecords) {
 		_formRecords = formRecords;
 	}
 
+	public void setFormRecords(
+		UnsafeSupplier<FormRecord[], Throwable> formRecordsUnsafeSupplier) {
+
+		try {
+			_formRecords = formRecordsUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setFormRecordsIds(Long[] formRecordsIds) {
 		_formRecordsIds = formRecordsIds;
+	}
+
+	public void setFormRecordsIds(
+		UnsafeSupplier<Long[], Throwable> formRecordsIdsUnsafeSupplier) {
+
+		try {
+			_formRecordsIds = formRecordsIdsUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	public void setId(Long id) {
 		_id = id;
 	}
 
+	public void setId(UnsafeSupplier<Long, Throwable> idUnsafeSupplier) {
+		try {
+			_id = idUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setName(String name) {
 		_name = name;
+	}
+
+	public void setName(UnsafeSupplier<String, Throwable> nameUnsafeSupplier) {
+		try {
+			_name = nameUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	public void setStructure(FormStructure structure) {
 		_structure = structure;
 	}
 
+	public void setStructure(
+		UnsafeSupplier<FormStructure, Throwable> structureUnsafeSupplier) {
+
+		try {
+			_structure = structureUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setStructureId(Long structureId) {
 		_structureId = structureId;
+	}
+
+	public void setStructureId(
+		UnsafeSupplier<Long, Throwable> structureIdUnsafeSupplier) {
+
+		try {
+			_structureId = structureIdUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	private String[] _availableLanguages;

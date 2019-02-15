@@ -39,8 +39,6 @@ import java.util.Locale;
  *
  * @author José Manuel Navarro
  * @see ScreensAssetEntryServiceUtil
- * @see com.liferay.screens.service.base.ScreensAssetEntryServiceBaseImpl
- * @see com.liferay.screens.service.impl.ScreensAssetEntryServiceImpl
  * @generated
  */
 @AccessControlled
@@ -54,7 +52,7 @@ public interface ScreensAssetEntryService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link ScreensAssetEntryServiceUtil} to access the screens asset entry remote service. Add custom service methods to {@link com.liferay.screens.service.impl.ScreensAssetEntryServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link ScreensAssetEntryServiceUtil} to access the screens asset entry remote service. Add custom service methods to <code>com.liferay.screens.service.impl.ScreensAssetEntryServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public JSONArray getAssetEntries(AssetEntryQuery assetEntryQuery,

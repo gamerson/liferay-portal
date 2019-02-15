@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see AssetEntryAssetCategoryRelModel
- * @see com.liferay.asset.entry.rel.model.impl.AssetEntryAssetCategoryRelImpl
- * @see com.liferay.asset.entry.rel.model.impl.AssetEntryAssetCategoryRelModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.asset.entry.rel.model.impl.AssetEntryAssetCategoryRelImpl")
@@ -36,7 +34,7 @@ public interface AssetEntryAssetCategoryRel
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.asset.entry.rel.model.impl.AssetEntryAssetCategoryRelImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.asset.entry.rel.model.impl.AssetEntryAssetCategoryRelImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<AssetEntryAssetCategoryRel, Long> ASSET_ENTRY_ASSET_CATEGORY_REL_ID_ACCESSOR =
 		new Accessor<AssetEntryAssetCategoryRel, Long>() {

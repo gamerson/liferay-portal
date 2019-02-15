@@ -46,8 +46,6 @@ import java.util.Locale;
  *
  * @author Brian Wing Shun Chan
  * @see WikiPageServiceUtil
- * @see com.liferay.wiki.service.base.WikiPageServiceBaseImpl
- * @see com.liferay.wiki.service.impl.WikiPageServiceImpl
  * @generated
  */
 @AccessControlled
@@ -61,7 +59,7 @@ public interface WikiPageService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link WikiPageServiceUtil} to access the wiki page remote service. Add custom service methods to {@link com.liferay.wiki.service.impl.WikiPageServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link WikiPageServiceUtil} to access the wiki page remote service. Add custom service methods to <code>com.liferay.wiki.service.impl.WikiPageServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public WikiPage addPage(long nodeId, String title, String content,
 		String summary, boolean minorEdit, ServiceContext serviceContext)

@@ -32,8 +32,6 @@ import com.liferay.portal.kernel.transaction.Transactional;
  *
  * @author Brian Wing Shun Chan
  * @see ERUserGroupLocalServiceUtil
- * @see com.liferay.external.reference.service.base.ERUserGroupLocalServiceBaseImpl
- * @see com.liferay.external.reference.service.impl.ERUserGroupLocalServiceImpl
  * @generated
  */
 @ProviderType
@@ -43,7 +41,7 @@ public interface ERUserGroupLocalService extends BaseLocalService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link ERUserGroupLocalServiceUtil} to access the er user group local service. Add custom service methods to {@link com.liferay.external.reference.service.impl.ERUserGroupLocalServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link ERUserGroupLocalServiceUtil} to access the er user group local service. Add custom service methods to <code>com.liferay.external.reference.service.impl.ERUserGroupLocalServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public UserGroup addOrUpdateUserGroup(String externalReferenceCode,
 		long userId, long companyId, String name, String description,

@@ -39,8 +39,6 @@ import java.util.List;
  *
  * @author Brian Wing Shun Chan
  * @see FragmentCollectionServiceUtil
- * @see com.liferay.fragment.service.base.FragmentCollectionServiceBaseImpl
- * @see com.liferay.fragment.service.impl.FragmentCollectionServiceImpl
  * @generated
  */
 @AccessControlled
@@ -54,7 +52,7 @@ public interface FragmentCollectionService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link FragmentCollectionServiceUtil} to access the fragment collection remote service. Add custom service methods to {@link com.liferay.fragment.service.impl.FragmentCollectionServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link FragmentCollectionServiceUtil} to access the fragment collection remote service. Add custom service methods to <code>com.liferay.fragment.service.impl.FragmentCollectionServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public FragmentCollection addFragmentCollection(long groupId, String name,
 		String description, ServiceContext serviceContext)

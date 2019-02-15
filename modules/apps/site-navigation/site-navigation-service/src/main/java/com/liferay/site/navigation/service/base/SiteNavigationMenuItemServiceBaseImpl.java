@@ -42,7 +42,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.site.navigation.service.impl.SiteNavigationMenuItemServiceImpl
- * @see com.liferay.site.navigation.service.SiteNavigationMenuItemServiceUtil
  * @generated
  */
 public abstract class SiteNavigationMenuItemServiceBaseImpl
@@ -51,7 +50,7 @@ public abstract class SiteNavigationMenuItemServiceBaseImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.site.navigation.service.SiteNavigationMenuItemServiceUtil} to access the site navigation menu item remote service.
+	 * Never modify or reference this class directly. Use <code>SiteNavigationMenuItemService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.site.navigation.service.SiteNavigationMenuItemServiceUtil</code>.
 	 */
 
 	/**

@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see KaleoTransitionModel
- * @see com.liferay.portal.workflow.kaleo.model.impl.KaleoTransitionImpl
- * @see com.liferay.portal.workflow.kaleo.model.impl.KaleoTransitionModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portal.workflow.kaleo.model.impl.KaleoTransitionImpl")
@@ -35,7 +33,7 @@ public interface KaleoTransition extends KaleoTransitionModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portal.workflow.kaleo.model.impl.KaleoTransitionImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portal.workflow.kaleo.model.impl.KaleoTransitionImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<KaleoTransition, Long> KALEO_TRANSITION_ID_ACCESSOR =
 		new Accessor<KaleoTransition, Long>() {

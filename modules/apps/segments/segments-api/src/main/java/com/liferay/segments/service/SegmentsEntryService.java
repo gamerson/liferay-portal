@@ -43,8 +43,6 @@ import java.util.Map;
  *
  * @author Eduardo Garcia
  * @see SegmentsEntryServiceUtil
- * @see com.liferay.segments.service.base.SegmentsEntryServiceBaseImpl
- * @see com.liferay.segments.service.impl.SegmentsEntryServiceImpl
  * @generated
  */
 @AccessControlled
@@ -58,7 +56,7 @@ public interface SegmentsEntryService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link SegmentsEntryServiceUtil} to access the segments entry remote service. Add custom service methods to {@link com.liferay.segments.service.impl.SegmentsEntryServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link SegmentsEntryServiceUtil} to access the segments entry remote service. Add custom service methods to <code>com.liferay.segments.service.impl.SegmentsEntryServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public SegmentsEntry addSegmentsEntry(Map<Locale, String> nameMap,
 		Map<Locale, String> descriptionMap, boolean active, String criteria,

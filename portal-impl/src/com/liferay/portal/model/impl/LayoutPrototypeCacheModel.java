@@ -34,7 +34,6 @@ import java.util.Date;
  * The cache model class for representing LayoutPrototype in entity cache.
  *
  * @author Brian Wing Shun Chan
- * @see LayoutPrototype
  * @generated
  */
 @ProviderType

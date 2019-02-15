@@ -34,7 +34,6 @@ import java.util.Date;
  * The cache model class for representing KaleoAction in entity cache.
  *
  * @author Brian Wing Shun Chan
- * @see KaleoAction
  * @generated
  */
 @ProviderType

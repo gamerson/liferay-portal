@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see DDMDataProviderInstanceModel
- * @see com.liferay.dynamic.data.mapping.model.impl.DDMDataProviderInstanceImpl
- * @see com.liferay.dynamic.data.mapping.model.impl.DDMDataProviderInstanceModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.dynamic.data.mapping.model.impl.DDMDataProviderInstanceImpl")
@@ -36,7 +34,7 @@ public interface DDMDataProviderInstance extends DDMDataProviderInstanceModel,
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.dynamic.data.mapping.model.impl.DDMDataProviderInstanceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.dynamic.data.mapping.model.impl.DDMDataProviderInstanceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<DDMDataProviderInstance, Long> DATA_PROVIDER_INSTANCE_ID_ACCESSOR =
 		new Accessor<DDMDataProviderInstance, Long>() {

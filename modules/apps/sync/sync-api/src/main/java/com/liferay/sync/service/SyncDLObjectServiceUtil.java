@@ -23,16 +23,14 @@ import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Provides the remote service utility for SyncDLObject. This utility wraps
- * {@link com.liferay.sync.service.impl.SyncDLObjectServiceImpl} and is the
- * primary access point for service operations in application layer code running
- * on a remote server. Methods of this service are expected to have security
- * checks based on the propagated JAAS credentials because this service can be
+ * <code>com.liferay.sync.service.impl.SyncDLObjectServiceImpl</code> and is an
+ * access point for service operations in application layer code running on a
+ * remote server. Methods of this service are expected to have security checks
+ * based on the propagated JAAS credentials because this service can be
  * accessed remotely.
  *
  * @author Brian Wing Shun Chan
  * @see SyncDLObjectService
- * @see com.liferay.sync.service.base.SyncDLObjectServiceBaseImpl
- * @see com.liferay.sync.service.impl.SyncDLObjectServiceImpl
  * @generated
  */
 @ProviderType
@@ -40,7 +38,7 @@ public class SyncDLObjectServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this class directly. Add custom service methods to {@link com.liferay.sync.service.impl.SyncDLObjectServiceImpl} and rerun ServiceBuilder to regenerate this class.
+	 * Never modify this class directly. Add custom service methods to <code>com.liferay.sync.service.impl.SyncDLObjectServiceImpl</code> and rerun ServiceBuilder to regenerate this class.
 	 */
 	public static com.liferay.sync.model.SyncDLObject addFileEntry(
 		long repositoryId, long folderId, String sourceFileName,

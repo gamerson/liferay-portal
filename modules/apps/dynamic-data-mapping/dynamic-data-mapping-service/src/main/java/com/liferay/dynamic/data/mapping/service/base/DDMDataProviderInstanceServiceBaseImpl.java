@@ -43,7 +43,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.dynamic.data.mapping.service.impl.DDMDataProviderInstanceServiceImpl
- * @see com.liferay.dynamic.data.mapping.service.DDMDataProviderInstanceServiceUtil
  * @generated
  */
 public abstract class DDMDataProviderInstanceServiceBaseImpl
@@ -52,7 +51,7 @@ public abstract class DDMDataProviderInstanceServiceBaseImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.dynamic.data.mapping.service.DDMDataProviderInstanceServiceUtil} to access the ddm data provider instance remote service.
+	 * Never modify or reference this class directly. Use <code>DDMDataProviderInstanceService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.dynamic.data.mapping.service.DDMDataProviderInstanceServiceUtil</code>.
 	 */
 
 	/**

@@ -45,7 +45,6 @@ import javax.sql.DataSource;
  *
  * @author José Manuel Navarro
  * @see com.liferay.screens.service.impl.ScreensRatingsEntryServiceImpl
- * @see com.liferay.screens.service.ScreensRatingsEntryServiceUtil
  * @generated
  */
 public abstract class ScreensRatingsEntryServiceBaseImpl extends BaseServiceImpl
@@ -53,7 +52,7 @@ public abstract class ScreensRatingsEntryServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.screens.service.ScreensRatingsEntryServiceUtil} to access the screens ratings entry remote service.
+	 * Never modify or reference this class directly. Use <code>ScreensRatingsEntryService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.screens.service.ScreensRatingsEntryServiceUtil</code>.
 	 */
 
 	/**

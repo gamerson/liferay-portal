@@ -32,8 +32,6 @@ import java.util.Map;
  *
  * @author Brian Wing Shun Chan
  * @see ResourcePermissionServiceUtil
- * @see com.liferay.portal.service.base.ResourcePermissionServiceBaseImpl
- * @see com.liferay.portal.service.impl.ResourcePermissionServiceImpl
  * @generated
  */
 @AccessControlled
@@ -45,7 +43,7 @@ public interface ResourcePermissionService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link ResourcePermissionServiceUtil} to access the resource permission remote service. Add custom service methods to {@link com.liferay.portal.service.impl.ResourcePermissionServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link ResourcePermissionServiceUtil} to access the resource permission remote service. Add custom service methods to <code>com.liferay.portal.service.impl.ResourcePermissionServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 
 	/**

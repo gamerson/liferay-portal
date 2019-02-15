@@ -32,7 +32,6 @@ import java.io.ObjectOutput;
  * The cache model class for representing AssetTagStats in entity cache.
  *
  * @author Brian Wing Shun Chan
- * @see AssetTagStats
  * @deprecated As of Judson (7.1.x), replaced by {@link
             com.liferay.asset.tag.stats.model.impl.AssetTagStatsImpl}
  * @generated

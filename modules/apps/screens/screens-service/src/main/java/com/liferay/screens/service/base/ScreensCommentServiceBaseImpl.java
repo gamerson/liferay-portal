@@ -44,7 +44,6 @@ import javax.sql.DataSource;
  *
  * @author José Manuel Navarro
  * @see com.liferay.screens.service.impl.ScreensCommentServiceImpl
- * @see com.liferay.screens.service.ScreensCommentServiceUtil
  * @generated
  */
 public abstract class ScreensCommentServiceBaseImpl extends BaseServiceImpl
@@ -52,7 +51,7 @@ public abstract class ScreensCommentServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.screens.service.ScreensCommentServiceUtil} to access the screens comment remote service.
+	 * Never modify or reference this class directly. Use <code>ScreensCommentService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.screens.service.ScreensCommentServiceUtil</code>.
 	 */
 
 	/**

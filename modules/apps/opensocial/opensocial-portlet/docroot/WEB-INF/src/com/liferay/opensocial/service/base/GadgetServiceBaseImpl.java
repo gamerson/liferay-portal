@@ -44,7 +44,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.opensocial.service.impl.GadgetServiceImpl
- * @see com.liferay.opensocial.service.GadgetServiceUtil
  * @generated
  */
 public abstract class GadgetServiceBaseImpl extends BaseServiceImpl
@@ -52,7 +51,7 @@ public abstract class GadgetServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.opensocial.service.GadgetServiceUtil} to access the gadget remote service.
+	 * Never modify or reference this class directly. Use <code>GadgetService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.opensocial.service.GadgetServiceUtil</code>.
 	 */
 
 	/**

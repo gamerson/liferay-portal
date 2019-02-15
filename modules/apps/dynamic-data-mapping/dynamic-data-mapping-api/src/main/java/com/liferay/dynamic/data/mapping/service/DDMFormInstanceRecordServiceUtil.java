@@ -23,16 +23,14 @@ import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Provides the remote service utility for DDMFormInstanceRecord. This utility wraps
- * {@link com.liferay.dynamic.data.mapping.service.impl.DDMFormInstanceRecordServiceImpl} and is the
- * primary access point for service operations in application layer code running
- * on a remote server. Methods of this service are expected to have security
- * checks based on the propagated JAAS credentials because this service can be
+ * <code>com.liferay.dynamic.data.mapping.service.impl.DDMFormInstanceRecordServiceImpl</code> and is an
+ * access point for service operations in application layer code running on a
+ * remote server. Methods of this service are expected to have security checks
+ * based on the propagated JAAS credentials because this service can be
  * accessed remotely.
  *
  * @author Brian Wing Shun Chan
  * @see DDMFormInstanceRecordService
- * @see com.liferay.dynamic.data.mapping.service.base.DDMFormInstanceRecordServiceBaseImpl
- * @see com.liferay.dynamic.data.mapping.service.impl.DDMFormInstanceRecordServiceImpl
  * @generated
  */
 @ProviderType
@@ -40,7 +38,7 @@ public class DDMFormInstanceRecordServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this class directly. Add custom service methods to {@link com.liferay.dynamic.data.mapping.service.impl.DDMFormInstanceRecordServiceImpl} and rerun ServiceBuilder to regenerate this class.
+	 * Never modify this class directly. Add custom service methods to <code>com.liferay.dynamic.data.mapping.service.impl.DDMFormInstanceRecordServiceImpl</code> and rerun ServiceBuilder to regenerate this class.
 	 */
 	public static com.liferay.dynamic.data.mapping.model.DDMFormInstanceRecord addFormInstanceRecord(
 		long groupId, long ddmFormInstanceId,

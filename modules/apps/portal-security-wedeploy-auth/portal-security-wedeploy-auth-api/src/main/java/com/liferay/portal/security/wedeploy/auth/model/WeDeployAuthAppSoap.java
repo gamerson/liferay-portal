@@ -26,7 +26,6 @@ import java.util.List;
  * This class is used by SOAP remote services, specifically {@link com.liferay.portal.security.wedeploy.auth.service.http.WeDeployAuthAppServiceSoap}.
  *
  * @author Supritha Sundaram
- * @see com.liferay.portal.security.wedeploy.auth.service.http.WeDeployAuthAppServiceSoap
  * @generated
  */
 @ProviderType

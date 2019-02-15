@@ -52,7 +52,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.dynamic.data.mapping.service.impl.DDMStructureServiceImpl
- * @see com.liferay.dynamic.data.mapping.service.DDMStructureServiceUtil
  * @generated
  */
 public abstract class DDMStructureServiceBaseImpl extends BaseServiceImpl
@@ -60,7 +59,7 @@ public abstract class DDMStructureServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.dynamic.data.mapping.service.DDMStructureServiceUtil} to access the ddm structure remote service.
+	 * Never modify or reference this class directly. Use <code>DDMStructureService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.dynamic.data.mapping.service.DDMStructureServiceUtil</code>.
 	 */
 
 	/**

@@ -34,7 +34,6 @@ import java.util.Date;
  * The cache model class for representing ChangesetEntry in entity cache.
  *
  * @author Brian Wing Shun Chan
- * @see ChangesetEntry
  * @generated
  */
 @ProviderType

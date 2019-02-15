@@ -55,7 +55,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.wiki.service.impl.WikiPageServiceImpl
- * @see com.liferay.wiki.service.WikiPageServiceUtil
  * @generated
  */
 public abstract class WikiPageServiceBaseImpl extends BaseServiceImpl
@@ -63,7 +62,7 @@ public abstract class WikiPageServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.wiki.service.WikiPageServiceUtil} to access the wiki page remote service.
+	 * Never modify or reference this class directly. Use <code>WikiPageService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.wiki.service.WikiPageServiceUtil</code>.
 	 */
 
 	/**

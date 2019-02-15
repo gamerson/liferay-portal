@@ -14,6 +14,8 @@
 
 package com.liferay.headless.form.dto.v1_0;
 
+import com.liferay.petra.function.UnsafeSupplier;
+
 import java.util.Date;
 
 import javax.annotation.Generated;
@@ -68,36 +70,131 @@ public class FormRecord {
 		_creator = creator;
 	}
 
+	public void setCreator(
+		UnsafeSupplier<Creator, Throwable> creatorUnsafeSupplier) {
+
+		try {
+			_creator = creatorUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setDateCreated(Date dateCreated) {
 		_dateCreated = dateCreated;
+	}
+
+	public void setDateCreated(
+		UnsafeSupplier<Date, Throwable> dateCreatedUnsafeSupplier) {
+
+		try {
+			_dateCreated = dateCreatedUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	public void setDateModified(Date dateModified) {
 		_dateModified = dateModified;
 	}
 
+	public void setDateModified(
+		UnsafeSupplier<Date, Throwable> dateModifiedUnsafeSupplier) {
+
+		try {
+			_dateModified = dateModifiedUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setDatePublished(Date datePublished) {
 		_datePublished = datePublished;
+	}
+
+	public void setDatePublished(
+		UnsafeSupplier<Date, Throwable> datePublishedUnsafeSupplier) {
+
+		try {
+			_datePublished = datePublishedUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	public void setDraft(Boolean draft) {
 		_draft = draft;
 	}
 
+	public void setDraft(
+		UnsafeSupplier<Boolean, Throwable> draftUnsafeSupplier) {
+
+		try {
+			_draft = draftUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setFieldValues(FieldValues[] fieldValues) {
 		_fieldValues = fieldValues;
+	}
+
+	public void setFieldValues(
+		UnsafeSupplier<FieldValues[], Throwable> fieldValuesUnsafeSupplier) {
+
+		try {
+			_fieldValues = fieldValuesUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	public void setForm(Form form) {
 		_form = form;
 	}
 
+	public void setForm(UnsafeSupplier<Form, Throwable> formUnsafeSupplier) {
+		try {
+			_form = formUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setFormId(Long formId) {
 		_formId = formId;
 	}
 
+	public void setFormId(
+		UnsafeSupplier<Long, Throwable> formIdUnsafeSupplier) {
+
+		try {
+			_formId = formIdUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setId(Long id) {
 		_id = id;
+	}
+
+	public void setId(UnsafeSupplier<Long, Throwable> idUnsafeSupplier) {
+		try {
+			_id = idUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	private Creator _creator;

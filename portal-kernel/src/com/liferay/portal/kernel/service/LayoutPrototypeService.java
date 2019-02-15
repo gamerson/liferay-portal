@@ -37,8 +37,6 @@ import java.util.Map;
  *
  * @author Brian Wing Shun Chan
  * @see LayoutPrototypeServiceUtil
- * @see com.liferay.portal.service.base.LayoutPrototypeServiceBaseImpl
- * @see com.liferay.portal.service.impl.LayoutPrototypeServiceImpl
  * @generated
  */
 @AccessControlled
@@ -50,7 +48,7 @@ public interface LayoutPrototypeService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link LayoutPrototypeServiceUtil} to access the layout prototype remote service. Add custom service methods to {@link com.liferay.portal.service.impl.LayoutPrototypeServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link LayoutPrototypeServiceUtil} to access the layout prototype remote service. Add custom service methods to <code>com.liferay.portal.service.impl.LayoutPrototypeServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public LayoutPrototype addLayoutPrototype(Map<Locale, String> nameMap,
 		Map<Locale, String> descriptionMap, boolean active,

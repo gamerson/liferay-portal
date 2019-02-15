@@ -44,7 +44,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.portlet.social.service.impl.SocialActivityInterpreterLocalServiceImpl
- * @see com.liferay.social.kernel.service.SocialActivityInterpreterLocalServiceUtil
  * @generated
  */
 @ProviderType
@@ -54,7 +53,7 @@ public abstract class SocialActivityInterpreterLocalServiceBaseImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.social.kernel.service.SocialActivityInterpreterLocalServiceUtil} to access the social activity interpreter local service.
+	 * Never modify or reference this class directly. Use <code>SocialActivityInterpreterLocalService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.social.kernel.service.SocialActivityInterpreterLocalServiceUtil</code>.
 	 */
 
 	/**

@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see ExportImportConfigurationModel
- * @see com.liferay.portlet.exportimport.model.impl.ExportImportConfigurationImpl
- * @see com.liferay.portlet.exportimport.model.impl.ExportImportConfigurationModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portlet.exportimport.model.impl.ExportImportConfigurationImpl")
@@ -36,7 +34,7 @@ public interface ExportImportConfiguration
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portlet.exportimport.model.impl.ExportImportConfigurationImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portlet.exportimport.model.impl.ExportImportConfigurationImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<ExportImportConfiguration, Long> EXPORT_IMPORT_CONFIGURATION_ID_ACCESSOR =
 		new Accessor<ExportImportConfiguration, Long>() {

@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see KaleoNotificationModel
- * @see com.liferay.portal.workflow.kaleo.model.impl.KaleoNotificationImpl
- * @see com.liferay.portal.workflow.kaleo.model.impl.KaleoNotificationModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portal.workflow.kaleo.model.impl.KaleoNotificationImpl")
@@ -35,7 +33,7 @@ public interface KaleoNotification extends KaleoNotificationModel, PersistedMode
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portal.workflow.kaleo.model.impl.KaleoNotificationImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portal.workflow.kaleo.model.impl.KaleoNotificationImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<KaleoNotification, Long> KALEO_NOTIFICATION_ID_ACCESSOR =
 		new Accessor<KaleoNotification, Long>() {

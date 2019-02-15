@@ -45,7 +45,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.journal.service.impl.JournalFeedServiceImpl
- * @see com.liferay.journal.service.JournalFeedServiceUtil
  * @generated
  */
 public abstract class JournalFeedServiceBaseImpl extends BaseServiceImpl
@@ -53,7 +52,7 @@ public abstract class JournalFeedServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.journal.service.JournalFeedServiceUtil} to access the journal feed remote service.
+	 * Never modify or reference this class directly. Use <code>JournalFeedService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.journal.service.JournalFeedServiceUtil</code>.
 	 */
 
 	/**

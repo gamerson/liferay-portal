@@ -40,7 +40,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.dynamic.data.mapping.service.impl.DDMTemplateVersionServiceImpl
- * @see com.liferay.dynamic.data.mapping.service.DDMTemplateVersionServiceUtil
  * @generated
  */
 public abstract class DDMTemplateVersionServiceBaseImpl extends BaseServiceImpl
@@ -48,7 +47,7 @@ public abstract class DDMTemplateVersionServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.dynamic.data.mapping.service.DDMTemplateVersionServiceUtil} to access the ddm template version remote service.
+	 * Never modify or reference this class directly. Use <code>DDMTemplateVersionService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.dynamic.data.mapping.service.DDMTemplateVersionServiceUtil</code>.
 	 */
 
 	/**

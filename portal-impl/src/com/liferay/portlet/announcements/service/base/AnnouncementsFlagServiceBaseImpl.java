@@ -39,7 +39,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.portlet.announcements.service.impl.AnnouncementsFlagServiceImpl
- * @see com.liferay.announcements.kernel.service.AnnouncementsFlagServiceUtil
  * @generated
  */
 public abstract class AnnouncementsFlagServiceBaseImpl extends BaseServiceImpl
@@ -47,7 +46,7 @@ public abstract class AnnouncementsFlagServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.announcements.kernel.service.AnnouncementsFlagServiceUtil} to access the announcements flag remote service.
+	 * Never modify or reference this class directly. Use <code>AnnouncementsFlagService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.announcements.kernel.service.AnnouncementsFlagServiceUtil</code>.
 	 */
 
 	/**

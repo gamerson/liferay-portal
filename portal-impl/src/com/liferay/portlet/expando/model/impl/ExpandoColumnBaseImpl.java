@@ -37,7 +37,7 @@ public abstract class ExpandoColumnBaseImpl extends ExpandoColumnModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a expando column model instance should use the {@link ExpandoColumn} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a expando column model instance should use the <code>ExpandoColumn</code> interface instead.
 	 */
 	@Override
 	public void persist() {

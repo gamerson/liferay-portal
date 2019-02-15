@@ -38,8 +38,6 @@ import java.util.List;
  *
  * @author Brian Wing Shun Chan
  * @see MicroblogsEntryServiceUtil
- * @see com.liferay.microblogs.service.base.MicroblogsEntryServiceBaseImpl
- * @see com.liferay.microblogs.service.impl.MicroblogsEntryServiceImpl
  * @generated
  */
 @AccessControlled
@@ -53,7 +51,7 @@ public interface MicroblogsEntryService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link MicroblogsEntryServiceUtil} to access the microblogs entry remote service. Add custom service methods to {@link com.liferay.microblogs.service.impl.MicroblogsEntryServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link MicroblogsEntryServiceUtil} to access the microblogs entry remote service. Add custom service methods to <code>com.liferay.microblogs.service.impl.MicroblogsEntryServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public MicroblogsEntry addMicroblogsEntry(long userId, String content,
 		int type, long parentMicroblogsEntryId, int socialRelationType,

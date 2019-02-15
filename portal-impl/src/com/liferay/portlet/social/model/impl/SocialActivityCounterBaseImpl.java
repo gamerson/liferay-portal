@@ -37,7 +37,7 @@ public abstract class SocialActivityCounterBaseImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a social activity counter model instance should use the {@link SocialActivityCounter} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a social activity counter model instance should use the <code>SocialActivityCounter</code> interface instead.
 	 */
 	@Override
 	public void persist() {

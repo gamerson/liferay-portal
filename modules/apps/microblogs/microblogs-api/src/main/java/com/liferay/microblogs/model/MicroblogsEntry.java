@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see MicroblogsEntryModel
- * @see com.liferay.microblogs.model.impl.MicroblogsEntryImpl
- * @see com.liferay.microblogs.model.impl.MicroblogsEntryModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.microblogs.model.impl.MicroblogsEntryImpl")
@@ -35,7 +33,7 @@ public interface MicroblogsEntry extends MicroblogsEntryModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.microblogs.model.impl.MicroblogsEntryImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.microblogs.model.impl.MicroblogsEntryImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<MicroblogsEntry, Long> MICROBLOGS_ENTRY_ID_ACCESSOR =
 		new Accessor<MicroblogsEntry, Long>() {

@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see DLOpenerFileEntryReferenceModel
- * @see com.liferay.document.library.opener.model.impl.DLOpenerFileEntryReferenceImpl
- * @see com.liferay.document.library.opener.model.impl.DLOpenerFileEntryReferenceModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.document.library.opener.model.impl.DLOpenerFileEntryReferenceImpl")
@@ -36,7 +34,7 @@ public interface DLOpenerFileEntryReference
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.document.library.opener.model.impl.DLOpenerFileEntryReferenceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.document.library.opener.model.impl.DLOpenerFileEntryReferenceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<DLOpenerFileEntryReference, Long> DL_OPENER_FILE_ENTRY_REFERENCE_ID_ACCESSOR =
 		new Accessor<DLOpenerFileEntryReference, Long>() {

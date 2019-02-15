@@ -38,8 +38,6 @@ import javax.servlet.ServletContext;
  *
  * @author Brian Wing Shun Chan
  * @see ThemeLocalServiceUtil
- * @see com.liferay.portal.service.base.ThemeLocalServiceBaseImpl
- * @see com.liferay.portal.service.impl.ThemeLocalServiceImpl
  * @generated
  */
 @ProviderType
@@ -49,7 +47,7 @@ public interface ThemeLocalService extends BaseLocalService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link ThemeLocalServiceUtil} to access the theme local service. Add custom service methods to {@link com.liferay.portal.service.impl.ThemeLocalServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link ThemeLocalServiceUtil} to access the theme local service. Add custom service methods to <code>com.liferay.portal.service.impl.ThemeLocalServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public ColorScheme fetchColorScheme(long companyId, String themeId,

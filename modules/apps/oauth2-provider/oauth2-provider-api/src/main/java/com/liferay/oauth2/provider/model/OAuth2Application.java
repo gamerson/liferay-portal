@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see OAuth2ApplicationModel
- * @see com.liferay.oauth2.provider.model.impl.OAuth2ApplicationImpl
- * @see com.liferay.oauth2.provider.model.impl.OAuth2ApplicationModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.oauth2.provider.model.impl.OAuth2ApplicationImpl")
@@ -35,7 +33,7 @@ public interface OAuth2Application extends OAuth2ApplicationModel, PersistedMode
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.oauth2.provider.model.impl.OAuth2ApplicationImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.oauth2.provider.model.impl.OAuth2ApplicationImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<OAuth2Application, Long> O_AUTH2_APPLICATION_ID_ACCESSOR =
 		new Accessor<OAuth2Application, Long>() {

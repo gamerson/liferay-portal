@@ -37,7 +37,7 @@ public abstract class KaleoTaskInstanceTokenBaseImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a kaleo task instance token model instance should use the {@link KaleoTaskInstanceToken} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a kaleo task instance token model instance should use the <code>KaleoTaskInstanceToken</code> interface instead.
 	 */
 	@Override
 	public void persist() {

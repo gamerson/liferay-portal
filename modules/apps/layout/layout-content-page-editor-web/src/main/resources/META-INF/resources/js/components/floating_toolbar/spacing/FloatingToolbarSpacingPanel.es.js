@@ -57,6 +57,12 @@ class FloatingToolbarSpacingPanel extends Component {
 			selectedPaddingSizes
 		);
 
+		nextState = setIn(
+			nextState,
+			['_sectionColumnsCount'],
+			this.item.columns.length
+		);
+
 		return nextState;
 	}
 
@@ -108,6 +114,14 @@ class FloatingToolbarSpacingPanel extends Component {
 				[ITEM_CONFIG_KEYS.columnSpacing]: event.target.checked
 			}
 		);
+	}
+
+	/**
+	 * Handle container spacing checkbox mousedown
+	 * @param {Event} event
+	 */
+	_handleColumnSpacingOptionMousedown(event) {
+		event.preventDefault();
 	}
 
 	/**

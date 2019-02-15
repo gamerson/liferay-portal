@@ -26,8 +26,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see DLFolderModel
- * @see com.liferay.portlet.documentlibrary.model.impl.DLFolderImpl
- * @see com.liferay.portlet.documentlibrary.model.impl.DLFolderModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portlet.documentlibrary.model.impl.DLFolderImpl")
@@ -36,7 +34,7 @@ public interface DLFolder extends DLFolderModel, PersistedModel, TreeModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portlet.documentlibrary.model.impl.DLFolderImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portlet.documentlibrary.model.impl.DLFolderImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<DLFolder, Long> FOLDER_ID_ACCESSOR = new Accessor<DLFolder, Long>() {
 			@Override

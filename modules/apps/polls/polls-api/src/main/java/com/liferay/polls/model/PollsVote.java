@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see PollsVoteModel
- * @see com.liferay.polls.model.impl.PollsVoteImpl
- * @see com.liferay.polls.model.impl.PollsVoteModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.polls.model.impl.PollsVoteImpl")
@@ -35,7 +33,7 @@ public interface PollsVote extends PollsVoteModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.polls.model.impl.PollsVoteImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.polls.model.impl.PollsVoteImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<PollsVote, Long> VOTE_ID_ACCESSOR = new Accessor<PollsVote, Long>() {
 			@Override

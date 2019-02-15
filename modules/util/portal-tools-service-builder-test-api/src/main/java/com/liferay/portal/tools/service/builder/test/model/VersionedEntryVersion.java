@@ -24,8 +24,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see VersionedEntryVersionModel
- * @see com.liferay.portal.tools.service.builder.test.model.impl.VersionedEntryVersionImpl
- * @see com.liferay.portal.tools.service.builder.test.model.impl.VersionedEntryVersionModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portal.tools.service.builder.test.model.impl.VersionedEntryVersionImpl")
@@ -34,7 +32,7 @@ public interface VersionedEntryVersion extends VersionedEntryVersionModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portal.tools.service.builder.test.model.impl.VersionedEntryVersionImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portal.tools.service.builder.test.model.impl.VersionedEntryVersionImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<VersionedEntryVersion, Long> VERSIONED_ENTRY_VERSION_ID_ACCESSOR =
 		new Accessor<VersionedEntryVersion, Long>() {

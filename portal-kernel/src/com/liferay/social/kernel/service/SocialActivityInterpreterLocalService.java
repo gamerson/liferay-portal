@@ -40,8 +40,6 @@ import java.util.Map;
  *
  * @author Brian Wing Shun Chan
  * @see SocialActivityInterpreterLocalServiceUtil
- * @see com.liferay.portlet.social.service.base.SocialActivityInterpreterLocalServiceBaseImpl
- * @see com.liferay.portlet.social.service.impl.SocialActivityInterpreterLocalServiceImpl
  * @generated
  */
 @ProviderType
@@ -51,7 +49,7 @@ public interface SocialActivityInterpreterLocalService extends BaseLocalService 
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link SocialActivityInterpreterLocalServiceUtil} to access the social activity interpreter local service. Add custom service methods to {@link com.liferay.portlet.social.service.impl.SocialActivityInterpreterLocalServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link SocialActivityInterpreterLocalServiceUtil} to access the social activity interpreter local service. Add custom service methods to <code>com.liferay.portlet.social.service.impl.SocialActivityInterpreterLocalServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 
 	/**

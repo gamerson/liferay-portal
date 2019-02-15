@@ -23,16 +23,14 @@ import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Provides the remote service utility for AuditEvent. This utility wraps
- * {@link com.liferay.portal.security.audit.storage.service.impl.AuditEventServiceImpl} and is the
- * primary access point for service operations in application layer code running
- * on a remote server. Methods of this service are expected to have security
- * checks based on the propagated JAAS credentials because this service can be
+ * <code>com.liferay.portal.security.audit.storage.service.impl.AuditEventServiceImpl</code> and is an
+ * access point for service operations in application layer code running on a
+ * remote server. Methods of this service are expected to have security checks
+ * based on the propagated JAAS credentials because this service can be
  * accessed remotely.
  *
  * @author Brian Wing Shun Chan
  * @see AuditEventService
- * @see com.liferay.portal.security.audit.storage.service.base.AuditEventServiceBaseImpl
- * @see com.liferay.portal.security.audit.storage.service.impl.AuditEventServiceImpl
  * @generated
  */
 @ProviderType
@@ -40,7 +38,7 @@ public class AuditEventServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this class directly. Add custom service methods to {@link com.liferay.portal.security.audit.storage.service.impl.AuditEventServiceImpl} and rerun ServiceBuilder to regenerate this class.
+	 * Never modify this class directly. Add custom service methods to <code>com.liferay.portal.security.audit.storage.service.impl.AuditEventServiceImpl</code> and rerun ServiceBuilder to regenerate this class.
 	 */
 	public static java.util.List<com.liferay.portal.security.audit.storage.model.AuditEvent> getAuditEvents(
 		long companyId, int start, int end)

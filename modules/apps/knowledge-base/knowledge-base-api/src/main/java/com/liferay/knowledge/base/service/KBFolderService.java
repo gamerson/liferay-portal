@@ -39,8 +39,6 @@ import java.util.List;
  *
  * @author Brian Wing Shun Chan
  * @see KBFolderServiceUtil
- * @see com.liferay.knowledge.base.service.base.KBFolderServiceBaseImpl
- * @see com.liferay.knowledge.base.service.impl.KBFolderServiceImpl
  * @generated
  */
 @AccessControlled
@@ -54,7 +52,7 @@ public interface KBFolderService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link KBFolderServiceUtil} to access the kb folder remote service. Add custom service methods to {@link com.liferay.knowledge.base.service.impl.KBFolderServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link KBFolderServiceUtil} to access the kb folder remote service. Add custom service methods to <code>com.liferay.knowledge.base.service.impl.KBFolderServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public KBFolder addKBFolder(long groupId, long parentResourceClassNameId,
 		long parentResourcePrimKey, String name, String description,

@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see ExpandoRowModel
- * @see com.liferay.portlet.expando.model.impl.ExpandoRowImpl
- * @see com.liferay.portlet.expando.model.impl.ExpandoRowModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portlet.expando.model.impl.ExpandoRowImpl")
@@ -35,7 +33,7 @@ public interface ExpandoRow extends ExpandoRowModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portlet.expando.model.impl.ExpandoRowImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portlet.expando.model.impl.ExpandoRowImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<ExpandoRow, Long> ROW_ID_ACCESSOR = new Accessor<ExpandoRow, Long>() {
 			@Override

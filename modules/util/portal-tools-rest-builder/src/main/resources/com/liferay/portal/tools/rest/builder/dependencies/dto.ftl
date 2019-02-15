@@ -6,6 +6,8 @@ package ${configYAML.apiPackagePath}.dto.${versionDirName};
 	</#list>
 </#compress>
 
+import com.liferay.petra.function.UnsafeSupplier;
+
 import java.util.Date;
 
 import javax.annotation.Generated;
@@ -27,6 +29,15 @@ public class ${schemaName} {
 
 	public void set${javaParameter.parameterName?cap_first}(${javaParameter.parameterType} ${javaParameter.parameterName}) {
 		_${javaParameter.parameterName} = ${javaParameter.parameterName};
+	}
+
+	public void set${javaParameter.parameterName?cap_first}(UnsafeSupplier<${javaParameter.parameterType}, Throwable> ${javaParameter.parameterName}UnsafeSupplier) {
+		try {
+			_${javaParameter.parameterName} = ${javaParameter.parameterName}UnsafeSupplier.get();
+		}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+		}
 	}
 
 	private ${javaParameter.parameterType} _${javaParameter.parameterName};

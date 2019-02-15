@@ -35,8 +35,6 @@ import com.liferay.tasks.model.TasksEntry;
  *
  * @author Ryan Park
  * @see TasksEntryServiceUtil
- * @see com.liferay.tasks.service.base.TasksEntryServiceBaseImpl
- * @see com.liferay.tasks.service.impl.TasksEntryServiceImpl
  * @generated
  */
 @AccessControlled
@@ -48,7 +46,7 @@ public interface TasksEntryService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link TasksEntryServiceUtil} to access the tasks entry remote service. Add custom service methods to {@link com.liferay.tasks.service.impl.TasksEntryServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link TasksEntryServiceUtil} to access the tasks entry remote service. Add custom service methods to <code>com.liferay.tasks.service.impl.TasksEntryServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public TasksEntry addTasksEntry(String title, int priority,
 		long assigneeUserId, int dueDateMonth, int dueDateDay, int dueDateYear,

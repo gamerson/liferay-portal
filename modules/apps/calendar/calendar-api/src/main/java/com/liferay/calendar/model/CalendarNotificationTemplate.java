@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Eduardo Lundgren
  * @see CalendarNotificationTemplateModel
- * @see com.liferay.calendar.model.impl.CalendarNotificationTemplateImpl
- * @see com.liferay.calendar.model.impl.CalendarNotificationTemplateModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.calendar.model.impl.CalendarNotificationTemplateImpl")
@@ -36,7 +34,7 @@ public interface CalendarNotificationTemplate
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.calendar.model.impl.CalendarNotificationTemplateImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.calendar.model.impl.CalendarNotificationTemplateImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<CalendarNotificationTemplate, Long> CALENDAR_NOTIFICATION_TEMPLATE_ID_ACCESSOR =
 		new Accessor<CalendarNotificationTemplate, Long>() {

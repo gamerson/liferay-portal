@@ -30,7 +30,6 @@ import java.io.ObjectOutput;
  * The cache model class for representing LVEntryVersion in entity cache.
  *
  * @author Brian Wing Shun Chan
- * @see LVEntryVersion
  * @generated
  */
 @ProviderType

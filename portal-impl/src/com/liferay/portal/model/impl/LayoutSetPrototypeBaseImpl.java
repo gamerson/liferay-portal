@@ -37,7 +37,7 @@ public abstract class LayoutSetPrototypeBaseImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a layout set prototype model instance should use the {@link LayoutSetPrototype} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a layout set prototype model instance should use the <code>LayoutSetPrototype</code> interface instead.
 	 */
 	@Override
 	public void persist() {

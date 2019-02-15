@@ -37,7 +37,7 @@ public abstract class PluginSettingBaseImpl extends PluginSettingModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a plugin setting model instance should use the {@link PluginSetting} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a plugin setting model instance should use the <code>PluginSetting</code> interface instead.
 	 */
 	@Override
 	public void persist() {

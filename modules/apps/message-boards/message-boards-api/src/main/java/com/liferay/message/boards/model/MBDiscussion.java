@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see MBDiscussionModel
- * @see com.liferay.message.boards.model.impl.MBDiscussionImpl
- * @see com.liferay.message.boards.model.impl.MBDiscussionModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.message.boards.model.impl.MBDiscussionImpl")
@@ -35,7 +33,7 @@ public interface MBDiscussion extends MBDiscussionModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.message.boards.model.impl.MBDiscussionImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.message.boards.model.impl.MBDiscussionImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<MBDiscussion, Long> DISCUSSION_ID_ACCESSOR = new Accessor<MBDiscussion, Long>() {
 			@Override

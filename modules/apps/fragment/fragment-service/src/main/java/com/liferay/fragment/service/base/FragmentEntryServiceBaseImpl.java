@@ -43,7 +43,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.fragment.service.impl.FragmentEntryServiceImpl
- * @see com.liferay.fragment.service.FragmentEntryServiceUtil
  * @generated
  */
 public abstract class FragmentEntryServiceBaseImpl extends BaseServiceImpl
@@ -51,7 +50,7 @@ public abstract class FragmentEntryServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.fragment.service.FragmentEntryServiceUtil} to access the fragment entry remote service.
+	 * Never modify or reference this class directly. Use <code>FragmentEntryService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.fragment.service.FragmentEntryServiceUtil</code>.
 	 */
 
 	/**

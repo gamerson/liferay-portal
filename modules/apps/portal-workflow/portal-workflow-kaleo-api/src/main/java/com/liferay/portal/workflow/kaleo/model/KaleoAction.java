@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see KaleoActionModel
- * @see com.liferay.portal.workflow.kaleo.model.impl.KaleoActionImpl
- * @see com.liferay.portal.workflow.kaleo.model.impl.KaleoActionModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portal.workflow.kaleo.model.impl.KaleoActionImpl")
@@ -35,7 +33,7 @@ public interface KaleoAction extends KaleoActionModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portal.workflow.kaleo.model.impl.KaleoActionImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portal.workflow.kaleo.model.impl.KaleoActionImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<KaleoAction, Long> KALEO_ACTION_ID_ACCESSOR = new Accessor<KaleoAction, Long>() {
 			@Override

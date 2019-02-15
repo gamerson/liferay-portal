@@ -49,7 +49,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.knowledge.base.service.impl.KBTemplateServiceImpl
- * @see com.liferay.knowledge.base.service.KBTemplateServiceUtil
  * @generated
  */
 public abstract class KBTemplateServiceBaseImpl extends BaseServiceImpl
@@ -57,7 +56,7 @@ public abstract class KBTemplateServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.knowledge.base.service.KBTemplateServiceUtil} to access the kb template remote service.
+	 * Never modify or reference this class directly. Use <code>KBTemplateService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.knowledge.base.service.KBTemplateServiceUtil</code>.
 	 */
 
 	/**

@@ -33,7 +33,6 @@ import java.util.Date;
  * The cache model class for representing WeDeployAuthApp in entity cache.
  *
  * @author Supritha Sundaram
- * @see WeDeployAuthApp
  * @generated
  */
 @ProviderType

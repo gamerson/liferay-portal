@@ -24,8 +24,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see CountryModel
- * @see com.liferay.portal.model.impl.CountryImpl
- * @see com.liferay.portal.model.impl.CountryModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portal.model.impl.CountryImpl")
@@ -34,7 +32,7 @@ public interface Country extends CountryModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portal.model.impl.CountryImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portal.model.impl.CountryImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<Country, Long> COUNTRY_ID_ACCESSOR = new Accessor<Country, Long>() {
 			@Override

@@ -42,7 +42,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.portal.service.impl.PluginSettingServiceImpl
- * @see com.liferay.portal.kernel.service.PluginSettingServiceUtil
  * @generated
  */
 public abstract class PluginSettingServiceBaseImpl extends BaseServiceImpl
@@ -50,7 +49,7 @@ public abstract class PluginSettingServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.portal.kernel.service.PluginSettingServiceUtil} to access the plugin setting remote service.
+	 * Never modify or reference this class directly. Use <code>PluginSettingService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.portal.kernel.service.PluginSettingServiceUtil</code>.
 	 */
 
 	/**

@@ -41,8 +41,6 @@ import java.util.Map;
  *
  * @author Eduardo Lundgren
  * @see CalendarResourceServiceUtil
- * @see com.liferay.calendar.service.base.CalendarResourceServiceBaseImpl
- * @see com.liferay.calendar.service.impl.CalendarResourceServiceImpl
  * @generated
  */
 @AccessControlled
@@ -56,7 +54,7 @@ public interface CalendarResourceService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link CalendarResourceServiceUtil} to access the calendar resource remote service. Add custom service methods to {@link com.liferay.calendar.service.impl.CalendarResourceServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link CalendarResourceServiceUtil} to access the calendar resource remote service. Add custom service methods to <code>com.liferay.calendar.service.impl.CalendarResourceServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public CalendarResource addCalendarResource(long groupId, long classNameId,
 		long classPK, String classUuid, String code,

@@ -34,7 +34,6 @@ import java.util.Date;
  * The cache model class for representing DDMStructureVersion in entity cache.
  *
  * @author Brian Wing Shun Chan
- * @see DDMStructureVersion
  * @generated
  */
 @ProviderType

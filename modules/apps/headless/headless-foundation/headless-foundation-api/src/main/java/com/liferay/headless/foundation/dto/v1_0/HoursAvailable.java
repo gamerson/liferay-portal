@@ -14,6 +14,8 @@
 
 package com.liferay.headless.foundation.dto.v1_0;
 
+import com.liferay.petra.function.UnsafeSupplier;
+
 import javax.annotation.Generated;
 
 import javax.xml.bind.annotation.XmlRootElement;
@@ -46,16 +48,58 @@ public class HoursAvailable {
 		_closes = closes;
 	}
 
+	public void setCloses(
+		UnsafeSupplier<String, Throwable> closesUnsafeSupplier) {
+
+		try {
+			_closes = closesUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setDayOfWeek(String dayOfWeek) {
 		_dayOfWeek = dayOfWeek;
+	}
+
+	public void setDayOfWeek(
+		UnsafeSupplier<String, Throwable> dayOfWeekUnsafeSupplier) {
+
+		try {
+			_dayOfWeek = dayOfWeekUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	public void setId(Long id) {
 		_id = id;
 	}
 
+	public void setId(UnsafeSupplier<Long, Throwable> idUnsafeSupplier) {
+		try {
+			_id = idUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setOpens(String opens) {
 		_opens = opens;
+	}
+
+	public void setOpens(
+		UnsafeSupplier<String, Throwable> opensUnsafeSupplier) {
+
+		try {
+			_opens = opensUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	private String _closes;

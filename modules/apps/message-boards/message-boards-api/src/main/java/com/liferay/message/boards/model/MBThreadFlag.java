@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see MBThreadFlagModel
- * @see com.liferay.message.boards.model.impl.MBThreadFlagImpl
- * @see com.liferay.message.boards.model.impl.MBThreadFlagModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.message.boards.model.impl.MBThreadFlagImpl")
@@ -35,7 +33,7 @@ public interface MBThreadFlag extends MBThreadFlagModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.message.boards.model.impl.MBThreadFlagImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.message.boards.model.impl.MBThreadFlagImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<MBThreadFlag, Long> THREAD_FLAG_ID_ACCESSOR = new Accessor<MBThreadFlag, Long>() {
 			@Override

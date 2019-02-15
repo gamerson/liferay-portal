@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see OAuth2ScopeGrantModel
- * @see com.liferay.oauth2.provider.model.impl.OAuth2ScopeGrantImpl
- * @see com.liferay.oauth2.provider.model.impl.OAuth2ScopeGrantModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.oauth2.provider.model.impl.OAuth2ScopeGrantImpl")
@@ -35,7 +33,7 @@ public interface OAuth2ScopeGrant extends OAuth2ScopeGrantModel, PersistedModel 
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.oauth2.provider.model.impl.OAuth2ScopeGrantImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.oauth2.provider.model.impl.OAuth2ScopeGrantImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<OAuth2ScopeGrant, Long> O_AUTH2_SCOPE_GRANT_ID_ACCESSOR =
 		new Accessor<OAuth2ScopeGrant, Long>() {

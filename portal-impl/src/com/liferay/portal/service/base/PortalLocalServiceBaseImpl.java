@@ -40,7 +40,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.portal.service.impl.PortalLocalServiceImpl
- * @see com.liferay.portal.kernel.service.PortalLocalServiceUtil
  * @generated
  */
 @ProviderType
@@ -49,7 +48,7 @@ public abstract class PortalLocalServiceBaseImpl extends BaseLocalServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.portal.kernel.service.PortalLocalServiceUtil} to access the portal local service.
+	 * Never modify or reference this class directly. Use <code>PortalLocalService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.portal.kernel.service.PortalLocalServiceUtil</code>.
 	 */
 
 	/**

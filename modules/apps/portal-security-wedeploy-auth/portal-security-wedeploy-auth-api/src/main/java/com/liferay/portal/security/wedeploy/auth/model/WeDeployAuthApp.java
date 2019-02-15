@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Supritha Sundaram
  * @see WeDeployAuthAppModel
- * @see com.liferay.portal.security.wedeploy.auth.model.impl.WeDeployAuthAppImpl
- * @see com.liferay.portal.security.wedeploy.auth.model.impl.WeDeployAuthAppModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portal.security.wedeploy.auth.model.impl.WeDeployAuthAppImpl")
@@ -35,7 +33,7 @@ public interface WeDeployAuthApp extends WeDeployAuthAppModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portal.security.wedeploy.auth.model.impl.WeDeployAuthAppImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portal.security.wedeploy.auth.model.impl.WeDeployAuthAppImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<WeDeployAuthApp, Long> WE_DEPLOY_AUTH_APP_ID_ACCESSOR =
 		new Accessor<WeDeployAuthApp, Long>() {

@@ -36,7 +36,7 @@ public abstract class RoleBaseImpl extends RoleModelImpl implements Role {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a role model instance should use the {@link Role} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a role model instance should use the <code>Role</code> interface instead.
 	 */
 	@Override
 	public void persist() {

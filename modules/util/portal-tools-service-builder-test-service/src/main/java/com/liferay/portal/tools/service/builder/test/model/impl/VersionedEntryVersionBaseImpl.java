@@ -36,6 +36,6 @@ public abstract class VersionedEntryVersionBaseImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a versioned entry version model instance should use the {@link VersionedEntryVersion} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a versioned entry version model instance should use the <code>VersionedEntryVersion</code> interface instead.
 	 */
 }

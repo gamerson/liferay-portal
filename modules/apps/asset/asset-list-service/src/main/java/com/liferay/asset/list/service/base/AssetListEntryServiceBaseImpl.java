@@ -42,7 +42,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.asset.list.service.impl.AssetListEntryServiceImpl
- * @see com.liferay.asset.list.service.AssetListEntryServiceUtil
  * @generated
  */
 public abstract class AssetListEntryServiceBaseImpl extends BaseServiceImpl
@@ -50,7 +49,7 @@ public abstract class AssetListEntryServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.asset.list.service.AssetListEntryServiceUtil} to access the asset list entry remote service.
+	 * Never modify or reference this class directly. Use <code>AssetListEntryService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.asset.list.service.AssetListEntryServiceUtil</code>.
 	 */
 
 	/**

@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see ChangesetCollectionModel
- * @see com.liferay.changeset.model.impl.ChangesetCollectionImpl
- * @see com.liferay.changeset.model.impl.ChangesetCollectionModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.changeset.model.impl.ChangesetCollectionImpl")
@@ -36,7 +34,7 @@ public interface ChangesetCollection extends ChangesetCollectionModel,
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.changeset.model.impl.ChangesetCollectionImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.changeset.model.impl.ChangesetCollectionImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<ChangesetCollection, Long> CHANGESET_COLLECTION_ID_ACCESSOR =
 		new Accessor<ChangesetCollection, Long>() {

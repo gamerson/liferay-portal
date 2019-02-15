@@ -33,8 +33,6 @@ import com.liferay.portal.kernel.transaction.Transactional;
  *
  * @author Brian Wing Shun Chan
  * @see FlagsEntryServiceUtil
- * @see com.liferay.flags.service.base.FlagsEntryServiceBaseImpl
- * @see com.liferay.flags.service.impl.FlagsEntryServiceImpl
  * @generated
  */
 @AccessControlled
@@ -48,7 +46,7 @@ public interface FlagsEntryService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link FlagsEntryServiceUtil} to access the flags entry remote service. Add custom service methods to {@link com.liferay.flags.service.impl.FlagsEntryServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link FlagsEntryServiceUtil} to access the flags entry remote service. Add custom service methods to <code>com.liferay.flags.service.impl.FlagsEntryServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public void addEntry(String className, long classPK,
 		String reporterEmailAddress, long reportedUserId, String contentTitle,

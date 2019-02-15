@@ -37,7 +37,7 @@ public abstract class KaleoActionBaseImpl extends KaleoActionModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a kaleo action model instance should use the {@link KaleoAction} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a kaleo action model instance should use the <code>KaleoAction</code> interface instead.
 	 */
 	@Override
 	public void persist() {

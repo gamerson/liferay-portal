@@ -26,8 +26,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see SyncDLObjectModel
- * @see com.liferay.sync.model.impl.SyncDLObjectImpl
- * @see com.liferay.sync.model.impl.SyncDLObjectModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.sync.model.impl.SyncDLObjectImpl")
@@ -37,7 +35,7 @@ public interface SyncDLObject extends SyncDLObjectModel, PersistedModel,
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.sync.model.impl.SyncDLObjectImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.sync.model.impl.SyncDLObjectImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<SyncDLObject, Long> SYNC_DL_OBJECT_ID_ACCESSOR = new Accessor<SyncDLObject, Long>() {
 			@Override

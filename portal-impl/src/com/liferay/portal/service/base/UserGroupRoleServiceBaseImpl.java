@@ -45,7 +45,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.portal.service.impl.UserGroupRoleServiceImpl
- * @see com.liferay.portal.kernel.service.UserGroupRoleServiceUtil
  * @generated
  */
 public abstract class UserGroupRoleServiceBaseImpl extends BaseServiceImpl
@@ -53,7 +52,7 @@ public abstract class UserGroupRoleServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.portal.kernel.service.UserGroupRoleServiceUtil} to access the user group role remote service.
+	 * Never modify or reference this class directly. Use <code>UserGroupRoleService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.portal.kernel.service.UserGroupRoleServiceUtil</code>.
 	 */
 
 	/**

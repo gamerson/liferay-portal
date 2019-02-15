@@ -73,6 +73,9 @@ import com.liferay.portal.template.soy.util.SoyContext;
 import com.liferay.portal.template.soy.util.SoyContextFactoryUtil;
 import com.liferay.portal.util.PortletCategoryUtil;
 import com.liferay.portal.util.WebAppPool;
+import com.liferay.segments.constants.SegmentsConstants;
+import com.liferay.segments.model.SegmentsEntry;
+import com.liferay.segments.service.SegmentsEntryLocalServiceUtil;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -140,6 +143,7 @@ public class ContentPageEditorDisplayContext {
 		soyContext.put(
 			"defaultEditorConfigurations", _getDefaultConfigurations());
 		soyContext.put("defaultLanguageId", themeDisplay.getLanguageId());
+		soyContext.put("defaultSegmentId", _getDefaultSegmentId());
 		soyContext.put(
 			"deleteFragmentEntryLinkURL",
 			getFragmentEntryActionURL(
@@ -189,6 +193,7 @@ public class ContentPageEditorDisplayContext {
 			"availableLanguages", _getAvailableLanguagesSoyContext());
 		soyContext.put("classPK", themeDisplay.getPlid());
 		soyContext.put("defaultLanguageId", themeDisplay.getLanguageId());
+		soyContext.put("defaultSegmentId", _getDefaultSegmentId());
 		soyContext.put("lastSaveDate", StringPool.BLANK);
 		soyContext.put("portletNamespace", _renderResponse.getNamespace());
 		soyContext.put(
@@ -343,6 +348,14 @@ public class ContentPageEditorDisplayContext {
 		_defaultConfigurations = configurations;
 
 		return _defaultConfigurations;
+	}
+
+	private String _getDefaultSegmentId() {
+		SegmentsEntry segmentsEntry =
+			SegmentsEntryLocalServiceUtil.fetchSegmentsEntry(
+				getGroupId(), SegmentsConstants.KEY_DEFAULT, true);
+
+		return "segment-id-" + segmentsEntry.getSegmentsEntryId();
 	}
 
 	private List<SoyContext> _getFragmentEntriesSoyContext(

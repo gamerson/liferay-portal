@@ -60,7 +60,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.portal.workflow.kaleo.service.impl.KaleoDefinitionServiceImpl
- * @see com.liferay.portal.workflow.kaleo.service.KaleoDefinitionServiceUtil
  * @deprecated As of Judson (7.1.x), with no direct replacement
  * @generated
  */
@@ -70,7 +69,7 @@ public abstract class KaleoDefinitionServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.portal.workflow.kaleo.service.KaleoDefinitionServiceUtil} to access the kaleo definition remote service.
+	 * Never modify or reference this class directly. Use <code>KaleoDefinitionService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.portal.workflow.kaleo.service.KaleoDefinitionServiceUtil</code>.
 	 */
 
 	/**

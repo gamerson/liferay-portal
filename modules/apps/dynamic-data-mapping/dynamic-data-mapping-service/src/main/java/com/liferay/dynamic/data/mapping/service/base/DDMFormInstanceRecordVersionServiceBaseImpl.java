@@ -40,7 +40,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.dynamic.data.mapping.service.impl.DDMFormInstanceRecordVersionServiceImpl
- * @see com.liferay.dynamic.data.mapping.service.DDMFormInstanceRecordVersionServiceUtil
  * @generated
  */
 public abstract class DDMFormInstanceRecordVersionServiceBaseImpl
@@ -49,7 +48,7 @@ public abstract class DDMFormInstanceRecordVersionServiceBaseImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.dynamic.data.mapping.service.DDMFormInstanceRecordVersionServiceUtil} to access the ddm form instance record version remote service.
+	 * Never modify or reference this class directly. Use <code>DDMFormInstanceRecordVersionService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.dynamic.data.mapping.service.DDMFormInstanceRecordVersionServiceUtil</code>.
 	 */
 
 	/**

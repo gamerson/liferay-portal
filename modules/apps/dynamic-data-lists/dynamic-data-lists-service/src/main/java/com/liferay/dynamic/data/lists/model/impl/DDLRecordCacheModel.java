@@ -35,7 +35,6 @@ import java.util.Date;
  * The cache model class for representing DDLRecord in entity cache.
  *
  * @author Brian Wing Shun Chan
- * @see DDLRecord
  * @generated
  */
 @ProviderType

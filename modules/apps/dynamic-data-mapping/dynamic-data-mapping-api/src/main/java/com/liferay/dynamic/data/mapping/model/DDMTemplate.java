@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see DDMTemplateModel
- * @see com.liferay.dynamic.data.mapping.model.impl.DDMTemplateImpl
- * @see com.liferay.dynamic.data.mapping.model.impl.DDMTemplateModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.dynamic.data.mapping.model.impl.DDMTemplateImpl")
@@ -35,7 +33,7 @@ public interface DDMTemplate extends DDMTemplateModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.dynamic.data.mapping.model.impl.DDMTemplateImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.dynamic.data.mapping.model.impl.DDMTemplateImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<DDMTemplate, Long> TEMPLATE_ID_ACCESSOR = new Accessor<DDMTemplate, Long>() {
 			@Override

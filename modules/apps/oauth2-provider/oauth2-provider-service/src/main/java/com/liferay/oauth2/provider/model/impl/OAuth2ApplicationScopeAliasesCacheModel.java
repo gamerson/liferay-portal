@@ -34,7 +34,6 @@ import java.util.Date;
  * The cache model class for representing OAuth2ApplicationScopeAliases in entity cache.
  *
  * @author Brian Wing Shun Chan
- * @see OAuth2ApplicationScopeAliases
  * @generated
  */
 @ProviderType

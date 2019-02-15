@@ -23,16 +23,14 @@ import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Provides the remote service utility for FragmentCollection. This utility wraps
- * {@link com.liferay.fragment.service.impl.FragmentCollectionServiceImpl} and is the
- * primary access point for service operations in application layer code running
- * on a remote server. Methods of this service are expected to have security
- * checks based on the propagated JAAS credentials because this service can be
+ * <code>com.liferay.fragment.service.impl.FragmentCollectionServiceImpl</code> and is an
+ * access point for service operations in application layer code running on a
+ * remote server. Methods of this service are expected to have security checks
+ * based on the propagated JAAS credentials because this service can be
  * accessed remotely.
  *
  * @author Brian Wing Shun Chan
  * @see FragmentCollectionService
- * @see com.liferay.fragment.service.base.FragmentCollectionServiceBaseImpl
- * @see com.liferay.fragment.service.impl.FragmentCollectionServiceImpl
  * @generated
  */
 @ProviderType
@@ -40,7 +38,7 @@ public class FragmentCollectionServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this class directly. Add custom service methods to {@link com.liferay.fragment.service.impl.FragmentCollectionServiceImpl} and rerun ServiceBuilder to regenerate this class.
+	 * Never modify this class directly. Add custom service methods to <code>com.liferay.fragment.service.impl.FragmentCollectionServiceImpl</code> and rerun ServiceBuilder to regenerate this class.
 	 */
 	public static com.liferay.fragment.model.FragmentCollection addFragmentCollection(
 		long groupId, String name, String description,

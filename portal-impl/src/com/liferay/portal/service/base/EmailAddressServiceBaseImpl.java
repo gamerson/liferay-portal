@@ -42,7 +42,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.portal.service.impl.EmailAddressServiceImpl
- * @see com.liferay.portal.kernel.service.EmailAddressServiceUtil
  * @generated
  */
 public abstract class EmailAddressServiceBaseImpl extends BaseServiceImpl
@@ -50,7 +49,7 @@ public abstract class EmailAddressServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.portal.kernel.service.EmailAddressServiceUtil} to access the email address remote service.
+	 * Never modify or reference this class directly. Use <code>EmailAddressService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.portal.kernel.service.EmailAddressServiceUtil</code>.
 	 */
 
 	/**

@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see TrashEntryModel
- * @see com.liferay.trash.model.impl.TrashEntryImpl
- * @see com.liferay.trash.model.impl.TrashEntryModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.trash.model.impl.TrashEntryImpl")
@@ -35,7 +33,7 @@ public interface TrashEntry extends TrashEntryModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.trash.model.impl.TrashEntryImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.trash.model.impl.TrashEntryImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<TrashEntry, Long> ENTRY_ID_ACCESSOR = new Accessor<TrashEntry, Long>() {
 			@Override

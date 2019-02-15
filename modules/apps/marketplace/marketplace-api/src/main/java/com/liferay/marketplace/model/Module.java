@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Ryan Park
  * @see ModuleModel
- * @see com.liferay.marketplace.model.impl.ModuleImpl
- * @see com.liferay.marketplace.model.impl.ModuleModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.marketplace.model.impl.ModuleImpl")
@@ -35,7 +33,7 @@ public interface Module extends ModuleModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.marketplace.model.impl.ModuleImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.marketplace.model.impl.ModuleImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<Module, Long> MODULE_ID_ACCESSOR = new Accessor<Module, Long>() {
 			@Override

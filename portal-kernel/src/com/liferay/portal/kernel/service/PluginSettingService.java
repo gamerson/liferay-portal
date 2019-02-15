@@ -31,8 +31,6 @@ import com.liferay.portal.kernel.transaction.Transactional;
  *
  * @author Brian Wing Shun Chan
  * @see PluginSettingServiceUtil
- * @see com.liferay.portal.service.base.PluginSettingServiceBaseImpl
- * @see com.liferay.portal.service.impl.PluginSettingServiceImpl
  * @generated
  */
 @AccessControlled
@@ -44,7 +42,7 @@ public interface PluginSettingService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link PluginSettingServiceUtil} to access the plugin setting remote service. Add custom service methods to {@link com.liferay.portal.service.impl.PluginSettingServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link PluginSettingServiceUtil} to access the plugin setting remote service. Add custom service methods to <code>com.liferay.portal.service.impl.PluginSettingServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 
 	/**

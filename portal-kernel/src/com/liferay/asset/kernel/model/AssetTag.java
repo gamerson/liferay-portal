@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see AssetTagModel
- * @see com.liferay.portlet.asset.model.impl.AssetTagImpl
- * @see com.liferay.portlet.asset.model.impl.AssetTagModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portlet.asset.model.impl.AssetTagImpl")
@@ -35,7 +33,7 @@ public interface AssetTag extends AssetTagModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portlet.asset.model.impl.AssetTagImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portlet.asset.model.impl.AssetTagImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<AssetTag, Long> TAG_ID_ACCESSOR = new Accessor<AssetTag, Long>() {
 			@Override

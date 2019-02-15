@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see DDLRecordSetVersionModel
- * @see com.liferay.dynamic.data.lists.model.impl.DDLRecordSetVersionImpl
- * @see com.liferay.dynamic.data.lists.model.impl.DDLRecordSetVersionModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.dynamic.data.lists.model.impl.DDLRecordSetVersionImpl")
@@ -36,7 +34,7 @@ public interface DDLRecordSetVersion extends DDLRecordSetVersionModel,
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.dynamic.data.lists.model.impl.DDLRecordSetVersionImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.dynamic.data.lists.model.impl.DDLRecordSetVersionImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<DDLRecordSetVersion, Long> RECORD_SET_VERSION_ID_ACCESSOR =
 		new Accessor<DDLRecordSetVersion, Long>() {

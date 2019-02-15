@@ -17,17 +17,32 @@ package com.liferay.headless.web.experience.internal.resource.v1_0;
 import com.liferay.dynamic.data.mapping.model.DDMStructure;
 import com.liferay.dynamic.data.mapping.service.DDMStructureService;
 import com.liferay.headless.web.experience.dto.v1_0.ContentStructure;
-import com.liferay.headless.web.experience.internal.dto.v1_0.CreatorUtil;
+import com.liferay.headless.web.experience.internal.dto.v1_0.ContentStructureUtil;
+import com.liferay.headless.web.experience.internal.odata.entity.v1_0.ContentStructureEntityModel;
 import com.liferay.headless.web.experience.resource.v1_0.ContentStructureResource;
 import com.liferay.journal.model.JournalArticle;
 import com.liferay.portal.kernel.model.ClassName;
-import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.search.Document;
+import com.liferay.portal.kernel.search.Field;
+import com.liferay.portal.kernel.search.Hits;
+import com.liferay.portal.kernel.search.IndexerRegistry;
+import com.liferay.portal.kernel.search.SearchResultPermissionFilterFactory;
+import com.liferay.portal.kernel.search.Sort;
+import com.liferay.portal.kernel.search.filter.Filter;
 import com.liferay.portal.kernel.service.ClassNameService;
-import com.liferay.portal.kernel.service.GroupService;
-import com.liferay.portal.kernel.service.UserService;
-import com.liferay.portal.kernel.util.LocaleUtil;
+import com.liferay.portal.kernel.service.UserLocalService;
+import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.Portal;
+import com.liferay.portal.odata.entity.EntityModel;
 import com.liferay.portal.vulcan.pagination.Page;
 import com.liferay.portal.vulcan.pagination.Pagination;
+import com.liferay.portal.vulcan.resource.EntityModelResource;
+import com.liferay.portal.vulcan.util.SearchUtil;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.ws.rs.core.MultivaluedMap;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -41,28 +56,46 @@ import org.osgi.service.component.annotations.ServiceScope;
 	scope = ServiceScope.PROTOTYPE, service = ContentStructureResource.class
 )
 public class ContentStructureResourceImpl
-	extends BaseContentStructureResourceImpl {
+	extends BaseContentStructureResourceImpl implements EntityModelResource {
 
 	@Override
 	public Page<ContentStructure> getContentSpaceContentStructuresPage(
-			Long contentSpaceId, Pagination pagination)
+			Long contentSpaceId, Filter filter, Pagination pagination,
+			Sort[] sorts)
 		throws Exception {
 
-		Group group = _groupService.getGroup(contentSpaceId);
+		List<DDMStructure> ddmStructures = new ArrayList<>();
+
 		ClassName className = _classNameService.fetchClassName(
 			JournalArticle.class.getName());
 
-		return Page.of(
-			transform(
-				_ddmStructureService.getStructures(
-					company.getCompanyId(), new long[] {group.getGroupId()},
-					className.getClassNameId(), pagination.getStartPosition(),
-					pagination.getEndPosition(), null),
-				this::_toContentStructure),
+		Hits hits = SearchUtil.getHits(
+			filter, _indexerRegistry.nullSafeGetIndexer(DDMStructure.class),
 			pagination,
-			_ddmStructureService.getStructuresCount(
-				company.getCompanyId(), new long[] {group.getGroupId()},
-				className.getClassNameId()));
+			booleanQuery -> {
+			},
+			queryConfig -> {
+				queryConfig.setSelectedFieldNames(Field.ENTRY_CLASS_PK);
+			},
+			searchContext -> {
+				searchContext.setAttribute(
+					Field.CLASS_NAME_ID, className.getClassNameId());
+				searchContext.setAttribute("head", Boolean.TRUE);
+				searchContext.setCompanyId(company.getCompanyId());
+				searchContext.setGroupIds(new long[] {contentSpaceId});
+			},
+			_searchResultPermissionFilterFactory, sorts);
+
+		for (Document document : hits.getDocs()) {
+			DDMStructure ddmStructure = _ddmStructureService.getStructure(
+				GetterUtil.getLong(document.get(Field.ENTRY_CLASS_PK)));
+
+			ddmStructures.add(ddmStructure);
+		}
+
+		return Page.of(
+			transform(ddmStructures, this::_toContentStructure), pagination,
+			ddmStructures.size());
 	}
 
 	@Override
@@ -73,29 +106,21 @@ public class ContentStructureResourceImpl
 			_ddmStructureService.getStructure(contentStructureId));
 	}
 
+	@Override
+	public EntityModel getEntityModel(MultivaluedMap multivaluedMap) {
+		return _contentStructureEntityModel;
+	}
+
 	private ContentStructure _toContentStructure(DDMStructure ddmStructure)
 		throws Exception {
 
-		return new ContentStructure() {
-			{
-				setAvailableLanguages(
-					LocaleUtil.toW3cLanguageIds(
-						ddmStructure.getAvailableLanguageIds()));
-				setContentSpace(ddmStructure.getGroupId());
-				setCreator(
-					CreatorUtil.toCreator(
-						_userService.getUserById(ddmStructure.getUserId())));
-				setDateCreated(ddmStructure.getCreateDate());
-				setDateModified(ddmStructure.getModifiedDate());
-				setDescription(
-					ddmStructure.getDescription(
-						acceptLanguage.getPreferredLocale()));
-				setId(ddmStructure.getStructureId());
-				setName(
-					ddmStructure.getName(acceptLanguage.getPreferredLocale()));
-			}
-		};
+		return ContentStructureUtil.toContentStructure(
+			ddmStructure, acceptLanguage.getPreferredLocale(), _portal,
+			_userLocalService);
 	}
+
+	private static final ContentStructureEntityModel
+		_contentStructureEntityModel = new ContentStructureEntityModel();
 
 	@Reference
 	private ClassNameService _classNameService;
@@ -104,9 +129,16 @@ public class ContentStructureResourceImpl
 	private DDMStructureService _ddmStructureService;
 
 	@Reference
-	private GroupService _groupService;
+	private IndexerRegistry _indexerRegistry;
 
 	@Reference
-	private UserService _userService;
+	private Portal _portal;
+
+	@Reference
+	private SearchResultPermissionFilterFactory
+		_searchResultPermissionFilterFactory;
+
+	@Reference
+	private UserLocalService _userLocalService;
 
 }

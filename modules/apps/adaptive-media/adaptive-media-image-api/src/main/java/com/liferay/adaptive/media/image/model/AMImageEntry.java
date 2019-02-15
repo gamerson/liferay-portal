@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see AMImageEntryModel
- * @see com.liferay.adaptive.media.image.model.impl.AMImageEntryImpl
- * @see com.liferay.adaptive.media.image.model.impl.AMImageEntryModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.adaptive.media.image.model.impl.AMImageEntryImpl")
@@ -35,7 +33,7 @@ public interface AMImageEntry extends AMImageEntryModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.adaptive.media.image.model.impl.AMImageEntryImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.adaptive.media.image.model.impl.AMImageEntryImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<AMImageEntry, Long> AM_IMAGE_ENTRY_ID_ACCESSOR = new Accessor<AMImageEntry, Long>() {
 			@Override

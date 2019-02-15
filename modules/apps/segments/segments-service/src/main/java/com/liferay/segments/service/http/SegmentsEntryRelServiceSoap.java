@@ -25,19 +25,20 @@ import java.rmi.RemoteException;
 
 /**
  * Provides the SOAP utility for the
- * {@link SegmentsEntryRelServiceUtil} service utility. The
- * static methods of this class calls the same methods of the service utility.
- * However, the signatures are different because it is difficult for SOAP to
- * support certain types.
+ * <code>SegmentsEntryRelServiceUtil</code> service
+ * utility. The static methods of this class call the same methods of the
+ * service utility. However, the signatures are different because it is
+ * difficult for SOAP to support certain types.
  *
  * <p>
  * ServiceBuilder follows certain rules in translating the methods. For example,
- * if the method in the service utility returns a {@link java.util.List}, that
- * is translated to an array of {@link com.liferay.segments.model.SegmentsEntryRelSoap}.
- * If the method in the service utility returns a
- * {@link com.liferay.segments.model.SegmentsEntryRel}, that is translated to a
- * {@link com.liferay.segments.model.SegmentsEntryRelSoap}. Methods that SOAP cannot
- * safely wire are skipped.
+ * if the method in the service utility returns a <code>java.util.List</code>,
+ * that is translated to an array of
+ * <code>com.liferay.segments.model.SegmentsEntryRelSoap</code>. If the method in the
+ * service utility returns a
+ * <code>com.liferay.segments.model.SegmentsEntryRel</code>, that is translated to a
+ * <code>com.liferay.segments.model.SegmentsEntryRelSoap</code>. Methods that SOAP
+ * cannot safely wire are skipped.
  * </p>
  *
  * <p>
@@ -59,8 +60,6 @@ import java.rmi.RemoteException;
  *
  * @author Eduardo Garcia
  * @see SegmentsEntryRelServiceHttp
- * @see com.liferay.segments.model.SegmentsEntryRelSoap
- * @see SegmentsEntryRelServiceUtil
  * @generated
  */
 @ProviderType

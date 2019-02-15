@@ -34,7 +34,6 @@ import java.util.Date;
  * The cache model class for representing PowwowParticipant in entity cache.
  *
  * @author Shinn Lok
- * @see PowwowParticipant
  * @generated
  */
 @ProviderType

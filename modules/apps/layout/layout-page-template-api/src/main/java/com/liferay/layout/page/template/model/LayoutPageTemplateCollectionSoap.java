@@ -26,7 +26,6 @@ import java.util.List;
  * This class is used by SOAP remote services, specifically {@link com.liferay.layout.page.template.service.http.LayoutPageTemplateCollectionServiceSoap}.
  *
  * @author Brian Wing Shun Chan
- * @see com.liferay.layout.page.template.service.http.LayoutPageTemplateCollectionServiceSoap
  * @generated
  */
 @ProviderType

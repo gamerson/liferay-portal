@@ -24,8 +24,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see UserNotificationEventModel
- * @see com.liferay.portal.model.impl.UserNotificationEventImpl
- * @see com.liferay.portal.model.impl.UserNotificationEventModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portal.model.impl.UserNotificationEventImpl")
@@ -35,7 +33,7 @@ public interface UserNotificationEvent extends UserNotificationEventModel,
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portal.model.impl.UserNotificationEventImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portal.model.impl.UserNotificationEventImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<UserNotificationEvent, Long> USER_NOTIFICATION_EVENT_ID_ACCESSOR =
 		new Accessor<UserNotificationEvent, Long>() {

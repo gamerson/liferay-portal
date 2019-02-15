@@ -37,7 +37,7 @@ public abstract class AuditEventBaseImpl extends AuditEventModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a audit event model instance should use the {@link AuditEvent} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a audit event model instance should use the <code>AuditEvent</code> interface instead.
 	 */
 	@Override
 	public void persist() {

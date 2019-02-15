@@ -21,16 +21,14 @@ import com.liferay.portal.kernel.util.ReferenceRegistry;
 
 /**
  * Provides the remote service utility for ResourceBlock. This utility wraps
- * {@link com.liferay.portal.service.impl.ResourceBlockServiceImpl} and is the
- * primary access point for service operations in application layer code running
- * on a remote server. Methods of this service are expected to have security
- * checks based on the propagated JAAS credentials because this service can be
+ * <code>com.liferay.portal.service.impl.ResourceBlockServiceImpl</code> and is an
+ * access point for service operations in application layer code running on a
+ * remote server. Methods of this service are expected to have security checks
+ * based on the propagated JAAS credentials because this service can be
  * accessed remotely.
  *
  * @author Brian Wing Shun Chan
  * @see ResourceBlockService
- * @see com.liferay.portal.service.base.ResourceBlockServiceBaseImpl
- * @see com.liferay.portal.service.impl.ResourceBlockServiceImpl
  * @deprecated
  * @generated
  */
@@ -40,7 +38,7 @@ public class ResourceBlockServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this class directly. Add custom service methods to {@link com.liferay.portal.service.impl.ResourceBlockServiceImpl} and rerun ServiceBuilder to regenerate this class.
+	 * Never modify this class directly. Add custom service methods to <code>com.liferay.portal.service.impl.ResourceBlockServiceImpl</code> and rerun ServiceBuilder to regenerate this class.
 	 */
 	public static void addCompanyScopePermission(long scopeGroupId,
 		long companyId, String name, long roleId, String actionId)

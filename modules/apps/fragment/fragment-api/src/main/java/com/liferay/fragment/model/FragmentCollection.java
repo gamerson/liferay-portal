@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see FragmentCollectionModel
- * @see com.liferay.fragment.model.impl.FragmentCollectionImpl
- * @see com.liferay.fragment.model.impl.FragmentCollectionModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.fragment.model.impl.FragmentCollectionImpl")
@@ -36,7 +34,7 @@ public interface FragmentCollection extends FragmentCollectionModel,
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.fragment.model.impl.FragmentCollectionImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.fragment.model.impl.FragmentCollectionImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<FragmentCollection, Long> FRAGMENT_COLLECTION_ID_ACCESSOR =
 		new Accessor<FragmentCollection, Long>() {

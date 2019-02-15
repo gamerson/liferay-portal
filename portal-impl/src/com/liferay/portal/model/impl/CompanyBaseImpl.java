@@ -37,7 +37,7 @@ public abstract class CompanyBaseImpl extends CompanyModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a company model instance should use the {@link Company} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a company model instance should use the <code>Company</code> interface instead.
 	 */
 	@Override
 	public void persist() {

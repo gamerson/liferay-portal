@@ -37,7 +37,7 @@ public abstract class WikiPageBaseImpl extends WikiPageModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a wiki page model instance should use the {@link WikiPage} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a wiki page model instance should use the <code>WikiPage</code> interface instead.
 	 */
 	@Override
 	public void persist() {

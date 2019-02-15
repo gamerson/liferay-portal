@@ -34,8 +34,6 @@ import java.util.List;
  *
  * @author Brian Wing Shun Chan
  * @see OrgLaborServiceUtil
- * @see com.liferay.portal.service.base.OrgLaborServiceBaseImpl
- * @see com.liferay.portal.service.impl.OrgLaborServiceImpl
  * @generated
  */
 @AccessControlled
@@ -47,7 +45,7 @@ public interface OrgLaborService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link OrgLaborServiceUtil} to access the org labor remote service. Add custom service methods to {@link com.liferay.portal.service.impl.OrgLaborServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link OrgLaborServiceUtil} to access the org labor remote service. Add custom service methods to <code>com.liferay.portal.service.impl.OrgLaborServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public OrgLabor addOrgLabor(long organizationId, long typeId, int sunOpen,
 		int sunClose, int monOpen, int monClose, int tueOpen, int tueClose,

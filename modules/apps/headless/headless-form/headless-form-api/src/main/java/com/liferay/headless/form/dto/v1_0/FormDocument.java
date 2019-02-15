@@ -14,6 +14,8 @@
 
 package com.liferay.headless.form.dto.v1_0;
 
+import com.liferay.petra.function.UnsafeSupplier;
+
 import javax.annotation.Generated;
 
 import javax.xml.bind.annotation.XmlRootElement;
@@ -54,24 +56,88 @@ public class FormDocument {
 		_contentUrl = contentUrl;
 	}
 
+	public void setContentUrl(
+		UnsafeSupplier<String, Throwable> contentUrlUnsafeSupplier) {
+
+		try {
+			_contentUrl = contentUrlUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setEncodingFormat(String encodingFormat) {
 		_encodingFormat = encodingFormat;
+	}
+
+	public void setEncodingFormat(
+		UnsafeSupplier<String, Throwable> encodingFormatUnsafeSupplier) {
+
+		try {
+			_encodingFormat = encodingFormatUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	public void setFileExtension(String fileExtension) {
 		_fileExtension = fileExtension;
 	}
 
+	public void setFileExtension(
+		UnsafeSupplier<String, Throwable> fileExtensionUnsafeSupplier) {
+
+		try {
+			_fileExtension = fileExtensionUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setId(Long id) {
 		_id = id;
+	}
+
+	public void setId(UnsafeSupplier<Long, Throwable> idUnsafeSupplier) {
+		try {
+			_id = idUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	public void setSizeInBytes(Number sizeInBytes) {
 		_sizeInBytes = sizeInBytes;
 	}
 
+	public void setSizeInBytes(
+		UnsafeSupplier<Number, Throwable> sizeInBytesUnsafeSupplier) {
+
+		try {
+			_sizeInBytes = sizeInBytesUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setTitle(String title) {
 		_title = title;
+	}
+
+	public void setTitle(
+		UnsafeSupplier<String, Throwable> titleUnsafeSupplier) {
+
+		try {
+			_title = titleUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	private String _contentUrl;

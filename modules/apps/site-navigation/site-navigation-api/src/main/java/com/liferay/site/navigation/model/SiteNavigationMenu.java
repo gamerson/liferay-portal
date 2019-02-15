@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see SiteNavigationMenuModel
- * @see com.liferay.site.navigation.model.impl.SiteNavigationMenuImpl
- * @see com.liferay.site.navigation.model.impl.SiteNavigationMenuModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.site.navigation.model.impl.SiteNavigationMenuImpl")
@@ -36,7 +34,7 @@ public interface SiteNavigationMenu extends SiteNavigationMenuModel,
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.site.navigation.model.impl.SiteNavigationMenuImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.site.navigation.model.impl.SiteNavigationMenuImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<SiteNavigationMenu, Long> SITE_NAVIGATION_MENU_ID_ACCESSOR =
 		new Accessor<SiteNavigationMenu, Long>() {

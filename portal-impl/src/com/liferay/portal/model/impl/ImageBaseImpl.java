@@ -36,7 +36,7 @@ public abstract class ImageBaseImpl extends ImageModelImpl implements Image {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a image model instance should use the {@link Image} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a image model instance should use the <code>Image</code> interface instead.
 	 */
 	@Override
 	public void persist() {

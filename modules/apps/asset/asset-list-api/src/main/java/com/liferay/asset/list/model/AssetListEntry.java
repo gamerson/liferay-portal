@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see AssetListEntryModel
- * @see com.liferay.asset.list.model.impl.AssetListEntryImpl
- * @see com.liferay.asset.list.model.impl.AssetListEntryModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.asset.list.model.impl.AssetListEntryImpl")
@@ -35,7 +33,7 @@ public interface AssetListEntry extends AssetListEntryModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.asset.list.model.impl.AssetListEntryImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.asset.list.model.impl.AssetListEntryImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<AssetListEntry, Long> ASSET_LIST_ENTRY_ID_ACCESSOR =
 		new Accessor<AssetListEntry, Long>() {

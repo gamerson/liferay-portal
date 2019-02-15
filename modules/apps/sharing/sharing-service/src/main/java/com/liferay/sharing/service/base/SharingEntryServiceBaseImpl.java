@@ -41,7 +41,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.sharing.service.impl.SharingEntryServiceImpl
- * @see com.liferay.sharing.service.SharingEntryServiceUtil
  * @generated
  */
 public abstract class SharingEntryServiceBaseImpl extends BaseServiceImpl
@@ -49,7 +48,7 @@ public abstract class SharingEntryServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.sharing.service.SharingEntryServiceUtil} to access the sharing entry remote service.
+	 * Never modify or reference this class directly. Use <code>SharingEntryService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.sharing.service.SharingEntryServiceUtil</code>.
 	 */
 
 	/**

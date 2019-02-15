@@ -40,7 +40,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.reading.time.service.impl.ReadingTimeEntryServiceImpl
- * @see com.liferay.reading.time.service.ReadingTimeEntryServiceUtil
  * @generated
  */
 public abstract class ReadingTimeEntryServiceBaseImpl extends BaseServiceImpl
@@ -48,7 +47,7 @@ public abstract class ReadingTimeEntryServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.reading.time.service.ReadingTimeEntryServiceUtil} to access the reading time entry remote service.
+	 * Never modify or reference this class directly. Use <code>ReadingTimeEntryService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.reading.time.service.ReadingTimeEntryServiceUtil</code>.
 	 */
 
 	/**

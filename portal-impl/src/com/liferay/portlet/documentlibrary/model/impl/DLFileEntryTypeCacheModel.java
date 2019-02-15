@@ -34,7 +34,6 @@ import java.util.Date;
  * The cache model class for representing DLFileEntryType in entity cache.
  *
  * @author Brian Wing Shun Chan
- * @see DLFileEntryType
  * @generated
  */
 @ProviderType

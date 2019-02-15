@@ -38,8 +38,6 @@ import java.util.List;
  *
  * @author Brian Wing Shun Chan
  * @see DDLRecordSetVersionServiceUtil
- * @see com.liferay.dynamic.data.lists.service.base.DDLRecordSetVersionServiceBaseImpl
- * @see com.liferay.dynamic.data.lists.service.impl.DDLRecordSetVersionServiceImpl
  * @generated
  */
 @AccessControlled
@@ -53,7 +51,7 @@ public interface DDLRecordSetVersionService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link DDLRecordSetVersionServiceUtil} to access the ddl record set version remote service. Add custom service methods to {@link com.liferay.dynamic.data.lists.service.impl.DDLRecordSetVersionServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link DDLRecordSetVersionServiceUtil} to access the ddl record set version remote service. Add custom service methods to <code>com.liferay.dynamic.data.lists.service.impl.DDLRecordSetVersionServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public DDLRecordSetVersion getLatestRecordSetVersion(long recordSetId)

@@ -24,8 +24,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see RepositoryModel
- * @see com.liferay.portal.model.impl.RepositoryImpl
- * @see com.liferay.portal.model.impl.RepositoryModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portal.model.impl.RepositoryImpl")
@@ -34,7 +32,7 @@ public interface Repository extends RepositoryModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portal.model.impl.RepositoryImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portal.model.impl.RepositoryImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<Repository, Long> REPOSITORY_ID_ACCESSOR = new Accessor<Repository, Long>() {
 			@Override

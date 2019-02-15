@@ -34,8 +34,6 @@ import java.util.List;
  *
  * @author Brian Wing Shun Chan
  * @see RegionServiceUtil
- * @see com.liferay.portal.service.base.RegionServiceBaseImpl
- * @see com.liferay.portal.service.impl.RegionServiceImpl
  * @generated
  */
 @AccessControlled
@@ -47,7 +45,7 @@ public interface RegionService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link RegionServiceUtil} to access the region remote service. Add custom service methods to {@link com.liferay.portal.service.impl.RegionServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link RegionServiceUtil} to access the region remote service. Add custom service methods to <code>com.liferay.portal.service.impl.RegionServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public Region addRegion(long countryId, String regionCode, String name,
 		boolean active) throws PortalException;

@@ -34,7 +34,6 @@ import java.util.Date;
  * The cache model class for representing KaleoTaskForm in entity cache.
  *
  * @author Brian Wing Shun Chan
- * @see KaleoTaskForm
  * @generated
  */
 @ProviderType

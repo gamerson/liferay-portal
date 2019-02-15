@@ -38,8 +38,6 @@ import java.util.List;
  *
  * @author Brian Wing Shun Chan
  * @see SiteNavigationMenuItemServiceUtil
- * @see com.liferay.site.navigation.service.base.SiteNavigationMenuItemServiceBaseImpl
- * @see com.liferay.site.navigation.service.impl.SiteNavigationMenuItemServiceImpl
  * @generated
  */
 @AccessControlled
@@ -53,7 +51,7 @@ public interface SiteNavigationMenuItemService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link SiteNavigationMenuItemServiceUtil} to access the site navigation menu item remote service. Add custom service methods to {@link com.liferay.site.navigation.service.impl.SiteNavigationMenuItemServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link SiteNavigationMenuItemServiceUtil} to access the site navigation menu item remote service. Add custom service methods to <code>com.liferay.site.navigation.service.impl.SiteNavigationMenuItemServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public SiteNavigationMenuItem addSiteNavigationMenuItem(long groupId,
 		long siteNavigationMenuId, long parentSiteNavigationMenuItemId,

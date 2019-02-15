@@ -39,8 +39,6 @@ import java.util.List;
  *
  * @author Brian Wing Shun Chan
  * @see AssetListEntryServiceUtil
- * @see com.liferay.asset.list.service.base.AssetListEntryServiceBaseImpl
- * @see com.liferay.asset.list.service.impl.AssetListEntryServiceImpl
  * @generated
  */
 @AccessControlled
@@ -54,7 +52,7 @@ public interface AssetListEntryService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link AssetListEntryServiceUtil} to access the asset list entry remote service. Add custom service methods to {@link com.liferay.asset.list.service.impl.AssetListEntryServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link AssetListEntryServiceUtil} to access the asset list entry remote service. Add custom service methods to <code>com.liferay.asset.list.service.impl.AssetListEntryServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public void addAssetEntrySelection(long assetListEntryId,
 		long assetEntryId, ServiceContext serviceContext)

@@ -34,8 +34,6 @@ import java.util.List;
  *
  * @author Brian Wing Shun Chan
  * @see CountryServiceUtil
- * @see com.liferay.portal.service.base.CountryServiceBaseImpl
- * @see com.liferay.portal.service.impl.CountryServiceImpl
  * @generated
  */
 @AccessControlled
@@ -47,7 +45,7 @@ public interface CountryService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link CountryServiceUtil} to access the country remote service. Add custom service methods to {@link com.liferay.portal.service.impl.CountryServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link CountryServiceUtil} to access the country remote service. Add custom service methods to <code>com.liferay.portal.service.impl.CountryServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public Country addCountry(String name, String a2, String a3, String number,
 		String idd, boolean active) throws PortalException;

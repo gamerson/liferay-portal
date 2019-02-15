@@ -24,8 +24,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see PortletPreferencesModel
- * @see com.liferay.portal.model.impl.PortletPreferencesImpl
- * @see com.liferay.portal.model.impl.PortletPreferencesModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portal.model.impl.PortletPreferencesImpl")
@@ -35,7 +33,7 @@ public interface PortletPreferences extends PortletPreferencesModel,
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portal.model.impl.PortletPreferencesImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portal.model.impl.PortletPreferencesImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<PortletPreferences, Long> PORTLET_PREFERENCES_ID_ACCESSOR =
 		new Accessor<PortletPreferences, Long>() {

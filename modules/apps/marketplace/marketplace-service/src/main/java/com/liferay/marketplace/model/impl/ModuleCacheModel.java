@@ -32,7 +32,6 @@ import java.io.ObjectOutput;
  * The cache model class for representing Module in entity cache.
  *
  * @author Ryan Park
- * @see Module
  * @generated
  */
 @ProviderType

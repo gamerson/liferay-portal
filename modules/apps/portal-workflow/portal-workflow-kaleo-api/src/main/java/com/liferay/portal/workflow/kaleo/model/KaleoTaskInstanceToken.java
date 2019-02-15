@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see KaleoTaskInstanceTokenModel
- * @see com.liferay.portal.workflow.kaleo.model.impl.KaleoTaskInstanceTokenImpl
- * @see com.liferay.portal.workflow.kaleo.model.impl.KaleoTaskInstanceTokenModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portal.workflow.kaleo.model.impl.KaleoTaskInstanceTokenImpl")
@@ -36,7 +34,7 @@ public interface KaleoTaskInstanceToken extends KaleoTaskInstanceTokenModel,
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portal.workflow.kaleo.model.impl.KaleoTaskInstanceTokenImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portal.workflow.kaleo.model.impl.KaleoTaskInstanceTokenImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<KaleoTaskInstanceToken, Long> KALEO_TASK_INSTANCE_TOKEN_ID_ACCESSOR =
 		new Accessor<KaleoTaskInstanceToken, Long>() {

@@ -24,8 +24,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see LayoutSetBranchModel
- * @see com.liferay.portal.model.impl.LayoutSetBranchImpl
- * @see com.liferay.portal.model.impl.LayoutSetBranchModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portal.model.impl.LayoutSetBranchImpl")
@@ -34,7 +32,7 @@ public interface LayoutSetBranch extends LayoutSetBranchModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portal.model.impl.LayoutSetBranchImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portal.model.impl.LayoutSetBranchImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<LayoutSetBranch, Long> LAYOUT_SET_BRANCH_ID_ACCESSOR =
 		new Accessor<LayoutSetBranch, Long>() {

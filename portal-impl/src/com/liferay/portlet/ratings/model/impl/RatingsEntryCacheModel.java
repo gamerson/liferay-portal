@@ -34,7 +34,6 @@ import java.util.Date;
  * The cache model class for representing RatingsEntry in entity cache.
  *
  * @author Brian Wing Shun Chan
- * @see RatingsEntry
  * @generated
  */
 @ProviderType

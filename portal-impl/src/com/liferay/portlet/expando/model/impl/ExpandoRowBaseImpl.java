@@ -37,7 +37,7 @@ public abstract class ExpandoRowBaseImpl extends ExpandoRowModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a expando row model instance should use the {@link ExpandoRow} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a expando row model instance should use the <code>ExpandoRow</code> interface instead.
 	 */
 	@Override
 	public void persist() {

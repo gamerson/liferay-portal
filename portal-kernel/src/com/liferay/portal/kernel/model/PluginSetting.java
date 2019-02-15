@@ -24,8 +24,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see PluginSettingModel
- * @see com.liferay.portal.model.impl.PluginSettingImpl
- * @see com.liferay.portal.model.impl.PluginSettingModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portal.model.impl.PluginSettingImpl")
@@ -34,7 +32,7 @@ public interface PluginSetting extends PluginSettingModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portal.model.impl.PluginSettingImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portal.model.impl.PluginSettingImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<PluginSetting, Long> PLUGIN_SETTING_ID_ACCESSOR =
 		new Accessor<PluginSetting, Long>() {

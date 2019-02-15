@@ -53,7 +53,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.sync.service.impl.SyncDLObjectServiceImpl
- * @see com.liferay.sync.service.SyncDLObjectServiceUtil
  * @generated
  */
 public abstract class SyncDLObjectServiceBaseImpl extends BaseServiceImpl
@@ -61,7 +60,7 @@ public abstract class SyncDLObjectServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.sync.service.SyncDLObjectServiceUtil} to access the sync dl object remote service.
+	 * Never modify or reference this class directly. Use <code>SyncDLObjectService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.sync.service.SyncDLObjectServiceUtil</code>.
 	 */
 
 	/**

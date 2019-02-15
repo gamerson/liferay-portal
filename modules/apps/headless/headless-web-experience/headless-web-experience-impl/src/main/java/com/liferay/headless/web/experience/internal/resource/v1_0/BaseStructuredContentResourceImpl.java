@@ -14,7 +14,6 @@
 
 package com.liferay.headless.web.experience.internal.resource.v1_0;
 
-import com.liferay.headless.web.experience.dto.v1_0.ContentStructure;
 import com.liferay.headless.web.experience.dto.v1_0.StructuredContent;
 import com.liferay.headless.web.experience.resource.v1_0.StructuredContentResource;
 import com.liferay.petra.function.UnsafeFunction;
@@ -67,13 +66,6 @@ public abstract class BaseStructuredContentResourceImpl
 		throws Exception {
 
 		return Page.of(Collections.emptyList());
-	}
-
-	@Override
-	public ContentStructure getContentStructure(Long contentStructureId)
-		throws Exception {
-
-		return new ContentStructure();
 	}
 
 	@Override
@@ -150,7 +142,7 @@ public abstract class BaseStructuredContentResourceImpl
 	}
 
 	protected <T, R> List<R> transform(
-		List<T> list, UnsafeFunction<T, R, Exception> unsafeFunction) {
+		List<T> list, UnsafeFunction<T, R, Throwable> unsafeFunction) {
 
 		return TransformUtil.transform(list, unsafeFunction);
 	}

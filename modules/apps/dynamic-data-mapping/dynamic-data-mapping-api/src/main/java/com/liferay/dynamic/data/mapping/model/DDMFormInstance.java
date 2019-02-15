@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see DDMFormInstanceModel
- * @see com.liferay.dynamic.data.mapping.model.impl.DDMFormInstanceImpl
- * @see com.liferay.dynamic.data.mapping.model.impl.DDMFormInstanceModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.dynamic.data.mapping.model.impl.DDMFormInstanceImpl")
@@ -35,7 +33,7 @@ public interface DDMFormInstance extends DDMFormInstanceModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.dynamic.data.mapping.model.impl.DDMFormInstanceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.dynamic.data.mapping.model.impl.DDMFormInstanceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<DDMFormInstance, Long> FORM_INSTANCE_ID_ACCESSOR =
 		new Accessor<DDMFormInstance, Long>() {

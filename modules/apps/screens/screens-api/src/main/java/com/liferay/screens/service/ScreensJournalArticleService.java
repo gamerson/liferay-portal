@@ -35,8 +35,6 @@ import java.util.Locale;
  *
  * @author José Manuel Navarro
  * @see ScreensJournalArticleServiceUtil
- * @see com.liferay.screens.service.base.ScreensJournalArticleServiceBaseImpl
- * @see com.liferay.screens.service.impl.ScreensJournalArticleServiceImpl
  * @generated
  */
 @AccessControlled
@@ -50,7 +48,7 @@ public interface ScreensJournalArticleService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link ScreensJournalArticleServiceUtil} to access the screens journal article remote service. Add custom service methods to {@link com.liferay.screens.service.impl.ScreensJournalArticleServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link ScreensJournalArticleServiceUtil} to access the screens journal article remote service. Add custom service methods to <code>com.liferay.screens.service.impl.ScreensJournalArticleServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public String getJournalArticleContent(long classPK, Locale locale)

@@ -1,6 +1,6 @@
 package ${configYAML.apiPackagePath}.resource.${versionDirName}.test;
 
-import org.jboss.arquillian.junit.Arquillian;
+import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 
 import org.junit.Ignore;
 import org.junit.runner.RunWith;

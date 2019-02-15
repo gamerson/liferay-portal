@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Ryan Park
  * @see TasksEntryModel
- * @see com.liferay.tasks.model.impl.TasksEntryImpl
- * @see com.liferay.tasks.model.impl.TasksEntryModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.tasks.model.impl.TasksEntryImpl")
@@ -35,7 +33,7 @@ public interface TasksEntry extends TasksEntryModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.tasks.model.impl.TasksEntryImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.tasks.model.impl.TasksEntryImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<TasksEntry, Long> TASKS_ENTRY_ID_ACCESSOR = new Accessor<TasksEntry, Long>() {
 			@Override

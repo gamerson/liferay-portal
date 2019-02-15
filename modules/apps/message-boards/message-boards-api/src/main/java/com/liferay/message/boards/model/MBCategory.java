@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see MBCategoryModel
- * @see com.liferay.message.boards.model.impl.MBCategoryImpl
- * @see com.liferay.message.boards.model.impl.MBCategoryModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.message.boards.model.impl.MBCategoryImpl")
@@ -35,7 +33,7 @@ public interface MBCategory extends MBCategoryModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.message.boards.model.impl.MBCategoryImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.message.boards.model.impl.MBCategoryImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<MBCategory, Long> CATEGORY_ID_ACCESSOR = new Accessor<MBCategory, Long>() {
 			@Override

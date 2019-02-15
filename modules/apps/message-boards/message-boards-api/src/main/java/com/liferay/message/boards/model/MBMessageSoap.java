@@ -26,7 +26,6 @@ import java.util.List;
  * This class is used by SOAP remote services, specifically {@link com.liferay.message.boards.service.http.MBMessageServiceSoap}.
  *
  * @author Brian Wing Shun Chan
- * @see com.liferay.message.boards.service.http.MBMessageServiceSoap
  * @generated
  */
 @ProviderType

@@ -1,5 +1,5 @@
 Liferay-Releng-App-Description:
-Liferay-Releng-App-Title: ${liferay.releng.app.title.prefix} Portal Security Sso
+Liferay-Releng-App-Title: ${liferay.releng.app.title.prefix} Portal Security SSO
 Liferay-Releng-Bundle: true
 Liferay-Releng-Category: Utility
 Liferay-Releng-Demo-Url:

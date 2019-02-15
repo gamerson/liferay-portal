@@ -37,7 +37,7 @@ public abstract class JournalFeedBaseImpl extends JournalFeedModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a journal feed model instance should use the {@link JournalFeed} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a journal feed model instance should use the <code>JournalFeed</code> interface instead.
 	 */
 	@Override
 	public void persist() {

@@ -38,7 +38,7 @@ public abstract class LayoutPageTemplateStructureBaseImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a layout page template structure model instance should use the {@link LayoutPageTemplateStructure} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a layout page template structure model instance should use the <code>LayoutPageTemplateStructure</code> interface instead.
 	 */
 	@Override
 	public void persist() {

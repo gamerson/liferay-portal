@@ -23,16 +23,14 @@ import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Provides the remote service utility for PushNotificationsDevice. This utility wraps
- * {@link com.liferay.push.notifications.service.impl.PushNotificationsDeviceServiceImpl} and is the
- * primary access point for service operations in application layer code running
- * on a remote server. Methods of this service are expected to have security
- * checks based on the propagated JAAS credentials because this service can be
+ * <code>com.liferay.push.notifications.service.impl.PushNotificationsDeviceServiceImpl</code> and is an
+ * access point for service operations in application layer code running on a
+ * remote server. Methods of this service are expected to have security checks
+ * based on the propagated JAAS credentials because this service can be
  * accessed remotely.
  *
  * @author Bruno Farache
  * @see PushNotificationsDeviceService
- * @see com.liferay.push.notifications.service.base.PushNotificationsDeviceServiceBaseImpl
- * @see com.liferay.push.notifications.service.impl.PushNotificationsDeviceServiceImpl
  * @generated
  */
 @ProviderType
@@ -40,7 +38,7 @@ public class PushNotificationsDeviceServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this class directly. Add custom service methods to {@link com.liferay.push.notifications.service.impl.PushNotificationsDeviceServiceImpl} and rerun ServiceBuilder to regenerate this class.
+	 * Never modify this class directly. Add custom service methods to <code>com.liferay.push.notifications.service.impl.PushNotificationsDeviceServiceImpl</code> and rerun ServiceBuilder to regenerate this class.
 	 */
 	public static com.liferay.push.notifications.model.PushNotificationsDevice addPushNotificationsDevice(
 		String token, String platform)

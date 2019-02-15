@@ -45,7 +45,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.sync.service.impl.SyncDeviceServiceImpl
- * @see com.liferay.sync.service.SyncDeviceServiceUtil
  * @generated
  */
 public abstract class SyncDeviceServiceBaseImpl extends BaseServiceImpl
@@ -53,7 +52,7 @@ public abstract class SyncDeviceServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.sync.service.SyncDeviceServiceUtil} to access the sync device remote service.
+	 * Never modify or reference this class directly. Use <code>SyncDeviceService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.sync.service.SyncDeviceServiceUtil</code>.
 	 */
 
 	/**

@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Bruno Farache
  * @see PushNotificationsDeviceModel
- * @see com.liferay.push.notifications.model.impl.PushNotificationsDeviceImpl
- * @see com.liferay.push.notifications.model.impl.PushNotificationsDeviceModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.push.notifications.model.impl.PushNotificationsDeviceImpl")
@@ -36,7 +34,7 @@ public interface PushNotificationsDevice extends PushNotificationsDeviceModel,
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.push.notifications.model.impl.PushNotificationsDeviceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.push.notifications.model.impl.PushNotificationsDeviceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<PushNotificationsDevice, Long> PUSH_NOTIFICATIONS_DEVICE_ID_ACCESSOR =
 		new Accessor<PushNotificationsDevice, Long>() {

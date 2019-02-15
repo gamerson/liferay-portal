@@ -24,8 +24,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see PortalPreferencesModel
- * @see com.liferay.portal.model.impl.PortalPreferencesImpl
- * @see com.liferay.portal.model.impl.PortalPreferencesModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portal.model.impl.PortalPreferencesImpl")
@@ -34,7 +32,7 @@ public interface PortalPreferences extends PortalPreferencesModel, PersistedMode
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portal.model.impl.PortalPreferencesImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portal.model.impl.PortalPreferencesImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<PortalPreferences, Long> PORTAL_PREFERENCES_ID_ACCESSOR =
 		new Accessor<PortalPreferences, Long>() {

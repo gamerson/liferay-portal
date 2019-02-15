@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Eduardo Garcia
  * @see SegmentsEntryRelModel
- * @see com.liferay.segments.model.impl.SegmentsEntryRelImpl
- * @see com.liferay.segments.model.impl.SegmentsEntryRelModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.segments.model.impl.SegmentsEntryRelImpl")
@@ -35,7 +33,7 @@ public interface SegmentsEntryRel extends SegmentsEntryRelModel, PersistedModel 
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.segments.model.impl.SegmentsEntryRelImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.segments.model.impl.SegmentsEntryRelImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<SegmentsEntryRel, Long> SEGMENTS_ENTRY_REL_ID_ACCESSOR =
 		new Accessor<SegmentsEntryRel, Long>() {

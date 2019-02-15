@@ -32,7 +32,6 @@ import java.io.ObjectOutput;
  * The cache model class for representing RecentLayoutSetBranch in entity cache.
  *
  * @author Brian Wing Shun Chan
- * @see RecentLayoutSetBranch
  * @generated
  */
 @ProviderType

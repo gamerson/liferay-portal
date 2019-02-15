@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see OAuth2AuthorizationModel
- * @see com.liferay.oauth2.provider.model.impl.OAuth2AuthorizationImpl
- * @see com.liferay.oauth2.provider.model.impl.OAuth2AuthorizationModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.oauth2.provider.model.impl.OAuth2AuthorizationImpl")
@@ -36,7 +34,7 @@ public interface OAuth2Authorization extends OAuth2AuthorizationModel,
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.oauth2.provider.model.impl.OAuth2AuthorizationImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.oauth2.provider.model.impl.OAuth2AuthorizationImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<OAuth2Authorization, Long> O_AUTH2_AUTHORIZATION_ID_ACCESSOR =
 		new Accessor<OAuth2Authorization, Long>() {

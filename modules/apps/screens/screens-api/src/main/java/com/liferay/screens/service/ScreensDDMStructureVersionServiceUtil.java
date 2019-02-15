@@ -23,16 +23,14 @@ import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Provides the remote service utility for ScreensDDMStructureVersion. This utility wraps
- * {@link com.liferay.screens.service.impl.ScreensDDMStructureVersionServiceImpl} and is the
- * primary access point for service operations in application layer code running
- * on a remote server. Methods of this service are expected to have security
- * checks based on the propagated JAAS credentials because this service can be
+ * <code>com.liferay.screens.service.impl.ScreensDDMStructureVersionServiceImpl</code> and is an
+ * access point for service operations in application layer code running on a
+ * remote server. Methods of this service are expected to have security checks
+ * based on the propagated JAAS credentials because this service can be
  * accessed remotely.
  *
  * @author José Manuel Navarro
  * @see ScreensDDMStructureVersionService
- * @see com.liferay.screens.service.base.ScreensDDMStructureVersionServiceBaseImpl
- * @see com.liferay.screens.service.impl.ScreensDDMStructureVersionServiceImpl
  * @generated
  */
 @ProviderType
@@ -40,7 +38,7 @@ public class ScreensDDMStructureVersionServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this class directly. Add custom service methods to {@link com.liferay.screens.service.impl.ScreensDDMStructureVersionServiceImpl} and rerun ServiceBuilder to regenerate this class.
+	 * Never modify this class directly. Add custom service methods to <code>com.liferay.screens.service.impl.ScreensDDMStructureVersionServiceImpl</code> and rerun ServiceBuilder to regenerate this class.
 	 */
 	public static com.liferay.portal.kernel.json.JSONObject getDDMStructureVersion(
 		long structureId)

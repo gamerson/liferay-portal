@@ -40,8 +40,6 @@ import java.util.List;
  *
  * @author Brian Wing Shun Chan
  * @see BookmarksEntryServiceUtil
- * @see com.liferay.bookmarks.service.base.BookmarksEntryServiceBaseImpl
- * @see com.liferay.bookmarks.service.impl.BookmarksEntryServiceImpl
  * @generated
  */
 @AccessControlled
@@ -55,7 +53,7 @@ public interface BookmarksEntryService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link BookmarksEntryServiceUtil} to access the bookmarks entry remote service. Add custom service methods to {@link com.liferay.bookmarks.service.impl.BookmarksEntryServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link BookmarksEntryServiceUtil} to access the bookmarks entry remote service. Add custom service methods to <code>com.liferay.bookmarks.service.impl.BookmarksEntryServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public BookmarksEntry addEntry(long groupId, long folderId, String name,
 		String url, String description, ServiceContext serviceContext)

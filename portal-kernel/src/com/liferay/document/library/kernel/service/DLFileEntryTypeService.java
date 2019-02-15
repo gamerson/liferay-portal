@@ -40,8 +40,6 @@ import java.util.Map;
  *
  * @author Brian Wing Shun Chan
  * @see DLFileEntryTypeServiceUtil
- * @see com.liferay.portlet.documentlibrary.service.base.DLFileEntryTypeServiceBaseImpl
- * @see com.liferay.portlet.documentlibrary.service.impl.DLFileEntryTypeServiceImpl
  * @generated
  */
 @AccessControlled
@@ -53,7 +51,7 @@ public interface DLFileEntryTypeService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link DLFileEntryTypeServiceUtil} to access the document library file entry type remote service. Add custom service methods to {@link com.liferay.portlet.documentlibrary.service.impl.DLFileEntryTypeServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link DLFileEntryTypeServiceUtil} to access the document library file entry type remote service. Add custom service methods to <code>com.liferay.portlet.documentlibrary.service.impl.DLFileEntryTypeServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public DLFileEntryType addFileEntryType(long groupId,
 		String fileEntryTypeKey, Map<Locale, String> nameMap,

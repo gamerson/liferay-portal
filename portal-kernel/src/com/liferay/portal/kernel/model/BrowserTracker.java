@@ -24,8 +24,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see BrowserTrackerModel
- * @see com.liferay.portal.model.impl.BrowserTrackerImpl
- * @see com.liferay.portal.model.impl.BrowserTrackerModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portal.model.impl.BrowserTrackerImpl")
@@ -34,7 +32,7 @@ public interface BrowserTracker extends BrowserTrackerModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portal.model.impl.BrowserTrackerImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portal.model.impl.BrowserTrackerImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<BrowserTracker, Long> BROWSER_TRACKER_ID_ACCESSOR =
 		new Accessor<BrowserTracker, Long>() {

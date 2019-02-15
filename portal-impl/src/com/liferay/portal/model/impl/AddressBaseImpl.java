@@ -37,7 +37,7 @@ public abstract class AddressBaseImpl extends AddressModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a address model instance should use the {@link Address} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a address model instance should use the <code>Address</code> interface instead.
 	 */
 	@Override
 	public void persist() {

@@ -37,7 +37,7 @@ public abstract class SiteFriendlyURLBaseImpl extends SiteFriendlyURLModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a site friendly url model instance should use the {@link SiteFriendlyURL} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a site friendly url model instance should use the <code>SiteFriendlyURL</code> interface instead.
 	 */
 	@Override
 	public void persist() {

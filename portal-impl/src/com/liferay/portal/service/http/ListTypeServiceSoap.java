@@ -24,19 +24,20 @@ import java.rmi.RemoteException;
 
 /**
  * Provides the SOAP utility for the
- * {@link ListTypeServiceUtil} service utility. The
- * static methods of this class calls the same methods of the service utility.
- * However, the signatures are different because it is difficult for SOAP to
- * support certain types.
+ * <code>ListTypeServiceUtil</code> service
+ * utility. The static methods of this class call the same methods of the
+ * service utility. However, the signatures are different because it is
+ * difficult for SOAP to support certain types.
  *
  * <p>
  * ServiceBuilder follows certain rules in translating the methods. For example,
- * if the method in the service utility returns a {@link java.util.List}, that
- * is translated to an array of {@link com.liferay.portal.kernel.model.ListTypeSoap}.
- * If the method in the service utility returns a
- * {@link com.liferay.portal.kernel.model.ListType}, that is translated to a
- * {@link com.liferay.portal.kernel.model.ListTypeSoap}. Methods that SOAP cannot
- * safely wire are skipped.
+ * if the method in the service utility returns a <code>java.util.List</code>,
+ * that is translated to an array of
+ * <code>com.liferay.portal.kernel.model.ListTypeSoap</code>. If the method in the
+ * service utility returns a
+ * <code>com.liferay.portal.kernel.model.ListType</code>, that is translated to a
+ * <code>com.liferay.portal.kernel.model.ListTypeSoap</code>. Methods that SOAP
+ * cannot safely wire are skipped.
  * </p>
  *
  * <p>
@@ -58,8 +59,6 @@ import java.rmi.RemoteException;
  *
  * @author Brian Wing Shun Chan
  * @see ListTypeServiceHttp
- * @see com.liferay.portal.kernel.model.ListTypeSoap
- * @see ListTypeServiceUtil
  * @generated
  */
 @ProviderType

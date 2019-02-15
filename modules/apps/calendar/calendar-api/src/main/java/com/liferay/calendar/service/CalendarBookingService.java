@@ -42,8 +42,6 @@ import java.util.Map;
  *
  * @author Eduardo Lundgren
  * @see CalendarBookingServiceUtil
- * @see com.liferay.calendar.service.base.CalendarBookingServiceBaseImpl
- * @see com.liferay.calendar.service.impl.CalendarBookingServiceImpl
  * @generated
  */
 @AccessControlled
@@ -57,7 +55,7 @@ public interface CalendarBookingService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link CalendarBookingServiceUtil} to access the calendar booking remote service. Add custom service methods to {@link com.liferay.calendar.service.impl.CalendarBookingServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link CalendarBookingServiceUtil} to access the calendar booking remote service. Add custom service methods to <code>com.liferay.calendar.service.impl.CalendarBookingServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public CalendarBooking addCalendarBooking(long calendarId,
 		long[] childCalendarIds, long parentCalendarBookingId,

@@ -37,7 +37,7 @@ public abstract class RecentLayoutRevisionBaseImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a recent layout revision model instance should use the {@link RecentLayoutRevision} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a recent layout revision model instance should use the <code>RecentLayoutRevision</code> interface instead.
 	 */
 	@Override
 	public void persist() {

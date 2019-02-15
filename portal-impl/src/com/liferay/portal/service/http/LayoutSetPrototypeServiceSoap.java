@@ -28,19 +28,20 @@ import java.util.Map;
 
 /**
  * Provides the SOAP utility for the
- * {@link LayoutSetPrototypeServiceUtil} service utility. The
- * static methods of this class calls the same methods of the service utility.
- * However, the signatures are different because it is difficult for SOAP to
- * support certain types.
+ * <code>LayoutSetPrototypeServiceUtil</code> service
+ * utility. The static methods of this class call the same methods of the
+ * service utility. However, the signatures are different because it is
+ * difficult for SOAP to support certain types.
  *
  * <p>
  * ServiceBuilder follows certain rules in translating the methods. For example,
- * if the method in the service utility returns a {@link java.util.List}, that
- * is translated to an array of {@link com.liferay.portal.kernel.model.LayoutSetPrototypeSoap}.
- * If the method in the service utility returns a
- * {@link com.liferay.portal.kernel.model.LayoutSetPrototype}, that is translated to a
- * {@link com.liferay.portal.kernel.model.LayoutSetPrototypeSoap}. Methods that SOAP cannot
- * safely wire are skipped.
+ * if the method in the service utility returns a <code>java.util.List</code>,
+ * that is translated to an array of
+ * <code>com.liferay.portal.kernel.model.LayoutSetPrototypeSoap</code>. If the method in the
+ * service utility returns a
+ * <code>com.liferay.portal.kernel.model.LayoutSetPrototype</code>, that is translated to a
+ * <code>com.liferay.portal.kernel.model.LayoutSetPrototypeSoap</code>. Methods that SOAP
+ * cannot safely wire are skipped.
  * </p>
  *
  * <p>
@@ -62,8 +63,6 @@ import java.util.Map;
  *
  * @author Brian Wing Shun Chan
  * @see LayoutSetPrototypeServiceHttp
- * @see com.liferay.portal.kernel.model.LayoutSetPrototypeSoap
- * @see LayoutSetPrototypeServiceUtil
  * @generated
  */
 @ProviderType

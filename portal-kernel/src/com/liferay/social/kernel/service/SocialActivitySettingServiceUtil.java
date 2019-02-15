@@ -21,16 +21,14 @@ import com.liferay.portal.kernel.util.ReferenceRegistry;
 
 /**
  * Provides the remote service utility for SocialActivitySetting. This utility wraps
- * {@link com.liferay.portlet.social.service.impl.SocialActivitySettingServiceImpl} and is the
- * primary access point for service operations in application layer code running
- * on a remote server. Methods of this service are expected to have security
- * checks based on the propagated JAAS credentials because this service can be
+ * <code>com.liferay.portlet.social.service.impl.SocialActivitySettingServiceImpl</code> and is an
+ * access point for service operations in application layer code running on a
+ * remote server. Methods of this service are expected to have security checks
+ * based on the propagated JAAS credentials because this service can be
  * accessed remotely.
  *
  * @author Brian Wing Shun Chan
  * @see SocialActivitySettingService
- * @see com.liferay.portlet.social.service.base.SocialActivitySettingServiceBaseImpl
- * @see com.liferay.portlet.social.service.impl.SocialActivitySettingServiceImpl
  * @generated
  */
 @ProviderType
@@ -38,7 +36,7 @@ public class SocialActivitySettingServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this class directly. Add custom service methods to {@link com.liferay.portlet.social.service.impl.SocialActivitySettingServiceImpl} and rerun ServiceBuilder to regenerate this class.
+	 * Never modify this class directly. Add custom service methods to <code>com.liferay.portlet.social.service.impl.SocialActivitySettingServiceImpl</code> and rerun ServiceBuilder to regenerate this class.
 	 */
 	public static com.liferay.social.kernel.model.SocialActivityDefinition getActivityDefinition(
 		long groupId, String className, int activityType)

@@ -43,7 +43,6 @@ import javax.sql.DataSource;
  *
  * @author Eduardo Garcia
  * @see com.liferay.segments.service.impl.SegmentsEntryRelServiceImpl
- * @see com.liferay.segments.service.SegmentsEntryRelServiceUtil
  * @generated
  */
 public abstract class SegmentsEntryRelServiceBaseImpl extends BaseServiceImpl
@@ -51,7 +50,7 @@ public abstract class SegmentsEntryRelServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.segments.service.SegmentsEntryRelServiceUtil} to access the segments entry rel remote service.
+	 * Never modify or reference this class directly. Use <code>SegmentsEntryRelService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.segments.service.SegmentsEntryRelServiceUtil</code>.
 	 */
 
 	/**

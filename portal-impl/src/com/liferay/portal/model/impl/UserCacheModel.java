@@ -34,7 +34,6 @@ import java.util.Date;
  * The cache model class for representing User in entity cache.
  *
  * @author Brian Wing Shun Chan
- * @see User
  * @generated
  */
 @ProviderType

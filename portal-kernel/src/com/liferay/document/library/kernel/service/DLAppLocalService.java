@@ -41,8 +41,6 @@ import java.io.InputStream;
  *
  * @author Brian Wing Shun Chan
  * @see DLAppLocalServiceUtil
- * @see com.liferay.portlet.documentlibrary.service.base.DLAppLocalServiceBaseImpl
- * @see com.liferay.portlet.documentlibrary.service.impl.DLAppLocalServiceImpl
  * @generated
  */
 @ProviderType
@@ -52,7 +50,7 @@ public interface DLAppLocalService extends BaseLocalService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link DLAppLocalServiceUtil} to access the dl app local service. Add custom service methods to {@link com.liferay.portlet.documentlibrary.service.impl.DLAppLocalServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link DLAppLocalServiceUtil} to access the dl app local service. Add custom service methods to <code>com.liferay.portlet.documentlibrary.service.impl.DLAppLocalServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public FileEntry addFileEntry(long userId, long repositoryId,
 		long folderId, String sourceFileName, String mimeType, byte[] bytes,

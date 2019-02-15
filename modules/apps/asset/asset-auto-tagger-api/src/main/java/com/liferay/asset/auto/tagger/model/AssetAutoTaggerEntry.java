@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see AssetAutoTaggerEntryModel
- * @see com.liferay.asset.auto.tagger.model.impl.AssetAutoTaggerEntryImpl
- * @see com.liferay.asset.auto.tagger.model.impl.AssetAutoTaggerEntryModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.asset.auto.tagger.model.impl.AssetAutoTaggerEntryImpl")
@@ -36,7 +34,7 @@ public interface AssetAutoTaggerEntry extends AssetAutoTaggerEntryModel,
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.asset.auto.tagger.model.impl.AssetAutoTaggerEntryImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.asset.auto.tagger.model.impl.AssetAutoTaggerEntryImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<AssetAutoTaggerEntry, Long> ASSET_AUTO_TAGGER_ENTRY_ID_ACCESSOR =
 		new Accessor<AssetAutoTaggerEntry, Long>() {

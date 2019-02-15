@@ -24,8 +24,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see GroupModel
- * @see com.liferay.portal.model.impl.GroupImpl
- * @see com.liferay.portal.model.impl.GroupModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portal.model.impl.GroupImpl")
@@ -34,7 +32,7 @@ public interface Group extends GroupModel, PersistedModel, TreeModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portal.model.impl.GroupImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portal.model.impl.GroupImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<Group, Long> GROUP_ID_ACCESSOR = new Accessor<Group, Long>() {
 			@Override

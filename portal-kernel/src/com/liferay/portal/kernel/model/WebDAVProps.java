@@ -24,8 +24,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see WebDAVPropsModel
- * @see com.liferay.portal.model.impl.WebDAVPropsImpl
- * @see com.liferay.portal.model.impl.WebDAVPropsModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portal.model.impl.WebDAVPropsImpl")
@@ -34,7 +32,7 @@ public interface WebDAVProps extends WebDAVPropsModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portal.model.impl.WebDAVPropsImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portal.model.impl.WebDAVPropsImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<WebDAVProps, Long> WEB_DAV_PROPS_ID_ACCESSOR = new Accessor<WebDAVProps, Long>() {
 			@Override

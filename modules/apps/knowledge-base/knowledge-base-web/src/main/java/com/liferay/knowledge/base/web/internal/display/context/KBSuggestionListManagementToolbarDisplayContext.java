@@ -16,6 +16,8 @@ package com.liferay.knowledge.base.web.internal.display.context;
 
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItemList;
+import com.liferay.frontend.taglib.clay.servlet.taglib.util.LabelItem;
+import com.liferay.frontend.taglib.clay.servlet.taglib.util.LabelItemList;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.SafeConsumer;
 import com.liferay.knowledge.base.model.KBComment;
 import com.liferay.knowledge.base.web.internal.security.permission.resource.KBCommentPermission;
@@ -96,6 +98,14 @@ public class KBSuggestionListManagementToolbarDisplayContext {
 		return availableActionDropdownItems;
 	}
 
+	public String getClearResultsURL() {
+		PortletURL clearResultsURL = _liferayPortletResponse.createRenderURL();
+
+		clearResultsURL.setParameter("mvcPath", "/admin/view_suggestions.jsp");
+
+		return clearResultsURL.toString();
+	}
+
 	public List<DropdownItem> getFilterDropdownItems() {
 		return new DropdownItemList() {
 			{
@@ -117,6 +127,36 @@ public class KBSuggestionListManagementToolbarDisplayContext {
 							dropdownGroupItem.setLabel(
 								LanguageUtil.get(_request, "order-by"));
 						}));
+			}
+		};
+	}
+
+	public List<LabelItem> getFilterLabelItems() {
+		return new LabelItemList() {
+			{
+				String navigation = _getNavigation();
+
+				if (!navigation.equals("all")) {
+					add(
+						SafeConsumer.ignore(
+							labelItem -> {
+								PortletURL removeLabelURL =
+									PortletURLUtil.clone(
+										_currentURLObj,
+										_liferayPortletResponse);
+
+								removeLabelURL.setParameter(
+									"navigation", (String)null);
+
+								labelItem.putData(
+									"removeLabelURL",
+									removeLabelURL.toString());
+
+								labelItem.setCloseable(true);
+								labelItem.setLabel(
+									LanguageUtil.get(_request, navigation));
+							}));
+				}
 			}
 		};
 	}

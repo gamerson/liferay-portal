@@ -26,8 +26,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see DLFileVersionModel
- * @see com.liferay.portlet.documentlibrary.model.impl.DLFileVersionImpl
- * @see com.liferay.portlet.documentlibrary.model.impl.DLFileVersionModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portlet.documentlibrary.model.impl.DLFileVersionImpl")
@@ -37,7 +35,7 @@ public interface DLFileVersion extends DLFileVersionModel, PersistedModel,
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portlet.documentlibrary.model.impl.DLFileVersionImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portlet.documentlibrary.model.impl.DLFileVersionImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<DLFileVersion, Long> FILE_VERSION_ID_ACCESSOR = new Accessor<DLFileVersion, Long>() {
 			@Override

@@ -37,7 +37,7 @@ public abstract class ListTypeBaseImpl extends ListTypeModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a list type model instance should use the {@link ListType} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a list type model instance should use the <code>ListType</code> interface instead.
 	 */
 	@Override
 	public void persist() {

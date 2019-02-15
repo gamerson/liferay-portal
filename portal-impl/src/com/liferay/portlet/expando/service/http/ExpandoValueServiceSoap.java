@@ -25,19 +25,20 @@ import java.rmi.RemoteException;
 
 /**
  * Provides the SOAP utility for the
- * {@link ExpandoValueServiceUtil} service utility. The
- * static methods of this class calls the same methods of the service utility.
- * However, the signatures are different because it is difficult for SOAP to
- * support certain types.
+ * <code>ExpandoValueServiceUtil</code> service
+ * utility. The static methods of this class call the same methods of the
+ * service utility. However, the signatures are different because it is
+ * difficult for SOAP to support certain types.
  *
  * <p>
  * ServiceBuilder follows certain rules in translating the methods. For example,
- * if the method in the service utility returns a {@link java.util.List}, that
- * is translated to an array of {@link com.liferay.expando.kernel.model.ExpandoValueSoap}.
- * If the method in the service utility returns a
- * {@link com.liferay.expando.kernel.model.ExpandoValue}, that is translated to a
- * {@link com.liferay.expando.kernel.model.ExpandoValueSoap}. Methods that SOAP cannot
- * safely wire are skipped.
+ * if the method in the service utility returns a <code>java.util.List</code>,
+ * that is translated to an array of
+ * <code>com.liferay.expando.kernel.model.ExpandoValueSoap</code>. If the method in the
+ * service utility returns a
+ * <code>com.liferay.expando.kernel.model.ExpandoValue</code>, that is translated to a
+ * <code>com.liferay.expando.kernel.model.ExpandoValueSoap</code>. Methods that SOAP
+ * cannot safely wire are skipped.
  * </p>
  *
  * <p>
@@ -59,8 +60,6 @@ import java.rmi.RemoteException;
  *
  * @author Brian Wing Shun Chan
  * @see ExpandoValueServiceHttp
- * @see com.liferay.expando.kernel.model.ExpandoValueSoap
- * @see ExpandoValueServiceUtil
  * @generated
  */
 @ProviderType

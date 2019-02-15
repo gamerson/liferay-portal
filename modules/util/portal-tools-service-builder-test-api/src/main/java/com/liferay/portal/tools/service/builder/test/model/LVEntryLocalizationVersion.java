@@ -24,8 +24,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see LVEntryLocalizationVersionModel
- * @see com.liferay.portal.tools.service.builder.test.model.impl.LVEntryLocalizationVersionImpl
- * @see com.liferay.portal.tools.service.builder.test.model.impl.LVEntryLocalizationVersionModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portal.tools.service.builder.test.model.impl.LVEntryLocalizationVersionImpl")
@@ -35,7 +33,7 @@ public interface LVEntryLocalizationVersion
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portal.tools.service.builder.test.model.impl.LVEntryLocalizationVersionImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portal.tools.service.builder.test.model.impl.LVEntryLocalizationVersionImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<LVEntryLocalizationVersion, Long> LV_ENTRY_LOCALIZATION_VERSION_ID_ACCESSOR =
 		new Accessor<LVEntryLocalizationVersion, Long>() {

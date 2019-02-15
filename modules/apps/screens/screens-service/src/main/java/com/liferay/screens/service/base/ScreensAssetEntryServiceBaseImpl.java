@@ -49,7 +49,6 @@ import javax.sql.DataSource;
  *
  * @author José Manuel Navarro
  * @see com.liferay.screens.service.impl.ScreensAssetEntryServiceImpl
- * @see com.liferay.screens.service.ScreensAssetEntryServiceUtil
  * @generated
  */
 public abstract class ScreensAssetEntryServiceBaseImpl extends BaseServiceImpl
@@ -57,7 +56,7 @@ public abstract class ScreensAssetEntryServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.screens.service.ScreensAssetEntryServiceUtil} to access the screens asset entry remote service.
+	 * Never modify or reference this class directly. Use <code>ScreensAssetEntryService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.screens.service.ScreensAssetEntryServiceUtil</code>.
 	 */
 
 	/**

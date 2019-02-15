@@ -39,8 +39,6 @@ import java.util.List;
  *
  * @author Eduardo Garcia
  * @see SegmentsEntryRelServiceUtil
- * @see com.liferay.segments.service.base.SegmentsEntryRelServiceBaseImpl
- * @see com.liferay.segments.service.impl.SegmentsEntryRelServiceImpl
  * @generated
  */
 @AccessControlled
@@ -54,7 +52,7 @@ public interface SegmentsEntryRelService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link SegmentsEntryRelServiceUtil} to access the segments entry rel remote service. Add custom service methods to {@link com.liferay.segments.service.impl.SegmentsEntryRelServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link SegmentsEntryRelServiceUtil} to access the segments entry rel remote service. Add custom service methods to <code>com.liferay.segments.service.impl.SegmentsEntryRelServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public SegmentsEntryRel addSegmentsEntryRel(long segmentsEntryId,
 		long classNameId, long classPK, ServiceContext serviceContext)

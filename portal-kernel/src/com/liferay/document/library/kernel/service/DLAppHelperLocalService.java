@@ -47,8 +47,6 @@ import java.util.Map;
  *
  * @author Brian Wing Shun Chan
  * @see DLAppHelperLocalServiceUtil
- * @see com.liferay.portlet.documentlibrary.service.base.DLAppHelperLocalServiceBaseImpl
- * @see com.liferay.portlet.documentlibrary.service.impl.DLAppHelperLocalServiceImpl
  * @generated
  */
 @ProviderType
@@ -58,7 +56,7 @@ public interface DLAppHelperLocalService extends BaseLocalService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link DLAppHelperLocalServiceUtil} to access the dl app helper local service. Add custom service methods to {@link com.liferay.portlet.documentlibrary.service.impl.DLAppHelperLocalServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link DLAppHelperLocalServiceUtil} to access the dl app helper local service. Add custom service methods to <code>com.liferay.portlet.documentlibrary.service.impl.DLAppHelperLocalServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public void addFolder(long userId, Folder folder,
 		ServiceContext serviceContext) throws PortalException;

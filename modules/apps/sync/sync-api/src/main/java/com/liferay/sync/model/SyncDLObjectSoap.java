@@ -26,7 +26,6 @@ import java.util.List;
  * This class is used by SOAP remote services, specifically {@link com.liferay.sync.service.http.SyncDLObjectServiceSoap}.
  *
  * @author Brian Wing Shun Chan
- * @see com.liferay.sync.service.http.SyncDLObjectServiceSoap
  * @generated
  */
 @ProviderType

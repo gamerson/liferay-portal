@@ -47,7 +47,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.dynamic.data.lists.service.impl.DDLRecordSetServiceImpl
- * @see com.liferay.dynamic.data.lists.service.DDLRecordSetServiceUtil
  * @generated
  */
 public abstract class DDLRecordSetServiceBaseImpl extends BaseServiceImpl
@@ -55,7 +54,7 @@ public abstract class DDLRecordSetServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.dynamic.data.lists.service.DDLRecordSetServiceUtil} to access the ddl record set remote service.
+	 * Never modify or reference this class directly. Use <code>DDLRecordSetService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.dynamic.data.lists.service.DDLRecordSetServiceUtil</code>.
 	 */
 
 	/**

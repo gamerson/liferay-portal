@@ -37,7 +37,7 @@ public abstract class AssetLinkBaseImpl extends AssetLinkModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a asset link model instance should use the {@link AssetLink} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a asset link model instance should use the <code>AssetLink</code> interface instead.
 	 */
 	@Override
 	public void persist() {

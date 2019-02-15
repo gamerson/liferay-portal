@@ -24,8 +24,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see LocalizedEntryLocalizationModel
- * @see com.liferay.portal.tools.service.builder.test.model.impl.LocalizedEntryLocalizationImpl
- * @see com.liferay.portal.tools.service.builder.test.model.impl.LocalizedEntryLocalizationModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portal.tools.service.builder.test.model.impl.LocalizedEntryLocalizationImpl")
@@ -35,7 +33,7 @@ public interface LocalizedEntryLocalization
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portal.tools.service.builder.test.model.impl.LocalizedEntryLocalizationImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portal.tools.service.builder.test.model.impl.LocalizedEntryLocalizationImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<LocalizedEntryLocalization, Long> LOCALIZED_ENTRY_LOCALIZATION_ID_ACCESSOR =
 		new Accessor<LocalizedEntryLocalization, Long>() {

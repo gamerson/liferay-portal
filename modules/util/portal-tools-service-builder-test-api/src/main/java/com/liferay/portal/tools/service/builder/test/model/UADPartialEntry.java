@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see UADPartialEntryModel
- * @see com.liferay.portal.tools.service.builder.test.model.impl.UADPartialEntryImpl
- * @see com.liferay.portal.tools.service.builder.test.model.impl.UADPartialEntryModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portal.tools.service.builder.test.model.impl.UADPartialEntryImpl")
@@ -35,7 +33,7 @@ public interface UADPartialEntry extends UADPartialEntryModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portal.tools.service.builder.test.model.impl.UADPartialEntryImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portal.tools.service.builder.test.model.impl.UADPartialEntryImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<UADPartialEntry, Long> UAD_PARTIAL_ENTRY_ID_ACCESSOR =
 		new Accessor<UADPartialEntry, Long>() {

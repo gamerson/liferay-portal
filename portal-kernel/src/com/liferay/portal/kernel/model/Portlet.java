@@ -24,8 +24,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see PortletModel
- * @see com.liferay.portal.model.impl.PortletImpl
- * @see com.liferay.portal.model.impl.PortletModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portal.model.impl.PortletImpl")
@@ -34,7 +32,7 @@ public interface Portlet extends PortletModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portal.model.impl.PortletImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portal.model.impl.PortletImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<Portlet, Long> ID_ACCESSOR = new Accessor<Portlet, Long>() {
 			@Override

@@ -46,8 +46,6 @@ import java.util.List;
  *
  * @author Brian Wing Shun Chan
  * @see MBMessageServiceUtil
- * @see com.liferay.message.boards.service.base.MBMessageServiceBaseImpl
- * @see com.liferay.message.boards.service.impl.MBMessageServiceImpl
  * @generated
  */
 @AccessControlled
@@ -61,7 +59,7 @@ public interface MBMessageService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link MBMessageServiceUtil} to access the message-boards message remote service. Add custom service methods to {@link com.liferay.message.boards.service.impl.MBMessageServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link MBMessageServiceUtil} to access the message-boards message remote service. Add custom service methods to <code>com.liferay.message.boards.service.impl.MBMessageServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public MBMessage addDiscussionMessage(long groupId, String className,
 		long classPK, long threadId, long parentMessageId, String subject,

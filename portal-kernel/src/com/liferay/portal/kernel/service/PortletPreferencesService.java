@@ -33,8 +33,6 @@ import com.liferay.portal.kernel.transaction.Transactional;
  *
  * @author Brian Wing Shun Chan
  * @see PortletPreferencesServiceUtil
- * @see com.liferay.portal.service.base.PortletPreferencesServiceBaseImpl
- * @see com.liferay.portal.service.impl.PortletPreferencesServiceImpl
  * @generated
  */
 @AccessControlled
@@ -46,7 +44,7 @@ public interface PortletPreferencesService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link PortletPreferencesServiceUtil} to access the portlet preferences remote service. Add custom service methods to {@link com.liferay.portal.service.impl.PortletPreferencesServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link PortletPreferencesServiceUtil} to access the portlet preferences remote service. Add custom service methods to <code>com.liferay.portal.service.impl.PortletPreferencesServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public void deleteArchivedPreferences(long portletItemId)
 		throws PortalException;

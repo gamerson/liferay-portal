@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Supritha Sundaram
  * @see WeDeployAuthTokenModel
- * @see com.liferay.portal.security.wedeploy.auth.model.impl.WeDeployAuthTokenImpl
- * @see com.liferay.portal.security.wedeploy.auth.model.impl.WeDeployAuthTokenModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portal.security.wedeploy.auth.model.impl.WeDeployAuthTokenImpl")
@@ -35,7 +33,7 @@ public interface WeDeployAuthToken extends WeDeployAuthTokenModel, PersistedMode
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portal.security.wedeploy.auth.model.impl.WeDeployAuthTokenImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portal.security.wedeploy.auth.model.impl.WeDeployAuthTokenImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<WeDeployAuthToken, Long> WE_DEPLOY_AUTH_TOKEN_ID_ACCESSOR =
 		new Accessor<WeDeployAuthToken, Long>() {

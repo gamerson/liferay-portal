@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see LayoutPageTemplateCollectionModel
- * @see com.liferay.layout.page.template.model.impl.LayoutPageTemplateCollectionImpl
- * @see com.liferay.layout.page.template.model.impl.LayoutPageTemplateCollectionModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.layout.page.template.model.impl.LayoutPageTemplateCollectionImpl")
@@ -36,7 +34,7 @@ public interface LayoutPageTemplateCollection
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.layout.page.template.model.impl.LayoutPageTemplateCollectionImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.layout.page.template.model.impl.LayoutPageTemplateCollectionImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<LayoutPageTemplateCollection, Long> LAYOUT_PAGE_TEMPLATE_COLLECTION_ID_ACCESSOR =
 		new Accessor<LayoutPageTemplateCollection, Long>() {

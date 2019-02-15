@@ -14,10 +14,10 @@
 
 	&-buttons {
 		display: inline-block;
+		padding: $fragmentsEditorSpacing;
 
 		& .btn {
-			margin: $fragmentsEditorSpacing / 2;
-			opacity: 0.6;
+			margin: 0 ($fragmentsEditorSpacing / 2) 0 ($fragmentsEditorSpacing / 2);
 
 			&.active {
 				background-color: rgba(0, 0, 0, 0.1);
@@ -28,10 +28,15 @@
 
 	&-panel {
 		margin-top: $fragmentsEditorSpacing;
+		min-width: $floatingToolbarPanelMinWidth;
 		padding: $fragmentsEditorSpacing * 2;
 
-		.form-group:last-child {
-			margin: 0;
+		.form-group, .form-group-autofit {
+			margin-bottom: $fragmentsEditorSpacing * 2;
+
+			&:last-child {
+				margin: 0;
+			}
 		}
 
 		.palette-container {

@@ -41,7 +41,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.portal.security.audit.storage.service.impl.AuditEventServiceImpl
- * @see com.liferay.portal.security.audit.storage.service.AuditEventServiceUtil
  * @generated
  */
 public abstract class AuditEventServiceBaseImpl extends BaseServiceImpl
@@ -49,7 +48,7 @@ public abstract class AuditEventServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.portal.security.audit.storage.service.AuditEventServiceUtil} to access the audit event remote service.
+	 * Never modify or reference this class directly. Use <code>AuditEventService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.portal.security.audit.storage.service.AuditEventServiceUtil</code>.
 	 */
 
 	/**

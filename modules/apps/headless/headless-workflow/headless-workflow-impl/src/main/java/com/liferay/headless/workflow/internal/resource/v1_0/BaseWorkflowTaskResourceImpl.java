@@ -99,7 +99,7 @@ public abstract class BaseWorkflowTaskResourceImpl
 	}
 
 	protected <T, R> List<R> transform(
-		List<T> list, UnsafeFunction<T, R, Exception> unsafeFunction) {
+		List<T> list, UnsafeFunction<T, R, Throwable> unsafeFunction) {
 
 		return TransformUtil.transform(list, unsafeFunction);
 	}

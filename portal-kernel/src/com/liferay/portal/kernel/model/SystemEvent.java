@@ -24,8 +24,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see SystemEventModel
- * @see com.liferay.portal.model.impl.SystemEventImpl
- * @see com.liferay.portal.model.impl.SystemEventModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portal.model.impl.SystemEventImpl")
@@ -34,7 +32,7 @@ public interface SystemEvent extends SystemEventModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portal.model.impl.SystemEventImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portal.model.impl.SystemEventImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<SystemEvent, Long> SYSTEM_EVENT_ID_ACCESSOR = new Accessor<SystemEvent, Long>() {
 			@Override

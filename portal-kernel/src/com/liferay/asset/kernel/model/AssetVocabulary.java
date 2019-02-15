@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see AssetVocabularyModel
- * @see com.liferay.portlet.asset.model.impl.AssetVocabularyImpl
- * @see com.liferay.portlet.asset.model.impl.AssetVocabularyModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portlet.asset.model.impl.AssetVocabularyImpl")
@@ -35,7 +33,7 @@ public interface AssetVocabulary extends AssetVocabularyModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portlet.asset.model.impl.AssetVocabularyImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portlet.asset.model.impl.AssetVocabularyImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<AssetVocabulary, Long> VOCABULARY_ID_ACCESSOR = new Accessor<AssetVocabulary, Long>() {
 			@Override

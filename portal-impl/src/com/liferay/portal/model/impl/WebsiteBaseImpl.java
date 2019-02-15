@@ -37,7 +37,7 @@ public abstract class WebsiteBaseImpl extends WebsiteModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a website model instance should use the {@link Website} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a website model instance should use the <code>Website</code> interface instead.
 	 */
 	@Override
 	public void persist() {

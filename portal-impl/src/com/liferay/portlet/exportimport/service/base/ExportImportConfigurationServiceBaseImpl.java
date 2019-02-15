@@ -45,7 +45,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.portlet.exportimport.service.impl.ExportImportConfigurationServiceImpl
- * @see com.liferay.exportimport.kernel.service.ExportImportConfigurationServiceUtil
  * @generated
  */
 public abstract class ExportImportConfigurationServiceBaseImpl
@@ -54,7 +53,7 @@ public abstract class ExportImportConfigurationServiceBaseImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.exportimport.kernel.service.ExportImportConfigurationServiceUtil} to access the export import configuration remote service.
+	 * Never modify or reference this class directly. Use <code>ExportImportConfigurationService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.exportimport.kernel.service.ExportImportConfigurationServiceUtil</code>.
 	 */
 
 	/**

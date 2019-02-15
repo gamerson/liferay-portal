@@ -27,10 +27,11 @@ import com.liferay.segments.service.SegmentsEntryServiceUtil;
 
 /**
  * Provides the HTTP utility for the
- * {@link SegmentsEntryServiceUtil} service utility. The
+ * <code>SegmentsEntryServiceUtil</code> service
+ * utility. The
  * static methods of this class calls the same methods of the service utility.
  * However, the signatures are different because it requires an additional
- * {@link HttpPrincipal} parameter.
+ * <code>HttpPrincipal</code> parameter.
  *
  * <p>
  * The benefits of using the HTTP utility is that it is fast and allows for
@@ -49,8 +50,6 @@ import com.liferay.segments.service.SegmentsEntryServiceUtil;
  *
  * @author Eduardo Garcia
  * @see SegmentsEntryServiceSoap
- * @see HttpPrincipal
- * @see SegmentsEntryServiceUtil
  * @generated
  */
 @ProviderType

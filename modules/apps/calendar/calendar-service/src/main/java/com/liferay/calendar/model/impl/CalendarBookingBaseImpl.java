@@ -37,7 +37,7 @@ public abstract class CalendarBookingBaseImpl extends CalendarBookingModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a calendar booking model instance should use the {@link CalendarBooking} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a calendar booking model instance should use the <code>CalendarBooking</code> interface instead.
 	 */
 	@Override
 	public void persist() {

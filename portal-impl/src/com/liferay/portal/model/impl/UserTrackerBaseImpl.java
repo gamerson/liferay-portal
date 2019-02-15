@@ -37,7 +37,7 @@ public abstract class UserTrackerBaseImpl extends UserTrackerModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a user tracker model instance should use the {@link UserTracker} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a user tracker model instance should use the <code>UserTracker</code> interface instead.
 	 */
 	@Override
 	public void persist() {

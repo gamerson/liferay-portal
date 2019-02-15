@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see WikiNodeModel
- * @see com.liferay.wiki.model.impl.WikiNodeImpl
- * @see com.liferay.wiki.model.impl.WikiNodeModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.wiki.model.impl.WikiNodeImpl")
@@ -35,7 +33,7 @@ public interface WikiNode extends WikiNodeModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.wiki.model.impl.WikiNodeImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.wiki.model.impl.WikiNodeImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<WikiNode, Long> NODE_ID_ACCESSOR = new Accessor<WikiNode, Long>() {
 			@Override

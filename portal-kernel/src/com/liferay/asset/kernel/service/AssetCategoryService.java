@@ -43,8 +43,6 @@ import java.util.Map;
  *
  * @author Brian Wing Shun Chan
  * @see AssetCategoryServiceUtil
- * @see com.liferay.portlet.asset.service.base.AssetCategoryServiceBaseImpl
- * @see com.liferay.portlet.asset.service.impl.AssetCategoryServiceImpl
  * @generated
  */
 @AccessControlled
@@ -56,7 +54,7 @@ public interface AssetCategoryService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link AssetCategoryServiceUtil} to access the asset category remote service. Add custom service methods to {@link com.liferay.portlet.asset.service.impl.AssetCategoryServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link AssetCategoryServiceUtil} to access the asset category remote service. Add custom service methods to <code>com.liferay.portlet.asset.service.impl.AssetCategoryServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public AssetCategory addCategory(long groupId, long parentCategoryId,
 		Map<Locale, String> titleMap, Map<Locale, String> descriptionMap,

@@ -24,8 +24,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see WorkflowInstanceLinkModel
- * @see com.liferay.portal.model.impl.WorkflowInstanceLinkImpl
- * @see com.liferay.portal.model.impl.WorkflowInstanceLinkModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portal.model.impl.WorkflowInstanceLinkImpl")
@@ -35,7 +33,7 @@ public interface WorkflowInstanceLink extends WorkflowInstanceLinkModel,
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portal.model.impl.WorkflowInstanceLinkImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portal.model.impl.WorkflowInstanceLinkImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<WorkflowInstanceLink, Long> WORKFLOW_INSTANCE_LINK_ID_ACCESSOR =
 		new Accessor<WorkflowInstanceLink, Long>() {

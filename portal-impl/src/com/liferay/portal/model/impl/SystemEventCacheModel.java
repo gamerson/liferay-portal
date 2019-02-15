@@ -34,7 +34,6 @@ import java.util.Date;
  * The cache model class for representing SystemEvent in entity cache.
  *
  * @author Brian Wing Shun Chan
- * @see SystemEvent
  * @generated
  */
 @ProviderType

@@ -32,7 +32,6 @@ import java.io.ObjectOutput;
  * The cache model class for representing DDMTemplateLink in entity cache.
  *
  * @author Brian Wing Shun Chan
- * @see DDMTemplateLink
  * @generated
  */
 @ProviderType

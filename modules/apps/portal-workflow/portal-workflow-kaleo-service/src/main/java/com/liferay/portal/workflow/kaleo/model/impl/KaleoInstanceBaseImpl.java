@@ -37,7 +37,7 @@ public abstract class KaleoInstanceBaseImpl extends KaleoInstanceModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a kaleo instance model instance should use the {@link KaleoInstance} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a kaleo instance model instance should use the <code>KaleoInstance</code> interface instead.
 	 */
 	@Override
 	public void persist() {

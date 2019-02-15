@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see SharingEntryModel
- * @see com.liferay.sharing.model.impl.SharingEntryImpl
- * @see com.liferay.sharing.model.impl.SharingEntryModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.sharing.model.impl.SharingEntryImpl")
@@ -35,7 +33,7 @@ public interface SharingEntry extends SharingEntryModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.sharing.model.impl.SharingEntryImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.sharing.model.impl.SharingEntryImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<SharingEntry, Long> SHARING_ENTRY_ID_ACCESSOR = new Accessor<SharingEntry, Long>() {
 			@Override

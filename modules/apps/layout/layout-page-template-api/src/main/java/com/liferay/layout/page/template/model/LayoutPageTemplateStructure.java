@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see LayoutPageTemplateStructureModel
- * @see com.liferay.layout.page.template.model.impl.LayoutPageTemplateStructureImpl
- * @see com.liferay.layout.page.template.model.impl.LayoutPageTemplateStructureModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.layout.page.template.model.impl.LayoutPageTemplateStructureImpl")
@@ -36,7 +34,7 @@ public interface LayoutPageTemplateStructure
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.layout.page.template.model.impl.LayoutPageTemplateStructureImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.layout.page.template.model.impl.LayoutPageTemplateStructureImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<LayoutPageTemplateStructure, Long> LAYOUT_PAGE_TEMPLATE_STRUCTURE_ID_ACCESSOR =
 		new Accessor<LayoutPageTemplateStructure, Long>() {

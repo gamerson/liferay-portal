@@ -14,6 +14,8 @@
 
 package com.liferay.headless.collaboration.dto.v1_0;
 
+import com.liferay.petra.function.UnsafeSupplier;
+
 import javax.annotation.Generated;
 
 import javax.xml.bind.annotation.XmlRootElement;
@@ -50,20 +52,73 @@ public class AggregateRating {
 		_bestRating = bestRating;
 	}
 
+	public void setBestRating(
+		UnsafeSupplier<Number, Throwable> bestRatingUnsafeSupplier) {
+
+		try {
+			_bestRating = bestRatingUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setId(Long id) {
 		_id = id;
+	}
+
+	public void setId(UnsafeSupplier<Long, Throwable> idUnsafeSupplier) {
+		try {
+			_id = idUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	public void setRatingCount(Number ratingCount) {
 		_ratingCount = ratingCount;
 	}
 
+	public void setRatingCount(
+		UnsafeSupplier<Number, Throwable> ratingCountUnsafeSupplier) {
+
+		try {
+			_ratingCount = ratingCountUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setRatingValue(Number ratingValue) {
 		_ratingValue = ratingValue;
 	}
 
+	public void setRatingValue(
+		UnsafeSupplier<Number, Throwable> ratingValueUnsafeSupplier) {
+
+		try {
+			_ratingValue = ratingValueUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setWorstRating(Number worstRating) {
 		_worstRating = worstRating;
+	}
+
+	public void setWorstRating(
+		UnsafeSupplier<Number, Throwable> worstRatingUnsafeSupplier) {
+
+		try {
+			_worstRating = worstRatingUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	private Number _bestRating;

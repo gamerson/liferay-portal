@@ -24,8 +24,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see RecentLayoutRevisionModel
- * @see com.liferay.portal.model.impl.RecentLayoutRevisionImpl
- * @see com.liferay.portal.model.impl.RecentLayoutRevisionModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portal.model.impl.RecentLayoutRevisionImpl")
@@ -35,7 +33,7 @@ public interface RecentLayoutRevision extends RecentLayoutRevisionModel,
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portal.model.impl.RecentLayoutRevisionImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portal.model.impl.RecentLayoutRevisionImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<RecentLayoutRevision, Long> RECENT_LAYOUT_REVISION_ID_ACCESSOR =
 		new Accessor<RecentLayoutRevision, Long>() {

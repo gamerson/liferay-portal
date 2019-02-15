@@ -34,8 +34,6 @@ import java.util.List;
  *
  * @author Brian Wing Shun Chan
  * @see LayoutSetBranchServiceUtil
- * @see com.liferay.portal.service.base.LayoutSetBranchServiceBaseImpl
- * @see com.liferay.portal.service.impl.LayoutSetBranchServiceImpl
  * @generated
  */
 @AccessControlled
@@ -47,7 +45,7 @@ public interface LayoutSetBranchService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link LayoutSetBranchServiceUtil} to access the layout set branch remote service. Add custom service methods to {@link com.liferay.portal.service.impl.LayoutSetBranchServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link LayoutSetBranchServiceUtil} to access the layout set branch remote service. Add custom service methods to <code>com.liferay.portal.service.impl.LayoutSetBranchServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public LayoutSetBranch addLayoutSetBranch(long groupId,
 		boolean privateLayout, String name, String description, boolean master,

@@ -37,7 +37,7 @@ public abstract class MemberRequestBaseImpl extends MemberRequestModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a member request model instance should use the {@link MemberRequest} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a member request model instance should use the <code>MemberRequest</code> interface instead.
 	 */
 	@Override
 	public void persist() {

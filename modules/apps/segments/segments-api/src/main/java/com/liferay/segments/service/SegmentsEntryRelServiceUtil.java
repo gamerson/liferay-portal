@@ -23,16 +23,14 @@ import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Provides the remote service utility for SegmentsEntryRel. This utility wraps
- * {@link com.liferay.segments.service.impl.SegmentsEntryRelServiceImpl} and is the
- * primary access point for service operations in application layer code running
- * on a remote server. Methods of this service are expected to have security
- * checks based on the propagated JAAS credentials because this service can be
+ * <code>com.liferay.segments.service.impl.SegmentsEntryRelServiceImpl</code> and is an
+ * access point for service operations in application layer code running on a
+ * remote server. Methods of this service are expected to have security checks
+ * based on the propagated JAAS credentials because this service can be
  * accessed remotely.
  *
  * @author Eduardo Garcia
  * @see SegmentsEntryRelService
- * @see com.liferay.segments.service.base.SegmentsEntryRelServiceBaseImpl
- * @see com.liferay.segments.service.impl.SegmentsEntryRelServiceImpl
  * @generated
  */
 @ProviderType
@@ -40,7 +38,7 @@ public class SegmentsEntryRelServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this class directly. Add custom service methods to {@link com.liferay.segments.service.impl.SegmentsEntryRelServiceImpl} and rerun ServiceBuilder to regenerate this class.
+	 * Never modify this class directly. Add custom service methods to <code>com.liferay.segments.service.impl.SegmentsEntryRelServiceImpl</code> and rerun ServiceBuilder to regenerate this class.
 	 */
 	public static com.liferay.segments.model.SegmentsEntryRel addSegmentsEntryRel(
 		long segmentsEntryId, long classNameId, long classPK,

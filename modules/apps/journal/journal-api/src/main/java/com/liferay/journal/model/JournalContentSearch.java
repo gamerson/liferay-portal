@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see JournalContentSearchModel
- * @see com.liferay.journal.model.impl.JournalContentSearchImpl
- * @see com.liferay.journal.model.impl.JournalContentSearchModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.journal.model.impl.JournalContentSearchImpl")
@@ -36,7 +34,7 @@ public interface JournalContentSearch extends JournalContentSearchModel,
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.journal.model.impl.JournalContentSearchImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.journal.model.impl.JournalContentSearchImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<JournalContentSearch, Long> CONTENT_SEARCH_ID_ACCESSOR =
 		new Accessor<JournalContentSearch, Long>() {

@@ -31,8 +31,6 @@ import com.liferay.portal.kernel.transaction.Transactional;
  *
  * @author Brian Wing Shun Chan
  * @see LayoutRevisionServiceUtil
- * @see com.liferay.portal.service.base.LayoutRevisionServiceBaseImpl
- * @see com.liferay.portal.service.impl.LayoutRevisionServiceImpl
  * @generated
  */
 @AccessControlled
@@ -44,7 +42,7 @@ public interface LayoutRevisionService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link LayoutRevisionServiceUtil} to access the layout revision remote service. Add custom service methods to {@link com.liferay.portal.service.impl.LayoutRevisionServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link LayoutRevisionServiceUtil} to access the layout revision remote service. Add custom service methods to <code>com.liferay.portal.service.impl.LayoutRevisionServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public LayoutRevision addLayoutRevision(long userId,
 		long layoutSetBranchId, long layoutBranchId,

@@ -48,7 +48,6 @@ import javax.sql.DataSource;
  *
  * @author Eduardo Lundgren
  * @see com.liferay.calendar.service.impl.CalendarNotificationTemplateServiceImpl
- * @see com.liferay.calendar.service.CalendarNotificationTemplateServiceUtil
  * @generated
  */
 public abstract class CalendarNotificationTemplateServiceBaseImpl
@@ -57,7 +56,7 @@ public abstract class CalendarNotificationTemplateServiceBaseImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.calendar.service.CalendarNotificationTemplateServiceUtil} to access the calendar notification template remote service.
+	 * Never modify or reference this class directly. Use <code>CalendarNotificationTemplateService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.calendar.service.CalendarNotificationTemplateServiceUtil</code>.
 	 */
 
 	/**

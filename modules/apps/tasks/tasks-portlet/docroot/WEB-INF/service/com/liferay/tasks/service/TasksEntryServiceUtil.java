@@ -21,16 +21,14 @@ import com.liferay.portal.kernel.util.ReferenceRegistry;
 
 /**
  * Provides the remote service utility for TasksEntry. This utility wraps
- * {@link com.liferay.tasks.service.impl.TasksEntryServiceImpl} and is the
- * primary access point for service operations in application layer code running
- * on a remote server. Methods of this service are expected to have security
- * checks based on the propagated JAAS credentials because this service can be
+ * <code>com.liferay.tasks.service.impl.TasksEntryServiceImpl</code> and is an
+ * access point for service operations in application layer code running on a
+ * remote server. Methods of this service are expected to have security checks
+ * based on the propagated JAAS credentials because this service can be
  * accessed remotely.
  *
  * @author Ryan Park
  * @see TasksEntryService
- * @see com.liferay.tasks.service.base.TasksEntryServiceBaseImpl
- * @see com.liferay.tasks.service.impl.TasksEntryServiceImpl
  * @generated
  */
 @ProviderType
@@ -38,7 +36,7 @@ public class TasksEntryServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this class directly. Add custom service methods to {@link com.liferay.tasks.service.impl.TasksEntryServiceImpl} and rerun ServiceBuilder to regenerate this class.
+	 * Never modify this class directly. Add custom service methods to <code>com.liferay.tasks.service.impl.TasksEntryServiceImpl</code> and rerun ServiceBuilder to regenerate this class.
 	 */
 	public static com.liferay.tasks.model.TasksEntry addTasksEntry(
 		String title, int priority, long assigneeUserId, int dueDateMonth,

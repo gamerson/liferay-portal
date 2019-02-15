@@ -255,23 +255,17 @@ class SegmentEdit extends Component {
 										size="sm"
 									/>
 
-									<div className="members-count mr-3">
-										{getPluralMessage(
+									<ClayButton
+										className="members-count-button"
+										label={getPluralMessage(
 											Liferay.Language.get('x-member'),
 											Liferay.Language.get('x-members'),
 											membersCount
 										)}
-									</div>
-
-									{previewMembersURL &&
-										<ClayButton
-											borderless
-											label={Liferay.Language.get('preview-members')}
-											onClick={this._handlePreviewClick(previewMembersURL)}
-											size="sm"
-											type="button"
-										/>
-									}
+										onClick={this._handlePreviewClick(previewMembersURL)}
+										size="sm"
+										type="button"
+									/>
 								</div>
 							</div>
 

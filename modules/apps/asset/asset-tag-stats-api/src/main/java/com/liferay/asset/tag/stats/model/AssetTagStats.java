@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see AssetTagStatsModel
- * @see com.liferay.asset.tag.stats.model.impl.AssetTagStatsImpl
- * @see com.liferay.asset.tag.stats.model.impl.AssetTagStatsModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.asset.tag.stats.model.impl.AssetTagStatsImpl")
@@ -35,7 +33,7 @@ public interface AssetTagStats extends AssetTagStatsModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.asset.tag.stats.model.impl.AssetTagStatsImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.asset.tag.stats.model.impl.AssetTagStatsImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<AssetTagStats, Long> TAG_STATS_ID_ACCESSOR = new Accessor<AssetTagStats, Long>() {
 			@Override

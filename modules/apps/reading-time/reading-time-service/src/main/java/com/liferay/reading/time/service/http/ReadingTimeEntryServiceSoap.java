@@ -18,19 +18,20 @@ import aQute.bnd.annotation.ProviderType;
 
 /**
  * Provides the SOAP utility for the
- * {@link com.liferay.reading.time.service.ReadingTimeEntryServiceUtil} service utility. The
- * static methods of this class calls the same methods of the service utility.
- * However, the signatures are different because it is difficult for SOAP to
- * support certain types.
+ * <code>com.liferay.reading.time.service.ReadingTimeEntryServiceUtil</code> service
+ * utility. The static methods of this class call the same methods of the
+ * service utility. However, the signatures are different because it is
+ * difficult for SOAP to support certain types.
  *
  * <p>
  * ServiceBuilder follows certain rules in translating the methods. For example,
- * if the method in the service utility returns a {@link java.util.List}, that
- * is translated to an array of {@link com.liferay.reading.time.model.ReadingTimeEntrySoap}.
- * If the method in the service utility returns a
- * {@link com.liferay.reading.time.model.ReadingTimeEntry}, that is translated to a
- * {@link com.liferay.reading.time.model.ReadingTimeEntrySoap}. Methods that SOAP cannot
- * safely wire are skipped.
+ * if the method in the service utility returns a <code>java.util.List</code>,
+ * that is translated to an array of
+ * <code>com.liferay.reading.time.model.ReadingTimeEntrySoap</code>. If the method in the
+ * service utility returns a
+ * <code>com.liferay.reading.time.model.ReadingTimeEntry</code>, that is translated to a
+ * <code>com.liferay.reading.time.model.ReadingTimeEntrySoap</code>. Methods that SOAP
+ * cannot safely wire are skipped.
  * </p>
  *
  * <p>
@@ -52,8 +53,6 @@ import aQute.bnd.annotation.ProviderType;
  *
  * @author Brian Wing Shun Chan
  * @see ReadingTimeEntryServiceHttp
- * @see com.liferay.reading.time.model.ReadingTimeEntrySoap
- * @see com.liferay.reading.time.service.ReadingTimeEntryServiceUtil
  * @generated
  */
 @ProviderType

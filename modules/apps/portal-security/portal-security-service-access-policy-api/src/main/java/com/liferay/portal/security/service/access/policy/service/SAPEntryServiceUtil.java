@@ -23,16 +23,14 @@ import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Provides the remote service utility for SAPEntry. This utility wraps
- * {@link com.liferay.portal.security.service.access.policy.service.impl.SAPEntryServiceImpl} and is the
- * primary access point for service operations in application layer code running
- * on a remote server. Methods of this service are expected to have security
- * checks based on the propagated JAAS credentials because this service can be
+ * <code>com.liferay.portal.security.service.access.policy.service.impl.SAPEntryServiceImpl</code> and is an
+ * access point for service operations in application layer code running on a
+ * remote server. Methods of this service are expected to have security checks
+ * based on the propagated JAAS credentials because this service can be
  * accessed remotely.
  *
  * @author Brian Wing Shun Chan
  * @see SAPEntryService
- * @see com.liferay.portal.security.service.access.policy.service.base.SAPEntryServiceBaseImpl
- * @see com.liferay.portal.security.service.access.policy.service.impl.SAPEntryServiceImpl
  * @generated
  */
 @ProviderType
@@ -40,7 +38,7 @@ public class SAPEntryServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this class directly. Add custom service methods to {@link com.liferay.portal.security.service.access.policy.service.impl.SAPEntryServiceImpl} and rerun ServiceBuilder to regenerate this class.
+	 * Never modify this class directly. Add custom service methods to <code>com.liferay.portal.security.service.access.policy.service.impl.SAPEntryServiceImpl</code> and rerun ServiceBuilder to regenerate this class.
 	 */
 	public static com.liferay.portal.security.service.access.policy.model.SAPEntry addSAPEntry(
 		String allowedServiceSignatures, boolean defaultSAPEntry,

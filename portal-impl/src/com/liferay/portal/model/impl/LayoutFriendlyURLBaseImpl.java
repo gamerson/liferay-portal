@@ -37,7 +37,7 @@ public abstract class LayoutFriendlyURLBaseImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a layout friendly url model instance should use the {@link LayoutFriendlyURL} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a layout friendly url model instance should use the <code>LayoutFriendlyURL</code> interface instead.
 	 */
 	@Override
 	public void persist() {

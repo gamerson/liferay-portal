@@ -45,7 +45,6 @@ import javax.sql.DataSource;
  *
  * @author Edward C. Han
  * @see com.liferay.mobile.device.rules.service.impl.MDRRuleGroupServiceImpl
- * @see com.liferay.mobile.device.rules.service.MDRRuleGroupServiceUtil
  * @generated
  */
 public abstract class MDRRuleGroupServiceBaseImpl extends BaseServiceImpl
@@ -53,7 +52,7 @@ public abstract class MDRRuleGroupServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.mobile.device.rules.service.MDRRuleGroupServiceUtil} to access the mdr rule group remote service.
+	 * Never modify or reference this class directly. Use <code>MDRRuleGroupService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.mobile.device.rules.service.MDRRuleGroupServiceUtil</code>.
 	 */
 
 	/**

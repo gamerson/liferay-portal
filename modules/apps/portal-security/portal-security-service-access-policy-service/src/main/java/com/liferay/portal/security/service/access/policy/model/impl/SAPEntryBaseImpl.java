@@ -37,7 +37,7 @@ public abstract class SAPEntryBaseImpl extends SAPEntryModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a sap entry model instance should use the {@link SAPEntry} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a sap entry model instance should use the <code>SAPEntry</code> interface instead.
 	 */
 	@Override
 	public void persist() {

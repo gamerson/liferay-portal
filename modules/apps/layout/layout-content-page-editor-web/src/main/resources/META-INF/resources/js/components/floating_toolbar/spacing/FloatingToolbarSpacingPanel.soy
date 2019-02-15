@@ -7,9 +7,11 @@
 	{@param item: ?}
 	{@param? _containerTypes: ?}
 	{@param? _handleColumnSpacingOptionChange: any}
+	{@param? _handleColumnSpacingOptionMousedown: any}
 	{@param? _handleContainerPaddingOptionChange: any}
 	{@param? _handleContainerTypeOptionChange: any}
 	{@param? _paddingSizes: list<string>}
+	{@param? _sectionColumnsCount: number}
 	{@param? _selectedPaddingSizes: [
 		horizontal: string,
 		vertical: string
@@ -52,12 +54,15 @@
 			</div>
 		{/if}
 
-		<div class="form-group">
-			{call .columnSpacingOptions}
-				{param handleColumnSpacingOptionChange: $_handleColumnSpacingOptionChange /}
-				{param item: $item /}
-			{/call}
-		</div>
+		{if $_sectionColumnsCount > 1}
+			<div class="form-group">
+				{call .columnSpacingOptions}
+					{param handleColumnSpacingOptionChange: $_handleColumnSpacingOptionChange /}
+					{param handleColumnSpacingOptionMousedown: $_handleColumnSpacingOptionMousedown /}
+					{param item: $item /}
+				{/call}
+			</div>
+		{/if}
 	</div>
 {/template}
 
@@ -123,6 +128,7 @@
 		]
 	]}
 	{@param? handleColumnSpacingOptionChange: any}
+	{@param? handleColumnSpacingOptionMousedown: any}
 
 	{let $spacingCheckboxLabel kind="text"}
 		{msg desc=""}space-between-columns{/msg}
@@ -131,7 +137,8 @@
 	{call ClayCheckbox.render}
 		{param checked: ($item.config and $item.config.columnSpacing) ?: true /}
 		{param events: [
-			'change': $handleColumnSpacingOptionChange
+			'change': $handleColumnSpacingOptionChange,
+			'mousedown': $handleColumnSpacingOptionMousedown
 		] /}
 		{param label: $spacingCheckboxLabel /}
 	{/call}

@@ -37,7 +37,7 @@ public abstract class LocalizedEntryBaseImpl extends LocalizedEntryModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a localized entry model instance should use the {@link LocalizedEntry} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a localized entry model instance should use the <code>LocalizedEntry</code> interface instead.
 	 */
 	@Override
 	public void persist() {

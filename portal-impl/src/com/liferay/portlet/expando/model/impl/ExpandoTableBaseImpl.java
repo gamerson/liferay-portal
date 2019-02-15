@@ -37,7 +37,7 @@ public abstract class ExpandoTableBaseImpl extends ExpandoTableModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a expando table model instance should use the {@link ExpandoTable} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a expando table model instance should use the <code>ExpandoTable</code> interface instead.
 	 */
 	@Override
 	public void persist() {

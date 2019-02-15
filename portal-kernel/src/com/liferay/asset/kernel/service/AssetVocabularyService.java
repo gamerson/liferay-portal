@@ -42,8 +42,6 @@ import java.util.Map;
  *
  * @author Brian Wing Shun Chan
  * @see AssetVocabularyServiceUtil
- * @see com.liferay.portlet.asset.service.base.AssetVocabularyServiceBaseImpl
- * @see com.liferay.portlet.asset.service.impl.AssetVocabularyServiceImpl
  * @generated
  */
 @AccessControlled
@@ -55,7 +53,7 @@ public interface AssetVocabularyService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link AssetVocabularyServiceUtil} to access the asset vocabulary remote service. Add custom service methods to {@link com.liferay.portlet.asset.service.impl.AssetVocabularyServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link AssetVocabularyServiceUtil} to access the asset vocabulary remote service. Add custom service methods to <code>com.liferay.portlet.asset.service.impl.AssetVocabularyServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public AssetVocabulary addVocabulary(long groupId, String title,
 		Map<Locale, String> titleMap, Map<Locale, String> descriptionMap,

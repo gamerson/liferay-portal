@@ -37,7 +37,7 @@ public abstract class MessageBaseImpl extends MessageModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a message model instance should use the {@link Message} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a message model instance should use the <code>Message</code> interface instead.
 	 */
 	@Override
 	public void persist() {

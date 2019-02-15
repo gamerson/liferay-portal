@@ -40,7 +40,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.dynamic.data.lists.service.impl.DDLRecordSetVersionServiceImpl
- * @see com.liferay.dynamic.data.lists.service.DDLRecordSetVersionServiceUtil
  * @generated
  */
 public abstract class DDLRecordSetVersionServiceBaseImpl extends BaseServiceImpl
@@ -48,7 +47,7 @@ public abstract class DDLRecordSetVersionServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.dynamic.data.lists.service.DDLRecordSetVersionServiceUtil} to access the ddl record set version remote service.
+	 * Never modify or reference this class directly. Use <code>DDLRecordSetVersionService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.dynamic.data.lists.service.DDLRecordSetVersionServiceUtil</code>.
 	 */
 
 	/**

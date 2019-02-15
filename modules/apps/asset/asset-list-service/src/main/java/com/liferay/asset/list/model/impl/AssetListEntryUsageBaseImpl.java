@@ -37,7 +37,7 @@ public abstract class AssetListEntryUsageBaseImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a asset list entry usage model instance should use the {@link AssetListEntryUsage} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a asset list entry usage model instance should use the <code>AssetListEntryUsage</code> interface instead.
 	 */
 	@Override
 	public void persist() {

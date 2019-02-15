@@ -21,16 +21,14 @@ import com.liferay.portal.kernel.util.ReferenceRegistry;
 
 /**
  * Provides the local service utility for Counter. This utility wraps
- * {@link com.liferay.counter.service.impl.CounterLocalServiceImpl} and is the
- * primary access point for service operations in application layer code running
+ * <code>com.liferay.counter.service.impl.CounterLocalServiceImpl</code> and
+ * is an access point for service operations in application layer code running
  * on the local server. Methods of this service will not have security checks
  * based on the propagated JAAS credentials because this service can only be
  * accessed from within the same VM.
  *
  * @author Brian Wing Shun Chan
  * @see CounterLocalService
- * @see com.liferay.counter.service.base.CounterLocalServiceBaseImpl
- * @see com.liferay.counter.service.impl.CounterLocalServiceImpl
  * @generated
  */
 @ProviderType
@@ -38,7 +36,7 @@ public class CounterLocalServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this class directly. Add custom service methods to {@link com.liferay.counter.service.impl.CounterLocalServiceImpl} and rerun ServiceBuilder to regenerate this class.
+	 * Never modify this class directly. Add custom service methods to <code>com.liferay.counter.service.impl.CounterLocalServiceImpl</code> and rerun ServiceBuilder to regenerate this class.
 	 */
 	public static java.util.List<String> getNames() {
 		return getService().getNames();

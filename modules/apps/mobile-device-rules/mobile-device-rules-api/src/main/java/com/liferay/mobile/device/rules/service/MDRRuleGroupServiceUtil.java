@@ -23,16 +23,14 @@ import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Provides the remote service utility for MDRRuleGroup. This utility wraps
- * {@link com.liferay.mobile.device.rules.service.impl.MDRRuleGroupServiceImpl} and is the
- * primary access point for service operations in application layer code running
- * on a remote server. Methods of this service are expected to have security
- * checks based on the propagated JAAS credentials because this service can be
+ * <code>com.liferay.mobile.device.rules.service.impl.MDRRuleGroupServiceImpl</code> and is an
+ * access point for service operations in application layer code running on a
+ * remote server. Methods of this service are expected to have security checks
+ * based on the propagated JAAS credentials because this service can be
  * accessed remotely.
  *
  * @author Edward C. Han
  * @see MDRRuleGroupService
- * @see com.liferay.mobile.device.rules.service.base.MDRRuleGroupServiceBaseImpl
- * @see com.liferay.mobile.device.rules.service.impl.MDRRuleGroupServiceImpl
  * @generated
  */
 @ProviderType
@@ -40,7 +38,7 @@ public class MDRRuleGroupServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this class directly. Add custom service methods to {@link com.liferay.mobile.device.rules.service.impl.MDRRuleGroupServiceImpl} and rerun ServiceBuilder to regenerate this class.
+	 * Never modify this class directly. Add custom service methods to <code>com.liferay.mobile.device.rules.service.impl.MDRRuleGroupServiceImpl</code> and rerun ServiceBuilder to regenerate this class.
 	 */
 	public static com.liferay.mobile.device.rules.model.MDRRuleGroup addRuleGroup(
 		long groupId, java.util.Map<java.util.Locale, String> nameMap,

@@ -32,8 +32,6 @@ import com.liferay.portal.kernel.transaction.Transactional;
  *
  * @author Brian Wing Shun Chan
  * @see UADPartialEntryServiceUtil
- * @see com.liferay.portal.tools.service.builder.test.service.base.UADPartialEntryServiceBaseImpl
- * @see com.liferay.portal.tools.service.builder.test.service.impl.UADPartialEntryServiceImpl
  * @generated
  */
 @AccessControlled
@@ -47,7 +45,7 @@ public interface UADPartialEntryService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link UADPartialEntryServiceUtil} to access the uad partial entry remote service. Add custom service methods to {@link com.liferay.portal.tools.service.builder.test.service.impl.UADPartialEntryServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link UADPartialEntryServiceUtil} to access the uad partial entry remote service. Add custom service methods to <code>com.liferay.portal.tools.service.builder.test.service.impl.UADPartialEntryServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 
 	/**

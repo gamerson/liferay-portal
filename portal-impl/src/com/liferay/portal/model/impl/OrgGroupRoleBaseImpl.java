@@ -36,6 +36,6 @@ public abstract class OrgGroupRoleBaseImpl extends OrgGroupRoleModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a org group role model instance should use the {@link OrgGroupRole} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a org group role model instance should use the <code>OrgGroupRole</code> interface instead.
 	 */
 }

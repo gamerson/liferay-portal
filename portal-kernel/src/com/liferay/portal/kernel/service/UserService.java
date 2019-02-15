@@ -44,8 +44,6 @@ import java.util.Locale;
  *
  * @author Brian Wing Shun Chan
  * @see UserServiceUtil
- * @see com.liferay.portal.service.base.UserServiceBaseImpl
- * @see com.liferay.portal.service.impl.UserServiceImpl
  * @generated
  */
 @AccessControlled
@@ -57,7 +55,7 @@ public interface UserService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link UserServiceUtil} to access the user remote service. Add custom service methods to {@link com.liferay.portal.service.impl.UserServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link UserServiceUtil} to access the user remote service. Add custom service methods to <code>com.liferay.portal.service.impl.UserServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 
 	/**

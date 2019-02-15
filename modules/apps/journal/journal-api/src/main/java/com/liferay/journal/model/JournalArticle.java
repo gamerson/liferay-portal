@@ -26,8 +26,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see JournalArticleModel
- * @see com.liferay.journal.model.impl.JournalArticleImpl
- * @see com.liferay.journal.model.impl.JournalArticleModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.journal.model.impl.JournalArticleImpl")
@@ -37,7 +35,7 @@ public interface JournalArticle extends JournalArticleModel, PersistedModel,
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.journal.model.impl.JournalArticleImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.journal.model.impl.JournalArticleImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<JournalArticle, Long> ID_ACCESSOR = new Accessor<JournalArticle, Long>() {
 			@Override

@@ -37,7 +37,7 @@ public abstract class UADPartialEntryBaseImpl extends UADPartialEntryModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a uad partial entry model instance should use the {@link UADPartialEntry} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a uad partial entry model instance should use the <code>UADPartialEntry</code> interface instead.
 	 */
 	@Override
 	public void persist() {

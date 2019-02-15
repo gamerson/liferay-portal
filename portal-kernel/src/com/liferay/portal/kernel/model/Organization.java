@@ -24,8 +24,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see OrganizationModel
- * @see com.liferay.portal.model.impl.OrganizationImpl
- * @see com.liferay.portal.model.impl.OrganizationModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portal.model.impl.OrganizationImpl")
@@ -35,7 +33,7 @@ public interface Organization extends OrganizationModel, PersistedModel,
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portal.model.impl.OrganizationImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portal.model.impl.OrganizationImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<Organization, Long> ORGANIZATION_ID_ACCESSOR = new Accessor<Organization, Long>() {
 			@Override

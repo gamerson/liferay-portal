@@ -24,8 +24,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see ResourceActionModel
- * @see com.liferay.portal.model.impl.ResourceActionImpl
- * @see com.liferay.portal.model.impl.ResourceActionModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portal.model.impl.ResourceActionImpl")
@@ -34,7 +32,7 @@ public interface ResourceAction extends ResourceActionModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portal.model.impl.ResourceActionImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portal.model.impl.ResourceActionImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<ResourceAction, Long> RESOURCE_ACTION_ID_ACCESSOR =
 		new Accessor<ResourceAction, Long>() {

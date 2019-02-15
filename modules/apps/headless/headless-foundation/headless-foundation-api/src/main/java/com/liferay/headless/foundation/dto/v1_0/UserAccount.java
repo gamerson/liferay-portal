@@ -14,6 +14,8 @@
 
 package com.liferay.headless.foundation.dto.v1_0;
 
+import com.liferay.petra.function.UnsafeSupplier;
+
 import java.util.Date;
 
 import javax.annotation.Generated;
@@ -116,84 +118,315 @@ public class UserAccount {
 		_additionalName = additionalName;
 	}
 
+	public void setAdditionalName(
+		UnsafeSupplier<String, Throwable> additionalNameUnsafeSupplier) {
+
+		try {
+			_additionalName = additionalNameUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setAlternateName(String alternateName) {
 		_alternateName = alternateName;
+	}
+
+	public void setAlternateName(
+		UnsafeSupplier<String, Throwable> alternateNameUnsafeSupplier) {
+
+		try {
+			_alternateName = alternateNameUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	public void setBirthDate(Date birthDate) {
 		_birthDate = birthDate;
 	}
 
+	public void setBirthDate(
+		UnsafeSupplier<Date, Throwable> birthDateUnsafeSupplier) {
+
+		try {
+			_birthDate = birthDateUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setContactInformation(ContactInformation contactInformation) {
 		_contactInformation = contactInformation;
+	}
+
+	public void setContactInformation(
+		UnsafeSupplier<ContactInformation, Throwable>
+			contactInformationUnsafeSupplier) {
+
+		try {
+			_contactInformation = contactInformationUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	public void setDashboardURL(String dashboardURL) {
 		_dashboardURL = dashboardURL;
 	}
 
+	public void setDashboardURL(
+		UnsafeSupplier<String, Throwable> dashboardURLUnsafeSupplier) {
+
+		try {
+			_dashboardURL = dashboardURLUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setEmail(String email) {
 		_email = email;
+	}
+
+	public void setEmail(
+		UnsafeSupplier<String, Throwable> emailUnsafeSupplier) {
+
+		try {
+			_email = emailUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	public void setFamilyName(String familyName) {
 		_familyName = familyName;
 	}
 
+	public void setFamilyName(
+		UnsafeSupplier<String, Throwable> familyNameUnsafeSupplier) {
+
+		try {
+			_familyName = familyNameUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setGivenName(String givenName) {
 		_givenName = givenName;
+	}
+
+	public void setGivenName(
+		UnsafeSupplier<String, Throwable> givenNameUnsafeSupplier) {
+
+		try {
+			_givenName = givenNameUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	public void setHonorificPrefix(String honorificPrefix) {
 		_honorificPrefix = honorificPrefix;
 	}
 
+	public void setHonorificPrefix(
+		UnsafeSupplier<String, Throwable> honorificPrefixUnsafeSupplier) {
+
+		try {
+			_honorificPrefix = honorificPrefixUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setHonorificSuffix(String honorificSuffix) {
 		_honorificSuffix = honorificSuffix;
+	}
+
+	public void setHonorificSuffix(
+		UnsafeSupplier<String, Throwable> honorificSuffixUnsafeSupplier) {
+
+		try {
+			_honorificSuffix = honorificSuffixUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	public void setId(Long id) {
 		_id = id;
 	}
 
+	public void setId(UnsafeSupplier<Long, Throwable> idUnsafeSupplier) {
+		try {
+			_id = idUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setImage(String image) {
 		_image = image;
+	}
+
+	public void setImage(
+		UnsafeSupplier<String, Throwable> imageUnsafeSupplier) {
+
+		try {
+			_image = imageUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	public void setJobTitle(String jobTitle) {
 		_jobTitle = jobTitle;
 	}
 
+	public void setJobTitle(
+		UnsafeSupplier<String, Throwable> jobTitleUnsafeSupplier) {
+
+		try {
+			_jobTitle = jobTitleUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setMyOrganizations(Organization[] myOrganizations) {
 		_myOrganizations = myOrganizations;
+	}
+
+	public void setMyOrganizations(
+		UnsafeSupplier<Organization[], Throwable>
+			myOrganizationsUnsafeSupplier) {
+
+		try {
+			_myOrganizations = myOrganizationsUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	public void setMyOrganizationsIds(Long[] myOrganizationsIds) {
 		_myOrganizationsIds = myOrganizationsIds;
 	}
 
+	public void setMyOrganizationsIds(
+		UnsafeSupplier<Long[], Throwable> myOrganizationsIdsUnsafeSupplier) {
+
+		try {
+			_myOrganizationsIds = myOrganizationsIdsUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setName(String name) {
 		_name = name;
+	}
+
+	public void setName(UnsafeSupplier<String, Throwable> nameUnsafeSupplier) {
+		try {
+			_name = nameUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	public void setProfileURL(String profileURL) {
 		_profileURL = profileURL;
 	}
 
+	public void setProfileURL(
+		UnsafeSupplier<String, Throwable> profileURLUnsafeSupplier) {
+
+		try {
+			_profileURL = profileURLUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setRoles(Role[] roles) {
 		_roles = roles;
+	}
+
+	public void setRoles(
+		UnsafeSupplier<Role[], Throwable> rolesUnsafeSupplier) {
+
+		try {
+			_roles = rolesUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	public void setRolesIds(Long[] rolesIds) {
 		_rolesIds = rolesIds;
 	}
 
+	public void setRolesIds(
+		UnsafeSupplier<Long[], Throwable> rolesIdsUnsafeSupplier) {
+
+		try {
+			_rolesIds = rolesIdsUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setTasksAssignedToMe(String[] tasksAssignedToMe) {
 		_tasksAssignedToMe = tasksAssignedToMe;
 	}
 
+	public void setTasksAssignedToMe(
+		UnsafeSupplier<String[], Throwable> tasksAssignedToMeUnsafeSupplier) {
+
+		try {
+			_tasksAssignedToMe = tasksAssignedToMeUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setTasksAssignedToMyRoles(String[] tasksAssignedToMyRoles) {
 		_tasksAssignedToMyRoles = tasksAssignedToMyRoles;
+	}
+
+	public void setTasksAssignedToMyRoles(
+		UnsafeSupplier<String[], Throwable>
+			tasksAssignedToMyRolesUnsafeSupplier) {
+
+		try {
+			_tasksAssignedToMyRoles =
+				tasksAssignedToMyRolesUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	private String _additionalName;

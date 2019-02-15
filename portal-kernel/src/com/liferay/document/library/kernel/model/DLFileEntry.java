@@ -26,8 +26,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see DLFileEntryModel
- * @see com.liferay.portlet.documentlibrary.model.impl.DLFileEntryImpl
- * @see com.liferay.portlet.documentlibrary.model.impl.DLFileEntryModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portlet.documentlibrary.model.impl.DLFileEntryImpl")
@@ -36,7 +34,7 @@ public interface DLFileEntry extends DLFileEntryModel, PersistedModel, TreeModel
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portlet.documentlibrary.model.impl.DLFileEntryImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portlet.documentlibrary.model.impl.DLFileEntryImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<DLFileEntry, Long> FILE_ENTRY_ID_ACCESSOR = new Accessor<DLFileEntry, Long>() {
 			@Override

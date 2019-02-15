@@ -44,7 +44,6 @@ import javax.sql.DataSource;
  *
  * @author José Manuel Navarro
  * @see com.liferay.screens.service.impl.ScreensJournalArticleServiceImpl
- * @see com.liferay.screens.service.ScreensJournalArticleServiceUtil
  * @generated
  */
 public abstract class ScreensJournalArticleServiceBaseImpl
@@ -53,7 +52,7 @@ public abstract class ScreensJournalArticleServiceBaseImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.screens.service.ScreensJournalArticleServiceUtil} to access the screens journal article remote service.
+	 * Never modify or reference this class directly. Use <code>ScreensJournalArticleService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.screens.service.ScreensJournalArticleServiceUtil</code>.
 	 */
 
 	/**

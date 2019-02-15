@@ -37,8 +37,6 @@ import javax.servlet.http.HttpServletRequest;
  *
  * @author Michael C. Han
  * @see PortalInstancesLocalServiceUtil
- * @see com.liferay.portal.instances.service.base.PortalInstancesLocalServiceBaseImpl
- * @see com.liferay.portal.instances.service.impl.PortalInstancesLocalServiceImpl
  * @generated
  */
 @ProviderType
@@ -48,7 +46,7 @@ public interface PortalInstancesLocalService extends BaseLocalService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link PortalInstancesLocalServiceUtil} to access the portal instances local service. Add custom service methods to {@link com.liferay.portal.instances.service.impl.PortalInstancesLocalServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link PortalInstancesLocalServiceUtil} to access the portal instances local service. Add custom service methods to <code>com.liferay.portal.instances.service.impl.PortalInstancesLocalServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public void addCompanyId(long companyId);
 

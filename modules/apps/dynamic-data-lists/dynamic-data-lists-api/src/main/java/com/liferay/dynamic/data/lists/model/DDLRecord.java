@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see DDLRecordModel
- * @see com.liferay.dynamic.data.lists.model.impl.DDLRecordImpl
- * @see com.liferay.dynamic.data.lists.model.impl.DDLRecordModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.dynamic.data.lists.model.impl.DDLRecordImpl")
@@ -35,7 +33,7 @@ public interface DDLRecord extends DDLRecordModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.dynamic.data.lists.model.impl.DDLRecordImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.dynamic.data.lists.model.impl.DDLRecordImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<DDLRecord, Long> RECORD_ID_ACCESSOR = new Accessor<DDLRecord, Long>() {
 			@Override

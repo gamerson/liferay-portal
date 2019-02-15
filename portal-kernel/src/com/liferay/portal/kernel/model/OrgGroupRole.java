@@ -24,8 +24,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see OrgGroupRoleModel
- * @see com.liferay.portal.model.impl.OrgGroupRoleImpl
- * @see com.liferay.portal.model.impl.OrgGroupRoleModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portal.model.impl.OrgGroupRoleImpl")
@@ -34,7 +32,7 @@ public interface OrgGroupRole extends OrgGroupRoleModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portal.model.impl.OrgGroupRoleImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portal.model.impl.OrgGroupRoleImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<OrgGroupRole, Long> ORGANIZATION_ID_ACCESSOR = new Accessor<OrgGroupRole, Long>() {
 			@Override

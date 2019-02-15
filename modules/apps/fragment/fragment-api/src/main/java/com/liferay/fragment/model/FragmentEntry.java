@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see FragmentEntryModel
- * @see com.liferay.fragment.model.impl.FragmentEntryImpl
- * @see com.liferay.fragment.model.impl.FragmentEntryModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.fragment.model.impl.FragmentEntryImpl")
@@ -35,7 +33,7 @@ public interface FragmentEntry extends FragmentEntryModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.fragment.model.impl.FragmentEntryImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.fragment.model.impl.FragmentEntryImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<FragmentEntry, Long> FRAGMENT_ENTRY_ID_ACCESSOR =
 		new Accessor<FragmentEntry, Long>() {

@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see DDMStructureModel
- * @see com.liferay.dynamic.data.mapping.model.impl.DDMStructureImpl
- * @see com.liferay.dynamic.data.mapping.model.impl.DDMStructureModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.dynamic.data.mapping.model.impl.DDMStructureImpl")
@@ -35,7 +33,7 @@ public interface DDMStructure extends DDMStructureModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.dynamic.data.mapping.model.impl.DDMStructureImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.dynamic.data.mapping.model.impl.DDMStructureImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<DDMStructure, Long> STRUCTURE_ID_ACCESSOR = new Accessor<DDMStructure, Long>() {
 			@Override

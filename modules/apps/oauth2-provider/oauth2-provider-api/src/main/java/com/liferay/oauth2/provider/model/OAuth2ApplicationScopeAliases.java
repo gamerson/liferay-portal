@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see OAuth2ApplicationScopeAliasesModel
- * @see com.liferay.oauth2.provider.model.impl.OAuth2ApplicationScopeAliasesImpl
- * @see com.liferay.oauth2.provider.model.impl.OAuth2ApplicationScopeAliasesModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.oauth2.provider.model.impl.OAuth2ApplicationScopeAliasesImpl")
@@ -36,7 +34,7 @@ public interface OAuth2ApplicationScopeAliases
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.oauth2.provider.model.impl.OAuth2ApplicationScopeAliasesImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.oauth2.provider.model.impl.OAuth2ApplicationScopeAliasesImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<OAuth2ApplicationScopeAliases, Long> O_AUTH2_APPLICATION_SCOPE_ALIASES_ID_ACCESSOR =
 		new Accessor<OAuth2ApplicationScopeAliases, Long>() {

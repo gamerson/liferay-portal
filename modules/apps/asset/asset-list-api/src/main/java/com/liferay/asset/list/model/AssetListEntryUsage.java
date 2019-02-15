@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see AssetListEntryUsageModel
- * @see com.liferay.asset.list.model.impl.AssetListEntryUsageImpl
- * @see com.liferay.asset.list.model.impl.AssetListEntryUsageModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.asset.list.model.impl.AssetListEntryUsageImpl")
@@ -36,7 +34,7 @@ public interface AssetListEntryUsage extends AssetListEntryUsageModel,
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.asset.list.model.impl.AssetListEntryUsageImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.asset.list.model.impl.AssetListEntryUsageImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<AssetListEntryUsage, Long> ASSET_LIST_ENTRY_USAGE_ID_ACCESSOR =
 		new Accessor<AssetListEntryUsage, Long>() {

@@ -33,7 +33,6 @@ import com.liferay.portal.kernel.service.BaseLocalServiceImpl;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.counter.service.impl.CounterLocalServiceImpl
- * @see com.liferay.counter.kernel.service.CounterLocalServiceUtil
  * @generated
  */
 @ProviderType
@@ -42,7 +41,7 @@ public abstract class CounterLocalServiceBaseImpl extends BaseLocalServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.counter.kernel.service.CounterLocalServiceUtil} to access the counter local service.
+	 * Never modify or reference this class directly. Use <code>CounterLocalService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.counter.kernel.service.CounterLocalServiceUtil</code>.
 	 */
 
 	/**

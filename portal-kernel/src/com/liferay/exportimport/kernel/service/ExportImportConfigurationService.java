@@ -33,8 +33,6 @@ import com.liferay.portal.kernel.transaction.Transactional;
  *
  * @author Brian Wing Shun Chan
  * @see ExportImportConfigurationServiceUtil
- * @see com.liferay.portlet.exportimport.service.base.ExportImportConfigurationServiceBaseImpl
- * @see com.liferay.portlet.exportimport.service.impl.ExportImportConfigurationServiceImpl
  * @generated
  */
 @AccessControlled
@@ -46,7 +44,7 @@ public interface ExportImportConfigurationService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link ExportImportConfigurationServiceUtil} to access the export import configuration remote service. Add custom service methods to {@link com.liferay.portlet.exportimport.service.impl.ExportImportConfigurationServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link ExportImportConfigurationServiceUtil} to access the export import configuration remote service. Add custom service methods to <code>com.liferay.portlet.exportimport.service.impl.ExportImportConfigurationServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public void deleteExportImportConfiguration(
 		long exportImportConfigurationId) throws PortalException;

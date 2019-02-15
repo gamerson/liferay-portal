@@ -21,16 +21,14 @@ import com.liferay.portal.kernel.util.ReferenceRegistry;
 
 /**
  * Provides the remote service utility for PowwowParticipant. This utility wraps
- * {@link com.liferay.powwow.service.impl.PowwowParticipantServiceImpl} and is the
- * primary access point for service operations in application layer code running
- * on a remote server. Methods of this service are expected to have security
- * checks based on the propagated JAAS credentials because this service can be
+ * <code>com.liferay.powwow.service.impl.PowwowParticipantServiceImpl</code> and is an
+ * access point for service operations in application layer code running on a
+ * remote server. Methods of this service are expected to have security checks
+ * based on the propagated JAAS credentials because this service can be
  * accessed remotely.
  *
  * @author Shinn Lok
  * @see PowwowParticipantService
- * @see com.liferay.powwow.service.base.PowwowParticipantServiceBaseImpl
- * @see com.liferay.powwow.service.impl.PowwowParticipantServiceImpl
  * @generated
  */
 @ProviderType
@@ -38,7 +36,7 @@ public class PowwowParticipantServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this class directly. Add custom service methods to {@link com.liferay.powwow.service.impl.PowwowParticipantServiceImpl} and rerun ServiceBuilder to regenerate this class.
+	 * Never modify this class directly. Add custom service methods to <code>com.liferay.powwow.service.impl.PowwowParticipantServiceImpl</code> and rerun ServiceBuilder to regenerate this class.
 	 */
 	public static com.liferay.powwow.model.PowwowParticipant deletePowwowParticipant(
 		com.liferay.powwow.model.PowwowParticipant powwowParticipant)

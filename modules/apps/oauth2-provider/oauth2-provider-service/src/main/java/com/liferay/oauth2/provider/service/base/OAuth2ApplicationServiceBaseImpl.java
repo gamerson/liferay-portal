@@ -44,7 +44,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.oauth2.provider.service.impl.OAuth2ApplicationServiceImpl
- * @see com.liferay.oauth2.provider.service.OAuth2ApplicationServiceUtil
  * @generated
  */
 public abstract class OAuth2ApplicationServiceBaseImpl extends BaseServiceImpl
@@ -52,7 +51,7 @@ public abstract class OAuth2ApplicationServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.oauth2.provider.service.OAuth2ApplicationServiceUtil} to access the o auth2 application remote service.
+	 * Never modify or reference this class directly. Use <code>OAuth2ApplicationService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.oauth2.provider.service.OAuth2ApplicationServiceUtil</code>.
 	 */
 
 	/**

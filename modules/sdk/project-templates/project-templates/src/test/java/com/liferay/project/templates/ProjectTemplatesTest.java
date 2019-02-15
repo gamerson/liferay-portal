@@ -3470,7 +3470,7 @@ public class ProjectTemplatesTest {
 
 		_testContains(
 			gradleWorkspaceProjectDir, "gradle.properties", true,
-			".*liferay.workspace.bundle.url=.*liferay.com/portal/7.1.1-.*");
+			".*liferay.workspace.bundle.url=.*liferay.com/portal/7.1.2-.*");
 
 		File gradlePropertiesFile = new File(
 			gradleWorkspaceProjectDir, "gradle.properties");
@@ -3484,7 +3484,7 @@ public class ProjectTemplatesTest {
 
 		_testContains(
 			mavenWorkspaceProjectDir, "pom.xml",
-			"<liferay.workspace.bundle.url>", "liferay.com/portal/7.1.1-");
+			"<liferay.workspace.bundle.url>", "liferay.com/portal/7.1.2-");
 	}
 
 	@Test

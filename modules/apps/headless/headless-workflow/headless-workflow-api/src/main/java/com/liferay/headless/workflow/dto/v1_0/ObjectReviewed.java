@@ -14,6 +14,8 @@
 
 package com.liferay.headless.workflow.dto.v1_0;
 
+import com.liferay.petra.function.UnsafeSupplier;
+
 import javax.annotation.Generated;
 
 import javax.xml.bind.annotation.XmlRootElement;
@@ -42,12 +44,43 @@ public class ObjectReviewed {
 		_id = id;
 	}
 
+	public void setId(UnsafeSupplier<Long, Throwable> idUnsafeSupplier) {
+		try {
+			_id = idUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setIdentifier(String identifier) {
 		_identifier = identifier;
 	}
 
+	public void setIdentifier(
+		UnsafeSupplier<String, Throwable> identifierUnsafeSupplier) {
+
+		try {
+			_identifier = identifierUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setResourceType(String resourceType) {
 		_resourceType = resourceType;
+	}
+
+	public void setResourceType(
+		UnsafeSupplier<String, Throwable> resourceTypeUnsafeSupplier) {
+
+		try {
+			_resourceType = resourceTypeUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	private Long _id;

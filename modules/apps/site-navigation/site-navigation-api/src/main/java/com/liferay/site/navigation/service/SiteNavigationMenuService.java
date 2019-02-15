@@ -39,8 +39,6 @@ import java.util.List;
  *
  * @author Brian Wing Shun Chan
  * @see SiteNavigationMenuServiceUtil
- * @see com.liferay.site.navigation.service.base.SiteNavigationMenuServiceBaseImpl
- * @see com.liferay.site.navigation.service.impl.SiteNavigationMenuServiceImpl
  * @generated
  */
 @AccessControlled
@@ -54,7 +52,7 @@ public interface SiteNavigationMenuService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link SiteNavigationMenuServiceUtil} to access the site navigation menu remote service. Add custom service methods to {@link com.liferay.site.navigation.service.impl.SiteNavigationMenuServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link SiteNavigationMenuServiceUtil} to access the site navigation menu remote service. Add custom service methods to <code>com.liferay.site.navigation.service.impl.SiteNavigationMenuServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public SiteNavigationMenu addSiteNavigationMenu(long groupId, String name,
 		int type, ServiceContext serviceContext) throws PortalException;

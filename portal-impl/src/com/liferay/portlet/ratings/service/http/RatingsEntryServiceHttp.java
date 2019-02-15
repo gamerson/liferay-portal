@@ -27,10 +27,11 @@ import com.liferay.ratings.kernel.service.RatingsEntryServiceUtil;
 
 /**
  * Provides the HTTP utility for the
- * {@link RatingsEntryServiceUtil} service utility. The
+ * <code>RatingsEntryServiceUtil</code> service
+ * utility. The
  * static methods of this class calls the same methods of the service utility.
  * However, the signatures are different because it requires an additional
- * {@link HttpPrincipal} parameter.
+ * <code>HttpPrincipal</code> parameter.
  *
  * <p>
  * The benefits of using the HTTP utility is that it is fast and allows for
@@ -49,8 +50,6 @@ import com.liferay.ratings.kernel.service.RatingsEntryServiceUtil;
  *
  * @author Brian Wing Shun Chan
  * @see RatingsEntryServiceSoap
- * @see HttpPrincipal
- * @see RatingsEntryServiceUtil
  * @generated
  */
 @ProviderType

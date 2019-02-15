@@ -22,6 +22,7 @@ import com.liferay.portal.vulcan.resource.EntityModelResource;
 import java.util.Collections;
 import java.util.Map;
 
+import javax.ws.rs.GET;
 import javax.ws.rs.core.MultivaluedMap;
 
 /**
@@ -29,14 +30,15 @@ import javax.ws.rs.core.MultivaluedMap;
  */
 public class MockResource implements EntityModelResource {
 
-	public static final String METHOD_NAME = "mockJaxRSMethod";
+	public static final String METHOD_NAME = "mockGet";
 
 	@Override
 	public EntityModel getEntityModel(MultivaluedMap multivaluedMap) {
 		return _ENTITY_MODEL;
 	}
 
-	public String mockJaxRSMethod(String param) {
+	@GET
+	public String mockGet(String string) {
 		return "";
 	}
 

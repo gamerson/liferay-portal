@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Edward C. Han
  * @see MDRRuleGroupInstanceModel
- * @see com.liferay.mobile.device.rules.model.impl.MDRRuleGroupInstanceImpl
- * @see com.liferay.mobile.device.rules.model.impl.MDRRuleGroupInstanceModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.mobile.device.rules.model.impl.MDRRuleGroupInstanceImpl")
@@ -36,7 +34,7 @@ public interface MDRRuleGroupInstance extends MDRRuleGroupInstanceModel,
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.mobile.device.rules.model.impl.MDRRuleGroupInstanceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.mobile.device.rules.model.impl.MDRRuleGroupInstanceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<MDRRuleGroupInstance, Long> RULE_GROUP_INSTANCE_ID_ACCESSOR =
 		new Accessor<MDRRuleGroupInstance, Long>() {

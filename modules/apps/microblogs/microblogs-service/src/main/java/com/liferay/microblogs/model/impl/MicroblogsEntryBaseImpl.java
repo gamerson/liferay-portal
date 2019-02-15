@@ -37,7 +37,7 @@ public abstract class MicroblogsEntryBaseImpl extends MicroblogsEntryModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a microblogs entry model instance should use the {@link MicroblogsEntry} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a microblogs entry model instance should use the <code>MicroblogsEntry</code> interface instead.
 	 */
 	@Override
 	public void persist() {

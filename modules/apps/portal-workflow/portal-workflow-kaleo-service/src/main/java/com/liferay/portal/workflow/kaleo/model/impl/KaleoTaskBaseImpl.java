@@ -37,7 +37,7 @@ public abstract class KaleoTaskBaseImpl extends KaleoTaskModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a kaleo task model instance should use the {@link KaleoTask} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a kaleo task model instance should use the <code>KaleoTask</code> interface instead.
 	 */
 	@Override
 	public void persist() {

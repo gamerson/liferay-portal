@@ -20,11 +20,6 @@ import com.liferay.portal.kernel.service.persistence.BasePersistence;
 import com.liferay.portal.security.wedeploy.auth.exception.NoSuchTokenException;
 import com.liferay.portal.security.wedeploy.auth.model.WeDeployAuthToken;
 
-import java.io.Serializable;
-
-import java.util.Map;
-import java.util.Set;
-
 /**
  * The persistence interface for the we deploy auth token service.
  *
@@ -33,7 +28,6 @@ import java.util.Set;
  * </p>
  *
  * @author Supritha Sundaram
- * @see com.liferay.portal.security.wedeploy.auth.service.persistence.impl.WeDeployAuthTokenPersistenceImpl
  * @see WeDeployAuthTokenUtil
  * @generated
  */
@@ -44,12 +38,9 @@ public interface WeDeployAuthTokenPersistence extends BasePersistence<WeDeployAu
 	 *
 	 * Never modify or reference this interface directly. Always use {@link WeDeployAuthTokenUtil} to access the we deploy auth token persistence. Modify <code>service.xml</code> and rerun ServiceBuilder to regenerate this interface.
 	 */
-	@Override
-	public Map<Serializable, WeDeployAuthToken> fetchByPrimaryKeys(
-		Set<Serializable> primaryKeys);
 
 	/**
-	* Returns the we deploy auth token where token = &#63; and type = &#63; or throws a {@link NoSuchTokenException} if it could not be found.
+	* Returns the we deploy auth token where token = &#63; and type = &#63; or throws a <code>NoSuchTokenException</code> if it could not be found.
 	*
 	* @param token the token
 	* @param type the type
@@ -99,7 +90,7 @@ public interface WeDeployAuthTokenPersistence extends BasePersistence<WeDeployAu
 	public int countByT_T(String token, int type);
 
 	/**
-	* Returns the we deploy auth token where clientId = &#63; and token = &#63; and type = &#63; or throws a {@link NoSuchTokenException} if it could not be found.
+	* Returns the we deploy auth token where clientId = &#63; and token = &#63; and type = &#63; or throws a <code>NoSuchTokenException</code> if it could not be found.
 	*
 	* @param clientId the client ID
 	* @param token the token
@@ -190,7 +181,7 @@ public interface WeDeployAuthTokenPersistence extends BasePersistence<WeDeployAu
 	public WeDeployAuthToken updateImpl(WeDeployAuthToken weDeployAuthToken);
 
 	/**
-	* Returns the we deploy auth token with the primary key or throws a {@link NoSuchTokenException} if it could not be found.
+	* Returns the we deploy auth token with the primary key or throws a <code>NoSuchTokenException</code> if it could not be found.
 	*
 	* @param weDeployAuthTokenId the primary key of the we deploy auth token
 	* @return the we deploy auth token
@@ -218,7 +209,7 @@ public interface WeDeployAuthTokenPersistence extends BasePersistence<WeDeployAu
 	* Returns a range of all the we deploy auth tokens.
 	*
 	* <p>
-	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link WeDeployAuthTokenModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>WeDeployAuthTokenModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	* </p>
 	*
 	* @param start the lower bound of the range of we deploy auth tokens
@@ -231,7 +222,7 @@ public interface WeDeployAuthTokenPersistence extends BasePersistence<WeDeployAu
 	* Returns an ordered range of all the we deploy auth tokens.
 	*
 	* <p>
-	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link WeDeployAuthTokenModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>WeDeployAuthTokenModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	* </p>
 	*
 	* @param start the lower bound of the range of we deploy auth tokens
@@ -246,7 +237,7 @@ public interface WeDeployAuthTokenPersistence extends BasePersistence<WeDeployAu
 	* Returns an ordered range of all the we deploy auth tokens.
 	*
 	* <p>
-	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link WeDeployAuthTokenModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>WeDeployAuthTokenModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	* </p>
 	*
 	* @param start the lower bound of the range of we deploy auth tokens
@@ -270,7 +261,4 @@ public interface WeDeployAuthTokenPersistence extends BasePersistence<WeDeployAu
 	* @return the number of we deploy auth tokens
 	*/
 	public int countAll();
-
-	@Override
-	public Set<String> getBadColumnNames();
 }

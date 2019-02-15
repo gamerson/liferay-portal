@@ -36,7 +36,7 @@ public abstract class MBBanBaseImpl extends MBBanModelImpl implements MBBan {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a message boards ban model instance should use the {@link MBBan} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a message boards ban model instance should use the <code>MBBan</code> interface instead.
 	 */
 	@Override
 	public void persist() {

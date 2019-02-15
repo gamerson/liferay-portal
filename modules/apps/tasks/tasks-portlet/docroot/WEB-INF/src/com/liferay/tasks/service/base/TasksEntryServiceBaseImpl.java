@@ -47,7 +47,6 @@ import javax.sql.DataSource;
  *
  * @author Ryan Park
  * @see com.liferay.tasks.service.impl.TasksEntryServiceImpl
- * @see com.liferay.tasks.service.TasksEntryServiceUtil
  * @generated
  */
 public abstract class TasksEntryServiceBaseImpl extends BaseServiceImpl
@@ -55,7 +54,7 @@ public abstract class TasksEntryServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.tasks.service.TasksEntryServiceUtil} to access the tasks entry remote service.
+	 * Never modify or reference this class directly. Use <code>TasksEntryService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.tasks.service.TasksEntryServiceUtil</code>.
 	 */
 
 	/**

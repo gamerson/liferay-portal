@@ -24,8 +24,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see CompanyModel
- * @see com.liferay.portal.model.impl.CompanyImpl
- * @see com.liferay.portal.model.impl.CompanyModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portal.model.impl.CompanyImpl")
@@ -34,7 +32,7 @@ public interface Company extends CompanyModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portal.model.impl.CompanyImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portal.model.impl.CompanyImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<Company, Long> COMPANY_ID_ACCESSOR = new Accessor<Company, Long>() {
 			@Override

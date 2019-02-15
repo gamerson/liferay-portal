@@ -42,7 +42,6 @@ import javax.sql.DataSource;
  *
  * @author Edward C. Han
  * @see com.liferay.mobile.device.rules.service.impl.MDRActionServiceImpl
- * @see com.liferay.mobile.device.rules.service.MDRActionServiceUtil
  * @generated
  */
 public abstract class MDRActionServiceBaseImpl extends BaseServiceImpl
@@ -50,7 +49,7 @@ public abstract class MDRActionServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.mobile.device.rules.service.MDRActionServiceUtil} to access the mdr action remote service.
+	 * Never modify or reference this class directly. Use <code>MDRActionService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.mobile.device.rules.service.MDRActionServiceUtil</code>.
 	 */
 
 	/**

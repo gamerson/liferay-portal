@@ -40,8 +40,6 @@ import java.util.List;
  *
  * @author Brian Wing Shun Chan
  * @see MBCategoryServiceUtil
- * @see com.liferay.message.boards.service.base.MBCategoryServiceBaseImpl
- * @see com.liferay.message.boards.service.impl.MBCategoryServiceImpl
  * @generated
  */
 @AccessControlled
@@ -55,7 +53,7 @@ public interface MBCategoryService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link MBCategoryServiceUtil} to access the message boards category remote service. Add custom service methods to {@link com.liferay.message.boards.service.impl.MBCategoryServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link MBCategoryServiceUtil} to access the message boards category remote service. Add custom service methods to <code>com.liferay.message.boards.service.impl.MBCategoryServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public MBCategory addCategory(long userId, long parentCategoryId,
 		String name, String description, ServiceContext serviceContext)

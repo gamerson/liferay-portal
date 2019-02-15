@@ -34,7 +34,6 @@ import java.util.Date;
  * The cache model class for representing PowwowServer in entity cache.
  *
  * @author Shinn Lok
- * @see PowwowServer
  * @generated
  */
 @ProviderType

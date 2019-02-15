@@ -23,16 +23,14 @@ import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Provides the local service utility for ERUserGroup. This utility wraps
- * {@link com.liferay.external.reference.service.impl.ERUserGroupLocalServiceImpl} and is the
- * primary access point for service operations in application layer code running
+ * <code>com.liferay.external.reference.service.impl.ERUserGroupLocalServiceImpl</code> and
+ * is an access point for service operations in application layer code running
  * on the local server. Methods of this service will not have security checks
  * based on the propagated JAAS credentials because this service can only be
  * accessed from within the same VM.
  *
  * @author Brian Wing Shun Chan
  * @see ERUserGroupLocalService
- * @see com.liferay.external.reference.service.base.ERUserGroupLocalServiceBaseImpl
- * @see com.liferay.external.reference.service.impl.ERUserGroupLocalServiceImpl
  * @generated
  */
 @ProviderType
@@ -40,7 +38,7 @@ public class ERUserGroupLocalServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this class directly. Add custom service methods to {@link com.liferay.external.reference.service.impl.ERUserGroupLocalServiceImpl} and rerun ServiceBuilder to regenerate this class.
+	 * Never modify this class directly. Add custom service methods to <code>com.liferay.external.reference.service.impl.ERUserGroupLocalServiceImpl</code> and rerun ServiceBuilder to regenerate this class.
 	 */
 	public static com.liferay.portal.kernel.model.UserGroup addOrUpdateUserGroup(
 		String externalReferenceCode, long userId, long companyId, String name,

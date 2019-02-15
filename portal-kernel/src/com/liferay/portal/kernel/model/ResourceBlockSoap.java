@@ -25,7 +25,6 @@ import java.util.List;
  * This class is used by SOAP remote services, specifically {@link com.liferay.portal.service.http.ResourceBlockServiceSoap}.
  *
  * @author Brian Wing Shun Chan
- * @see com.liferay.portal.service.http.ResourceBlockServiceSoap
  * @deprecated As of Judson (7.1.x), with no direct replacement
  * @generated
  */

@@ -27,10 +27,11 @@ import com.liferay.screens.service.ScreensDDMStructureVersionServiceUtil;
 
 /**
  * Provides the HTTP utility for the
- * {@link ScreensDDMStructureVersionServiceUtil} service utility. The
+ * <code>ScreensDDMStructureVersionServiceUtil</code> service
+ * utility. The
  * static methods of this class calls the same methods of the service utility.
  * However, the signatures are different because it requires an additional
- * {@link HttpPrincipal} parameter.
+ * <code>HttpPrincipal</code> parameter.
  *
  * <p>
  * The benefits of using the HTTP utility is that it is fast and allows for
@@ -49,8 +50,6 @@ import com.liferay.screens.service.ScreensDDMStructureVersionServiceUtil;
  *
  * @author José Manuel Navarro
  * @see ScreensDDMStructureVersionServiceSoap
- * @see HttpPrincipal
- * @see ScreensDDMStructureVersionServiceUtil
  * @generated
  */
 @ProviderType

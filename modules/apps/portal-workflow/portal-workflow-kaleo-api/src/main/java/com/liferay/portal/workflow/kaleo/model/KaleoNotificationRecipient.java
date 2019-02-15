@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see KaleoNotificationRecipientModel
- * @see com.liferay.portal.workflow.kaleo.model.impl.KaleoNotificationRecipientImpl
- * @see com.liferay.portal.workflow.kaleo.model.impl.KaleoNotificationRecipientModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portal.workflow.kaleo.model.impl.KaleoNotificationRecipientImpl")
@@ -36,7 +34,7 @@ public interface KaleoNotificationRecipient
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portal.workflow.kaleo.model.impl.KaleoNotificationRecipientImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portal.workflow.kaleo.model.impl.KaleoNotificationRecipientImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<KaleoNotificationRecipient, Long> KALEO_NOTIFICATION_RECIPIENT_ID_ACCESSOR =
 		new Accessor<KaleoNotificationRecipient, Long>() {

@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see AnnouncementsEntryModel
- * @see com.liferay.portlet.announcements.model.impl.AnnouncementsEntryImpl
- * @see com.liferay.portlet.announcements.model.impl.AnnouncementsEntryModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portlet.announcements.model.impl.AnnouncementsEntryImpl")
@@ -36,7 +34,7 @@ public interface AnnouncementsEntry extends AnnouncementsEntryModel,
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portlet.announcements.model.impl.AnnouncementsEntryImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portlet.announcements.model.impl.AnnouncementsEntryImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<AnnouncementsEntry, Long> ENTRY_ID_ACCESSOR = new Accessor<AnnouncementsEntry, Long>() {
 			@Override

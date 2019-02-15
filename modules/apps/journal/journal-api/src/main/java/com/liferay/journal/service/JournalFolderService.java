@@ -42,8 +42,6 @@ import java.util.Locale;
  *
  * @author Brian Wing Shun Chan
  * @see JournalFolderServiceUtil
- * @see com.liferay.journal.service.base.JournalFolderServiceBaseImpl
- * @see com.liferay.journal.service.impl.JournalFolderServiceImpl
  * @generated
  */
 @AccessControlled
@@ -57,7 +55,7 @@ public interface JournalFolderService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link JournalFolderServiceUtil} to access the journal folder remote service. Add custom service methods to {@link com.liferay.journal.service.impl.JournalFolderServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link JournalFolderServiceUtil} to access the journal folder remote service. Add custom service methods to <code>com.liferay.journal.service.impl.JournalFolderServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public JournalFolder addFolder(long groupId, long parentFolderId,
 		String name, String description, ServiceContext serviceContext)

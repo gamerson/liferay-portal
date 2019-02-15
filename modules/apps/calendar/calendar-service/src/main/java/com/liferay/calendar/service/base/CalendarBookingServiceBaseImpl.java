@@ -59,7 +59,6 @@ import javax.sql.DataSource;
  *
  * @author Eduardo Lundgren
  * @see com.liferay.calendar.service.impl.CalendarBookingServiceImpl
- * @see com.liferay.calendar.service.CalendarBookingServiceUtil
  * @generated
  */
 public abstract class CalendarBookingServiceBaseImpl extends BaseServiceImpl
@@ -67,7 +66,7 @@ public abstract class CalendarBookingServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.calendar.service.CalendarBookingServiceUtil} to access the calendar booking remote service.
+	 * Never modify or reference this class directly. Use <code>CalendarBookingService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.calendar.service.CalendarBookingServiceUtil</code>.
 	 */
 
 	/**

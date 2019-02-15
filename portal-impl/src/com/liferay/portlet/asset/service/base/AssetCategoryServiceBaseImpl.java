@@ -47,7 +47,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.portlet.asset.service.impl.AssetCategoryServiceImpl
- * @see com.liferay.asset.kernel.service.AssetCategoryServiceUtil
  * @generated
  */
 public abstract class AssetCategoryServiceBaseImpl extends BaseServiceImpl
@@ -55,7 +54,7 @@ public abstract class AssetCategoryServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.asset.kernel.service.AssetCategoryServiceUtil} to access the asset category remote service.
+	 * Never modify or reference this class directly. Use <code>AssetCategoryService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.asset.kernel.service.AssetCategoryServiceUtil</code>.
 	 */
 
 	/**

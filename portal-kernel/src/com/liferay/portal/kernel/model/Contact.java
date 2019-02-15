@@ -24,8 +24,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see ContactModel
- * @see com.liferay.portal.model.impl.ContactImpl
- * @see com.liferay.portal.model.impl.ContactModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portal.model.impl.ContactImpl")
@@ -34,7 +32,7 @@ public interface Contact extends ContactModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portal.model.impl.ContactImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portal.model.impl.ContactImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<Contact, Long> CONTACT_ID_ACCESSOR = new Accessor<Contact, Long>() {
 			@Override

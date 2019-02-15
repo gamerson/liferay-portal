@@ -39,7 +39,7 @@ public abstract class LVEntryBaseImpl extends LVEntryModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a lv entry model instance should use the {@link LVEntry} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a lv entry model instance should use the <code>LVEntry</code> interface instead.
 	 */
 	@Override
 	public void persist() {

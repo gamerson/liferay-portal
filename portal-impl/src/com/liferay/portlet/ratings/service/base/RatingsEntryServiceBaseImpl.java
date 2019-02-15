@@ -48,7 +48,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.portlet.ratings.service.impl.RatingsEntryServiceImpl
- * @see com.liferay.ratings.kernel.service.RatingsEntryServiceUtil
  * @generated
  */
 public abstract class RatingsEntryServiceBaseImpl extends BaseServiceImpl
@@ -56,7 +55,7 @@ public abstract class RatingsEntryServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.ratings.kernel.service.RatingsEntryServiceUtil} to access the ratings entry remote service.
+	 * Never modify or reference this class directly. Use <code>RatingsEntryService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.ratings.kernel.service.RatingsEntryServiceUtil</code>.
 	 */
 
 	/**

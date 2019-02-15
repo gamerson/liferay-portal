@@ -32,7 +32,6 @@ import java.io.ObjectOutput;
  * The cache model class for representing DLFileEntryMetadata in entity cache.
  *
  * @author Brian Wing Shun Chan
- * @see DLFileEntryMetadata
  * @generated
  */
 @ProviderType

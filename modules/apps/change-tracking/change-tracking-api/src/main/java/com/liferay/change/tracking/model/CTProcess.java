@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see CTProcessModel
- * @see com.liferay.change.tracking.model.impl.CTProcessImpl
- * @see com.liferay.change.tracking.model.impl.CTProcessModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.change.tracking.model.impl.CTProcessImpl")
@@ -35,7 +33,7 @@ public interface CTProcess extends CTProcessModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.change.tracking.model.impl.CTProcessImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.change.tracking.model.impl.CTProcessImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<CTProcess, Long> CT_PROCESS_ID_ACCESSOR = new Accessor<CTProcess, Long>() {
 			@Override

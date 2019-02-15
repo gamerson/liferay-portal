@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see SyncDeviceModel
- * @see com.liferay.sync.model.impl.SyncDeviceImpl
- * @see com.liferay.sync.model.impl.SyncDeviceModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.sync.model.impl.SyncDeviceImpl")
@@ -35,7 +33,7 @@ public interface SyncDevice extends SyncDeviceModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.sync.model.impl.SyncDeviceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.sync.model.impl.SyncDeviceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<SyncDevice, Long> SYNC_DEVICE_ID_ACCESSOR = new Accessor<SyncDevice, Long>() {
 			@Override

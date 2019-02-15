@@ -37,7 +37,7 @@ public abstract class DDMFormInstanceBaseImpl extends DDMFormInstanceModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a ddm form instance model instance should use the {@link DDMFormInstance} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a ddm form instance model instance should use the <code>DDMFormInstance</code> interface instead.
 	 */
 	@Override
 	public void persist() {

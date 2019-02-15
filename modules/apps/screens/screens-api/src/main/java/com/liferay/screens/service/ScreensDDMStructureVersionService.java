@@ -34,8 +34,6 @@ import com.liferay.portal.kernel.transaction.Transactional;
  *
  * @author José Manuel Navarro
  * @see ScreensDDMStructureVersionServiceUtil
- * @see com.liferay.screens.service.base.ScreensDDMStructureVersionServiceBaseImpl
- * @see com.liferay.screens.service.impl.ScreensDDMStructureVersionServiceImpl
  * @generated
  */
 @AccessControlled
@@ -49,7 +47,7 @@ public interface ScreensDDMStructureVersionService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link ScreensDDMStructureVersionServiceUtil} to access the screens ddm structure version remote service. Add custom service methods to {@link com.liferay.screens.service.impl.ScreensDDMStructureVersionServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link ScreensDDMStructureVersionServiceUtil} to access the screens ddm structure version remote service. Add custom service methods to <code>com.liferay.screens.service.impl.ScreensDDMStructureVersionServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public JSONObject getDDMStructureVersion(long structureId)

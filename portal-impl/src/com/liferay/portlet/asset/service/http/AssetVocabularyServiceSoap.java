@@ -29,19 +29,20 @@ import java.util.Map;
 
 /**
  * Provides the SOAP utility for the
- * {@link AssetVocabularyServiceUtil} service utility. The
- * static methods of this class calls the same methods of the service utility.
- * However, the signatures are different because it is difficult for SOAP to
- * support certain types.
+ * <code>AssetVocabularyServiceUtil</code> service
+ * utility. The static methods of this class call the same methods of the
+ * service utility. However, the signatures are different because it is
+ * difficult for SOAP to support certain types.
  *
  * <p>
  * ServiceBuilder follows certain rules in translating the methods. For example,
- * if the method in the service utility returns a {@link java.util.List}, that
- * is translated to an array of {@link com.liferay.asset.kernel.model.AssetVocabularySoap}.
- * If the method in the service utility returns a
- * {@link com.liferay.asset.kernel.model.AssetVocabulary}, that is translated to a
- * {@link com.liferay.asset.kernel.model.AssetVocabularySoap}. Methods that SOAP cannot
- * safely wire are skipped.
+ * if the method in the service utility returns a <code>java.util.List</code>,
+ * that is translated to an array of
+ * <code>com.liferay.asset.kernel.model.AssetVocabularySoap</code>. If the method in the
+ * service utility returns a
+ * <code>com.liferay.asset.kernel.model.AssetVocabulary</code>, that is translated to a
+ * <code>com.liferay.asset.kernel.model.AssetVocabularySoap</code>. Methods that SOAP
+ * cannot safely wire are skipped.
  * </p>
  *
  * <p>
@@ -63,8 +64,6 @@ import java.util.Map;
  *
  * @author Brian Wing Shun Chan
  * @see AssetVocabularyServiceHttp
- * @see com.liferay.asset.kernel.model.AssetVocabularySoap
- * @see AssetVocabularyServiceUtil
  * @generated
  */
 @ProviderType

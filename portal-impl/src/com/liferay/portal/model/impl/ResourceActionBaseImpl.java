@@ -37,7 +37,7 @@ public abstract class ResourceActionBaseImpl extends ResourceActionModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a resource action model instance should use the {@link ResourceAction} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a resource action model instance should use the <code>ResourceAction</code> interface instead.
 	 */
 	@Override
 	public void persist() {

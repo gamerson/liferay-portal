@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see SocialActivityLimitModel
- * @see com.liferay.portlet.social.model.impl.SocialActivityLimitImpl
- * @see com.liferay.portlet.social.model.impl.SocialActivityLimitModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portlet.social.model.impl.SocialActivityLimitImpl")
@@ -36,7 +34,7 @@ public interface SocialActivityLimit extends SocialActivityLimitModel,
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portlet.social.model.impl.SocialActivityLimitImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portlet.social.model.impl.SocialActivityLimitImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<SocialActivityLimit, Long> ACTIVITY_LIMIT_ID_ACCESSOR =
 		new Accessor<SocialActivityLimit, Long>() {

@@ -33,7 +33,6 @@ import java.io.ObjectOutput;
  * The cache model class for representing FriendlyURLEntryLocalization in entity cache.
  *
  * @author Brian Wing Shun Chan
- * @see FriendlyURLEntryLocalization
  * @generated
  */
 @ProviderType

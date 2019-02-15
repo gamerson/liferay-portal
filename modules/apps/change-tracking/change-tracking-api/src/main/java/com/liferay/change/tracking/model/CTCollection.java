@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see CTCollectionModel
- * @see com.liferay.change.tracking.model.impl.CTCollectionImpl
- * @see com.liferay.change.tracking.model.impl.CTCollectionModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.change.tracking.model.impl.CTCollectionImpl")
@@ -35,7 +33,7 @@ public interface CTCollection extends CTCollectionModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.change.tracking.model.impl.CTCollectionImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.change.tracking.model.impl.CTCollectionImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<CTCollection, Long> CT_COLLECTION_ID_ACCESSOR = new Accessor<CTCollection, Long>() {
 			@Override

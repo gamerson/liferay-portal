@@ -37,7 +37,7 @@ public abstract class WorkflowDefinitionLinkBaseImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a workflow definition link model instance should use the {@link WorkflowDefinitionLink} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a workflow definition link model instance should use the <code>WorkflowDefinitionLink</code> interface instead.
 	 */
 	@Override
 	public void persist() {

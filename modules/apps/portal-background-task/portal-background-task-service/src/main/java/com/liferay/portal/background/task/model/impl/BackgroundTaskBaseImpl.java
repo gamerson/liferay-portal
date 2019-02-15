@@ -37,7 +37,7 @@ public abstract class BackgroundTaskBaseImpl extends BackgroundTaskModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a background task model instance should use the {@link BackgroundTask} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a background task model instance should use the <code>BackgroundTask</code> interface instead.
 	 */
 	@Override
 	public void persist() {

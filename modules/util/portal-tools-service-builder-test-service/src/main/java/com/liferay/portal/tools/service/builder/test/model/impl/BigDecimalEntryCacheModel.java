@@ -32,7 +32,6 @@ import java.math.BigDecimal;
  * The cache model class for representing BigDecimalEntry in entity cache.
  *
  * @author Brian Wing Shun Chan
- * @see BigDecimalEntry
  * @generated
  */
 @ProviderType

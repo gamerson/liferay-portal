@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see ExpandoValueModel
- * @see com.liferay.portlet.expando.model.impl.ExpandoValueImpl
- * @see com.liferay.portlet.expando.model.impl.ExpandoValueModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portlet.expando.model.impl.ExpandoValueImpl")
@@ -35,7 +33,7 @@ public interface ExpandoValue extends ExpandoValueModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portlet.expando.model.impl.ExpandoValueImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portlet.expando.model.impl.ExpandoValueImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<ExpandoValue, Long> VALUE_ID_ACCESSOR = new Accessor<ExpandoValue, Long>() {
 			@Override

@@ -34,8 +34,6 @@ import com.liferay.portal.kernel.transaction.Transactional;
  *
  * @author Brian Wing Shun Chan
  * @see GadgetServiceUtil
- * @see com.liferay.opensocial.service.base.GadgetServiceBaseImpl
- * @see com.liferay.opensocial.service.impl.GadgetServiceImpl
  * @generated
  */
 @AccessControlled
@@ -47,7 +45,7 @@ public interface GadgetService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link GadgetServiceUtil} to access the gadget remote service. Add custom service methods to {@link com.liferay.opensocial.service.impl.GadgetServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link GadgetServiceUtil} to access the gadget remote service. Add custom service methods to <code>com.liferay.opensocial.service.impl.GadgetServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public Gadget addGadget(long companyId, String url,
 		String portletCategoryNames, ServiceContext serviceContext)

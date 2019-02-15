@@ -35,8 +35,6 @@ import com.liferay.portal.kernel.transaction.Transactional;
  *
  * @author Brian Wing Shun Chan
  * @see DLFileShortcutServiceUtil
- * @see com.liferay.portlet.documentlibrary.service.base.DLFileShortcutServiceBaseImpl
- * @see com.liferay.portlet.documentlibrary.service.impl.DLFileShortcutServiceImpl
  * @generated
  */
 @AccessControlled
@@ -48,7 +46,7 @@ public interface DLFileShortcutService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link DLFileShortcutServiceUtil} to access the document library file shortcut remote service. Add custom service methods to {@link com.liferay.portlet.documentlibrary.service.impl.DLFileShortcutServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link DLFileShortcutServiceUtil} to access the document library file shortcut remote service. Add custom service methods to <code>com.liferay.portlet.documentlibrary.service.impl.DLFileShortcutServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public DLFileShortcut addFileShortcut(long groupId, long repositoryId,
 		long folderId, long toFileEntryId, ServiceContext serviceContext)

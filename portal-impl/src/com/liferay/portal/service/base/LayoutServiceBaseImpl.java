@@ -67,7 +67,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.portal.service.impl.LayoutServiceImpl
- * @see com.liferay.portal.kernel.service.LayoutServiceUtil
  * @generated
  */
 public abstract class LayoutServiceBaseImpl extends BaseServiceImpl
@@ -75,7 +74,7 @@ public abstract class LayoutServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.portal.kernel.service.LayoutServiceUtil} to access the layout remote service.
+	 * Never modify or reference this class directly. Use <code>LayoutService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.portal.kernel.service.LayoutServiceUtil</code>.
 	 */
 
 	/**

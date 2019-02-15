@@ -24,8 +24,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see ClusterGroupModel
- * @see com.liferay.portal.model.impl.ClusterGroupImpl
- * @see com.liferay.portal.model.impl.ClusterGroupModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portal.model.impl.ClusterGroupImpl")
@@ -34,7 +32,7 @@ public interface ClusterGroup extends ClusterGroupModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portal.model.impl.ClusterGroupImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portal.model.impl.ClusterGroupImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<ClusterGroup, Long> CLUSTER_GROUP_ID_ACCESSOR = new Accessor<ClusterGroup, Long>() {
 			@Override

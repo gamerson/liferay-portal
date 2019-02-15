@@ -24,8 +24,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see LayoutPrototypeModel
- * @see com.liferay.portal.model.impl.LayoutPrototypeImpl
- * @see com.liferay.portal.model.impl.LayoutPrototypeModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portal.model.impl.LayoutPrototypeImpl")
@@ -34,7 +32,7 @@ public interface LayoutPrototype extends LayoutPrototypeModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portal.model.impl.LayoutPrototypeImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portal.model.impl.LayoutPrototypeImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<LayoutPrototype, Long> LAYOUT_PROTOTYPE_ID_ACCESSOR =
 		new Accessor<LayoutPrototype, Long>() {

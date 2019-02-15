@@ -37,7 +37,7 @@ public abstract class TrashVersionBaseImpl extends TrashVersionModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a trash version model instance should use the {@link TrashVersion} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a trash version model instance should use the <code>TrashVersion</code> interface instead.
 	 */
 	@Override
 	public void persist() {

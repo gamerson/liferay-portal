@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see LVEntryModel
- * @see com.liferay.portal.tools.service.builder.test.model.impl.LVEntryImpl
- * @see com.liferay.portal.tools.service.builder.test.model.impl.LVEntryModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portal.tools.service.builder.test.model.impl.LVEntryImpl")
@@ -35,7 +33,7 @@ public interface LVEntry extends LVEntryModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portal.tools.service.builder.test.model.impl.LVEntryImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portal.tools.service.builder.test.model.impl.LVEntryImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<LVEntry, Long> LV_ENTRY_ID_ACCESSOR = new Accessor<LVEntry, Long>() {
 			@Override

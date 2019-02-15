@@ -26,7 +26,6 @@ import java.util.List;
  * This class is used by SOAP remote services, specifically {@link com.liferay.asset.category.property.service.http.AssetCategoryPropertyServiceSoap}.
  *
  * @author Brian Wing Shun Chan
- * @see com.liferay.asset.category.property.service.http.AssetCategoryPropertyServiceSoap
  * @generated
  */
 @ProviderType

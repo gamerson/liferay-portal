@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see LockModel
- * @see com.liferay.portal.lock.model.impl.LockImpl
- * @see com.liferay.portal.lock.model.impl.LockModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portal.lock.model.impl.LockImpl")
@@ -35,7 +33,7 @@ public interface Lock extends LockModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portal.lock.model.impl.LockImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portal.lock.model.impl.LockImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<Lock, Long> LOCK_ID_ACCESSOR = new Accessor<Lock, Long>() {
 			@Override

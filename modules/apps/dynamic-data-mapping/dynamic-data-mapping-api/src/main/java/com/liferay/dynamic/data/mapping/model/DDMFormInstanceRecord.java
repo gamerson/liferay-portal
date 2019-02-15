@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see DDMFormInstanceRecordModel
- * @see com.liferay.dynamic.data.mapping.model.impl.DDMFormInstanceRecordImpl
- * @see com.liferay.dynamic.data.mapping.model.impl.DDMFormInstanceRecordModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.dynamic.data.mapping.model.impl.DDMFormInstanceRecordImpl")
@@ -36,7 +34,7 @@ public interface DDMFormInstanceRecord extends DDMFormInstanceRecordModel,
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.dynamic.data.mapping.model.impl.DDMFormInstanceRecordImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.dynamic.data.mapping.model.impl.DDMFormInstanceRecordImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<DDMFormInstanceRecord, Long> FORM_INSTANCE_RECORD_ID_ACCESSOR =
 		new Accessor<DDMFormInstanceRecord, Long>() {

@@ -24,8 +24,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see FriendlyURLEntryMappingModel
- * @see com.liferay.friendly.url.model.impl.FriendlyURLEntryMappingImpl
- * @see com.liferay.friendly.url.model.impl.FriendlyURLEntryMappingModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.friendly.url.model.impl.FriendlyURLEntryMappingImpl")
@@ -34,7 +32,7 @@ public interface FriendlyURLEntryMapping extends FriendlyURLEntryMappingModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.friendly.url.model.impl.FriendlyURLEntryMappingImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.friendly.url.model.impl.FriendlyURLEntryMappingImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<FriendlyURLEntryMapping, Long> FRIENDLY_URL_ENTRY_MAPPING_ID_ACCESSOR =
 		new Accessor<FriendlyURLEntryMapping, Long>() {

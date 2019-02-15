@@ -26,7 +26,6 @@ import java.util.List;
  * This class is used by SOAP remote services, specifically {@link com.liferay.push.notifications.service.http.PushNotificationsDeviceServiceSoap}.
  *
  * @author Bruno Farache
- * @see com.liferay.push.notifications.service.http.PushNotificationsDeviceServiceSoap
  * @generated
  */
 @ProviderType

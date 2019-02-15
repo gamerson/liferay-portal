@@ -41,8 +41,6 @@ import java.util.Map;
  *
  * @author Brian Wing Shun Chan
  * @see ExpandoValueServiceUtil
- * @see com.liferay.portlet.expando.service.base.ExpandoValueServiceBaseImpl
- * @see com.liferay.portlet.expando.service.impl.ExpandoValueServiceImpl
  * @generated
  */
 @AccessControlled
@@ -54,7 +52,7 @@ public interface ExpandoValueService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link ExpandoValueServiceUtil} to access the expando value remote service. Add custom service methods to {@link com.liferay.portlet.expando.service.impl.ExpandoValueServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link ExpandoValueServiceUtil} to access the expando value remote service. Add custom service methods to <code>com.liferay.portlet.expando.service.impl.ExpandoValueServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	@JSONWebService(mode = JSONWebServiceMode.IGNORE)
 	public ExpandoValue addValue(long companyId, String className,

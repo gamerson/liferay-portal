@@ -36,6 +36,6 @@ public abstract class FriendlyURLEntryMappingBaseImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a friendly url entry mapping model instance should use the {@link FriendlyURLEntryMapping} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a friendly url entry mapping model instance should use the <code>FriendlyURLEntryMapping</code> interface instead.
 	 */
 }

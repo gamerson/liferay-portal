@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see AssetEntryUsageModel
- * @see com.liferay.asset.model.impl.AssetEntryUsageImpl
- * @see com.liferay.asset.model.impl.AssetEntryUsageModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.asset.model.impl.AssetEntryUsageImpl")
@@ -35,7 +33,7 @@ public interface AssetEntryUsage extends AssetEntryUsageModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.asset.model.impl.AssetEntryUsageImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.asset.model.impl.AssetEntryUsageImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<AssetEntryUsage, Long> ASSET_ENTRY_USAGE_ID_ACCESSOR =
 		new Accessor<AssetEntryUsage, Long>() {

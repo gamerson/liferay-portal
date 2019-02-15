@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see FriendlyURLEntryModel
- * @see com.liferay.friendly.url.model.impl.FriendlyURLEntryImpl
- * @see com.liferay.friendly.url.model.impl.FriendlyURLEntryModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.friendly.url.model.impl.FriendlyURLEntryImpl")
@@ -35,7 +33,7 @@ public interface FriendlyURLEntry extends FriendlyURLEntryModel, PersistedModel 
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.friendly.url.model.impl.FriendlyURLEntryImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.friendly.url.model.impl.FriendlyURLEntryImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<FriendlyURLEntry, Long> FRIENDLY_URL_ENTRY_ID_ACCESSOR =
 		new Accessor<FriendlyURLEntry, Long>() {

@@ -26,7 +26,6 @@ import java.util.List;
  * This class is used by SOAP remote services, specifically {@link com.liferay.trash.service.http.TrashEntryServiceSoap}.
  *
  * @author Brian Wing Shun Chan
- * @see com.liferay.trash.service.http.TrashEntryServiceSoap
  * @generated
  */
 @ProviderType

@@ -36,8 +36,6 @@ import java.util.List;
  *
  * @author Brian Wing Shun Chan
  * @see KaleoDefinitionServiceUtil
- * @see com.liferay.portal.workflow.kaleo.service.base.KaleoDefinitionServiceBaseImpl
- * @see com.liferay.portal.workflow.kaleo.service.impl.KaleoDefinitionServiceImpl
  * @deprecated As of Judson (7.1.x), with no direct replacement
  * @generated
  */
@@ -53,7 +51,7 @@ public interface KaleoDefinitionService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link KaleoDefinitionServiceUtil} to access the kaleo definition remote service. Add custom service methods to {@link com.liferay.portal.workflow.kaleo.service.impl.KaleoDefinitionServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link KaleoDefinitionServiceUtil} to access the kaleo definition remote service. Add custom service methods to <code>com.liferay.portal.workflow.kaleo.service.impl.KaleoDefinitionServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 
 	/**

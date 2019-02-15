@@ -40,7 +40,6 @@ import javax.sql.DataSource;
  *
  * @author Brian Wing Shun Chan
  * @see com.liferay.portal.service.impl.ThemeLocalServiceImpl
- * @see com.liferay.portal.kernel.service.ThemeLocalServiceUtil
  * @generated
  */
 @ProviderType
@@ -49,7 +48,7 @@ public abstract class ThemeLocalServiceBaseImpl extends BaseLocalServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.portal.kernel.service.ThemeLocalServiceUtil} to access the theme local service.
+	 * Never modify or reference this class directly. Use <code>ThemeLocalService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.portal.kernel.service.ThemeLocalServiceUtil</code>.
 	 */
 
 	/**

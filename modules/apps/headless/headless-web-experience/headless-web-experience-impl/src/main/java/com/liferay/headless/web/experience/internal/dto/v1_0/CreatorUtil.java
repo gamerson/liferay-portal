@@ -16,13 +16,15 @@ package com.liferay.headless.web.experience.internal.dto.v1_0;
 
 import com.liferay.headless.web.experience.dto.v1_0.Creator;
 import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.theme.ThemeDisplay;
+import com.liferay.portal.kernel.util.Portal;
 
 /**
  * @author Cristina González
  */
 public class CreatorUtil {
 
-	public static Creator toCreator(User user) {
+	public static Creator toCreator(Portal portal, User user) throws Exception {
 		if (user == null) {
 			return null;
 		}
@@ -30,13 +32,24 @@ public class CreatorUtil {
 		return new Creator() {
 			{
 				setAdditionalName(user.getMiddleName());
-				setAlternateName(user.getScreenName());
-				setEmail(user.getEmailAddress());
 				setFamilyName(user.getLastName());
 				setGivenName(user.getFirstName());
 				setId(user.getUserId());
-				setJobTitle(user.getJobTitle());
 				setName(user.getFullName());
+				setProfileURL(
+					() -> {
+						if (user.getPortraitId() == 0) {
+							return null;
+						}
+
+						ThemeDisplay themeDisplay = new ThemeDisplay() {
+							{
+								setPathImage(portal.getPathImage());
+							}
+						};
+
+						return user.getPortraitURL(themeDisplay);
+					});
 			}
 		};
 	}

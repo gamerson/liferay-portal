@@ -82,10 +82,14 @@
 
 		{if $row and $row.config}
 			{sp}px-{$row.config.paddingHorizontal ?: '3'}
+		{else}
+			{sp}px-3
 		{/if}
 
 		{if $row and $row.config}
 			{sp}py-{$row.config.paddingVertical ?: '3'}
+		{else}
+			{sp}py-3
 		{/if}
 	{/let}
 
@@ -210,6 +214,7 @@
 
 	{let $columnClasses kind="text"}
 		col
+		{sp}col-{$size}
 		{sp}fragments-editor__drop-target
 		{sp}fragments-editor__drop-target--fragment
 		{sp}fragments-editor__drop-target--sidebar-fragment

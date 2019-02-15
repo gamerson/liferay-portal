@@ -40,8 +40,6 @@ import java.util.Map;
  *
  * @author Edward C. Han
  * @see MDRActionServiceUtil
- * @see com.liferay.mobile.device.rules.service.base.MDRActionServiceBaseImpl
- * @see com.liferay.mobile.device.rules.service.impl.MDRActionServiceImpl
  * @generated
  */
 @AccessControlled
@@ -55,7 +53,7 @@ public interface MDRActionService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link MDRActionServiceUtil} to access the mdr action remote service. Add custom service methods to {@link com.liferay.mobile.device.rules.service.impl.MDRActionServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link MDRActionServiceUtil} to access the mdr action remote service. Add custom service methods to <code>com.liferay.mobile.device.rules.service.impl.MDRActionServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public MDRAction addAction(long ruleGroupInstanceId,
 		Map<Locale, String> nameMap, Map<Locale, String> descriptionMap,

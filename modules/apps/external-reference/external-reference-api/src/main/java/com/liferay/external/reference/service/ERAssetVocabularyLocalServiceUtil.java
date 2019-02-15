@@ -23,16 +23,14 @@ import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Provides the local service utility for ERAssetVocabulary. This utility wraps
- * {@link com.liferay.external.reference.service.impl.ERAssetVocabularyLocalServiceImpl} and is the
- * primary access point for service operations in application layer code running
+ * <code>com.liferay.external.reference.service.impl.ERAssetVocabularyLocalServiceImpl</code> and
+ * is an access point for service operations in application layer code running
  * on the local server. Methods of this service will not have security checks
  * based on the propagated JAAS credentials because this service can only be
  * accessed from within the same VM.
  *
  * @author Brian Wing Shun Chan
  * @see ERAssetVocabularyLocalService
- * @see com.liferay.external.reference.service.base.ERAssetVocabularyLocalServiceBaseImpl
- * @see com.liferay.external.reference.service.impl.ERAssetVocabularyLocalServiceImpl
  * @generated
  */
 @ProviderType
@@ -40,7 +38,7 @@ public class ERAssetVocabularyLocalServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this class directly. Add custom service methods to {@link com.liferay.external.reference.service.impl.ERAssetVocabularyLocalServiceImpl} and rerun ServiceBuilder to regenerate this class.
+	 * Never modify this class directly. Add custom service methods to <code>com.liferay.external.reference.service.impl.ERAssetVocabularyLocalServiceImpl</code> and rerun ServiceBuilder to regenerate this class.
 	 */
 	public static com.liferay.asset.kernel.model.AssetVocabulary addOrUpdateVocabulary(
 		String externalReferenceCode, long userId, long groupId, String title,

@@ -35,8 +35,6 @@ import com.liferay.portal.kernel.transaction.Transactional;
  *
  * @author José Manuel Navarro
  * @see ScreensCommentServiceUtil
- * @see com.liferay.screens.service.base.ScreensCommentServiceBaseImpl
- * @see com.liferay.screens.service.impl.ScreensCommentServiceImpl
  * @generated
  */
 @AccessControlled
@@ -50,7 +48,7 @@ public interface ScreensCommentService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link ScreensCommentServiceUtil} to access the screens comment remote service. Add custom service methods to {@link com.liferay.screens.service.impl.ScreensCommentServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link ScreensCommentServiceUtil} to access the screens comment remote service. Add custom service methods to <code>com.liferay.screens.service.impl.ScreensCommentServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public JSONObject addComment(String className, long classPK, String body)
 		throws PortalException;

@@ -23,16 +23,14 @@ import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Provides the remote service utility for SegmentsEntry. This utility wraps
- * {@link com.liferay.segments.service.impl.SegmentsEntryServiceImpl} and is the
- * primary access point for service operations in application layer code running
- * on a remote server. Methods of this service are expected to have security
- * checks based on the propagated JAAS credentials because this service can be
+ * <code>com.liferay.segments.service.impl.SegmentsEntryServiceImpl</code> and is an
+ * access point for service operations in application layer code running on a
+ * remote server. Methods of this service are expected to have security checks
+ * based on the propagated JAAS credentials because this service can be
  * accessed remotely.
  *
  * @author Eduardo Garcia
  * @see SegmentsEntryService
- * @see com.liferay.segments.service.base.SegmentsEntryServiceBaseImpl
- * @see com.liferay.segments.service.impl.SegmentsEntryServiceImpl
  * @generated
  */
 @ProviderType
@@ -40,7 +38,7 @@ public class SegmentsEntryServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this class directly. Add custom service methods to {@link com.liferay.segments.service.impl.SegmentsEntryServiceImpl} and rerun ServiceBuilder to regenerate this class.
+	 * Never modify this class directly. Add custom service methods to <code>com.liferay.segments.service.impl.SegmentsEntryServiceImpl</code> and rerun ServiceBuilder to regenerate this class.
 	 */
 	public static com.liferay.segments.model.SegmentsEntry addSegmentsEntry(
 		java.util.Map<java.util.Locale, String> nameMap,

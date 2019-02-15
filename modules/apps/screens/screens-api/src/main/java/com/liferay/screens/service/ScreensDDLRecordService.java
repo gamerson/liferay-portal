@@ -40,8 +40,6 @@ import java.util.Locale;
  *
  * @author José Manuel Navarro
  * @see ScreensDDLRecordServiceUtil
- * @see com.liferay.screens.service.base.ScreensDDLRecordServiceBaseImpl
- * @see com.liferay.screens.service.impl.ScreensDDLRecordServiceImpl
  * @generated
  */
 @AccessControlled
@@ -55,7 +53,7 @@ public interface ScreensDDLRecordService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link ScreensDDLRecordServiceUtil} to access the screens ddl record remote service. Add custom service methods to {@link com.liferay.screens.service.impl.ScreensDDLRecordServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link ScreensDDLRecordServiceUtil} to access the screens ddl record remote service. Add custom service methods to <code>com.liferay.screens.service.impl.ScreensDDLRecordServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public JSONObject getDDLRecord(long ddlRecordId, Locale locale)

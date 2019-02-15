@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see WikiPageModel
- * @see com.liferay.wiki.model.impl.WikiPageImpl
- * @see com.liferay.wiki.model.impl.WikiPageModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.wiki.model.impl.WikiPageImpl")
@@ -35,7 +33,7 @@ public interface WikiPage extends WikiPageModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.wiki.model.impl.WikiPageImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.wiki.model.impl.WikiPageImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<WikiPage, Long> PAGE_ID_ACCESSOR = new Accessor<WikiPage, Long>() {
 			@Override

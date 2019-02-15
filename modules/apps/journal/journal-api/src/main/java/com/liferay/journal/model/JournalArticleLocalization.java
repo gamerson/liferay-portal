@@ -24,8 +24,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see JournalArticleLocalizationModel
- * @see com.liferay.journal.model.impl.JournalArticleLocalizationImpl
- * @see com.liferay.journal.model.impl.JournalArticleLocalizationModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.journal.model.impl.JournalArticleLocalizationImpl")
@@ -35,7 +33,7 @@ public interface JournalArticleLocalization
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.journal.model.impl.JournalArticleLocalizationImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.journal.model.impl.JournalArticleLocalizationImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<JournalArticleLocalization, Long> ARTICLE_LOCALIZATION_ID_ACCESSOR =
 		new Accessor<JournalArticleLocalization, Long>() {

@@ -24,8 +24,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see LayoutFriendlyURLModel
- * @see com.liferay.portal.model.impl.LayoutFriendlyURLImpl
- * @see com.liferay.portal.model.impl.LayoutFriendlyURLModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portal.model.impl.LayoutFriendlyURLImpl")
@@ -34,7 +32,7 @@ public interface LayoutFriendlyURL extends LayoutFriendlyURLModel, PersistedMode
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portal.model.impl.LayoutFriendlyURLImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portal.model.impl.LayoutFriendlyURLImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<LayoutFriendlyURL, Long> LAYOUT_FRIENDLY_U_R_L_ID_ACCESSOR =
 		new Accessor<LayoutFriendlyURL, Long>() {

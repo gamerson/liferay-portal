@@ -37,8 +37,6 @@ import java.util.List;
  *
  * @author Brian Wing Shun Chan
  * @see AssetCategoryPropertyServiceUtil
- * @see com.liferay.asset.category.property.service.base.AssetCategoryPropertyServiceBaseImpl
- * @see com.liferay.asset.category.property.service.impl.AssetCategoryPropertyServiceImpl
  * @generated
  */
 @AccessControlled
@@ -52,7 +50,7 @@ public interface AssetCategoryPropertyService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link AssetCategoryPropertyServiceUtil} to access the asset category property remote service. Add custom service methods to {@link com.liferay.asset.category.property.service.impl.AssetCategoryPropertyServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link AssetCategoryPropertyServiceUtil} to access the asset category property remote service. Add custom service methods to <code>com.liferay.asset.category.property.service.impl.AssetCategoryPropertyServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public AssetCategoryProperty addCategoryProperty(long entryId, String key,
 		String value) throws PortalException;

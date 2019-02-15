@@ -34,7 +34,6 @@ import java.util.Date;
  * The cache model class for representing WebDAVProps in entity cache.
  *
  * @author Brian Wing Shun Chan
- * @see WebDAVProps
  * @generated
  */
 @ProviderType

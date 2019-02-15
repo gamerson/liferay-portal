@@ -34,8 +34,6 @@ import java.util.List;
  *
  * @author Brian Wing Shun Chan
  * @see EmailAddressServiceUtil
- * @see com.liferay.portal.service.base.EmailAddressServiceBaseImpl
- * @see com.liferay.portal.service.impl.EmailAddressServiceImpl
  * @generated
  */
 @AccessControlled
@@ -47,7 +45,7 @@ public interface EmailAddressService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link EmailAddressServiceUtil} to access the email address remote service. Add custom service methods to {@link com.liferay.portal.service.impl.EmailAddressServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link EmailAddressServiceUtil} to access the email address remote service. Add custom service methods to <code>com.liferay.portal.service.impl.EmailAddressServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public EmailAddress addEmailAddress(String className, long classPK,
 		String address, long typeId, boolean primary,

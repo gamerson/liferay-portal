@@ -37,7 +37,7 @@ public abstract class ContactBaseImpl extends ContactModelImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a contact model instance should use the {@link Contact} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a contact model instance should use the <code>Contact</code> interface instead.
 	 */
 	@Override
 	public void persist() {

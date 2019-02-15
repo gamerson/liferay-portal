@@ -42,8 +42,6 @@ import java.util.Map;
  *
  * @author Brian Wing Shun Chan
  * @see SyncDLObjectServiceUtil
- * @see com.liferay.sync.service.base.SyncDLObjectServiceBaseImpl
- * @see com.liferay.sync.service.impl.SyncDLObjectServiceImpl
  * @generated
  */
 @AccessControlled
@@ -57,7 +55,7 @@ public interface SyncDLObjectService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link SyncDLObjectServiceUtil} to access the sync dl object remote service. Add custom service methods to {@link com.liferay.sync.service.impl.SyncDLObjectServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link SyncDLObjectServiceUtil} to access the sync dl object remote service. Add custom service methods to <code>com.liferay.sync.service.impl.SyncDLObjectServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public SyncDLObject addFileEntry(long repositoryId, long folderId,
 		String sourceFileName, String mimeType, String title,

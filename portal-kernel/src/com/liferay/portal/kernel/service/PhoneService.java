@@ -34,8 +34,6 @@ import java.util.List;
  *
  * @author Brian Wing Shun Chan
  * @see PhoneServiceUtil
- * @see com.liferay.portal.service.base.PhoneServiceBaseImpl
- * @see com.liferay.portal.service.impl.PhoneServiceImpl
  * @generated
  */
 @AccessControlled
@@ -47,7 +45,7 @@ public interface PhoneService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link PhoneServiceUtil} to access the phone remote service. Add custom service methods to {@link com.liferay.portal.service.impl.PhoneServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link PhoneServiceUtil} to access the phone remote service. Add custom service methods to <code>com.liferay.portal.service.impl.PhoneServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public Phone addPhone(String className, long classPK, String number,
 		String extension, long typeId, boolean primary,

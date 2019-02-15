@@ -24,8 +24,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see UserGroupRoleModel
- * @see com.liferay.portal.model.impl.UserGroupRoleImpl
- * @see com.liferay.portal.model.impl.UserGroupRoleModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portal.model.impl.UserGroupRoleImpl")
@@ -34,7 +32,7 @@ public interface UserGroupRole extends UserGroupRoleModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portal.model.impl.UserGroupRoleImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portal.model.impl.UserGroupRoleImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<UserGroupRole, Long> USER_ID_ACCESSOR = new Accessor<UserGroupRole, Long>() {
 			@Override

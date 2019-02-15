@@ -40,8 +40,6 @@ import java.util.List;
  *
  * @author Brian Wing Shun Chan
  * @see DLFolderServiceUtil
- * @see com.liferay.portlet.documentlibrary.service.base.DLFolderServiceBaseImpl
- * @see com.liferay.portlet.documentlibrary.service.impl.DLFolderServiceImpl
  * @generated
  */
 @AccessControlled
@@ -53,7 +51,7 @@ public interface DLFolderService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link DLFolderServiceUtil} to access the document library folder remote service. Add custom service methods to {@link com.liferay.portlet.documentlibrary.service.impl.DLFolderServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link DLFolderServiceUtil} to access the document library folder remote service. Add custom service methods to <code>com.liferay.portlet.documentlibrary.service.impl.DLFolderServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public DLFolder addFolder(long groupId, long repositoryId,
 		boolean mountPoint, long parentFolderId, String name,

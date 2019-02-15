@@ -14,6 +14,8 @@
 
 package com.liferay.headless.document.library.dto.v1_0;
 
+import com.liferay.petra.function.UnsafeSupplier;
+
 import javax.annotation.Generated;
 
 import javax.xml.bind.annotation.XmlRootElement;
@@ -54,24 +56,88 @@ public class AdaptedMedia {
 		_contentUrl = contentUrl;
 	}
 
+	public void setContentUrl(
+		UnsafeSupplier<String, Throwable> contentUrlUnsafeSupplier) {
+
+		try {
+			_contentUrl = contentUrlUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setHeight(Number height) {
 		_height = height;
+	}
+
+	public void setHeight(
+		UnsafeSupplier<Number, Throwable> heightUnsafeSupplier) {
+
+		try {
+			_height = heightUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	public void setId(Long id) {
 		_id = id;
 	}
 
+	public void setId(UnsafeSupplier<Long, Throwable> idUnsafeSupplier) {
+		try {
+			_id = idUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setResolutionName(String resolutionName) {
 		_resolutionName = resolutionName;
+	}
+
+	public void setResolutionName(
+		UnsafeSupplier<String, Throwable> resolutionNameUnsafeSupplier) {
+
+		try {
+			_resolutionName = resolutionNameUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	public void setSizeInBytes(Number sizeInBytes) {
 		_sizeInBytes = sizeInBytes;
 	}
 
+	public void setSizeInBytes(
+		UnsafeSupplier<Number, Throwable> sizeInBytesUnsafeSupplier) {
+
+		try {
+			_sizeInBytes = sizeInBytesUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setWidth(Number width) {
 		_width = width;
+	}
+
+	public void setWidth(
+		UnsafeSupplier<Number, Throwable> widthUnsafeSupplier) {
+
+		try {
+			_width = widthUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	private String _contentUrl;

@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see SAPEntryModel
- * @see com.liferay.portal.security.service.access.policy.model.impl.SAPEntryImpl
- * @see com.liferay.portal.security.service.access.policy.model.impl.SAPEntryModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portal.security.service.access.policy.model.impl.SAPEntryImpl")
@@ -35,7 +33,7 @@ public interface SAPEntry extends SAPEntryModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portal.security.service.access.policy.model.impl.SAPEntryImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portal.security.service.access.policy.model.impl.SAPEntryImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<SAPEntry, Long> SAP_ENTRY_ID_ACCESSOR = new Accessor<SAPEntry, Long>() {
 			@Override

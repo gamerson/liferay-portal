@@ -38,8 +38,6 @@ import java.util.List;
  *
  * @author Brian Wing Shun Chan
  * @see DDMFormInstanceVersionServiceUtil
- * @see com.liferay.dynamic.data.mapping.service.base.DDMFormInstanceVersionServiceBaseImpl
- * @see com.liferay.dynamic.data.mapping.service.impl.DDMFormInstanceVersionServiceImpl
  * @generated
  */
 @AccessControlled
@@ -53,7 +51,7 @@ public interface DDMFormInstanceVersionService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link DDMFormInstanceVersionServiceUtil} to access the ddm form instance version remote service. Add custom service methods to {@link com.liferay.dynamic.data.mapping.service.impl.DDMFormInstanceVersionServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link DDMFormInstanceVersionServiceUtil} to access the ddm form instance version remote service. Add custom service methods to <code>com.liferay.dynamic.data.mapping.service.impl.DDMFormInstanceVersionServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public DDMFormInstanceVersion getFormInstanceVersion(

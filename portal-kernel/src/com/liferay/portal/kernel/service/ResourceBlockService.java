@@ -33,8 +33,6 @@ import java.util.Map;
  *
  * @author Brian Wing Shun Chan
  * @see ResourceBlockServiceUtil
- * @see com.liferay.portal.service.base.ResourceBlockServiceBaseImpl
- * @see com.liferay.portal.service.impl.ResourceBlockServiceImpl
  * @deprecated
  * @generated
  */
@@ -48,7 +46,7 @@ public interface ResourceBlockService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link ResourceBlockServiceUtil} to access the resource block remote service. Add custom service methods to {@link com.liferay.portal.service.impl.ResourceBlockServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link ResourceBlockServiceUtil} to access the resource block remote service. Add custom service methods to <code>com.liferay.portal.service.impl.ResourceBlockServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public void addCompanyScopePermission(long scopeGroupId, long companyId,
 		String name, long roleId, String actionId) throws PortalException;

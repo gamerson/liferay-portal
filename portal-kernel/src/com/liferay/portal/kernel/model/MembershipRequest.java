@@ -24,8 +24,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see MembershipRequestModel
- * @see com.liferay.portal.model.impl.MembershipRequestImpl
- * @see com.liferay.portal.model.impl.MembershipRequestModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.portal.model.impl.MembershipRequestImpl")
@@ -34,7 +32,7 @@ public interface MembershipRequest extends MembershipRequestModel, PersistedMode
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.portal.model.impl.MembershipRequestImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.portal.model.impl.MembershipRequestImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<MembershipRequest, Long> MEMBERSHIP_REQUEST_ID_ACCESSOR =
 		new Accessor<MembershipRequest, Long>() {

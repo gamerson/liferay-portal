@@ -43,7 +43,6 @@ import javax.sql.DataSource;
  *
  * @author José Manuel Navarro
  * @see com.liferay.screens.service.impl.ScreensDDLRecordServiceImpl
- * @see com.liferay.screens.service.ScreensDDLRecordServiceUtil
  * @generated
  */
 public abstract class ScreensDDLRecordServiceBaseImpl extends BaseServiceImpl
@@ -51,7 +50,7 @@ public abstract class ScreensDDLRecordServiceBaseImpl extends BaseServiceImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link com.liferay.screens.service.ScreensDDLRecordServiceUtil} to access the screens ddl record remote service.
+	 * Never modify or reference this class directly. Use <code>ScreensDDLRecordService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.screens.service.ScreensDDLRecordServiceUtil</code>.
 	 */
 
 	/**

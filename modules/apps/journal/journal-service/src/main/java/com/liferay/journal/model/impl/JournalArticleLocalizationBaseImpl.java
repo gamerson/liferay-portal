@@ -37,6 +37,6 @@ public abstract class JournalArticleLocalizationBaseImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a journal article localization model instance should use the {@link JournalArticleLocalization} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a journal article localization model instance should use the <code>JournalArticleLocalization</code> interface instead.
 	 */
 }

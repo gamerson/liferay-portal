@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Eduardo Lundgren
  * @see CalendarBookingModel
- * @see com.liferay.calendar.model.impl.CalendarBookingImpl
- * @see com.liferay.calendar.model.impl.CalendarBookingModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.calendar.model.impl.CalendarBookingImpl")
@@ -35,7 +33,7 @@ public interface CalendarBooking extends CalendarBookingModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.calendar.model.impl.CalendarBookingImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.calendar.model.impl.CalendarBookingImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<CalendarBooking, Long> CALENDAR_BOOKING_ID_ACCESSOR =
 		new Accessor<CalendarBooking, Long>() {

@@ -34,8 +34,6 @@ import java.util.List;
  *
  * @author Brian Wing Shun Chan
  * @see AddressServiceUtil
- * @see com.liferay.portal.service.base.AddressServiceBaseImpl
- * @see com.liferay.portal.service.impl.AddressServiceImpl
  * @generated
  */
 @AccessControlled
@@ -47,7 +45,7 @@ public interface AddressService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link AddressServiceUtil} to access the address remote service. Add custom service methods to {@link com.liferay.portal.service.impl.AddressServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link AddressServiceUtil} to access the address remote service. Add custom service methods to <code>com.liferay.portal.service.impl.AddressServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public Address addAddress(String className, long classPK, String street1,
 		String street2, String street3, String city, String zip, long regionId,

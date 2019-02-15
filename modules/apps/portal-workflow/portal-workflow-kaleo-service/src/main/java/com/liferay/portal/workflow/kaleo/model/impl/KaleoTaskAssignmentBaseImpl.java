@@ -37,7 +37,7 @@ public abstract class KaleoTaskAssignmentBaseImpl
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a kaleo task assignment model instance should use the {@link KaleoTaskAssignment} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a kaleo task assignment model instance should use the <code>KaleoTaskAssignment</code> interface instead.
 	 */
 	@Override
 	public void persist() {

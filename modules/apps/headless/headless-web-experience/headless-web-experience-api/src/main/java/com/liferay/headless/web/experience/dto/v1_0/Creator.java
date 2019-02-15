@@ -14,6 +14,8 @@
 
 package com.liferay.headless.web.experience.dto.v1_0;
 
+import com.liferay.petra.function.UnsafeSupplier;
+
 import javax.annotation.Generated;
 
 import javax.xml.bind.annotation.XmlRootElement;
@@ -28,14 +30,6 @@ public class Creator {
 
 	public String getAdditionalName() {
 		return _additionalName;
-	}
-
-	public String getAlternateName() {
-		return _alternateName;
-	}
-
-	public String getEmail() {
-		return _email;
 	}
 
 	public String getFamilyName() {
@@ -54,10 +48,6 @@ public class Creator {
 		return _image;
 	}
 
-	public String getJobTitle() {
-		return _jobTitle;
-	}
-
 	public String getName() {
 		return _name;
 	}
@@ -70,50 +60,108 @@ public class Creator {
 		_additionalName = additionalName;
 	}
 
-	public void setAlternateName(String alternateName) {
-		_alternateName = alternateName;
-	}
+	public void setAdditionalName(
+		UnsafeSupplier<String, Throwable> additionalNameUnsafeSupplier) {
 
-	public void setEmail(String email) {
-		_email = email;
+		try {
+			_additionalName = additionalNameUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	public void setFamilyName(String familyName) {
 		_familyName = familyName;
 	}
 
+	public void setFamilyName(
+		UnsafeSupplier<String, Throwable> familyNameUnsafeSupplier) {
+
+		try {
+			_familyName = familyNameUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setGivenName(String givenName) {
 		_givenName = givenName;
+	}
+
+	public void setGivenName(
+		UnsafeSupplier<String, Throwable> givenNameUnsafeSupplier) {
+
+		try {
+			_givenName = givenNameUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	public void setId(Long id) {
 		_id = id;
 	}
 
+	public void setId(UnsafeSupplier<Long, Throwable> idUnsafeSupplier) {
+		try {
+			_id = idUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setImage(String image) {
 		_image = image;
 	}
 
-	public void setJobTitle(String jobTitle) {
-		_jobTitle = jobTitle;
+	public void setImage(
+		UnsafeSupplier<String, Throwable> imageUnsafeSupplier) {
+
+		try {
+			_image = imageUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
 	}
 
 	public void setName(String name) {
 		_name = name;
 	}
 
+	public void setName(UnsafeSupplier<String, Throwable> nameUnsafeSupplier) {
+		try {
+			_name = nameUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	public void setProfileURL(String profileURL) {
 		_profileURL = profileURL;
 	}
 
+	public void setProfileURL(
+		UnsafeSupplier<String, Throwable> profileURLUnsafeSupplier) {
+
+		try {
+			_profileURL = profileURLUnsafeSupplier.get();
+	}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+	}
+	}
+
 	private String _additionalName;
-	private String _alternateName;
-	private String _email;
 	private String _familyName;
 	private String _givenName;
 	private Long _id;
 	private String _image;
-	private String _jobTitle;
 	private String _name;
 	private String _profileURL;
 

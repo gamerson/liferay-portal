@@ -25,8 +25,6 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author Brian Wing Shun Chan
  * @see AssetDisplayPageEntryModel
- * @see com.liferay.asset.display.page.model.impl.AssetDisplayPageEntryImpl
- * @see com.liferay.asset.display.page.model.impl.AssetDisplayPageEntryModelImpl
  * @generated
  */
 @ImplementationClassName("com.liferay.asset.display.page.model.impl.AssetDisplayPageEntryImpl")
@@ -36,7 +34,7 @@ public interface AssetDisplayPageEntry extends AssetDisplayPageEntryModel,
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.asset.display.page.model.impl.AssetDisplayPageEntryImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.asset.display.page.model.impl.AssetDisplayPageEntryImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public static final Accessor<AssetDisplayPageEntry, Long> ASSET_DISPLAY_PAGE_ENTRY_ID_ACCESSOR =
 		new Accessor<AssetDisplayPageEntry, Long>() {
