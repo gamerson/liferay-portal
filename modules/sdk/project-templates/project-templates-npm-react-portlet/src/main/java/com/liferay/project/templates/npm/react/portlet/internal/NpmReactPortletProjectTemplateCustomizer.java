@@ -27,7 +27,7 @@ import org.apache.maven.archetype.ArchetypeGenerationResult;
 /**
  * @author Gregory Amerson
  */
-public class NpmReactPortletProjectTemplateCustomizer
+public class NPMReactPortletProjectTemplateCustomizer
 	implements ProjectTemplateCustomizer {
 
 	@Override

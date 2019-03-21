@@ -27,7 +27,7 @@ import org.apache.maven.archetype.ArchetypeGenerationResult;
 /**
  * @author Gregory Amerson
  */
-public class NpmVuejsPortletProjectTemplateCustomizer
+public class NPMVuejsPortletProjectTemplateCustomizer
 	implements ProjectTemplateCustomizer {
 
 	@Override
