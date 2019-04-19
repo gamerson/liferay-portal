@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+
+<archetype-descriptor name="liferay-module-war-mvcbean-cdi-jsp-portlet">
+	<fileSets>
+		<fileSet filtered="true" packaged="true">
+			<directory>src/main/java</directory>
+			<includes>
+				<include>**/*.java</include>
+			</includes>
+		</fileSet>
+		<fileSet filtered="true">
+			<directory>src/main/webapp/WEB-INF</directory>
+			<includes>
+				<include>*.xml</include>
+			</includes>
+			<excludes>
+				<exclude>**/*.jspx</exclude>
+			</excludes>
+		</fileSet>
+		<fileSet filtered="false">
+			<directory>src/main/webapp/WEB-INF</directory>
+			<includes>
+				<include>**/*.jspx</include>
+			</includes>
+			<excludes>
+				<exclude>*.xml</exclude>
+			</excludes>
+		</fileSet>
+		<fileSet filtered="true">
+			<directory>src/main/webapp/css</directory>
+			<includes>
+				<include>*.scss</include>
+			</includes>
+		</fileSet>
+		<fileSet filtered="true">
+			<directory>src/main/resources</directory>
+			<includes>
+				<include>*.properties</include>
+				<include>**/*.properties</include>
+			</includes>
+		</fileSet>
+		<fileSet filtered="true">
+			<directory></directory>
+			<includes>
+				<include>.gitignore</include>
+				<include>build.gradle</include>
+			</includes>
+		</fileSet>
+	</fileSets>
+	<requiredProperties>
+		<requiredProperty key="author">
+		</requiredProperty>
+		<requiredProperty key="className">
+		</requiredProperty>
+		<requiredProperty key="dependencyManagementEnabled">
+			<defaultValue>false</defaultValue>
+		</requiredProperty>
+		<requiredProperty key="projectType">
+			<defaultValue>standalone</defaultValue>
+		</requiredProperty>
+	</requiredProperties>
+</archetype-descriptor>

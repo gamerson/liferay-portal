@@ -1,0 +1,81 @@
+buildscript {
+	dependencies {
+		classpath group: "com.liferay", name: "com.liferay.css.builder", version: "@com.liferay.css.builder.version@"
+		classpath group: "com.liferay", name: "com.liferay.gradle.plugins.css.builder", version: "@com.liferay.gradle.plugins.css.builder.version@"
+	}
+
+	repositories {
+		maven {
+			url "https://repository-cdn.liferay.com/nexus/content/groups/public"
+		}
+	}
+}
+
+apply plugin: "com.liferay.css.builder"
+#if (${projectType} != "workspace")
+apply plugin: "war"
+#end
+
+dependencies {
+#if (${dependencyManagementEnabled} == "true")
+	compile group: "org.apache.portals.pluto.templating", name: "thymeleaf-mvc-portlet-cdi"
+	compile (group: "org.hibernate.validator", name: "hibernate-validator") {
+		exclude group: "javax.validation", module: "validation-api"
+	}
+	compile (group: "org.hibernate.validator", name: "hibernate-validator-cdi") {
+		exclude group: "javax.validation", module: "validation-api"
+	}
+	compile group: "org.slf4j", name: "slf4j-api"
+
+	compileOnly group: "com.liferay", name: "com.liferay.bean.portlet.api"
+	compileOnly group: "com.liferay.portal", name: "com.liferay.portal.kernel"
+	compileOnly group: "com.liferay.portal", name: "com.liferay.util.taglib"
+	compileOnly group: "javax.mvc", name: "javax.mvc-api"
+	compileOnly group: "javax.portlet", name: "portlet-api"
+	compileOnly group: "javax.servlet", name: "javax.servlet-api"
+	compileOnly group: "javax.validation", name: "validation-api"
+	compileOnly group: "javax.ws.rs", name: "javax.ws.rs-api"
+	compileOnly group: "jstl", name: "jstl"
+
+	runtime group: "org.slf4j", name: "slf4j-log4j12"
+#else
+	compile group: "org.apache.portals.pluto.templating", name: "thymeleaf-mvc-portlet-cdi", version: "3.1.0"
+	compile (group: "org.hibernate.validator", name: "hibernate-validator", version: "6.0.14.Final") {
+		exclude group: "javax.validation", module: "validation-api"
+	}
+	compile (group: "org.hibernate.validator", name: "hibernate-validator-cdi", version: "6.0.14.Final") {
+		exclude group: "javax.validation", module: "validation-api"
+	}
+	compile group: "org.slf4j", name: "slf4j-api", version: "1.7.25"
+
+	compileOnly group: "com.liferay", name: "com.liferay.bean.portlet.api", version: "1.0.3"
+	compileOnly group: "com.liferay.portal", name: "com.liferay.portal.kernel", version: "3.13.0"
+	compileOnly group: "com.liferay.portal", name: "com.liferay.util.taglib", version: "3.1.0"
+	compileOnly group: "javax.mvc", name: "javax.mvc-api", version: "1.0-pfd"
+	compileOnly group: "javax.portlet", name: "portlet-api", version: "3.0.0"
+	compileOnly group: "javax.servlet", name: "javax.servlet-api", version: "3.1.0"
+	compileOnly group: "javax.validation", name: "validation-api", version: "2.0.1.Final"
+	compileOnly group: "javax.ws.rs", name: "javax.ws.rs-api", version: "2.1.1"
+	compileOnly group: "jstl", name: "jstl", version: "1.2"
+
+	runtime group: "org.slf4j", name: "slf4j-log4j12", version: "1.7.25"
+#end
+}
+
+war {
+	dependsOn buildCSS
+	exclude "**/*.scss"
+
+	filesMatching("**/.sass-cache/") {
+		it.path = it.path.replace(".sass-cache/", "")
+	}
+
+	includeEmptyDirs = false
+}
+#if (${projectType} != "workspace")
+
+repositories {
+	maven {
+		url "https://repository-cdn.liferay.com/nexus/content/groups/public"
+	}
+}#end
