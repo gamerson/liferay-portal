@@ -155,6 +155,21 @@ public class PortletHotDeployListener extends BaseHotDeployListener {
 
 		ServletContext servletContext = hotDeployEvent.getServletContext();
 
+		List<String> beanFilterNames =
+			(List<String>)servletContext.getAttribute(
+				WebKeys.BEAN_FILTER_NAMES);
+		List<String> beanPortletIds = (List<String>)servletContext.getAttribute(
+			WebKeys.BEAN_PORTLET_IDS);
+
+		if ((beanFilterNames != null) || (beanPortletIds != null)) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(
+					"Detected bean portlet from ServletContext attributes");
+			}
+
+			return;
+		}
+
 		try (InputStream inputStream = servletContext.getResourceAsStream(
 				"/META-INF/MANIFEST.MF")) {
 
@@ -177,21 +192,6 @@ public class PortletHotDeployListener extends BaseHotDeployListener {
 		}
 		catch (Exception e) {
 			_log.error(e, e);
-		}
-
-		List<String> beanFilterNames =
-			(List<String>)servletContext.getAttribute(
-				WebKeys.BEAN_FILTER_NAMES);
-		List<String> beanPortletIds = (List<String>)servletContext.getAttribute(
-			WebKeys.BEAN_PORTLET_IDS);
-
-		if ((beanFilterNames != null) || (beanPortletIds != null)) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(
-					"Detected bean portlet from ServletContext attributes");
-			}
-
-			return;
 		}
 
 		String servletContextName = servletContext.getServletContextName();
