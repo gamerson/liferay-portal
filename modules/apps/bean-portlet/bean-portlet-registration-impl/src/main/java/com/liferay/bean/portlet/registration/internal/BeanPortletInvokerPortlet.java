@@ -19,10 +19,14 @@ import com.liferay.bean.portlet.extension.BeanPortletMethodInvoker;
 import com.liferay.bean.portlet.extension.MethodType;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.portlet.InvokerPortlet;
+import com.liferay.portal.kernel.util.ClassUtil;
+import com.liferay.portal.kernel.util.GetterUtil;
 
 import java.io.IOException;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,14 +35,13 @@ import java.util.Map;
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.portlet.Event;
-import javax.portlet.EventPortlet;
 import javax.portlet.EventRequest;
 import javax.portlet.EventResponse;
-import javax.portlet.HeaderPortlet;
 import javax.portlet.HeaderRequest;
 import javax.portlet.HeaderResponse;
 import javax.portlet.Portlet;
 import javax.portlet.PortletConfig;
+import javax.portlet.PortletContext;
 import javax.portlet.PortletException;
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletResponse;
@@ -46,13 +49,11 @@ import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 import javax.portlet.ResourceRequest;
 import javax.portlet.ResourceResponse;
-import javax.portlet.ResourceServingPortlet;
 
 /**
  * @author Neil Griffin
  */
-public class BeanPortletInvokerPortlet
-	implements EventPortlet, HeaderPortlet, Portlet, ResourceServingPortlet {
+public class BeanPortletInvokerPortlet implements InvokerPortlet {
 
 	public BeanPortletInvokerPortlet(
 		Map<MethodType, List<BeanMethod>> beanMethods,
@@ -60,6 +61,35 @@ public class BeanPortletInvokerPortlet
 
 		_beanMethods = beanMethods;
 		_beanPortletMethodInvoker = beanPortletMethodInvoker;
+
+		boolean facesPortlet = false;
+
+		for (Map.Entry<MethodType, List<BeanMethod>> entry :
+				beanMethods.entrySet()) {
+
+			List<BeanMethod> beanMethodList = entry.getValue();
+
+			for (BeanMethod beanMethod : beanMethodList) {
+				Method method = beanMethod.getMethod();
+
+				Class<?> declaringClass = method.getDeclaringClass();
+
+				if (ClassUtil.isSubclass(
+						declaringClass,
+						"javax.portlet.faces.GenericFacesPortlet")) {
+
+					facesPortlet = true;
+
+					break;
+				}
+			}
+
+			if (facesPortlet) {
+				break;
+			}
+		}
+
+		_facesPortlet = facesPortlet;
 	}
 
 	@Override
@@ -73,10 +103,75 @@ public class BeanPortletInvokerPortlet
 	}
 
 	@Override
+	public Integer getExpCache() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Portlet getPortlet() {
+		return this;
+	}
+
+	@Override
+	public ClassLoader getPortletClassLoader() {
+		Class<? extends BeanPortletInvokerPortlet> portletClass = getClass();
+
+		return portletClass.getClassLoader();
+	}
+
+	@Override
+	public PortletConfig getPortletConfig() {
+		return _portletConfig;
+	}
+
+	@Override
+	public PortletContext getPortletContext() {
+		return _portletConfig.getPortletContext();
+	}
+
+	@Override
+	public Portlet getPortletInstance() {
+		return this;
+	}
+
+	@Override
 	public void init(PortletConfig portletConfig) throws PortletException {
 		_invokeBeanMethods(_beanMethods.get(MethodType.INIT), portletConfig);
 
 		_portletConfig = portletConfig;
+	}
+
+	@Override
+	public boolean isCheckAuthToken() {
+		return GetterUtil.getBoolean(
+			_portletConfig.getInitParameter("check-auth-token"));
+	}
+
+	public boolean isFacesPortlet() {
+		return _facesPortlet;
+	}
+
+	@Override
+	public boolean isHeaderPortlet() {
+		return true;
+	}
+
+	/**
+	 * @deprecated As of Judson (7.1.x), with no direct replacement
+	 */
+	@Deprecated
+	@Override
+	public boolean isStrutsBridgePortlet() {
+		return false;
+	}
+
+	/**
+	 * @deprecated As of Judson (7.1.x), with no direct replacement
+	 */
+	@Deprecated
+	@Override
+	public boolean isStrutsPortlet() {
+		return false;
 	}
 
 	@Override
@@ -141,6 +236,11 @@ public class BeanPortletInvokerPortlet
 			_beanMethods.get(MethodType.SERVE_RESOURCE));
 	}
 
+	@Override
+	public void setPortletFilters() throws PortletException {
+		throw new UnsupportedOperationException();
+	}
+
 	private void _invokeBeanMethods(
 			List<BeanMethod> beanMethods, Object... args)
 		throws PortletException {
@@ -186,6 +286,7 @@ public class BeanPortletInvokerPortlet
 
 	private final Map<MethodType, List<BeanMethod>> _beanMethods;
 	private final BeanPortletMethodInvoker _beanPortletMethodInvoker;
+	private final boolean _facesPortlet;
 	private PortletConfig _portletConfig;
 
 }
