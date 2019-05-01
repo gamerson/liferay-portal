@@ -1,0 +1,9 @@
+Bundle-Description: Creates a Liferay MVCBean CDI portlet as a WAR project with JSP views.
+Bundle-Name: Liferay Project Templates MVCBean CDI JSP Portlet
+Bundle-SymbolicName: com.liferay.project.templates.mvcbean.cdi.jsp.portlet
+Bundle-Version: 1.0.0
+Liferay-Versions: [7.2,8)
+-removeheaders:\
+	Import-Package,\
+	Private-Package,\
+	Require-Capability

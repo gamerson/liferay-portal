@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<div xmlns:th="http://www.thymeleaf.org">
+	<form th:action="${submitUserActionURL}" class="user-form" method="post" th:object="${user}">
+		<p class="caption" th:text="#{personal-information}"/>
+		<fieldset>
+			<div class="form-group">
+				<label th:for="|${namespace}firstName|" th:text="#{first-name}" />
+				<input class="form-control" th:id="|${namespace}firstName|" th:name="|${namespace}firstName|" th:value="*{firstName}" type="text" />
+				<span class="portlet-msg-error" th:if="${fields.hasErrors('firstName')}" th:text="${fields.error('firstName')}" />
+			</div>
+			<div class="form-group">
+				<label th:for="|${namespace}lastName|" th:text="#{last-name}" />
+				<input class="form-control" th:id="|${namespace}lastName|" th:name="|${namespace}lastName|" th:value="*{lastName}" type="text" />
+				<span class="portlet-msg-error" th:if="${fields.hasErrors('lastName')}" th:text="${fields.error('lastName')}" />
+			</div>
+		</fieldset>
+		<input th:name="|${mvc.csrf.name}|" th:value="|${mvc.csrf.token}|" type="hidden" />
+		<input class="btn btn-primary" th:text="${submit}" type="submit" />
+	</form>
+</div>

@@ -1,0 +1,9 @@
+Bundle-Description: Creates a Liferay MVCBean Spring portlet as a WAR project with JSP views.
+Bundle-Name: Liferay Project Templates MVCBean Spring JSP Portlet
+Bundle-SymbolicName: com.liferay.project.templates.mvcbean.spring.jsp.portlet
+Bundle-Version: 1.0.0
+Liferay-Versions: [7.2,8)
+-removeheaders:\
+	Import-Package,\
+	Private-Package,\
+	Require-Capability
