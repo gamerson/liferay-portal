@@ -1,0 +1,111 @@
+buildscript {
+	repositories {
+		maven {
+			url "https://repository-cdn.liferay.com/nexus/content/groups/public"
+		}
+	}
+
+	dependencies {
+		classpath group: "com.liferay", name: "com.liferay.gradle.plugins.css.builder", version: "@com.liferay.gradle.plugins.css.builder.version@"
+	}
+}
+
+apply plugin: "com.liferay.css.builder"
+#if (${projectType} != "workspace")
+apply plugin: "war"
+#end
+
+dependencies {
+#if (${dependencyManagementEnabled} == "true")
+	compile group: "com.liferay.portletmvc4spring", name: "com.liferay.portletmvc4spring.framework"
+	compile group: "com.liferay.portletmvc4spring", name: "com.liferay.portletmvc4spring.security"
+#if (${liferayVersion.startsWith("7.1")})
+	compile group: "javax.validation", name: "validation-api"
+#end
+	compile (group: "org.hibernate.validator", name: "hibernate-validator") {
+		exclude group: "javax.validation", module: "validation-api"
+	}
+	compile group: "org.slf4j", name: "slf4j-api"
+	compile group: "org.springframework", name: "spring-aop"
+	compile group: "org.springframework", name: "spring-beans"
+	compile group: "org.springframework", name: "spring-context"
+	compile group: "org.springframework", name: "spring-core"
+	compile group: "org.springframework", name: "spring-expression"
+	compile group: "org.springframework", name: "spring-jcl"
+	compile group: "org.springframework", name: "spring-web"
+	compile group: "org.springframework", name: "spring-webmvc"
+	compile group: "org.springframework.security", name: "spring-security-config"
+	compile group: "org.springframework.security", name: "spring-security-core"
+	compile group: "org.springframework.security", name: "spring-security-web"
+	compile (group: "org.thymeleaf", name: "thymeleaf") {
+		exclude group: "ognl", module: "ognl"
+	}
+	compile group: "org.thymeleaf", name: "thymeleaf-spring5"
+
+	compileOnly group: "com.liferay.portal", name: "com.liferay.portal.kernel"
+	compileOnly group: "javax.portlet", name: "portlet-api"
+	compileOnly group: "javax.servlet", name: "javax.servlet-api"
+#if (${liferayVersion.startsWith("7.2")})
+	compileOnly group: "javax.validation", name: "validation-api"
+#end
+
+	runtime group: "org.slf4j", name: "slf4j-log4j12"
+#else
+	compile group: "com.liferay.portletmvc4spring", name: "com.liferay.portletmvc4spring.framework", version: "5.1.0"
+	compile group: "com.liferay.portletmvc4spring", name: "com.liferay.portletmvc4spring.security", version: "5.1.0"
+#if (${liferayVersion.startsWith("7.1")})
+	compile group: "javax.validation", name: "validation-api", version: "2.0.1.Final"
+#end
+	compile (group: "org.hibernate.validator", name: "hibernate-validator", version: "6.0.14.Final") {
+		exclude group: "javax.validation", module: "validation-api"
+	}
+	compile group: "org.slf4j", name: "slf4j-api", version: "1.7.25"
+	compile group: "org.springframework", name: "spring-aop", version: "5.1.5.RELEASE"
+	compile group: "org.springframework", name: "spring-beans", version: "5.1.5.RELEASE"
+	compile group: "org.springframework", name: "spring-context", version: "5.1.5.RELEASE"
+	compile group: "org.springframework", name: "spring-core", version: "5.1.5.RELEASE"
+	compile group: "org.springframework", name: "spring-expression", version: "5.1.5.RELEASE"
+	compile group: "org.springframework", name: "spring-jcl", version: "5.1.5.RELEASE"
+	compile group: "org.springframework", name: "spring-web", version: "5.1.5.RELEASE"
+	compile group: "org.springframework", name: "spring-webmvc", version: "5.1.5.RELEASE"
+	compile group: "org.springframework.security", name: "spring-security-config", version: "5.1.4.RELEASE"
+	compile group: "org.springframework.security", name: "spring-security-core", version: "5.1.4.RELEASE"
+	compile group: "org.springframework.security", name: "spring-security-web", version: "5.1.4.RELEASE"
+	compile (group: "org.thymeleaf", name: "thymeleaf", version: "3.0.11.RELEASE") {
+		exclude group: "ognl", module: "ognl"
+	}
+	compile group: "org.thymeleaf", name: "thymeleaf-spring5", version: "3.0.11.RELEASE"
+
+#if (${liferayVersion.startsWith("7.1")})
+	compileOnly group: "com.liferay.portal", name: "com.liferay.portal.kernel", version: "3.0.0"
+#else
+	compileOnly group: "com.liferay.portal", name: "com.liferay.portal.kernel", version: "4.2.0"
+#end
+	compileOnly group: "javax.portlet", name: "portlet-api", version: "3.0.0"
+	compileOnly group: "javax.servlet", name: "javax.servlet-api", version: "3.0.1"
+#if (${liferayVersion.startsWith("7.2")})
+	compileOnly group: "javax.validation", name: "validation-api", version: "2.0.1.Final"
+#end
+
+	runtime group: "org.slf4j", name: "slf4j-log4j12", version: "1.7.25"
+#end
+}
+#if (${projectType} != "workspace")
+
+repositories {
+	maven {
+		url "https://repository-cdn.liferay.com/nexus/content/groups/public"
+	}
+}
+#end
+
+war {
+	dependsOn buildCSS
+	exclude "**/*.scss"
+
+	filesMatching("**/.sass-cache/") {
+		it.path = it.path.replace(".sass-cache/", "")
+	}
+
+	includeEmptyDirs = false
+}

@@ -1,0 +1,9 @@
+Bundle-Description: Creates a PortletMVC4Spring JSP portlet as a WAR project.
+Bundle-Name: Liferay Project Templates PortletMVC4Spring JSP Portlet
+Bundle-SymbolicName: com.liferay.project.templates.portletmvc4spring.jsp.portlet
+Bundle-Version: 1.0.28
+Liferay-Versions: [7.1,8)
+-removeheaders:\
+	Import-Package,\
+	Private-Package,\
+	Require-Capability
