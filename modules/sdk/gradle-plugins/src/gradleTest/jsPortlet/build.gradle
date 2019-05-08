@@ -1,0 +1,15 @@
+apply plugin: "com.liferay.frontend.plugin"
+
+task runGradleTest
+
+runGradleTest {
+	dependsOn build
+
+	doLast {
+		assert file("dist/jsPortlet-1.2.3.jar").exists()
+
+		assert node.nodeVersion == "10.15.3"
+		
+		assert node.npmVersion == "6.4.1"
+	}
+}
