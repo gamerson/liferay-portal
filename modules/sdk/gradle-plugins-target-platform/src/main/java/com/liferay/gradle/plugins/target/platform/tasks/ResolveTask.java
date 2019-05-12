@@ -28,7 +28,9 @@ import aQute.service.reporter.Report;
 import biz.aQute.resolve.Bndrun;
 import biz.aQute.resolve.ResolveProcess;
 
+import com.liferay.gradle.plugins.extensions.BundleExtension;
 import com.liferay.gradle.plugins.target.platform.internal.util.GradleUtil;
+import com.liferay.gradle.plugins.util.BndBuilderUtil;
 
 import java.io.File;
 
@@ -106,6 +108,15 @@ public class ResolveTask extends DefaultTask {
 		File bndrunFile = getBndrunFile();
 		File temporaryDir = getTemporaryDir();
 
+		BundleExtension bundleExtension = BndBuilderUtil.getInstructions(
+			project);
+
+		if (!bundleExtension.containsKey(Constants.BUNDLE_SYMBOLICNAME)) {
+			logger.info("Skipping {} because it is not a bundle", this);
+
+			return;
+		}
+
 		try (Bndrun bndrun = Bndrun.createBndrun(null, bndrunFile)) {
 			Workspace workspace = bndrun.getWorkspace();
 			bndrun.setBase(temporaryDir);
@@ -149,7 +160,8 @@ public class ResolveTask extends DefaultTask {
 
 				gradleProperties.put("project", project);
 
-				String distroReference = getDistroFile().getAbsolutePath() + ";version=file";
+				String distroReference =
+					getDistroFile().getAbsolutePath() + ";version=file";
 
 				gradleProperties.put("targetPlatformDistro", distroReference);
 
@@ -177,6 +189,7 @@ public class ResolveTask extends DefaultTask {
 			}
 			catch (ResolutionException re) {
 				logger.error(ResolveProcess.format(re, isReportOptional()));
+
 				throw new GradleException(
 					bndrun.getPropertiesFile() + " resolution exception", re);
 			}
@@ -243,13 +256,7 @@ public class ResolveTask extends DefaultTask {
 		}
 	}
 
-	private Object _bndrunFile;
-	private FileCollection _distroFileCollection;
-	private Object _failOnChanges = Boolean.FALSE;
-	private Object _offline;
-	private Object _reportOptional = Boolean.TRUE;
-
-	private Converter<List<String>, Collection<? extends HeaderClause>>
+	private static Converter<List<String>, Collection<? extends HeaderClause>>
 		_runbundlesFormatter =
 			new Converter<List<String>, Collection<? extends HeaderClause>>() {
 
@@ -273,14 +280,20 @@ public class ResolveTask extends DefaultTask {
 
 			};
 
-	static class ProcessorWrapper extends Processor {
+	private Object _bndrunFile;
+	private FileCollection _distroFileCollection;
+	private Object _failOnChanges = Boolean.FALSE;
+	private Object _offline;
+	private Object _reportOptional = Boolean.TRUE;
+
+	private static class ProcessorWrapper extends Processor {
+
+		public ProcessorWrapper(Properties properties) {
+			_internalProperties = properties;
+		}
 
 		public Properties getProperties() {
 			return _internalProperties;
-		}
-
-		ProcessorWrapper(Properties properties) {
-			_internalProperties = properties;
 		}
 
 		private final Properties _internalProperties;
