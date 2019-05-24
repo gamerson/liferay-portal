@@ -100,7 +100,7 @@
 					</execution>
 				</executions>
 				<configuration>
-					<docrootDirName>src/main/webapp</docrootDirName>
+					<baseDir>src/main/webapp</baseDir>
 					<outputDirName>${project.build.directory}/compiledCss/</outputDirName>
 					<precision>9</precision>
 				</configuration>

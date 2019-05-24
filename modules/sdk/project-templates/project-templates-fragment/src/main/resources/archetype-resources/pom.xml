@@ -27,7 +27,7 @@
 					</execution>
 				</executions>
 				<configuration>
-					<docrootDirName>src/main/resources</docrootDirName>
+					<baseDir>src/main/resources</baseDir>
 				</configuration>
 			</plugin>
 			<plugin>

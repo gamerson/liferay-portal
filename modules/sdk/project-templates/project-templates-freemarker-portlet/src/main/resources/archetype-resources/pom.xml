@@ -166,7 +166,7 @@
 					</execution>
 				</executions>
 				<configuration>
-					<docrootDirName>src/main/resources/META-INF/resources</docrootDirName>
+					<baseDir>src/main/resources/META-INF/resources</baseDir>
 				</configuration>
 			</plugin>
 		</plugins>
