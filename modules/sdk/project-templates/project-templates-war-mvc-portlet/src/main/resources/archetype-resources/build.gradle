@@ -35,7 +35,16 @@ dependencies {
 #end
 	compileOnly group: "javax.servlet", name: "javax.servlet-api", version: "3.0.1"
 #end
-}
+
+	cssBuilder group: "com.liferay", name: "com.liferay.css.builder", version: "@com.liferay.css.builder.version@"
+
+#if (${liferayVersion.startsWith("7.0")})
+	portalCommonCSS group: "com.liferay", name: "com.liferay.frontend.css.common", version: "2.0.3"
+#elseif (${liferayVersion.startsWith("7.1")})
+	portalCommonCSS group: "com.liferay", name: "com.liferay.frontend.css.common", version: "3.0.1"
+#elseif (${liferayVersion.startsWith("7.2")})
+	portalCommonCSS group: "com.liferay", name: "com.liferay.frontend.css.common", version: "4.0.0"
+#end}
 
 war {
 	dependsOn buildCSS
