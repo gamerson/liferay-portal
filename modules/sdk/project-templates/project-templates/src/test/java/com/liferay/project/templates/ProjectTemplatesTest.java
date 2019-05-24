@@ -3415,7 +3415,6 @@ public class ProjectTemplatesTest {
 		_buildProjects(gradleProjectDir, mavenProjectDir);
 	}
 
-	@Ignore
 	@Test
 	public void testBuildTemplateTheme72() throws Exception {
 		File gradleProjectDir = _buildTemplateWithGradle(
@@ -3558,7 +3557,6 @@ public class ProjectTemplatesTest {
 			"build/libs/my.contributor-1.0.0.jar");
 	}
 
-	@Ignore
 	@Test
 	public void testBuildTemplateThemeInWorkspace() throws Exception {
 		File gradleProjectDir = _buildTemplateWithGradle("theme", "theme-test");
