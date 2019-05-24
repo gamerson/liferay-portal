@@ -5964,7 +5964,8 @@ public class ProjectTemplatesTest {
 
 		_testContains(
 			gradleProjectDir, "build.gradle", "buildscript {",
-			"apply plugin: \"war\"", "repositories {");
+			"apply plugin: \"war\"", "repositories {","cssBuilder group",
+			"portalCommonCSS group");
 
 		File workspaceDir = _buildWorkspace();
 
@@ -5972,6 +5973,9 @@ public class ProjectTemplatesTest {
 
 		File workspaceProjectDir = _buildTemplateWithGradle(
 			warsDir, template, name);
+
+		_testContains(workspaceProjectDir, "build.gradle", "cssBuilder group",
+			"portalCommonCSS group");
 
 		_testNotContains(
 			workspaceProjectDir, "build.gradle", "apply plugin: \"war\"");
