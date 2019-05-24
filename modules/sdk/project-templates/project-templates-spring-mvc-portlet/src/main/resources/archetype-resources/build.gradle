@@ -15,7 +15,7 @@ apply plugin: "com.liferay.css.builder"
 apply plugin: "war"
 #end
 
-dependencies {	
+dependencies {
 	compile group: "org.springframework", name: "spring-webmvc-portlet", version: "4.1.9.RELEASE"
 #if (${dependencyManagementEnabled} == "true")
 	compileOnly group: "com.liferay.portal", name: "com.liferay.portal.kernel"
