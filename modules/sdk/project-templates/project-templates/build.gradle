@@ -1,6 +1,9 @@
 import com.liferay.gradle.util.FileUtil
 import com.liferay.gradle.util.copy.StripPathSegmentsAction
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import org.gradle.execution.ProjectConfigurer
 import org.gradle.util.GUtil
 
@@ -59,12 +62,12 @@ configurations {
 }
 
 repositories {
-    File m2Dir = new File("System.properties['maven.repo.local']")
+	String mavenRepoString = System.getProperty("maven.repo.local");
 
-	File tmpMavenRepositoryDir = new File(m2Dir.getParentFile(), ".m2-tmp")
+	Path m2tmpPath = Paths.get(mavenRepoString + "-tmp");
 
     maven {
-        url tmpMavenRepositoryDir
+        url m2tmpPath.toFile()
     }
 }
 
