@@ -23,6 +23,21 @@ Set<Project> projectTemplateProjects = project.parent.subprojects.findAll {
 
 ProjectConfigurer projectConfigurer = gradle.services.get(ProjectConfigurer)
 
+File dir = rootProject.projectDir
+File mavenRepositoryDir = null
+File tmpMavenRepositoryDir = null
+
+while (dir != null) {
+	mavenRepositoryDir = new File(dir, ".m2")
+	tmpMavenRepositoryDir = new File(dir, ".m2-tmp")
+
+	if (mavenRepositoryDir.exists() && tmpMavenRepositoryDir.exists()) {
+		break;
+	}
+
+	dir = dir.getParentFile();
+}
+
 bundle {
 	includeTransitiveDependencies = true
 }
@@ -59,13 +74,13 @@ configurations {
 }
 
 repositories {
-    File m2Dir = new File("System.properties['maven.repo.local']")
+	maven {
+		url tmpMavenRepositoryDir
+	}
 
-    File tmpMavenRepositoryDir = new File(m2Dir, "-tmp")
-
-    maven {
-        url tmpMavenRepositoryDir
-    }
+	maven {
+		url mavenRepositoryDir
+	}
 }
 
 dependencies {
@@ -176,7 +191,7 @@ test {
 	systemProperty "http.proxyHost", System.properties["http.proxyHost"]
 	systemProperty "http.proxyPort", System.properties["http.proxyPort"]
 	systemProperty "maven.debug", System.properties["maven.debug"]
-	systemProperty "maven.repo.local", System.properties["maven.repo.local"]
+	systemProperty "maven.repo.local", tmpMavenRepositoryDir.absolutePath
 	systemProperty "nodejs.npm.ci.registry", project.findProperty("nodejs.npm.ci.registry")
 	systemProperty "nodejs.npm.ci.sass.binary.site", project.findProperty("nodejs.npm.ci.sass.binary.site")
 	systemProperty "project.templates.test.builds", project.findProperty("project.templates.test.builds")
