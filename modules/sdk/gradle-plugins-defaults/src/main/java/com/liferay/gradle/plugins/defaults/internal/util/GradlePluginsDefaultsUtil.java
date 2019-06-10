@@ -22,6 +22,7 @@ import java.io.File;
 
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -142,9 +143,9 @@ public class GradlePluginsDefaultsUtil {
 	}
 
 	public static Set<String> getBuildProfileFileNames(
-		String buildProfile, boolean publicBranch) {
+		String[] buildProfiles, boolean publicBranch) {
 
-		if (Validator.isNull(buildProfile)) {
+		if (Objects.isNull(buildProfiles) || buildProfiles.length == 0) {
 			return null;
 		}
 
@@ -156,14 +157,18 @@ public class GradlePluginsDefaultsUtil {
 
 		Set<String> fileNames = new HashSet<>();
 
-		fileNames.add(
-			_BUILD_PROFILE_FILE_NAME_PREFIX + buildProfile + "-" + suffix);
-		fileNames.add(_BUILD_PROFILE_FILE_NAME_PREFIX + buildProfile);
-
-		if (buildProfile.equals("portal-deprecated")) {
-			fileNames.add(_BUILD_PROFILE_FILE_NAME_PREFIX + "portal-" + suffix);
-			fileNames.add(_BUILD_PROFILE_FILE_NAME_PREFIX + "portal");
+		for (String buildProfile : buildProfiles) {
+			fileNames.add(
+				_BUILD_PROFILE_FILE_NAME_PREFIX + buildProfile + "-" + suffix);
+			fileNames.add(_BUILD_PROFILE_FILE_NAME_PREFIX + buildProfile);
+	
+			if (buildProfile.equals("portal-deprecated")) {
+				fileNames.add(_BUILD_PROFILE_FILE_NAME_PREFIX + "portal-" + suffix);
+				fileNames.add(_BUILD_PROFILE_FILE_NAME_PREFIX + "portal");
+			}
 		}
+
+		fileNames.add(_BUILD_PROFILE_FILE_NAME_PREFIX + "profiles");
 
 		return fileNames;
 	}

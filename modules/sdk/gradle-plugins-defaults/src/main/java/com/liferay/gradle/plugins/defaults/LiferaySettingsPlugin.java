@@ -26,11 +26,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Scanner;
 import java.util.Set;
 
 import org.gradle.api.Plugin;
@@ -169,9 +169,20 @@ public class LiferaySettingsPlugin implements Plugin<Settings> {
 			final String projectPathPrefix)
 		throws IOException {
 
+		final String buildProfileProperty = System.getProperty("build.profile");
+		
+		final String buildProfileNames[];
+		
+		if (buildProfileProperty == null) {
+			buildProfileNames = null;
+		}
+		else {
+			buildProfileNames = buildProfileProperty.split(",");
+		}
+		
 		final Set<String> buildProfileFileNames =
 			GradlePluginsDefaultsUtil.getBuildProfileFileNames(
-				System.getProperty("build.profile"),
+				buildProfileNames,
 				GradleUtil.getProperty(
 					settings, "liferay.releng.public", true));
 		final Set<Path> excludedDirPaths = _getDirPaths(
@@ -226,10 +237,18 @@ public class LiferaySettingsPlugin implements Plugin<Settings> {
 						boolean found = false;
 
 						for (String fileName : buildProfileFileNames) {
-							if (Files.exists(dirPath.resolve(fileName))) {
-								found = true;
-
-								break;
+							Path buildProfilePath = dirPath.resolve(fileName);
+							if (Files.exists(buildProfilePath)) {
+								if (fileName.equals(".lfrbuild-profiles") && (buildProfileNames != null)) {
+									found = _checkLfrFile(buildProfileNames, buildProfilePath);
+								}
+								else {
+									found = true;
+								}
+								
+								if (found) {
+									break;
+								}
 							}
 						}
 
@@ -245,7 +264,52 @@ public class LiferaySettingsPlugin implements Plugin<Settings> {
 					return FileVisitResult.SKIP_SUBTREE;
 				}
 
+
+
 			});
+	}
+	private static boolean _checkLfrFile(final String[] buildProfileNames, Path buildProfilePath) {
+		boolean found = false;
+		try (Scanner scanner = new Scanner(buildProfilePath)) {
+			while (scanner.hasNext()) {
+			    String line = scanner.next();
+			    
+			    if (_checkProfile(buildProfileNames, line)) {
+			    	found = true;
+			    	
+			    	break;
+			    }
+			}
+
+		} catch (IOException e) {
+		}
+		return found;
+	}
+	private static boolean _checkProfile(String[] profileNames, String line) {
+		boolean found = false;
+		
+	    for (String buildProfileName : profileNames) {
+	    	if (buildProfileName.contains(":") && line.endsWith(buildProfileName)) {
+    			found = true;
+	    	}
+	    	else if (line.equals(buildProfileName)) {
+				found = true;
+		    }
+	    	else
+	    	{
+	    		boolean lineContainsColon = line.contains(":");
+	    		if (lineContainsColon) {
+	    			String[] lineSplit = line.split(":");
+	    			found = lineSplit[lineSplit.length - 1].equals(buildProfileName) ||
+	    					(lineSplit[lineSplit.length - 1] + ":").equals(":" + buildProfileName);
+	    		}
+	    	}
+	    	if (found) {
+	    		break;
+	    	}
+		}
+	    
+	    return found;
 	}
 
 	private boolean _isPortalRootDirPath(Path dirPath) {

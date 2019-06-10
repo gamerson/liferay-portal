@@ -27,9 +27,13 @@ import org.gradle.api.Action;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
+import org.gradle.api.UnknownTaskException;
+import org.gradle.api.logging.Logger;
+import org.gradle.api.tasks.TaskContainer;
 
 /**
  * @author Andrea Di Giorgi
+ * @author Christopher Bryan Boyd
  * @author Gregory Amerson
  */
 public class LiferayBaseDefaultsPlugin
@@ -42,10 +46,28 @@ public class LiferayBaseDefaultsPlugin
 	public void apply(Project project) {
 		super.apply(project);
 
+		Logger logger = project.getLogger();
+		
+		Project parentProject = project.getParent();
+		
+		TaskContainer taskContainer = parentProject.getTasks();
+		
+		if (taskContainer.findByPath(parentProject.getPath() + ":cleanBuildProfile") == null) {
+			taskContainer.create("cleanBuildProfile", CleanBuildProfileTask.class);
+		}
+		if (taskContainer.findByPath(parentProject.getPath() + ":setBuildProfile") == null) {
+			taskContainer.create("setBuildProfile", SetBuildProfileTask.class);
+		}
 		GradleUtil.addTask(
 			project, "cleanBuildProfile", CleanBuildProfileTask.class);
+		
+		logger.lifecycle("Adding task " + project.getPath() + ":cleanBuildProfile");
+
 		GradleUtil.addTask(
 			project, "setBuildProfile", SetBuildProfileTask.class);
+		
+
+		logger.lifecycle("Adding task " + project.getPath() + ":setBuildProfile");
 	}
 
 	@Override
@@ -73,11 +95,21 @@ public class LiferayBaseDefaultsPlugin
 	}
 
 	private void _configureBuildProfileTasks(Project project) {
-		Task cleanBuildProfile = GradleUtil.getTask(
-			project, "cleanBuildProfile");
-		Task setBuildProfile = GradleUtil.getTask(project, "setBuildProfile");
-
-		setBuildProfile.dependsOn(cleanBuildProfile);
+		try {
+			String cleanBuildProfileTaskName = "cleanBuildProfile";
+			String setBuildProfileTaskName = "setBuildProfile";
+			
+			TaskContainer taskContainer = project.getTasks();
+			
+			Task cleanBuildProfile = taskContainer.getByPath(project.getPath() + ":" + cleanBuildProfileTaskName);
+			
+			Task setBuildProfile = taskContainer.getByPath(project.getPath() + ":" + setBuildProfileTaskName);
+	
+			setBuildProfile.dependsOn(cleanBuildProfile);
+		}
+		catch (UnknownTaskException e) {
+			
+		}
 	}
 
 	private void _configureLiferayDeployDir(Project project) {

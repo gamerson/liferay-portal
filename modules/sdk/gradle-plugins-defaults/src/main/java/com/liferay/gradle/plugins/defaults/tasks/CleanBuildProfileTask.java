@@ -15,34 +15,75 @@
 package com.liferay.gradle.plugins.defaults.tasks;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
-
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
-
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Scanner;
+import java.util.Set;
 
 import org.gradle.api.DefaultTask;
+import org.gradle.api.DomainObjectSet;
 import org.gradle.api.GradleException;
 import org.gradle.api.Project;
+import org.gradle.api.artifacts.ConfigurationContainer;
+import org.gradle.api.artifacts.DependencySet;
+import org.gradle.api.artifacts.ProjectDependency;
+import org.gradle.api.artifacts.ResolvedConfiguration;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.tasks.TaskAction;
 
+import static com.liferay.gradle.plugins.defaults.tasks.SetBuildProfileTask.*;
+
 /**
+ * @author Christopher Bryan Boyd
  * @author Gregory Amerson
  */
 public class CleanBuildProfileTask extends DefaultTask {
 
+	private Project getSourceProject() {
+		String sourceProjectName = System.getProperty(_SOURCE_PROJECT_PATH_KEY);
+		
+		Project currentProject = getProject();
+		Project foundProject = null;
+		if (sourceProjectName == null) {
+			
+			Collection<Project> allProjects = currentProject.getRootProject().getAllprojects();
+			
+			
+			for (Project subProject : allProjects) {
+				
+				Path subProjectPath = subProject.getProjectDir().toPath();
+				if (subProjectPath.equals(_CURRENT_WORKING_PATH)) {
+					foundProject = subProject;
+					break;
+				}
+			}
+			if (foundProject != null) {
+				System.setProperty(_SOURCE_PROJECT_PATH_KEY, foundProject.getPath());
+			}
+		}
+		else {
+			foundProject = currentProject.findProject(sourceProjectName);
+		}
+		return foundProject;
+	}
+	
 	@TaskAction
 	public void cleanBuildProfile() throws Exception {
 		Project project = getProject();
+		
+		Project sourceProject = getSourceProject();
+		
+		String profileName 
+		= sourceProject.getPath();
 
-		String profileName = project.getName();
-
-		Map<String, ?> properties = project.getProperties();
+		Map<String, ?> properties = sourceProject.getProperties();
 
 		Object value = properties.get("profileName");
 
@@ -54,57 +95,110 @@ public class CleanBuildProfileTask extends DefaultTask {
 
 		logger.lifecycle("Cleaning build profile name: {}", profileName);
 
-		_cleanBuildProfile(profileName);
-	}
+		Set<Project> projectDependencies = _getProjectDependencies(project);
 
-	private void _cleanBuildProfile(String profileName) {
-		Logger logger = getLogger();
+		for (Project projectDependency : projectDependencies) {
+			File lfrBuildFile = new File(projectDependency.getProjectDir(), ".lfrbuild-profiles");
+			
+			try {
 
-		Project project = getProject();
-
-		Project rootProject = project.getRootProject();
-
-		File rootProjectDir = rootProject.getProjectDir();
-
-		try {
-			Files.walkFileTree(
-				rootProjectDir.toPath(),
-				new SimpleFileVisitor<Path>() {
-
-					@Override
-					public FileVisitResult preVisitDirectory(
-							Path path, BasicFileAttributes baseFileAttributes)
-						throws IOException {
-
-						Path buildProfilePath = path.resolve(
-							".lfrbuild-" + profileName);
-
-						if (Files.exists(buildProfilePath)) {
-							Files.delete(buildProfilePath);
-
-							logger.lifecycle("Cleaned {}", buildProfilePath);
-
-							return FileVisitResult.SKIP_SUBTREE;
-						}
-
-						if (Files.exists(path.resolve("bnd.bnd")) ||
-							Files.exists(path.resolve("build")) ||
-							Files.exists(path.resolve("build.xml")) ||
-							Files.exists(path.resolve("gulpfile.js")) ||
-							Files.exists(path.resolve("node_modules")) ||
-							Files.exists(path.resolve("node_modules_cache"))) {
-
-							return FileVisitResult.SKIP_SUBTREE;
-						}
-
-						return FileVisitResult.CONTINUE;
-					}
-
-				});
-		}
-		catch (IOException ioe) {
-			throw new GradleException("Error deleting build profile", ioe);
+				_processBuildFile(profileName, logger, lfrBuildFile);
+			} 
+			catch (IOException ioe) {
+				throw new GradleException(
+					"Error cleaning build profile " + profileName + " in " +
+						lfrBuildFile.getAbsolutePath(),
+					ioe);
+			}
 		}
 	}
+
+	private void _processBuildFile(String profileName, Logger logger, File lfrBuildFile)
+			throws FileNotFoundException, IOException {
+		ArrayList<String> list = new ArrayList<String>();
+		if (lfrBuildFile.exists()) {
+
+			logger.lifecycle("Removing " + profileName + " from {}", lfrBuildFile);
+			try (Scanner s = new Scanner(lfrBuildFile)) {
+				while (s.hasNext()){
+					String foundProfileName = s.next();
+
+					list.add(foundProfileName);
+				}
+			}
+		}
+		
+		if (list.contains(profileName)) {
+			list.remove(profileName);
+			lfrBuildFile.delete();
+			
+			try (FileWriter fw = new FileWriter(lfrBuildFile)) {
+			
+				for (String foundProfileName : list) {
+					fw.write(foundProfileName + System.lineSeparator());
+				}
+			}
+		}
+		else if (list.isEmpty()) {
+
+			logger.lifecycle("Deleting {}", lfrBuildFile.getAbsolutePath());
+
+			lfrBuildFile.delete();
+		}
+	}
+
+	private Set<Project> _getProjectDependencies(Project project) {
+		Set<Project> projects = new LinkedHashSet<>();
+
+		projects.add(project);
+		
+		Set<ConfigurationContainer> configurationContainers = new HashSet<>();
+
+		for (Project childProject: project.getChildProjects().values()) {
+			projects.add(childProject);
+			
+			configurationContainers.add(childProject.getConfigurations());
+		}
+
+		ConfigurationContainer configurationContainer =
+			project.getConfigurations();
+		
+
+		configurationContainers.add(configurationContainer);
+		
+		configurationContainers.stream()
+		.flatMap(
+			Set::stream
+		).forEach(
+			c -> {
+				DependencySet dependencySet = c.getDependencies();
+
+				DomainObjectSet<ProjectDependency> projectDependencies =
+					dependencySet.withType(ProjectDependency.class);
+
+				if (!projectDependencies.isEmpty()) {
+					ResolvedConfiguration rc = c.getResolvedConfiguration();
+
+					rc.getFirstLevelModuleDependencies();
+
+					projectDependencies.stream(
+					).map(
+						ProjectDependency::getDependencyProject
+					).flatMap(
+						pd -> {
+							Set<Project> pds = _getProjectDependencies(pd);
+
+							return pds.stream();
+						}
+					).forEach(
+						projects::add
+					);
+				}
+			}
+		);
+
+		return projects;
+	}
+
 
 }
