@@ -84,7 +84,7 @@ public class GradlePluginsDefaultsUtilTest {
 		Assert.assertEquals(
 			expectedFileNamesSet,
 			GradlePluginsDefaultsUtil.getBuildProfileFileNames(
-				new String[] { buildProfile }, publicBranch));
+				new String[] {buildProfile}, publicBranch));
 	}
 
 }

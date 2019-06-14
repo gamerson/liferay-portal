@@ -18,14 +18,18 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
+
 import org.gradle.api.DefaultTask;
 import org.gradle.api.DomainObjectSet;
 import org.gradle.api.GradleException;
@@ -44,109 +48,91 @@ import org.gradle.api.tasks.TaskAction;
  */
 public class SetBuildProfileTask extends DefaultTask {
 
-	public static final String LFRBUILD_PROFILES_FILENAME = ".lfrbuild-profiles";
-
 	public static final String BUILD_PROFILE_KEY = "build.profile";
 
-	public static final String _SOURCE_PROJECT_PATH_KEY = "source.project.path";
+	public static final Path CURRENT_WORKING_PATH = Paths.get(
+		System.getProperty("user.dir"));
 
-	public static final Path _CURRENT_WORKING_PATH = Paths.get(System.getProperty("user.dir"));
+	public static final String LFRBUILD_PROFILES_FILENAME =
+		".lfrbuild-profiles";
 
-	private Project getSourceProject() {
-		String sourceProjectName = System.getProperty(_SOURCE_PROJECT_PATH_KEY);
-		
-		Project currentProject = getProject();
-		Project foundProject = null;
-		if (sourceProjectName == null) {
-			
-			Collection<Project> allProjects = currentProject.getRootProject().getAllprojects();
-			
-			
-			for (Project subProject : allProjects) {
-				
-				Path subProjectPath = subProject.getProjectDir().toPath();
-				if (subProjectPath.equals(_CURRENT_WORKING_PATH)) {
-					foundProject = subProject;
-					break;
-				}
-			}
-			if (foundProject != null) {
-				System.setProperty(_SOURCE_PROJECT_PATH_KEY, foundProject.getPath());
-			}
-		}
-		else {
-			foundProject = currentProject.findProject(sourceProjectName);
-		}
-		return foundProject;
-	}
-	
+	public static final String SOURCE_PROJECT_PATH_KEY = "source.project.path";
+
 	@TaskAction
 	public void setBuildProfile() throws Exception {
-		
 		Project project = getProject();
-		
-		Project sourceProject = getSourceProject();
-		
+
+		Project sourceProject = _getSourceProject();
 
 		String profileName = System.getProperty(BUILD_PROFILE_KEY);
-		
+
 		if (profileName == null) {
 			profileName = sourceProject.getPath();
-			
+
 			System.setProperty(BUILD_PROFILE_KEY, profileName);
 		}
 
 		Logger logger = getLogger();
 
 		logger.lifecycle("Setting build profile name: {}", profileName);
-		
-		Collection<Project> projectDependencies = _getProjectDependencies(project);
+
+		Collection<Project> projectDependencies = _getProjectDependencies(
+			project);
 
 		for (Project projectDependency : projectDependencies) {
-			File lfrBuildFile = new File(projectDependency.getProjectDir(), LFRBUILD_PROFILES_FILENAME);
-			
-			try {
+			File lfrBuildFile = new File(
+				projectDependency.getProjectDir(), LFRBUILD_PROFILES_FILENAME);
 
+			try {
 				_processBuildFile(profileName, logger, lfrBuildFile);
-			 
-			} catch (IOException ioe) {
+			}
+			catch (IOException ioe) {
 				throw new GradleException(
 					"Unable to create build profile custom marker:" +
 						lfrBuildFile.getAbsolutePath(),
 					ioe);
 			}
 		}
-		
-		logger.lifecycle("Build profile " + profileName + " created successfully.");
-		logger.lifecycle("To import or use this profile, please use the following argument: ");
-		logger.lifecycle("-Dbuild.profile="+profileName);
+
+		StringBuilder sb = new StringBuilder();
+
+		sb.append("Build profile " + profileName + " created successfully.");
+		sb.append(System.lineSeparator());
+		sb.append("To import or use this profile, ");
+		sb.append("please use the following argument: ");
+		sb.append(System.lineSeparator());
+		sb.append("-Dbuild.profile=" + profileName);
+
+		String message = sb.toString();
+
+		logger.lifecycle(message);
 	}
 
-	private static void _processBuildFile(String profileName, Logger logger, File lfrBuildFile)
-			throws FileNotFoundException, IOException {
-		
-		ArrayList<String> list = new ArrayList<String>();
-		
+	private static void _processBuildFile(
+			String profileName, Logger logger, File lfrBuildFile)
+		throws FileNotFoundException, IOException {
+
+		ArrayList<String> list = new ArrayList<>();
+
 		list.add(profileName);
-		
+
 		if (lfrBuildFile.exists()) {
-
 			logger.lifecycle("Reading {}", lfrBuildFile);
-			try (Scanner s = new Scanner(lfrBuildFile)) {
-				while (s.hasNext()){
-					String foundProfileName = s.next();
-					if (!list.contains(foundProfileName)) {
 
-					    list.add(foundProfileName);
+			try (Scanner s = new Scanner(lfrBuildFile)) {
+				while (s.hasNext()) {
+					String foundProfileName = s.next();
+
+					if (!list.contains(foundProfileName)) {
+						list.add(foundProfileName);
 					}
 				}
 			}
+
 			lfrBuildFile.delete();
 		}
-		
-		
+
 		try (FileWriter fw = new FileWriter(lfrBuildFile)) {
-		 
 			for (String foundProfileName : list) {
 				fw.write(foundProfileName + System.lineSeparator());
 			}
@@ -157,23 +143,24 @@ public class SetBuildProfileTask extends DefaultTask {
 		Collection<Project> projects = new LinkedHashSet<>();
 
 		projects.add(project);
-		
+
 		Set<ConfigurationContainer> configurationContainers = new HashSet<>();
 
-		for (Project childProject: project.getChildProjects().values()) {
+		Map<String, Project> childProjects = project.getChildProjects();
+
+		for (Project childProject : childProjects.values()) {
 			projects.add(childProject);
-			
+
 			configurationContainers.add(childProject.getConfigurations());
 		}
 
 		ConfigurationContainer configurationContainer =
 			project.getConfigurations();
-		
 
 		configurationContainers.add(configurationContainer);
-		
-		configurationContainers.stream()
-		.flatMap(
+
+		configurationContainers.stream(
+		).flatMap(
 			Set::stream
 		).forEach(
 			c -> {
@@ -184,7 +171,44 @@ public class SetBuildProfileTask extends DefaultTask {
 		return projects;
 	}
 
-	private void _processConfiguration(Collection<Project> projects, Configuration c) {
+	private Project _getSourceProject() {
+		String sourceProjectName = System.getProperty(SOURCE_PROJECT_PATH_KEY);
+
+		Project currentProject = getProject();
+		Project foundProject = null;
+
+		if (sourceProjectName == null) {
+			Project rootProject = currentProject.getRootProject();
+
+			Collection<Project> allProjects = rootProject.getAllprojects();
+
+			for (Project subproject : allProjects) {
+				File subprojectFile = subproject.getProjectDir();
+
+				Path subprojectPath = subprojectFile.toPath();
+
+				if (subprojectPath.equals(CURRENT_WORKING_PATH)) {
+					foundProject = subproject;
+
+					break;
+				}
+			}
+
+			if (foundProject != null) {
+				System.setProperty(
+					SOURCE_PROJECT_PATH_KEY, foundProject.getPath());
+			}
+		}
+		else {
+			foundProject = currentProject.findProject(sourceProjectName);
+		}
+
+		return foundProject;
+	}
+
+	private void _processConfiguration(
+		Collection<Project> projects, Configuration c) {
+
 		DependencySet dependencySet = c.getDependencies();
 
 		DomainObjectSet<ProjectDependency> projectDependencies =

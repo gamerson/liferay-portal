@@ -18,7 +18,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+
 import java.nio.file.Path;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -38,50 +40,19 @@ import org.gradle.api.artifacts.ResolvedConfiguration;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.tasks.TaskAction;
 
-import static com.liferay.gradle.plugins.defaults.tasks.SetBuildProfileTask.*;
-
 /**
  * @author Christopher Bryan Boyd
  * @author Gregory Amerson
  */
 public class CleanBuildProfileTask extends DefaultTask {
 
-	private Project getSourceProject() {
-		String sourceProjectName = System.getProperty(_SOURCE_PROJECT_PATH_KEY);
-		
-		Project currentProject = getProject();
-		Project foundProject = null;
-		if (sourceProjectName == null) {
-			
-			Collection<Project> allProjects = currentProject.getRootProject().getAllprojects();
-			
-			
-			for (Project subProject : allProjects) {
-				
-				Path subProjectPath = subProject.getProjectDir().toPath();
-				if (subProjectPath.equals(_CURRENT_WORKING_PATH)) {
-					foundProject = subProject;
-					break;
-				}
-			}
-			if (foundProject != null) {
-				System.setProperty(_SOURCE_PROJECT_PATH_KEY, foundProject.getPath());
-			}
-		}
-		else {
-			foundProject = currentProject.findProject(sourceProjectName);
-		}
-		return foundProject;
-	}
-	
 	@TaskAction
 	public void cleanBuildProfile() throws Exception {
 		Project project = getProject();
-		
-		Project sourceProject = getSourceProject();
-		
-		String profileName 
-		= sourceProject.getPath();
+
+		Project sourceProject = _getSourceProject();
+
+		String profileName = sourceProject.getPath();
 
 		Map<String, ?> properties = sourceProject.getProperties();
 
@@ -98,52 +69,24 @@ public class CleanBuildProfileTask extends DefaultTask {
 		Set<Project> projectDependencies = _getProjectDependencies(project);
 
 		for (Project projectDependency : projectDependencies) {
-			File lfrBuildFile = new File(projectDependency.getProjectDir(), ".lfrbuild-profiles");
-			
+			File lfrBuildFile = new File(
+				projectDependency.getProjectDir(), ".lfrbuild-profiles");
+
 			try {
-
 				_processBuildFile(profileName, logger, lfrBuildFile);
-			} 
+			}
 			catch (IOException ioe) {
-				throw new GradleException(
-					"Error cleaning build profile " + profileName + " in " +
-						lfrBuildFile.getAbsolutePath(),
-					ioe);
+				StringBuilder sb = new StringBuilder();
+
+				sb.append("Error cleaning build profile ");
+				sb.append(profileName);
+				sb.append(" in ");
+				sb.append(lfrBuildFile.getAbsolutePath());
+
+				String message = sb.toString();
+
+				throw new GradleException(message, ioe);
 			}
-		}
-	}
-
-	private void _processBuildFile(String profileName, Logger logger, File lfrBuildFile)
-			throws FileNotFoundException, IOException {
-		ArrayList<String> list = new ArrayList<String>();
-		if (lfrBuildFile.exists()) {
-
-			logger.lifecycle("Removing " + profileName + " from {}", lfrBuildFile);
-			try (Scanner s = new Scanner(lfrBuildFile)) {
-				while (s.hasNext()){
-					String foundProfileName = s.next();
-
-					list.add(foundProfileName);
-				}
-			}
-		}
-		
-		if (list.contains(profileName)) {
-			list.remove(profileName);
-			lfrBuildFile.delete();
-			
-			try (FileWriter fw = new FileWriter(lfrBuildFile)) {
-			
-				for (String foundProfileName : list) {
-					fw.write(foundProfileName + System.lineSeparator());
-				}
-			}
-		}
-		else if (list.isEmpty()) {
-
-			logger.lifecycle("Deleting {}", lfrBuildFile.getAbsolutePath());
-
-			lfrBuildFile.delete();
 		}
 	}
 
@@ -151,23 +94,24 @@ public class CleanBuildProfileTask extends DefaultTask {
 		Set<Project> projects = new LinkedHashSet<>();
 
 		projects.add(project);
-		
+
 		Set<ConfigurationContainer> configurationContainers = new HashSet<>();
 
-		for (Project childProject: project.getChildProjects().values()) {
+		Map<String, Project> childProjects = project.getChildProjects();
+
+		for (Project childProject : childProjects.values()) {
 			projects.add(childProject);
-			
+
 			configurationContainers.add(childProject.getConfigurations());
 		}
 
 		ConfigurationContainer configurationContainer =
 			project.getConfigurations();
-		
 
 		configurationContainers.add(configurationContainer);
-		
-		configurationContainers.stream()
-		.flatMap(
+
+		configurationContainers.stream(
+		).flatMap(
 			Set::stream
 		).forEach(
 			c -> {
@@ -200,5 +144,81 @@ public class CleanBuildProfileTask extends DefaultTask {
 		return projects;
 	}
 
+	private Project _getSourceProject() {
+		String sourceProjectName = System.getProperty(
+			SetBuildProfileTask.SOURCE_PROJECT_PATH_KEY);
+
+		Project currentProject = getProject();
+		Project foundProject = null;
+
+		if (sourceProjectName == null) {
+			Project rootProject = currentProject.getRootProject();
+
+			Collection<Project> allProjects = rootProject.getAllprojects();
+
+			for (Project subproject : allProjects) {
+				File subprojectDir = subproject.getProjectDir();
+
+				Path subprojectPath = subprojectDir.toPath();
+
+				if (subprojectPath.equals(
+						com.liferay.gradle.plugins.defaults.tasks.
+							SetBuildProfileTask.CURRENT_WORKING_PATH)) {
+
+					foundProject = subproject;
+
+					break;
+				}
+			}
+
+			if (foundProject != null) {
+				System.setProperty(
+					com.liferay.gradle.plugins.defaults.tasks.
+						SetBuildProfileTask.SOURCE_PROJECT_PATH_KEY,
+					foundProject.getPath());
+			}
+		}
+		else {
+			foundProject = currentProject.findProject(sourceProjectName);
+		}
+
+		return foundProject;
+	}
+
+	private void _processBuildFile(
+			String profileName, Logger logger, File lfrBuildFile)
+		throws FileNotFoundException, IOException {
+
+		ArrayList<String> list = new ArrayList<>();
+
+		if (lfrBuildFile.exists()) {
+			logger.lifecycle(
+				"Removing " + profileName + " from {}", lfrBuildFile);
+
+			try (Scanner s = new Scanner(lfrBuildFile)) {
+				while (s.hasNext()) {
+					String foundProfileName = s.next();
+
+					list.add(foundProfileName);
+				}
+			}
+		}
+
+		if (list.contains(profileName)) {
+			list.remove(profileName);
+			lfrBuildFile.delete();
+
+			try (FileWriter fw = new FileWriter(lfrBuildFile)) {
+				for (String foundProfileName : list) {
+					fw.write(foundProfileName + System.lineSeparator());
+				}
+			}
+		}
+		else if (list.isEmpty()) {
+			logger.lifecycle("Deleting {}", lfrBuildFile.getAbsolutePath());
+
+			lfrBuildFile.delete();
+		}
+	}
 
 }
