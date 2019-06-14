@@ -145,7 +145,7 @@ public class GradlePluginsDefaultsUtil {
 	public static Set<String> getBuildProfileFileNames(
 		String[] buildProfiles, boolean publicBranch) {
 
-		if (Objects.isNull(buildProfiles) || buildProfiles.length == 0) {
+		if (Objects.isNull(buildProfiles) || (buildProfiles.length == 0)) {
 			return null;
 		}
 
@@ -161,9 +161,10 @@ public class GradlePluginsDefaultsUtil {
 			fileNames.add(
 				_BUILD_PROFILE_FILE_NAME_PREFIX + buildProfile + "-" + suffix);
 			fileNames.add(_BUILD_PROFILE_FILE_NAME_PREFIX + buildProfile);
-	
+
 			if (buildProfile.equals("portal-deprecated")) {
-				fileNames.add(_BUILD_PROFILE_FILE_NAME_PREFIX + "portal-" + suffix);
+				fileNames.add(
+					_BUILD_PROFILE_FILE_NAME_PREFIX + "portal-" + suffix);
 				fileNames.add(_BUILD_PROFILE_FILE_NAME_PREFIX + "portal");
 			}
 		}

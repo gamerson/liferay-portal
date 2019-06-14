@@ -47,27 +47,35 @@ public class LiferayBaseDefaultsPlugin
 		super.apply(project);
 
 		Logger logger = project.getLogger();
-		
+
 		Project parentProject = project.getParent();
-		
+
 		TaskContainer taskContainer = parentProject.getTasks();
-		
-		if (taskContainer.findByPath(parentProject.getPath() + ":cleanBuildProfile") == null) {
-			taskContainer.create("cleanBuildProfile", CleanBuildProfileTask.class);
+
+		if (taskContainer.findByPath(
+				parentProject.getPath() + ":cleanBuildProfile") == null) {
+
+			taskContainer.create(
+				"cleanBuildProfile", CleanBuildProfileTask.class);
 		}
-		if (taskContainer.findByPath(parentProject.getPath() + ":setBuildProfile") == null) {
+
+		if (taskContainer.findByPath(
+				parentProject.getPath() + ":setBuildProfile") == null) {
+
 			taskContainer.create("setBuildProfile", SetBuildProfileTask.class);
 		}
+
 		GradleUtil.addTask(
 			project, "cleanBuildProfile", CleanBuildProfileTask.class);
-		
-		logger.lifecycle("Adding task " + project.getPath() + ":cleanBuildProfile");
+
+		logger.lifecycle(
+			"Adding task " + project.getPath() + ":cleanBuildProfile");
 
 		GradleUtil.addTask(
 			project, "setBuildProfile", SetBuildProfileTask.class);
-		
 
-		logger.lifecycle("Adding task " + project.getPath() + ":setBuildProfile");
+		logger.lifecycle(
+			"Adding task " + project.getPath() + ":setBuildProfile");
 	}
 
 	@Override
@@ -98,17 +106,18 @@ public class LiferayBaseDefaultsPlugin
 		try {
 			String cleanBuildProfileTaskName = "cleanBuildProfile";
 			String setBuildProfileTaskName = "setBuildProfile";
-			
+
 			TaskContainer taskContainer = project.getTasks();
-			
-			Task cleanBuildProfile = taskContainer.getByPath(project.getPath() + ":" + cleanBuildProfileTaskName);
-			
-			Task setBuildProfile = taskContainer.getByPath(project.getPath() + ":" + setBuildProfileTaskName);
-	
+
+			Task cleanBuildProfile = taskContainer.getByPath(
+				project.getPath() + ":" + cleanBuildProfileTaskName);
+
+			Task setBuildProfile = taskContainer.getByPath(
+				project.getPath() + ":" + setBuildProfileTaskName);
+
 			setBuildProfile.dependsOn(cleanBuildProfile);
 		}
-		catch (UnknownTaskException e) {
-			
+		catch (UnknownTaskException ute) {
 		}
 	}
 
