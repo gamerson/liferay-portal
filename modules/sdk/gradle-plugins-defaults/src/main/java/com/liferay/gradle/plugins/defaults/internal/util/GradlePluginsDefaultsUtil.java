@@ -39,6 +39,9 @@ import org.gradle.internal.authentication.DefaultBasicAuthentication;
  */
 public class GradlePluginsDefaultsUtil {
 
+	public static final String BUILD_PROFILE_FILE_NAME =
+		GradlePluginsDefaultsUtil._BUILD_PROFILE_FILE_NAME_PREFIX + "profiles";
+
 	public static final String DEFAULT_REPOSITORY_URL =
 		"https://repository-cdn.liferay.com/nexus/content/groups/public";
 
@@ -169,7 +172,7 @@ public class GradlePluginsDefaultsUtil {
 			}
 		}
 
-		fileNames.add(_BUILD_PROFILE_FILE_NAME_PREFIX + "profiles");
+		fileNames.add(BUILD_PROFILE_FILE_NAME);
 
 		return fileNames;
 	}

@@ -14,6 +14,8 @@
 
 package com.liferay.gradle.plugins.defaults.tasks;
 
+import com.liferay.gradle.plugins.defaults.LiferaySettingsPlugin;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -48,13 +50,16 @@ import org.gradle.api.tasks.TaskAction;
  */
 public class SetBuildProfileTask extends DefaultTask {
 
-	public static final String BUILD_PROFILE_KEY = "build.profile";
+	public static final String BUILD_PROFILE_NAME_PROP_KEY =
+		"build.profile.name";
 
 	public static final Path CURRENT_WORKING_PATH = Paths.get(
 		System.getProperty("user.dir"));
 
 	public static final String LFRBUILD_PROFILES_FILENAME =
 		".lfrbuild-profiles";
+
+	public static final String SET_BUILD_PROFILE_TASK_NAME = "setBuildProfile";
 
 	public static final String SOURCE_PROJECT_PATH_KEY = "source.project.path";
 
@@ -64,12 +69,23 @@ public class SetBuildProfileTask extends DefaultTask {
 
 		Project sourceProject = _getSourceProject();
 
-		String profileName = System.getProperty(BUILD_PROFILE_KEY);
+		String profileName = System.getProperty(BUILD_PROFILE_NAME_PROP_KEY);
 
-		if (profileName == null) {
+		if ((profileName == null) || profileName.isEmpty()) {
 			profileName = sourceProject.getPath();
 
-			System.setProperty(BUILD_PROFILE_KEY, profileName);
+			System.setProperty(BUILD_PROFILE_NAME_PROP_KEY, profileName);
+		}
+		else if (profileName.contains(",") || profileName.contains(":")) {
+			StringBuilder sb = new StringBuilder();
+
+			sb.append(BUILD_PROFILE_NAME_PROP_KEY);
+			sb.append("'" + profileName + "' is invalid. ");
+			sb.append(System.lineSeparator());
+			sb.append("Profile name cannot contain ',' or ':'.");
+			sb.append(System.lineSeparator());
+
+			throw new IllegalArgumentException(sb.toString());
 		}
 
 		Logger logger = getLogger();
@@ -101,7 +117,26 @@ public class SetBuildProfileTask extends DefaultTask {
 		sb.append("To import or use this profile, ");
 		sb.append("please use the following argument: ");
 		sb.append(System.lineSeparator());
-		sb.append("-Dbuild.profile=" + profileName);
+		sb.append("-D");
+		sb.append(LiferaySettingsPlugin.BUILD_PROFILE_PROP_KEY);
+		sb.append("=" + profileName);
+
+		if (profileName.contains(":")) {
+			String[] path = profileName.split(":");
+
+			String simpleProfileName = path[path.length - 1];
+
+			sb.append("The value can also be specified as: ");
+			sb.append(System.lineSeparator());
+			sb.append("-D");
+			sb.append(LiferaySettingsPlugin.BUILD_PROFILE_PROP_KEY);
+			sb.append("=" + simpleProfileName);
+		}
+
+		sb.append(System.lineSeparator());
+
+		sb.append(
+			"The value may be comma separated to specify multiple profiles.");
 
 		String message = sb.toString();
 
@@ -114,7 +149,7 @@ public class SetBuildProfileTask extends DefaultTask {
 
 		ArrayList<String> list = new ArrayList<>();
 
-		list.add(profileName);
+		boolean missingProfile = false;
 
 		if (lfrBuildFile.exists()) {
 			logger.lifecycle("Reading {}", lfrBuildFile);
@@ -123,18 +158,41 @@ public class SetBuildProfileTask extends DefaultTask {
 				while (s.hasNext()) {
 					String foundProfileName = s.next();
 
-					if (!list.contains(foundProfileName)) {
-						list.add(foundProfileName);
+					if (!foundProfileName.isEmpty()) {
+						if (!list.contains(foundProfileName)) {
+							list.add(foundProfileName);
+						}
 					}
 				}
 			}
 
-			lfrBuildFile.delete();
+			missingProfile = !list.contains(profileName);
+
+			if (missingProfile) {
+				lfrBuildFile.delete();
+			}
+		}
+		else {
+			missingProfile = true;
 		}
 
-		try (FileWriter fw = new FileWriter(lfrBuildFile)) {
-			for (String foundProfileName : list) {
-				fw.write(foundProfileName + System.lineSeparator());
+		if (missingProfile) {
+			list.add(profileName);
+		}
+
+		if (missingProfile) {
+			boolean buildFileExists = lfrBuildFile.exists();
+
+			try (FileWriter fw = new FileWriter(
+					lfrBuildFile, buildFileExists)) {
+
+				if (buildFileExists) {
+					fw.write(System.lineSeparator());
+				}
+
+				for (String foundProfileName : list) {
+					fw.write(foundProfileName + System.lineSeparator());
+				}
 			}
 		}
 	}

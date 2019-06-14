@@ -16,6 +16,8 @@ package com.liferay.gradle.plugins.defaults;
 
 import com.liferay.gradle.plugins.defaults.internal.util.GradlePluginsDefaultsUtil;
 import com.liferay.gradle.plugins.defaults.internal.util.GradleUtil;
+import com.liferay.gradle.plugins.defaults.tasks.CleanBuildProfileTask;
+import com.liferay.gradle.plugins.defaults.tasks.SetBuildProfileTask;
 import com.liferay.gradle.util.Validator;
 
 import java.io.File;
@@ -31,9 +33,11 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
 
+import org.gradle.StartParameter;
 import org.gradle.api.Plugin;
 import org.gradle.api.UncheckedIOException;
 import org.gradle.api.initialization.ProjectDescriptor;
@@ -44,11 +48,25 @@ import org.gradle.api.initialization.Settings;
  */
 public class LiferaySettingsPlugin implements Plugin<Settings> {
 
+	public static final String BUILD_PROFILE_PROP_KEY = "build.profile";
+
 	public static final String PROJECT_PATH_PREFIX_PROPERTY_NAME =
 		"project.path.prefix";
 
 	@Override
 	public void apply(Settings settings) {
+		StartParameter startParameter = settings.getStartParameter();
+
+		List<String> taskNames = startParameter.getTaskNames();
+
+		if (taskNames.size() > 1) {
+			if (taskNames.contains(
+					SetBuildProfileTask.SET_BUILD_PROFILE_TASK_NAME) ||
+				taskNames.contains(
+					CleanBuildProfileTask.CLEAN_BUILD_PROFILE_TASK_NAME)) {
+			}
+		}
+
 		File rootDir = settings.getRootDir();
 
 		Path rootDirPath = rootDir.toPath();
@@ -225,7 +243,8 @@ public class LiferaySettingsPlugin implements Plugin<Settings> {
 			final String projectPathPrefix)
 		throws IOException {
 
-		final String buildProfileProperty = System.getProperty("build.profile");
+		final String buildProfileProperty = System.getProperty(
+			BUILD_PROFILE_PROP_KEY);
 
 		final String[] buildProfileNames;
 
@@ -296,7 +315,9 @@ public class LiferaySettingsPlugin implements Plugin<Settings> {
 							Path buildProfilePath = dirPath.resolve(fileName);
 
 							if (Files.exists(buildProfilePath)) {
-								if (fileName.equals(".lfrbuild-profiles") &&
+								if (fileName.equals(
+										GradlePluginsDefaultsUtil.
+											BUILD_PROFILE_FILE_NAME) &&
 									(buildProfileNames != null)) {
 
 									found = _checkLfrFile(
