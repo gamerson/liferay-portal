@@ -16,8 +16,6 @@ package com.liferay.gradle.plugins.defaults;
 
 import com.liferay.gradle.plugins.defaults.internal.util.GradlePluginsDefaultsUtil;
 import com.liferay.gradle.plugins.defaults.internal.util.GradleUtil;
-import com.liferay.gradle.plugins.defaults.tasks.CleanBuildProfileTask;
-import com.liferay.gradle.plugins.defaults.tasks.SetBuildProfileTask;
 import com.liferay.gradle.util.Validator;
 
 import java.io.File;
@@ -33,11 +31,9 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
 
-import org.gradle.StartParameter;
 import org.gradle.api.Plugin;
 import org.gradle.api.UncheckedIOException;
 import org.gradle.api.initialization.ProjectDescriptor;
@@ -55,17 +51,41 @@ public class LiferaySettingsPlugin implements Plugin<Settings> {
 
 	@Override
 	public void apply(Settings settings) {
+
+		/*
 		StartParameter startParameter = settings.getStartParameter();
 
 		List<String> taskNames = startParameter.getTaskNames();
 
-		if (taskNames.size() > 1) {
-			if (taskNames.contains(
-					SetBuildProfileTask.SET_BUILD_PROFILE_TASK_NAME) ||
-				taskNames.contains(
-					CleanBuildProfileTask.CLEAN_BUILD_PROFILE_TASK_NAME)) {
+		boolean hasBuildProfileTasks = false;
+
+		if ( taskNames.contains(
+				SetBuildProfileTask.SET_BUILD_PROFILE_TASK_NAME) ||
+			taskNames.contains(
+				CleanBuildProfileTask.CLEAN_BUILD_PROFILE_TASK_NAME)) {
+
+			hasBuildProfileTasks = true;
+		}
+
+		if (hasBuildProfileTasks && (taskNames.size() > 1)) {
+				StringBuilder sb = new StringBuilder();
+
+				sb.append("Tasks '");
+				sb.append(SetBuildProfileTask.SET_BUILD_PROFILE_TASK_NAME);
+				sb.append("' and '");
+				sb.append(CleanBuildProfileTask.CLEAN_BUILD_PROFILE_TASK_NAME);
+				sb.append("'" + System.lineSeparator());
+				sb.append("cannot be used with additional tasks.");
+				sb.append(System.lineSeparator());
+				sb.append("Please consider using '&&' as an alternative.");
+				sb.append(System.lineSeparator());
+
+				String message = sb.toString();
+
+				throw new IllegalArgumentException(message);
 			}
 		}
+		*/
 
 		File rootDir = settings.getRootDir();
 
