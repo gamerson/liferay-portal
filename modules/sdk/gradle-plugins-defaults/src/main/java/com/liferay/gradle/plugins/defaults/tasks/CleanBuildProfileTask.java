@@ -14,6 +14,8 @@
 
 package com.liferay.gradle.plugins.defaults.tasks;
 
+import com.liferay.gradle.plugins.defaults.internal.util.GradlePluginsDefaultsUtil;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -46,31 +48,49 @@ import org.gradle.api.tasks.TaskAction;
  */
 public class CleanBuildProfileTask extends DefaultTask {
 
+	public static final String CLEAN_BUILD_PROFILE_TASK_NAME =
+		"cleanBuildProfile";
+
 	@TaskAction
 	public void cleanBuildProfile() throws Exception {
 		Project project = getProject();
 
 		Project sourceProject = _getSourceProject();
 
-		String profileName = sourceProject.getPath();
+		String profileName = System.getProperty(
+			SetBuildProfileTask.BUILD_PROFILE_NAME_PROP_KEY);
 
-		Map<String, ?> properties = sourceProject.getProperties();
+		if ((profileName == null) || profileName.isEmpty()) {
+			profileName = sourceProject.getPath();
 
-		Object value = properties.get("profileName");
+			System.setProperty(
+				SetBuildProfileTask.BUILD_PROFILE_NAME_PROP_KEY, profileName);
+		}
+		else if (profileName.contains(",") || profileName.contains(":")) {
+			StringBuilder sb = new StringBuilder();
 
-		if (value instanceof String) {
-			profileName = (String)value;
+			sb.append(SetBuildProfileTask.BUILD_PROFILE_NAME_PROP_KEY);
+			sb.append("'" + profileName + "' is invalid. ");
+			sb.append(System.lineSeparator());
+			sb.append("Profile name cannot contain ',' or ':'.");
+			sb.append(System.lineSeparator());
+
+			throw new IllegalArgumentException(sb.toString());
 		}
 
 		Logger logger = getLogger();
 
-		logger.lifecycle("Cleaning build profile name: {}", profileName);
+		logger.lifecycle(
+			"Cleaning " + SetBuildProfileTask.BUILD_PROFILE_NAME_PROP_KEY +
+				": {}",
+			profileName);
 
 		Set<Project> projectDependencies = _getProjectDependencies(project);
 
 		for (Project projectDependency : projectDependencies) {
 			File lfrBuildFile = new File(
-				projectDependency.getProjectDir(), ".lfrbuild-profiles");
+				projectDependency.getProjectDir(),
+				GradlePluginsDefaultsUtil.BUILD_PROFILE_FILE_NAME);
 
 			try {
 				_processBuildFile(profileName, logger, lfrBuildFile);
@@ -78,7 +98,9 @@ public class CleanBuildProfileTask extends DefaultTask {
 			catch (IOException ioe) {
 				StringBuilder sb = new StringBuilder();
 
-				sb.append("Error cleaning build profile ");
+				sb.append("Error cleaning ");
+				sb.append(SetBuildProfileTask.BUILD_PROFILE_NAME_PROP_KEY);
+				sb.append(" specified as ");
 				sb.append(profileName);
 				sb.append(" in ");
 				sb.append(lfrBuildFile.getAbsolutePath());
@@ -162,8 +184,7 @@ public class CleanBuildProfileTask extends DefaultTask {
 				Path subprojectPath = subprojectDir.toPath();
 
 				if (subprojectPath.equals(
-						com.liferay.gradle.plugins.defaults.tasks.
-							SetBuildProfileTask.CURRENT_WORKING_PATH)) {
+						SetBuildProfileTask.CURRENT_WORKING_PATH)) {
 
 					foundProject = subproject;
 
@@ -173,8 +194,7 @@ public class CleanBuildProfileTask extends DefaultTask {
 
 			if (foundProject != null) {
 				System.setProperty(
-					com.liferay.gradle.plugins.defaults.tasks.
-						SetBuildProfileTask.SOURCE_PROJECT_PATH_KEY,
+					SetBuildProfileTask.SOURCE_PROJECT_PATH_KEY,
 					foundProject.getPath());
 			}
 		}
@@ -192,19 +212,22 @@ public class CleanBuildProfileTask extends DefaultTask {
 		ArrayList<String> list = new ArrayList<>();
 
 		if (lfrBuildFile.exists()) {
-			logger.lifecycle(
-				"Removing " + profileName + " from {}", lfrBuildFile);
-
 			try (Scanner s = new Scanner(lfrBuildFile)) {
 				while (s.hasNext()) {
 					String foundProfileName = s.next();
 
-					list.add(foundProfileName);
+					if (!foundProfileName.isEmpty() &&
+						!list.contains(foundProfileName)) {
+
+						list.add(foundProfileName);
+					}
 				}
 			}
 		}
 
 		if (list.contains(profileName)) {
+			logger.lifecycle(
+				"Removing " + profileName + " from {}", lfrBuildFile);
 			list.remove(profileName);
 			lfrBuildFile.delete();
 
@@ -215,7 +238,9 @@ public class CleanBuildProfileTask extends DefaultTask {
 			}
 		}
 		else if (list.isEmpty()) {
-			logger.lifecycle("Deleting {}", lfrBuildFile.getAbsolutePath());
+			logger.lifecycle(
+				"Deleting empty marker file {}",
+				lfrBuildFile.getAbsolutePath());
 
 			lfrBuildFile.delete();
 		}

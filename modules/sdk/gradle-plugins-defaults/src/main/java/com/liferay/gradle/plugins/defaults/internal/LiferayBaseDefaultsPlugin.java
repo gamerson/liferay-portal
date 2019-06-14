@@ -53,29 +53,39 @@ public class LiferayBaseDefaultsPlugin
 		TaskContainer taskContainer = parentProject.getTasks();
 
 		if (taskContainer.findByPath(
-				parentProject.getPath() + ":cleanBuildProfile") == null) {
+				parentProject.getPath() + ":" +
+					CleanBuildProfileTask.CLEAN_BUILD_PROFILE_TASK_NAME) ==
+						null) {
 
 			taskContainer.create(
-				"cleanBuildProfile", CleanBuildProfileTask.class);
+				CleanBuildProfileTask.CLEAN_BUILD_PROFILE_TASK_NAME,
+				CleanBuildProfileTask.class);
 		}
 
 		if (taskContainer.findByPath(
-				parentProject.getPath() + ":setBuildProfile") == null) {
+				parentProject.getPath() + ":" +
+					SetBuildProfileTask.SET_BUILD_PROFILE_TASK_NAME) == null) {
 
-			taskContainer.create("setBuildProfile", SetBuildProfileTask.class);
+			taskContainer.create(
+				SetBuildProfileTask.SET_BUILD_PROFILE_TASK_NAME,
+				SetBuildProfileTask.class);
 		}
 
 		GradleUtil.addTask(
-			project, "cleanBuildProfile", CleanBuildProfileTask.class);
+			project, CleanBuildProfileTask.CLEAN_BUILD_PROFILE_TASK_NAME,
+			CleanBuildProfileTask.class);
 
 		logger.lifecycle(
-			"Adding task " + project.getPath() + ":cleanBuildProfile");
+			"Adding task " + project.getPath() + ":" +
+				CleanBuildProfileTask.CLEAN_BUILD_PROFILE_TASK_NAME);
 
 		GradleUtil.addTask(
-			project, "setBuildProfile", SetBuildProfileTask.class);
+			project, SetBuildProfileTask.SET_BUILD_PROFILE_TASK_NAME,
+			SetBuildProfileTask.class);
 
 		logger.lifecycle(
-			"Adding task " + project.getPath() + ":setBuildProfile");
+			"Adding task " + project.getPath() + ":" +
+				SetBuildProfileTask.SET_BUILD_PROFILE_TASK_NAME);
 	}
 
 	@Override
@@ -104,16 +114,15 @@ public class LiferayBaseDefaultsPlugin
 
 	private void _configureBuildProfileTasks(Project project) {
 		try {
-			String cleanBuildProfileTaskName = "cleanBuildProfile";
-			String setBuildProfileTaskName = "setBuildProfile";
-
 			TaskContainer taskContainer = project.getTasks();
 
 			Task cleanBuildProfile = taskContainer.getByPath(
-				project.getPath() + ":" + cleanBuildProfileTaskName);
+				project.getPath() + ":" +
+					CleanBuildProfileTask.CLEAN_BUILD_PROFILE_TASK_NAME);
 
 			Task setBuildProfile = taskContainer.getByPath(
-				project.getPath() + ":" + setBuildProfileTaskName);
+				project.getPath() + ":" +
+					SetBuildProfileTask.SET_BUILD_PROFILE_TASK_NAME);
 
 			setBuildProfile.dependsOn(cleanBuildProfile);
 		}
