@@ -51,42 +51,6 @@ public class LiferaySettingsPlugin implements Plugin<Settings> {
 
 	@Override
 	public void apply(Settings settings) {
-
-		/*
-		StartParameter startParameter = settings.getStartParameter();
-
-		List<String> taskNames = startParameter.getTaskNames();
-
-		boolean hasBuildProfileTasks = false;
-
-		if ( taskNames.contains(
-				SetBuildProfileTask.SET_BUILD_PROFILE_TASK_NAME) ||
-			taskNames.contains(
-				CleanBuildProfileTask.CLEAN_BUILD_PROFILE_TASK_NAME)) {
-
-			hasBuildProfileTasks = true;
-		}
-
-		if (hasBuildProfileTasks && (taskNames.size() > 1)) {
-				StringBuilder sb = new StringBuilder();
-
-				sb.append("Tasks '");
-				sb.append(SetBuildProfileTask.SET_BUILD_PROFILE_TASK_NAME);
-				sb.append("' and '");
-				sb.append(CleanBuildProfileTask.CLEAN_BUILD_PROFILE_TASK_NAME);
-				sb.append("'" + System.lineSeparator());
-				sb.append("cannot be used with additional tasks.");
-				sb.append(System.lineSeparator());
-				sb.append("Please consider using '&&' as an alternative.");
-				sb.append(System.lineSeparator());
-
-				String message = sb.toString();
-
-				throw new IllegalArgumentException(message);
-			}
-		}
-		*/
-
 		File rootDir = settings.getRootDir();
 
 		Path rootDirPath = rootDir.toPath();
