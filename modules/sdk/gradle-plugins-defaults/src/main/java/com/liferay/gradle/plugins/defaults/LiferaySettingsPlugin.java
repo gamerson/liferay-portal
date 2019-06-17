@@ -41,7 +41,7 @@ import org.gradle.api.initialization.Settings;
 
 /**
  * @author Andrea Di Giorgi
- * @author Christopher Boyd
+ * @author Christopher Bryan Boyd
  * @author Gregory Amerson
  */
 public class LiferaySettingsPlugin implements Plugin<Settings> {
@@ -88,7 +88,7 @@ public class LiferaySettingsPlugin implements Plugin<Settings> {
 		}
 	}
 
-	private static boolean _checkLfrFile(
+	private static boolean _checkBuildProfiles(
 		final String[] buildProfileNames, Path buildProfilePath) {
 
 		boolean found = false;
@@ -97,47 +97,35 @@ public class LiferaySettingsPlugin implements Plugin<Settings> {
 			while (scanner.hasNext()) {
 				String line = scanner.next();
 
-				if (_checkProfile(buildProfileNames, line)) {
-					found = true;
+				for (String buildProfileName : buildProfileNames) {
+					if (buildProfileName.contains(":") &&
+						line.endsWith(buildProfileName)) {
 
-					break;
+						found = true;
+					}
+					else if (line.equals(buildProfileName)) {
+						found = true;
+					}
+					else {
+						boolean lineContainsColon = line.contains(":");
+
+						if (lineContainsColon) {
+							String[] lineSplit = line.split(":");
+							found =
+								lineSplit[lineSplit.length - 1].equals(
+									buildProfileName) ||
+								(lineSplit[lineSplit.length - 1] + ":").equals(
+									":" + buildProfileName);
+						}
+					}
+
+					if (found) {
+						break;
+					}
 				}
 			}
 		}
 		catch (IOException ioe) {
-		}
-
-		return found;
-	}
-
-	private static boolean _checkProfile(String[] profileNames, String line) {
-		boolean found = false;
-
-		for (String buildProfileName : profileNames) {
-			if (buildProfileName.contains(":") &&
-				line.endsWith(buildProfileName)) {
-
-				found = true;
-			}
-			else if (line.equals(buildProfileName)) {
-				found = true;
-			}
-			else {
-				boolean lineContainsColon = line.contains(":");
-
-				if (lineContainsColon) {
-					String[] lineSplit = line.split(":");
-					found =
-						lineSplit[lineSplit.length - 1].equals(
-							buildProfileName) ||
-						(lineSplit[lineSplit.length - 1] + ":").equals(
-							":" + buildProfileName);
-				}
-			}
-
-			if (found) {
-				break;
-			}
 		}
 
 		return found;
@@ -306,7 +294,7 @@ public class LiferaySettingsPlugin implements Plugin<Settings> {
 											BUILD_PROFILE_FILE_NAME) &&
 									(buildProfileNames != null)) {
 
-									found = _checkLfrFile(
+									found = _checkBuildProfiles(
 										buildProfileNames, buildProfilePath);
 								}
 								else {

@@ -36,6 +36,7 @@ import org.gradle.internal.authentication.DefaultBasicAuthentication;
 
 /**
  * @author Andrea Di Giorgi
+ * @author Christopher Bryan Boyd
  */
 public class GradlePluginsDefaultsUtil {
 
