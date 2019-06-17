@@ -118,7 +118,7 @@ public class SetBuildProfileTask extends DefaultTask {
 		sb.append("please use the following argument: ");
 		sb.append(System.lineSeparator());
 		sb.append("-D");
-		sb.append(LiferaySettingsPlugin.BUILD_PROFILE_PROP_KEY);
+		sb.append(LiferaySettingsPlugin.BUILD_PROFILE_PROPERTY_NAME);
 		sb.append("=" + profileName);
 
 		if (profileName.contains(":")) {
@@ -129,7 +129,7 @@ public class SetBuildProfileTask extends DefaultTask {
 			sb.append("The value can also be specified as: ");
 			sb.append(System.lineSeparator());
 			sb.append("-D");
-			sb.append(LiferaySettingsPlugin.BUILD_PROFILE_PROP_KEY);
+			sb.append(LiferaySettingsPlugin.BUILD_PROFILE_PROPERTY_NAME);
 			sb.append("=" + simpleProfileName);
 		}
 

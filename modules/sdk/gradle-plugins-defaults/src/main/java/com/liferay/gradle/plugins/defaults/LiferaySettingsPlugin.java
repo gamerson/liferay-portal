@@ -41,10 +41,12 @@ import org.gradle.api.initialization.Settings;
 
 /**
  * @author Andrea Di Giorgi
+ * @author Christopher Boyd
+ * @author Gregory Amerson
  */
 public class LiferaySettingsPlugin implements Plugin<Settings> {
 
-	public static final String BUILD_PROFILE_PROP_KEY = "build.profile";
+	public static final String BUILD_PROFILE_PROPERTY_NAME = "build.profile";
 
 	public static final String PROJECT_PATH_PREFIX_PROPERTY_NAME =
 		"project.path.prefix";
@@ -228,7 +230,7 @@ public class LiferaySettingsPlugin implements Plugin<Settings> {
 		throws IOException {
 
 		final String buildProfileProperty = System.getProperty(
-			BUILD_PROFILE_PROP_KEY);
+			BUILD_PROFILE_PROPERTY_NAME);
 
 		final String[] buildProfileNames;
 
