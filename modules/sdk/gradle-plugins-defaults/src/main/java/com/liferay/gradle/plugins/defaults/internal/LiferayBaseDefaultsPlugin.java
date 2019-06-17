@@ -33,8 +33,8 @@ import org.gradle.api.tasks.TaskContainer;
 
 /**
  * @author Andrea Di Giorgi
- * @author Christopher Bryan Boyd
  * @author Gregory Amerson
+ * @author Christopher Bryan Boyd
  */
 public class LiferayBaseDefaultsPlugin
 	extends BaseDefaultsPlugin<LiferayBasePlugin> {

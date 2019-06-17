@@ -45,8 +45,8 @@ import org.gradle.api.logging.Logger;
 import org.gradle.api.tasks.TaskAction;
 
 /**
- * @author Christopher Bryan Boyd
  * @author Gregory Amerson
+ * @author Christopher Bryan Boyd
  */
 public class SetBuildProfileTask extends DefaultTask {
 
