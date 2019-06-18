@@ -92,10 +92,10 @@ public class IdeaDefaultsPlugin extends BaseDefaultsPlugin<IdeaPlugin> {
 
 			SourceDirectorySet javaSourceDirectorySet = sourceSet.getJava();
 
-			File classesDir = javaSourceDirectorySet.getOutputDir();
+			File javaOutputDir = javaSourceDirectorySet.getOutputDir();
 
-			if (!FileUtil.isChild(classesDir, project.getBuildDir())) {
-				excludeDirs.add(classesDir);
+			if (!FileUtil.isChild(javaOutputDir, project.getBuildDir())) {
+				excludeDirs.add(javaOutputDir);
 			}
 
 			File resourcesDir = sourceSetOutput.getResourcesDir();
