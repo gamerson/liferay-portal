@@ -28,7 +28,6 @@ import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.UnknownTaskException;
-import org.gradle.api.logging.Logger;
 import org.gradle.api.tasks.TaskContainer;
 
 /**
@@ -45,8 +44,6 @@ public class LiferayBaseDefaultsPlugin
 	@Override
 	public void apply(Project project) {
 		super.apply(project);
-
-		Logger logger = project.getLogger();
 
 		Project parentProject = project.getParent();
 
@@ -75,17 +72,9 @@ public class LiferayBaseDefaultsPlugin
 			project, CleanBuildProfileTask.CLEAN_BUILD_PROFILE_TASK_NAME,
 			CleanBuildProfileTask.class);
 
-		logger.lifecycle(
-			"Adding task " + project.getPath() + ":" +
-				CleanBuildProfileTask.CLEAN_BUILD_PROFILE_TASK_NAME);
-
 		GradleUtil.addTask(
 			project, SetBuildProfileTask.SET_BUILD_PROFILE_TASK_NAME,
 			SetBuildProfileTask.class);
-
-		logger.lifecycle(
-			"Adding task " + project.getPath() + ":" +
-				SetBuildProfileTask.SET_BUILD_PROFILE_TASK_NAME);
 	}
 
 	@Override
