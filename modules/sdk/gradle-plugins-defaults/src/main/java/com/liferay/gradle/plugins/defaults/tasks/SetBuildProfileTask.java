@@ -29,6 +29,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Scanner;
 import java.util.Set;
 
@@ -76,7 +77,9 @@ public class SetBuildProfileTask extends DefaultTask {
 
 			System.setProperty(BUILD_PROFILE_NAME_PROP_KEY, profileName);
 		}
-		else if (profileName.contains(",") || profileName.contains(":")) {
+		else if (!Objects.equals(sourceProject.getPath(), profileName) &&
+				 (profileName.contains(",") || profileName.contains(":"))) {
+
 			StringBuilder sb = new StringBuilder();
 
 			sb.append(BUILD_PROFILE_NAME_PROP_KEY);
@@ -221,9 +224,7 @@ public class SetBuildProfileTask extends DefaultTask {
 		).flatMap(
 			Set::stream
 		).forEach(
-			c -> {
-				_processConfiguration(projects, c);
-			}
+			c -> _processConfiguration(projects, c)
 		);
 
 		return projects;
@@ -280,12 +281,10 @@ public class SetBuildProfileTask extends DefaultTask {
 			projectDependencies.stream(
 			).map(
 				ProjectDependency::getDependencyProject
+			).map(
+				this::_getProjectDependencies
 			).flatMap(
-				pd -> {
-					Collection<Project> pds = _getProjectDependencies(pd);
-
-					return pds.stream();
-				}
+				Collection::stream
 			).forEach(
 				projects::add
 			);

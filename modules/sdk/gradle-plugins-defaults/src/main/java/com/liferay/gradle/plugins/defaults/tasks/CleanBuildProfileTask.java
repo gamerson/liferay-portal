@@ -14,6 +14,8 @@
 
 package com.liferay.gradle.plugins.defaults.tasks;
 
+import com.google.api.client.repackaged.com.google.common.base.Objects;
+
 import com.liferay.gradle.plugins.defaults.internal.util.GradlePluginsDefaultsUtil;
 
 import java.io.File;
@@ -35,6 +37,7 @@ import org.gradle.api.DefaultTask;
 import org.gradle.api.DomainObjectSet;
 import org.gradle.api.GradleException;
 import org.gradle.api.Project;
+import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ConfigurationContainer;
 import org.gradle.api.artifacts.DependencySet;
 import org.gradle.api.artifacts.ProjectDependency;
@@ -66,7 +69,9 @@ public class CleanBuildProfileTask extends DefaultTask {
 			System.setProperty(
 				SetBuildProfileTask.BUILD_PROFILE_NAME_PROP_KEY, profileName);
 		}
-		else if (profileName.contains(",") || profileName.contains(":")) {
+		else if (!Objects.equal(sourceProject.getPath(), profileName) &&
+				 (profileName.contains(",") || profileName.contains(":"))) {
+
 			StringBuilder sb = new StringBuilder();
 
 			sb.append(SetBuildProfileTask.BUILD_PROFILE_NAME_PROP_KEY);
@@ -136,31 +141,7 @@ public class CleanBuildProfileTask extends DefaultTask {
 		).flatMap(
 			Set::stream
 		).forEach(
-			c -> {
-				DependencySet dependencySet = c.getDependencies();
-
-				DomainObjectSet<ProjectDependency> projectDependencies =
-					dependencySet.withType(ProjectDependency.class);
-
-				if (!projectDependencies.isEmpty()) {
-					ResolvedConfiguration rc = c.getResolvedConfiguration();
-
-					rc.getFirstLevelModuleDependencies();
-
-					projectDependencies.stream(
-					).map(
-						ProjectDependency::getDependencyProject
-					).flatMap(
-						pd -> {
-							Set<Project> pds = _getProjectDependencies(pd);
-
-							return pds.stream();
-						}
-					).forEach(
-						projects::add
-					);
-				}
-			}
+			c -> _processConfiguration(projects, c)
 		);
 
 		return projects;
@@ -231,9 +212,11 @@ public class CleanBuildProfileTask extends DefaultTask {
 			list.remove(profileName);
 			lfrBuildFile.delete();
 
-			try (FileWriter fw = new FileWriter(lfrBuildFile)) {
-				for (String foundProfileName : list) {
-					fw.write(foundProfileName + System.lineSeparator());
+			if (!list.isEmpty()) {
+				try (FileWriter fw = new FileWriter(lfrBuildFile)) {
+					for (String foundProfileName : list) {
+						fw.write(foundProfileName + System.lineSeparator());
+					}
 				}
 			}
 		}
@@ -243,6 +226,32 @@ public class CleanBuildProfileTask extends DefaultTask {
 				lfrBuildFile.getAbsolutePath());
 
 			lfrBuildFile.delete();
+		}
+	}
+
+	private void _processConfiguration(
+		Collection<Project> projects, Configuration c) {
+
+		DependencySet dependencySet = c.getDependencies();
+
+		DomainObjectSet<ProjectDependency> projectDependencies =
+			dependencySet.withType(ProjectDependency.class);
+
+		if (!projectDependencies.isEmpty()) {
+			ResolvedConfiguration rc = c.getResolvedConfiguration();
+
+			rc.getFirstLevelModuleDependencies();
+
+			projectDependencies.stream(
+			).map(
+				ProjectDependency::getDependencyProject
+			).map(
+				this::_getProjectDependencies
+			).flatMap(
+				Collection::stream
+			).forEach(
+				projects::add
+			);
 		}
 	}
 
