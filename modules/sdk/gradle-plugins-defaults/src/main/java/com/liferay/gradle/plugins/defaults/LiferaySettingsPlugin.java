@@ -31,6 +31,7 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Scanner;
 import java.util.Set;
 
 import org.gradle.api.Plugin;
@@ -40,8 +41,12 @@ import org.gradle.api.initialization.Settings;
 
 /**
  * @author Andrea Di Giorgi
+ * @author Christopher Bryan Boyd
+ * @author Gregory Amerson
  */
 public class LiferaySettingsPlugin implements Plugin<Settings> {
+
+	public static final String BUILD_PROFILE_PROPERTY_NAME = "build.profile";
 
 	public static final String PROJECT_PATH_PREFIX_PROPERTY_NAME =
 		"project.path.prefix";
@@ -81,6 +86,49 @@ public class LiferaySettingsPlugin implements Plugin<Settings> {
 		catch (IOException ioe) {
 			throw new UncheckedIOException(ioe);
 		}
+	}
+
+	private static boolean _checkBuildProfiles(
+		final String[] buildProfileNames, Path buildProfilePath) {
+
+		boolean found = false;
+
+		try (Scanner scanner = new Scanner(buildProfilePath)) {
+			while (scanner.hasNext()) {
+				String line = scanner.next();
+
+				for (String buildProfileName : buildProfileNames) {
+					if (buildProfileName.contains(":") &&
+						line.endsWith(buildProfileName)) {
+
+						found = true;
+					}
+					else if (line.equals(buildProfileName)) {
+						found = true;
+					}
+					else {
+						boolean lineContainsColon = line.contains(":");
+
+						if (lineContainsColon) {
+							String[] lineSplit = line.split(":");
+							found =
+								lineSplit[lineSplit.length - 1].equals(
+									buildProfileName) ||
+								(lineSplit[lineSplit.length - 1] + ":").equals(
+									":" + buildProfileName);
+						}
+					}
+
+					if (found) {
+						break;
+					}
+				}
+			}
+		}
+		catch (IOException ioe) {
+		}
+
+		return found;
 	}
 
 	private Set<Path> _getDirPaths(String key, Path rootDirPath) {
@@ -169,9 +217,21 @@ public class LiferaySettingsPlugin implements Plugin<Settings> {
 			final String projectPathPrefix)
 		throws IOException {
 
+		final String buildProfileProperty = System.getProperty(
+			BUILD_PROFILE_PROPERTY_NAME);
+
+		final String[] buildProfileNames;
+
+		if (buildProfileProperty == null) {
+			buildProfileNames = null;
+		}
+		else {
+			buildProfileNames = buildProfileProperty.split(",");
+		}
+
 		final Set<String> buildProfileFileNames =
 			GradlePluginsDefaultsUtil.getBuildProfileFileNames(
-				System.getProperty("build.profile"),
+				buildProfileNames,
 				GradleUtil.getProperty(
 					settings, "liferay.releng.public", true));
 		final Set<Path> excludedDirPaths = _getDirPaths(
@@ -226,10 +286,24 @@ public class LiferaySettingsPlugin implements Plugin<Settings> {
 						boolean found = false;
 
 						for (String fileName : buildProfileFileNames) {
-							if (Files.exists(dirPath.resolve(fileName))) {
-								found = true;
+							Path buildProfilePath = dirPath.resolve(fileName);
 
-								break;
+							if (Files.exists(buildProfilePath)) {
+								if (fileName.equals(
+										GradlePluginsDefaultsUtil.
+											BUILD_PROFILE_FILE_NAME) &&
+									(buildProfileNames != null)) {
+
+									found = _checkBuildProfiles(
+										buildProfileNames, buildProfilePath);
+								}
+								else {
+									found = true;
+								}
+
+								if (found) {
+									break;
+								}
 							}
 						}
 
