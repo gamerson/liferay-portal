@@ -28,7 +28,6 @@ import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.UnknownTaskException;
-import org.gradle.api.tasks.TaskContainer;
 
 /**
  * @author Andrea Di Giorgi
@@ -44,29 +43,6 @@ public class LiferayBaseDefaultsPlugin
 	@Override
 	public void apply(Project project) {
 		super.apply(project);
-
-		Project parentProject = project.getParent();
-
-		TaskContainer taskContainer = parentProject.getTasks();
-
-		if (taskContainer.findByPath(
-				parentProject.getPath() + ":" +
-					CleanBuildProfileTask.CLEAN_BUILD_PROFILE_TASK_NAME) ==
-						null) {
-
-			taskContainer.create(
-				CleanBuildProfileTask.CLEAN_BUILD_PROFILE_TASK_NAME,
-				CleanBuildProfileTask.class);
-		}
-
-		if (taskContainer.findByPath(
-				parentProject.getPath() + ":" +
-					SetBuildProfileTask.SET_BUILD_PROFILE_TASK_NAME) == null) {
-
-			taskContainer.create(
-				SetBuildProfileTask.SET_BUILD_PROFILE_TASK_NAME,
-				SetBuildProfileTask.class);
-		}
 
 		GradleUtil.addTask(
 			project, CleanBuildProfileTask.CLEAN_BUILD_PROFILE_TASK_NAME,
@@ -86,8 +62,8 @@ public class LiferayBaseDefaultsPlugin
 
 				@Override
 				public void execute(Project project) {
-					_configureLiferayDeployDir(project);
 					_configureBuildProfileTasks(project);
+					_configureLiferayDeployDir(project);
 				}
 
 			});
@@ -103,17 +79,13 @@ public class LiferayBaseDefaultsPlugin
 
 	private void _configureBuildProfileTasks(Project project) {
 		try {
-			TaskContainer taskContainer = project.getTasks();
+			Task setBuildProfileTask = GradleUtil.getTask(
+				project, SetBuildProfileTask.SET_BUILD_PROFILE_TASK_NAME);
 
-			Task cleanBuildProfile = taskContainer.getByPath(
-				project.getPath() + ":" +
-					CleanBuildProfileTask.CLEAN_BUILD_PROFILE_TASK_NAME);
-
-			Task setBuildProfile = taskContainer.getByPath(
-				project.getPath() + ":" +
-					SetBuildProfileTask.SET_BUILD_PROFILE_TASK_NAME);
-
-			setBuildProfile.dependsOn(cleanBuildProfile);
+			setBuildProfileTask.dependsOn(
+				GradleUtil.getTask(
+					project,
+					CleanBuildProfileTask.CLEAN_BUILD_PROFILE_TASK_NAME));
 		}
 		catch (UnknownTaskException ute) {
 		}
