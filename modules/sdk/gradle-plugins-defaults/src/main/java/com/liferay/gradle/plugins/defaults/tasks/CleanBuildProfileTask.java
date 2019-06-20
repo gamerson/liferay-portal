@@ -61,20 +61,21 @@ public class CleanBuildProfileTask extends DefaultTask {
 		Project sourceProject = _getSourceProject();
 
 		String profileName = System.getProperty(
-			SetBuildProfileTask.BUILD_PROFILE_NAME_PROP_KEY);
+			SetBuildProfileTask.BUILD_PROFILE_NAME_PROPERTY_NAME);
 
 		if ((profileName == null) || profileName.isEmpty()) {
 			profileName = sourceProject.getPath();
 
 			System.setProperty(
-				SetBuildProfileTask.BUILD_PROFILE_NAME_PROP_KEY, profileName);
+				SetBuildProfileTask.BUILD_PROFILE_NAME_PROPERTY_NAME,
+				profileName);
 		}
 		else if (!Objects.equal(sourceProject.getPath(), profileName) &&
 				 (profileName.contains(",") || profileName.contains(":"))) {
 
 			StringBuilder sb = new StringBuilder();
 
-			sb.append(SetBuildProfileTask.BUILD_PROFILE_NAME_PROP_KEY);
+			sb.append(SetBuildProfileTask.BUILD_PROFILE_NAME_PROPERTY_NAME);
 			sb.append("'" + profileName + "' is invalid. ");
 			sb.append(System.lineSeparator());
 			sb.append("Profile name cannot contain ',' or ':'.");
@@ -86,7 +87,7 @@ public class CleanBuildProfileTask extends DefaultTask {
 		Logger logger = getLogger();
 
 		logger.lifecycle(
-			"Cleaning " + SetBuildProfileTask.BUILD_PROFILE_NAME_PROP_KEY +
+			"Cleaning " + SetBuildProfileTask.BUILD_PROFILE_NAME_PROPERTY_NAME +
 				": {}",
 			profileName);
 
@@ -104,7 +105,7 @@ public class CleanBuildProfileTask extends DefaultTask {
 				StringBuilder sb = new StringBuilder();
 
 				sb.append("Error cleaning ");
-				sb.append(SetBuildProfileTask.BUILD_PROFILE_NAME_PROP_KEY);
+				sb.append(SetBuildProfileTask.BUILD_PROFILE_NAME_PROPERTY_NAME);
 				sb.append(" specified as ");
 				sb.append(profileName);
 				sb.append(" in ");
