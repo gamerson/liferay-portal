@@ -51,7 +51,7 @@ import org.gradle.api.tasks.TaskAction;
  */
 public class SetBuildProfileTask extends DefaultTask {
 
-	public static final String BUILD_PROFILE_NAME_PROP_KEY =
+	public static final String BUILD_PROFILE_NAME_PROPERTY_NAME =
 		"build.profile.name";
 
 	public static final Path CURRENT_WORKING_PATH = Paths.get(
@@ -70,19 +70,20 @@ public class SetBuildProfileTask extends DefaultTask {
 
 		Project sourceProject = _getSourceProject();
 
-		String profileName = System.getProperty(BUILD_PROFILE_NAME_PROP_KEY);
+		String profileName = System.getProperty(
+			BUILD_PROFILE_NAME_PROPERTY_NAME);
 
 		if ((profileName == null) || profileName.isEmpty()) {
 			profileName = sourceProject.getPath();
 
-			System.setProperty(BUILD_PROFILE_NAME_PROP_KEY, profileName);
+			System.setProperty(BUILD_PROFILE_NAME_PROPERTY_NAME, profileName);
 		}
 		else if (!Objects.equals(sourceProject.getPath(), profileName) &&
 				 (profileName.contains(",") || profileName.contains(":"))) {
 
 			StringBuilder sb = new StringBuilder();
 
-			sb.append(BUILD_PROFILE_NAME_PROP_KEY);
+			sb.append(BUILD_PROFILE_NAME_PROPERTY_NAME);
 			sb.append("'" + profileName + "' is invalid. ");
 			sb.append(System.lineSeparator());
 			sb.append("Profile name cannot contain ',' or ':'.");
