@@ -9,6 +9,7 @@
 *.iml
 *.ipr
 *.iws
+*.lfrbuild-profiles
 *.swp
 *~
 .ant-targets-build.xml
