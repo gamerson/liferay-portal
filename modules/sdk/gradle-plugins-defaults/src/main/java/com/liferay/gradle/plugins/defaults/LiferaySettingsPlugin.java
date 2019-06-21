@@ -88,7 +88,7 @@ public class LiferaySettingsPlugin implements Plugin<Settings> {
 		}
 	}
 
-	private static boolean _checkBuildProfiles(
+	private boolean _checkBuildProfiles(
 		final String[] buildProfileNames, Path buildProfilePath) {
 
 		boolean found = false;

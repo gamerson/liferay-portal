@@ -116,7 +116,7 @@ public class SetBuildProfileTask extends BaseBuildProfileTask {
 		logger.lifecycle(message);
 	}
 
-	private static void _processBuildFile(
+	private void _processBuildFile(
 			String profileName, Logger logger, File buildProfilesFile)
 		throws FileNotFoundException, IOException {
 
