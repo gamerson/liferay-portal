@@ -72,7 +72,10 @@ public class SetBuildProfileTask extends BaseBuildProfileTask {
 				projectDependency.getProjectDir(), BUILD_PROFILES_FILENAME);
 
 			try {
-				_processBuildFile(profileName, logger, buildProfilesFile);
+				_processBuildFile(profileName, buildProfilesFile);
+
+				logger.lifecycle(
+					"Added profile {} to {}.", profileName, buildProfilesFile);
 			}
 			catch (IOException ioe) {
 				throw new GradleException(
@@ -86,8 +89,8 @@ public class SetBuildProfileTask extends BaseBuildProfileTask {
 
 		sb.append("Build profile " + profileName + " created successfully.");
 		sb.append(System.lineSeparator());
-		sb.append("To import or use this profile, ");
-		sb.append("please use the following argument: ");
+		sb.append("Please the following JVM arguments when importing ");
+		sb.append("into your IDE gradle import wizard:");
 		sb.append(System.lineSeparator());
 		sb.append("-D");
 		sb.append(LiferaySettingsPlugin.BUILD_PROFILE_PROPERTY_NAME);
@@ -111,35 +114,30 @@ public class SetBuildProfileTask extends BaseBuildProfileTask {
 		sb.append(
 			"The value may be comma separated to specify multiple profiles.");
 
-		String message = sb.toString();
-
-		logger.lifecycle(message);
+		logger.lifecycle(sb.toString());
 	}
 
-	private void _processBuildFile(
-			String profileName, Logger logger, File buildProfilesFile)
+	private void _processBuildFile(String profileName, File buildProfilesFile)
 		throws FileNotFoundException, IOException {
 
-		ArrayList<String> list = new ArrayList<>();
+		ArrayList<String> profileNames = new ArrayList<>();
 
 		boolean missingProfile = false;
 
 		if (buildProfilesFile.exists()) {
-			logger.lifecycle("Reading {}", buildProfilesFile);
+			try (Scanner scanner = new Scanner(buildProfilesFile)) {
+				while (scanner.hasNext()) {
+					String line = scanner.next();
 
-			try (Scanner s = new Scanner(buildProfilesFile)) {
-				while (s.hasNext()) {
-					String foundProfileName = s.next();
-
-					if (!foundProfileName.isEmpty()) {
-						if (!list.contains(foundProfileName)) {
-							list.add(foundProfileName);
+					if (!line.isEmpty()) {
+						if (!profileNames.contains(line)) {
+							profileNames.add(line);
 						}
 					}
 				}
 			}
 
-			missingProfile = !list.contains(profileName);
+			missingProfile = !profileNames.contains(profileName);
 
 			if (missingProfile) {
 				buildProfilesFile.delete();
@@ -150,7 +148,7 @@ public class SetBuildProfileTask extends BaseBuildProfileTask {
 		}
 
 		if (missingProfile) {
-			list.add(profileName);
+			profileNames.add(profileName);
 		}
 
 		if (missingProfile) {
@@ -163,7 +161,7 @@ public class SetBuildProfileTask extends BaseBuildProfileTask {
 					fileWriter.write(System.lineSeparator());
 				}
 
-				for (String foundProfileName : list) {
+				for (String foundProfileName : profileNames) {
 					fileWriter.write(foundProfileName + System.lineSeparator());
 				}
 			}

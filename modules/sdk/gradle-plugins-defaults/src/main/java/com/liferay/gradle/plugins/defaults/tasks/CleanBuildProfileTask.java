@@ -89,9 +89,7 @@ public class CleanBuildProfileTask extends BaseBuildProfileTask {
 				sb.append(" in ");
 				sb.append(buildProfilesFile.getAbsolutePath());
 
-				String message = sb.toString();
-
-				throw new GradleException(message, ioe);
+				throw new GradleException(sb.toString(), ioe);
 			}
 		}
 	}
@@ -100,39 +98,42 @@ public class CleanBuildProfileTask extends BaseBuildProfileTask {
 			String profileName, Logger logger, File buildProfilesFile)
 		throws FileNotFoundException, IOException {
 
-		ArrayList<String> list = new ArrayList<>();
+		ArrayList<String> foundProfileNames = new ArrayList<>();
 
 		if (buildProfilesFile.exists()) {
 			try (Scanner scanner = new Scanner(buildProfilesFile)) {
 				while (scanner.hasNext()) {
-					String foundProfileName = scanner.next();
+					String line = scanner.next();
 
-					if (!foundProfileName.isEmpty() &&
-						!list.contains(foundProfileName)) {
-
-						list.add(foundProfileName);
+					if (!line.isEmpty() && !foundProfileNames.contains(line)) {
+						foundProfileNames.add(line);
 					}
 				}
 			}
 		}
 
-		if (list.contains(profileName)) {
+		if (foundProfileNames.contains(profileName)) {
 			logger.lifecycle(
 				"Removing " + profileName + " from {}", buildProfilesFile);
-			list.remove(profileName);
+
+			foundProfileNames.remove(profileName);
+
 			buildProfilesFile.delete();
 
-			if (!list.isEmpty()) {
-				try (FileWriter fw = new FileWriter(buildProfilesFile)) {
-					for (String foundProfileName : list) {
-						fw.write(foundProfileName + System.lineSeparator());
+			if (!foundProfileNames.isEmpty()) {
+				try (FileWriter fileWriter = new FileWriter(
+						buildProfilesFile)) {
+
+					for (String foundProfileName : foundProfileNames) {
+						fileWriter.write(
+							foundProfileName + System.lineSeparator());
 					}
 				}
 			}
 		}
-		else if (list.isEmpty()) {
+		else if (foundProfileNames.isEmpty()) {
 			logger.lifecycle(
-				"Deleting empty marker file {}",
+				"Deleting empty build profiles file {}",
 				buildProfilesFile.getAbsolutePath());
 
 			buildProfilesFile.delete();
