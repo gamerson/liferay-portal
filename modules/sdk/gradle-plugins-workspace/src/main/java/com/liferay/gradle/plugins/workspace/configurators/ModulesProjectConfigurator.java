@@ -249,7 +249,8 @@ public class ModulesProjectConfigurator extends BaseProjectConfigurator {
 	}
 
 	private void _configureTaskTestIntegration(Project project) {
-		File testClassesIntegration = project.file("test-classes/integration");
+		File testClassesIntegrationDir = project.file(
+			"test-classes/integration");
 		Task testIntegrationClassesTask = GradleUtil.getTask(
 			project,
 			TestIntegrationBasePlugin.TEST_INTEGRATION_TASK_NAME + "Classes");
@@ -274,7 +275,7 @@ public class ModulesProjectConfigurator extends BaseProjectConfigurator {
 										testIntegrationSourceSet));
 								copySpec.from(
 									_getResourcesDir(testIntegrationSourceSet));
-								copySpec.into(testClassesIntegration);
+								copySpec.into(testClassesIntegrationDir);
 							}
 
 						});
@@ -289,14 +290,14 @@ public class ModulesProjectConfigurator extends BaseProjectConfigurator {
 			new Action<Task>() {
 
 				@Override
-				public void execute(Task t) {
+				public void execute(Task task) {
 					project.delete(
 						new Action<DeleteSpec>() {
 
 							@Override
-							public void execute(DeleteSpec t) {
-								t.delete(
-									testClassesIntegration.getParentFile());
+							public void execute(DeleteSpec deleteSpec) {
+								deleteSpec.delete(
+									testClassesIntegrationDir.getParentFile());
 							}
 
 						});
