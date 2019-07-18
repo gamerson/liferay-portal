@@ -110,6 +110,7 @@
 
 		<suppress checks="GradleDependencyVersionCheck" files="modules/sdk/.*" />
 		<suppress checks="GradleDependencyVersionCheck" files="modules/util/.*" />
+		<suppress checks="GradleExportedPackageDependenciesCheck" files="modules/apps/static/portal-osgi-web/portal-osgi-web-wab-generator-impl/build\.gradle" />
 
 		<!-- Temporary suppressions for project-templates (Chema) -->
 
