@@ -1,4 +1,3 @@
-<%--
 /**
  * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
@@ -12,21 +11,14 @@
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
  */
---%>
 
-<%@ include file="/init.jsp" %>
+package com.liferay.blade.configuration.action.constants;
 
-<%
-boolean doConfigure = Validator.isNull(fontFamily) && Validator.isNull(fontColor) && (Validator.isNull(fontSize) || "0".equals(fontSize));
-%>
+/**
+ * @author Liferay
+ */
+public class BladeMessagePortletKeys {
 
-<c:choose>
-	<c:when test="<%= doConfigure %>">
-		<liferay-ui:message key="blade_configurationaction_portlet_BladeMessagePortlet.no-config" />
-	</c:when>
-	<c:otherwise>
-		<p style="font-family:<%= fontFamily %>;color:<%= fontColor %>;font-size:<%= fontSize %>">
-			<liferay-ui:message key="blade_configurationaction_portlet_BladeMessagePortlet.caption" />
-		</p>
-	</c:otherwise>
-</c:choose>
+	public static final String BLADE_MESSAGE_PORTLET = "BladeMessagePortlet";
+
+}

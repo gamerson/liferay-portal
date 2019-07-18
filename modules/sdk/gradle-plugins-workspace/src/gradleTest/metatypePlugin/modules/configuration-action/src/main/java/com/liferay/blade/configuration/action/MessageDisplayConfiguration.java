@@ -1,4 +1,3 @@
-<%--
 /**
  * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
@@ -12,21 +11,29 @@
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
  */
---%>
 
-<%@ include file="/init.jsp" %>
+package com.liferay.blade.configuration.action;
 
-<%
-boolean doConfigure = Validator.isNull(fontFamily) && Validator.isNull(fontColor) && (Validator.isNull(fontSize) || "0".equals(fontSize));
-%>
+import aQute.bnd.annotation.metatype.Meta;
 
-<c:choose>
-	<c:when test="<%= doConfigure %>">
-		<liferay-ui:message key="blade_configurationaction_portlet_BladeMessagePortlet.no-config" />
-	</c:when>
-	<c:otherwise>
-		<p style="font-family:<%= fontFamily %>;color:<%= fontColor %>;font-size:<%= fontSize %>">
-			<liferay-ui:message key="blade_configurationaction_portlet_BladeMessagePortlet.caption" />
-		</p>
-	</c:otherwise>
-</c:choose>
+import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClassDefinition;
+
+/**
+ * @author Liferay
+ */
+@ExtendedObjectClassDefinition(category = "third-party")
+@Meta.OCD(
+	id = "com.liferay.blade.configuration.action.MessageDisplayConfiguration"
+)
+public interface MessageDisplayConfiguration {
+
+	@Meta.AD(required = false)
+	public String fontColor();
+
+	@Meta.AD(required = false)
+	public String fontFamily();
+
+	@Meta.AD(required = false)
+	public int fontSize();
+
+}
