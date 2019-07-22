@@ -11,6 +11,7 @@ buildscript {
 	}
 }
 
+apply plugin: "eclipse-wtp"
 apply plugin: "com.liferay.css.builder"
 #if (${projectType} != "workspace")
 apply plugin: "war"
