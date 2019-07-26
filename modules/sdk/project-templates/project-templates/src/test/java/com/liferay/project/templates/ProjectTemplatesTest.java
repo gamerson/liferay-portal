@@ -2657,7 +2657,7 @@ public class ProjectTemplatesTest {
 		File workspaceDir = _buildTemplateWithGradle(
 			WorkspaceUtil.WORKSPACE, "workspace");
 
-		_enableTargetPlatformInWorkspace(workspaceDir, "7.1.0");
+		_enableTargetPlatformInWorkspace(workspaceDir, "7.1.3");
 
 		File modulesDir = new File(workspaceDir, "modules");
 
