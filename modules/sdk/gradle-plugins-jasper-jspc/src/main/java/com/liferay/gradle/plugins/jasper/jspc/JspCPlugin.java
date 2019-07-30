@@ -18,7 +18,6 @@ import com.liferay.gradle.util.GradleUtil;
 
 import java.io.File;
 
-import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
@@ -29,18 +28,23 @@ import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.DependencySet;
 import org.gradle.api.artifacts.dsl.DependencyHandler;
 import org.gradle.api.file.ConfigurableFileCollection;
+import org.gradle.api.file.CopySpec;
+import org.gradle.api.file.FileTree;
 import org.gradle.api.file.SourceDirectorySet;
 import org.gradle.api.plugins.JavaBasePlugin;
 import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.plugins.PluginContainer;
 import org.gradle.api.plugins.WarPlugin;
 import org.gradle.api.plugins.WarPluginConvention;
+import org.gradle.api.tasks.Copy;
 import org.gradle.api.tasks.SourceSet;
-import org.gradle.api.tasks.bundling.Jar;
+import org.gradle.api.tasks.SourceSetOutput;
 import org.gradle.api.tasks.compile.JavaCompile;
+import org.gradle.api.tasks.util.PatternFilterable;
 
 /**
  * @author Andrea Di Giorgi
+ * @author Gregory Amerson
  */
 public class JspCPlugin implements Plugin<Project> {
 
@@ -73,6 +77,8 @@ public class JspCPlugin implements Plugin<Project> {
 				public void execute(Project project) {
 					_addDependenciesJspC(project);
 					_configureTaskCompileJSP(compileJSPTask);
+					_configureTaskGenerateJSPJava(generateJSPJavaTask);
+					_configureTaskProcessResources(project);
 				}
 
 			});
@@ -113,12 +119,22 @@ public class JspCPlugin implements Plugin<Project> {
 	private void _addDependenciesJspC(Project project) {
 		DependencyHandler dependencyHandler = project.getDependencies();
 
-		Jar jar = (Jar)GradleUtil.getTask(project, JavaPlugin.JAR_TASK_NAME);
+		JavaCompile javaCompile = (JavaCompile)GradleUtil.getTask(
+			project, JavaPlugin.COMPILE_JAVA_TASK_NAME);
 
 		ConfigurableFileCollection configurableFileCollection = project.files(
-			jar);
+			javaCompile);
 
-		configurableFileCollection.builtBy(jar);
+		configurableFileCollection.builtBy(javaCompile);
+
+		dependencyHandler.add(CONFIGURATION_NAME, configurableFileCollection);
+
+		Copy copy = (Copy)GradleUtil.getTask(
+			project, JavaPlugin.PROCESS_RESOURCES_TASK_NAME);
+
+		configurableFileCollection = project.files(copy);
+
+		configurableFileCollection.builtBy(copy);
 
 		dependencyHandler.add(CONFIGURATION_NAME, configurableFileCollection);
 
@@ -179,20 +195,6 @@ public class JspCPlugin implements Plugin<Project> {
 
 		compileJSPTask.setJspCClasspath(jspCConfiguration);
 
-		compileJSPTask.setWebAppDir(
-			new Callable<File>() {
-
-				@Override
-				public File call() throws Exception {
-					SourceSet sourceSet = GradleUtil.getSourceSet(
-						compileJSPTask.getProject(),
-						SourceSet.MAIN_SOURCE_SET_NAME);
-
-					return _getSrcDir(sourceSet.getResources());
-				}
-
-			});
-
 		PluginContainer pluginContainer = project.getPlugins();
 
 		pluginContainer.withType(
@@ -213,6 +215,38 @@ public class JspCPlugin implements Plugin<Project> {
 		if (compileJSPTask.getDestinationDir() == null) {
 			compileJSPTask.setDestinationDir(compileJSPTask.getTemporaryDir());
 		}
+
+		JavaCompile javaCompile = (JavaCompile)GradleUtil.getTask(
+			compileJSPTask.getProject(), JavaPlugin.COMPILE_JAVA_TASK_NAME);
+
+		compileJSPTask.dependsOn(javaCompile);
+	}
+
+	private void _configureTaskGenerateJSPJava(
+		final CompileJSPTask compileJSPTask) {
+
+		Copy copy = (Copy)GradleUtil.getTask(
+			compileJSPTask.getProject(),
+			JavaPlugin.PROCESS_RESOURCES_TASK_NAME);
+
+		compileJSPTask.dependsOn(copy);
+
+		compileJSPTask.setWebAppDir(
+			new Callable<File>() {
+
+				@Override
+				public File call() throws Exception {
+					SourceSet sourceSet = GradleUtil.getSourceSet(
+						compileJSPTask.getProject(),
+						SourceSet.MAIN_SOURCE_SET_NAME);
+
+					SourceSetOutput output = sourceSet.getOutput();
+
+					return new File(
+						output.getSingleFile(), "META-INF/resources");
+				}
+
+			});
 	}
 
 	private void _configureTaskGenerateJSPJavaForWarPlugin(
@@ -234,12 +268,39 @@ public class JspCPlugin implements Plugin<Project> {
 			});
 	}
 
-	private File _getSrcDir(SourceDirectorySet sourceDirectorySet) {
-		Set<File> srcDirs = sourceDirectorySet.getSrcDirs();
+	private void _configureTaskProcessResources(Project project) {
+		Copy copy = (Copy)GradleUtil.getTask(
+			project, JavaPlugin.PROCESS_RESOURCES_TASK_NAME);
 
-		Iterator<File> iterator = srcDirs.iterator();
+		SourceSet sourceSet = GradleUtil.getSourceSet(
+			project, SourceSet.MAIN_SOURCE_SET_NAME);
 
-		return iterator.next();
+		SourceDirectorySet sourceDirectorySet = sourceSet.getResources();
+
+		FileTree fileTree = sourceDirectorySet.getAsFileTree();
+
+		fileTree = fileTree.matching(
+			new Action<PatternFilterable>() {
+
+				@Override
+				public void execute(PatternFilterable patternFilterable) {
+					patternFilterable.include("**/*.tld");
+				}
+
+			});
+
+		Set<File> tldFiles = fileTree.getFiles();
+
+		copy.from(
+			tldFiles,
+			new Action<CopySpec>() {
+
+				@Override
+				public void execute(CopySpec copySpec) {
+					copySpec.into("META-INF/resources/WEB-INF");
+				}
+
+			});
 	}
 
 }
