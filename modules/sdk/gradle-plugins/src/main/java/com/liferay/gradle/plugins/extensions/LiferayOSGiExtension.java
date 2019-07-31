@@ -18,6 +18,7 @@ import aQute.bnd.osgi.Constants;
 
 import aQute.lib.spring.SpringComponent;
 
+import com.liferay.ant.bnd.jsp.JSPClassesVerifierPlugin;
 import com.liferay.ant.bnd.jsp.JspAnalyzerPlugin;
 import com.liferay.ant.bnd.npm.NpmAnalyzerPlugin;
 import com.liferay.ant.bnd.resource.bundle.ResourceBundleLoaderAnalyzerPlugin;
@@ -181,7 +182,9 @@ public class LiferayOSGiExtension {
 	}
 
 	private static final String[] _BND_PLUGIN_CLASS_NAMES = {
-		JspAnalyzerPlugin.class.getName(), NpmAnalyzerPlugin.class.getName(),
+		JspAnalyzerPlugin.class.getName(),
+		JSPClassesVerifierPlugin.class.getName(),
+		NpmAnalyzerPlugin.class.getName(),
 		ResourceBundleLoaderAnalyzerPlugin.class.getName(),
 		SassAnalyzerPlugin.class.getName(),
 		ServiceAnalyzerPlugin.class.getName(),
