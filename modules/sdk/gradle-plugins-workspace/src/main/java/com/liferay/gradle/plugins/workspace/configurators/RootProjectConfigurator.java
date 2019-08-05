@@ -382,6 +382,26 @@ public class RootProjectConfigurator implements Plugin<Project> {
 
 		dockerCreateContainer.setBinds(binds);
 
+		String dockerEnvironmentVariables =
+			workspaceExtension.getDockerEnvironmentVariables();
+
+		String[] dockerEnvironmentVariableArray =
+			dockerEnvironmentVariables.split(",");
+
+		for (String dockerEnvironmentVariable :
+				dockerEnvironmentVariableArray) {
+
+			String[] dockerEnvironmentVariableMap =
+				dockerEnvironmentVariable.split(":");
+
+			if (dockerEnvironmentVariableMap.length == 2) {
+				String key = dockerEnvironmentVariableMap[0];
+				String value = dockerEnvironmentVariableMap[1];
+
+				dockerCreateContainer.withEnvVar(key, value);
+			}
+		}
+
 		dockerCreateContainer.setContainerName(
 			project.getName() + "-liferayapp");
 
@@ -391,10 +411,82 @@ public class RootProjectConfigurator implements Plugin<Project> {
 
 		List<String> portBindings = new ArrayList<>();
 
-		portBindings.add("8080:8080");
-		portBindings.add("11311:11311");
+		String dockerPortBindings = workspaceExtension.getDockerPortBindings();
+
+		String[] dockerPortBindingArray = dockerPortBindings.split(",");
+
+		boolean port8080exists = false;
+		boolean port11311exists = false;
+
+		for (String dockerPortBinding : dockerPortBindingArray) {
+			if (dockerPortBinding.startsWith("11311:")) {
+				port11311exists = true;
+			}
+
+			if (dockerPortBinding.startsWith("8080:")) {
+				port8080exists = true;
+			}
+
+			if (!dockerPortBinding.equals("")) {
+				portBindings.add(dockerPortBinding);
+			}
+		}
+
+		if (!port8080exists) {
+			portBindings.add("8080:8080");
+		}
+
+		if (!port11311exists) {
+			portBindings.add("11311:11311");
+		}
 
 		dockerCreateContainer.setPortBindings(portBindings);
+
+		String dockerTcpExposedPorts =
+			workspaceExtension.getDockerTcpExposedPorts();
+
+		List<Integer> tcpExposedPorts = new ArrayList<>();
+
+		String[] dockerTcpExposedPortArray = dockerTcpExposedPorts.split(",");
+
+		for (String dockerTcpExposedPort : dockerTcpExposedPortArray) {
+			int port = -1;
+
+			try {
+				port = Integer.parseInt(dockerTcpExposedPort);
+
+				tcpExposedPorts.add(port);
+			}
+			catch (NumberFormatException nfe) {
+			}
+		}
+
+		if (!tcpExposedPorts.isEmpty()) {
+			dockerCreateContainer.exposePorts("tcp", tcpExposedPorts);
+		}
+
+		String dockerUdpExposedPorts =
+			workspaceExtension.getDockerUdpExposedPorts();
+
+		List<Integer> udpExposedPorts = new ArrayList<>();
+
+		String[] dockerUdpExposedPortArray = dockerUdpExposedPorts.split(",");
+
+		for (String dockerUdpExposedPort : dockerUdpExposedPortArray) {
+			int port = -1;
+
+			try {
+				port = Integer.parseInt(dockerUdpExposedPort);
+
+				udpExposedPorts.add(port);
+			}
+			catch (NumberFormatException nfe) {
+			}
+		}
+
+		if (!udpExposedPorts.isEmpty()) {
+			dockerCreateContainer.exposePorts("udp", udpExposedPorts);
+		}
 
 		dockerCreateContainer.targetImageId(
 			new Callable<String>() {

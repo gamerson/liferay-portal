@@ -75,6 +75,15 @@ public class WorkspaceExtension {
 			BundleSupportConstants.DEFAULT_CONFIGS_DIR_NAME);
 		_dockerImageLiferay = _getProperty(
 			settings, "docker.image.liferay", _DOCKER_IMAGE_LIFERAY);
+		_dockerPortBindings = _getProperty(
+			settings, "docker.port.bindings", _DOCKER_PORT_BINDINGS);
+		_dockerTcpExposedPorts = _getProperty(
+			settings, "docker.tcp.exposed.ports", _DOCKER_TCP_EXPOSED_PORTS);
+		_dockerUdpExposedPorts = _getProperty(
+			settings, "docker.udp.exposed.ports", _DOCKER_UDP_EXPOSED_PORTS);
+		_dockerEnvironmentVariables = _getProperty(
+			settings, "docker.environment.variables",
+			_DOCKER_ENVIRONMENT_VARIABLES);
 		_dockerDir = _getProperty(settings, "docker.dir", _DOCKER_DIR);
 		_environment = _getProperty(
 			settings, "environment",
@@ -121,8 +130,24 @@ public class WorkspaceExtension {
 		return GradleUtil.toFile(_gradle.getRootProject(), _dockerDir);
 	}
 
+	public String getDockerEnvironmentVariables() {
+		return GradleUtil.toString(_dockerEnvironmentVariables);
+	}
+
 	public String getDockerImageLiferay() {
 		return GradleUtil.toString(_dockerImageLiferay);
+	}
+
+	public String getDockerPortBindings() {
+		return GradleUtil.toString(_dockerPortBindings);
+	}
+
+	public String getDockerTcpExposedPorts() {
+		return GradleUtil.toString(_dockerTcpExposedPorts);
+	}
+
+	public String getDockerUdpExposedPorts() {
+		return GradleUtil.toString(_dockerUdpExposedPorts);
 	}
 
 	public String getEnvironment() {
@@ -203,8 +228,26 @@ public class WorkspaceExtension {
 		_dockerDir = dockerDir;
 	}
 
+	public void setDockerEnvironmentVariables(
+		Object dockerEnvironmentVariables) {
+
+		_dockerEnvironmentVariables = dockerEnvironmentVariables;
+	}
+
 	public void setDockerImageLiferay(Object dockerImageLiferay) {
 		_dockerImageLiferay = dockerImageLiferay;
+	}
+
+	public void setDockerPortBindings(Object dockerPortBindings) {
+		_dockerPortBindings = dockerPortBindings;
+	}
+
+	public void setDockerTcpExposedPorts(Object dockerTcpExposedPorts) {
+		_dockerTcpExposedPorts = dockerTcpExposedPorts;
+	}
+
+	public void setDockerUdpExposedPorts(Object dockerUdpExposedPorts) {
+		_dockerUdpExposedPorts = dockerUdpExposedPorts;
 	}
 
 	public void setEnvironment(Object environment) {
@@ -269,8 +312,16 @@ public class WorkspaceExtension {
 	private static final File _DOCKER_DIR = new File(
 		Project.DEFAULT_BUILD_DIR_NAME + File.separator + "docker");
 
+	private static final String _DOCKER_ENVIRONMENT_VARIABLES = "";
+
 	private static final String _DOCKER_IMAGE_LIFERAY =
 		"liferay/portal:7.1.1-ga2";
+
+	private static final String _DOCKER_PORT_BINDINGS = "";
+
+	private static final String _DOCKER_TCP_EXPOSED_PORTS = "";
+
+	private static final String _DOCKER_UDP_EXPOSED_PORTS = "";
 
 	private Object _bundleCacheDir;
 	private Object _bundleDistRootDirName;
@@ -282,7 +333,11 @@ public class WorkspaceExtension {
 	private Object _bundleUrl;
 	private Object _configsDir;
 	private Object _dockerDir;
+	private Object _dockerEnvironmentVariables;
 	private Object _dockerImageLiferay;
+	private Object _dockerPortBindings;
+	private Object _dockerTcpExposedPorts;
+	private Object _dockerUdpExposedPorts;
 	private Object _environment;
 	private final Gradle _gradle;
 	private Object _homeDir;
