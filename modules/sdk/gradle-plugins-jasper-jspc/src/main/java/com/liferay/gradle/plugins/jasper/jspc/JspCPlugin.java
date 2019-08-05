@@ -14,11 +14,7 @@
 
 package com.liferay.gradle.plugins.jasper.jspc;
 
-import com.liferay.gradle.util.GradleUtil;
-
 import java.io.File;
-
-import java.util.Set;
 import java.util.concurrent.Callable;
 
 import org.gradle.api.Action;
@@ -28,9 +24,6 @@ import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.DependencySet;
 import org.gradle.api.artifacts.dsl.DependencyHandler;
 import org.gradle.api.file.ConfigurableFileCollection;
-import org.gradle.api.file.CopySpec;
-import org.gradle.api.file.FileTree;
-import org.gradle.api.file.SourceDirectorySet;
 import org.gradle.api.plugins.JavaBasePlugin;
 import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.plugins.PluginContainer;
@@ -38,9 +31,10 @@ import org.gradle.api.plugins.WarPlugin;
 import org.gradle.api.plugins.WarPluginConvention;
 import org.gradle.api.tasks.Copy;
 import org.gradle.api.tasks.SourceSet;
-import org.gradle.api.tasks.SourceSetOutput;
+import org.gradle.api.tasks.bundling.War;
 import org.gradle.api.tasks.compile.JavaCompile;
-import org.gradle.api.tasks.util.PatternFilterable;
+
+import com.liferay.gradle.util.GradleUtil;
 
 /**
  * @author Andrea Di Giorgi
@@ -77,8 +71,6 @@ public class JspCPlugin implements Plugin<Project> {
 				public void execute(Project project) {
 					_addDependenciesJspC(project);
 					_configureTaskCompileJSP(compileJSPTask);
-					_configureTaskGenerateJSPJava(generateJSPJavaTask);
-					_configureTaskProcessResources(project);
 				}
 
 			});
@@ -167,6 +159,21 @@ public class JspCPlugin implements Plugin<Project> {
 		javaCompile.setGroup(JavaBasePlugin.VERIFICATION_GROUP);
 		javaCompile.setSource(generateJSPJavaTask.getOutputs());
 
+		Project project = generateJSPJavaTask.getProject();
+
+		PluginContainer pluginContainer = project.getPlugins();
+
+		pluginContainer.withType(
+			WarPlugin.class,
+			new Action<WarPlugin>() {
+
+				@Override
+				public void execute(WarPlugin warPlugin) {
+					_configureTaskCompileJSPForWarPlugin(javaCompile);
+				}
+
+			});
+
 		return javaCompile;
 	}
 
@@ -222,34 +229,6 @@ public class JspCPlugin implements Plugin<Project> {
 		compileJSPTask.dependsOn(javaCompile);
 	}
 
-	private void _configureTaskGenerateJSPJava(
-		final CompileJSPTask compileJSPTask) {
-
-		Copy copy = (Copy)GradleUtil.getTask(
-			compileJSPTask.getProject(),
-			JavaPlugin.PROCESS_RESOURCES_TASK_NAME);
-
-		compileJSPTask.dependsOn(copy);
-
-		compileJSPTask.setWebAppDir(
-			new Callable<File>() {
-
-				@Override
-				public File call() throws Exception {
-					SourceSet sourceSet = GradleUtil.getSourceSet(
-						compileJSPTask.getProject(),
-						SourceSet.MAIN_SOURCE_SET_NAME);
-
-					SourceSetOutput sourceSetOutput = sourceSet.getOutput();
-
-					return new File(
-						sourceSetOutput.getResourcesDir(),
-						"META-INF/resources");
-				}
-
-			});
-	}
-
 	private void _configureTaskGenerateJSPJavaForWarPlugin(
 		final CompileJSPTask compileJSPTask) {
 
@@ -267,41 +246,18 @@ public class JspCPlugin implements Plugin<Project> {
 				}
 
 			});
+
+
 	}
 
-	private void _configureTaskProcessResources(Project project) {
-		Copy copy = (Copy)GradleUtil.getTask(
-			project, JavaPlugin.PROCESS_RESOURCES_TASK_NAME);
+	private void _configureTaskCompileJSPForWarPlugin(JavaCompile compileJSPTask) {
+		War war = (War)GradleUtil.getTask(
+			compileJSPTask.getProject(),
+			WarPlugin.WAR_TASK_NAME);
 
-		SourceSet sourceSet = GradleUtil.getSourceSet(
-			project, SourceSet.MAIN_SOURCE_SET_NAME);
+		war.dependsOn(compileJSPTask);
 
-		SourceDirectorySet sourceDirectorySet = sourceSet.getResources();
-
-		FileTree fileTree = sourceDirectorySet.getAsFileTree();
-
-		fileTree = fileTree.matching(
-			new Action<PatternFilterable>() {
-
-				@Override
-				public void execute(PatternFilterable patternFilterable) {
-					patternFilterable.include("**/*.tld");
-				}
-
-			});
-
-		Set<File> tldFiles = fileTree.getFiles();
-
-		copy.from(
-			tldFiles,
-			new Action<CopySpec>() {
-
-				@Override
-				public void execute(CopySpec copySpec) {
-					copySpec.into("META-INF/resources/WEB-INF");
-				}
-
-			});
+		war.from(compileJSPTask);
 	}
 
 }
