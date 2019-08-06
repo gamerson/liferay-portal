@@ -16,6 +16,7 @@ package com.liferay.gradle.plugins.workspace.configurators;
 
 import com.liferay.ant.bnd.metatype.MetatypePlugin;
 import com.liferay.gradle.plugins.LiferayOSGiPlugin;
+import com.liferay.gradle.plugins.extensions.BundleExtension;
 import com.liferay.gradle.plugins.extensions.LiferayExtension;
 import com.liferay.gradle.plugins.extensions.LiferayOSGiExtension;
 import com.liferay.gradle.plugins.jasper.jspc.JspCPlugin;
@@ -61,6 +62,7 @@ import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.tasks.Copy;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetOutput;
+import org.gradle.api.tasks.Sync;
 import org.gradle.api.tasks.compile.JavaCompile;
 import org.gradle.jvm.tasks.Jar;
 import org.gradle.language.base.plugins.LifecycleBasePlugin;
@@ -131,6 +133,9 @@ public class ModulesProjectConfigurator extends BaseProjectConfigurator {
 			final JavaCompile compileJSPTask = (JavaCompile)GradleUtil.getTask(
 				project, JspCPlugin.COMPILE_JSP_TASK_NAME);
 
+			final Sync deployJSPTask = (Sync)GradleUtil.getTask(
+				project, JspCPlugin.DEPLOY_JSP_TASK_NAME);
+
 			_configureLiferayOSGi(project);
 
 			_configureRootTaskDistBundle(jar, compileJSPTask);
@@ -140,8 +145,10 @@ public class ModulesProjectConfigurator extends BaseProjectConfigurator {
 
 					@Override
 					public void execute(Project project) {
-						_configureTaskCompileJSP(
-							compileJSPTask, _getWorkspaceExtension(project));
+						WorkspaceExtension workspaceExtension = _getWorkspaceExtension(project);
+
+						_configureTaskCompileJSP(compileJSPTask, workspaceExtension);
+						_configureTaskDeployJSP(deployJSPTask, workspaceExtension);
 						_configureTaskTestIntegration(project);
 					}
 
@@ -323,6 +330,16 @@ public class ModulesProjectConfigurator extends BaseProjectConfigurator {
 			_getCompileJSPDestinationDirName(compileJSPTask.getProject()));
 
 		compileJSPTask.setDestinationDir(dir);
+	}
+
+	private void _configureTaskDeployJSP(Sync deployJSPTask, WorkspaceExtension workspaceExtension) {
+		final BundleExtension bundleExtension = GradleUtil.getExtension(deployJSPTask.getProject(), BundleExtension.class);
+
+		String bundleSymbolicName = (String) bundleExtension.get("Bundle-SymbolicName");
+		String bundleVersion = (String) bundleExtension.get("Bundle-Version");
+
+		deployJSPTask.into(new File(workspaceExtension.getHomeDir(), "work/" + bundleSymbolicName + "-" + bundleVersion));
+
 	}
 
 	private void _configureTaskTestIntegration(Project project) {

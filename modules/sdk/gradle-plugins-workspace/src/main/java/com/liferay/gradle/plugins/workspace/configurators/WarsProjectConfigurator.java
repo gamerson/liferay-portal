@@ -15,6 +15,7 @@
 package com.liferay.gradle.plugins.workspace.configurators;
 
 import com.liferay.gradle.plugins.LiferayBasePlugin;
+import com.liferay.gradle.plugins.jasper.jspc.JspCPlugin;
 import com.liferay.gradle.plugins.workspace.WorkspaceExtension;
 import com.liferay.gradle.plugins.workspace.WorkspacePlugin;
 import com.liferay.gradle.plugins.workspace.internal.util.GradleUtil;
@@ -41,6 +42,7 @@ import org.gradle.api.plugins.BasePlugin;
 import org.gradle.api.plugins.ExtensionAware;
 import org.gradle.api.plugins.WarPlugin;
 import org.gradle.api.tasks.Copy;
+import org.gradle.api.tasks.Sync;
 import org.gradle.api.tasks.bundling.War;
 
 /**
@@ -64,6 +66,7 @@ public class WarsProjectConfigurator extends BaseProjectConfigurator {
 			(ExtensionAware)project.getGradle(), WorkspaceExtension.class);
 
 		GradleUtil.applyPlugin(project, WarPlugin.class);
+		GradleUtil.applyPlugin(project, JspCPlugin.class);
 
 		War war = (War)GradleUtil.getTask(project, WarPlugin.WAR_TASK_NAME);
 
@@ -76,6 +79,20 @@ public class WarsProjectConfigurator extends BaseProjectConfigurator {
 		addTaskDockerDeploy(project, war, workspaceExtension);
 
 		_configureRootTaskDistBundle(war);
+
+		Sync deployJSPTask = (Sync)GradleUtil.getTask(project, JspCPlugin.DEPLOY_JSP_TASK_NAME);
+
+		_configureTaskDeployJSP(deployJSPTask, war, workspaceExtension);
+	}
+
+	private void _configureTaskDeployJSP(Sync deployJSPTask, War war, WorkspaceExtension workspaceExtension) {
+		String version = war.getVersion();
+
+		if (version == null) {
+			version = "1.0.0";
+		}
+
+		deployJSPTask.into(new File(workspaceExtension.getHomeDir(), "work/" + war.getBaseName() + "-" + version));
 	}
 
 	@Override
@@ -144,6 +161,7 @@ public class WarsProjectConfigurator extends BaseProjectConfigurator {
 		return copy;
 	}
 
+	@SuppressWarnings("serial")
 	private void _configureRootTaskDistBundle(final War war) {
 		Project project = war.getProject();
 

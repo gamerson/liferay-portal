@@ -31,6 +31,7 @@ import org.gradle.api.plugins.WarPlugin;
 import org.gradle.api.plugins.WarPluginConvention;
 import org.gradle.api.tasks.Copy;
 import org.gradle.api.tasks.SourceSet;
+import org.gradle.api.tasks.Sync;
 import org.gradle.api.tasks.bundling.War;
 import org.gradle.api.tasks.compile.JavaCompile;
 
@@ -43,6 +44,8 @@ import com.liferay.gradle.util.GradleUtil;
 public class JspCPlugin implements Plugin<Project> {
 
 	public static final String COMPILE_JSP_TASK_NAME = "compileJSP";
+
+	public static final String DEPLOY_JSP_TASK_NAME = "deployJSP";
 
 	public static final String CONFIGURATION_NAME = "jspC";
 
@@ -64,6 +67,8 @@ public class JspCPlugin implements Plugin<Project> {
 		final JavaCompile compileJSPTask = _addTaskCompileJSP(
 			generateJSPJavaTask, jspCConfiguration, jspCToolConfiguration);
 
+		_addTaskDeployJSP(compileJSPTask);
+
 		project.afterEvaluate(
 			new Action<Project>() {
 
@@ -74,6 +79,16 @@ public class JspCPlugin implements Plugin<Project> {
 				}
 
 			});
+	}
+
+	private Sync _addTaskDeployJSP(JavaCompile compileJSPTask) {
+		Sync deployJSPTask = GradleUtil.addTask(compileJSPTask.getProject(), DEPLOY_JSP_TASK_NAME, Sync.class);
+
+		deployJSPTask.from(compileJSPTask);
+
+		deployJSPTask.setDescription("Deploy compiled JSP classes to Liferay work directory.");
+
+		return deployJSPTask;
 	}
 
 	private Configuration _addConfigurationJspC(Project project) {

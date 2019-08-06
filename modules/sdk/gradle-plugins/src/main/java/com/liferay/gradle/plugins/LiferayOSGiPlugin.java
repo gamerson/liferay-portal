@@ -120,6 +120,7 @@ import org.gradle.api.tasks.Delete;
 import org.gradle.api.tasks.JavaExec;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetOutput;
+import org.gradle.api.tasks.Sync;
 import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.TaskInputs;
 import org.gradle.api.tasks.TaskOutputs;
@@ -177,6 +178,7 @@ public class LiferayOSGiPlugin implements Plugin<Project> {
 		_configureLiferay(project, liferayExtension);
 		_configureSourceSetMain(project);
 		_configureTaskClean(project);
+		_configureTaskDeployJSP(project, liferayExtension);
 		_configureTaskGenerateJSPJava(project);
 		_configureTaskJar(project);
 		_configureTaskJavadoc(project);
@@ -213,6 +215,18 @@ public class LiferayOSGiPlugin implements Plugin<Project> {
 				}
 
 			});
+	}
+
+	private void _configureTaskDeployJSP(Project project, LiferayExtension liferayExtension) {
+		final Sync deployJSPTask = (Sync)GradleUtil.getTask(project, JspCPlugin.DEPLOY_JSP_TASK_NAME);
+
+		final BundleExtension bundleExtension = GradleUtil.getExtension(project, BundleExtension.class);
+
+		String bundleSymbolicName = (String) bundleExtension.get("Bundle-SymbolicName");
+		String bundleVersion = (String) bundleExtension.get("Bundle-Version");
+
+		deployJSPTask.into(new File(liferayExtension.getLiferayHome(), "work/" + bundleSymbolicName + "-" + bundleVersion));
+
 	}
 
 	private Configuration _addConfigurationCompileInclude(Project project) {
