@@ -14,12 +14,15 @@
 
 package com.liferay.project.templates;
 
+import com.beust.jcommander.DynamicParameter;
 import com.beust.jcommander.Parameter;
 
 import java.io.File;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Andrea Di Giorgi
@@ -28,88 +31,100 @@ import java.util.List;
 public class ProjectTemplatesArgs {
 
 	public ProjectTemplatesArgs() {
-		_author = System.getProperty("user.name");
-		_destinationDir = new File(System.getProperty("user.dir"));
+		setArgument("author", System.getProperty("user.name"));
+		setArgument("dependency-injector", "ds");
+		setArgument("destination", System.getProperty("user.dir"));
+		setArgument("framework-dependencies", "embedded");
+		setArgument("liferay-version", "7.2");
+		setArgument("template", "mvc-portlet");
 	}
 
 	public List<File> getArchetypesDirs() {
 		return _archetypesDirs;
 	}
 
+	public String getArgument(String key) {
+		return _arguments.get(key);
+	}
+
+	public Map<String, String> getArguments() {
+		return _arguments;
+	}
+
 	public String getAuthor() {
-		return _author;
+		return getArgument("author");
 	}
 
 	public String getClassName() {
-		return _className;
+		return getArgument("class-name");
 	}
 
 	public String getContributorType() {
-		return _contributorType;
+		return getArgument("contributor-type");
 	}
 
 	public String getDependencyInjector() {
-		return _dependencyInjector;
+		return getArgument("dependency-injector");
 	}
 
 	public File getDestinationDir() {
-		return _destinationDir;
+		return new File(getArgument("destination"));
 	}
 
 	public String getFramework() {
-		return _framework;
+		return getArgument("framework");
 	}
 
 	public String getFrameworkDependencies() {
-		return _frameworkDependencies;
+		return getArgument("framework-dependencies");
 	}
 
 	public String getGroupId() {
-		return _groupId;
+		return getArgument("group-id");
 	}
 
 	public String getHostBundleSymbolicName() {
-		return _hostBundleSymbolicName;
+		return getArgument("host-bundle-symbolic-name");
 	}
 
 	public String getHostBundleVersion() {
-		return _hostBundleVersion;
+		return getArgument("host-bundle-version");
 	}
 
 	public String getLiferayVersion() {
-		return _liferayVersion;
+		return getArgument("liferay-version");
 	}
 
 	public String getName() {
-		return _name;
+		return getArgument("name");
 	}
 
 	public String getOriginalModuleName() {
-		return _originalModuleName;
+		return getArgument("original-module-name");
 	}
 
 	public String getOriginalModuleVersion() {
-		return _originalModuleVersion;
+		return getArgument("original-module-version");
 	}
 
 	public String getPackageName() {
-		return _packageName;
+		return getArgument("package-name");
 	}
 
 	public String getService() {
-		return _service;
+		return getArgument("service");
 	}
 
 	public String getTemplate() {
-		return _template;
+		return getArgument("template");
 	}
 
 	public String getTemplateVersion() {
-		return _templateVersion;
+		return getArgument("template-version");
 	}
 
 	public String getViewType() {
-		return _viewType;
+		return getArgument("view-type");
 	}
 
 	public boolean isDependencyManagementEnabled() {
@@ -132,20 +147,44 @@ public class ProjectTemplatesArgs {
 		_archetypesDirs = archetypesDirs;
 	}
 
+	public void setArgument(String key, String value) {
+		_arguments.put(key, value);
+	}
+
+	public void setArguments(Map<String, String> arguments) {
+		_arguments = arguments;
+	}
+
+	@Parameter(
+		description = "The name of the user associated with the code.",
+		names = "--author"
+	)
 	public void setAuthor(String author) {
-		_author = author;
+		setArgument("author", author);
 	}
 
+	@Parameter(
+		description = "If a class is generated, provide the name of the class to be generated. If not provided, defaults to the project name.",
+		names = "--class-name"
+	)
 	public void setClassName(String className) {
-		_className = className;
+		setArgument("class-name", className);
 	}
 
+	@Parameter(
+		description = "Used to identify your module as a Theme Contributor. Also, used to add the Liferay-Theme-Contributor-Type and Web-ContextPath bundle headers.",
+		names = "--contributor-type"
+	)
 	public void setContributorType(String contributorType) {
-		_contributorType = contributorType;
+		setArgument("contributor-type", contributorType);
 	}
 
+	@Parameter(
+		description = "For Service Builder projects, specify the preferred dependency injection method (ds | spring). Default is DS",
+		names = "--dependency-injector"
+	)
 	public void setDependencyInjector(String dependencyInjector) {
-		_dependencyInjector = dependencyInjector;
+		setArgument("dependency-injector", dependencyInjector);
 	}
 
 	public void setDependencyManagementEnabled(
@@ -154,76 +193,133 @@ public class ProjectTemplatesArgs {
 		_dependencyManagementEnabled = dependencyManagementEnabled;
 	}
 
+	@Parameter(
+		description = "The directory where to create the new project.",
+		names = "--destination"
+	)
 	public void setDestinationDir(File destinationDir) {
-		_destinationDir = destinationDir;
+		setArgument("destination", destinationDir.getAbsolutePath());
 	}
 
 	public void setForce(boolean force) {
 		_force = force;
 	}
 
+	@Parameter(
+		description = "The name of the framework to use in the generated project.",
+		names = "--framework"
+	)
 	public void setFramework(String framework) {
-		_framework = framework;
+		setArgument("framework", framework);
 	}
 
+	@Parameter(
+		description = "The way that the framework dependencies will be configured.",
+		names = "--framework-dependencies"
+	)
 	public void setFrameworkDependencies(String frameworkDependencies) {
-		_frameworkDependencies = frameworkDependencies;
+		setArgument("framework-dependencies", frameworkDependencies);
 	}
 
 	public void setGradle(boolean gradle) {
 		_gradle = gradle;
 	}
 
+	@Parameter(
+		description = "The group ID to use in the project.",
+		names = "--group-id"
+	)
 	public void setGroupId(String groupId) {
-		_groupId = groupId;
+		setArgument("group-id", groupId);
 	}
 
+	@Parameter(
+		description = "If a new JSP hook fragment is generated, provide the name of the host bundle symbolic name.",
+		names = "--host-bundle-symbolic-name"
+	)
 	public void setHostBundleSymbolicName(String hostBundleSymbolicName) {
-		_hostBundleSymbolicName = hostBundleSymbolicName;
+		setArgument("host-bundle-symbolic-name", hostBundleSymbolicName);
 	}
 
+	@Parameter(
+		description = "If a new JSP hook fragment is generated, provide the name of the host bundle version.",
+		names = "--host-bundle-version"
+	)
 	public void setHostBundleVersion(String hostBundleVersion) {
-		_hostBundleVersion = hostBundleVersion;
+		setArgument("host-bundle-version", hostBundleVersion);
 	}
 
-	public void setLiferayVersion(String version) {
-		_liferayVersion = version;
+	@Parameter(
+		description = "The version of Liferay to target when creating the project.",
+		names = "--liferay-version"
+	)
+	public void setLiferayVersion(String liferayVersion) {
+		setArgument("liferay-version", liferayVersion);
 	}
 
 	public void setMaven(boolean maven) {
 		_maven = maven;
 	}
 
+	@Parameter(
+		description = "The name of the new project.", names = "--name",
+		required = true
+	)
 	public void setName(String name) {
-		_name = name;
+		setArgument("name", name);
 	}
 
+	@Parameter(
+		description = "Provide the name of the original module which you want to override.",
+		names = "--original-module-name"
+	)
 	public void setOriginalModuleName(String originalModuleName) {
-		_originalModuleName = originalModuleName;
+		setArgument("original-module-name", originalModuleName);
 	}
 
+	@Parameter(
+		description = "The original module version.",
+		names = "--original-module-version"
+	)
 	public void setOriginalModuleVersion(String originalModuleVersion) {
-		_originalModuleVersion = originalModuleVersion;
+		setArgument("original-module-version", originalModuleVersion);
 	}
 
+	@Parameter(
+		description = "The main package name to use in the project.",
+		names = "--package-name"
+	)
 	public void setPackageName(String packageName) {
-		_packageName = packageName;
+		setArgument("package-name", packageName);
 	}
 
+	@Parameter(
+		description = "If a new DS component is generated, provide the name of the service to be implemented.",
+		names = "--service"
+	)
 	public void setService(String service) {
-		_service = service;
+		setArgument("service", service);
 	}
 
+	@Parameter(
+		description = "The template to use when creating the project.",
+		names = "--template"
+	)
 	public void setTemplate(String template) {
-		_template = template;
+		setArgument("template", template);
 	}
 
+	@Parameter(hidden = true, names = "--template-version")
 	public void setTemplateVersion(String templateVersion) {
-		_templateVersion = templateVersion;
+		setArgument("template-version", templateVersion);
 	}
 
+	@Parameter(
+		description = "Choose the view technology that will be used in the generated project.",
+		names = "--view-type"
+	)
 	public void setViewType(String viewType) {
-		_viewType = viewType;
+		setArgument("view-type", viewType);
 	}
 
 	protected boolean isHelp() {
@@ -237,29 +333,8 @@ public class ProjectTemplatesArgs {
 	@Parameter(hidden = true, names = {"--archetypes-dir", "--archetypes-dirs"})
 	private List<File> _archetypesDirs = new ArrayList<>();
 
-	@Parameter(
-		description = "The name of the user associated with the code.",
-		names = "--author"
-	)
-	private String _author;
-
-	@Parameter(
-		description = "If a class is generated, provide the name of the class to be generated. If not provided, defaults to the project name.",
-		names = "--class-name"
-	)
-	private String _className;
-
-	@Parameter(
-		description = "Used to identify your module as a Theme Contributor. Also, used to add the Liferay-Theme-Contributor-Type and Web-ContextPath bundle headers.",
-		names = "--contributor-type"
-	)
-	private String _contributorType;
-
-	@Parameter(
-		description = "For Service Builder projects, specify the preferred dependency injection method (ds | spring). Default is DS",
-		names = "--dependency-injector"
-	)
-	private String _dependencyInjector = "ds";
+	@DynamicParameter(description = "Dynamic arguments", names = "-A")
+	private Map<String, String> _arguments = new HashMap<>();
 
 	@Parameter(
 		description = "If workspace support target platform, no version number is required for the module.",
@@ -268,28 +343,10 @@ public class ProjectTemplatesArgs {
 	private boolean _dependencyManagementEnabled;
 
 	@Parameter(
-		description = "The directory where to create the new project.",
-		names = "--destination"
-	)
-	private File _destinationDir;
-
-	@Parameter(
 		description = "Forces creation of new project even if target directory contains files.",
 		names = "--force"
 	)
 	private boolean _force;
-
-	@Parameter(
-		description = "The name of the framework to use in the generated project.",
-		names = "--framework"
-	)
-	private String _framework;
-
-	@Parameter(
-		description = "The way that the framework dependencies will be configured.",
-		names = "--framework-dependencies"
-	)
-	private String _frameworkDependencies = "embedded";
 
 	@Parameter(
 		arity = 1,
@@ -299,34 +356,10 @@ public class ProjectTemplatesArgs {
 	private boolean _gradle = true;
 
 	@Parameter(
-		description = "The group ID to use in the project.",
-		names = "--group-id"
-	)
-	private String _groupId;
-
-	@Parameter(
 		description = "Print this message.", help = true,
 		names = {"-h", "--help"}
 	)
 	private boolean _help;
-
-	@Parameter(
-		description = "If a new JSP hook fragment is generated, provide the name of the host bundle symbolic name.",
-		names = "--host-bundle-symbolic-name"
-	)
-	private String _hostBundleSymbolicName;
-
-	@Parameter(
-		description = "If a new JSP hook fragment is generated, provide the name of the host bundle version.",
-		names = "--host-bundle-version"
-	)
-	private String _hostBundleVersion;
-
-	@Parameter(
-		description = "The version of Liferay to target when creating the project.",
-		names = "--liferay-version"
-	)
-	private String _liferayVersion = "7.2";
 
 	@Parameter(
 		description = "Print the list of available project templates.",
@@ -339,50 +372,5 @@ public class ProjectTemplatesArgs {
 		names = "--maven"
 	)
 	private boolean _maven;
-
-	@Parameter(
-		description = "The name of the new project.", names = "--name",
-		required = true
-	)
-	private String _name;
-
-	@Parameter(
-		description = "Provide the name of the original module which you want to override.",
-		names = "--original-module-name"
-	)
-	private String _originalModuleName;
-
-	@Parameter(
-		description = "The original module version.",
-		names = "--original-module-version"
-	)
-	private String _originalModuleVersion;
-
-	@Parameter(
-		description = "The main package name to use in the project.",
-		names = "--package-name"
-	)
-	private String _packageName;
-
-	@Parameter(
-		description = "If a new DS component is generated, provide the name of the service to be implemented.",
-		names = "--service"
-	)
-	private String _service;
-
-	@Parameter(
-		description = "The template to use when creating the project.",
-		names = "--template"
-	)
-	private String _template = "mvc-portlet";
-
-	@Parameter(hidden = true, names = "--template-version")
-	private String _templateVersion;
-
-	@Parameter(
-		description = "Choose the view technology that will be used in the generated project.",
-		names = "--view-type"
-	)
-	private String _viewType;
 
 }
