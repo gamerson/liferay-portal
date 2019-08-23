@@ -15,6 +15,7 @@
 package com.liferay.gradle.plugins.workspace.configurators;
 
 import com.liferay.ant.bnd.metatype.MetatypePlugin;
+import com.liferay.gradle.plugins.JspCDefaultsPlugin;
 import com.liferay.gradle.plugins.LiferayOSGiPlugin;
 import com.liferay.gradle.plugins.extensions.LiferayExtension;
 import com.liferay.gradle.plugins.extensions.LiferayOSGiExtension;
@@ -104,20 +105,27 @@ public class ModulesProjectConfigurator extends BaseProjectConfigurator {
 				ExtraPropertiesExtension extraPropertiesExtension =
 					extensionContainer.getExtraProperties();
 
-				extraPropertiesExtension.set("compile.jsp.include", "true");
+				extraPropertiesExtension.set(
+					JspCDefaultsPlugin.COMPILE_JSP_INCLUDE_PROPERTY_NAME,
+					"true");
 
 				if ((project.getRootProject() == null) ||
 					(project.getRootProject() == project)) {
 
 					for (Project childProject : project.getAllprojects()) {
-						if (!childProject.hasProperty("compile.jsp.include")) {
+						if (!childProject.hasProperty(
+								JspCDefaultsPlugin.
+									COMPILE_JSP_INCLUDE_PROPERTY_NAME)) {
+
 							extensionContainer = childProject.getExtensions();
 
 							extraPropertiesExtension =
 								extensionContainer.getExtraProperties();
 
 							extraPropertiesExtension.set(
-								"compile.jsp.include", "true");
+								JspCDefaultsPlugin.
+									COMPILE_JSP_INCLUDE_PROPERTY_NAME,
+								"true");
 						}
 					}
 				}
@@ -209,8 +217,9 @@ public class ModulesProjectConfigurator extends BaseProjectConfigurator {
 
 		String[] propertyNames = {
 			WorkspacePlugin.PROPERTY_PREFIX + NAME + ".jsp.precompile.enabled",
-			WorkspacePlugin.PROPERTY_PREFIX + NAME + ".compile.jsp.include",
-			"compile.jsp.include"
+			WorkspacePlugin.PROPERTY_PREFIX + NAME +
+				JspCDefaultsPlugin.COMPILE_JSP_INCLUDE_PROPERTY_NAME,
+			JspCDefaultsPlugin.COMPILE_JSP_INCLUDE_PROPERTY_NAME
 		};
 
 		Boolean jspPrecompileEnabled = null;
