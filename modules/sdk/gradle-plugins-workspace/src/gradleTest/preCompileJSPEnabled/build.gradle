@@ -1,0 +1,20 @@
+task runGradleTest
+
+gradle.liferayWorkspace {
+	homeDir = new File(buildDir, "bundles")
+	modules.jspPrecompileEnabled = true
+}
+
+runGradleTest {
+	dependsOn ":modules:foo-web:assemble"
+	dependsOn ":modules:foo-web2:assemble"
+
+	doLast {
+		for (String fileName in ["init_jsp.class", "view_jsp.class"]) {
+			// Assert that the files are in the jar
+			File generatedFile = new File(gradle.liferayWorkspace.homeDir, "work/com.liferay.foo.web-1.0.0/org/apache/jsp/${fileName}")
+
+			assert generatedFile.exists()
+		}
+	}
+}

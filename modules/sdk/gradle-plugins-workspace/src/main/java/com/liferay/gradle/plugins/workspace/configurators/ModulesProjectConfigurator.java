@@ -19,7 +19,6 @@ import com.liferay.gradle.plugins.JspCDefaultsPlugin;
 import com.liferay.gradle.plugins.LiferayOSGiPlugin;
 import com.liferay.gradle.plugins.extensions.LiferayExtension;
 import com.liferay.gradle.plugins.extensions.LiferayOSGiExtension;
-import com.liferay.gradle.plugins.jasper.jspc.JspCPlugin;
 import com.liferay.gradle.plugins.service.builder.ServiceBuilderPlugin;
 import com.liferay.gradle.plugins.test.integration.TestIntegrationBasePlugin;
 import com.liferay.gradle.plugins.workspace.FrontendPlugin;
@@ -62,7 +61,6 @@ import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.tasks.Copy;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetOutput;
-import org.gradle.api.tasks.compile.JavaCompile;
 import org.gradle.jvm.tasks.Jar;
 import org.gradle.language.base.plugins.LifecycleBasePlugin;
 
@@ -100,11 +98,18 @@ public class ModulesProjectConfigurator extends BaseProjectConfigurator {
 
 		if (bndBndFile.exists() &&
 			(buildGradleFile.exists() || pomXmlFile.exists())) {
-			if (!project.hasProperty(JspCDefaultsPlugin.COMPILE_JSP_INCLUDE_PROPERTY_NAME)) {
 
-				project.getExtensions().getExtraProperties().set(JspCDefaultsPlugin.COMPILE_JSP_INCLUDE_PROPERTY_NAME, isJspPrecompileEnabled());
+			if (!project.hasProperty(
+					JspCDefaultsPlugin.COMPILE_JSP_INCLUDE_PROPERTY_NAME)) {
+
+				project.getExtensions(
+				).getExtraProperties(
+				).set(
+					JspCDefaultsPlugin.COMPILE_JSP_INCLUDE_PROPERTY_NAME,
+					isJspPrecompileEnabled()
+				);
 			}
-			
+
 			GradleUtil.applyPlugin(project, LiferayOSGiPlugin.class);
 
 			if (FileUtil.exists(project, "service.xml")) {
@@ -123,7 +128,6 @@ public class ModulesProjectConfigurator extends BaseProjectConfigurator {
 
 					@Override
 					public void execute(Project project) {
-						
 						_configureTaskTestIntegration(project);
 					}
 
@@ -268,9 +272,7 @@ public class ModulesProjectConfigurator extends BaseProjectConfigurator {
 	}
 
 	@SuppressWarnings("serial")
-	private void _configureRootTaskDistBundle(
-		final Jar jar) {
-
+	private void _configureRootTaskDistBundle(final Jar jar) {
 		final Project project = jar.getProject();
 
 		Copy copy = (Copy)GradleUtil.getTask(
@@ -287,7 +289,6 @@ public class ModulesProjectConfigurator extends BaseProjectConfigurator {
 				}
 
 			});
-		
 	}
 
 	private void _configureRootTaskDistBundle(final Task buildTask) {
