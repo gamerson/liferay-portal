@@ -48,6 +48,7 @@ import java.util.concurrent.Callable;
 
 import org.gradle.api.Action;
 import org.gradle.api.DefaultTask;
+import org.gradle.api.GradleException;
 import org.gradle.api.Project;
 import org.gradle.api.file.CopySpec;
 import org.gradle.api.tasks.Input;
@@ -226,6 +227,13 @@ public class SetUpTestableTomcatTask
 		_zipUrl = zipUrl;
 	}
 
+	private void _assertDirExists(File dir) {
+		if (!dir.exists()) {
+			throw new GradleException(
+				"Expected tomcat directory to exist: " + dir);
+		}
+	}
+
 	private boolean _contains(String fileName, String s) throws IOException {
 		File file = new File(getDir(), fileName);
 
@@ -241,7 +249,11 @@ public class SetUpTestableTomcatTask
 	private PrintWriter _getAppendPrintWriter(String fileName)
 		throws IOException {
 
-		File file = new File(getDir(), fileName);
+		File dir = getDir();
+
+		_assertDirExists(dir);
+
+		File file = new File(dir, fileName);
 
 		return new PrintWriter(
 			Files.newBufferedWriter(
@@ -283,6 +295,8 @@ public class SetUpTestableTomcatTask
 
 		File binDir = getBinDir();
 
+		_assertDirExists(binDir);
+
 		for (File file : binDir.listFiles()) {
 			if (!file.isFile()) {
 				continue;
@@ -297,8 +311,12 @@ public class SetUpTestableTomcatTask
 	}
 
 	private void _setUpJaCoCo() throws IOException {
+		File dir = getDir();
+
+		_assertDirExists(dir);
+
 		File jaCoCoAgentFile = getJaCoCoAgentFile();
-		File targetJaCoCoAgentFile = new File(getDir(), "bin/jacocoagent.jar");
+		File targetJaCoCoAgentFile = new File(dir, "bin/jacocoagent.jar");
 
 		if ((jaCoCoAgentFile != null) && !targetJaCoCoAgentFile.exists()) {
 			Files.copy(
@@ -367,7 +385,11 @@ public class SetUpTestableTomcatTask
 	}
 
 	private void _setUpManager() throws Exception {
-		final File managerDir = new File(getDir(), "webapps/manager");
+		File dir = getDir();
+
+		_assertDirExists(dir);
+
+		final File managerDir = new File(dir, "webapps/manager");
 
 		if (!managerDir.exists()) {
 			final Project project = getProject();
@@ -392,8 +414,7 @@ public class SetUpTestableTomcatTask
 
 		Document document = null;
 
-		final File tomcatUsersXmlFile = new File(
-			getDir(), "conf/tomcat-users.xml");
+		final File tomcatUsersXmlFile = new File(dir, "conf/tomcat-users.xml");
 
 		try (InputStreamReader inputStreamReader = new InputStreamReader(
 				new FileInputStream(tomcatUsersXmlFile))) {
@@ -487,8 +508,12 @@ public class SetUpTestableTomcatTask
 				public void execute(CopySpec copySpec) {
 					File moduleFrameworkBaseDir = getModuleFrameworkBaseDir();
 
+					_assertDirExists(moduleFrameworkBaseDir);
+
 					File modulesDir = new File(
 						moduleFrameworkBaseDir, "modules");
+
+					_assertDirExists(modulesDir);
 
 					if (!isOverwriteTestModules()) {
 						copySpec.eachFile(
