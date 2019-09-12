@@ -513,8 +513,6 @@ public class SetUpTestableTomcatTask
 					File modulesDir = new File(
 						moduleFrameworkBaseDir, "modules");
 
-					_assertDirExists(modulesDir);
-
 					if (!isOverwriteTestModules()) {
 						copySpec.eachFile(
 							new ExcludeExistingFileAction(modulesDir));
