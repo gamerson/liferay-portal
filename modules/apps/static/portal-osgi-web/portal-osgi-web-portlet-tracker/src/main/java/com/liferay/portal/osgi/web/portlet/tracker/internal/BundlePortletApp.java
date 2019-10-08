@@ -43,14 +43,12 @@ import org.osgi.framework.Bundle;
 public class BundlePortletApp implements PortletApp {
 
 	public BundlePortletApp(
-		Bundle bundle, Portlet portalPortletModel,
+		Bundle bundle, PortletApp systemPortletApp,
 		ServletContext servletContext) {
 
-		_portalPortletModel = portalPortletModel;
 		_servletContext = servletContext;
 
-		_pluginPackage = new BundlePluginPackage(bundle, this);
-		_portletApp = portalPortletModel.getPortletApp();
+		_portletApp = systemPortletApp;
 	}
 
 	@Override
@@ -123,10 +121,6 @@ public class BundlePortletApp implements PortletApp {
 		return _eventDefinitions;
 	}
 
-	public BundlePluginPackage getPluginPackage() {
-		return _pluginPackage;
-	}
-
 	@Override
 	public PortletFilter getPortletFilter(String filterName) {
 		return _portletApp.getPortletFilter(filterName);
@@ -155,10 +149,6 @@ public class BundlePortletApp implements PortletApp {
 	@Override
 	public PublicRenderParameter getPublicRenderParameter(String identifier) {
 		return _portletApp.getPublicRenderParameter(identifier);
-	}
-
-	public Map<String, String> getRoleMappers() {
-		return _portalPortletModel.getRoleMappers();
 	}
 
 	@Override
@@ -260,8 +250,6 @@ public class BundlePortletApp implements PortletApp {
 
 	private String _defaultNamespace;
 	private final Set<EventDefinition> _eventDefinitions = new HashSet<>();
-	private final BundlePluginPackage _pluginPackage;
-	private final Portlet _portalPortletModel;
 	private final PortletApp _portletApp;
 	private final Set<PortletURLListener> _portletURLListeners =
 		new LinkedHashSet<>();
