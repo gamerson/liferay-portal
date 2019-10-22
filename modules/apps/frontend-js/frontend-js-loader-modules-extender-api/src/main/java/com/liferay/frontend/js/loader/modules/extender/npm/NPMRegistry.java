@@ -25,6 +25,8 @@ import org.osgi.annotation.versioning.ProviderType;
 @ProviderType
 public interface NPMRegistry {
 
+	public void addJSBundle(JSBundle jsBundle);
+
 	/**
 	 * @deprecated As of Mueller (7.2.x), with no direct replacement
 	 */
@@ -48,6 +50,8 @@ public interface NPMRegistry {
 	public Collection<JSPackage> getResolvedJSPackages();
 
 	public String mapModuleName(String moduleName);
+
+	public void removeJSBundle(JSBundle jsBundle);
 
 	/**
 	 * @deprecated As of Mueller (7.2.x), with no direct replacement

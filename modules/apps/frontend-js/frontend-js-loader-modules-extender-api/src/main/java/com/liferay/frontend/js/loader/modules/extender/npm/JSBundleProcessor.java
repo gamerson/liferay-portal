@@ -54,4 +54,6 @@ public interface JSBundleProcessor {
 	 */
 	public JSBundle process(Bundle bundle);
 
+	public JSBundle process(JSBundleSource jsBundleSource);
+
 }
