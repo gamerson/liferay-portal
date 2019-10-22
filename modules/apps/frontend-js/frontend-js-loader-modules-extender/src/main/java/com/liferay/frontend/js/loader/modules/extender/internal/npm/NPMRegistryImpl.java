@@ -46,6 +46,7 @@ import java.net.URL;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Dictionary;
 import java.util.HashMap;
@@ -82,6 +83,15 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 )
 public class NPMRegistryImpl implements NPMRegistry {
 
+	@Override
+	public void addJSBundle(JSBundle jsBundle) {
+		if (!_activationThreadLocal.get()) {
+			_jsBundles.add(jsBundle);
+
+			_refreshJSModuleCaches(_jsBundles);
+		}
+	}
+
 	/**
 	 * @deprecated As of Mueller (7.2.x), with no direct replacement
 	 */
@@ -102,9 +112,7 @@ public class NPMRegistryImpl implements NPMRegistry {
 	 * @return the OSGi bundles
 	 */
 	public Collection<JSBundle> getJSBundles() {
-		Map<Bundle, JSBundle> tracked = _bundleTracker.getTracked();
-
-		return tracked.values();
+		return Collections.unmodifiableList(_jsBundles);
 	}
 
 	/**
@@ -209,6 +217,15 @@ public class NPMRegistryImpl implements NPMRegistry {
 		return moduleName;
 	}
 
+	@Override
+	public void removeJSBundle(JSBundle jsBundle) {
+		if (!_activationThreadLocal.get()) {
+			_jsBundles.remove(jsBundle);
+
+			_refreshJSModuleCaches(_jsBundles);
+		}
+	}
+
 	/**
 	 * @deprecated As of Mueller (7.2.x), with no direct replacement
 	 */
@@ -280,7 +297,9 @@ public class NPMRegistryImpl implements NPMRegistry {
 
 		Map<Bundle, JSBundle> tracked = _bundleTracker.getTracked();
 
-		_refreshJSModuleCaches(tracked.values());
+		_jsBundles.addAll(tracked.values());
+
+		_refreshJSModuleCaches(_jsBundles);
 
 		Details details = ConfigurableUtil.createConfigurable(
 			Details.class, properties);
@@ -498,6 +517,7 @@ public class NPMRegistryImpl implements NPMRegistry {
 	@Reference
 	private JSBundleProcessor _jsBundleProcessor;
 
+	private final List<JSBundle> _jsBundles = new ArrayList<>();
 	private Map<String, JSModule> _jsModules = new HashMap<>();
 
 	@Reference
@@ -542,16 +562,7 @@ public class NPMRegistryImpl implements NPMRegistry {
 
 			_processLegacyBridges(bundle);
 
-			if (!_activationThreadLocal.get()) {
-				Map<Bundle, JSBundle> tracked = _bundleTracker.getTracked();
-
-				Collection<JSBundle> jsBundles = new ArrayList<>(
-					tracked.values());
-
-				jsBundles.add(jsBundle);
-
-				_refreshJSModuleCaches(jsBundles);
-			}
+			addJSBundle(jsBundle);
 
 			return jsBundle;
 		}
@@ -565,11 +576,7 @@ public class NPMRegistryImpl implements NPMRegistry {
 		public void removedBundle(
 			Bundle bundle, BundleEvent bundleEvent, JSBundle jsBundle) {
 
-			if (!_activationThreadLocal.get()) {
-				Map<Bundle, JSBundle> tracked = _bundleTracker.getTracked();
-
-				_refreshJSModuleCaches(tracked.values());
-			}
+			removeJSBundle(jsBundle);
 		}
 
 	}
