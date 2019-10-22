@@ -16,6 +16,7 @@ package com.liferay.frontend.js.loader.modules.extender.internal.npm.flat;
 
 import com.liferay.frontend.js.loader.modules.extender.npm.JSBundle;
 import com.liferay.frontend.js.loader.modules.extender.npm.JSBundleProcessor;
+import com.liferay.frontend.js.loader.modules.extender.npm.JSBundleSource;
 import com.liferay.frontend.js.loader.modules.extender.npm.JSModuleAlias;
 import com.liferay.frontend.js.loader.modules.extender.npm.JSPackageDependency;
 import com.liferay.frontend.js.loader.modules.extender.npm.ModuleNameUtil;
@@ -184,6 +185,127 @@ public class FlatNPMBundleProcessor implements JSBundleProcessor {
 		_processPackage(
 			flatJSBundle, manifest, packageJSONObject, jsonObjects,
 			moduleDependenciesMap, "/META-INF/resources", true);
+
+		_processNodePackages(
+			flatJSBundle, manifest, jsonObjects, moduleDependenciesMap);
+
+		return flatJSBundle;
+	}
+
+	@Override
+	public JSBundle process(JSBundleSource jsBundleSource) {
+		URL url = jsBundleSource.getResource("package.json");
+
+		if (url == null) {
+			return null;
+		}
+
+		FlatJSBundle flatJSBundle = new FlatJSBundleSource(jsBundleSource);
+
+		if (_log.isInfoEnabled()) {
+			_log.info("Processing NPM bundle: " + flatJSBundle);
+		}
+
+		List<Future<Map.Entry<URL, JSONObject>>> futures = new ArrayList<>();
+
+		URL manifestJSONURL = jsBundleSource.getResource("manifest.json");
+
+		futures.add(
+			_executorService.submit(
+				() -> {
+					String content = StringUtil.read(
+						manifestJSONURL.openStream());
+
+					if (!content.contains("\"flags\"")) {
+						return new AbstractMap.SimpleImmutableEntry<>(
+							manifestJSONURL, null);
+					}
+
+					JSONObject jsonObject = _jsonFactory.createJSONObject(
+						content);
+
+					return new AbstractMap.SimpleImmutableEntry<>(
+						manifestJSONURL, jsonObject.getJSONObject("packages"));
+				}));
+
+		Enumeration<URL> enumeration = jsBundleSource.findResources(
+			"package.json", true);
+
+		if (enumeration == null) {
+			_log.error("No package.json files found in " + jsBundleSource);
+
+			return null;
+		}
+
+		while (enumeration.hasMoreElements()) {
+			URL packageJSONURL = enumeration.nextElement();
+
+			futures.add(
+				_executorService.submit(
+					() -> new AbstractMap.SimpleImmutableEntry<>(
+						packageJSONURL,
+						_jsonFactory.createJSONObject(
+							StringUtil.read(packageJSONURL.openStream())))));
+		}
+
+		enumeration = jsBundleSource.findResources("*.js", true);
+
+		if (enumeration == null) {
+			_log.error("No *.js files found in " + jsBundleSource);
+
+			return null;
+		}
+
+		List<Future<Map.Entry<URL, Collection<String>>>>
+			moduleDepedenciesFutures = new ArrayList<>();
+
+		while (enumeration.hasMoreElements()) {
+			URL jsURL = enumeration.nextElement();
+
+			moduleDepedenciesFutures.add(
+				_executorService.submit(
+					() -> new AbstractMap.SimpleImmutableEntry<>(
+						jsURL,
+						_parseModuleDependencies(_getDefineArgs(jsURL)))));
+		}
+
+		Map<URL, Collection<String>> moduleDependenciesMap = new HashMap<>();
+
+		for (Future<Map.Entry<URL, Collection<String>>> future :
+				moduleDepedenciesFutures) {
+
+			try {
+				Map.Entry<URL, Collection<String>> entry = future.get();
+
+				moduleDependenciesMap.put(entry.getKey(), entry.getValue());
+			}
+			catch (Exception e) {
+				_log.error(e, e);
+			}
+		}
+
+		Map<URL, JSONObject> jsonObjects = new HashMap<>();
+
+		for (Future<Map.Entry<URL, JSONObject>> future : futures) {
+			try {
+				Map.Entry<URL, JSONObject> entry = future.get();
+
+				jsonObjects.put(entry.getKey(), entry.getValue());
+			}
+			catch (Exception e) {
+				_log.error(e, e);
+			}
+		}
+
+		JSONObject packagesJSONObject = jsonObjects.remove(manifestJSONURL);
+
+		Manifest manifest = new Manifest(packagesJSONObject);
+
+		JSONObject packageJSONObject = jsonObjects.remove(url);
+
+		_processPackage(
+			flatJSBundle, manifest, packageJSONObject, jsonObjects,
+			moduleDependenciesMap, jsBundleSource.getResourcesPath(), true);
 
 		_processNodePackages(
 			flatJSBundle, manifest, jsonObjects, moduleDependenciesMap);
