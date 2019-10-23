@@ -12,8 +12,9 @@
  * details.
  */
 
-package com.liferay.portal.osgi.web.portlet.tracker.internal;
+package com.liferay.frontend.js.portlet.extender.internal.portlet;
 
+import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.model.EventDefinition;
 import com.liferay.portal.kernel.model.Portlet;
 import com.liferay.portal.kernel.model.PortletApp;
@@ -21,76 +22,66 @@ import com.liferay.portal.kernel.model.PortletFilter;
 import com.liferay.portal.kernel.model.PortletURLListener;
 import com.liferay.portal.kernel.model.PublicRenderParameter;
 import com.liferay.portal.kernel.model.SpriteImage;
-import com.liferay.portal.kernel.util.StringUtil;
-import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.xml.QName;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import javax.servlet.Servlet;
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 
-import org.osgi.framework.Bundle;
-
 /**
- * @author Raymond Augé
+ * @author Gregory Amerson
  */
-public class BundlePortletApp implements PortletApp {
+@SuppressWarnings("serial")
+public class JSAppPortlet extends JSPortlet implements PortletApp {
 
-	public BundlePortletApp(
-		Bundle bundle, PortletApp systemPortletApp,
-		ServletContext servletContext) {
+	public JSAppPortlet(
+		JSONFactory jsonFactory, String packageName, String packageVersion,
+		Set<String> portletPreferencesFieldNames, PortletApp portletApp,
+		Servlet servlet) {
 
-		_servletContext = servletContext;
+		super(
+			jsonFactory, packageName, packageVersion,
+			portletPreferencesFieldNames);
 
-		_portletApp = systemPortletApp;
+		_portletApp = portletApp;
+		_servlet = servlet;
 	}
 
-	@Override
 	public void addEventDefinition(EventDefinition eventDefinition) {
-		_eventDefinitions.add(eventDefinition);
+		_portletApp.addEventDefinition(eventDefinition);
 	}
 
-	@Override
 	public void addPortlet(Portlet portlet) {
 		_portletApp.addPortlet(portlet);
 	}
 
-	@Override
 	public void addPortletFilter(PortletFilter portletFilter) {
 		_portletApp.addPortletFilter(portletFilter);
 	}
 
-	@Override
 	public void addPortletURLListener(PortletURLListener portletURLListener) {
-		_portletURLListeners.add(portletURLListener);
-		_portletURLListenersMap.put(
-			portletURLListener.getListenerClass(), portletURLListener);
+		_portletApp.addPortletURLListener(portletURLListener);
 	}
 
-	@Override
 	public void addPublicRenderParameter(
 		PublicRenderParameter publicRenderParameter) {
 
 		_portletApp.addPublicRenderParameter(publicRenderParameter);
 	}
 
-	@Override
 	public void addPublicRenderParameter(String identifier, QName qName) {
 		_portletApp.addPublicRenderParameter(identifier, qName);
 	}
 
-	@Override
 	public void addServletURLPatterns(Set<String> servletURLPatterns) {
 		_portletApp.addServletURLPatterns(servletURLPatterns);
 	}
 
-	@Override
 	public Map<String, String[]> getContainerRuntimeOptions() {
 		return _portletApp.getContainerRuntimeOptions();
 	}
@@ -102,163 +93,100 @@ public class BundlePortletApp implements PortletApp {
 		return servletContext.getContextPath();
 	}
 
-	@Override
 	public Map<String, String> getCustomUserAttributes() {
 		return _portletApp.getCustomUserAttributes();
 	}
 
-	@Override
 	public String getDefaultNamespace() {
-		if (_defaultNamespace == null) {
-			return _portletApp.getDefaultNamespace();
-		}
-
-		return _defaultNamespace;
+		return _portletApp.getDefaultNamespace();
 	}
 
-	@Override
 	public Set<EventDefinition> getEventDefinitions() {
-		return _eventDefinitions;
+		return _portletApp.getEventDefinitions();
 	}
 
-	@Override
 	public PortletFilter getPortletFilter(String filterName) {
 		return _portletApp.getPortletFilter(filterName);
 	}
 
-	@Override
 	public Set<PortletFilter> getPortletFilters() {
 		return _portletApp.getPortletFilters();
 	}
 
-	@Override
 	public List<Portlet> getPortlets() {
 		return _portletApp.getPortlets();
 	}
 
-	@Override
 	public PortletURLListener getPortletURLListener(String listenerClass) {
-		return _portletURLListenersMap.get(listenerClass);
+		return _portletApp.getPortletURLListener(listenerClass);
 	}
 
-	@Override
 	public Set<PortletURLListener> getPortletURLListeners() {
-		return _portletURLListeners;
+		return _portletApp.getPortletURLListeners();
 	}
 
-	@Override
 	public PublicRenderParameter getPublicRenderParameter(String identifier) {
 		return _portletApp.getPublicRenderParameter(identifier);
 	}
 
-	@Override
 	public ServletContext getServletContext() {
-		return _servletContext;
+		ServletConfig servletConfig = _servlet.getServletConfig();
+
+		return servletConfig.getServletContext();
 	}
 
-	@Override
 	public String getServletContextName() {
 		ServletContext servletContext = getServletContext();
 
 		return servletContext.getServletContextName();
 	}
 
-	@Override
 	public Set<String> getServletURLPatterns() {
 		return _portletApp.getServletURLPatterns();
 	}
 
-	@Override
 	public int getSpecMajorVersion() {
-		return _specMajorVersion;
+		return _portletApp.getSpecMajorVersion();
 	}
 
-	@Override
 	public int getSpecMinorVersion() {
-		return _specMinorVersion;
+		return _portletApp.getSpecMinorVersion();
 	}
 
-	@Override
 	public SpriteImage getSpriteImage(String fileName) {
-		return _spriteImagesMap.get(fileName);
+		return _portletApp.getSpriteImage(fileName);
 	}
 
-	@Override
 	public Set<String> getUserAttributes() {
 		return _portletApp.getUserAttributes();
 	}
 
-	@Override
 	public boolean isWARFile() {
-		return _warFile;
+		return true;
 	}
 
-	@Override
 	public void removePortlet(Portlet portletModel) {
-		_portletApp.removePortlet(portletModel);
 	}
 
-	@Override
 	public void setDefaultNamespace(String defaultNamespace) {
-		if (Validator.isNull(defaultNamespace)) {
-			_defaultNamespace = null;
-		}
-		else {
-			_defaultNamespace = defaultNamespace;
-		}
 	}
 
-	@Override
 	public void setServletContext(ServletContext servletContext) {
-		throw new UnsupportedOperationException();
 	}
 
-	@Override
 	public void setSpecMajorVersion(int specMajorVersion) {
-		_specMajorVersion = specMajorVersion;
 	}
 
-	@Override
 	public void setSpecMinorVersion(int specMinorVersion) {
-		_specMinorVersion = specMinorVersion;
 	}
 
-	@Override
 	public void setSpriteImages(String spriteFileName, Properties properties) {
-		for (Map.Entry<Object, Object> entry : properties.entrySet()) {
-			String key = (String)entry.getKey();
-
-			String value = (String)entry.getValue();
-
-			int[] values = StringUtil.split(value, 0);
-
-			int offset = values[0];
-			int height = values[1];
-			int width = values[2];
-
-			SpriteImage spriteImage = new SpriteImage(
-				spriteFileName, key, offset, height, width);
-
-			_spriteImagesMap.put(key, spriteImage);
-		}
 	}
 
-	@Override
 	public void setWARFile(boolean warFile) {
-		_warFile = warFile;
 	}
 
-	private String _defaultNamespace;
-	private final Set<EventDefinition> _eventDefinitions = new HashSet<>();
 	private final PortletApp _portletApp;
-	private final Set<PortletURLListener> _portletURLListeners =
-		new LinkedHashSet<>();
-	private final Map<String, PortletURLListener> _portletURLListenersMap =
-		new HashMap<>();
-	private final ServletContext _servletContext;
-	private int _specMajorVersion = 2;
-	private int _specMinorVersion;
-	private final Map<String, SpriteImage> _spriteImagesMap = new HashMap<>();
-	private boolean _warFile = true;
+	private final Servlet _servlet;
 
 }
