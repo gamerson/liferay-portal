@@ -339,8 +339,7 @@ public class PortletTracker
 			PortletBagFactory portletBagFactory = new PortletBagFactory();
 
 			portletBagFactory.setClassLoader(bundleClassLoader);
-			portletBagFactory.setServletContext(
-				portletApp.getServletContext());
+			portletBagFactory.setServletContext(portletApp.getServletContext());
 			portletBagFactory.setWARFile(true);
 
 			portletBagFactory.create(portletModel, portlet, true);
