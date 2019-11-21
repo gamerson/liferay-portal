@@ -119,7 +119,8 @@ public class ModulesProjectConfigurator extends BaseProjectConfigurator {
 
 			if (FileUtil.exists(project, "service.xml")) {
 				GradleUtil.applyPlugin(project, ServiceBuilderPlugin.class);
-				GradleUtil.applyPlugin(project, UpgradeTableBuilderPlugin.class);
+				GradleUtil.applyPlugin(
+					project, UpgradeTableBuilderPlugin.class);
 				GradleUtil.applyPlugin(project, WSDDBuilderPlugin.class);
 			}
 
