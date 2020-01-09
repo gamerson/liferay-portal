@@ -20,6 +20,13 @@ buildscript {
 }
 
 apply plugin: "com.liferay.yarn.defaults.plugin"
+apply plugin: "com.gradle.build-scan"
+
+buildScan {
+	allowUntrustedServer = true
+	publishAlways()
+	server = "https://ec2-54-202-222-165.us-west-2.compute.amazonaws.com/"
+}
 
 ext {
 	projectTemplateTokens = [
