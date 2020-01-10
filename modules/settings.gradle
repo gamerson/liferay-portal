@@ -26,3 +26,11 @@ if (testClassGroupIndex) {
 	gradle.ext.testClassGroupIndex = testClassGroupIndex
 	gradle.ext.testClassGroups = properties["TEST_CLASS_GROUPS"]
 }
+
+buildCache {
+	remote(HttpBuildCache) {
+		allowUntrustedServer = true
+		push = true
+		url = "https://ec2-54-202-222-165.us-west-2.compute.amazonaws.com/cache/"
+	}
+}
