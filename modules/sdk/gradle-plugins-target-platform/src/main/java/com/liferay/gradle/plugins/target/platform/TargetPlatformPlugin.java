@@ -18,6 +18,7 @@ import com.liferay.gradle.plugins.target.platform.extensions.TargetPlatformExten
 import com.liferay.gradle.plugins.target.platform.internal.util.GradleUtil;
 import com.liferay.gradle.plugins.target.platform.internal.util.TargetPlatformPluginUtil;
 import com.liferay.gradle.plugins.target.platform.tasks.ResolveTask;
+import com.liferay.gradle.plugins.target.platform.tasks.TargetPlatformManagementTask;
 
 import groovy.lang.Closure;
 
@@ -33,6 +34,7 @@ import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.invocation.Gradle;
 import org.gradle.api.logging.Logger;
+import org.gradle.api.plugins.HelpTasksPlugin;
 import org.gradle.api.plugins.JavaBasePlugin;
 import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.plugins.PluginContainer;
@@ -57,6 +59,9 @@ public class TargetPlatformPlugin implements Plugin<Project> {
 
 	public static final String TARGET_PLATFORM_DISTRO_CONFIGURATION_NAME =
 		"targetPlatformDistro";
+
+	public static final String TARGETPLATFFORMMANAGEMENT_TASK_NAME =
+		"targetPlatformManagement";
 
 	@Override
 	@SuppressWarnings("serial")
@@ -154,6 +159,23 @@ public class TargetPlatformPlugin implements Plugin<Project> {
 		return resolveTask;
 	}
 
+	private TargetPlatformManagementTask _addTaskTargetPlatformManagement(
+		Project project) {
+
+		final TargetPlatformManagementTask targetPlatformManagementTask =
+			GradleUtil.addTask(
+				project, TARGETPLATFFORMMANAGEMENT_TASK_NAME,
+				TargetPlatformManagementTask.class);
+
+		targetPlatformManagementTask.setDescription(
+			"Displays the target platform dependency management declared in " +
+				targetPlatformManagementTask.getProject() + ".");
+
+		targetPlatformManagementTask.setGroup(HelpTasksPlugin.HELP_GROUP);
+
+		return targetPlatformManagementTask;
+	}
+
 	private void _configureAfterProject(
 		Project afterProject, Logger logger,
 		Configuration targetPlatformBomsConfiguration,
@@ -190,6 +212,8 @@ public class TargetPlatformPlugin implements Plugin<Project> {
 			logger.info(
 				"Explicitly excluding {} from resolution", afterProject);
 		}
+
+		_addTaskTargetPlatformManagement(afterProject);
 	}
 
 	private void _configureTaskResolve(
