@@ -33,6 +33,7 @@ import org.gradle.api.GradleException;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.internal.TaskOutputsInternal;
 import org.gradle.api.invocation.Gradle;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.plugins.HelpTasksPlugin;
@@ -87,6 +88,8 @@ public class TargetPlatformPlugin implements Plugin<Project> {
 
 		final Configuration targetPlatformDistroConfiguration =
 			_addConfigurationTargetPlatformDistro(project);
+
+		_addTaskDependencyManagement(project);
 
 		PluginContainer pluginContainer = project.getPlugins();
 
@@ -156,6 +159,7 @@ public class TargetPlatformPlugin implements Plugin<Project> {
 		return configuration;
 	}
 
+	@SuppressWarnings("serial")
 	private DependencyManagementTask _addTaskDependencyManagement(
 		Project project) {
 
@@ -166,6 +170,17 @@ public class TargetPlatformPlugin implements Plugin<Project> {
 		dependencyManagementTask.setDescription(
 			"Displays the target platform dependencies for the project.");
 		dependencyManagementTask.setGroup(HelpTasksPlugin.HELP_GROUP);
+
+		TaskOutputsInternal outputs = dependencyManagementTask.getOutputs();
+
+		outputs.upToDateWhen(
+			new Closure<Boolean>(this, null) {
+
+				public Boolean call(Object... obj) {
+					return false;
+				}
+
+			});
 
 		return dependencyManagementTask;
 	}
@@ -219,8 +234,6 @@ public class TargetPlatformPlugin implements Plugin<Project> {
 			logger.info(
 				"Explicitly excluding {} from resolution", afterProject);
 		}
-
-		_addTaskDependencyManagement(afterProject);
 	}
 
 	private void _configureTaskResolve(
