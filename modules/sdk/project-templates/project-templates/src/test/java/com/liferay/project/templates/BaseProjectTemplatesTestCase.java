@@ -1354,6 +1354,98 @@ public interface BaseProjectTemplatesTestCase {
 		}
 	}
 
+	public default void testBuildTemplateProjectWarMVCPortletInWorkspace(
+			TemporaryFolder temporaryFolder, String testModifier, URI gradleDistribution,
+			MavenExecutor mavenExecutor, String template, String name,
+			String liferayVersion)
+		throws Exception {
+
+		File gradleWorkspaceDir = newBuildWorkspace(
+			temporaryFolder, "gradle", "gradleWS", liferayVersion,
+			mavenExecutor);
+
+		File gradleWorkspaceWarsDir = new File(
+			gradleWorkspaceDir, "wars");
+
+		File gradleProjectDir;
+
+		if (testModifier.equals("portlet")) {
+			gradleProjectDir = buildTemplateWithGradle(
+				gradleWorkspaceWarsDir, template, name, "--liferay-version",
+				liferayVersion);
+		}
+		else if (testModifier.equals("customPackage")) {
+			gradleProjectDir = buildTemplateWithGradle(
+				gradleWorkspaceWarsDir, template, name, "--liferay-version",
+				liferayVersion, "--package-name", "com.liferay.test");
+		}
+		else if (testModifier.equals("portletName")) {
+			name = "portlet";
+			gradleProjectDir = buildTemplateWithGradle(
+				gradleWorkspaceWarsDir, template, name, "--liferay-version",
+				liferayVersion);
+		}
+		else {
+			name = "portlet-portlet";
+			gradleProjectDir = buildTemplateWithGradle(
+				gradleWorkspaceWarsDir, template, name, "--liferay-version",
+				liferayVersion);
+		}
+
+		testContains(
+			gradleProjectDir, "build.gradle", "buildscript {",
+			"cssBuilder group", "portalCommonCSS group");
+
+		testNotContains(
+			gradleProjectDir, "build.gradle", "apply plugin: \"war\"");
+		testNotContains(
+			gradleProjectDir, "build.gradle", true, "^repositories \\{.*");
+		testNotContains(gradleProjectDir, "build.gradle", "version: \"[0-9].*");
+
+		File mavenWorkspaceDir = newBuildWorkspace(
+			temporaryFolder, "maven", "mavenWS", liferayVersion, mavenExecutor);
+
+		File mavenWarsDir = new File(mavenWorkspaceDir, "wars");
+
+		File mavenProjectDir;
+
+		if (testModifier.equals("portlet")) {
+			mavenProjectDir = buildTemplateWithMaven(
+					mavenWarsDir, mavenWarsDir, template, name, "com.test",
+				mavenExecutor, "-DclassName=Foo", "-Dpackage=foo",
+				"-DliferayVersion=" + liferayVersion);
+		}
+		else if (testModifier.equals("customPackage")) {
+			mavenProjectDir = buildTemplateWithMaven(
+					mavenWarsDir, mavenWarsDir, template, name, "com.test",
+				mavenExecutor, "-DclassName=Foo", "-Dpackage=com.liferay.test",
+				"-DliferayVersion=" + liferayVersion);
+		}
+		else if (testModifier.equals("portletName")) {
+			mavenProjectDir = buildTemplateWithMaven(
+					mavenWarsDir, mavenWarsDir, template, name, "com.test",
+				mavenExecutor, "-DclassName=Portlet", "-Dpackage=portlet",
+				"-DliferayVersion=" + liferayVersion);
+		}
+		else {
+			mavenProjectDir = buildTemplateWithMaven(
+					mavenWarsDir, mavenWarsDir, template, name, "com.test",
+				mavenExecutor, "-DclassName=Portlet",
+				"-Dpackage=portlet.portlet",
+				"-DliferayVersion=" + liferayVersion);
+		}
+
+		if (isBuildProjects()) {
+			File gradleOutputDir = new File(gradleProjectDir, "build/libs");
+			File mavenOutputDir = new File(mavenProjectDir, "target");
+
+			buildProjects(
+				gradleDistribution, mavenExecutor, gradleWorkspaceDir,
+				mavenProjectDir, gradleOutputDir, mavenOutputDir,
+				":wars:" + name + GRADLE_TASK_PATH_BUILD);
+		}
+	}
+
 	public default File testBuildTemplateWithWorkspace(
 			TemporaryFolder temporaryFolder, URI gradleDistribution,
 			String template, String name, String jarFilePath, String... args)
