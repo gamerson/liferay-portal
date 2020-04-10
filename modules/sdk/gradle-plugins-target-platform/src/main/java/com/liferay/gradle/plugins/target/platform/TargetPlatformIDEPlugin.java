@@ -14,6 +14,8 @@
 
 package com.liferay.gradle.plugins.target.platform;
 
+import com.google.common.collect.ImmutableMap;
+
 import com.liferay.gradle.plugins.target.platform.extensions.TargetPlatformIDEExtension;
 import com.liferay.gradle.plugins.target.platform.internal.util.GradleUtil;
 
@@ -22,9 +24,7 @@ import groovy.util.slurpersupport.GPathResult;
 
 import java.io.File;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -35,17 +35,12 @@ import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.DependencySet;
-import org.gradle.api.file.FileCollection;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.plugins.JavaPlugin;
-import org.gradle.api.tasks.SourceSet;
 import org.gradle.plugins.ide.eclipse.EclipsePlugin;
 import org.gradle.plugins.ide.eclipse.model.EclipseClasspath;
 import org.gradle.plugins.ide.eclipse.model.EclipseModel;
 import org.gradle.plugins.ide.idea.IdeaPlugin;
-import org.gradle.plugins.ide.idea.model.IdeaModel;
-import org.gradle.plugins.ide.idea.model.IdeaModule;
-import org.gradle.plugins.ide.idea.model.internal.GeneratedIdeaScope;
 
 /**
  * @author Gregory Amerson
@@ -201,40 +196,40 @@ public class TargetPlatformIDEPlugin implements Plugin<Project> {
 	private void _configureIdeaModel(
 		Project project, Configuration targetPlatformIDEConfiguration) {
 
-		IdeaModel ideaModel = GradleUtil.getExtension(project, IdeaModel.class);
+		try {
+			Configuration implementationConfiguration =
+				GradleUtil.getConfiguration(project, "implementation");
 
-		IdeaModule ideaModule = ideaModel.getModule();
+			implementationConfiguration.exclude(
+				_excludeProperties("net.java.dev.jna", "jna"));
+			implementationConfiguration.exclude(
+				_excludeProperties("javax.jms", "jms"));
+			implementationConfiguration.exclude(
+				_excludeProperties("net.open-esb.core", "jbi_rt"));
 
-		Map<String, Map<String, Collection<Configuration>>> scopes =
-			ideaModule.getScopes();
-
-		Map<String, Collection<Configuration>> providedScope = scopes.get(
-			GeneratedIdeaScope.PROVIDED.name());
-
-		if (providedScope == null) {
-			providedScope = new HashMap<>();
+			implementationConfiguration.extendsFrom(
+				targetPlatformIDEConfiguration);
 		}
+		catch (Exception exception) {
+			Logger logger = project.getLogger();
 
-		Collection<Configuration> plus = providedScope.get("plus");
-
-		if (plus == null) {
-			plus = new ArrayList<>();
+			if (logger.isErrorEnabled()) {
+				logger.error(
+					"Unable to add targetPalatformIDE to implementation " +
+						"configuration.");
+			}
 		}
+	}
 
-		plus.add(targetPlatformIDEConfiguration);
+	private Map<String, String> _excludeProperties(
+		String group, String module) {
 
-		providedScope.put("plus", plus);
-
-		scopes.put(GeneratedIdeaScope.PROVIDED.name(), providedScope);
-
-		ideaModule.setScopes(scopes);
-
-		SourceSet mainSourceSet = GradleUtil.getSourceSet(
-			project, SourceSet.MAIN_SOURCE_SET_NAME);
-
-		FileCollection compileClasspath = mainSourceSet.getCompileClasspath();
-
-		compileClasspath.plus(targetPlatformIDEConfiguration);
+		return ImmutableMap.<String, String>builder(
+		).put(
+			"group", group
+		).put(
+			"module", module
+		).build();
 	}
 
 	private static final String _TARGET_PLATFORM_IDE_BOMS_CONFIGURATION_NAME =
