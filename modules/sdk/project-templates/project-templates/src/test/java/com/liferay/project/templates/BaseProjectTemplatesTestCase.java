@@ -1320,6 +1320,33 @@ public interface BaseProjectTemplatesTestCase {
 				"repositories {");
 		}
 
+		if (template.equals("war-hook") && liferayVersion.startsWith("7.0")) {
+			testContains(
+				gradleProjectDir, "src/main/webapp/WEB-INF/liferay-hook.xml",
+				"liferay-hook_7_0_0.dtd");
+		}
+		else if (template.equals("war-hook") &&
+				 liferayVersion.startsWith("7.1")) {
+
+			testContains(
+				gradleProjectDir, "src/main/webapp/WEB-INF/liferay-hook.xml",
+				"liferay-hook_7_1_0.dtd");
+		}
+		else if (template.equals("war-hook") &&
+				 liferayVersion.startsWith("7.2")) {
+
+			testContains(
+				gradleProjectDir, "src/main/webapp/WEB-INF/liferay-hook.xml",
+				"liferay-hook_7_2_0.dtd");
+		}
+		else if (template.equals("war-hook") &&
+				 liferayVersion.startsWith("7.3")) {
+
+			testContains(
+				gradleProjectDir, "src/main/webapp/WEB-INF/liferay-hook.xml",
+				"liferay-hook_7_3_0.dtd");
+		}
+
 		testNotContains(
 			gradleProjectDir, "build.gradle", "apply plugin: \"war\"");
 		testNotContains(
@@ -1396,6 +1423,43 @@ public interface BaseProjectTemplatesTestCase {
 		testNotContains(
 			gradleProjectDir, "build.gradle", true, "^repositories \\{.*");
 		testNotContains(gradleProjectDir, "build.gradle", "version: \"[0-9].*");
+
+		if (liferayVersion.startsWith("7.0")) {
+			testContains(
+				gradleProjectDir, "src/main/webapp/WEB-INF/liferay-display.xml",
+				"liferay-display_7_0_0.dtd");
+
+			testContains(
+				gradleProjectDir, "src/main/webapp/WEB-INF/liferay-portlet.xml",
+				"liferay-portlet-app_7_0_0.dtd");
+		}
+		else if (liferayVersion.startsWith("7.1")) {
+			testContains(
+				gradleProjectDir, "src/main/webapp/WEB-INF/liferay-display.xml",
+				"liferay-display_7_1_0.dtd");
+
+			testContains(
+				gradleProjectDir, "src/main/webapp/WEB-INF/liferay-portlet.xml",
+				"liferay-portlet-app_7_1_0.dtd");
+		}
+		else if (liferayVersion.startsWith("7.2")) {
+			testContains(
+				gradleProjectDir, "src/main/webapp/WEB-INF/liferay-display.xml",
+				"liferay-display_7_2_0.dtd");
+
+			testContains(
+				gradleProjectDir, "src/main/webapp/WEB-INF/liferay-portlet.xml",
+				"liferay-portlet-app_7_2_0.dtd");
+		}
+		else if (liferayVersion.startsWith("7.3")) {
+			testContains(
+				gradleProjectDir, "src/main/webapp/WEB-INF/liferay-display.xml",
+				"liferay-display_7_3_0.dtd");
+
+			testContains(
+				gradleProjectDir, "src/main/webapp/WEB-INF/liferay-portlet.xml",
+				"liferay-portlet-app_7_3_0.dtd");
+		}
 
 		File mavenWorkspaceDir = newBuildWorkspace(
 			temporaryFolder, "maven", "mavenWS", liferayVersion, mavenExecutor);
