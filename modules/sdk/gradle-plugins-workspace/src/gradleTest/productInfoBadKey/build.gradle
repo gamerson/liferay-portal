@@ -1,7 +1,25 @@
 task runGradleTest
 
+LogListener logListener = new LogListener()
+
 runGradleTest {
+	doFirst {
+		logging.addStandardOutputListener(logListener)
+	}
+
 	doLast {
 		assert gradle.liferayWorkspace.appServerTomcatVersion == null
+
+		assert logListener.log.contains("The property `liferay.workspace.product` has not been set.")
 	}
+}
+
+class LogListener implements StandardOutputListener {
+
+	void onOutput(CharSequence charSequence) {
+		log = log + charSequence
+	}
+
+	String log = ""
+
 }

@@ -1,10 +1,31 @@
 task runGradleTest
 
+LogListener logListener = new LogListener()
+
 runGradleTest {
+	doFirst {
+		logging.addStandardOutputListener(logListener)
+	}
+
 	doLast {
 		assert gradle.liferayWorkspace.appServerTomcatVersion == "9.0.31"
 		assert gradle.liferayWorkspace.bundleUrl == "https://releases-cdn.liferay.com/portal/7.2.1-ga2/liferay-ce-portal-tomcat-7.2.1-ga2-20191111141448326.tar.gz"
 		assert gradle.liferayWorkspace.dockerImageLiferay == "liferay/portal:7.3.0-ga1"
 		assert gradle.liferayWorkspace.targetPlatformVersion == "7.2.1"
+
+		assert logListener.log.contains("The app.server.tomcat.version property is currently overriding the default value")
+		assert logListener.log.contains("The liferay.workspace.bundle.url property is currently overriding the default value")
+		assert logListener.log.contains("The liferay.workspace.target.platform.version property is currently overriding the default value")
+		assert logListener.log.contains("The liferay.workspace.docker.image.liferay property is currently overriding the default value")
 	}
+}
+
+class LogListener implements StandardOutputListener {
+
+	void onOutput(CharSequence charSequence) {
+		log = log + charSequence
+	}
+
+	String log = ""
+
 }
