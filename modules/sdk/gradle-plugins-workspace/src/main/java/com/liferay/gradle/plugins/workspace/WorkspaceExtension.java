@@ -585,6 +585,10 @@ public class WorkspaceExtension {
 			return _liferayProductVersion;
 		}
 
+		public String getPromoted() {
+			return _promoted;
+		}
+
 		public String getReleaseDate() {
 			return _releaseDate;
 		}
@@ -604,6 +608,9 @@ public class WorkspaceExtension {
 
 		@SerializedName("liferayProductVersion")
 		private String _liferayProductVersion;
+
+		@SerializedName("promoted")
+		private String _promoted;
 
 		@SerializedName("releaseDate")
 		private String _releaseDate;
