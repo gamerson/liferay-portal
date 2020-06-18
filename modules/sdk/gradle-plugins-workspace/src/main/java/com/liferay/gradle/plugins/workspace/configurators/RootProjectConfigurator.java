@@ -25,6 +25,8 @@ import com.bmuschko.gradle.docker.tasks.image.DockerPullImage;
 import com.bmuschko.gradle.docker.tasks.image.DockerRemoveImage;
 import com.bmuschko.gradle.docker.tasks.image.Dockerfile;
 
+import com.google.common.base.Strings;
+
 import com.liferay.gradle.plugins.LiferayBasePlugin;
 import com.liferay.gradle.plugins.workspace.WorkspaceExtension;
 import com.liferay.gradle.plugins.workspace.WorkspacePlugin;
@@ -269,6 +271,16 @@ public class RootProjectConfigurator implements Plugin<Project> {
 	private void _addDockerTasks(
 		Project project, WorkspaceExtension workspaceExtension,
 		Configuration providedModulesConfiguration) {
+
+		if (Strings.isNullOrEmpty(workspaceExtension.getDockerImageLiferay())) {
+			Logger logger = project.getLogger();
+
+			if (logger.isWarnEnabled()) {
+				logger.warn("No liferay docker image found.");
+			}
+
+			return;
+		}
 
 		Copy dockerDeploy = _addTaskDockerDeploy(
 			project, workspaceExtension, providedModulesConfiguration);
