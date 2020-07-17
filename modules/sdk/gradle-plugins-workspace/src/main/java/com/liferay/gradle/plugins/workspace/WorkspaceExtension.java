@@ -14,11 +14,6 @@
 
 package com.liferay.gradle.plugins.workspace;
 
-import com.google.gson.Gson;
-import com.google.gson.annotations.SerializedName;
-import com.google.gson.reflect.TypeToken;
-import com.google.gson.stream.JsonReader;
-
 import com.liferay.gradle.plugins.workspace.configurators.ExtProjectConfigurator;
 import com.liferay.gradle.plugins.workspace.configurators.ModulesProjectConfigurator;
 import com.liferay.gradle.plugins.workspace.configurators.PluginsProjectConfigurator;
@@ -31,10 +26,14 @@ import com.liferay.portal.tools.bundle.support.commands.DownloadCommand;
 import com.liferay.portal.tools.bundle.support.constants.BundleSupportConstants;
 import com.liferay.workspace.bundle.url.codec.BundleURLCodec;
 
+import groovy.json.JsonSlurper;
+
 import groovy.lang.Closure;
 import groovy.lang.MissingPropertyException;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStream;
 
 import java.net.URL;
 
@@ -48,6 +47,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+
+import javax.net.ssl.SSLHandshakeException;
+
+import org.apache.http.conn.ConnectTimeoutException;
 
 import org.gradle.api.GradleException;
 import org.gradle.api.Plugin;
@@ -439,6 +442,7 @@ public class WorkspaceExtension {
 		);
 	}
 
+	@SuppressWarnings("unchecked")
 	private ProductInfo _getProductInfo(String product) {
 		if (product == null) {
 			return null;
@@ -447,6 +451,8 @@ public class WorkspaceExtension {
 		return _productInfos.computeIfAbsent(
 			product,
 			key -> {
+				JsonSlurper jsonSlurper = new JsonSlurper();
+
 				try {
 					DownloadCommand downloadCommand = new DownloadCommand();
 
@@ -461,20 +467,35 @@ public class WorkspaceExtension {
 
 					Path downloadPath = downloadCommand.getDownloadPath();
 
-					try (JsonReader jsonReader = new JsonReader(
-							Files.newBufferedReader(downloadPath))) {
+					try (BufferedReader reader = Files.newBufferedReader(
+							downloadPath)) {
 
-						Gson gson = new Gson();
+						Map<String, Object> productInfoMap =
+							(Map<String, Object>)jsonSlurper.parse(
+								Files.newBufferedReader(downloadPath));
 
-						TypeToken<Map<String, ProductInfo>> typeToken =
-							new TypeToken<Map<String, ProductInfo>>() {
-							};
-
-						Map<String, ProductInfo> productInfos = gson.fromJson(
-							jsonReader, typeToken.getType());
-
-						return productInfos.get(product);
+						return new ProductInfo(
+							(Map<String, String>)productInfoMap.get(product));
 					}
+				}
+				catch (ConnectTimeoutException | SSLHandshakeException
+							exception) {
+
+					try (InputStream resourceAsStream =
+							WorkspaceExtension.class.getResourceAsStream(
+								"/product_info.json")) {
+
+						Map<String, Object> productInfoMap =
+							(Map<String, Object>)jsonSlurper.parse(
+								resourceAsStream);
+
+						return new ProductInfo(
+							(Map<String, String>)productInfoMap.get(product));
+					}
+					catch (Exception ioException) {
+					}
+
+					return null;
 				}
 				catch (Exception exception) {
 					throw new GradleException(
@@ -572,8 +593,16 @@ public class WorkspaceExtension {
 	private File _workspaceCacheDir = new File(
 		System.getProperty("user.home"), _DEFAULT_WORKSPACE_CACHE_DIR_NAME);
 
-	@SuppressWarnings("unused")
 	private class ProductInfo {
+
+		public ProductInfo(Map<String, String> productMap) {
+			_appServerTomcatVersion = productMap.get("appServerTomcatVersion");
+			_bundleUrl = productMap.get("bundleUrl");
+			_liferayDockerImage = productMap.get("liferayDockerImage");
+			_liferayProductVersion = productMap.get("liferayProductVersion");
+			_releaseDate = productMap.get("releaseDate");
+			_targetPlatformVersion = productMap.get("targetPlatformVersion");
+		}
 
 		public String getAppServerTomcatVersion() {
 			return _appServerTomcatVersion;
@@ -587,6 +616,7 @@ public class WorkspaceExtension {
 			return _liferayDockerImage;
 		}
 
+		@SuppressWarnings("unused")
 		public String getLiferayProductVersion() {
 			return _liferayProductVersion;
 		}
@@ -599,22 +629,11 @@ public class WorkspaceExtension {
 			return _targetPlatformVersion;
 		}
 
-		@SerializedName("appServerTomcatVersion")
 		private String _appServerTomcatVersion;
-
-		@SerializedName("bundleUrl")
 		private String _bundleUrl;
-
-		@SerializedName("liferayDockerImage")
-		private String _liferayDockerImage;
-
-		@SerializedName("liferayProductVersion")
-		private String _liferayProductVersion;
-
-		@SerializedName("releaseDate")
-		private String _releaseDate;
-
-		@SerializedName("targetPlatformVersion")
+		private final String _liferayDockerImage;
+		private final String _liferayProductVersion;
+		private final String _releaseDate;
 		private String _targetPlatformVersion;
 
 	}
