@@ -60,7 +60,7 @@ dependencies {
 	compileInclude group: "com.liferay", name: "com.liferay.project.templates.extensions", version: "1.0.36"
 
 	compileOnly group: "biz.aQute.bnd", name: "biz.aQute.bnd", version: "3.5.0"
-	compileOnly group: "org.apache.maven.archetype", name: "archetype-common", version: "2.4"
+	compileOnly group: "org.apache.maven.archetype", name: "archetype-common", version: "3.2.0"
 
 	projectTemplates group: "com.liferay", name: "com.liferay.project.templates.api", version: "1.0.98"
 	projectTemplates group: "com.liferay", name: "com.liferay.project.templates.control.menu.entry", version: "1.0.96"

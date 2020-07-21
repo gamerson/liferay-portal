@@ -30,6 +30,7 @@ import java.util.List;
 import org.apache.maven.archetype.common.DefaultArchetypeArtifactManager;
 import org.apache.maven.archetype.exception.UnknownArchetype;
 import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.project.ProjectBuildingRequest;
 
 /**
  * @author Gregory Amerson
@@ -46,7 +47,8 @@ public class ArchetyperArchetypeArtifactManager
 		String archetypeGroupId, String archetypeArtifactId,
 		String archetypeVersion, ArtifactRepository archetypeRepository,
 		ArtifactRepository localRepository,
-		List<ArtifactRepository> remoteRepositories) {
+		List<ArtifactRepository> remoteRepositories,
+		ProjectBuildingRequest buildingRequest) {
 
 		return true;
 	}
@@ -56,7 +58,8 @@ public class ArchetyperArchetypeArtifactManager
 			String groupId, String artifactId, String version,
 			ArtifactRepository archetypeRepository,
 			ArtifactRepository localRepository,
-			List<ArtifactRepository> repositories)
+			List<ArtifactRepository> repositories,
+			ProjectBuildingRequest buildingRequest)
 		throws UnknownArchetype {
 
 		File archetypeFile = null;

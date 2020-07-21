@@ -1,4 +1,4 @@
 dependencies {
 	compileOnly group: "com.beust", name: "jcommander", version: "1.72"
-	compileOnly group: "org.apache.maven.archetype", name: "archetype-common", version: "2.4"
+	compileOnly group: "org.apache.maven.archetype", name: "archetype-common", version: "3.2.0"
 }
