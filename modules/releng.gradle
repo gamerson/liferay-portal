@@ -1421,6 +1421,8 @@ private List<String> _getIncludes(File jarFile) {
 
 	List<String> includes = new ArrayList<>()
 
+	includes.add("**/*.tld")
+
 	if (resource == null) {
 		return includes
 	}
