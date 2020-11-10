@@ -1412,44 +1412,35 @@ private InputStream _getCommitFileStream(String commitId, String fileName) {
 	}
 }
 
-private List<String> _getExcludes(File jarFile) {
-	List<String> excludes = new ArrayList<>()
-
-	if (jarFile.name.startsWith("com.liferay")) {
-		excludes.add("*.jar")
-		excludes.add("**/javadocs-*.xml")
-		excludes.add("**/node_modules/**")
-	}
-
-	return excludes
-}
-
 private List<String> _getIncludes(File jarFile) {
-	List<String> includes = new ArrayList<>()
-
-	if (!jarFile.name.startsWith("com.liferay")) {
-		return includes
-	}
-
-	includes.add("*")
-	includes.add("META-INF/**")
-	includes.add("OSGI-INF/**")
-	includes.add("WEB-INF/**")
-
 	FileTree jarFileTree = zipTree(jarFile)
 
 	aQute.bnd.osgi.Jar jar = new aQute.bnd.osgi.Jar(jarFile)
 
-	jarFileTree.visit {
-		if (!it.isDirectory()) {
-			return
-		}
+	Resource resource = jar.getResource("META-INF/MANIFEST.MF")
 
-		String path = it.path
+	List<String> includes = new ArrayList<>()
 
-		if (path.startsWith("com/liferay/") && (jar.getResource(path + "/packageinfo") != null)) {
-			includes.add(path + "/*")
-		}
+	if (resource == null) {
+		return includes
+	}
+
+	Manifest manifest = new Manifest(resource.openInputStream())
+
+	Attributes attributes = manifest.getMainAttributes()
+
+	String exportPackageValue = attributes.getValue(Constants.EXPORT_PACKAGE)
+
+	if (exportPackageValue == null) {
+		return includes
+	}
+
+	String[] exportPackages = exportPackageValue.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*\$)", -1)
+
+	for(String exportPackage : exportPackages) {
+		String line = exportPackage.substring(0, exportPackage.indexOf(";"))
+
+		includes.add(line.replace('.' as char, '/' as char) + "/*")
 	}
 
 	return includes
@@ -1553,45 +1544,22 @@ private List<Dependency> _getPortalArtifactsDependencies(List<File> relengProper
 
 		File dir = new File(portalArtifactsDir, jarFile.name[0 .. -5])
 
-		copy {
-			from zipTree(jarFile).matching {
-				exclude _getExcludes(jarFile)
-				include _getIncludes(jarFile)
-			}
+		List<String> includes = _getIncludes(jarFile)
 
-			into dir
-		}
-
-		DependencyHandler dependencyHandler = project.getDependencies()
-
-		dependencies.add(dependencyHandler.create(files(dir)))
-
-		logger.lifecycle "Added {}", jarFile.name
-	}
-
-	portalArtifactsDir.eachFile {
-		File portalArtifactDir ->
-
-		File servicesDir = new File(portalArtifactDir, "META-INF/services")
-
-		if (servicesDir.exists()) {
-			servicesDir.eachFile {
-				File servicesFile ->
-
-				servicesFile.getText("UTF-8").eachLine {
-					String line ->
-
-					if (Validator.isNotNull(line)) {
-						File file = new File(portalArtifactDir, line.replace('.' as char, '/' as char) + ".class")
-
-						if (!file.exists()) {
-							delete servicesFile
-
-							return
-						}
-					}
+		if (!includes.isEmpty()) {
+			copy {
+				from zipTree(jarFile).matching {
+					include includes
 				}
+
+				into dir
 			}
+
+			DependencyHandler dependencyHandler = project.getDependencies()
+
+			dependencies.add(dependencyHandler.create(files(dir)))
+
+			logger.lifecycle "Added {}", jarFile.name
 		}
 	}
 
