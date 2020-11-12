@@ -15,6 +15,7 @@
 package com.liferay.gradle.plugins.workspace.configurators;
 
 import com.liferay.gradle.plugins.LiferayBasePlugin;
+import com.liferay.gradle.plugins.css.builder.CSSBuilderPlugin;
 import com.liferay.gradle.plugins.workspace.WorkspaceExtension;
 import com.liferay.gradle.plugins.workspace.WorkspacePlugin;
 import com.liferay.gradle.plugins.workspace.internal.util.GradleUtil;
@@ -35,12 +36,15 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 
 import org.gradle.api.Project;
+import org.gradle.api.Task;
 import org.gradle.api.file.CopySpec;
 import org.gradle.api.initialization.Settings;
 import org.gradle.api.plugins.BasePlugin;
 import org.gradle.api.plugins.ExtensionAware;
+import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.plugins.WarPlugin;
 import org.gradle.api.tasks.Copy;
+import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.bundling.War;
 
 /**
@@ -64,6 +68,8 @@ public class WarsProjectConfigurator extends BaseProjectConfigurator {
 			(ExtensionAware)project.getGradle(), WorkspaceExtension.class);
 
 		GradleUtil.applyPlugin(project, WarPlugin.class);
+
+		_configureTaskProcessResources(project);
 
 		War war = (War)GradleUtil.getTask(project, WarPlugin.WAR_TASK_NAME);
 
@@ -167,6 +173,39 @@ public class WarsProjectConfigurator extends BaseProjectConfigurator {
 					copySpec.from(war);
 				}
 
+			});
+	}
+
+	private void _configureTaskProcessResources(Project project) {
+		project.afterEvaluate(
+			p -> {
+				TaskContainer taskContainer = p.getTasks();
+
+				Task buildCSSTask = taskContainer.findByName(
+					CSSBuilderPlugin.BUILD_CSS_TASK_NAME);
+
+				if (buildCSSTask != null) {
+					Copy copy = (Copy)GradleUtil.getTask(
+						project, JavaPlugin.PROCESS_RESOURCES_TASK_NAME);
+
+					if (copy != null) {
+						copy.dependsOn(buildCSSTask);
+
+						copy.exclude("**/*.css");
+						copy.exclude("**/*.scss");
+
+						copy.filesMatching(
+							"**/.sass-cache/",
+							details -> {
+								String path = details.getPath();
+
+								details.setPath(
+									path.replace(".sass-cache/", ""));
+							});
+
+						copy.setIncludeEmptyDirs(false);
+					}
+				}
 			});
 	}
 
