@@ -12,7 +12,7 @@ function copy_configs {
 		echo ""
 		echo "[LIFERAY] ... into ${LIFERAY_HOME}."
 
-		cp -R "${CONFIGS_DIR}"/* ${LIFERAY_HOME}
+		cp -pR "${CONFIGS_DIR}"/* ${LIFERAY_HOME}
 
 		echo ""
 	fi
@@ -31,7 +31,7 @@ function copy_remove_dir {
 		echo ""
 		echo "[LIFERAY] ... into ${LIFERAY_MOUNT_DIR}/${DEST_DIR}"
 
-		cp -R "${SRC_DIR}"/* ${LIFERAY_MOUNT_DIR}/${DEST_DIR}
+		cp -pR "${SRC_DIR}"/* ${LIFERAY_MOUNT_DIR}/${DEST_DIR}
 
 		rm -rf "${SRC_DIR}"
 
