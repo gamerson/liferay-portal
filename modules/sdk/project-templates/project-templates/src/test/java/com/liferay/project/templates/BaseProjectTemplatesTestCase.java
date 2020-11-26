@@ -150,7 +150,7 @@ public interface BaseProjectTemplatesTestCase {
 		"gradle/wrapper/gradle-wrapper.properties"
 	};
 
-	public static final String GRADLE_WRAPPER_VERSION = "5.6.4";
+	public static final String GRADLE_WRAPPER_VERSION = "6.6.1";
 
 	public static final String MAVEN_GOAL_BUILD_REST = "rest-builder:build";
 
@@ -256,6 +256,30 @@ public interface BaseProjectTemplatesTestCase {
 
 				configurationElement.appendChild(newElement);
 			}
+		}
+	}
+
+	public default void addGradleConfigurations(
+			File buildFile, String... confiugrations)
+		throws IOException {
+
+		Path buildFilePath = buildFile.toPath();
+
+		List<String> lines = Files.readAllLines(
+			buildFilePath, StandardCharsets.UTF_8);
+
+		try (BufferedWriter bufferedWriter = Files.newBufferedWriter(
+				buildFilePath, StandardCharsets.UTF_8)) {
+
+			lines.add("configurations {" + System.lineSeparator());
+
+			for (String line : confiugrations) {
+				lines.add(line + System.lineSeparator());
+			}
+
+			lines.add("}" + System.lineSeparator());
+
+			FileTestUtil.write(bufferedWriter, lines.toArray(new String[0]));
 		}
 	}
 

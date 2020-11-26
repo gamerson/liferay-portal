@@ -1,0 +1,21 @@
+test.testLogging.showStandardStreams = true
+
+configurations {
+	releaseApiJar
+	releaseApiJarSources
+}
+
+dependencies{
+	releaseApiJar group: "com.liferay.portal", name: "release.${releaseApiJarType}.api",version: "${releaseApiJarVersion}"
+	releaseApiJarSources group: "com.liferay.portal", name: "release.${releaseApiJarType}.api", version: "${releaseApiJarVersion}", classifier: "sources"
+}
+task verifyJar{
+	
+	System.setProperty("releaseApiJar", configurations.releaseApiJar.singleFile.path)
+	System.setProperty("releaseApiJarSources", configurations.releaseApiJarSources.singleFile.path)
+
+	test.systemProperties System.properties
+	
+	println "Executing the set:" + System.getProperty("releaseApiJar")
+}
+
