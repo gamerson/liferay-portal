@@ -480,16 +480,20 @@ public class RootProjectConfigurator implements Plugin<Project> {
 
 		String workPath = workDir.getAbsolutePath();
 
+		String deployPath = deployDir.getAbsolutePath();
+
 		if (OSDetector.isWindows()) {
 			String prefix = FilenameUtils.getPrefix(dockerPath);
 
 			if (prefix.contains(":")) {
 				dockerPath = '/' + dockerPath.replace(":", "");
 				workPath = '/' + workPath.replace(":", "");
+				deployPath = '/' + deployPath.replace(":", "");
 			}
 
 			dockerPath = dockerPath.replace('\\', '/');
 			workPath = workPath.replace('\\', '/');
+			deployPath = deployPath.replace('\\', '/');
 		}
 
 		DockerCreateContainer.HostConfig hostConfig =
@@ -497,7 +501,7 @@ public class RootProjectConfigurator implements Plugin<Project> {
 
 		MapProperty<String, String> binds = hostConfig.getBinds();
 
-		binds.put(deployDir.getAbsolutePath(), "/mnt/liferay/deploy");
+		binds.put(deployPath, "/mnt/liferay/deploy");
 		binds.put(workPath, "/opt/liferay/work");
 
 		dockerCreateContainer.setDescription(
