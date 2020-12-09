@@ -14,6 +14,7 @@ task copyRepo(type: Copy)
 task downloadBundle(type: Download)
 task downloadHotFixZip(type: Download)
 task downloadPluginsSdk(type: Download)
+task downloadProductInfo(type: Download)
 
 String bundleUrl = "https://releases-cdn.liferay.com/portal/7.1.2-ga3/liferay-ce-portal-tomcat-7.1.2-ga3-20190107144105508.tar.gz"
 File gradleTestDependenciesDir = new File(buildDir, "gradle-test-dependencies")
@@ -89,7 +90,6 @@ copyRepo {
 
 dependencies {
 	compile group: "com.bmuschko", name: "gradle-docker-plugin", version: "6.6.1"
-	compile group: 'com.google.code.gson', name: 'gson', version: '2.8.6'
 	compile group: "com.liferay", name: "com.liferay.ant.bnd", version: "3.2.6"
 	compile(group: "com.liferay", name: "com.liferay.gradle.plugins", version: "13.0.2") {
 		exclude group: "biz.aQute.bnd", module: "biz.aQute.bnd"
@@ -135,6 +135,12 @@ downloadPluginsSdk {
 	src pluginsSdkUrl
 }
 
+downloadProductInfo {
+	src "https://releases-cdn.liferay.com/tools/workspace/.product_info.json"
+	dest buildDir
+	onlyIfNewer true
+}
+
 eclipse.classpath.file {
 	whenMerged {
 		classpath ->
@@ -143,6 +149,10 @@ eclipse.classpath.file {
 			entry -> (entry.kind == "src") && (entry.path == "build/gradleTest/src/groovy")
 		}
 	}
+}
+
+jar {
+	from downloadProductInfo
 }
 
 gradleTest {
