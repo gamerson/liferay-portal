@@ -14,10 +14,7 @@
 
 package com.liferay.gradle.plugins.workspace;
 
-import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
-import com.google.gson.reflect.TypeToken;
-import com.google.gson.stream.JsonReader;
 
 import com.liferay.gradle.plugins.workspace.configurators.ExtProjectConfigurator;
 import com.liferay.gradle.plugins.workspace.configurators.ModulesProjectConfigurator;
@@ -31,15 +28,18 @@ import com.liferay.portal.tools.bundle.support.commands.DownloadCommand;
 import com.liferay.portal.tools.bundle.support.constants.BundleSupportConstants;
 import com.liferay.workspace.bundle.url.codec.BundleURLCodec;
 
+import groovy.json.JsonSlurper;
+
 import groovy.lang.Closure;
 import groovy.lang.MissingPropertyException;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStream;
 
 import java.net.URL;
 
 import java.nio.file.Files;
-import java.nio.file.Path;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -405,6 +405,7 @@ public class WorkspaceExtension {
 		);
 	}
 
+	@SuppressWarnings("unchecked")
 	private ProductInfo _getProductInfo(String product) {
 		if (product == null) {
 			return null;
@@ -413,6 +414,9 @@ public class WorkspaceExtension {
 		return _productInfos.computeIfAbsent(
 			product,
 			key -> {
+				Map<String, Object> productInfoMap = Collections.emptyMap();
+				JsonSlurper jsonSlurper = new JsonSlurper();
+
 				try {
 					DownloadCommand downloadCommand = new DownloadCommand();
 
@@ -425,28 +429,29 @@ public class WorkspaceExtension {
 
 					downloadCommand.execute();
 
-					Path downloadPath = downloadCommand.getDownloadPath();
+					try (BufferedReader reader = Files.newBufferedReader(
+							downloadCommand.getDownloadPath())) {
 
-					try (JsonReader jsonReader = new JsonReader(
-							Files.newBufferedReader(downloadPath))) {
-
-						Gson gson = new Gson();
-
-						TypeToken<Map<String, ProductInfo>> typeToken =
-							new TypeToken<Map<String, ProductInfo>>() {
-							};
-
-						Map<String, ProductInfo> productInfos = gson.fromJson(
-							jsonReader, typeToken.getType());
-
-						return productInfos.get(product);
+						productInfoMap = (Map<String, Object>)jsonSlurper.parse(
+							reader);
 					}
 				}
-				catch (Exception exception) {
-					throw new GradleException(
-						"Unable to get product info for :" + product,
-						exception);
+				catch (Exception exception1) {
+					try (InputStream resourceAsStream =
+							WorkspaceExtension.class.getResourceAsStream(
+								"/.product_info.json")) {
+
+						productInfoMap = (Map<String, Object>)jsonSlurper.parse(
+							resourceAsStream);
+					}
+					catch (Exception exception2) {
+						throw new GradleException(
+							"Unable to get product info for :" + product,
+							exception2);
+					}
 				}
+
+				return (ProductInfo)productInfoMap.get(product);
 			});
 	}
 
