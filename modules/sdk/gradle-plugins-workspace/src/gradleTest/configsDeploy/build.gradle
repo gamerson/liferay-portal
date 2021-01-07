@@ -1,0 +1,28 @@
+task runGradleTest
+
+runGradleTest {
+	dependsOn configsDeploy
+
+	doLast {
+
+		// Configs
+
+		Map<String, String> configFileNames = [
+			"common.txt": "common",
+			"production.txt" : "production",
+			"license/copyright.txt": "production"
+		]
+
+		configFileNames.each {
+			String fileName, String config ->
+
+			File generatedFile = new File(initBundle.destinationDir, fileName)
+
+			assert generatedFile.exists()
+
+			File expectedFile = file("configs/${config}/${fileName}")
+
+			assert expectedFile.text.normalize() == generatedFile.text.normalize()
+		}
+	}
+}
