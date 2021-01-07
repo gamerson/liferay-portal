@@ -118,6 +118,8 @@ public class RootProjectConfigurator implements Plugin<Project> {
 	public static final String CLEAN_TASK_NAME =
 		LifecycleBasePlugin.CLEAN_TASK_NAME;
 
+	public static final String CONFIGS_DEPLOY_TASK_NAME = "configsDeploy";
+
 	public static final String CREATE_DOCKER_CONTAINER_TASK_NAME =
 		"createDockerContainer";
 
@@ -239,6 +241,8 @@ public class RootProjectConfigurator implements Plugin<Project> {
 
 		_addDockerTasks(
 			project, workspaceExtension, providedModulesConfiguration);
+
+		_addTaskConfigsDeploy(project, workspaceExtension);
 	}
 
 	public boolean isDefaultRepositoryEnabled() {
@@ -395,6 +399,43 @@ public class RootProjectConfigurator implements Plugin<Project> {
 		cleanTask.dependsOn(dockerRemoveImage);
 
 		return dockerBuildImage;
+	}
+
+	private Copy _addTaskConfigsDeploy(
+		Project project, WorkspaceExtension workspaceExtension) {
+
+		Copy copy = GradleUtil.addTask(
+			project, CONFIGS_DEPLOY_TASK_NAME, Copy.class);
+
+		_configureTaskDisableUpToDate(copy);
+
+		copy.setDescription(
+			"Copy the Liferay configs and provided configurations to the " +
+				"bundles directory.");
+
+		copy.setDestinationDir(workspaceExtension.getHomeDir());
+
+		File configsDir = workspaceExtension.getConfigsDir();
+
+		copy.from(
+			new Callable<File>() {
+
+				@Override
+				public File call() throws Exception {
+					return configsDir;
+				}
+
+			},
+			new Closure<Void>(project) {
+
+				@SuppressWarnings("unused")
+				public void doCall(CopySpec copySpec) {
+					copySpec.into(LIFERAY_CONFIGS_DIR_NAME);
+				}
+
+			});
+
+		return copy;
 	}
 
 	@SuppressWarnings("serial")
