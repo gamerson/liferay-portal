@@ -1,0 +1,30 @@
+Bundle-Name: Liferay Portal Module Builder
+Bundle-SymbolicName: com.liferay.portal.module.builder
+Bundle-Version: 1.0.0
+Import-Package:\
+	!com.werken.xpath,\
+	\
+	!org.apache.log.*,\
+	!org.apache.maven.archetype.catalog.*,\
+	!org.apache.maven.archetype.old.descriptor.*,\
+	!org.apache.maven.archetype.registry.*,\
+	!org.apache.maven.artifact.*,\
+	!org.apache.maven.project.*,\
+	!org.apache.maven.settings,\
+	!org.apache.maven.shared.invoker,\
+	!org.apache.maven.wagon.*,\
+	!org.apache.oro.text.perl,\
+	\
+	!org.codehaus.classworlds,\
+	!org.codehaus.plexus.*,\
+	\
+	!org.gjt.xpp,\
+	\
+	!org.gradle.internal.impldep.com.google.errorprone.annotations.concurrent*,\
+	!org.gradle.internal.impldep.org.checkerframework.checker.nullness.compatqual*,\
+	\
+	!org.mozilla.intl.chardet,\
+	\
+	!org.xmlpull.v1,\
+	\
+	*
