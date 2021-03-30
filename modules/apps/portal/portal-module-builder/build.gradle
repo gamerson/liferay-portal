@@ -1,11 +1,45 @@
+import java.util.jar.Attributes
+import java.util.jar.JarFile
+
+task moduleBuilderJarsList
+
+configurations {
+	moduleBuilder
+}
+
 dependencies {
-	compileInclude group: "com.liferay", name: "com.liferay.project.templates", version: "5.0.117"
 	compileInclude group: "org.gradle", name: "gradle-tooling-api", version: "6.6.1"
 	compileInclude group: "org.slf4j", name: "slf4j-simple", version: "1.7.10"
 
 	compileOnly group: "com.liferay.portal", name: "com.liferay.portal.kernel", version: "default"
+	compileOnly group: "org.apache.felix", name: "org.apache.felix.gogo.runtime", version: "1.1.4"
 	compileOnly group: "org.osgi", name: "org.osgi.service.component.annotations", version: "1.3.0"
 	compileOnly group: "org.osgi", name: "osgi.core", version: "6.0.0"
+
+	moduleBuilder group: "org.osgi", name: "org.osgi.service.component.annotations", version: "1.3.0"
+	moduleBuilder group: "org.osgi", name: "osgi.annotation", version: "6.0.0"
+	moduleBuilder group: "org.osgi", name: "osgi.core", version: "6.0.0"
+	moduleBuilder project(":apps:portal:portal-aop-api")
+	moduleBuilder project(":sdk:project-templates:project-templates")
+	moduleBuilder project(":util:portal-tools-service-builder")
+}
+
+moduleBuilderJarsList {
+	File file = new File(buildDir, "module-builder-jars.txt")
+
+	outputs.file(file)
+
+	doFirst {
+		file.text = ""
+
+		configurations.moduleBuilder.resolvedConfiguration.resolvedArtifacts.each {
+			file.text += "${it.file.name}\n"
+		}
+	}
+}
+
+processResources {
+	from configurations.moduleBuilder, moduleBuilderJarsList
 }
 
 repositories {
