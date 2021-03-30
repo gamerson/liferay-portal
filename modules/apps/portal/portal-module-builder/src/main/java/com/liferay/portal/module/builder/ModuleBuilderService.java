@@ -14,6 +14,8 @@
 
 package com.liferay.portal.module.builder;
 
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.security.xml.SecureXMLFactoryProviderUtil;
 
 import java.io.ByteArrayInputStream;
@@ -68,6 +70,10 @@ public class ModuleBuilderService {
 
 	public File[] buildModule(String serviceXmlContent) {
 		try {
+			if (_log.isDebugEnabled()) {
+				_log.debug("Building modules for service.xml");
+			}
+
 			Path tempPath = Files.createTempDirectory(
 				Paths.get("/tmp"), "moduleBuilder");
 
@@ -90,10 +96,20 @@ public class ModuleBuilderService {
 
 			_buildServiceJars(workspacePath);
 
-			return _findJarFiles(modulesPath);
+			File[] jarFiles = _findJarFiles(modulesPath);
+
+			if (_log.isDebugEnabled()) {
+				_log.debug("Generated jar files: ");
+
+				for (File jarFile : jarFiles) {
+					_log.debug(jarFile.toString());
+				}
+			}
+
+			return jarFiles;
 		}
 		catch (Throwable throwable) {
-			throwable.printStackTrace(System.err);
+			_log.error(throwable);
 		}
 
 		return null;
@@ -102,10 +118,10 @@ public class ModuleBuilderService {
 	public File[] buildModuleFile(File serviceXmlFile) {
 		try {
 			return buildModule(
-				_read(Files.newInputStream(serviceXmlFile.toPath())));
+				Util.read(Files.newInputStream(serviceXmlFile.toPath())));
 		}
-		catch (IOException e) {
-			e.printStackTrace();
+		catch (IOException ioException) {
+			_log.error(ioException, ioException);
 		}
 
 		return null;
@@ -120,7 +136,8 @@ public class ModuleBuilderService {
 			_moduleBuilderLibPaths = _extractModuleBuilderLibs(classLoader);
 			_projectTemplatesJarPath = _extractProjectTemplatesJar(classLoader);
 		}
-		catch (IOException e) {
+		catch (IOException ioException) {
+			_log.error(ioException, ioException);
 		}
 	}
 
@@ -134,11 +151,19 @@ public class ModuleBuilderService {
 
 			buildLauncher.forTasks("buildService");
 
+			if (_log.isDebugEnabled()) {
+				_log.debug("Running buildService task");
+			}
+
 			buildLauncher.run();
 
 			buildLauncher = projectConnection.newBuild();
 
 			buildLauncher.forTasks("jar");
+
+			if (_log.isDebugEnabled()) {
+				_log.debug("Running jar task");
+			}
 
 			buildLauncher.run();
 		}
@@ -232,6 +257,13 @@ public class ModuleBuilderService {
 			String packageName)
 		throws Exception {
 
+		if (_log.isDebugEnabled()) {
+			_log.debug(
+				MessageFormat.format(
+					"Using params: namespace {0}, package-path: {1}", namespace,
+					packageName));
+		}
+
 		ProcessBuilder processBuilder = new ProcessBuilder();
 
 		processBuilder.command(
@@ -296,48 +328,6 @@ public class ModuleBuilderService {
 		return new String[] {namespace, packageNameNode.getTextContent()};
 	}
 
-	private String _loadTemplate(String name) {
-		try (InputStream inputStream =
-				ModuleBuilderService.class.getResourceAsStream(name)) {
-
-			return _read(inputStream);
-		}
-		catch (IOException e) {
-			return MessageFormat.format(
-				"Error loading {0}: {1}", name, e.getMessage());
-		}
-	}
-
-	private String _read(InputStream inputStream) throws IOException {
-		byte[] buffer = new byte[8192];
-		int offset = 0;
-
-		while (true) {
-			int count = inputStream.read(
-				buffer, offset, buffer.length - offset);
-
-			if (count == -1) {
-				break;
-			}
-
-			offset += count;
-
-			if (offset == buffer.length) {
-				byte[] newBuffer = new byte[buffer.length << 1];
-
-				System.arraycopy(buffer, 0, newBuffer, 0, buffer.length);
-
-				buffer = newBuffer;
-			}
-		}
-
-		if (offset == 0) {
-			return "";
-		}
-
-		return new String(buffer, 0, offset, "UTF-8");
-	}
-
 	private void _removeReleaseApiDependencies(Path modulesPath)
 		throws IOException {
 
@@ -351,8 +341,9 @@ public class ModuleBuilderService {
 					try {
 						List<String> lines = Files.readAllLines(path);
 
-						String content = lines.stream(
-						).map(
+						Stream<String> stream = lines.stream();
+
+						String content = stream.map(
 							line ->
 								line.matches(".*compileOnly.*release.*api.*") ?
 									null : line
@@ -364,8 +355,8 @@ public class ModuleBuilderService {
 
 						Files.write(path, content.getBytes());
 					}
-					catch (IOException e) {
-						e.printStackTrace();
+					catch (IOException ioException) {
+						_log.error(ioException, ioException);
 					}
 				}
 			);
@@ -381,7 +372,7 @@ public class ModuleBuilderService {
 		content = content.replaceAll(
 			"%module_builder_jars_dir%", moduleBuilderLibsPath.toString());
 
-		Path catalinaBasePath = Paths.get(_catalinaBase);
+		Path catalinaBasePath = Paths.get(_CATALINA_BASE);
 
 		Path extPath = catalinaBasePath.resolve("lib/ext");
 
@@ -414,21 +405,24 @@ public class ModuleBuilderService {
 					try {
 						Files.write(path, serviceXmlContent.getBytes());
 					}
-					catch (IOException e) {
-						e.printStackTrace();
+					catch (IOException ioException) {
+						_log.error(ioException, ioException);
 					}
 				}
 			);
 		}
 	}
 
-	private static final String _TPL_ROOT_BUILD_GRADLE;
-
-	private static final String _catalinaBase = System.getProperty(
+	private static final String _CATALINA_BASE = System.getProperty(
 		"catalina.base");
 
+	private static final String _TPL_ROOT_BUILD_GRADLE;
+
+	private static final Log _log = LogFactoryUtil.getLog(
+		ModuleBuilderService.class);
+
 	static {
-		_TPL_ROOT_BUILD_GRADLE = _loadTemplate("root.build.gradle.tpl");
+		_TPL_ROOT_BUILD_GRADLE = Util.loadTemplate("root.build.gradle.tpl");
 	}
 
 	private Path[] _moduleBuilderLibPaths;
