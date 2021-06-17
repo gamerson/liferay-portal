@@ -46,6 +46,8 @@ runGradleTest {
 		jarFile.withCloseable {
 			assert jarFile.getEntry("META-INF/resources/hello.jspf")
 
+			assert jarFile.getEntry("resources/com/liferay/login/web/constants/package-ext.info")
+
 			JarEntry jarEntry = jarFile.getEntry("META-INF/resources/init-ext.jsp")
 
 			InputStream inputStream = jarFile.getInputStream(jarEntry)
