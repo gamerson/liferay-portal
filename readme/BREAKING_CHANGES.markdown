@@ -901,3 +901,26 @@ In the UI, review the OpenID Connect Provider Connection configuration(s). Speci
 This improves using all signing algorithms supported by OpenID Connect providers.
 
 ---------------------------------------
+
+### Service-Builder Task Can Only Be Used On *-service Module Directory And service.xml File
+
+- **Date:** 2021-Nov-02
+- **JIRA Ticket:** [LPS-129696](https://issues.liferay.com/browse/LPS-129696)
+
+#### What changed?
+
+Automatically apply service builder plugin to all osgi projects.
+
+#### Who is affected?
+
+This affects anyone who want to run buildService task on unspecified directory of the liferay-workspace.
+
+#### How should I update my code?
+
+There are no required code updates.You just need to execute the buildService task on the *-service directory underlying service-builder module directory or on service.xml underlying *-service directory.
+
+#### Why was this change made?
+
+We changed the directory where users will need to run buildService to be more specific and clearly.
+
+---------------------------------------
