@@ -19,11 +19,13 @@ import com.liferay.asset.kernel.model.AssetEntry;
 import com.liferay.asset.list.model.AssetListEntry;
 import com.liferay.asset.list.model.AssetListEntrySegmentsEntryRel;
 import com.liferay.asset.list.service.AssetListEntrySegmentsEntryRelLocalService;
+import com.liferay.asset.list.service.AssetListEntrySegmentsEntryRelLocalServiceUtil;
 import com.liferay.asset.list.service.persistence.AssetListEntryAssetEntryRelUtil;
 import com.liferay.asset.list.service.persistence.AssetListEntrySegmentsEntryRelUtil;
 import com.liferay.asset.list.util.AssetListTestUtil;
 import com.liferay.asset.test.util.AssetTestUtil;
 import com.liferay.asset.test.util.asset.renderer.factory.TestAssetRendererFactory;
+import com.liferay.portal.configuration.test.util.ConfigurationTemporarySwapper;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
@@ -31,12 +33,14 @@ import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
 import com.liferay.portal.kernel.test.util.GroupTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.transaction.Propagation;
+import com.liferay.portal.kernel.util.HashMapDictionaryBuilder;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
 import com.liferay.portal.test.rule.PersistenceTestRule;
 import com.liferay.portal.test.rule.TransactionalTestRule;
 
+import java.util.Dictionary;
 import java.util.List;
 
 import org.junit.Assert;
@@ -48,6 +52,7 @@ import org.junit.runner.RunWith;
 
 /**
  * @author Eduardo García
+ * @author Yurena Cabrera
  */
 @RunWith(Arquillian.class)
 public class AssetListEntrySegmentsEntryRelServiceTest {
@@ -183,6 +188,79 @@ public class AssetListEntrySegmentsEntryRelServiceTest {
 	}
 
 	@Test
+	public void testNewVariationCreationAssignTheRightPriorityWithFF()
+		throws Exception {
+
+		AssetListEntry assetListEntry = AssetListTestUtil.addAssetListEntry(
+			_group.getGroupId());
+
+		AssetListEntrySegmentsEntryRel assetListEntrySegmentsEntryRel1 =
+			AssetListTestUtil.addAssetListEntrySegmentsEntryRel(
+				_group.getGroupId(), assetListEntry);
+		AssetListEntrySegmentsEntryRel assetListEntrySegmentsEntryRel2 =
+			AssetListTestUtil.addAssetListEntrySegmentsEntryRel(
+				_group.getGroupId(), assetListEntry);
+		AssetListEntrySegmentsEntryRel assetListEntrySegmentsEntryRel3 =
+			AssetListTestUtil.addAssetListEntrySegmentsEntryRel(
+				_group.getGroupId(), assetListEntry);
+		AssetListEntrySegmentsEntryRel assetListEntrySegmentsEntryRel4 =
+			AssetListTestUtil.addAssetListEntrySegmentsEntryRel(
+				_group.getGroupId(), assetListEntry);
+
+		Assert.assertEquals(1, assetListEntrySegmentsEntryRel1.getPriority());
+		Assert.assertEquals(2, assetListEntrySegmentsEntryRel2.getPriority());
+		Assert.assertEquals(3, assetListEntrySegmentsEntryRel3.getPriority());
+		Assert.assertEquals(4, assetListEntrySegmentsEntryRel4.getPriority());
+	}
+
+	@Test
+	public void testRetrieveVariationsBehavesLikeBeforeWhenFFDisabled()
+		throws Exception {
+
+		Dictionary<String, Object> dictionary =
+			HashMapDictionaryBuilder.<String, Object>put(
+				"enabled", false
+			).build();
+
+		try (ConfigurationTemporarySwapper configurationTemporarySwapper =
+				new ConfigurationTemporarySwapper(
+					"com.liferay.asset.list.web.internal.configuration." +
+						"FFCollectionsVariationsPrioritizationConfiguration",
+					dictionary)) {
+
+			AssetListEntry assetListEntry = AssetListTestUtil.addAssetListEntry(
+				_group.getGroupId());
+
+			AssetListEntrySegmentsEntryRel assetListEntrySegmentsEntryRel1 =
+				AssetListTestUtil.addAssetListEntrySegmentsEntryRel(
+					_group.getGroupId(), assetListEntry);
+			AssetListEntrySegmentsEntryRel assetListEntrySegmentsEntryRel2 =
+				AssetListTestUtil.addAssetListEntrySegmentsEntryRel(
+					_group.getGroupId(), assetListEntry);
+			AssetListEntrySegmentsEntryRel assetListEntrySegmentsEntryRel3 =
+				AssetListTestUtil.addAssetListEntrySegmentsEntryRel(
+					_group.getGroupId(), assetListEntry);
+
+			List<AssetListEntrySegmentsEntryRel>
+				assetListEntrySegmentsEntryRels =
+					AssetListEntrySegmentsEntryRelLocalServiceUtil.
+						getAssetListEntrySegmentsEntryRels(
+							assetListEntry.getAssetListEntryId(),
+							QueryUtil.ALL_POS, QueryUtil.ALL_POS);
+
+			Assert.assertTrue(
+				assetListEntrySegmentsEntryRels.contains(
+					assetListEntrySegmentsEntryRel1));
+			Assert.assertTrue(
+				assetListEntrySegmentsEntryRels.contains(
+					assetListEntrySegmentsEntryRel2));
+			Assert.assertTrue(
+				assetListEntrySegmentsEntryRels.contains(
+					assetListEntrySegmentsEntryRel3));
+		}
+	}
+
+	@Test
 	public void testUpdateAssetListEntrySegmentsEntryRelTypeSettings()
 		throws Exception {
 
@@ -209,6 +287,74 @@ public class AssetListEntrySegmentsEntryRelServiceTest {
 		Assert.assertEquals(
 			assetListEntrySegmentsEntryRelUpdated.getTypeSettings(),
 			typeSettingsUpdated);
+	}
+
+	@Test
+	public void testUpdateVariationsWhenFFEnabled() throws Exception {
+		Dictionary<String, Object> dictionary =
+			HashMapDictionaryBuilder.<String, Object>put(
+				"enabled", false
+			).build();
+
+		try (ConfigurationTemporarySwapper configurationTemporarySwapper =
+				new ConfigurationTemporarySwapper(
+					"com.liferay.asset.list.web.internal.configuration." +
+						"FFCollectionsVariationsPrioritizationConfiguration",
+					dictionary)) {
+
+			AssetListEntry assetListEntry = AssetListTestUtil.addAssetListEntry(
+				_group.getGroupId());
+
+			AssetListEntrySegmentsEntryRel assetListEntrySegmentsEntryRel1 =
+				AssetListTestUtil.addAssetListEntrySegmentsEntryRel(
+					_group.getGroupId(), assetListEntry);
+			AssetListEntrySegmentsEntryRel assetListEntrySegmentsEntryRel2 =
+				AssetListTestUtil.addAssetListEntrySegmentsEntryRel(
+					_group.getGroupId(), assetListEntry);
+			AssetListEntrySegmentsEntryRel assetListEntrySegmentsEntryRel3 =
+				AssetListTestUtil.addAssetListEntrySegmentsEntryRel(
+					_group.getGroupId(), assetListEntry);
+
+			long[] priorities = {
+				assetListEntrySegmentsEntryRel3.
+					getAssetListEntrySegmentsEntryRelId(),
+				assetListEntrySegmentsEntryRel1.
+					getAssetListEntrySegmentsEntryRelId(),
+				assetListEntrySegmentsEntryRel2.
+					getAssetListEntrySegmentsEntryRelId()
+			};
+
+			_assetListEntrySegmentsEntryRelLocalService.
+				updateVariationsPriority(priorities);
+
+			AssetListEntrySegmentsEntryRel
+				updatedAssetListEntrySegmentsEntryRel1 =
+					_assetListEntrySegmentsEntryRelLocalService.
+						getAssetListEntrySegmentsEntryRel(
+							assetListEntrySegmentsEntryRel1.
+								getAssetListEntrySegmentsEntryRelId());
+
+			AssetListEntrySegmentsEntryRel
+				updatedAssetListEntrySegmentsEntryRel2 =
+					_assetListEntrySegmentsEntryRelLocalService.
+						getAssetListEntrySegmentsEntryRel(
+							assetListEntrySegmentsEntryRel2.
+								getAssetListEntrySegmentsEntryRelId());
+
+			AssetListEntrySegmentsEntryRel
+				updatedAssetListEntrySegmentsEntryRel3 =
+					_assetListEntrySegmentsEntryRelLocalService.
+						getAssetListEntrySegmentsEntryRel(
+							assetListEntrySegmentsEntryRel3.
+								getAssetListEntrySegmentsEntryRelId());
+
+			Assert.assertEquals(
+				1, updatedAssetListEntrySegmentsEntryRel1.getPriority());
+			Assert.assertEquals(
+				2, updatedAssetListEntrySegmentsEntryRel2.getPriority());
+			Assert.assertEquals(
+				0, updatedAssetListEntrySegmentsEntryRel3.getPriority());
+		}
 	}
 
 	private void _assertSameAssetListEntrySegmentsEntryRel(

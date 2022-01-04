@@ -131,7 +131,7 @@ public class DBPartitionUtilTest extends BaseDBPartitionTestCase {
 	}
 
 	@Test
-	public void testRemoveDBPartition() throws Exception {
+	public void testMigrateDBPartition() throws Exception {
 		addDBPartition();
 
 		List<String> viewNames = _getObjectNames("VIEW");
@@ -140,7 +140,7 @@ public class DBPartitionUtilTest extends BaseDBPartitionTestCase {
 
 		int tablesCount = _getTablesCount();
 
-		_removeDBPartition();
+		_removeDBPartition(true);
 
 		Assert.assertEquals(tablesCount + viewNames.size(), _getTablesCount());
 		Assert.assertEquals(0, _getViewsCount());
@@ -153,7 +153,7 @@ public class DBPartitionUtilTest extends BaseDBPartitionTestCase {
 	}
 
 	@Test
-	public void testRemoveDBPartitionRollback() throws Exception {
+	public void testMigrateDBPartitionRollback() throws Exception {
 		addDBPartition();
 
 		int tablesCount = _getTablesCount();
@@ -167,7 +167,7 @@ public class DBPartitionUtilTest extends BaseDBPartitionTestCase {
 			createAndPopulateControlTable(fullTestTableName);
 
 			try {
-				_removeDBPartition();
+				_removeDBPartition(true);
 
 				Assert.fail("Should throw an exception");
 			}
@@ -178,6 +178,23 @@ public class DBPartitionUtilTest extends BaseDBPartitionTestCase {
 		}
 		finally {
 			dropTable(TEST_CONTROL_TABLE_NAME);
+		}
+	}
+
+	@Test
+	public void testRemoveDBPartition() throws Exception {
+		addDBPartition();
+
+		_removeDBPartition(false);
+
+		DatabaseMetaData databaseMetaData = connection.getMetaData();
+
+		try (ResultSet resultSet = databaseMetaData.getCatalogs()) {
+			while (resultSet.next()) {
+				String schemaName = resultSet.getString("TABLE_CAT");
+
+				Assert.assertNotEquals(getSchemaName(COMPANY_ID), schemaName);
+			}
 		}
 	}
 
@@ -238,13 +255,16 @@ public class DBPartitionUtilTest extends BaseDBPartitionTestCase {
 		return viewNames.size();
 	}
 
-	private void _removeDBPartition() throws Exception {
+	private void _removeDBPartition(boolean migrate) throws Exception {
 		CurrentConnection defaultCurrentConnection =
 			CurrentConnectionUtil.getCurrentConnection();
 
 		try {
 			CurrentConnection currentConnection = dataSource -> connection;
 
+			ReflectionTestUtil.setFieldValue(
+				DBPartitionUtil.class, "_DATABASE_PARTITION_MIGRATE_ENABLED",
+				migrate);
 			ReflectionTestUtil.setFieldValue(
 				CurrentConnectionUtil.class, "_currentConnection",
 				currentConnection);

@@ -250,6 +250,11 @@ public interface AssetListEntrySegmentsEntryRelLocalService
 			String uuid, long groupId);
 
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public List<AssetListEntrySegmentsEntryRel>
+		fetchAssetListEntrySegmentsEntryRels(
+			long assetListEntryId, long[] segmentsEntryId);
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public ActionableDynamicQuery getActionableDynamicQuery();
 
 	/**
@@ -382,6 +387,8 @@ public interface AssetListEntrySegmentsEntryRelLocalService
 	public AssetListEntrySegmentsEntryRel
 		updateAssetListEntrySegmentsEntryRelTypeSettings(
 			long assetListEntryId, long segmentsEntryId, String typeSettings);
+
+	public void updateVariationsPriority(long[] variationsPriority);
 
 	@Override
 	@Transactional(enabled = false)

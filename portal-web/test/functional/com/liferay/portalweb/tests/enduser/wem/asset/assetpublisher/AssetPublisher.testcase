@@ -833,13 +833,9 @@ definition {
 		}
 
 		task ("Configure application decorators to barebone") {
-			Portlet.gotoPortletOptions(portletOption = "Look and Feel Configuration");
-
-			IFrame.selectConfigurationFrame();
-
-			Portlet.selectApplicationDecorator(decorator = "Barebone");
-
-			PortletEntry.save();
+			Portlet.configureApplicationDecorator(
+				decorator = "Barebone",
+				portletName = "Asset Publisher");
 		}
 
 		task ("View Asset Publisher title is hidden") {
@@ -966,13 +962,9 @@ definition {
 		}
 
 		task ("Configure application decorators to barebone") {
-			Portlet.gotoPortletOptions(portletOption = "Look and Feel Configuration");
-
-			IFrame.selectConfigurationFrame();
-
-			Portlet.selectApplicationDecorator(decorator = "Decorate");
-
-			PortletEntry.save();
+			Portlet.configureApplicationDecorator(
+				decorator = "Decorate",
+				portletName = "Asset Publisher");
 		}
 
 		task ("View the Asset Publisher title") {
@@ -1029,7 +1021,7 @@ definition {
 		task ("Assert the Web Content Article Structures selector appear.") {
 			ApplicationsMenu.gotoSite(site = "Test Site Name");
 
-			SitePages.addPublicPage(pageName = "Test AP Page");
+			PagesAdmin.addPublicPage(pageName = "Test AP Page");
 
 			Navigator.gotoSitePage(
 				pageName = "Test AP Page",

@@ -18,11 +18,11 @@ definition {
 			category = "Site Builder",
 			portlet = "Pages");
 
-		SitePages.addPublicPage(
+		PagesAdmin.addPublicPage(
 			pageName = "Calendar Page",
 			sitePageType = "Widget Page");
 
-		SitePages.configurePage(
+		PagesAdmin.configurePage(
 			columnName = "1 Column",
 			pageName = "Calendar Page",
 			privacy = "Public Pages",
@@ -52,7 +52,7 @@ definition {
 
 			CalendarConfiguration.tearDown();
 
-			Page.tearDownCP();
+			PagesAdmin.tearDownCP();
 		}
 	}
 
@@ -230,12 +230,45 @@ definition {
 	}
 
 	@description = "Verify that the user can Enable Ratings on Calendar"
-	@ignore = "Test Stub"
 	@priority = "3"
 	test CanEnableRatings {
+		CalendarNavigator.gotoMyCalendarsManage();
 
-		// TODO LRQA-71798 CanEnableRatings pending implementation
+		CalendarMyCalendars.addMyCalendarByManageCalendars(calendarName = "Calendar Name");
 
+		PortletEntry.save();
+
+		Navigator.gotoPage(pageName = "Calendar Page");
+
+		CalendarNavigator.gotoAddEventViaMyCalendars(user = "Calendar Name");
+
+		CalendarEvent.editTitle(eventTitle = "Calendar Event Title");
+
+		CalendarEvent.publish();
+
+		Navigator.gotoPage(pageName = "Calendar Page");
+
+		CalendarEvent.viewDetails(
+			calendarName = "Test Test - Calendar Name",
+			eventTitle = "Calendar Event Title",
+			eventType = "Regular");
+
+		CalendarEvent.viewCalendarRatingNotPresent();
+
+		CalendarMyCalendars.gotoCalendarSettings(calendarName = "Calendar Name");
+
+		CalendarMyCalendars.checkboxOption(checkboxName = "Enable Ratings");
+
+		PortletEntry.save();
+
+		Navigator.gotoPage(pageName = "Calendar Page");
+
+		CalendarEvent.viewDetails(
+			calendarName = "Test Test - Calendar Name",
+			eventTitle = "Calendar Event Title",
+			eventType = "Regular");
+
+		CalendarEvent.viewCalendarRatingPresent();
 	}
 
 	@description = "LRQA-71595 - Verify that the user can make the new Calendar as the Default Calendar"
@@ -542,7 +575,7 @@ definition {
 				userScreenName = "usersn");
 		}
 
-		SitePages.openPagesAdmin(siteURLKey = "Site A");
+		PagesAdmin.openPagesAdmin(siteURLKey = "Site A");
 
 		ProductMenu.gotoPortlet(
 			category = "People",
@@ -554,7 +587,7 @@ definition {
 
 		Navigator.gotoPage(pageName = "Calendar Page");
 
-		SitePages.openPagesAdmin(siteURLKey = "Site C");
+		PagesAdmin.openPagesAdmin(siteURLKey = "Site C");
 
 		ProductMenu.gotoPortlet(
 			category = "People",

@@ -15,6 +15,9 @@
 package com.liferay.account.admin.web.internal.display.context;
 
 import com.liferay.account.admin.web.internal.display.AccountRoleDisplay;
+import com.liferay.account.admin.web.internal.security.permission.resource.AccountEntryPermission;
+import com.liferay.account.admin.web.internal.security.permission.resource.AccountRolePermission;
+import com.liferay.account.constants.AccountActionKeys;
 import com.liferay.frontend.taglib.clay.servlet.taglib.display.context.SearchContainerManagementToolbarDisplayContext;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.CreationMenu;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.CreationMenuBuilder;
@@ -30,8 +33,12 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.portlet.LiferayPortletRequest;
 import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
 import com.liferay.portal.kernel.portlet.PortletURLUtil;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
+import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ParamUtil;
+import com.liferay.portal.kernel.util.WebKeys;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.portlet.PortletURL;
@@ -76,6 +83,23 @@ public class ViewAccountRolesManagementToolbarDisplayContext
 			).setQuickAction(
 				true
 			).build());
+	}
+
+	public List<String> getAvailableActions(
+		AccountRoleDisplay accountRoleDisplay) {
+
+		ThemeDisplay themeDisplay =
+			(ThemeDisplay)httpServletRequest.getAttribute(
+				WebKeys.THEME_DISPLAY);
+
+		if (AccountRolePermission.contains(
+				themeDisplay.getPermissionChecker(),
+				accountRoleDisplay.getAccountRoleId(), ActionKeys.DELETE)) {
+
+			return Collections.<String>singletonList("deleteAccountRoles");
+		}
+
+		return Collections.<String>emptyList();
 	}
 
 	@Override
@@ -125,6 +149,18 @@ public class ViewAccountRolesManagementToolbarDisplayContext
 	@Override
 	public Boolean isDisabled() {
 		return false;
+	}
+
+	@Override
+	public Boolean isShowCreationMenu() {
+		ThemeDisplay themeDisplay =
+			(ThemeDisplay)httpServletRequest.getAttribute(
+				WebKeys.THEME_DISPLAY);
+
+		return AccountEntryPermission.contains(
+			themeDisplay.getPermissionChecker(),
+			ParamUtil.getLong(httpServletRequest, "accountEntryId"),
+			AccountActionKeys.ADD_ACCOUNT_ROLE);
 	}
 
 	@Override

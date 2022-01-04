@@ -286,6 +286,15 @@ definition {
 		SelectFrame(value1 = "relative=top");
 	}
 
+	macro addDescription {
+		CalendarNavigator.gotoEditEvent(eventTitle = "${eventTitle}");
+
+		Type(
+			key_fieldName = "${fieldName}",
+			locator1 = "CKEditor#BODY_FIELD_IFRAME",
+			value1 = "${fieldValue}");
+	}
+
 	macro addPGViaAP {
 		AssetPublisherPortlet.addAsset(assetType = "Calendar Event");
 
@@ -531,6 +540,18 @@ definition {
 
 	macro assertEventNotEditable {
 		AssertElementNotPresent(locator1 = "Calendar#SCHEDULER_EVENT_DIALOG_BOX_EDIT_BUTTON");
+	}
+
+	macro clickDeclineButton {
+		AssertClick(
+			locator1 = "CalendarViewEventDetails#DECLINE_BUTTON",
+			value1 = "Decline");
+	}
+
+	macro clickMaybeButton {
+		AssertClick(
+			locator1 = "CalendarViewEventDetails#MAYBE_BUTTON",
+			value1 = "Maybe");
 	}
 
 	macro clickPublish {
@@ -1294,7 +1315,7 @@ definition {
 				category = "Site Builder",
 				portlet = "Pages");
 
-			SitePages.addPublicPage(pageName = "Marketplace Calendar Testing");
+			PagesAdmin.addPublicPage(pageName = "Marketplace Calendar Testing");
 
 			Navigator.gotoPage(pageName = "Marketplace Calendar Testing");
 
@@ -1321,7 +1342,7 @@ definition {
 				category = "Site Builder",
 				portlet = "Pages");
 
-			SitePages.addPublicPage(pageName = "Marketplace Calendar Testing");
+			PagesAdmin.addPublicPage(pageName = "Marketplace Calendar Testing");
 
 			Navigator.gotoPage(pageName = "Marketplace Calendar Testing");
 
@@ -1418,6 +1439,18 @@ definition {
 		AssertElementNotPresent(locator1 = "CalendarViewEventDetails#CALENDAR_COMMENT_DEFAULT_MESSAGE");
 	}
 
+	macro viewCalendarRatingNotPresent {
+		AssertElementNotPresent(locator1 = "Ratings#YOUR_RATING_STAR");
+
+		AssertElementNotPresent(locator1 = "Ratings#AVERAGE_STAR");
+	}
+
+	macro viewCalendarRatingPresent {
+		AssertElementPresent(locator1 = "Ratings#YOUR_RATING_STAR");
+
+		AssertElementPresent(locator1 = "Ratings#AVERAGE_STAR");
+	}
+
 	macro viewComment {
 		CalendarEvent.viewDetails(
 			calendarName = "${calendarName}",
@@ -1454,6 +1487,13 @@ definition {
 		SelectFrame(value1 = "relative=top");
 	}
 
+	macro viewDescription {
+		AssertTextEquals(
+			key_eventDescription = "${eventDescription}",
+			locator1 = "CalendarViewEventDetails#EVENT_DESCRIPTION",
+			value1 = "${key_eventDescription}");
+	}
+
 	macro viewDetails {
 		CalendarNavigator.gotoView(viewType = "Week");
 
@@ -1466,6 +1506,24 @@ definition {
 			schedulerEventDialogBox = "${schedulerEventDialogBox}");
 
 		CalendarEvent.viewTitleViaDetails(eventTitle = "${eventTitle}");
+	}
+
+	macro viewDetailsFields {
+		AssertElementPresent(
+			key_tab = "Status",
+			locator1 = "CalendarViewEventDetails#STATUS");
+
+		AssertElementPresent(
+			key_tab = "Starts",
+			locator1 = "CalendarViewEventDetails#START_DATE_FIELD");
+
+		AssertElementPresent(
+			key_tab = "Ends",
+			locator1 = "CalendarViewEventDetails#END_DATE_FIELD");
+
+		AssertElementPresent(
+			key_tab = "Resources",
+			locator1 = "CalendarViewEventDetails#RESOURCES_FIELD");
 	}
 
 	macro viewDetailsInPortlet {
@@ -1602,6 +1660,16 @@ definition {
 			userCalendarName = "${userCalendarName}");
 
 		Click(locator1 = "Calendar#CURRENT_SITE_CALENDARS_CALENDAR");
+	}
+
+	macro viewMaybeAndDeclineButtons {
+		AssertElementPresent(
+			key_tab = "Maybe",
+			locator1 = "CalendarViewEventDetails#MAYBE_BUTTON");
+
+		AssertElementPresent(
+			key_tab = "Decline",
+			locator1 = "CalendarViewEventDetails#DECLINE_BUTTON");
 	}
 
 	macro viewNoRepeating {

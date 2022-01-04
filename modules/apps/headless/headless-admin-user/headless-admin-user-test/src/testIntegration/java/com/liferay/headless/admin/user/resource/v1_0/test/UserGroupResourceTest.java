@@ -26,7 +26,17 @@ import org.junit.runner.RunWith;
 public class UserGroupResourceTest extends BaseUserGroupResourceTestCase {
 
 	@Override
+	protected String[] getAdditionalAssertFieldNames() {
+		return new String[] {"description", "name"};
+	}
+
+	@Override
 	protected UserGroup testDeleteUserGroup_addUserGroup() throws Exception {
+		return _postUserGroup();
+	}
+
+	@Override
+	protected UserGroup testGetUserGroup_addUserGroup() throws Exception {
 		return _postUserGroup();
 	}
 
@@ -36,10 +46,20 @@ public class UserGroupResourceTest extends BaseUserGroupResourceTestCase {
 	}
 
 	@Override
+	protected UserGroup testPatchUserGroup_addUserGroup() throws Exception {
+		return _postUserGroup();
+	}
+
+	@Override
 	protected UserGroup testPostUserGroup_addUserGroup(UserGroup userGroup)
 		throws Exception {
 
 		return _postUserGroup(userGroup);
+	}
+
+	@Override
+	protected UserGroup testPutUserGroup_addUserGroup() throws Exception {
+		return _postUserGroup();
 	}
 
 	private UserGroup _postUserGroup() throws Exception {

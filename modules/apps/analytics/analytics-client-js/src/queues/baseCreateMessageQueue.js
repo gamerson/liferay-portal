@@ -15,6 +15,8 @@
 import uuidv4 from 'uuid/v4';
 
 import {getContexts} from '../utils/contexts';
+import {removeDups} from '../utils/events';
+import {setItem} from '../utils/storage';
 import BaseQueue from './baseQueue';
 
 class BaseCreateMessageQueue extends BaseQueue {
@@ -49,9 +51,18 @@ class BaseCreateMessageQueue extends BaseQueue {
 		return promisesArr;
 	}
 
-	onFlushSuccess() {
-		this.analyticsInstance.resetContext();
-		this.reset();
+	onFlushSuccess(results) {
+		const items = this.getItems();
+		const filteredResults = results.filter(
+			(message) => message && message.value && message.value.events
+		);
+
+		const updatedItems = removeDups(filteredResults, items);
+		setItem(this.name, updatedItems);
+
+		if (filteredResults.length === results.length) {
+			this.analyticsInstance.resetContext();
+		}
 	}
 
 	/**

@@ -15,15 +15,10 @@
 package com.liferay.account.admin.web.internal.portlet.action;
 
 import com.liferay.account.constants.AccountPortletKeys;
-import com.liferay.account.model.AccountRole;
-import com.liferay.account.service.AccountRoleLocalService;
+import com.liferay.account.service.AccountRoleService;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
-import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
@@ -56,30 +51,11 @@ public class SetUserAccountRolesMVCActionCommand extends BaseMVCActionCommand {
 			actionRequest, "accountRoleIds");
 		long accountUserId = ParamUtil.getLong(actionRequest, "accountUserId");
 
-		List<AccountRole> removeAccountRoles = new ArrayList<>();
-
-		List<AccountRole> currentAccountRoles =
-			_accountRoleLocalService.getAccountRoles(
-				accountEntryId, accountUserId);
-
-		for (AccountRole accountRole : currentAccountRoles) {
-			if (!ArrayUtil.contains(
-					accountRoleIds, accountRole.getAccountRoleId())) {
-
-				removeAccountRoles.add(accountRole);
-			}
-		}
-
-		_accountRoleLocalService.associateUser(
+		_accountRoleService.setUserAccountRoles(
 			accountEntryId, accountRoleIds, accountUserId);
-
-		for (AccountRole accountRole : removeAccountRoles) {
-			_accountRoleLocalService.unassociateUser(
-				accountEntryId, accountRole.getAccountRoleId(), accountUserId);
-		}
 	}
 
 	@Reference
-	private AccountRoleLocalService _accountRoleLocalService;
+	private AccountRoleService _accountRoleService;
 
 }

@@ -234,7 +234,7 @@ definition {
 	}
 
 	macro setUpRegRoleLoginUserCP {
-		PortalSettings.editConfigurationUsersDefaultUserAssociationsRolesCP(roleTitle = "");
+		PortalSettings.editConfigurationUsersDefaultUserAssociationsCP(roleTitle = "");
 
 		JSONUser.addUser(
 			userEmailAddress = "${userEmailAddress}",
@@ -348,7 +348,7 @@ definition {
 
 		Portlet.waitForForm();
 
-		PortalSettings.editConfigurationUsersDefaultUserAssociationsRolesCP(roleTitle = "");
+		PortalSettings.editConfigurationUsersDefaultUserAssociationsCP(roleTitle = "");
 
 		JSONUser.addUser(
 			userEmailAddress = "${userEmailAddress}",
@@ -495,7 +495,7 @@ definition {
 			userMiddleName = "${userMiddleName}",
 			userScreenName = "${userScreenName}");
 
-		SitePages.openPagesAdmin(siteURLKey = "${siteName}");
+		PagesAdmin.openPagesAdmin(siteURLKey = "${siteName}");
 
 		ProductMenu.gotoPortlet(
 			category = "People",
@@ -517,7 +517,7 @@ definition {
 			category = "Site Builder",
 			portlet = "Pages");
 
-		SitePages.addPublicPage(pageName = "${pageName}");
+		PagesAdmin.addPublicPage(pageName = "${pageName}");
 
 		Navigator.gotoSitePage(
 			pageName = "${pageName}",

@@ -153,6 +153,20 @@ public class GeneralConfigurationSerDes {
 			sb.append(generalConfiguration.getIncludeResponseString());
 		}
 
+		if (generalConfiguration.getQueryString() != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"queryString\": ");
+
+			sb.append("\"");
+
+			sb.append(_escape(generalConfiguration.getQueryString()));
+
+			sb.append("\"");
+		}
+
 		if (generalConfiguration.getSearchableAssetTypes() != null) {
 			if (sb.length() > 1) {
 				sb.append(", ");
@@ -181,6 +195,20 @@ public class GeneralConfigurationSerDes {
 			}
 
 			sb.append("]");
+		}
+
+		if (generalConfiguration.getTimeZoneId() != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"timeZoneId\": ");
+
+			sb.append("\"");
+
+			sb.append(_escape(generalConfiguration.getTimeZoneId()));
+
+			sb.append("\"");
 		}
 
 		sb.append("}");
@@ -251,6 +279,15 @@ public class GeneralConfigurationSerDes {
 					generalConfiguration.getIncludeResponseString()));
 		}
 
+		if (generalConfiguration.getQueryString() == null) {
+			map.put("queryString", null);
+		}
+		else {
+			map.put(
+				"queryString",
+				String.valueOf(generalConfiguration.getQueryString()));
+		}
+
 		if (generalConfiguration.getSearchableAssetTypes() == null) {
 			map.put("searchableAssetTypes", null);
 		}
@@ -258,6 +295,15 @@ public class GeneralConfigurationSerDes {
 			map.put(
 				"searchableAssetTypes",
 				String.valueOf(generalConfiguration.getSearchableAssetTypes()));
+		}
+
+		if (generalConfiguration.getTimeZoneId() == null) {
+			map.put("timeZoneId", null);
+		}
+		else {
+			map.put(
+				"timeZoneId",
+				String.valueOf(generalConfiguration.getTimeZoneId()));
 		}
 
 		return map;
@@ -319,12 +365,24 @@ public class GeneralConfigurationSerDes {
 						(Boolean)jsonParserFieldValue);
 				}
 			}
+			else if (Objects.equals(jsonParserFieldName, "queryString")) {
+				if (jsonParserFieldValue != null) {
+					generalConfiguration.setQueryString(
+						(String)jsonParserFieldValue);
+				}
+			}
 			else if (Objects.equals(
 						jsonParserFieldName, "searchableAssetTypes")) {
 
 				if (jsonParserFieldValue != null) {
 					generalConfiguration.setSearchableAssetTypes(
 						toStrings((Object[])jsonParserFieldValue));
+				}
+			}
+			else if (Objects.equals(jsonParserFieldName, "timeZoneId")) {
+				if (jsonParserFieldValue != null) {
+					generalConfiguration.setTimeZoneId(
+						(String)jsonParserFieldValue);
 				}
 			}
 		}

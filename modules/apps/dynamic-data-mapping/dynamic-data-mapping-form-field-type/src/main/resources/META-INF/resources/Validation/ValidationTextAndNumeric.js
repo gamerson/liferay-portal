@@ -20,16 +20,23 @@ import Text from '../Text/Text.es';
 import {EVENT_TYPES} from './validationReducer';
 
 const ValidationTextAndNumeric = ({
+	append,
+	appendType,
 	dataType,
+	decimalPlaces,
 	dispatch,
 	errorMessage,
+	inputMask,
+	inputMaskFormat,
 	localizationMode,
+	localizedSymbols,
 	localizedValue,
 	name,
 	onBlur,
 	parameter,
 	readOnly,
 	selectedValidation,
+	symbols,
 	transformSelectedValidation,
 	validations,
 	visible,
@@ -67,13 +74,32 @@ const ValidationTextAndNumeric = ({
 
 			{selectedValidation.parameterMessage && (
 				<DynamicComponent
+					{...(dataType !== 'string' && {
+						append,
+						appendType,
+						decimalPlaces,
+						inputMask,
+						inputMaskFormat,
+						localizedSymbols,
+						symbols,
+					})}
 					dataType={dataType}
 					label={Liferay.Language.get('value')}
 					name={`${name}_parameter`}
 					onChange={(event) => {
+						let parameter = event.target.value;
+
+						if (dataType === 'double') {
+							const decimalSymbol = parameter.match(/[^-\d]/g);
+
+							parameter = decimalSymbol
+								? parameter.replace(decimalSymbol[0], '.')
+								: parameter;
+						}
+
 						dispatch({
 							payload: {
-								parameter: event.target.value,
+								parameter,
 							},
 							type: EVENT_TYPES.SET_PARAMETER,
 						});

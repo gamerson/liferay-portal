@@ -3,6 +3,7 @@ definition {
 
 	property portal.release = "true";
 	property portal.upstream = "true";
+	property testray.component.names = "Notifications";
 	property testray.main.component.name = "Blogs";
 
 	var pageName = "Blogs Page";
@@ -57,7 +58,7 @@ definition {
 				pageName = "Blogs Page",
 				portletName = "Blogs");
 
-			Page.tearDownCP();
+			PagesAdmin.tearDownCP();
 
 			Site.tearDownCP();
 

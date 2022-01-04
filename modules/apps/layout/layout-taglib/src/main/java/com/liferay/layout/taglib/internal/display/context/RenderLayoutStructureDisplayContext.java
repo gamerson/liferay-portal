@@ -63,8 +63,8 @@ import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
-import com.liferay.segments.constants.SegmentsExperienceConstants;
-import com.liferay.segments.constants.SegmentsWebKeys;
+import com.liferay.segments.SegmentsEntryRetriever;
+import com.liferay.segments.context.RequestContextMapper;
 import com.liferay.style.book.model.StyleBookEntry;
 import com.liferay.style.book.util.DefaultStyleBookEntryUtil;
 
@@ -461,8 +461,8 @@ public class RenderLayoutStructureDisplayContext {
 			defaultFragmentRendererContext.setPreviewType(_getPreviewType());
 			defaultFragmentRendererContext.setPreviewVersion(
 				_getPreviewVersion());
-			defaultFragmentRendererContext.setSegmentsExperienceIds(
-				_getSegmentsExperienceIds());
+			defaultFragmentRendererContext.setSegmentsEntryIds(
+				_getSegmentsEntryIds());
 		}
 
 		if (LayoutStructureItemUtil.hasAncestor(
@@ -1131,24 +1131,22 @@ public class RenderLayoutStructureDisplayContext {
 		return _previewVersion;
 	}
 
-	private long[] _getSegmentsExperienceIds() {
-		long[] selectedSegmentsExperienceIds = ParamUtil.getLongValues(
-			_httpServletRequest, "segmentsExperienceId");
-
-		if (selectedSegmentsExperienceIds.length > 0) {
-			return selectedSegmentsExperienceIds;
+	private long[] _getSegmentsEntryIds() {
+		if (_segmentsEntryIds != null) {
+			return _segmentsEntryIds;
 		}
 
-		if (_segmentsExperienceIds != null) {
-			return _segmentsExperienceIds;
-		}
+		SegmentsEntryRetriever segmentsEntryRetriever =
+			ServletContextUtil.getSegmentsEntryRetriever();
 
-		_segmentsExperienceIds = GetterUtil.getLongValues(
-			_httpServletRequest.getAttribute(
-				SegmentsWebKeys.SEGMENTS_EXPERIENCE_IDS),
-			new long[] {SegmentsExperienceConstants.ID_DEFAULT});
+		RequestContextMapper requestContextMapper =
+			ServletContextUtil.getRequestContextMapper();
 
-		return _segmentsExperienceIds;
+		_segmentsEntryIds = segmentsEntryRetriever.getSegmentsEntryIds(
+			_themeDisplay.getScopeGroupId(), _themeDisplay.getUserId(),
+			requestContextMapper.map(_httpServletRequest));
+
+		return _segmentsEntryIds;
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(
@@ -1166,7 +1164,7 @@ public class RenderLayoutStructureDisplayContext {
 	private Long _previewClassPK;
 	private Integer _previewType;
 	private String _previewVersion;
-	private long[] _segmentsExperienceIds;
+	private long[] _segmentsEntryIds;
 	private final boolean _showPreview;
 	private final ThemeDisplay _themeDisplay;
 

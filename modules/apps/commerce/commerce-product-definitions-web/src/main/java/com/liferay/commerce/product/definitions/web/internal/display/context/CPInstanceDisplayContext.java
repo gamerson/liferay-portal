@@ -42,13 +42,16 @@ import com.liferay.portal.kernel.portlet.LiferayWindowState;
 import com.liferay.portal.kernel.portlet.PortletProvider;
 import com.liferay.portal.kernel.portlet.PortletProviderUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
+import com.liferay.portal.kernel.util.CalendarFactoryUtil;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.taglib.util.CustomAttributesUtil;
 
 import java.math.BigDecimal;
 
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -196,6 +199,33 @@ public class CPInstanceDisplayContext extends BaseCPDefinitionsDisplayContext {
 		return creationMenu;
 	}
 
+	public int getDiscontinuedDateField(int field) throws PortalException {
+		CPInstance cpInstance = getCPInstance();
+
+		if (cpInstance == null) {
+			if (field == Calendar.MONTH) {
+				return -1;
+			}
+
+			return 0;
+		}
+
+		Date discontinuedDate = cpInstance.getDiscontinuedDate();
+
+		if (discontinuedDate != null) {
+			Calendar calendar = CalendarFactoryUtil.getCalendar(
+				discontinuedDate.getTime());
+
+			return calendar.get(field);
+		}
+
+		if (field == Calendar.MONTH) {
+			return -1;
+		}
+
+		return 0;
+	}
+
 	@Override
 	public PortletURL getPortletURL() throws PortalException {
 		PortletURL portletURL = super.getPortletURL();
@@ -243,6 +273,44 @@ public class CPInstanceDisplayContext extends BaseCPDefinitionsDisplayContext {
 				cpInstance.getCPInstanceId(), getCommerceCurrency());
 
 		return round(commerceMoney.getPrice());
+	}
+
+	public long getReplacementCPInstanceId() throws PortalException {
+		CPInstance cpInstance = getCPInstance();
+
+		if (cpInstance == null) {
+			return 0;
+		}
+
+		CPInstance replacementCPInstance =
+			_cpInstanceHelper.fetchReplacementCPInstance(
+				cpInstance.getReplacementCProductId(),
+				cpInstance.getReplacementCPInstanceUuid());
+
+		if (replacementCPInstance == null) {
+			return 0;
+		}
+
+		return replacementCPInstance.getCPInstanceId();
+	}
+
+	public String getReplacementCPInstanceLabel() throws PortalException {
+		CPInstance cpInstance = getCPInstance();
+
+		if (cpInstance == null) {
+			return StringPool.BLANK;
+		}
+
+		CPInstance replacementCPInstance =
+			_cpInstanceHelper.fetchReplacementCPInstance(
+				cpInstance.getReplacementCProductId(),
+				cpInstance.getReplacementCPInstanceUuid());
+
+		if (replacementCPInstance == null) {
+			return StringPool.BLANK;
+		}
+
+		return replacementCPInstance.getSku();
 	}
 
 	@Override

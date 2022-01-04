@@ -26,7 +26,6 @@ import com.liferay.portal.kernel.dao.db.DBInspector;
 import com.liferay.portal.kernel.dao.db.DBManagerUtil;
 import com.liferay.portal.kernel.dao.db.DBType;
 import com.liferay.portal.kernel.dao.jdbc.CurrentConnectionUtil;
-import com.liferay.portal.kernel.dao.jdbc.DataAccess;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -131,6 +130,10 @@ public class DBPartitionUtil {
 		}
 	}
 
+	public static boolean isPartitionEnabled() {
+		return _DATABASE_PARTITION_ENABLED;
+	}
+
 	public static boolean removeDBPartition(long companyId)
 		throws PortalException {
 
@@ -138,61 +141,11 @@ public class DBPartitionUtil {
 			return false;
 		}
 
-		Connection connection = CurrentConnectionUtil.getConnection(
-			InfrastructureUtil.getDataSource());
-
-		DBInspector dbInspector = new DBInspector(connection);
-
-		List<String> controlTableNames = new ArrayList<>();
-
-		try {
-			DatabaseMetaData databaseMetaData = connection.getMetaData();
-
-			try (ResultSet resultSet = databaseMetaData.getTables(
-					_defaultSchemaName, dbInspector.getSchema(), null,
-					new String[] {"TABLE"});
-				Statement statement = connection.createStatement()) {
-
-				while (resultSet.next()) {
-					String tableName = resultSet.getString("TABLE_NAME");
-
-					if (_isControlTable(dbInspector, tableName)) {
-						controlTableNames.add(tableName);
-
-						_migrateTable(
-							companyId, tableName, statement, dbInspector);
-					}
-				}
-			}
-		}
-		catch (Exception exception1) {
-			if (ListUtil.isEmpty(controlTableNames)) {
-				throw new PortalException(exception1);
-			}
-
-			try {
-				for (String tableName : controlTableNames) {
-					try (Statement statement = connection.createStatement()) {
-						_restoreTable(
-							companyId, tableName, statement, dbInspector);
-					}
-				}
-			}
-			catch (Exception exception2) {
-				throw new PortalException(
-					StringBundler.concat(
-						"Unable to rollback the removal of database ",
-						"partition. Recover a backup of the database schema ",
-						_getSchemaName(companyId), "."),
-					exception2);
-			}
-
-			throw new PortalException(
-				"Removal of database partition removal was rolled back",
-				exception1);
+		if (_DATABASE_PARTITION_MIGRATE_ENABLED) {
+			return _migrateDBPartition(companyId);
 		}
 
-		return true;
+		return _dropDBPartition(companyId);
 	}
 
 	public static void setDefaultCompanyId(Connection connection)
@@ -264,6 +217,48 @@ public class DBPartitionUtil {
 				"insert ", toSchemaName, StringPool.PERIOD, tableName,
 				" select * from ", fromSchemaName, StringPool.PERIOD, tableName,
 				whereClause));
+	}
+
+	private static boolean _dropDBPartition(long companyId)
+		throws PortalException {
+
+		Connection connection = CurrentConnectionUtil.getConnection(
+			InfrastructureUtil.getDataSource());
+
+		DBInspector dbInspector = new DBInspector(connection);
+
+		try {
+			DatabaseMetaData databaseMetaData = connection.getMetaData();
+
+			try (ResultSet resultSet = databaseMetaData.getTables(
+					_defaultSchemaName, dbInspector.getSchema(), null,
+					new String[] {"TABLE"});
+				Statement statement = connection.createStatement()) {
+
+				while (resultSet.next()) {
+					String tableName = resultSet.getString("TABLE_NAME");
+
+					if (_isControlTable(dbInspector, tableName) &&
+						dbInspector.hasColumn(tableName, "companyId")) {
+
+						statement.executeUpdate(
+							StringBundler.concat(
+								"delete from ", _defaultSchemaName,
+								StringPool.PERIOD, tableName,
+								" where companyId = ", companyId));
+					}
+				}
+
+				statement.executeUpdate(
+					"drop schema " + _getSchemaName(companyId));
+			}
+		}
+		catch (Exception exception) {
+			throw new PortalException(
+				"Unable to drop database partition", exception);
+		}
+
+		return true;
 	}
 
 	private static Connection _getConnectionWrapper(Connection connection) {
@@ -461,8 +456,10 @@ public class DBPartitionUtil {
 		return false;
 	}
 
-	private static boolean _isSkip(String tableName) throws SQLException {
-		try (Connection connection = DataAccess.getConnection()) {
+	private static boolean _isSkip(Connection connection, String tableName)
+		throws SQLException {
+
+		try {
 			DBInspector dbInspector = new DBInspector(connection);
 
 			if (_isControlTable(dbInspector, tableName) &&
@@ -479,6 +476,66 @@ public class DBPartitionUtil {
 		}
 
 		return false;
+	}
+
+	private static boolean _migrateDBPartition(long companyId)
+		throws PortalException {
+
+		Connection connection = CurrentConnectionUtil.getConnection(
+			InfrastructureUtil.getDataSource());
+
+		DBInspector dbInspector = new DBInspector(connection);
+
+		List<String> controlTableNames = new ArrayList<>();
+
+		try {
+			DatabaseMetaData databaseMetaData = connection.getMetaData();
+
+			try (ResultSet resultSet = databaseMetaData.getTables(
+					_defaultSchemaName, dbInspector.getSchema(), null,
+					new String[] {"TABLE"});
+				Statement statement = connection.createStatement()) {
+
+				while (resultSet.next()) {
+					String tableName = resultSet.getString("TABLE_NAME");
+
+					if (_isControlTable(dbInspector, tableName)) {
+						controlTableNames.add(tableName);
+
+						_migrateTable(
+							companyId, tableName, statement, dbInspector);
+					}
+				}
+			}
+		}
+		catch (Exception exception1) {
+			if (ListUtil.isEmpty(controlTableNames)) {
+				throw new PortalException(exception1);
+			}
+
+			try {
+				for (String tableName : controlTableNames) {
+					try (Statement statement = connection.createStatement()) {
+						_restoreTable(
+							companyId, tableName, statement, dbInspector);
+					}
+				}
+			}
+			catch (Exception exception2) {
+				throw new PortalException(
+					StringBundler.concat(
+						"Unable to rollback the removal of database ",
+						"partition. Recover a backup of the database schema ",
+						_getSchemaName(companyId), "."),
+					exception2);
+			}
+
+			throw new PortalException(
+				"Removal of database partition removal was rolled back",
+				exception1);
+		}
+
+		return true;
 	}
 
 	private static void _migrateTable(
@@ -512,12 +569,10 @@ public class DBPartitionUtil {
 		_copyData(
 			tableName, fromSchemaName, toSchemaName, statement, whereClause);
 
-		if (!whereClause.isEmpty()) {
-			statement.executeUpdate(
-				StringBundler.concat(
-					"delete from ", fromSchemaName, StringPool.PERIOD,
-					tableName, whereClause));
-		}
+		statement.executeUpdate(
+			StringBundler.concat(
+				"delete from ", fromSchemaName, StringPool.PERIOD, tableName,
+				whereClause));
 	}
 
 	private static void _restoreTable(
@@ -546,13 +601,13 @@ public class DBPartitionUtil {
 				String[] query = sql.split(StringPool.SPACE);
 
 				if ((StringUtil.startsWith(lowerCaseSQL, "alter table") &&
-					 _isSkip(query[2])) ||
+					 _isSkip(statement.getConnection(), query[2])) ||
 					((StringUtil.startsWith(lowerCaseSQL, "create index") ||
 					  StringUtil.startsWith(lowerCaseSQL, "drop index")) &&
-					 _isSkip(query[4])) ||
+					 _isSkip(statement.getConnection(), query[4])) ||
 					(StringUtil.startsWith(
 						lowerCaseSQL, "create unique index") &&
-					 _isSkip(query[5]))) {
+					 _isSkip(statement.getConnection(), query[5]))) {
 
 					return 0;
 				}
@@ -563,7 +618,7 @@ public class DBPartitionUtil {
 					return returnValue;
 				}
 
-				try (Connection connection = DataAccess.getConnection()) {
+				try (Connection connection = statement.getConnection()) {
 					DBInspector dbInspector = new DBInspector(connection);
 					String tableName = query[2];
 
@@ -593,6 +648,10 @@ public class DBPartitionUtil {
 
 	private static final boolean _DATABASE_PARTITION_ENABLED =
 		GetterUtil.getBoolean(PropsUtil.get("database.partition.enabled"));
+
+	private static final boolean _DATABASE_PARTITION_MIGRATE_ENABLED =
+		GetterUtil.getBoolean(
+			PropsUtil.get("database.partition.migrate.enabled"));
 
 	private static final String _DATABASE_PARTITION_SCHEMA_NAME_PREFIX =
 		GetterUtil.get(

@@ -12,17 +12,22 @@
  * details.
  */
 
-import {parseCSV} from '../../src/main/resources/META-INF/resources/js/FileParsers';
+import parseFile, {
+	extractFieldsFromCSV,
+	extractFieldsFromJSON,
+	extractFieldsFromJSONL,
+} from '../../src/main/resources/META-INF/resources/js/FileParsers';
 
-const fileContents = `currencyCode,type,name
+const csvFileContents = `currencyCode,type,name
     USD,site,My Channel 0
     USD,site,My Channel 1
     USD,site,My Channel 2
     USD,site,My Channel 3
     USD,site,My Channel 4
 `;
+const jsonlFileContent = `{"currencyCode": "ciao", "type": 1, "name": "test"}`;
+const jsonFileContent = `[{"currencyCode": "ciao", "type": 1, "name": "test"}, {"currencyCode": "ciao", "type": 1, "name": "test"}, {"currencyCode": "ciao", "type": 1, "name": "test"}]`;
 const fileSchema = ['currencyCode', 'type', 'name'];
-const file = new Blob([fileContents], {type: 'text/csv'});
 const readAsText = jest.fn();
 let dummyFileReader;
 
@@ -34,17 +39,22 @@ function mockFileReader(addEventListener) {
 		addEventListener,
 		loaded: false,
 		readAsText,
-		result: fileContents,
+		result: csvFileContents,
 	};
 	window.FileReader = jest.fn(() => dummyFileReader);
 }
 
-describe('FileParsers', () => {
+describe('parseFile', () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
 	});
 
 	it('must correctly call onError when columns not detected', () => {
+		const file = new Blob([csvFileContents], {
+			type: 'text/csv',
+		});
+
+		file.name = 'test.csv';
 		const onProgressEvent = {
 			target: {
 				result: `currencyCode,ty`,
@@ -57,7 +67,7 @@ describe('FileParsers', () => {
 			})
 		);
 
-		parseCSV({
+		parseFile({
 			file,
 			onComplete,
 			onError,
@@ -68,10 +78,15 @@ describe('FileParsers', () => {
 	});
 
 	it('must correctly call onComplete', () => {
+		const file = new Blob([csvFileContents], {
+			type: 'text/csv',
+		});
+		file.name = 'test.csv';
+
 		const onProgressEvent = {
 			target: {
 				result: `currencyCode,type,name
-					USD,site,My Channel 0`,
+				USD,site,My Channel 0`,
 			},
 		};
 
@@ -81,7 +96,7 @@ describe('FileParsers', () => {
 			})
 		);
 
-		parseCSV({
+		parseFile({
 			file,
 			onComplete,
 			onError,
@@ -89,5 +104,27 @@ describe('FileParsers', () => {
 
 		expect(onComplete).toBeCalledWith(fileSchema);
 		expect(onError).not.toBeCalled();
+	});
+});
+
+describe('extractFieldsFromCSV', () => {
+	it('must correctly found file schema', () => {
+		expect(extractFieldsFromCSV(csvFileContents)).toStrictEqual(fileSchema);
+	});
+});
+
+describe('extractFieldsFromJSONL', () => {
+	it('must correctly found file schema', () => {
+		expect(extractFieldsFromJSONL(jsonlFileContent)).toStrictEqual(
+			fileSchema
+		);
+	});
+});
+
+describe('extractFieldsFromJSON', () => {
+	it('must correctly found file schema', () => {
+		expect(extractFieldsFromJSON(jsonFileContent)).toStrictEqual(
+			fileSchema
+		);
 	});
 });

@@ -16,6 +16,7 @@ package com.liferay.account.admin.web.internal.portlet.action;
 
 import com.liferay.account.constants.AccountConstants;
 import com.liferay.account.constants.AccountPortletKeys;
+import com.liferay.account.exception.AccountEntryDomainsException;
 import com.liferay.account.exception.DuplicateAccountEntryExternalReferenceCodeException;
 import com.liferay.account.model.AccountEntry;
 import com.liferay.account.service.AccountEntryService;
@@ -63,42 +64,6 @@ import org.osgi.service.component.annotations.Reference;
 )
 public class EditAccountEntryMVCActionCommand extends BaseMVCActionCommand {
 
-	protected AccountEntry addAccountEntry(ActionRequest actionRequest)
-		throws Exception {
-
-		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
-			WebKeys.THEME_DISPLAY);
-
-		String name = ParamUtil.getString(actionRequest, "name");
-		String description = ParamUtil.getString(actionRequest, "description");
-		String[] domains = new String[0];
-		String emailAddress = ParamUtil.getString(
-			actionRequest, "emailAddress");
-		String taxIdNumber = ParamUtil.getString(actionRequest, "taxIdNumber");
-
-		String type = ParamUtil.getString(
-			actionRequest, "type",
-			AccountConstants.ACCOUNT_ENTRY_TYPE_BUSINESS);
-
-		if (Objects.equals(
-				AccountConstants.ACCOUNT_ENTRY_TYPE_BUSINESS, type)) {
-
-			domains = ParamUtil.getStringValues(actionRequest, "domains");
-		}
-
-		AccountEntry accountEntry = _accountEntryService.addAccountEntry(
-			themeDisplay.getUserId(), AccountConstants.ACCOUNT_ENTRY_ID_DEFAULT,
-			name, description, domains, emailAddress,
-			_getLogoBytes(actionRequest), taxIdNumber, type,
-			_getStatus(actionRequest),
-			ServiceContextFactory.getInstance(
-				AccountEntry.class.getName(), actionRequest));
-
-		return _accountEntryService.updateExternalReferenceCode(
-			accountEntry.getAccountEntryId(),
-			ParamUtil.getString(actionRequest, "externalReferenceCode"));
-	}
-
 	@Override
 	protected void doProcessAction(
 			ActionRequest actionRequest, ActionResponse actionResponse)
@@ -114,7 +79,7 @@ public class EditAccountEntryMVCActionCommand extends BaseMVCActionCommand {
 						actionRequest, "redirect");
 
 					if (cmd.equals(Constants.ADD)) {
-						AccountEntry accountEntry = addAccountEntry(
+						AccountEntry accountEntry = _addAccountEntry(
 							actionRequest);
 
 						redirect = _http.setParameter(
@@ -140,8 +105,9 @@ public class EditAccountEntryMVCActionCommand extends BaseMVCActionCommand {
 				actionResponse.setRenderParameter(
 					"mvcPath", "/account_entries_admin/error.jsp");
 			}
-			else if (exception instanceof
-						DuplicateAccountEntryExternalReferenceCodeException) {
+			else if (exception instanceof AccountEntryDomainsException ||
+					 exception instanceof
+						 DuplicateAccountEntryExternalReferenceCodeException) {
 
 				SessionErrors.add(actionRequest, exception.getClass());
 
@@ -206,6 +172,42 @@ public class EditAccountEntryMVCActionCommand extends BaseMVCActionCommand {
 						accountEntryId);
 			}
 		}
+	}
+
+	private AccountEntry _addAccountEntry(ActionRequest actionRequest)
+		throws Exception {
+
+		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
+			WebKeys.THEME_DISPLAY);
+
+		String name = ParamUtil.getString(actionRequest, "name");
+		String description = ParamUtil.getString(actionRequest, "description");
+		String[] domains = new String[0];
+		String emailAddress = ParamUtil.getString(
+			actionRequest, "emailAddress");
+		String taxIdNumber = ParamUtil.getString(actionRequest, "taxIdNumber");
+
+		String type = ParamUtil.getString(
+			actionRequest, "type",
+			AccountConstants.ACCOUNT_ENTRY_TYPE_BUSINESS);
+
+		if (Objects.equals(
+				AccountConstants.ACCOUNT_ENTRY_TYPE_BUSINESS, type)) {
+
+			domains = ParamUtil.getStringValues(actionRequest, "domains");
+		}
+
+		AccountEntry accountEntry = _accountEntryService.addAccountEntry(
+			themeDisplay.getUserId(), AccountConstants.ACCOUNT_ENTRY_ID_DEFAULT,
+			name, description, domains, emailAddress,
+			_getLogoBytes(actionRequest), taxIdNumber, type,
+			_getStatus(actionRequest),
+			ServiceContextFactory.getInstance(
+				AccountEntry.class.getName(), actionRequest));
+
+		return _accountEntryService.updateExternalReferenceCode(
+			accountEntry.getAccountEntryId(),
+			ParamUtil.getString(actionRequest, "externalReferenceCode"));
 	}
 
 	private byte[] _getLogoBytes(ActionRequest actionRequest) throws Exception {

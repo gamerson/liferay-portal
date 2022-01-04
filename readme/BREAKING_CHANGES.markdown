@@ -12,7 +12,7 @@ Here are some of the types of changes documented in this file:
 * Execution requirements: Java version, J2EE Version, browser versions, etc.
 * Deprecations or end of support: For example, warning that a certain feature or API will be dropped in an upcoming version.
 
-*This document has been reviewed through the breaking change entry at commit `ac5b1e9670b1`.*
+*This document has been reviewed through the breaking change entry at commit `851ef01d7128`.*
 
 Each change must have a brief descriptive title and contain the following information:
 
@@ -28,8 +28,8 @@ Here is the template to use for each breaking change (note how it ends with a ho
 
 ```
 ## Title
-- **Date: YYYY-MMM-DD**
-- **JIRA Ticket: [LPS-1234](https://issues.liferay.com/browse/LPS-1234)**
+- **Date:** YYYY-MMM-DD
+- **JIRA Ticket:** [LPS-1234](https://issues.liferay.com/browse/LPS-1234)
 
 ### What changed?
 
@@ -879,7 +879,7 @@ The Web Content field Document Type was an accidental feature included in Docume
 
 ---------------------------------------
 
-### OpenID Connect Provider Signing Algorithm Must Be Configured If Different From RS256
+## OpenID Connect Provider Signing Algorithm Must Be Configured If Different From RS256
 
 - **Date:** 2021-Sep-30
 - **JIRA Ticket:** [LPS-138756](https://issues.liferay.com/browse/LPS-138756)
@@ -902,7 +902,7 @@ This improves using all signing algorithms supported by OpenID Connect providers
 
 ---------------------------------------
 
-### Restricted the Service Builder Task to Service Module Folders that have a Service XML File
+## Restricted the Service Builder Task to Service Module Folders that have a Service XML File
 
 - **Date:** 2021-Nov-02
 - **JIRA Ticket:** [LPS-129696](https://issues.liferay.com/browse/LPS-129696)
@@ -922,5 +922,50 @@ This requires no code changes. When you run the `buildService` task, you must ta
 #### Why was this change made?
 
 This was done to clarify the folder that `buildService` should target.
+
+---------------------------------------
+
+## Updated addFragmentEntry methods in FragmentEntryLocalService and FragmentEntryService
+
+- **Date:** 2021-Dec-16
+- **JIRA Ticket:** [LPS-125034](https://issues.liferay.com/browse/LPS-125034)
+
+### What changed?
+
+The `addFragmentEntry` methods in `FragmentEntryLocalService` and `FragmentEntryService` have been updated.
+
+### Who is affected?
+
+This affects anyone using `FragmentEntryLocalService` and `FragmentEntryService` to add fragment entries.
+
+### How should I update my code?
+
+Use the new `addFragmentEntry` methods in `FragmentEntryLocalService` and `FragmentEntryService`. Note, that they include a new `String` parameter for the `icon` of a `FragmentEntry`.
+
+### Why was this change made?
+
+This change was made so that a new icon can be used when importing a fragment.
+
+---------------------------------------
+
+## The getSegmentsExperienceIds methods in FragmentEntryProcessorContext, DefaultFragmentEntryProcessorContext, FragmentRendererContext, DefaultFragmentRendererContext have been removed.
+- **Date:** 2021-Dec-17
+- **JIRA Ticket:** [LPS-141471](https://issues.liferay.com/browse/LPS-141471)
+
+### What changed?
+
+The `getSegmentsExperienceIds` methods from `FragmentEntryProcessorContext`, `DefaultFragmentEntryProcessorContext`, `FragmentRendererContext` and `DefaultFragmentRendererContext` have been removed. The method with signature `getContextObjects(JSONObject, String)` from `FragmentEntryConfigurationParser` has been removed.
+
+### Who is affected?
+
+This affects anyone using `FragmentEntryProcessorContext`, `DefaultFragmentEntryProcessorContext`, `FragmentRendererContext` or `DefaultFragmentRendererContext` to get the `long array` of `segmentsExperienceIds`, or if you use the method with signature `getContextObjects(JSONObject, String)` from `FragmentEntryConfigurationParser`.
+
+### How should I update my code?
+
+Use `getSegmentsEntryIds` in `FragmentEntryProcessorContext`, `DefaultFragmentEntryProcessorContext`, `FragmentRendererContext` and `DefaultFragmentRendererContext`. Use the method with signature `getContextObjects(JSONObject, String, long[])` from `FragmentEntryConfigurationParser`, where the third parameter represents the `long array` of `segmentsEntryIds`.
+
+### Why was this change made?
+
+This change was made so that a collection's variations can be retrieved when using collections in a fragment.
 
 ---------------------------------------

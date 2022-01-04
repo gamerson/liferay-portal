@@ -24,6 +24,12 @@ definition {
 		else {
 			JSONGroup.deleteGroupByName(groupName = "Test Site Name");
 		}
+
+		for (var vocabulary : list "Topic,Audience,Stage") {
+			JSONCategory.tearDownCategories(
+				groupName = "Global",
+				vocabularyName = "${vocabulary}");
+		}
 	}
 
 	@description = "LPS-116987 When the user makes a change on web content and creates a draft version, the Info panel shows the version for the last version approved and the version of the draft "
@@ -164,7 +170,7 @@ definition {
 				portlet = "Content Dashboard");
 
 			ContentDashboard.filterByCategory(
-				categoryName = "Test",
+				categoryNameList = "Test",
 				filterOption = "Categories");
 
 			AssertTextPresent(
@@ -227,25 +233,42 @@ definition {
 				locator1 = "ContentDashboard#X_AXIS_CATEGORIES_NAME",
 				value1 = "A_Subaudience_3");
 		}
-
-		task ("Delete the global audience categories") {
-			for (var categories : list "C_Subaudience_1,B_Subaudience_2,A_Subaudience_3") {
-				JSONCategory.deleteCategory(
-					categoryName = "${categories}",
-					groupName = "Global",
-					vocabularyName = "Audience");
-			}
-		}
 	}
 
 	@description = "LPS-131793: Given the categorization section in Documents and Media
 	Then the OOTB Internal (Topic) and Public (Audience & Stage) vocabularies are shown"
-	@ignore = "true"
 	@priority = "3"
-	test CategorizationInOotbTable {
+	test CategorizationInOOTBTable {
+		task ("Go to Documents and Media and clik on Add Button and File Upload") {
+			ProductMenu.gotoPortlet(
+				category = "Content & Data",
+				portlet = "Documents and Media");
 
-		// TODO LPS-131793 CategorizationInOotbTable pending implementation
+			LexiconEntry.gotoAdd();
 
+			MenuItem.click(menuItem = "File Upload");
+		}
+
+		task ("Go to categorization and check if Topic, Audience and Stage are present") {
+			Panel.expandPanel(panel = "Categorization");
+		}
+
+		task ("Check if the words Topic, Audience and Stage are shown") {
+			AssertTextPresent(
+				key_fieldLabel = "Topic",
+				locator1 = "AssetCategorization#VOCABULARY_LIST_ITEM",
+				value1 = "Topic");
+
+			AssertTextPresent(
+				key_fieldLabel = "Audience",
+				locator1 = "AssetCategorization#VOCABULARY_LIST_ITEM",
+				value1 = "Audience");
+
+			AssertTextPresent(
+				key_fieldLabel = "Stage",
+				locator1 = "AssetCategorization#VOCABULARY_LIST_ITEM",
+				value1 = "Stage");
+		}
 	}
 
 	@description = "LPS-132597 When a web content is associated to a Display Page and its status is Approved, a display page icon is displayed"
@@ -403,15 +426,6 @@ definition {
 				locator1 = "ContentDashboard#AUDIENCE_LIST_DASHBOARD",
 				value = "...");
 		}
-
-		task ("Delete the global audience categories") {
-			for (var categories : list "Subaudience_1,Subaudience_2,Subaudience_3") {
-				JSONCategory.deleteCategory(
-					categoryName = "${categories}",
-					groupName = "Global",
-					vocabularyName = "Audience");
-			}
-		}
 	}
 
 	@description = "LPS-122873 When any web content is unassigned to a Vocab1's category, the relative ordering of categories remain the same"
@@ -490,22 +504,6 @@ definition {
 				AssertElementPresent(
 					fillColor = "FF5F5F",
 					locator1 = "ContentDashboard#BAR_FROM_NO_VOCABULARY_SPECIFIED");
-			}
-		}
-
-		task ("Delete the global audience categories") {
-			for (var categories : list "Subaudience_1,Subaudience_2,Subaudience_3") {
-				JSONCategory.deleteCategory(
-					categoryName = "${categories}",
-					groupName = "Global",
-					vocabularyName = "Audience");
-			}
-
-			for (var categories : list "Substage_1,Substage_2,Substage_3") {
-				JSONCategory.deleteCategory(
-					categoryName = "${categories}",
-					groupName = "Global",
-					vocabularyName = "Stage");
 			}
 		}
 	}
@@ -688,22 +686,6 @@ definition {
 				AssertElementPresent(
 					fillColor = "50D2A0",
 					locator1 = "ContentDashboard#BAR_FROM_NO_VOCABULARY_SPECIFIED");
-			}
-		}
-
-		task ("Delete the global audience categories") {
-			for (var categories : list "Subaudience_1,Subaudience_2,Subaudience_3") {
-				JSONCategory.deleteCategory(
-					categoryName = "${categories}",
-					groupName = "Global",
-					vocabularyName = "Audience");
-			}
-
-			for (var categories : list "Substage_1,Substage_2,Substage_3,Substage_4") {
-				JSONCategory.deleteCategory(
-					categoryName = "${categories}",
-					groupName = "Global",
-					vocabularyName = "Stage");
 			}
 		}
 	}
@@ -1339,6 +1321,17 @@ definition {
 		}
 	}
 
+	@description = "LPS-136512 Given The Content Performance panel of a document is opened
+	When the user clicks on the times icon ( X )
+	Then the Content Performance panel is closed"
+	@ignore = "true"
+	@priority = "3"
+	test CloseContentPerformancePanel {
+
+		// TODO LPS-144038 CloseContentPerformancePanel pending implementation
+
+	}
+
 	@description = "Given a document created in an Asset Library
 	When the user goes to the content dashboard
 	Then the user can see the document listed"
@@ -1424,6 +1417,43 @@ definition {
 			Click.clickNoMouseOver(locator1 = "ContentDashboard#ROW_PANEL_WC");
 
 			Click(locator1 = "ContentDashboard#ICON_VIEW_LISTED_MODIFIED_DATE");
+		}
+	}
+
+	@description = "LPS-119966 Given the Content Dashboard
+	When a document is listed in the assets list
+	Then the following metadata are shown: Title, Author (Owner), Subtype, Site or Asset Library, Status, Category 1, Category 2, Modified Date"
+	@priority = "3"
+	test DocumentMetadata {
+		task ("Create a category for Audiente and Staged") {
+			JSONCategory.addCategory(
+				groupName = "Global",
+				title = "Category1",
+				vocabularyName = "Audience");
+
+			JSONCategory.addCategory(
+				groupName = "Global",
+				title = "Category2",
+				vocabularyName = "Stage");
+		}
+
+		task ("Create a Document using JSONWS") {
+			JSONDocument.addFile(
+				dmDocumentDescription = "DM Document Description",
+				dmDocumentTitle = "DM Document Title",
+				groupName = "Test Site Name");
+		}
+
+		task ("Navigate to Content Dashboard") {
+			ContentDashboard.goToContentDashboard();
+		}
+
+		task ("Assert columns displayed") {
+			for (var columnHeader : list "Title,Author,Subtype,Site or Asset Library,Status,Audience,Stage,Modified Date") {
+				AssertElementPresent(
+					key_tableHeader = "${columnHeader}",
+					locator1 = "LexiconTable#TABLE_HEADER");
+			}
 		}
 	}
 
@@ -1653,6 +1683,97 @@ definition {
 		}
 	}
 
+	@description = "LPS-124960 When there's a WebContent1 authored by Author1 and has Category1 and Category2 and a WebContent2 authored by Author2 and has Category1, and the user filters by Author1 and Category1 and Category2, only the WebContent1 is shown in the list"
+	@priority = "3"
+	test FilterByCategoriesAndAuthor {
+		property custom.properties = "jsonws.web.service.paths.excludes=";
+
+		task ("Create two categories") {
+			var categoryId1 = JSONCategory.addCategory(
+				groupName = "Global",
+				title = "Category1",
+				vocabularyName = "Audience");
+
+			var categoryId2 = JSONCategory.addCategory(
+				groupName = "Global",
+				title = "Category2",
+				vocabularyName = "Audience");
+		}
+
+		task ("Create an user via JSONWS") {
+			JSONUser.addUser(
+				userEmailAddress = "userea@liferay.com",
+				userFirstName = "userfn",
+				userLastName = "userln",
+				userScreenName = "usersn");
+
+			JSONRole.assignRoleToUser(
+				roleTitle = "Administrator",
+				userEmailAddress = "userea@liferay.com");
+
+			JSONUser.setFirstPassword(
+				agreeToTermsAndAnswerReminderQuery = "true",
+				requireReset = "false",
+				userEmailAddress = "userea@liferay.com");
+		}
+
+		task ("Create a web content with Test Test via JSONWS") {
+			JSONWebcontent.addWebContent(
+				assetCategoryIds = "${categoryId1},${categoryId2}",
+				content = "Web Content Content",
+				groupName = "Test Site Name",
+				title = "Web Content Title 1");
+		}
+
+		task ("Disable option to strangers to verify email") {
+			ApplicationsMenu.gotoPortlet(
+				category = "Configuration",
+				panel = "Control Panel",
+				portlet = "Instance Settings");
+
+			PortalSettings.gotoConfiguration(
+				configurationCategory = "User Authentication",
+				configurationName = "General",
+				configurationScope = "Virtual Instance Scope");
+
+			PortalSettings.uncheckStrangersVerifyEmailCheckbox();
+		}
+
+		task ("Create a web content with created user via JSONWS") {
+			User.logoutAndLoginPG(
+				userLoginEmailAddress = "userea@liferay.com",
+				userLoginFullName = "userfn userln");
+
+			JSONWebcontent.addWebContent(
+				assetCategoryIds = "${categoryId1}",
+				content = "Web Content Content",
+				groupName = "Test Site Name",
+				title = "Web Content Title 2",
+				userEmailAddress = "userea@liferay.com",
+				userPassword = "test");
+		}
+
+		task ("Navigate to Content Dashbaord") {
+			ContentDashboard.goToContentDashboard();
+		}
+
+		task ("Filter by Category: Category1 and Category2") {
+			ContentDashboard.filterByCategory(
+				categoryNameList = "Category1,Category2",
+				filterOption = "Categories");
+		}
+
+		task ("Filter by Author: Test test") {
+			ContentDashboard.filterByAuthorList(filterOption = "Author");
+		}
+
+		task ("Assert if only one asset is displayed") {
+			LexiconTable.viewTableEntryTitle(tableEntry = "Web Content Title 1");
+
+			LexiconTable.viewTableEntryNotPresent(tableEntry = "Web Content Title 2");
+		}
+	}
+
 	@description = "Validate if the user can filter by category"
 	@priority = "5"
 	test FilterByCategory {
@@ -1681,7 +1802,7 @@ definition {
 
 		task ("Filter by category") {
 			ContentDashboard.filterByCategory(
-				categoryName = "Category Name",
+				categoryNameList = "Category Name",
 				filterOption = "Categories");
 
 			AssertTextPresent(
@@ -1693,6 +1814,246 @@ definition {
 			Category.openCategoriesAdmin(siteURLKey = "test-site-name");
 
 			Vocabulary.deleteByMenuCP(vocabularyName = "Vocabulary Name");
+		}
+	}
+
+	@description = "LPS-124960 When there's a WebContent1 authored by Author1 and has Category1 and Category2 and a WebContent2 authored by Author2 and has Category1, and the user filters by Author1 and Category1, only the WebContent1 is shown in the list"
+	@priority = "3"
+	test FilterByCategoryAndAuthor {
+		property custom.properties = "jsonws.web.service.paths.excludes=";
+
+		task ("Create two categories") {
+			var categoryId1 = JSONCategory.addCategory(
+				groupName = "Global",
+				title = "Category1",
+				vocabularyName = "Audience");
+
+			var categoryId2 = JSONCategory.addCategory(
+				groupName = "Global",
+				title = "Category2",
+				vocabularyName = "Audience");
+		}
+
+		task ("Create an user via JSONWS") {
+			JSONUser.addUser(
+				userEmailAddress = "userea@liferay.com",
+				userFirstName = "userfn",
+				userLastName = "userln",
+				userScreenName = "usersn");
+
+			JSONRole.assignRoleToUser(
+				roleTitle = "Administrator",
+				userEmailAddress = "userea@liferay.com");
+
+			JSONUser.setFirstPassword(
+				agreeToTermsAndAnswerReminderQuery = "true",
+				requireReset = "false",
+				userEmailAddress = "userea@liferay.com");
+		}
+
+		task ("Create a web content with Test Test via JSONWS") {
+			JSONWebcontent.addWebContent(
+				assetCategoryIds = "${categoryId1},${categoryId2}",
+				content = "Web Content Content",
+				groupName = "Test Site Name",
+				title = "Web Content Title 1");
+		}
+
+		task ("Disable option to strangers to verify email") {
+			ApplicationsMenu.gotoPortlet(
+				category = "Configuration",
+				panel = "Control Panel",
+				portlet = "Instance Settings");
+
+			PortalSettings.gotoConfiguration(
+				configurationCategory = "User Authentication",
+				configurationName = "General",
+				configurationScope = "Virtual Instance Scope");
+
+			PortalSettings.uncheckStrangersVerifyEmailCheckbox();
+		}
+
+		task ("Create a web content with created user via JSONWS") {
+			User.logoutAndLoginPG(
+				userLoginEmailAddress = "userea@liferay.com",
+				userLoginFullName = "userfn userln");
+
+			JSONWebcontent.addWebContent(
+				assetCategoryIds = "${categoryId1}",
+				content = "Web Content Content",
+				groupName = "Test Site Name",
+				title = "Web Content Title 2",
+				userEmailAddress = "userea@liferay.com",
+				userPassword = "test");
+		}
+
+		task ("Navigate to Content Dashbaord") {
+			ContentDashboard.goToContentDashboard();
+		}
+
+		task ("Filter by Category: Category1") {
+			ContentDashboard.filterByCategory(
+				categoryNameList = "Category1",
+				filterOption = "Categories");
+		}
+
+		task ("Filter by Author: Test test") {
+			ContentDashboard.filterByAuthorList(filterOption = "Author");
+		}
+
+		task ("Assert if only one asset is displayed") {
+			LexiconTable.viewTableEntryTitle(tableEntry = "Web Content Title 1");
+
+			LexiconTable.viewTableEntryNotPresent(tableEntry = "Web Content Title 2");
+		}
+	}
+
+	@description = "LPS-124960 When there's a WebContent1 authored by Author1 and has Category1 and Category2 and a WebContent2 authored by Author2 and has Category1, and the user filters by Author1, Author2 and Category1, both web content are shown in the list"
+	@priority = "3"
+	test FilterByCategoryAndAuthors {
+		property custom.properties = "jsonws.web.service.paths.excludes=";
+
+		task ("Create two categories") {
+			var categoryId1 = JSONCategory.addCategory(
+				groupName = "Global",
+				title = "Category1",
+				vocabularyName = "Audience");
+
+			var categoryId2 = JSONCategory.addCategory(
+				groupName = "Global",
+				title = "Category2",
+				vocabularyName = "Audience");
+		}
+
+		task ("Create an user via JSONWS") {
+			JSONUser.addUser(
+				userEmailAddress = "userea@liferay.com",
+				userFirstName = "userfn",
+				userLastName = "userln",
+				userScreenName = "usersn");
+
+			JSONRole.assignRoleToUser(
+				roleTitle = "Administrator",
+				userEmailAddress = "userea@liferay.com");
+
+			JSONUser.setFirstPassword(
+				agreeToTermsAndAnswerReminderQuery = "true",
+				requireReset = "false",
+				userEmailAddress = "userea@liferay.com");
+		}
+
+		task ("Create a web content with Test Test via JSONWS") {
+			JSONWebcontent.addWebContent(
+				assetCategoryIds = "${categoryId1},${categoryId2}",
+				content = "Web Content Content",
+				groupName = "Test Site Name",
+				title = "Web Content Title 1");
+		}
+
+		task ("Disable option to strangers to verify email") {
+			ApplicationsMenu.gotoPortlet(
+				category = "Configuration",
+				panel = "Control Panel",
+				portlet = "Instance Settings");
+
+			PortalSettings.gotoConfiguration(
+				configurationCategory = "User Authentication",
+				configurationName = "General",
+				configurationScope = "Virtual Instance Scope");
+
+			PortalSettings.uncheckStrangersVerifyEmailCheckbox();
+		}
+
+		task ("Create a web content with created user via JSONWS") {
+			User.logoutAndLoginPG(
+				userLoginEmailAddress = "userea@liferay.com",
+				userLoginFullName = "userfn userln");
+
+			JSONWebcontent.addWebContent(
+				assetCategoryIds = "${categoryId1}",
+				content = "Web Content Content",
+				groupName = "Test Site Name",
+				title = "Web Content Title 2",
+				userEmailAddress = "userea@liferay.com",
+				userPassword = "test");
+		}
+
+		task ("Navigate to Content Dashbaord") {
+			ContentDashboard.goToContentDashboard();
+		}
+
+		task ("Filter by Category: Category1") {
+			ContentDashboard.filterByCategory(
+				categoryNameList = "Category1",
+				filterOption = "Categories");
+		}
+
+		task ("Filter by Author: Test test and userfn userln") {
+			ContentDashboard.filterByAuthorTable(
+				authorNameList = "Test,userfn",
+				filterOption = "Author");
+		}
+
+		task ("Assert if both assets are displayed") {
+			for (var assetName : list "Web Content Title 1,Web Content Title 2") {
+				LexiconTable.viewTableEntryTitle(tableEntry = "${assetName}");
+			}
+		}
+	}
+
+	@description = "LPS-124960 When there's a WebContent1 that has Tag1, Category1 and Category2 and a WebContent2 that has Tag2 and Category1, and the user filters by Tag1 and Category1, both web content are shown in the list"
+	@priority = "3"
+	test FilterByCategoryAndTag {
+		task ("Create two categories") {
+			var categoryId1 = JSONCategory.addCategory(
+				groupName = "Global",
+				title = "Category1",
+				vocabularyName = "Audience");
+
+			var categoryId2 = JSONCategory.addCategory(
+				groupName = "Global",
+				title = "Category2",
+				vocabularyName = "Audience");
+		}
+
+		task ("Create a web content that has Tag1, Category1 and Category2 via JSONWS") {
+			JSONWebcontent.addWebContent(
+				assetCategoryIds = "${categoryId1},${categoryId2}",
+				assetTagNames = "tagnumber1",
+				content = "Web Content Content",
+				groupName = "Test Site Name",
+				title = "Web Content Title 1");
+		}
+
+		task ("Create a web content that has Tag2 and Category1 via JSONWS") {
+			JSONWebcontent.addWebContent(
+				assetCategoryIds = "${categoryId1}",
+				assetTagNames = "tagnumber2",
+				content = "Web Content Content",
+				groupName = "Test Site Name",
+				title = "Web Content Title 1");
+		}
+
+		task ("Navigate to Content Dashbaord") {
+			ContentDashboard.goToContentDashboard();
+		}
+
+		task ("Filter by Category: Category1") {
+			ContentDashboard.filterByCategory(
+				categoryNameList = "Category1",
+				filterOption = "Categories");
+		}
+
+		task ("Filter by Tag: tagnumber1") {
+			ContentDashboard.filterByTag(
+				filterOption = "Tags",
+				tagName = "tagnumber1");
+		}
+
+		task ("Assert if only one asset is displayed") {
+			LexiconTable.viewTableEntryTitle(tableEntry = "Web Content Title 1");
+
+			LexiconTable.viewTableEntryNotPresent(tableEntry = "Web Content Title 2");
 		}
 	}
 
@@ -1914,9 +2275,7 @@ definition {
 		}
 
 		task ("Filter by Type") {
-			ContentDashboard.filterByType(
-				filterOption = "Type",
-				subtypeName = "Basic Web Content");
+			ContentDashboard.filterByType(typeNameList = "Basic Web Content");
 		}
 
 		task ("Assert that the web content and filter label are present") {
@@ -1956,10 +2315,60 @@ definition {
 		}
 	}
 
+	@description = "LPS-124960 When there's a WebContent1 of type Subtype1 and WebContent2 of type Subtype2, and the user filters by Subtype1 and Subtype2, both web content are shown in the list"
+	@priority = "3"
+	test FilterByTypes {
+		task ("Create a basic web content via JSONWS") {
+			JSONWebcontent.addWebContent(
+				content = "Web Content Content",
+				groupName = "Test Site Name",
+				title = "Web Content Title 1");
+		}
+
+		task ("Create a web content structure") {
+			WebContentNavigator.openWebContentAdmin(siteURLKey = "test-site-name");
+
+			NavItem.gotoStructures();
+
+			WebContentStructures.addCP(structureName = "WC Structure Name");
+
+			DataEngine.addField(
+				fieldFieldLabel = "Text",
+				fieldName = "Text");
+
+			WebContentStructures.saveCP();
+		}
+
+		task ("Create a web content based on the structure created") {
+			NavItem.click(navItem = "Web Content");
+
+			WebContentNavigator.gotoAddWithStructureCP(structureName = "WC Structure Name");
+
+			WebContent.addWithStructureCP(
+				webContentText = "Web Content Content",
+				webContentTitle = "Web Content Title 2");
+
+			PortletEntry.publish();
+		}
+
+		task ("Navigate to Content Dashbaord") {
+			ContentDashboard.goToContentDashboard();
+		}
+
+		task ("Filter assets by both structure types") {
+			ContentDashboard.filterByType(typeNameList = "Basic Web Content,WC Structure Name");
+		}
+
+		task ("Assert if both assets are displayed") {
+			for (var assetName : list "Web Content Title 1,Web Content Title 2") {
+				LexiconTable.viewTableEntryTitle(tableEntry = "${assetName}");
+			}
+		}
+	}
+
 	@description = "LPS-133354: Given The Extension filter modal
 	When the user selects one or more extensions and clicks on 'Select' button
 	Then the extensions selected appear as filter boxes above the Content table in the Content Dashboard, with the format 'Extension: [extension_name]' "
-	@ignore = "true"
 	@priority = "5"
 	test FilteringExtensionsOnTheDashboard {
 		task ("Add a text file") {
@@ -2166,22 +2575,6 @@ definition {
 				value1 = "Substage_3",
 				xAxisCategoryName = "stage");
 		}
-
-		task ("Delete the global audience categories") {
-			for (var categories : list "Subaudience_1,Subaudience_2,Subaudience_3") {
-				JSONCategory.deleteCategory(
-					categoryName = "${categories}",
-					groupName = "Global",
-					vocabularyName = "Audience");
-			}
-
-			for (var categories : list "Substage_1,Substage_2,Substage_3") {
-				JSONCategory.deleteCategory(
-					categoryName = "${categories}",
-					groupName = "Global",
-					vocabularyName = "Stage");
-			}
-		}
 	}
 
 	@description = "LPS-116987 When the user clicks on the eye icon in any of the translated into languages within the info panel, the user navigates to the VIEW version of the page in the matching language"
@@ -2235,7 +2628,6 @@ definition {
 	@description = "LPS-133354: Given The Extension filter modal
 	When there are file extensions for the MIME type 'audio'
 	Then the MIME type 'audio' appears as father and all of the file extensions for it appear as children and available to be selected"
-	@ignore = "true"
 	@priority = "4"
 	test MimeTypeAudio {
 		task ("Add an audio file") {
@@ -2264,7 +2656,6 @@ definition {
 	@description = "LPS-133354 Given The Extension filter modal
 	When there are file extensions for the MIME type 'code'
 	Then the MIME type 'code' appears as father and all of the file extensions for it appear as children and available to be selected"
-	@ignore = "true"
 	@priority = "4"
 	test MimeTypeCode {
 		task ("Add a document") {
@@ -2293,7 +2684,6 @@ definition {
 	@description = "LPS-133354: Given The Extension filter modal
 	When there are file extensions for the MIME type 'compressed'
 	Then the MIME type 'compressed' appears as father and all of the file extensions for it appear as children and available to be selected"
-	@ignore = "true"
 	@priority = "4"
 	test MimeTypeCompressed {
 		task ("Add a compressed file") {
@@ -2322,7 +2712,6 @@ definition {
 	@description = "LPS-133354: Given The Extension filter modal
 	When there are file extensions for the MIME type 'others'
 	Then the MIME type 'others' appears as father and all of the file extensions for it appear as children and available to be selected"
-	@ignore = "true"
 	@priority = "4"
 	test MimeTypeOthers {
 		task ("Add a vectorial file") {
@@ -2351,7 +2740,6 @@ definition {
 	@description = "LPS-133354: Given The Extension filter modal
 	When there are file extensions for the MIME type 'presentation'
 	Then the MIME type 'presentation' appears as father and all of the file extensions for it appear as children and available to be selected"
-	@ignore = "true"
 	@priority = "4"
 	test MimeTypePresentation {
 		task ("Add a compressed file") {
@@ -2380,7 +2768,6 @@ definition {
 	@description = "LPS-133354: Given The Extension filter modal
 	When there are file extensions for the MIME type 'spreadSheet'
 	Then the MIME type 'spreadSheet' appears as father and all of the file extensions for it appear as children and available to be selected"
-	@ignore = "true"
 	@priority = "4"
 	test MimeTypeSpreadsheet {
 		task ("Add a spreadSheet file") {
@@ -2409,7 +2796,6 @@ definition {
 	@description = "LPS-133354: Given The Extension filter modal
 	When there are file extensions for the MIME type 'text'
 	Then the MIME type 'text' appears as father and all of the file extensions for it appear as children and available to be selected"
-	@ignore = "true"
 	@priority = "4"
 	test MimeTypeText {
 		task ("Add a text file") {
@@ -2438,7 +2824,6 @@ definition {
 	@description = "LPS-133354: Given The Extension filter modal
 	When there are file extensions for the MIME type 'vectorial'
 	Then the MIME type 'vectorial' appears as father and all of the file extensions for it appear as children and available to be selected"
-	@ignore = "true"
 	@priority = "4"
 	test MimeTypeVectorial {
 		task ("Add a vectorial file") {
@@ -2467,7 +2852,6 @@ definition {
 	@description = "LPS-133354: Given The Extension filter modal
 	When there are file extensions for the MIME type 'video'
 	Then the MIME type 'video' appears as father and all of the file extensions for it appear as children and available to be selected"
-	@ignore = "true"
 	@priority = "4"
 	test MimeTypeVideo {
 		task ("Add a video file") {
@@ -2496,29 +2880,76 @@ definition {
 	@description = "LPS-131793: Given the categorization section in Documents and Media
 	When the user creates a Global internal vocabulary
 	Then the vocabulary is shown"
-	@ignore = "true"
 	@priority = "3"
 	test NewVocabularyGlobalInOOTBTable {
+		task ("Add a Global Internal Vocabulary") {
+			JSONCategory.addVocabulary(
+				groupName = "Global",
+				title = "Vocabulary 1",
+				visibility = "internal");
+		}
 
-		// TODO LPS-131793 NewVocabularyGlobalInOOTBTable pending implementation
+		task ("Choose the site of interest") {
+			PagesAdmin.openPagesAdmin(siteURLKey = "global");
+		}
 
+		task ("Go to Documents and Media and clik on Add Button and File Upload") {
+			ProductMenu.gotoPortlet(
+				category = "Content & Data",
+				portlet = "Documents and Media");
+
+			LexiconEntry.gotoAdd();
+
+			MenuItem.click(menuItem = "File Upload");
+		}
+
+		task ("Check if the Vocabulary appears in the list") {
+			Panel.expandPanel(panel = "Categorization");
+
+			AssertTextPresent(
+				locator1 = "AssetCategorization#VOCABULARY_LIST_ITEM",
+				value1 = "Vocabulary 1");
+		}
 	}
 
 	@description = "LPS-131793: Given the categorization section in Documents and Media
 	When the user creates a Site internal vocabulary
 	Then the vocabulary is shown"
-	@ignore = "true"
 	@priority = "3"
 	test NewVocabularyInternalInOOTBTable {
+		task ("Add a Site Internal Vocabulary") {
+			JSONCategory.addVocabulary(
+				groupName = "Test Site Name",
+				title = "Vocabulary 1",
+				visibility = "internal");
+		}
 
-		// TODO LPS-131793 NewVocabularyInternalInOOTBTable pending implementation
+		task ("Choose the site of interest") {
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
+		}
 
+		task ("Go to Documents and Media and clik on Add Button and File Upload") {
+			ProductMenu.gotoPortlet(
+				category = "Content & Data",
+				portlet = "Documents and Media");
+
+			LexiconEntry.gotoAdd();
+
+			MenuItem.click(menuItem = "File Upload");
+		}
+
+		task ("Check if the Vocabulary appears in the list") {
+			Panel.expandPanel(panel = "Categorization");
+
+			AssertTextPresent(
+				locator1 = "AssetCategorization#VOCABULARY_LIST_ITEM",
+				value1 = "Vocabulary 1");
+		}
 	}
 
 	@description = "LPS-133354: Given The Extension filter modal
 	When there are NOT file extensions for any MIME type
 	Then the MIME type does NOT appear listed in the Extension modal"
-	@ignore = "true"
 	@priority = "3"
 	test NoMimeType {
 		task ("Navigate to the content Dashboard and filter by file extension") {
@@ -2622,22 +3053,6 @@ definition {
 				categoryIndex = "3",
 				locator1 = "ContentDashboard#X_AXIS_CATEGORIES_NAME",
 				value1 = "A_Subaudience_3");
-		}
-
-		task ("Delete the global audience categories") {
-			for (var categories : list "C_Subaudience_1,B_Subaudience_2,A_Subaudience_3") {
-				JSONCategory.deleteCategory(
-					categoryName = "${categories}",
-					groupName = "Global",
-					vocabularyName = "Audience");
-			}
-
-			for (var categories : list "Substage_1,Substage_2,Substage_3") {
-				JSONCategory.deleteCategory(
-					categoryName = "${categories}",
-					groupName = "Global",
-					vocabularyName = "Stage");
-			}
 		}
 	}
 
@@ -2899,7 +3314,6 @@ definition {
 	@description = "LPS-133354: Given The Extension filter modal
 	When the user selects one or more extensions
 	Then the number of file extensions preselected will be shown as a text with the format '[number] Subtypes selected' "
-	@ignore = "true"
 	@priority = "3"
 	test SelectedExtensionNumbers {
 		task ("Add a text file") {
@@ -2952,7 +3366,6 @@ definition {
 	@description = "LPS-133354: Given The Extension filter modal
 	When the text input matches to one or more extensions from a MIME type and the user clicks on the MIME type parent
 	Then all the children that appear filtered will be selected"
-	@ignore = "true"
 	@priority = "3"
 	test SelectedParentAndChildExtensions {
 		task ("Add a text file") {
@@ -3346,22 +3759,28 @@ definition {
 					locator1 = "ContentDashboard#BAR_FROM_NO_VOCABULARY_SPECIFIED");
 			}
 		}
+	}
 
-		task ("Delete the global audience categories") {
-			for (var categories : list "Subaudience_1,Subaudience_2,Subaudience_3") {
-				JSONCategory.deleteCategory(
-					categoryName = "${categories}",
-					groupName = "Global",
-					vocabularyName = "Audience");
-			}
+	@description = "LPS-136512 Given A document associated with a Display Page
+	When the user clicks on the option "View metrics" in the kebab menu
+	Then the Content Performance panel is displayed"
+	@ignore = "true"
+	@priority = "4"
+	test ViewMetricsButtonKebabWhenDocumentHasDPT {
 
-			for (var categories : list "Substage_1,Substage_2,Substage_3") {
-				JSONCategory.deleteCategory(
-					categoryName = "${categories}",
-					groupName = "Global",
-					vocabularyName = "Stage");
-			}
-		}
+		// TODO LPS-144038 ViewMetricsButtonKebabWhenDocumentHasDPT pending implementation
+
+	}
+
+	@description = "LPS-136512 Given A document associated with a Display Page
+	When the user clicks on the "Metrics" button in the hover action
+	Then the Content Performance panel is displayed"
+	@ignore = "true"
+	@priority = "4"
+	test ViewMetricsButtonWhenDocumentHasDPT {
+
+		// TODO LPS-144038 ViewMetricsButtonWhenDocumentHasDPT pending implementation
+
 	}
 
 	@description = "LPS-116840 When the user clicks on the view icon of a content with an associated display page, the user is led to the view mode of the page"

@@ -105,6 +105,7 @@ public class EditRemoteAppEntryMVCActionCommand extends BaseMVCActionCommand {
 
 		if (type.equals(RemoteAppConstants.TYPE_CUSTOM_ELEMENT)) {
 			_remoteAppEntryService.addCustomElementRemoteAppEntry(
+				StringPool.BLANK,
 				StringUtil.merge(
 					ParamUtil.getStringValues(
 						actionRequest, "customElementCSSURLs"),

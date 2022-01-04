@@ -194,6 +194,14 @@ definition {
 			locator1 = "ObjectAdmin#ENTRY_STRING_VALUE_FIELD",
 			value1 = "${entryValue}");
 
+		if (isSet(entryOption)) {
+			Click(locator1 = "ObjectPortlet#SEARCH_RELATIONSHIP_ENTRY");
+
+			Click(
+				key_picklistOption = "${entryOption}",
+				locator1 = "ObjectAdmin#ENTRY_PICKLIST_OPTION");
+		}
+
 		Button.clickSave();
 
 		WaitForSPARefresh();
@@ -455,6 +463,12 @@ definition {
 			value1 = "${description}");
 	}
 
+	macro assertRelationshipTabPresent {
+		AssertElementPresent(
+			key_tabName = "Relationship Tab",
+			locator1 = "ObjectAdmin#ENTRY_RELATIONSHIP_TAB");
+	}
+
 	macro assertTypeFieldRequired {
 		AssertElementPresent(locator1 = "ObjectAdmin#TYPE_FIELD_REQUIRED");
 	}
@@ -593,9 +607,17 @@ definition {
 	}
 
 	macro goToLayoutTabOnLayouts {
-		SelectFrame(locator1 = "IFrame#IFRAME");
+		if (!(IsElementPresent(locator1 = "ObjectAdmin#LAYOUT_LAYOUT_TAB"))) {
+			SelectFrame(locator1 = "IFrame#IFRAME");
+		}
 
 		Click(locator1 = "ObjectAdmin#LAYOUT_LAYOUT_TAB");
+	}
+
+	macro goToRelationshipsDetails {
+		Click(
+			key_name = "${fieldName}",
+			locator1 = "CreateObject#SELECT_OBJECT_FIELD_IN_TABLE");
 	}
 
 	macro gotoRelationshipsTab {

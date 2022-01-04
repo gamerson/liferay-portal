@@ -148,6 +148,27 @@ public class GeneralConfiguration implements Cloneable, Serializable {
 
 	protected Boolean includeResponseString;
 
+	public String getQueryString() {
+		return queryString;
+	}
+
+	public void setQueryString(String queryString) {
+		this.queryString = queryString;
+	}
+
+	public void setQueryString(
+		UnsafeSupplier<String, Exception> queryStringUnsafeSupplier) {
+
+		try {
+			queryString = queryStringUnsafeSupplier.get();
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	protected String queryString;
+
 	public String[] getSearchableAssetTypes() {
 		return searchableAssetTypes;
 	}
@@ -169,6 +190,27 @@ public class GeneralConfiguration implements Cloneable, Serializable {
 	}
 
 	protected String[] searchableAssetTypes;
+
+	public String getTimeZoneId() {
+		return timeZoneId;
+	}
+
+	public void setTimeZoneId(String timeZoneId) {
+		this.timeZoneId = timeZoneId;
+	}
+
+	public void setTimeZoneId(
+		UnsafeSupplier<String, Exception> timeZoneIdUnsafeSupplier) {
+
+		try {
+			timeZoneId = timeZoneIdUnsafeSupplier.get();
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	protected String timeZoneId;
 
 	@Override
 	public GeneralConfiguration clone() throws CloneNotSupportedException {

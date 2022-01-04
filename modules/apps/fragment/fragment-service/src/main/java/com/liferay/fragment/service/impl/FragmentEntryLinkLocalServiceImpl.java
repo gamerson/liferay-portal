@@ -39,6 +39,7 @@ import com.liferay.portal.kernel.model.SystemEventConstants;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.portletfilerepository.PortletFileRepositoryUtil;
 import com.liferay.portal.kernel.repository.model.FileEntry;
+import com.liferay.portal.kernel.security.auth.PrincipalThreadLocal;
 import com.liferay.portal.kernel.service.ClassNameLocalService;
 import com.liferay.portal.kernel.service.LayoutLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
@@ -255,6 +256,31 @@ public class FragmentEntryLinkLocalServiceImpl
 	}
 
 	@Override
+	public List<FragmentEntryLink>
+		deleteLayoutPageTemplateEntryFragmentEntryLinks(
+			long groupId, long[] segmentsExperienceIds, long plid) {
+
+		List<FragmentEntryLink> fragmentEntryLinks =
+			getFragmentEntryLinksBySegmentsExperienceId(
+				groupId, segmentsExperienceIds, plid);
+
+		if (ListUtil.isEmpty(fragmentEntryLinks)) {
+			return Collections.emptyList();
+		}
+
+		List<FragmentEntryLink> deletedFragmentEntryLinks = new ArrayList<>();
+
+		for (FragmentEntryLink fragmentEntryLink : fragmentEntryLinks) {
+			fragmentEntryLinkLocalService.deleteFragmentEntryLink(
+				fragmentEntryLink);
+
+			deletedFragmentEntryLinks.add(fragmentEntryLink);
+		}
+
+		return deletedFragmentEntryLinks;
+	}
+
+	@Override
 	public List<FragmentEntryLink> getAllFragmentEntryLinksByFragmentEntryId(
 		long groupId, long fragmentEntryId, int start, int end,
 		OrderByComparator<FragmentEntryLink> orderByComparator) {
@@ -351,6 +377,14 @@ public class FragmentEntryLinkLocalServiceImpl
 	}
 
 	@Override
+	public List<FragmentEntryLink> getFragmentEntryLinksBySegmentsExperienceId(
+		long groupId, long[] segmentsExperienceIds, long plid) {
+
+		return fragmentEntryLinkPersistence.findByG_S_P(
+			groupId, segmentsExperienceIds, plid);
+	}
+
+	@Override
 	public int getFragmentEntryLinksCountByFragmentEntryId(
 		long fragmentEntryId) {
 
@@ -402,15 +436,17 @@ public class FragmentEntryLinkLocalServiceImpl
 
 	@Override
 	public void updateClassedModel(long plid) {
-		Layout layout = _layoutLocalService.fetchLayout(plid);
-
-		if (layout == null) {
-			return;
+		try {
+			_layoutLocalService.updateStatus(
+				PrincipalThreadLocal.getUserId(), plid,
+				WorkflowConstants.STATUS_DRAFT,
+				ServiceContextThreadLocal.getServiceContext());
 		}
-
-		layout.setStatus(WorkflowConstants.STATUS_DRAFT);
-
-		_layoutLocalService.updateLayout(layout);
+		catch (PortalException portalException) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(portalException, portalException);
+			}
+		}
 	}
 
 	@Override
@@ -470,8 +506,12 @@ public class FragmentEntryLinkLocalServiceImpl
 			long fragmentEntryLinkId, String editableValues)
 		throws PortalException {
 
-		return updateFragmentEntryLink(
-			fragmentEntryLinkId, editableValues, true);
+		FragmentEntryLink fragmentEntryLink = fetchFragmentEntryLink(
+			fragmentEntryLinkId);
+
+		fragmentEntryLink.setEditableValues(editableValues);
+
+		return fragmentEntryLinkPersistence.update(fragmentEntryLink);
 	}
 
 	@Override

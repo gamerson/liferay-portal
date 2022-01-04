@@ -185,7 +185,8 @@ public class FragmentEntryConfigurationParserImpl
 
 	@Override
 	public Map<String, Object> getContextObjects(
-		JSONObject configurationValuesJSONObject, String configuration) {
+		JSONObject configurationValuesJSONObject, String configuration,
+		long[] segmentsEntryIds) {
 
 		HashMap<String, Object> contextObjects = new HashMap<>();
 
@@ -216,7 +217,8 @@ public class FragmentEntryConfigurationParserImpl
 					"collectionSelector")) {
 
 				Object contextListObject = _getInfoListObjectEntry(
-					configurationValuesJSONObject.getString(name));
+					configurationValuesJSONObject.getString(name),
+					segmentsEntryIds);
 
 				if (contextListObject != null) {
 					contextObjects.put(
@@ -647,7 +649,9 @@ public class FragmentEntryConfigurationParserImpl
 		return null;
 	}
 
-	private Object _getInfoListObjectEntry(String value) {
+	private Object _getInfoListObjectEntry(
+		String value, long[] segmentsEntryIds) {
+
 		if (Validator.isNull(value)) {
 			return Collections.emptyList();
 		}
@@ -676,9 +680,16 @@ public class FragmentEntryConfigurationParserImpl
 				return Collections.emptyList();
 			}
 
+			DefaultLayoutListRetrieverContext
+				defaultLayoutListRetrieverContext =
+					new DefaultLayoutListRetrieverContext();
+
+			defaultLayoutListRetrieverContext.setSegmentsEntryIds(
+				segmentsEntryIds);
+
 			return layoutListRetriever.getList(
 				listObjectReferenceFactory.getListObjectReference(jsonObject),
-				new DefaultLayoutListRetrieverContext());
+				defaultLayoutListRetrieverContext);
 		}
 		catch (Exception exception) {
 			if (_log.isDebugEnabled()) {

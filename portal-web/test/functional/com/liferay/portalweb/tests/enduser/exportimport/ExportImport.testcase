@@ -22,7 +22,7 @@ definition {
 				userLoginEmailAddress = "test@liferay.com",
 				userLoginFullName = "Test Test");
 
-			Page.tearDownCP();
+			PagesAdmin.tearDownCP();
 
 			Site.tearDownCP();
 		}
@@ -271,8 +271,8 @@ definition {
 
 		var larFileName = LAR.getLarFileName();
 
-		AssertTextEquals.assertPartialText(
-			locator1 = "SitePagesExport#CURRENT_AND_PREVIOUS_STATUS",
+		AssertTextEquals(
+			locator1 = "ExportImport#CURRENT_AND_PREVIOUS_STATUS_1",
 			value1 = "Successful");
 
 		LAR.downloadLar();
@@ -360,7 +360,7 @@ definition {
 			category = "Site Builder",
 			portlet = "Pages");
 
-		SitePages.gotoPageMenuItem(
+		PagesAdmin.gotoPageEllipsisMenuItem(
 			menuItem = "Edit",
 			pageName = "Test Template Content Page");
 
@@ -592,13 +592,14 @@ definition {
 			uncheckContentNameList = "Documents and Media,Pages");
 
 		AssertClick(
-			locator1 = "SitePagesExport#EXPORT_BUTTON",
+			key_text = "Export",
+			locator1 = "Button#ANY",
 			value1 = "Export");
 
 		var key_larFileName = "${larFileName}";
 
-		AssertTextEquals.assertPartialText(
-			locator1 = "SitePagesExport#CURRENT_AND_PREVIOUS_STATUS",
+		AssertTextEquals(
+			locator1 = "ExportImport#CURRENT_AND_PREVIOUS_STATUS_1",
 			value1 = "Successful");
 
 		var larFileName = LAR.getLarFileName();
@@ -643,13 +644,14 @@ definition {
 			uncheckContentNameList = "Documents and Media,Web Content");
 
 		AssertClick(
-			locator1 = "SitePagesExport#EXPORT_BUTTON",
+			key_text = "Export",
+			locator1 = "Button#ANY",
 			value1 = "Export");
 
 		var key_larFileName = "${larFileName}";
 
-		AssertTextEquals.assertPartialText(
-			locator1 = "SitePagesExport#CURRENT_AND_PREVIOUS_STATUS",
+		AssertTextEquals(
+			locator1 = "ExportImport#CURRENT_AND_PREVIOUS_STATUS_1",
 			value1 = "Successful");
 
 		var larFileName = LAR.getLarFileName();
@@ -882,8 +884,8 @@ definition {
 
 		var key_larFileName = "${larFileName}";
 
-		AssertTextEquals.assertPartialText(
-			locator1 = "SitePagesExport#CURRENT_AND_PREVIOUS_STATUS",
+		AssertTextEquals(
+			locator1 = "ExportImport#CURRENT_AND_PREVIOUS_STATUS_1",
 			value1 = "Successful");
 
 		var larFileName = LAR.getLarFileName();
@@ -1017,7 +1019,7 @@ definition {
 			category = "Site Builder",
 			portlet = "Pages");
 
-		SitePages.addPrivatePage(pageName = "Private Page");
+		PagesAdmin.addPrivatePage(pageName = "Private Page");
 
 		Navigator.gotoPrivateSitePage(
 			pageName = "Private Page",
@@ -1078,8 +1080,8 @@ definition {
 
 		var key_larFileName = "${larFileName}";
 
-		AssertTextEquals.assertPartialText(
-			locator1 = "SitePagesExport#CURRENT_AND_PREVIOUS_STATUS",
+		AssertTextEquals(
+			locator1 = "ExportImport#CURRENT_AND_PREVIOUS_STATUS_1",
 			value1 = "Successful");
 
 		var larFileName = LAR.getLarFileName();
@@ -1217,13 +1219,13 @@ definition {
 	test ExportImportThemeSettings {
 		JSONGroup.addGroup(groupName = "Site Name");
 
-		SitePages.openPagesAdmin(siteURLKey = "Site Name");
+		PagesAdmin.openPagesAdmin(siteURLKey = "Site Name");
 
-		SitePages.addPublicPage(pageName = "Test Page");
+		PagesAdmin.addPublicPage(pageName = "Test Page");
 
-		SitePages.openPagesAdmin(siteURLKey = "Site Name");
+		PagesAdmin.openPagesAdmin(siteURLKey = "Site Name");
 
-		SitePages.gotoPageMenuItem(
+		PagesAdmin.gotoPageEllipsisMenuItem(
 			menuItem = "Configure",
 			pageName = "Test Page");
 
@@ -1244,11 +1246,12 @@ definition {
 			uncheckSiteTemplateSettings = "true");
 
 		AssertClick(
-			locator1 = "SitePagesExport#EXPORT_BUTTON",
+			key_text = "Export",
+			locator1 = "Button#ANY",
 			value1 = "Export");
 
-		AssertTextEquals.assertPartialText(
-			locator1 = "SitePagesExport#CURRENT_AND_PREVIOUS_STATUS",
+		AssertTextEquals(
+			locator1 = "ExportImport#CURRENT_AND_PREVIOUS_STATUS_1",
 			value1 = "Successful");
 
 		var larFileName = LAR.getLarFileName();
@@ -1265,7 +1268,7 @@ definition {
 			pageName = "Test Page",
 			siteName = "Site Name 2");
 
-		Page.viewCurrentThemeSettings(
+		PagesAdmin.viewWidgetPageCurrentTheme(
 			checkThemeSettingList = "Show Maximize/Minimize Application Links",
 			pageName = "Test Page",
 			uncheckThemeSettingList = "Show Header Search");

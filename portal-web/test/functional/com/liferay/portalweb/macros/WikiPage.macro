@@ -532,6 +532,17 @@ definition {
 		if (isSet(saveAsDraft)) {
 			WikiEntry.saveAsDraft();
 		}
+		else if ("${wikiPageTitleVariation}" == "Invalid") {
+			AssertClick(
+				locator1 = "Button#PUBLISH",
+				value1 = "Publish");
+
+			Alert.viewRequestFailedToComplete();
+
+			AssertTextEquals.assertPartialText(
+				locator1 = "Message#ERROR_ENTER_A_VALID_TITLE",
+				value1 = "Please enter a valid title.");
+		}
 		else {
 			AssertClick(
 				locator1 = "Button#PUBLISH",
@@ -921,6 +932,8 @@ definition {
 		SelectFrame(value1 = "relative=top");
 
 		if ("${minorEdit}" == "true") {
+			Panel.expandPanel(panel = "Configuration");
+
 			Check(locator1 = "Checkbox#THIS_IS_A_MINOR_EDIT");
 		}
 
@@ -1313,7 +1326,7 @@ definition {
 			locator1 = "Wiki#PAGE_HEADER",
 			value1 = "${wikiPageTitle}");
 
-		AssertTextEquals(
+		AssertTextEquals.assertPartialText(
 			locator1 = "WikiEntry#BODY",
 			value1 = "${wikiPageContent}");
 
@@ -1632,6 +1645,9 @@ definition {
 				locator1 = "WikiEntry#BODY_LINK",
 				value1 = "${wikiPageContent}");
 		}
+		else if ("${wikiPageContentTable}" == "true") {
+			AssertElementPresent(locator1 = "WikiEntry#BODY_TABLE");
+		}
 		else {
 			AssertTextEquals(
 				locator1 = "WikiEntry#BODY",
@@ -1716,6 +1732,13 @@ definition {
 		AssertTextEquals(
 			locator1 = "Link#REDIRECT",
 			value1 = "${wikiPageRedirectLink}");
+	}
+
+	macro viewRelatedAsset {
+		AssertTextEquals(
+			key_relatedAssetTitle = "${relatedAssetTitle}",
+			locator1 = "AssetRelatedAssets#ASSET_TITLE",
+			value1 = "${relatedAssetTitle}");
 	}
 
 	macro viewRSS {
@@ -1804,6 +1827,32 @@ definition {
 					value1 = "Main");
 			}
 		}
+	}
+
+	macro viewSummary {
+		var key_wikiPageRevision = "${wikiPageRevision}";
+		var key_wikiPageTitle = "${wikiPageTitle}";
+		var key_wikiVersionSummary = "${wikiVersionSummary}";
+
+		AssertTextEquals(
+			locator1 = "Portlet#H3_HEADER",
+			value1 = "${wikiPageTitle}");
+
+		AssertClick(
+			locator1 = "Link#DETAILS",
+			value1 = "Details");
+
+		AssertClick(
+			locator1 = "Wiki#PAGE_TABS_HISTORY",
+			value1 = "History");
+
+		AssertClick(
+			locator1 = "Wiki#HISTORY_VERSIONS_TAB",
+			value1 = "Versions");
+
+		AssertTextEquals(
+			locator1 = "Wiki#HISTORY_VERSIONS_SUMMARY",
+			value1 = "${wikiVersionSummary}");
 	}
 
 	macro viewTagViaAddPG {

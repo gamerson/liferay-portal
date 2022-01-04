@@ -28,10 +28,12 @@ import com.liferay.petra.sql.dsl.query.FromStep;
 import com.liferay.petra.sql.dsl.query.GroupByStep;
 import com.liferay.portal.aop.AopService;
 import com.liferay.portal.dao.orm.custom.sql.CustomSQL;
+import com.liferay.portal.kernel.dao.search.SearchPaginationUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Company;
+import com.liferay.portal.kernel.model.ResourceConstants;
 import com.liferay.portal.kernel.model.Role;
 import com.liferay.portal.kernel.model.RoleTable;
 import com.liferay.portal.kernel.model.User;
@@ -40,6 +42,7 @@ import com.liferay.portal.kernel.model.role.RoleConstants;
 import com.liferay.portal.kernel.search.BaseModelSearchResult;
 import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
 import com.liferay.portal.kernel.service.CompanyLocalService;
+import com.liferay.portal.kernel.service.ResourceLocalService;
 import com.liferay.portal.kernel.service.RoleLocalService;
 import com.liferay.portal.kernel.service.UserGroupRoleLocalService;
 import com.liferay.portal.kernel.util.ArrayUtil;
@@ -51,6 +54,7 @@ import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.vulcan.util.TransformUtil;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -98,6 +102,10 @@ public class AccountRoleLocalServiceImpl
 		role.setClassPK(accountRole.getAccountRoleId());
 
 		_roleLocalService.updateRole(role);
+
+		_resourceLocalService.addResources(
+			role.getCompanyId(), 0, userId, AccountRole.class.getName(),
+			accountRole.getAccountRoleId(), false, false, false);
 
 		return addAccountRole(accountRole);
 	}
@@ -160,6 +168,10 @@ public class AccountRoleLocalServiceImpl
 
 		accountRole = super.deleteAccountRole(accountRole);
 
+		_resourceLocalService.deleteResource(
+			accountRole.getCompanyId(), AccountRole.class.getName(),
+			ResourceConstants.SCOPE_INDIVIDUAL, accountRole.getAccountRoleId());
+
 		Role role = _roleLocalService.fetchRole(accountRole.getRoleId());
 
 		if (role != null) {
@@ -180,7 +192,9 @@ public class AccountRoleLocalServiceImpl
 	}
 
 	@Override
-	public void deleteAccountRolesByCompanyId(long companyId) {
+	public void deleteAccountRolesByCompanyId(long companyId)
+		throws PortalException {
+
 		if (!CompanyThreadLocal.isDeleteInProcess()) {
 			throw new UnsupportedOperationException(
 				"Deleting account roles by company must be called when " +
@@ -190,10 +204,7 @@ public class AccountRoleLocalServiceImpl
 		for (AccountRole accountRole :
 				accountRolePersistence.findByCompanyId(companyId)) {
 
-			accountRolePersistence.remove(accountRole);
-
-			_userGroupRoleLocalService.deleteUserGroupRolesByRoleId(
-				accountRole.getRoleId());
+			deleteAccountRole(accountRole);
 		}
 	}
 
@@ -270,6 +281,16 @@ public class AccountRoleLocalServiceImpl
 			params = new LinkedHashMap<>();
 		}
 
+		int total = accountRoleLocalService.dslQueryCount(
+			_getGroupByStep(
+				accountEntryIds, companyId,
+				DSLQueryFactoryUtil.countDistinct(
+					AccountRoleTable.INSTANCE.roleId),
+				keywords, params));
+
+		int[] startAndEnd = SearchPaginationUtil.calculateStartAndEnd(
+			start, end, total);
+
 		return new BaseModelSearchResult<>(
 			accountRoleLocalService.dslQuery(
 				_getGroupByStep(
@@ -279,14 +300,35 @@ public class AccountRoleLocalServiceImpl
 				).orderBy(
 					RoleTable.INSTANCE, orderByComparator
 				).limit(
-					start, end
+					startAndEnd[0], startAndEnd[1]
 				)),
-			accountRoleLocalService.dslQueryCount(
-				_getGroupByStep(
-					accountEntryIds, companyId,
-					DSLQueryFactoryUtil.countDistinct(
-						AccountRoleTable.INSTANCE.roleId),
-					keywords, params)));
+			total);
+	}
+
+	@Override
+	public void setUserAccountRoles(
+			long accountEntryId, long[] accountRoleIds, long userId)
+		throws PortalException {
+
+		List<AccountRole> removeAccountRoles = new ArrayList<>();
+
+		List<AccountRole> currentAccountRoles = getAccountRoles(
+			accountEntryId, userId);
+
+		for (AccountRole accountRole : currentAccountRoles) {
+			if (!ArrayUtil.contains(
+					accountRoleIds, accountRole.getAccountRoleId())) {
+
+				removeAccountRoles.add(accountRole);
+			}
+		}
+
+		associateUser(accountEntryId, accountRoleIds, userId);
+
+		for (AccountRole accountRole : removeAccountRoles) {
+			unassociateUser(
+				accountEntryId, accountRole.getAccountRoleId(), userId);
+		}
 	}
 
 	@Override
@@ -429,6 +471,9 @@ public class AccountRoleLocalServiceImpl
 
 	@Reference
 	private CustomSQL _customSQL;
+
+	@Reference
+	private ResourceLocalService _resourceLocalService;
 
 	@Reference
 	private RoleLocalService _roleLocalService;

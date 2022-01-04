@@ -5,7 +5,6 @@
 
 	&.previous {
 		color: $color-action-neutral-default;
-		padding: $spacer-0 !important;
 		text-decoration: none !important;
 	}
 
@@ -20,7 +19,7 @@
 
 span.btn-info-panel {
 	cursor: pointer;
-	padding: 3px 0px;
+	padding: 3px 0;
 	width: fit-content;
 
 	svg {

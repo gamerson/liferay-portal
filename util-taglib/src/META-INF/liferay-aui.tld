@@ -833,6 +833,11 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
+			<name>languagesDropdownDirection</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
 			<description><![CDATA[Whether the component should be the last element of the form.]]></description>
 			<name>last</name>
 			<required>false</required>

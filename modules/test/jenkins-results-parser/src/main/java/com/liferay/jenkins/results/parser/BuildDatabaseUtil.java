@@ -34,23 +34,33 @@ public class BuildDatabaseUtil {
 	}
 
 	public static BuildDatabase getBuildDatabase(Build build) {
-		File buildDir = _getBuildDir(build);
+		TopLevelBuild topLevelBuild = null;
 
-		synchronized (_buildDatabases) {
-			BuildDatabase buildDatabase = _buildDatabases.get(buildDir);
+		if (build != null) {
+			topLevelBuild = build.getTopLevelBuild();
+		}
 
-			if (buildDatabase != null) {
+		if ((build instanceof TopLevelBuild) || (topLevelBuild == null)) {
+			File buildDir = _getBuildDir(build);
+
+			synchronized (_buildDatabases) {
+				BuildDatabase buildDatabase = _buildDatabases.get(buildDir);
+
+				if (buildDatabase != null) {
+					return buildDatabase;
+				}
+
+				_downloadBuildDatabaseFile(buildDir, build);
+
+				buildDatabase = new DefaultBuildDatabase(buildDir);
+
+				_buildDatabases.put(buildDir, buildDatabase);
+
 				return buildDatabase;
 			}
-
-			_downloadBuildDatabaseFile(buildDir, build);
-
-			buildDatabase = new DefaultBuildDatabase(buildDir);
-
-			_buildDatabases.put(buildDir, buildDatabase);
-
-			return buildDatabase;
 		}
+
+		return getBuildDatabase(topLevelBuild);
 	}
 
 	private static void _downloadBuildDatabaseFile(File buildDir, Build build) {
@@ -75,7 +85,22 @@ public class BuildDatabaseUtil {
 				buildDatabaseFile, distNodes, distPath);
 		}
 
-		if (buildDatabaseFile.exists()) {
+		if (buildDatabaseFile.exists() || (build == null)) {
+			return;
+		}
+
+		if (build.isFromArchive()) {
+			try {
+				JenkinsResultsParserUtil.write(
+					buildDatabaseFile,
+					JenkinsResultsParserUtil.toString(
+						build.getBuildURL() + "/build-database.json"));
+			}
+			catch (IOException ioException) {
+				throw new RuntimeException(
+					"Unable to write build-database.json", ioException);
+			}
+
 			return;
 		}
 

@@ -154,36 +154,39 @@ public abstract class BaseWorkspaceGitRepository
 			throw new IllegalArgumentException("Invalid count " + count);
 		}
 
-		int localGitCommitsSize = 0;
-
-		if ((localGitCommits != null) && !localGitCommits.isEmpty()) {
-			localGitCommitsSize = localGitCommits.size();
+		if ((localGitCommits == null) || localGitCommits.isEmpty()) {
+			return Collections.emptyList();
 		}
+
+		int localGitCommitsSize = localGitCommits.size();
 
 		if (count > localGitCommitsSize) {
-			throw new IllegalArgumentException(
-				JenkinsResultsParserUtil.combine(
-					String.valueOf(localGitCommitsSize),
-					" commits cannot be split into ", String.valueOf(count),
-					" lists"));
+			List<List<LocalGitCommit>> partitionedLocalGitCommits =
+				new ArrayList<>(localGitCommitsSize);
+
+			for (LocalGitCommit localGitCommit : localGitCommits) {
+				partitionedLocalGitCommits.add(
+					Lists.newArrayList(localGitCommit));
+			}
+
+			return partitionedLocalGitCommits;
 		}
 
-		List<LocalGitCommit> lastLocalGitCommitsPartition = Lists.newArrayList(
-			localGitCommits.get(localGitCommitsSize - 1));
-
-		List<List<LocalGitCommit>> localGitCommitsPartitions = new ArrayList<>(
+		List<List<LocalGitCommit>> partitionedLocalGitCommits = new ArrayList<>(
 			count);
 
-		if (localGitCommits.size() > 1) {
-			localGitCommitsPartitions.addAll(
+		LocalGitCommit lastLocalGitCommit = localGitCommits.remove(
+			localGitCommits.size() - 1);
+
+		if (!localGitCommits.isEmpty()) {
+			partitionedLocalGitCommits.addAll(
 				JenkinsResultsParserUtil.partitionByCount(
-					localGitCommits.subList(0, localGitCommitsSize - 2),
-					count - 1));
+					localGitCommits, count - 1));
 		}
 
-		localGitCommitsPartitions.add(lastLocalGitCommitsPartition);
+		partitionedLocalGitCommits.add(Lists.newArrayList(lastLocalGitCommit));
 
-		return localGitCommitsPartitions;
+		return partitionedLocalGitCommits;
 	}
 
 	@Override

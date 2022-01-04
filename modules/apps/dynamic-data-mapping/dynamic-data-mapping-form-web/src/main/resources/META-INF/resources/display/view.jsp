@@ -57,50 +57,72 @@ long formInstanceId = ddmFormDisplayContext.getFormInstanceId();
 		</div>
 	</c:when>
 	<c:otherwise>
+		<liferay-portlet:resourceURL copyCurrentRenderParameters="<%= false %>" id="/dynamic_data_mapping_form/get_form_report_data" var="formReportDataURL">
+			<portlet:param name="formInstanceId" value="<%= String.valueOf(formInstanceId) %>" />
+		</liferay-portlet:resourceURL>
 
 		<%
+		DDMFormInstance formInstance = ddmFormDisplayContext.getFormInstance();
+
+		boolean expired = false;
+
+		if (ddmFormDisplayContext.isExpirationDateEnabled()) {
+			expired = DDMFormInstanceExpirationStatusUtil.isFormExpired(formInstance, timeZone);
+		}
+
+		boolean preview = ddmFormDisplayContext.isPreview();
+		boolean showSuccessPage = ddmFormDisplayContext.isShowSuccessPage();
+
 		String languageId = ddmFormDisplayContext.getDefaultLanguageId();
 
 		Locale displayLocale = LocaleUtil.fromLanguageId(languageId);
 		%>
 
 		<c:choose>
-			<c:when test="<%= ddmFormDisplayContext.isShowSuccessPage() %>">
+			<c:when test="<%= !preview && (expired || showSuccessPage || ddmFormDisplayContext.hasSubmittedAnEntry()) %>">
 
 				<%
-				DDMFormSuccessPageSettings ddmFormSuccessPageSettings = ddmFormDisplayContext.getDDMFormSuccessPageSettings();
+				String pageDescription;
+				String pageTitle;
+				boolean showPartialResultsToRespondents = ddmFormDisplayContext.isFFShowPartialResultsEnabled() && ddmFormDisplayContext.isShowPartialResultsToRespondents();
 
-				LocalizedValue title = ddmFormSuccessPageSettings.getTitle();
-				LocalizedValue body = ddmFormSuccessPageSettings.getBody();
+				if (expired) {
+					pageDescription = LanguageUtil.get(request, "this-form-has-an-expiration-date");
+					pageTitle = LanguageUtil.get(request, "this-form-is-no-longer-available");
+				}
+				else if (showSuccessPage) {
+					pageDescription = ddmFormDisplayContext.getSuccessPageDescription(displayLocale);
+					pageTitle = ddmFormDisplayContext.getSuccessPageTitle(displayLocale);
+				}
+				else {
+					pageDescription = LanguageUtil.get(request, "you-can-fill-out-this-form-only-once.-contact-the-owner-of-the-form-if-you-think-this-is-a-mistake");
+					pageTitle = LanguageUtil.get(request, "you-have-already-responded");
+				}
 				%>
 
-				<div class="portlet-forms">
-					<div class="ddm-form-basic-info ddm-form-success-page">
-						<clay:container-fluid>
-							<h1 class="ddm-form-name"><%= HtmlUtil.escape(GetterUtil.getString(title.getString(displayLocale), title.getString(title.getDefaultLocale()))) %></h1>
-
-							<p class="ddm-form-description"><%= HtmlUtil.escape(GetterUtil.getString(body.getString(displayLocale), body.getString(body.getDefaultLocale()))) %></p>
-						</clay:container-fluid>
-					</div>
-				</div>
-			</c:when>
-			<c:when test="<%= ddmFormDisplayContext.hasSubmittedAnEntry() && !ddmFormDisplayContext.isPreview() %>">
-				<div class="portlet-forms">
-					<div class="ddm-form-basic-info">
-						<clay:container-fluid>
-							<h1 class="ddm-form-name"><%= LanguageUtil.get(request, "you-have-already-responded") %></h1>
-
-							<p class="ddm-form-description"><%= LanguageUtil.get(request, "you-can-fill-out-this-form-only-once.-contact-the-owner-of-the-form-if-you-think-this-is-a-mistake") %></p>
-						</clay:container-fluid>
-					</div>
-				</div>
+				<react:component
+					module="admin/js/components/DefaultPage"
+					props='<%=
+						HashMapBuilder.<String, Object>put(
+							"formDescription", formInstance.getDescription(displayLocale)
+						).put(
+							"formReportDataURL", formReportDataURL.toString()
+						).put(
+							"formTitle", formInstance.getName(displayLocale)
+						).put(
+							"pageDescription", pageDescription
+						).put(
+							"pageTitle", pageTitle
+						).put(
+							"showPartialResultsToRespondents", showPartialResultsToRespondents
+						).put(
+							"showSubmitAgainButton", !ddmFormDisplayContext.isLimitToOneSubmissionPerUserEnabled() && !expired
+						).build()
+					%>'
+				/>
 			</c:when>
 			<c:when test="<%= ddmFormDisplayContext.isFormAvailable() %>">
 				<portlet:actionURL name="/dynamic_data_mapping_form/add_form_instance_record" var="addFormInstanceRecordActionURL" />
-
-				<%
-				DDMFormInstance formInstance = ddmFormDisplayContext.getFormInstance();
-				%>
 
 				<div class="portlet-forms">
 					<aui:form action="<%= addFormInstanceRecordActionURL %>" data-DDMFormInstanceId="<%= formInstanceId %>" data-senna-off="true" method="post" name="fm">
@@ -162,7 +184,7 @@ long formInstanceId = ddmFormDisplayContext.getFormInstanceId();
 
 						<liferay-ui:error-principal />
 
-						<c:if test="<%= ddmFormDisplayContext.isFormShared() || ddmFormDisplayContext.isPreview() %>">
+						<c:if test="<%= ddmFormDisplayContext.isFormShared() || preview %>">
 							<clay:container-fluid>
 								<div class="locale-actions">
 									<liferay-ui:language
@@ -205,19 +227,18 @@ long formInstanceId = ddmFormDisplayContext.getFormInstanceId();
 							</clay:container-fluid>
 						</div>
 
-						<div class="ddm-form-basic-info">
-							<clay:container-fluid>
-								<h1 class="ddm-form-name"><%= HtmlUtil.escape(formInstance.getName(displayLocale)) %></h1>
-
-								<%
-								String description = StringUtil.trim(HtmlUtil.escape(formInstance.getDescription(displayLocale)));
-								%>
-
-								<c:if test="<%= Validator.isNotNull(description) %>">
-									<p class="ddm-form-description"><%= HtmlUtil.replaceNewLine(description) %></p>
-								</c:if>
-							</clay:container-fluid>
-						</div>
+						<clay:container-fluid>
+							<react:component
+								module="admin/js/util/ShowPartialResultsAlert"
+								props='<%=
+									HashMapBuilder.<String, Object>put(
+										"dismissible", true
+									).put(
+										"showPartialResultsToRespondents", ddmFormDisplayContext.isShowPartialResultsToRespondents()
+									).build()
+								%>'
+							/>
+						</clay:container-fluid>
 
 						<liferay-portlet:resourceURL copyCurrentRenderParameters="<%= false %>" id="/dynamic_data_mapping_form/get_form_report_data" var="formReportDataURL">
 							<portlet:param name="formInstanceId" value="<%= String.valueOf(formInstanceId) %>" />
@@ -230,10 +251,16 @@ long formInstanceId = ddmFormDisplayContext.getFormInstanceId();
 							id="<%= ddmFormDisplayContext.getContainerId() %>"
 						>
 							<react:component
-								module="admin/js/FormView.link.es"
+								module="admin/js/FormView"
 								props='<%=
 									HashMapBuilder.<String, Object>put(
+										"description", HtmlUtil.replaceNewLine(StringUtil.trim(HtmlUtil.escape(formInstance.getDescription(displayLocale))))
+									).put(
 										"formReportDataURL", formReportDataURL.toString()
+									).put(
+										"hasDescription", StringUtils.isNotEmpty(formInstance.getDescription(displayLocale))
+									).put(
+										"title", HtmlUtil.escape(formInstance.getName(displayLocale))
 									).put(
 										"validateCSRFTokenURL", validateCSRFTokenURL.toString()
 									).putAll(
@@ -283,7 +310,7 @@ long formInstanceId = ddmFormDisplayContext.getFormInstanceId();
 							<liferay-portlet:resourceURL copyCurrentRenderParameters="<%= false %>" id="/dynamic_data_mapping_form/add_form_instance_record" var="autoSaveFormInstanceRecordURL">
 								<portlet:param name="autoSave" value="<%= Boolean.TRUE.toString() %>" />
 								<portlet:param name="languageId" value="<%= languageId %>" />
-								<portlet:param name="preview" value="<%= String.valueOf(ddmFormDisplayContext.isPreview()) %>" />
+								<portlet:param name="preview" value="<%= String.valueOf(preview) %>" />
 							</liferay-portlet:resourceURL>
 
 							Liferay.on('sessionExpired', (event) => {

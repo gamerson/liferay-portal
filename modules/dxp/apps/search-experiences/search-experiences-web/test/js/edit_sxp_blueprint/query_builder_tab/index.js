@@ -51,12 +51,11 @@ function renderBuilder(props) {
 			elementInstances={QUERY_SXP_ELEMENTS.map((sxpElement, index) => ({
 				id: index,
 				sxpElement,
-				uiConfigurationValues: getUIConfigurationValues(
-					sxpElement.elementDefinition.uiConfiguration
-				),
+				uiConfigurationValues: getUIConfigurationValues(sxpElement),
 			}))}
 			onDeleteSXPElement={jest.fn()}
 			onFrameworkConfigChange={jest.fn()}
+			setFieldValue={jest.fn()}
 			{...props}
 		/>
 	);

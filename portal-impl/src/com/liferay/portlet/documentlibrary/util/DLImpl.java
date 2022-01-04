@@ -854,12 +854,22 @@ public class DLImpl implements DL {
 	public String getUniqueFileName(
 		long groupId, long folderId, String fileName) {
 
+		return getUniqueFileName(groupId, folderId, fileName, false);
+	}
+
+	@Override
+	public String getUniqueFileName(
+		long groupId, long folderId, String fileName,
+		boolean ignoreDuplicateTitle) {
+
 		String uniqueFileTitle = FileUtil.stripExtension(fileName);
 
 		String extension = FileUtil.getExtension(fileName);
 
 		for (int i = 1;; i++) {
-			if (!_existsFileEntryByTitle(groupId, folderId, uniqueFileTitle) &&
+			if ((ignoreDuplicateTitle ||
+				 !_existsFileEntryByTitle(
+					 groupId, folderId, uniqueFileTitle)) &&
 				!_existsFileEntryByFileName(
 					groupId, extension, folderId, uniqueFileTitle)) {
 
@@ -871,6 +881,22 @@ public class DLImpl implements DL {
 		}
 
 		return getTitleWithExtension(uniqueFileTitle, extension);
+	}
+
+	@Override
+	public String getUniqueTitle(long groupId, long folderId, String title) {
+		String uniqueFileTitle = title;
+
+		int i = 1;
+
+		while (_existsFileEntryByTitle(groupId, folderId, uniqueFileTitle)) {
+			uniqueFileTitle = FileUtil.appendParentheticalSuffix(
+				title, String.valueOf(i));
+
+			i++;
+		}
+
+		return uniqueFileTitle;
 	}
 
 	/**

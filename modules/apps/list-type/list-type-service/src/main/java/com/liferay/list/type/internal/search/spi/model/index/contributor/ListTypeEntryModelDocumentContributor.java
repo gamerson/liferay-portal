@@ -38,6 +38,8 @@ public class ListTypeEntryModelDocumentContributor
 		document.addText("key", listTypeEntry.getKey());
 		document.addKeyword(
 			"listTypeDefinitionId", listTypeEntry.getListTypeDefinitionId());
+		document.addLocalizedKeyword(
+			"localized_name", listTypeEntry.getNameMap(), true, true);
 		document.remove(Field.USER_NAME);
 	}
 

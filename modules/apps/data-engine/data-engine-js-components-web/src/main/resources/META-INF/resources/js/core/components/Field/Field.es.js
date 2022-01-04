@@ -174,7 +174,7 @@ const getRootParentField = (field, currentLoc, {loc, root}) => {
 	if (root) {
 		return {
 			...field,
-			loc: [currentLoc, ...loc],
+			loc: [...loc, currentLoc],
 			root,
 		};
 	}

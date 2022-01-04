@@ -1,5 +1,23 @@
 definition {
 
+	macro activeCustomObject {
+		ObjectPortlet.selectCustomObject(label = "${objectName}");
+
+		CreateObject.checkToggleActive();
+
+		CreateObject.saveObject();
+	}
+
+	macro addRelationshipAndSelectEntry {
+		LexiconEntry.gotoAdd();
+
+		SelectFrame(locator1 = "IFrame#MODAL_BODY");
+
+		ClickNoError(
+			key_titleFieldName = "${titleFieldName}",
+			locator1 = "CreateObject#SELECT_ENTRY_IN_RELATIONSHIP_TAB");
+	}
+
 	macro assertAddedEntryRelationshipIsDisplayed {
 		LexiconEntry.gotoAdd();
 
@@ -50,6 +68,16 @@ definition {
 
 	macro assertDisabledObjectName {
 		AssertElementPresent(locator1 = "CreateObject#DISABLED_OBJECT_NAME");
+	}
+
+	macro assertDisabledPublishObjectButton {
+		AssertElementPresent(locator1 = "CreateObject#DISABLED_PUBLISH_OBJECT_BUTTON");
+	}
+
+	macro assertEntrySelectedOnRelationshipField {
+		AssertElementPresent(
+			key_entry = "${entry}",
+			locator1 = "CreateObject#VIEW_ENTRY_SELECTED_ON_RELATIONSHIP_FIELD");
 	}
 
 	macro assertFieldAddedOnBlock {
@@ -112,10 +140,22 @@ definition {
 			locator1 = "CreateObject#PANEL_CATEGORY_KEY_SELECTED");
 	}
 
+	macro assertRelatedObject {
+		AssertElementPresent(
+			key_RelatedObject = "${relatedObject}",
+			locator1 = "CreateObject#VIEW_RELATED_OBJECT_ON_RELATIONSHIP_FIELD");
+	}
+
 	macro assertSearchableSectionOptionsAppears {
 		AssertElementPresent(
 			key_radioOption = "${radioOption}",
 			locator1 = "ObjectAdmin#FIELDS_RADIO_OPTION");
+	}
+
+	macro assertTitleFieldIsSelected {
+		AssertElementPresent(
+			locator1 = "CreateObject#TITLE_FIELD",
+			value1 = "${fieldLabel}");
 	}
 
 	macro assertToggleCollapsibleChecked {
@@ -140,6 +180,18 @@ definition {
 
 	macro checkToggleMandatory {
 		Check.checkToggleSwitch(locator1 = "CreateObject#TOGGLE_MANDATORY");
+	}
+
+	macro chooseEntryOnRelationshipField {
+		Click(locator1 = "ObjectPortlet#SEARCH_RELATIONSHIP_ENTRY");
+
+		KeyPress(
+			locator1 = "ObjectPortlet#SEARCH_RELATIONSHIP_ENTRY",
+			value1 = "\BACK_SPACE");
+
+		Click(
+			key_picklistOption = "${entryOption}",
+			locator1 = "ObjectAdmin#ENTRY_PICKLIST_OPTION");
 	}
 
 	macro deleteFieldOnBlock {
@@ -172,10 +224,34 @@ definition {
 			value1 = "${fieldType}");
 	}
 
+	macro inactiveCustomObject {
+		ObjectPortlet.selectCustomObject(label = "${objectName}");
+
+		CreateObject.checkToggleInactive();
+
+		CreateObject.saveObject();
+	}
+
 	macro saveObject {
 		Click(locator1 = "CreateObject#SAVE_BUTTON");
 
 		WaitForSPARefresh();
+	}
+
+	macro selectDeletionType {
+		ObjectAdmin.gotoRelationshipsTab();
+
+		ObjectAdmin.goToRelationshipsDetails(fieldName = "${fieldName}");
+
+		WaitForSPARefresh();
+
+		SelectFrame.selectFrameNoLoading(locator1 = "CommerceEntry#IFRAME_SIDE_PANEL");
+
+		Select(
+			locator1 = "CreateObject#SELECT_DELETION_TYPE",
+			value1 = "${deletionType}");
+
+		Button.clickSave();
 	}
 
 	macro selectPanelCategoryKey {

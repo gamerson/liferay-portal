@@ -42,7 +42,7 @@ definition {
 			panel = "Site Administration",
 			portlet = "Pages");
 
-		SitePages.addPublicPage(pageName = "Asset Publisher Page");
+		PagesAdmin.addPublicPage(pageName = "Asset Publisher Page");
 
 		Navigator.gotoPage(pageName = "Asset Publisher Page");
 
@@ -62,7 +62,7 @@ definition {
 
 			WebContent.tearDownCP();
 
-			Page.tearDownPG();
+			PagesAdmin.tearDownCP();
 
 			Workflow.tearDownPortalWorkflow();
 
@@ -354,7 +354,9 @@ definition {
 			panel = "Site Administration",
 			portlet = "Web Content");
 
-		AssertElementPresent(locator1 = "SitePages#SITE_PENDING_STATUS");
+		AssertElementPresent(
+			key_webContentTitle = "Web Content Title",
+			locator1 = "WC#ENTRY_LIST_WORKFLOW_STATUS");
 
 		ProductMenu.gotoPortlet(
 			category = "Site Builder",
@@ -451,7 +453,9 @@ definition {
 			panel = "Site Administration",
 			portlet = "Web Content");
 
-		AssertElementPresent(locator1 = "SitePages#SITE_PENDING_STATUS");
+		AssertElementPresent(
+			key_webContentTitle = "Web Content Title",
+			locator1 = "WC#ENTRY_LIST_WORKFLOW_STATUS");
 
 		ProductMenu.gotoPortlet(
 			category = "Site Builder",

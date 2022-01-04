@@ -210,10 +210,12 @@ class Analytics {
 	 * @param {Object} options Complementary information about the request
 	 */
 	track(eventId, eventProps, options = {}) {
+		const {assetType, ...otherEventProps} = eventProps || {};
+
 		if (
 			this._isTrackingDisabled() ||
 			instance._disposed ||
-			!isValidEvent({eventId, eventProps})
+			!isValidEvent({eventId, eventProps: otherEventProps})
 		) {
 			return;
 		}
@@ -221,13 +223,15 @@ class Analytics {
 		// eslint-disable-next-line
 		const mergedOptions = Object.assign({}, TRACK_DEFAULT_OPTIONS, options);
 
+		const applicationId = assetType || mergedOptions.applicationId;
+
 		const currentContextHash = this._getCurrentContextHash();
 
 		instance[STORAGE_KEY_EVENTS].addItem(
 			normalizeEvent(
 				eventId,
-				mergedOptions.applicationId,
-				eventProps,
+				applicationId,
+				otherEventProps,
 				currentContextHash
 			)
 		);
@@ -315,7 +319,7 @@ class Analytics {
 	_getContext() {
 		const {context} = middlewares.reduce(
 			(request, middleware) => middleware(request, this),
-			{context: {}}
+			{context: {channelId: instance.config.channelId}}
 		);
 
 		for (const key in context) {
@@ -375,8 +379,7 @@ class Analytics {
 	}
 
 	_isNewUserIdRequired() {
-		const {dataSourceId} = this.config;
-		const {identity} = this.config;
+		const {dataSourceId, identity} = this.config;
 
 		const storedIdentityHash = getItem(STORAGE_KEY_IDENTITY);
 		const storedUserId = getItem(STORAGE_KEY_USER_ID);

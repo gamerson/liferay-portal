@@ -33,6 +33,7 @@ import {
 	PROCESS_COMPLETED,
 	PROCESS_FAILED,
 	PROCESS_STARTED,
+	SCHEMA_SELECTED_EVENT,
 } from '../../../src/main/resources/META-INF/resources/js/constants';
 import Export from '../../../src/main/resources/META-INF/resources/js/export/Export';
 
@@ -60,6 +61,10 @@ jest.mock(
 	})
 );
 
+function fireSchemaChangeEvent() {
+	Liferay.fire(SCHEMA_SELECTED_EVENT, {schema: 'something'});
+}
+
 describe('Export', () => {
 	beforeAll(() => {
 		const form = document.createElement('form');
@@ -73,6 +78,7 @@ describe('Export', () => {
 
 	beforeEach(() => {
 		const blob = new Blob(['a', 'b', 'c', 'd']);
+
 		mockApi = fetchMock
 			.mock(BASE_PROPS.formExportURL, () => ({
 				exportTaskId: mockTaskID,
@@ -98,8 +104,28 @@ describe('Export', () => {
 		expect(getByText(Liferay.Language.get('export'))).toBeInTheDocument();
 	});
 
+	it('must has button disabled initially', () => {
+		const {getByText} = render(<Export {...BASE_PROPS} />);
+
+		expect(getByText(Liferay.Language.get('export'))).toBeDisabled();
+	});
+
+	it('must enable button on Schema Change Event', () => {
+		const {getByText} = render(<Export {...BASE_PROPS} />);
+
+		act(() => {
+			fireSchemaChangeEvent();
+		});
+
+		expect(getByText(Liferay.Language.get('export'))).not.toBeDisabled();
+	});
+
 	it('must show modal when the button is clicked', async () => {
 		const {getByText} = render(<Export {...BASE_PROPS} />);
+
+		act(() => {
+			fireSchemaChangeEvent();
+		});
 
 		act(() => {
 			fireEvent.click(getByText(Liferay.Language.get('export')));
@@ -116,17 +142,26 @@ describe('Export', () => {
 		const {getByText} = render(<Export {...BASE_PROPS} />);
 
 		act(() => {
+			fireSchemaChangeEvent();
+		});
+
+		act(() => {
 			fireEvent.click(getByText(Liferay.Language.get('export')));
 		});
 
 		const exportButton = await waitForElement(() =>
 			getByText(Liferay.Language.get('download'))
 		);
+
 		expect(exportButton).toBeDisabled();
 	});
 
 	it('must call export API only one time on mount', async () => {
 		const {getByText} = render(<Export {...BASE_PROPS} />);
+
+		act(() => {
+			fireSchemaChangeEvent();
+		});
 
 		act(() => {
 			fireEvent.click(getByText(Liferay.Language.get('export')));
@@ -158,6 +193,10 @@ describe('Export', () => {
 		}));
 
 		const {getByText} = render(<Export {...BASE_PROPS} />);
+
+		act(() => {
+			fireSchemaChangeEvent();
+		});
 
 		act(() => {
 			fireEvent.click(getByText(Liferay.Language.get('export')));
@@ -200,6 +239,10 @@ describe('Export', () => {
 		const {getByText} = render(<Export {...BASE_PROPS} />);
 
 		act(() => {
+			fireSchemaChangeEvent();
+		});
+
+		act(() => {
 			fireEvent.click(getByText(Liferay.Language.get('export')));
 		});
 
@@ -233,6 +276,10 @@ describe('Export', () => {
 		}));
 
 		const {getByText} = render(<Export {...BASE_PROPS} />);
+
+		act(() => {
+			fireSchemaChangeEvent();
+		});
 
 		act(() => {
 			fireEvent.click(getByText(Liferay.Language.get('export')));
@@ -272,6 +319,10 @@ describe('Export', () => {
 		}));
 
 		const {getByText} = render(<Export {...BASE_PROPS} />);
+
+		act(() => {
+			fireSchemaChangeEvent();
+		});
 
 		act(() => {
 			fireEvent.click(getByText(Liferay.Language.get('export')));

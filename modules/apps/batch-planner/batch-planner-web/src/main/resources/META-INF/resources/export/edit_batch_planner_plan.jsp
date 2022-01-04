@@ -26,20 +26,21 @@ renderResponse.setTitle(LanguageUtil.get(request, "export"));
 
 <div class="container pt-4">
 	<form id="<portlet:namespace />fm" name="<portlet:namespace />fm">
-		<aui:input name="batchPlannerPlanId" type="hidden" value="<%= batchPlannerPlanId %>" />
-		<aui:input name="export" type="hidden" value="<%= true %>" />
-		<aui:input name="name" type="hidden" />
-		<aui:input name="taskItemDelegateName" type="hidden" value="DEFAULT" />
+		<input id="<portlet:namespace />batchPlannerPlanId" name="<portlet:namespace />batchPlannerPlanId" type="hidden" value="<%= batchPlannerPlanId %>" />
+		<input id="<portlet:namespace />export" name="<portlet:namespace />export" type="hidden" value="<%= true %>" />
+		<input id="<portlet:namespace />taskItemDelegateName" name="<portlet:namespace />taskItemDelegateName" type="hidden" value="DEFAULT" />
 
 		<div class="card">
 			<h4 class="card-header"><%= LanguageUtil.get(request, "export-settings") %></h4>
 
 			<div class="card-body">
-				<liferay-frontend:edit-form-body>
 
-					<%
-					EditBatchPlannerPlanDisplayContext editBatchPlannerPlanDisplayContext = (EditBatchPlannerPlanDisplayContext)request.getAttribute(WebKeys.PORTLET_DISPLAY_CONTEXT);
-					%>
+				<%
+				EditBatchPlannerPlanDisplayContext editBatchPlannerPlanDisplayContext = (EditBatchPlannerPlanDisplayContext)request.getAttribute(WebKeys.PORTLET_DISPLAY_CONTEXT);
+				%>
+
+				<liferay-frontend:edit-form-body>
+					<div id="<portlet:namespace />templateSelect"></div>
 
 					<clay:row>
 						<clay:col
@@ -75,18 +76,6 @@ renderResponse.setTitle(LanguageUtil.get(request, "export"));
 									options="<%=
 										editBatchPlannerPlanDisplayContext.getExternalTypeSelectOptions()
 									%>"
-								/>
-							</clay:col>
-						</clay:row>
-
-						<clay:row>
-							<clay:col
-								md="6"
-							>
-								<clay:checkbox
-									id='<%= liferayPortletResponse.getNamespace() + "saveExport" %>'
-									label="save-export"
-									name='<%= liferayPortletResponse.getNamespace() + "saveExport" %>'
 								/>
 							</clay:col>
 						</clay:row>
@@ -196,5 +185,16 @@ renderResponse.setTitle(LanguageUtil.get(request, "export"));
 </div>
 
 <liferay-frontend:component
+	context='<%=
+		HashMapBuilder.<String, Object>put(
+			"initialTemplateClassName", editBatchPlannerPlanDisplayContext.getSelectedInternalClassName()
+		).put(
+			"initialTemplateHeadlessEndpoint", editBatchPlannerPlanDisplayContext.getSelectedHeadlessEndpoint()
+		).put(
+			"initialTemplateMapping", editBatchPlannerPlanDisplayContext.getSelectedBatchPlannerPlanMappings()
+		).put(
+			"templatesOptions", editBatchPlannerPlanDisplayContext.getTemplateSelectOptions()
+		).build()
+	%>'
 	module="js/edit_batch_planner_plan"
 />

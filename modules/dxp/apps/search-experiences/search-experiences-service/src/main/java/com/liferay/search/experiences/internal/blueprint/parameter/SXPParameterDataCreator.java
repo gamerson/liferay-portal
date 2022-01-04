@@ -30,16 +30,7 @@ import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.StringUtil;
-import com.liferay.search.experiences.blueprint.parameter.DateSXPParameter;
-import com.liferay.search.experiences.blueprint.parameter.DoubleSXPParameter;
-import com.liferay.search.experiences.blueprint.parameter.FloatSXPParameter;
-import com.liferay.search.experiences.blueprint.parameter.IntegerArraySXPParameter;
-import com.liferay.search.experiences.blueprint.parameter.IntegerSXPParameter;
-import com.liferay.search.experiences.blueprint.parameter.LongArraySXPParameter;
-import com.liferay.search.experiences.blueprint.parameter.LongSXPParameter;
 import com.liferay.search.experiences.blueprint.parameter.SXPParameter;
-import com.liferay.search.experiences.blueprint.parameter.StringArraySXPParameter;
-import com.liferay.search.experiences.blueprint.parameter.StringSXPParameter;
 import com.liferay.search.experiences.blueprint.parameter.contributor.SXPParameterContributorDefinition;
 import com.liferay.search.experiences.blueprint.parameter.contributor.SXPParameterContributorDefinitionProvider;
 import com.liferay.search.experiences.internal.blueprint.parameter.contributor.ContextSXPParameterContributor;
@@ -94,9 +85,11 @@ public class SXPParameterDataCreator
 
 		Configuration configuration = sxpBlueprint.getConfiguration();
 
-		_addSXPParameters(
-			configuration.getParameterConfiguration(), searchContext,
-			sxpParameters);
+		if (configuration != null) {
+			_addSXPParameters(
+				configuration.getParameterConfiguration(), searchContext,
+				sxpParameters);
+		}
 
 		_contribute(searchContext, sxpBlueprint, sxpParameters);
 
@@ -128,8 +121,7 @@ public class SXPParameterDataCreator
 	@Activate
 	protected void activate() {
 		_sxpParameterContributors = new SXPParameterContributor[] {
-			new ContextSXPParameterContributor(
-				_groupLocalService, _language, _layoutLocalService),
+			new ContextSXPParameterContributor(_groupLocalService, _language),
 			new IpstackSXPParameterContributor(_configurationProvider),
 			new OpenWeatherMapSXPParameterContributor(_configurationProvider),
 			new TimeSXPParameterContributor(),
@@ -260,6 +252,31 @@ public class SXPParameterDataCreator
 		}
 
 		return value;
+	}
+
+	private Boolean _getBoolean(Boolean defaultValue, Object object) {
+		if (object != null) {
+			return GetterUtil.getBoolean(object);
+		}
+
+		if (defaultValue != null) {
+			return defaultValue;
+		}
+
+		return null;
+	}
+
+	private SXPParameter _getBooleanSXPParameter(
+		String name, Object object, Parameter parameter) {
+
+		Boolean value = _getBoolean(
+			(Boolean)parameter.getDefaultValue(), object);
+
+		if (value == null) {
+			return null;
+		}
+
+		return new BooleanSXPParameter(name, true, value);
 	}
 
 	private SXPParameter _getDateSXPParameter(
@@ -499,7 +516,10 @@ public class SXPParameterDataCreator
 
 		Parameter.Type type = parameter.getType();
 
-		if (type.equals(Parameter.Type.DATE)) {
+		if (type.equals(Parameter.Type.BOOLEAN)) {
+			return _getBooleanSXPParameter(name, object, parameter);
+		}
+		else if (type.equals(Parameter.Type.DATE)) {
 			return _getDateSXPParameter(
 				name, object, searchContext.getTimeZone(), parameter);
 		}

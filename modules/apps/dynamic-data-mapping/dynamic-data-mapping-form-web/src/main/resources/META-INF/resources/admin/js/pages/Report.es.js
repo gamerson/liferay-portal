@@ -21,19 +21,11 @@ import {useEffect} from 'react';
  */
 export function Report() {
 	useEffect(() => {
-		const formReport = document.querySelector(
-			'#container-portlet-ddm-form-report'
-		);
+		const formReport = document.querySelector('.portlet-ddm-form-report');
 
-		if (formReport) {
-			formReport.classList.remove('hide');
-		}
+		formReport.classList.remove('hide');
 
-		return () => {
-			if (formReport) {
-				formReport.classList.add('hide');
-			}
-		};
+		return () => formReport.classList.add('hide');
 	}, []);
 
 	return null;

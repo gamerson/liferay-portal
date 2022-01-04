@@ -66,9 +66,9 @@ definition {
 		}
 
 		task ("Add a widget page and add it to navigation menu") {
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
-			SitePages.addPublicPage(
+			PagesAdmin.addPublicPage(
 				navigationMenus = "Navigation Menu Name",
 				pageName = "Test Widget Page");
 		}
@@ -85,14 +85,14 @@ definition {
 
 			AssertTextEquals(
 				key_masterLayoutName = "Custom Masters Page Template",
-				locator1 = "SitePagesEditPage#MASTER_LAYOUT_NAME",
+				locator1 = "PagesAdmin#MASTER_LAYOUT_NAME",
 				value1 = "Custom Masters Page Template");
 
 			PortletEntry.save();
 		}
 
 		task ("Add a content page and add it to navigation menu") {
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
 			ContentPages.addPage(
 				masterLayoutName = "Custom Masters Page Template",

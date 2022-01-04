@@ -7,6 +7,9 @@ export function WebsiteControlledInput({rules, ...props}) {
 	return (
 		<ControlledInput
 			{...props}
+			inputProps={{
+				className: 'd-flex mb-5 mr-0',
+			}}
 			rules={{
 				pattern: {
 					message: 'Should be a valid website address.',

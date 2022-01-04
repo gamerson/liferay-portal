@@ -31,9 +31,9 @@ import org.osgi.service.component.annotations.Modified;
 )
 public class FFDisplayPageSiteNavigationMenuItemConfigurationUtil {
 
-	public static boolean displayPageTypesEnabled() {
+	public static boolean multipleSelectionEnabled() {
 		return _ffDisplayPageSiteNavigationMenuItemConfiguration.
-			displayPageTypesEnabled();
+			multipleSelectionEnabled();
 	}
 
 	@Activate

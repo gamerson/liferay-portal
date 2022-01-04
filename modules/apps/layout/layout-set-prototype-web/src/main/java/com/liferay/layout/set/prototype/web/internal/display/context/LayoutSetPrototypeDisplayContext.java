@@ -29,11 +29,11 @@ import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.model.LayoutSetPrototype;
 import com.liferay.portal.kernel.portlet.PortalPreferences;
 import com.liferay.portal.kernel.portlet.PortletPreferencesFactoryUtil;
+import com.liferay.portal.kernel.portlet.SearchOrderByUtil;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.service.LayoutSetPrototypeLocalServiceUtil;
 import com.liferay.portal.kernel.service.permission.PortalPermissionUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
-import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -153,8 +153,9 @@ public class LayoutSetPrototypeDisplayContext {
 			return _orderByCol;
 		}
 
-		_orderByCol = ParamUtil.getString(
-			_httpServletRequest, "orderByCol", "create-date");
+		_orderByCol = SearchOrderByUtil.getOrderByCol(
+			_httpServletRequest,
+			LayoutSetPrototypePortletKeys.LAYOUT_SET_PROTOTYPE, "create-date");
 
 		return _orderByCol;
 	}
@@ -164,8 +165,9 @@ public class LayoutSetPrototypeDisplayContext {
 			return _orderByType;
 		}
 
-		_orderByType = ParamUtil.getString(
-			_httpServletRequest, "orderByType", "asc");
+		_orderByType = SearchOrderByUtil.getOrderByType(
+			_httpServletRequest,
+			LayoutSetPrototypePortletKeys.LAYOUT_SET_PROTOTYPE, "asc");
 
 		return _orderByType;
 	}
@@ -195,31 +197,25 @@ public class LayoutSetPrototypeDisplayContext {
 				"there-are-no-site-templates");
 
 		searchContainer.setId("layoutSetPrototype");
-		searchContainer.setRowChecker(
-			new EmptyOnClickRowChecker(_renderResponse));
+		searchContainer.setOrderByCol(getOrderByCol());
 
 		boolean orderByAsc = false;
 
-		if (getOrderByType().equals("asc")) {
+		if (Objects.equals(getOrderByType(), "asc")) {
 			orderByAsc = true;
 		}
 
-		OrderByComparator<LayoutSetPrototype> orderByComparator =
-			new LayoutSetPrototypeCreateDateComparator(orderByAsc);
-
-		searchContainer.setOrderByCol(getOrderByCol());
-		searchContainer.setOrderByComparator(orderByComparator);
+		searchContainer.setOrderByComparator(
+			new LayoutSetPrototypeCreateDateComparator(orderByAsc));
 		searchContainer.setOrderByType(getOrderByType());
-
-		searchContainer.setTotal(getTotal());
-
-		List<LayoutSetPrototype> results =
+		searchContainer.setResults(
 			LayoutSetPrototypeLocalServiceUtil.search(
 				themeDisplay.getCompanyId(), getActive(),
 				searchContainer.getStart(), searchContainer.getEnd(),
-				searchContainer.getOrderByComparator());
-
-		searchContainer.setResults(results);
+				searchContainer.getOrderByComparator()));
+		searchContainer.setRowChecker(
+			new EmptyOnClickRowChecker(_renderResponse));
+		searchContainer.setTotal(getTotal());
 
 		return searchContainer;
 	}

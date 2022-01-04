@@ -83,7 +83,7 @@ public class GoogleAuthorizationImpl implements GoogleAuthorization {
 		throws Exception {
 
 		GoogleAuthorizationCodeFlow googleAuthorizationCodeFlow =
-			getGoogleAuthorizationCodeFlow(companyId, scopes);
+			_getGoogleAuthorizationCodeFlow(companyId, scopes);
 
 		GoogleAuthorizationCodeTokenRequest
 			googleAuthorizationCodeTokenRequest =
@@ -98,7 +98,7 @@ public class GoogleAuthorizationImpl implements GoogleAuthorization {
 			googleAuthorizationCodeFlow.createAndStoreCredential(
 				googleTokenResponse, null);
 
-		Userinfoplus userinfoplus = getUserinfoplus(credential);
+		Userinfoplus userinfoplus = _getUserinfoplus(credential);
 
 		if (userinfoplus == null) {
 			return null;
@@ -107,7 +107,7 @@ public class GoogleAuthorizationImpl implements GoogleAuthorization {
 		try {
 			return TransactionInvokerUtil.invoke(
 				_transactionConfig,
-				() -> doAddOrUpdateUser(httpSession, companyId, userinfoplus));
+				() -> _addOrUpdateUser(httpSession, companyId, userinfoplus));
 		}
 		catch (Throwable throwable) {
 			if (throwable instanceof PortalException) {
@@ -124,7 +124,7 @@ public class GoogleAuthorizationImpl implements GoogleAuthorization {
 		throws Exception {
 
 		GoogleAuthorizationCodeFlow googleAuthorizationCodeFlow =
-			getGoogleAuthorizationCodeFlow(companyId, scopes);
+			_getGoogleAuthorizationCodeFlow(companyId, scopes);
 
 		GoogleAuthorizationCodeRequestUrl googleAuthorizationCodeRequestUrl =
 			googleAuthorizationCodeFlow.newAuthorizationUrl();
@@ -138,7 +138,7 @@ public class GoogleAuthorizationImpl implements GoogleAuthorization {
 	@Override
 	public boolean isEnabled(long companyId) {
 		GoogleAuthorizationConfiguration googleConfiguration =
-			getGoogleConfiguration(companyId);
+			_getGoogleConfiguration(companyId);
 
 		if (Validator.isNull(googleConfiguration.clientId()) ||
 			Validator.isNull(googleConfiguration.clientSecret())) {
@@ -149,7 +149,67 @@ public class GoogleAuthorizationImpl implements GoogleAuthorization {
 		return googleConfiguration.enabled();
 	}
 
-	protected User addUser(long companyId, Userinfoplus userinfoplus)
+	private User _addOrUpdateUser(
+			HttpSession httpSession, long companyId, Userinfoplus userinfoplus)
+		throws Exception {
+
+		User user = null;
+
+		String googleUserId = userinfoplus.getId();
+
+		if (Validator.isNotNull(googleUserId)) {
+			user = _userLocalService.fetchUserByGoogleUserId(
+				companyId, googleUserId);
+
+			if ((user != null) &&
+				(user.getStatus() != WorkflowConstants.STATUS_INCOMPLETE)) {
+
+				httpSession.setAttribute(
+					GoogleWebKeys.GOOGLE_USER_ID, String.valueOf(googleUserId));
+			}
+		}
+
+		String emailAddress = userinfoplus.getEmail();
+
+		if ((user == null) && Validator.isNotNull(emailAddress)) {
+			user = _userLocalService.fetchUserByEmailAddress(
+				companyId, emailAddress);
+
+			if ((user != null) &&
+				(user.getStatus() != WorkflowConstants.STATUS_INCOMPLETE)) {
+
+				httpSession.setAttribute(
+					GoogleWebKeys.GOOGLE_USER_EMAIL_ADDRESS, emailAddress);
+			}
+		}
+
+		if (user != null) {
+			if (user.getStatus() == WorkflowConstants.STATUS_INCOMPLETE) {
+				httpSession.setAttribute(
+					WebKeys.GOOGLE_INCOMPLETE_USER_ID, userinfoplus.getId());
+
+				user.setEmailAddress(userinfoplus.getEmail());
+				user.setFirstName(userinfoplus.getGivenName());
+				user.setLastName(userinfoplus.getFamilyName());
+
+				return user;
+			}
+
+			user = _updateUser(user, userinfoplus);
+		}
+		else {
+			_checkAllowUserCreation(companyId, userinfoplus);
+
+			user = _addUser(companyId, userinfoplus);
+
+			httpSession.setAttribute(
+				GoogleWebKeys.GOOGLE_USER_EMAIL_ADDRESS, emailAddress);
+		}
+
+		return user;
+	}
+
+	private User _addUser(long companyId, Userinfoplus userinfoplus)
 		throws Exception {
 
 		long creatorUserId = 0;
@@ -198,72 +258,32 @@ public class GoogleAuthorizationImpl implements GoogleAuthorization {
 		return user;
 	}
 
-	protected User doAddOrUpdateUser(
-			HttpSession httpSession, long companyId, Userinfoplus userinfoplus)
+	private void _checkAllowUserCreation(
+			long companyId, Userinfoplus userinfoplus)
 		throws Exception {
 
-		User user = null;
+		Company company = _companyLocalService.getCompany(companyId);
 
-		String googleUserId = userinfoplus.getId();
-
-		if (Validator.isNotNull(googleUserId)) {
-			user = _userLocalService.fetchUserByGoogleUserId(
-				companyId, googleUserId);
-
-			if ((user != null) &&
-				(user.getStatus() != WorkflowConstants.STATUS_INCOMPLETE)) {
-
-				httpSession.setAttribute(
-					GoogleWebKeys.GOOGLE_USER_ID, String.valueOf(googleUserId));
-			}
+		if (!company.isStrangers()) {
+			throw new StrangersNotAllowedException(companyId);
 		}
 
 		String emailAddress = userinfoplus.getEmail();
 
-		if ((user == null) && Validator.isNotNull(emailAddress)) {
-			user = _userLocalService.fetchUserByEmailAddress(
-				companyId, emailAddress);
+		if (company.hasCompanyMx(emailAddress) &&
+			!company.isStrangersWithMx()) {
 
-			if ((user != null) &&
-				(user.getStatus() != WorkflowConstants.STATUS_INCOMPLETE)) {
-
-				httpSession.setAttribute(
-					GoogleWebKeys.GOOGLE_USER_EMAIL_ADDRESS, emailAddress);
-			}
+			throw new UserEmailAddressException.MustNotUseCompanyMx(
+				emailAddress);
 		}
-
-		if (user != null) {
-			if (user.getStatus() == WorkflowConstants.STATUS_INCOMPLETE) {
-				httpSession.setAttribute(
-					WebKeys.GOOGLE_INCOMPLETE_USER_ID, userinfoplus.getId());
-
-				user.setEmailAddress(userinfoplus.getEmail());
-				user.setFirstName(userinfoplus.getGivenName());
-				user.setLastName(userinfoplus.getFamilyName());
-
-				return user;
-			}
-
-			user = updateUser(user, userinfoplus);
-		}
-		else {
-			_checkAllowUserCreation(companyId, userinfoplus);
-
-			user = addUser(companyId, userinfoplus);
-
-			httpSession.setAttribute(
-				GoogleWebKeys.GOOGLE_USER_EMAIL_ADDRESS, emailAddress);
-		}
-
-		return user;
 	}
 
-	protected GoogleAuthorizationCodeFlow getGoogleAuthorizationCodeFlow(
+	private GoogleAuthorizationCodeFlow _getGoogleAuthorizationCodeFlow(
 			long companyId, List<String> scopes)
 		throws Exception {
 
 		GoogleAuthorizationConfiguration googleAuthorizationConfiguration =
-			getGoogleConfiguration(companyId);
+			_getGoogleConfiguration(companyId);
 
 		HttpTransport httpTransport = new NetHttpTransport();
 		JacksonFactory jsonFactory = new JacksonFactory();
@@ -281,7 +301,7 @@ public class GoogleAuthorizationImpl implements GoogleAuthorization {
 		return googleAuthorizationCodeFlowBuilder.build();
 	}
 
-	protected GoogleAuthorizationConfiguration getGoogleConfiguration(
+	private GoogleAuthorizationConfiguration _getGoogleConfiguration(
 		long companyId) {
 
 		try {
@@ -295,7 +315,7 @@ public class GoogleAuthorizationImpl implements GoogleAuthorization {
 		}
 	}
 
-	protected Userinfoplus getUserinfoplus(Credential credentials)
+	private Userinfoplus _getUserinfoplus(Credential credentials)
 		throws Exception {
 
 		Oauth2.Builder builder = new Oauth2.Builder(
@@ -316,7 +336,7 @@ public class GoogleAuthorizationImpl implements GoogleAuthorization {
 		return userinfoplus;
 	}
 
-	protected User updateUser(User user, Userinfoplus userinfoplus)
+	private User _updateUser(User user, Userinfoplus userinfoplus)
 		throws Exception {
 
 		String emailAddress = userinfoplus.getEmail();
@@ -379,26 +399,6 @@ public class GoogleAuthorizationImpl implements GoogleAuthorization {
 			contact.getJabberSn(), contact.getSkypeSn(), contact.getTwitterSn(),
 			contact.getJobTitle(), groupIds, organizationIds, roleIds,
 			userGroupRoles, userGroupIds, serviceContext);
-	}
-
-	private void _checkAllowUserCreation(
-			long companyId, Userinfoplus userinfoplus)
-		throws Exception {
-
-		Company company = _companyLocalService.getCompany(companyId);
-
-		if (!company.isStrangers()) {
-			throw new StrangersNotAllowedException(companyId);
-		}
-
-		String emailAddress = userinfoplus.getEmail();
-
-		if (company.hasCompanyMx(emailAddress) &&
-			!company.isStrangersWithMx()) {
-
-			throw new UserEmailAddressException.MustNotUseCompanyMx(
-				emailAddress);
-		}
 	}
 
 	private static final String _ONLINE_ACCESS_TYPE = "online";

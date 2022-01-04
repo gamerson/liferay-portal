@@ -14,6 +14,8 @@
 
 package com.liferay.gradle.plugins.poshi.runner;
 
+import com.github.erdi.gradle.webdriver.WebDriverBinariesPlugin;
+
 import com.liferay.gradle.util.GradleUtil;
 import com.liferay.gradle.util.OSDetector;
 import com.liferay.gradle.util.StringUtil;
@@ -86,6 +88,7 @@ public class PoshiRunnerPlugin implements Plugin<Project> {
 	@Override
 	public void apply(Project project) {
 		GradleUtil.applyPlugin(project, BasePlugin.class);
+		GradleUtil.applyPlugin(project, WebDriverBinariesPlugin.class);
 
 		final PoshiRunnerExtension poshiRunnerExtension =
 			GradleUtil.addExtension(
@@ -122,6 +125,14 @@ public class PoshiRunnerPlugin implements Plugin<Project> {
 
 						poshiProperties = GUtil.loadProperties(
 							poshiPropertiesFile);
+
+						File poshiExtPropertiesFile =
+							_getPoshiExtPropertiesFile(poshiPropertiesFile);
+
+						if (poshiExtPropertiesFile.exists()) {
+							poshiProperties.putAll(
+								GUtil.loadProperties(poshiExtPropertiesFile));
+						}
 					}
 
 					_configureTaskExecutePQLQuery(
@@ -465,6 +476,26 @@ public class PoshiRunnerPlugin implements Plugin<Project> {
 		return new File(project.getBuildDir(), "poshi-runner");
 	}
 
+	private File _getPoshiExtPropertiesFile(File poshiPropertiesFile) {
+		String fileName = poshiPropertiesFile.getName();
+
+		int pos = fileName.lastIndexOf('.');
+
+		if (pos <= 0) {
+			return new File(
+				poshiPropertiesFile.getParentFile(), fileName + "-ext");
+		}
+
+		String extension = fileName.substring(pos + 1);
+
+		String shortFileName = fileName.substring(
+			0, fileName.length() - extension.length() - 1);
+
+		return new File(
+			poshiPropertiesFile.getParentFile(),
+			shortFileName + "-ext." + extension);
+	}
+
 	private FileCollection _getPoshiRunnerClasspath(Project project) {
 		Configuration poshiRunnerConfiguration = GradleUtil.getConfiguration(
 			project, POSHI_RUNNER_CONFIGURATION_NAME);
@@ -484,19 +515,6 @@ public class PoshiRunnerPlugin implements Plugin<Project> {
 	private void _populateSystemProperties(
 		Map<String, Object> systemProperties, Properties poshiProperties,
 		Project project, PoshiRunnerExtension poshiRunnerExtension) {
-
-		if (poshiProperties != null) {
-			Enumeration<String> enumeration =
-				(Enumeration<String>)poshiProperties.propertyNames();
-
-			while (enumeration.hasMoreElements()) {
-				String key = enumeration.nextElement();
-
-				String value = poshiProperties.getProperty(key);
-
-				systemProperties.put(key, value);
-			}
-		}
 
 		systemProperties.putAll(poshiRunnerExtension.getPoshiProperties());
 
@@ -538,6 +556,19 @@ public class PoshiRunnerPlugin implements Plugin<Project> {
 				sb.setLength(sb.length() - 1);
 
 				systemProperties.put(sb.toString(), entry.getValue());
+			}
+		}
+
+		if (poshiProperties != null) {
+			Enumeration<String> enumeration =
+				(Enumeration<String>)poshiProperties.propertyNames();
+
+			while (enumeration.hasMoreElements()) {
+				String key = enumeration.nextElement();
+
+				String value = poshiProperties.getProperty(key);
+
+				systemProperties.put(key, value);
 			}
 		}
 	}

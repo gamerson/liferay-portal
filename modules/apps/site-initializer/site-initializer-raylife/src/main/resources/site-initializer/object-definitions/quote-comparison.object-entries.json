@@ -19,7 +19,7 @@
 		"perOccuranceLimit": "1000000",
 		"price": "719",
 		"productRecallOrReplacement": true,
-		"promo": "359"
+		"promo": "359.5"
 	},
 	{
 		"aggregateLimit": "2000000",
@@ -30,6 +30,6 @@
 		"perOccuranceLimit": "1000000",
 		"price": "1225",
 		"productRecallOrReplacement": true,
-		"promo": "862.5"
+		"promo": "612.5"
 	}
 ]

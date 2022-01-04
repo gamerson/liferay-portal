@@ -23,6 +23,7 @@ import com.liferay.portal.kernel.model.Role;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.model.role.RoleConstants;
 import com.liferay.portal.kernel.portlet.SearchDisplayStyleUtil;
+import com.liferay.portal.kernel.portlet.SearchOrderByUtil;
 import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
 import com.liferay.portal.kernel.service.RoleLocalServiceUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
@@ -85,6 +86,32 @@ public class UserRolesDisplayContext {
 		return _eventName;
 	}
 
+	public String getOrderByCol() {
+		if (Validator.isNotNull(_orderByCol)) {
+			return _orderByCol;
+		}
+
+		_orderByCol = SearchOrderByUtil.getOrderByCol(
+			_httpServletRequest,
+			SiteMembershipsPortletKeys.SITE_MEMBERSHIPS_ADMIN,
+			"order-by-col-roles", "title");
+
+		return _orderByCol;
+	}
+
+	public String getOrderByType() {
+		if (Validator.isNotNull(_orderByType)) {
+			return _orderByType;
+		}
+
+		_orderByType = SearchOrderByUtil.getOrderByType(
+			_httpServletRequest,
+			SiteMembershipsPortletKeys.SITE_MEMBERSHIPS_ADMIN,
+			"order-by-type-roles", "asc");
+
+		return _orderByType;
+	}
+
 	public SearchContainer<Role> getRoleSearchSearchContainer()
 		throws PortalException {
 
@@ -100,11 +127,6 @@ public class UserRolesDisplayContext {
 			_renderRequest, _getPortletURL());
 
 		Group group = GroupLocalServiceUtil.fetchGroup(_getGroupId());
-
-		roleSearch.setRowChecker(
-			new UserGroupRoleRoleChecker(
-				_renderResponse,
-				PortalUtil.getSelectedUser(_httpServletRequest, false), group));
 
 		RoleSearchTerms searchTerms =
 			(RoleSearchTerms)roleSearch.getSearchTerms();
@@ -123,14 +145,17 @@ public class UserRolesDisplayContext {
 				themeDisplay.getPermissionChecker(), _getGroupId(), roles);
 		}
 
-		int rolesCount = roles.size();
+		List<Role> filteredRoles = roles;
 
-		roleSearch.setTotal(rolesCount);
+		roleSearch.setResultsAndTotal(
+			() -> ListUtil.subList(
+				filteredRoles, roleSearch.getStart(), roleSearch.getEnd()),
+			filteredRoles.size());
 
-		roles = ListUtil.subList(
-			roles, roleSearch.getStart(), roleSearch.getEnd());
-
-		roleSearch.setResults(roles);
+		roleSearch.setRowChecker(
+			new UserGroupRoleRoleChecker(
+				_renderResponse,
+				PortalUtil.getSelectedUser(_httpServletRequest, false), group));
 
 		_roleSearch = roleSearch;
 
@@ -183,8 +208,7 @@ public class UserRolesDisplayContext {
 		).setParameter(
 			"orderByCol",
 			() -> {
-				String orderByCol = ParamUtil.getString(
-					_renderRequest, "orderByCol", "title");
+				String orderByCol = getOrderByCol();
 
 				if (Validator.isNotNull(orderByCol)) {
 					return orderByCol;
@@ -195,8 +219,7 @@ public class UserRolesDisplayContext {
 		).setParameter(
 			"orderByType",
 			() -> {
-				String orderByType = ParamUtil.getString(
-					_renderRequest, "orderByType", "asc");
+				String orderByType = getOrderByType();
 
 				if (Validator.isNotNull(orderByType)) {
 					return orderByType;
@@ -245,6 +268,8 @@ public class UserRolesDisplayContext {
 	private String _eventName;
 	private Long _groupId;
 	private final HttpServletRequest _httpServletRequest;
+	private String _orderByCol;
+	private String _orderByType;
 	private final RenderRequest _renderRequest;
 	private final RenderResponse _renderResponse;
 	private RoleSearch _roleSearch;

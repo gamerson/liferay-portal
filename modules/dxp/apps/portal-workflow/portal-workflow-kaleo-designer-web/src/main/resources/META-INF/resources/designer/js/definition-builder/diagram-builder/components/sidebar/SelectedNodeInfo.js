@@ -17,16 +17,18 @@ import React, {useContext} from 'react';
 import {DefinitionBuilderContext} from '../../../DefinitionBuilderContext';
 import {DiagramBuilderContext} from '../../DiagramBuilderContext';
 import SidebarPanel from './SidebarPanel';
+import {isIdDuplicated} from './utils';
 
 export default function SelectedNodeInfo({errors, setErrors}) {
 	const {defaultLanguageId, selectedLanguageId} = useContext(
 		DefinitionBuilderContext
 	);
 	const {
-		selectedNode,
-		selectedNodeNewId,
-		setSelectedNode,
-		setSelectedNodeNewId,
+		elements,
+		selectedItem,
+		selectedItemNewId,
+		setSelectedItem,
+		setSelectedItemNewId,
 	} = useContext(DiagramBuilderContext);
 
 	return (
@@ -49,10 +51,10 @@ export default function SelectedNodeInfo({errors, setErrors}) {
 					id="nodeLabel"
 					onChange={({target}) => {
 						if (target.value.trim() === '') {
-							setErrors({label: true});
+							setErrors({...errors, label: true});
 						}
 						else {
-							setErrors({label: false});
+							setErrors({...errors, label: false});
 						}
 
 						const key =
@@ -60,12 +62,12 @@ export default function SelectedNodeInfo({errors, setErrors}) {
 								? selectedLanguageId
 								: defaultLanguageId;
 
-						setSelectedNode({
-							...selectedNode,
+						setSelectedItem({
+							...selectedItem,
 							data: {
-								...selectedNode.data,
+								...selectedItem.data,
 								label: {
-									...selectedNode.data.label,
+									...selectedItem.data.label,
 									[key]: target.value,
 								},
 							},
@@ -74,8 +76,8 @@ export default function SelectedNodeInfo({errors, setErrors}) {
 					type="text"
 					value={
 						(selectedLanguageId
-							? selectedNode?.data.label[selectedLanguageId]
-							: selectedNode?.data.label[defaultLanguageId]) || ''
+							? selectedItem?.data.label[selectedLanguageId]
+							: selectedItem?.data.label[defaultLanguageId]) || ''
 					}
 				/>
 
@@ -90,7 +92,11 @@ export default function SelectedNodeInfo({errors, setErrors}) {
 				</ClayForm.FeedbackItem>
 			</ClayForm.Group>
 
-			<ClayForm.Group className={errors.id ? 'has-error' : ''}>
+			<ClayForm.Group
+				className={
+					errors.id.duplicated || errors.id.empty ? 'has-error' : ''
+				}
+			>
 				<label htmlFor="nodeId">
 					<span>
 						{`${Liferay.Language.get(
@@ -116,24 +122,44 @@ export default function SelectedNodeInfo({errors, setErrors}) {
 					id="nodeId"
 					onChange={({target}) => {
 						if (target.value.trim() === '') {
-							setErrors({id: true});
+							setErrors({
+								...errors,
+								id: {duplicated: false, empty: true},
+							});
 						}
 						else {
-							setErrors({id: false});
+							if (isIdDuplicated(elements, target.value.trim())) {
+								setErrors({
+									...errors,
+									id: {duplicated: true, empty: false},
+								});
+							}
+							else {
+								setErrors({
+									...errors,
+									id: {duplicated: false, empty: false},
+								});
+							}
 						}
 
-						setSelectedNodeNewId(target.value);
+						setSelectedItemNewId(target.value);
 					}}
 					type="text"
-					value={(selectedNodeNewId ?? selectedNode?.id) || ''}
+					value={(selectedItemNewId ?? selectedItem?.id) || ''}
 				/>
 
 				<ClayForm.FeedbackItem>
-					{errors.id && (
+					{(errors.id.duplicated || errors.id.empty) && (
 						<>
 							<ClayForm.FeedbackIndicator symbol="exclamation-full" />
 
-							{Liferay.Language.get('this-field-is-required')}
+							{errors.id.duplicated
+								? Liferay.Language.get(
+										'a-node-with-that-id-already-exists'
+								  )
+								: Liferay.Language.get(
+										'this-field-is-required'
+								  )}
 						</>
 					)}
 				</ClayForm.FeedbackItem>
@@ -148,16 +174,16 @@ export default function SelectedNodeInfo({errors, setErrors}) {
 					component="textarea"
 					id="nodeDescription"
 					onChange={({target}) =>
-						setSelectedNode({
-							...selectedNode,
+						setSelectedItem({
+							...selectedItem,
 							data: {
-								...selectedNode.data,
+								...selectedItem.data,
 								description: target.value,
 							},
 						})
 					}
 					type="text"
-					value={selectedNode?.data.description || ''}
+					value={selectedItem?.data.description || ''}
 				/>
 			</ClayForm.Group>
 		</SidebarPanel>

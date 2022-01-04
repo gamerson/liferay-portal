@@ -14,10 +14,14 @@
 
 package com.liferay.change.tracking.internal.helper;
 
+import com.liferay.change.tracking.constants.CTConstants;
+import com.liferay.change.tracking.internal.mapping.CTMappingTableInfoImpl;
+import com.liferay.change.tracking.mapping.CTMappingTableInfo;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.cache.PortalCache;
 import com.liferay.portal.kernel.cache.PortalCacheManager;
 import com.liferay.portal.kernel.dao.jdbc.CurrentConnectionUtil;
+import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.service.change.tracking.CTService;
 import com.liferay.portal.kernel.service.persistence.change.tracking.CTPersistence;
 import com.liferay.portal.kernel.service.persistence.impl.TableMapper;
@@ -61,6 +65,21 @@ public class CTTableMapperHelper {
 
 				return null;
 			});
+	}
+
+	public CTMappingTableInfo getCTMappingTableInfo(long ctCollectionId) {
+		List<Map.Entry<Long, Long>> addedMappings = _getCTMappingChangeList(
+			ctCollectionId, CTConstants.CT_CHANGE_TYPE_ADDITION);
+		List<Map.Entry<Long, Long>> removedMappings = _getCTMappingChangeList(
+			ctCollectionId, CTConstants.CT_CHANGE_TYPE_DELETION);
+
+		if (addedMappings.isEmpty() && removedMappings.isEmpty()) {
+			return null;
+		}
+
+		return new CTMappingTableInfoImpl(
+			_tableName, _leftColumnName, _rightColumnName, addedMappings,
+			removedMappings);
 	}
 
 	public void publish(
@@ -149,6 +168,37 @@ public class CTTableMapperHelper {
 		if (portalCache != null) {
 			portalCache.removeAll();
 		}
+	}
+
+	private List<Map.Entry<Long, Long>> _getCTMappingChangeList(
+		long ctCollectionId, int ctChangeType) {
+
+		CTPersistence<?> ctPersistence = _ctService.getCTPersistence();
+
+		List<Map.Entry<Long, Long>> mappingChanges = new ArrayList<>();
+
+		Session session = ctPersistence.getCurrentSession();
+
+		session.apply(
+			connection -> {
+				try (PreparedStatement preparedStatement =
+						connection.prepareStatement(
+							StringBundler.concat(
+								"select ", _leftColumnName, ", ",
+								_rightColumnName, " from ", _tableName,
+								" where ctCollectionId = ", ctCollectionId,
+								" and ctChangeType = ", ctChangeType));
+					ResultSet resultSet = preparedStatement.executeQuery()) {
+
+					while (resultSet.next()) {
+						mappingChanges.add(
+							new AbstractMap.SimpleImmutableEntry<>(
+								resultSet.getLong(1), resultSet.getLong(2)));
+					}
+				}
+			});
+
+		return mappingChanges;
 	}
 
 	private int _publish(CTPersistence<?> ctPersistence, long ctCollectionId)

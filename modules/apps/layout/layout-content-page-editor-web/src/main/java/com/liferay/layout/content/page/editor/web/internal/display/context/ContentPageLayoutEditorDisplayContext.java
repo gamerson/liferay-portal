@@ -42,7 +42,6 @@ import com.liferay.layout.page.template.model.LayoutPageTemplateStructure;
 import com.liferay.layout.page.template.model.LayoutPageTemplateStructureRel;
 import com.liferay.layout.page.template.service.LayoutPageTemplateStructureLocalServiceUtil;
 import com.liferay.layout.page.template.service.LayoutPageTemplateStructureRelLocalServiceUtil;
-import com.liferay.petra.sql.dsl.DSLQueryFactoryUtil;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.comment.CommentManager;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -70,11 +69,9 @@ import com.liferay.segments.constants.SegmentsExperienceConstants;
 import com.liferay.segments.constants.SegmentsPortletKeys;
 import com.liferay.segments.model.SegmentsEntry;
 import com.liferay.segments.model.SegmentsExperience;
-import com.liferay.segments.model.SegmentsExperimentRel;
-import com.liferay.segments.model.SegmentsExperimentRelTable;
 import com.liferay.segments.service.SegmentsEntryServiceUtil;
 import com.liferay.segments.service.SegmentsExperienceLocalServiceUtil;
-import com.liferay.segments.service.SegmentsExperimentRelLocalServiceUtil;
+import com.liferay.segments.service.SegmentsExperimentLocalServiceUtil;
 import com.liferay.staging.StagingGroupHelper;
 
 import java.util.ArrayList;
@@ -680,31 +677,15 @@ public class ContentPageLayoutEditorDisplayContext
 				segmentsExperienceId);
 
 		if (segmentsExperience != null) {
-			List<SegmentsExperimentRel> segmentsExperimentRels =
-				SegmentsExperimentRelLocalServiceUtil.dslQuery(
-					DSLQueryFactoryUtil.select(
-						SegmentsExperimentRelTable.INSTANCE
-					).from(
-						SegmentsExperimentRelTable.INSTANCE
-					).where(
-						SegmentsExperimentRelTable.INSTANCE.
-							segmentsExperienceId.eq(
-								segmentsExperience.getSegmentsExperienceId())
-					));
+			SegmentsExperience controlSegmentsExperience =
+				SegmentsExperimentLocalServiceUtil.
+					fetchControlSegmentExperience(segmentsExperience);
 
-			if (segmentsExperimentRels.isEmpty()) {
-				return false;
+			if (controlSegmentsExperience != null) {
+				return true;
 			}
 
-			SegmentsExperimentRel segmentsExperimentRel =
-				segmentsExperimentRels.get(0);
-
-			try {
-				return !segmentsExperimentRel.isControl();
-			}
-			catch (PortalException portalException) {
-				portalException.printStackTrace();
-			}
+			return false;
 		}
 
 		return false;

@@ -347,7 +347,7 @@ public class XMLWorkflowModelParser implements WorkflowModelParser {
 
 		parseActionsElement(actionsElement, condition);
 
-		parseLabels(conditionElement.element("labels"), condition);
+		condition.setLabelMap(parseLabels(conditionElement.element("labels")));
 
 		Element timersElement = conditionElement.element("timers");
 
@@ -385,7 +385,7 @@ public class XMLWorkflowModelParser implements WorkflowModelParser {
 
 		parseActionsElement(actionsElement, fork);
 
-		parseLabels(forkElement.element("labels"), fork);
+		fork.setLabelMap(parseLabels(forkElement.element("labels")));
 
 		Element timersElement = forkElement.element("timers");
 
@@ -408,7 +408,7 @@ public class XMLWorkflowModelParser implements WorkflowModelParser {
 
 		parseActionsElement(actionsElement, join);
 
-		parseLabels(joinElement.element("labels"), join);
+		join.setLabelMap(parseLabels(joinElement.element("labels")));
 
 		Element timersElement = joinElement.element("timers");
 
@@ -431,7 +431,7 @@ public class XMLWorkflowModelParser implements WorkflowModelParser {
 
 		parseActionsElement(actionsElement, joinXor);
 
-		parseLabels(joinXorElement.element("labels"), joinXor);
+		joinXor.setLabelMap(parseLabels(joinXorElement.element("labels")));
 
 		Element timersElement = joinXorElement.element("timers");
 
@@ -440,9 +440,9 @@ public class XMLWorkflowModelParser implements WorkflowModelParser {
 		return joinXor;
 	}
 
-	protected void parseLabels(Element labelsElement, Node node) {
+	protected Map<Locale, String> parseLabels(Element labelsElement) {
 		if (labelsElement == null) {
-			return;
+			return Collections.emptyMap();
 		}
 
 		Map<Locale, String> labelMap = new HashMap<>();
@@ -454,7 +454,7 @@ public class XMLWorkflowModelParser implements WorkflowModelParser {
 				labelElement.getText());
 		}
 
-		node.setLabelMap(labelMap);
+		return labelMap;
 	}
 
 	protected void parseNotificationElements(
@@ -633,7 +633,7 @@ public class XMLWorkflowModelParser implements WorkflowModelParser {
 
 		parseActionsElement(actionsElement, state);
 
-		parseLabels(stateElement.element("labels"), state);
+		state.setLabelMap(parseLabels(stateElement.element("labels")));
 
 		Element timersElement = stateElement.element("timers");
 
@@ -662,7 +662,7 @@ public class XMLWorkflowModelParser implements WorkflowModelParser {
 			task.setAssignments(parseAssignments(assignmentsElement));
 		}
 
-		parseLabels(taskElement.element("labels"), task);
+		task.setLabelMap(parseLabels(taskElement.element("labels")));
 
 		Element formsElement = taskElement.element("task-forms");
 
@@ -875,7 +875,8 @@ public class XMLWorkflowModelParser implements WorkflowModelParser {
 				transitionElement.elementTextTrim("default"), true);
 
 			Transition transition = new Transition(
-				transitionName, sourceNode, targetNode, defaultValue);
+				defaultValue, parseLabels(transitionElement.element("labels")),
+				transitionName, sourceNode, targetNode);
 
 			Element timerElement = transitionElement.element("timer");
 

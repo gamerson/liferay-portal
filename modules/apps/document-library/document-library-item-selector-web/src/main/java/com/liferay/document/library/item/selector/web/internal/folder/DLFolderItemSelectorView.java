@@ -26,11 +26,13 @@ import com.liferay.item.selector.PortletItemSelectorView;
 import com.liferay.item.selector.criteria.FolderItemSelectorReturnType;
 import com.liferay.item.selector.criteria.folder.criterion.FolderItemSelectorCriterion;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
-import com.liferay.portal.kernel.bean.BeanParamUtil;
 import com.liferay.portal.kernel.repository.model.Folder;
 import com.liferay.portal.kernel.resource.bundle.ResourceBundleLoader;
+import com.liferay.portal.kernel.theme.ThemeDisplay;
+import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.ResourceBundleUtil;
+import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.language.LanguageResources;
 
 import java.io.IOException;
@@ -105,22 +107,27 @@ public class DLFolderItemSelectorView
 		RequestDispatcher requestDispatcher =
 			_servletContext.getRequestDispatcher("/select_folder.jsp");
 
-		long folderId = BeanParamUtil.getLong(
-			itemSelectorCriterion, (HttpServletRequest)servletRequest,
-			"folderId");
-		long selectedRepositoryId = BeanParamUtil.getLong(
-			itemSelectorCriterion, (HttpServletRequest)servletRequest,
-			"selectedRepositoryId");
+		ThemeDisplay themeDisplay = (ThemeDisplay)servletRequest.getAttribute(
+			WebKeys.THEME_DISPLAY);
+
+		long repositoryId = themeDisplay.getScopeGroupId();
+
+		long folderId = ParamUtil.getLong(
+			(HttpServletRequest)servletRequest, "folderId",
+			itemSelectorCriterion.getFolderId());
+
+		if (repositoryId != itemSelectorCriterion.getRepositoryId()) {
+			folderId = ParamUtil.getLong(
+				(HttpServletRequest)servletRequest, "folderId");
+		}
 
 		servletRequest.setAttribute(
 			DLSelectFolderDisplayContext.class.getName(),
 			new DLSelectFolderDisplayContext(
 				_dlAppService, _fetchFolder(folderId),
-				(HttpServletRequest)servletRequest, portletURL,
-				BeanParamUtil.getLong(
-					itemSelectorCriterion, (HttpServletRequest)servletRequest,
-					"selectedFolderId", folderId),
-				selectedRepositoryId,
+				(HttpServletRequest)servletRequest, portletURL, repositoryId,
+				itemSelectorCriterion.getSelectedFolderId(),
+				itemSelectorCriterion.getSelectedRepositoryId(),
 				_isShowGroupSelector(itemSelectorCriterion)));
 
 		requestDispatcher.include(servletRequest, servletResponse);

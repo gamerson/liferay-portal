@@ -5,9 +5,9 @@ import {WarningBadge} from '../../Badges/Warning';
 export function InputAreaWithError({children, className, error}) {
 	return (
 		<div
-			className={classNames('input-area', {
+			className={classNames('input-area d-block', {
 				[className]: className,
-				invalid: error,
+				'has-error': error,
 			})}
 		>
 			{children}

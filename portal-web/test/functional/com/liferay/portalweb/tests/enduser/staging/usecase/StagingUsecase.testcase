@@ -35,7 +35,7 @@ definition {
 	test ActivateStagingForSiteWithTheme {
 		property test.name.skip.portal.instance = "StagingUsecase#ActivateStagingForSiteWithTheme";
 
-		FileInstall.deployFileOnServer(liferayDependencyJars = "test-theme.war");
+		FileInstall.deployFileOnServer(jarFile = "test-theme.war");
 
 		WaitForConsoleTextPresent(value1 = "STARTED test-theme");
 
@@ -529,9 +529,9 @@ definition {
 			pageName = "Delete Live Page",
 			siteName = "Site Name");
 
-		SitePages.openPagesAdmin(siteURLKey = "site-name");
+		PagesAdmin.openPagesAdmin(siteURLKey = "site-name");
 
-		SitePages.deletePage(pageName = "Delete Live Page");
+		PagesAdmin.deletePage(pageName = "Delete Live Page");
 
 		Navigator.gotoSitePage(
 			pageName = "Staging Test Page",
@@ -750,15 +750,9 @@ definition {
 			assetTitle = "The SPACE Family",
 			pageName = "Home");
 
-		Portlet.gotoPortletOptions(
-			portletName = "Web Content Display",
-			portletOption = "Look and Feel Configuration");
-
-		IFrame.selectConfigurationFrame();
-
-		Portlet.selectApplicationDecorator(decorator = "Barebone");
-
-		PortletEntry.save();
+		Portlet.configureApplicationDecorator(
+			decorator = "Barebone",
+			portletName = "Web Content Display");
 
 		Navigator.gotoStagedSitePage(
 			pageName = "Home",
@@ -955,7 +949,7 @@ definition {
 	test PublishThemeFromStagedToLive {
 		property test.name.skip.portal.instance = "StagingUsecase#PublishThemeFromStagedToLive";
 
-		FileInstall.deployFileOnServer(liferayDependencyJars = "test-theme.war");
+		FileInstall.deployFileOnServer(jarFile = "test-theme.war");
 
 		WaitForConsoleTextPresent(value1 = "STARTED test-theme");
 
@@ -1235,7 +1229,7 @@ definition {
 
 		DMNavigator.gotoDocumentPG(dmDocumentTitle = "DM Document Title");
 
-		DMDocument.viewTag(tagName = "stagingtag");
+		DMDocument.viewTagInfo(tagName = "stagingtag");
 
 		Navigator.gotoStagedSitePage(
 			pageName = "Staging Test Page",
@@ -1269,7 +1263,7 @@ definition {
 
 		DMNavigator.gotoDocumentPG(dmDocumentTitle = "DM Document Title");
 
-		DMDocument.viewNoTag(tagName = "stagingtag");
+		DMDocument.viewNoTagInfo(tagName = "stagingtag");
 	}
 
 	@priority = "4"

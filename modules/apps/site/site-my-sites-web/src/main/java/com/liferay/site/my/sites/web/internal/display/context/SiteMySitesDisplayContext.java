@@ -22,6 +22,7 @@ import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.GroupConstants;
 import com.liferay.portal.kernel.portlet.SearchDisplayStyleUtil;
+import com.liferay.portal.kernel.portlet.SearchOrderByUtil;
 import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
 import com.liferay.portal.kernel.service.OrganizationLocalServiceUtil;
 import com.liferay.portal.kernel.service.UserGroupLocalServiceUtil;
@@ -30,7 +31,6 @@ import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.LinkedHashMapBuilder;
 import com.liferay.portal.kernel.util.ListUtil;
-import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -124,12 +124,10 @@ public class SiteMySitesDisplayContext {
 		GroupSearch groupSearch = new GroupSearch(
 			_renderRequest, getPortletURL());
 
-		OrderByComparator<Group> orderByComparator =
-			UsersAdminUtil.getGroupOrderByComparator(
-				getOrderByCol(), getOrderByType());
-
 		groupSearch.setOrderByCol(getOrderByCol());
-		groupSearch.setOrderByComparator(orderByComparator);
+		groupSearch.setOrderByComparator(
+			UsersAdminUtil.getGroupOrderByComparator(
+				getOrderByCol(), getOrderByType()));
 		groupSearch.setOrderByType(getOrderByType());
 
 		GroupSearchTerms searchTerms =
@@ -155,18 +153,14 @@ public class SiteMySitesDisplayContext {
 			groupParams.put("active", Boolean.TRUE);
 		}
 
-		int groupsCount = GroupLocalServiceUtil.searchCount(
-			themeDisplay.getCompanyId(), searchTerms.getKeywords(),
-			groupParams);
-
-		groupSearch.setTotal(groupsCount);
-
-		List<Group> groups = GroupLocalServiceUtil.search(
-			themeDisplay.getCompanyId(), searchTerms.getKeywords(), groupParams,
-			groupSearch.getStart(), groupSearch.getEnd(),
-			groupSearch.getOrderByComparator());
-
-		groupSearch.setResults(groups);
+		groupSearch.setResultsAndTotal(
+			() -> GroupLocalServiceUtil.search(
+				themeDisplay.getCompanyId(), searchTerms.getKeywords(),
+				groupParams, groupSearch.getStart(), groupSearch.getEnd(),
+				groupSearch.getOrderByComparator()),
+			GroupLocalServiceUtil.searchCount(
+				themeDisplay.getCompanyId(), searchTerms.getKeywords(),
+				groupParams));
 
 		_groupSearch = groupSearch;
 
@@ -204,12 +198,10 @@ public class SiteMySitesDisplayContext {
 
 		GroupSearch groupSearch = getGroupSearchContainer();
 
-		long[] groupIds = ListUtil.toLongArray(
-			groupSearch.getResults(), Group.GROUP_ID_ACCESSOR);
-
 		_groupUsersCounts = UserLocalServiceUtil.searchCounts(
 			themeDisplay.getCompanyId(), WorkflowConstants.STATUS_APPROVED,
-			groupIds);
+			ListUtil.toLongArray(
+				groupSearch.getResults(), Group.GROUP_ID_ACCESSOR));
 
 		return GetterUtil.getInteger(_groupUsersCounts.get(groupId));
 	}
@@ -240,8 +232,8 @@ public class SiteMySitesDisplayContext {
 			return _orderByCol;
 		}
 
-		_orderByCol = ParamUtil.getString(
-			_httpServletRequest, "orderByCol", "name");
+		_orderByCol = SearchOrderByUtil.getOrderByCol(
+			_httpServletRequest, MySitesPortletKeys.MY_SITES, "name");
 
 		return _orderByCol;
 	}
@@ -251,8 +243,8 @@ public class SiteMySitesDisplayContext {
 			return _orderByType;
 		}
 
-		_orderByType = ParamUtil.getString(
-			_httpServletRequest, "orderByType", "asc");
+		_orderByType = SearchOrderByUtil.getOrderByType(
+			_httpServletRequest, MySitesPortletKeys.MY_SITES, "asc");
 
 		return _orderByType;
 	}

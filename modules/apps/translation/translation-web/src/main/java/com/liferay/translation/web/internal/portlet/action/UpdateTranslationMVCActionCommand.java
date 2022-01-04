@@ -39,10 +39,9 @@ import com.liferay.portal.kernel.util.Validator;
 import com.liferay.segments.constants.SegmentsExperienceConstants;
 import com.liferay.translation.constants.TranslationPortletKeys;
 import com.liferay.translation.service.TranslationEntryService;
-import com.liferay.translation.web.internal.util.TranslationRequestUtil;
+import com.liferay.translation.web.internal.helper.TranslationRequestHelper;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -78,10 +77,14 @@ public class UpdateTranslationMVCActionCommand extends BaseMVCActionCommand {
 				actionRequest, "segmentsExperienceId",
 				SegmentsExperienceConstants.ID_DEFAULT);
 
-			String className = TranslationRequestUtil.getClassName(
-				actionRequest, segmentsExperienceId);
-			long classPK = TranslationRequestUtil.getClassPK(
-				actionRequest, segmentsExperienceId);
+			TranslationRequestHelper translationRequestHelper =
+				new TranslationRequestHelper(
+					_infoItemServiceTracker, actionRequest);
+
+			String className = translationRequestHelper.getClassName(
+				segmentsExperienceId);
+			long classPK = translationRequestHelper.getClassPK(
+				segmentsExperienceId);
 
 			InfoItemReference infoItemReference = new InfoItemReference(
 				className, classPK);
@@ -176,31 +179,27 @@ public class UpdateTranslationMVCActionCommand extends BaseMVCActionCommand {
 			if (ArrayUtil.isNotEmpty(infoFieldParameterValue)) {
 				Locale sourceLocale = _getSourceLocale(actionRequest);
 
-				infoFieldValues.add(
-					new InfoFieldValue<>(
-						infoField,
-						InfoLocalizedValue.builder(
-						).value(
-							biConsumer -> {
-								for (String value : infoFieldParameterValue) {
-									biConsumer.accept(
-										_getTargetLocale(actionRequest), value);
-								}
-							}
-						).value(
-							biConsumer -> {
-								Collection<InfoFieldValue<Object>>
-									sourceInfoFieldValues =
-										infoItemFieldValues.getInfoFieldValues(
-											infoField.getName());
+				List<InfoFieldValue<Object>> sourceInfoFieldValues =
+					new ArrayList<>(
+						infoItemFieldValues.getInfoFieldValues(
+							infoField.getName()));
 
-								sourceInfoFieldValues.forEach(
-									sourceInfoFieldValue -> biConsumer.accept(
-										sourceLocale,
-										sourceInfoFieldValue.getValue(
-											sourceLocale)));
-							}
-						).build()));
+				for (int i = 0; i < infoFieldParameterValue.length; i++) {
+					InfoFieldValue<Object> sourceInfoFieldValue =
+						sourceInfoFieldValues.get(i);
+
+					infoFieldValues.add(
+						new InfoFieldValue<>(
+							infoField,
+							InfoLocalizedValue.builder(
+							).value(
+								_getTargetLocale(actionRequest),
+								infoFieldParameterValue[i]
+							).value(
+								sourceLocale,
+								sourceInfoFieldValue.getValue(sourceLocale)
+							).build()));
+				}
 			}
 		}
 

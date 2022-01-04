@@ -92,9 +92,11 @@ public class CISystemHistoryReportUtil {
 			String jobName, String testSuiteName)
 		throws IOException {
 
-		for (String dateString : _dateStrings) {
+		int size = _dateStrings.size();
+
+		for (int i = size - _MONTH_RECORD_COUNT; i < size; i++) {
 			writeDateDurationsJavaScriptFile(
-				jobName, testSuiteName, dateString);
+				jobName, testSuiteName, _dateStrings.get(i));
 		}
 	}
 
@@ -121,6 +123,19 @@ public class CISystemHistoryReportUtil {
 		JenkinsResultsParserUtil.write(
 			indexHtmlFile,
 			content.replaceAll("\\t\\t<script-durations />\\n", sb.toString()));
+	}
+
+	private static int _getBuildPropertyInt(
+		String propertyName, int defaultValue) {
+
+		try {
+			return Integer.parseInt(
+				JenkinsResultsParserUtil.getProperty(
+					_buildProperties, propertyName));
+		}
+		catch (Exception exception) {
+			return defaultValue;
+		}
 	}
 
 	private static List<JSONObject> _getBuildResultJSONObjects(
@@ -401,7 +416,9 @@ public class CISystemHistoryReportUtil {
 
 	private static final File _CI_SYSTEM_HISTORY_REPORT_DIR;
 
-	private static final int _MONTHS_PER_YEAR = 12;
+	private static final int _MONTH_COUNT;
+
+	private static final int _MONTH_RECORD_COUNT;
 
 	private static final long _START_TIME =
 		JenkinsResultsParserUtil.getCurrentTimeMillis();
@@ -433,11 +450,17 @@ public class CISystemHistoryReportUtil {
 		_CI_SYSTEM_HISTORY_REPORT_DIR = new File(
 			_buildProperties.getProperty("ci.system.history.report.dir"));
 
-		_dateStrings = new ArrayList() {
+		_MONTH_COUNT = _getBuildPropertyInt(
+			"ci.system.history.report.month.count", 12);
+
+		_MONTH_RECORD_COUNT = _getBuildPropertyInt(
+			"ci.system.history.report.month.record.count", 2);
+
+		_dateStrings = new ArrayList<String>() {
 			{
 				LocalDate currentLocalDate = LocalDate.now();
 
-				for (int i = _MONTHS_PER_YEAR - 1; i >= 0; i--) {
+				for (int i = _MONTH_COUNT - 1; i >= 0; i--) {
 					LocalDate localDate = currentLocalDate.minusMonths(i);
 
 					add(

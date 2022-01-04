@@ -37,7 +37,7 @@
 </tr>
 <tr>
 	<td>ANY_DISABLED</td>
-	<td>//div[contains(@class,'input-text-wrapper')][2]/label[contains(.,'${key_selectFieldLabel}')]//following-sibling::input[contains(@class,'disabled')]</td>
+	<td>//div[contains(@class,'input-text-wrapper')]/label[contains(.,'${key_selectFieldLabel}')]//following-sibling::input[contains(@class,'disabled')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -283,11 +283,6 @@
 <tr>
 	<td>FILE_PRESENT</td>
 	<td>//small[contains(@class, 'inline-item-after')]</td>
-	<td></td>
-</tr>
-<tr>
-	<td>FRIENDLY_URL</td>
-	<td>//input[contains(@id,'friendlyURL')]</td>
 	<td></td>
 </tr>
 <tr>

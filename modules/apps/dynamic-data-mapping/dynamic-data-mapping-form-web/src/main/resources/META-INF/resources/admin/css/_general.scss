@@ -220,6 +220,13 @@ td.lfr-name-column {
 	text-align: center;
 }
 
+div.lfr-de__partial-results--background {
+	.ddm-form-builder-app {
+		margin-top: 0;
+		padding-top: 28px;
+	}
+}
+
 .form-builder-sidebar,
 .portlet-forms {
 	.forms-navigation-bar,
@@ -372,13 +379,6 @@ td.lfr-name-column {
 		.toggle-switch-text {
 			word-break: break-word;
 		}
-	}
-
-	.form-builder-tabview,
-	.lfr-ddm-form-wizard {
-		border-bottom: 1px solid #dee4e9;
-		padding: 20px 34px 11px;
-		position: relative;
 	}
 
 	.form-instance-id,

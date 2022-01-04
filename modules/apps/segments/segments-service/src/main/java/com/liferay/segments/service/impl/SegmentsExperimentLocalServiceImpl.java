@@ -14,6 +14,7 @@
 
 package com.liferay.segments.service.impl;
 
+import com.liferay.petra.sql.dsl.DSLQueryFactoryUtil;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.aop.AopService;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
@@ -52,6 +53,7 @@ import com.liferay.segments.exception.WinnerSegmentsExperienceException;
 import com.liferay.segments.model.SegmentsExperience;
 import com.liferay.segments.model.SegmentsExperiment;
 import com.liferay.segments.model.SegmentsExperimentRel;
+import com.liferay.segments.model.SegmentsExperimentRelTable;
 import com.liferay.segments.service.SegmentsExperienceLocalService;
 import com.liferay.segments.service.SegmentsExperimentRelLocalService;
 import com.liferay.segments.service.base.SegmentsExperimentLocalServiceBaseImpl;
@@ -207,6 +209,35 @@ public class SegmentsExperimentLocalServiceImpl
 			segmentsExperimentLocalService.deleteSegmentsExperiment(
 				segmentsExperiment);
 		}
+	}
+
+	@Override
+	public SegmentsExperience fetchControlSegmentExperience(
+		SegmentsExperience segmentsExperience) {
+
+		List<SegmentsExperimentRel> segmentsExperimentRels =
+			_segmentsExperimentRelLocalService.dslQuery(
+				DSLQueryFactoryUtil.select(
+					SegmentsExperimentRelTable.INSTANCE
+				).from(
+					SegmentsExperimentRelTable.INSTANCE
+				).where(
+					SegmentsExperimentRelTable.INSTANCE.segmentsExperienceId.eq(
+						segmentsExperience.getSegmentsExperienceId())
+				));
+
+		if (segmentsExperimentRels.isEmpty()) {
+			return null;
+		}
+
+		SegmentsExperimentRel segmentsExperimentRel =
+			segmentsExperimentRels.get(0);
+
+		SegmentsExperiment segmentsExperiment = fetchSegmentsExperiment(
+			segmentsExperimentRel.getSegmentsExperimentId());
+
+		return _segmentsExperienceLocalService.fetchSegmentsExperience(
+			segmentsExperiment.getSegmentsExperienceId());
 	}
 
 	@Override

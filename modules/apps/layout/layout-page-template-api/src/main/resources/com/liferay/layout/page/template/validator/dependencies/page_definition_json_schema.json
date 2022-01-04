@@ -646,6 +646,10 @@
 						"paddingTop": {
 							"title": "The paddingTop Schema",
 							"type": "string"
+						},
+						"textAlign": {
+							"title": "The textAlign Schema",
+							"type": "string"
 						}
 					},
 					"title": "The fragmentViewportStyle Schema",
@@ -772,6 +776,10 @@
 					],
 					"title": "The paginationType Schema",
 					"type": "string"
+				},
+				"showAllItems": {
+					"title": "The showAllItems Schema",
+					"type": "boolean"
 				},
 				"templateKey": {
 					"title": "The templateKey Schema",

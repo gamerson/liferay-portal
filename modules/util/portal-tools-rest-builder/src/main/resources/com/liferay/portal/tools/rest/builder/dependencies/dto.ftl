@@ -23,6 +23,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.liferay.petra.function.UnsafeSupplier;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.vulcan.graphql.annotation.GraphQLField;
 import com.liferay.portal.vulcan.graphql.annotation.GraphQLName;
 import com.liferay.portal.vulcan.util.ObjectMapperUtil;
@@ -51,6 +52,7 @@ import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
@@ -227,7 +229,14 @@ public class ${schemaName} <#if dtoParentClassName?has_content>extends ${dtoPare
 			<#else>
 				access = JsonProperty.Access.READ_WRITE
 			</#if>
+
+			<#if propertySchema.name?? && !stringUtil.equals(propertyName, propertySchema.name)>
+				, value = "${propertySchema.name}"
+			</#if>
 		)
+		<#if propertySchema.xml??>
+			@XmlElement(name = "${propertySchema.xml.name}")
+		</#if>
 		<#if schema.requiredPropertySchemaNames?? && schema.requiredPropertySchemaNames?seq_contains(propertyName)>
 			<#if stringUtil.equals(propertyType, "String")>
 				@NotEmpty
@@ -276,14 +285,23 @@ public class ${schemaName} <#if dtoParentClassName?has_content>extends ${dtoPare
 		</#list>
 
 		<#list properties?keys as propertyName>
-			<#assign propertyType = properties[propertyName] />
+			<#assign
+				propertySchema = freeMarkerTool.getDTOPropertySchema(propertyName, schema)
+				propertyType = properties[propertyName]
+			/>
 
 			if (${propertyName} != null) {
 				if (sb.length() > 1) {
 					sb.append(", ");
 				}
 
-				sb.append("\"${propertyName}\": ");
+				<#if propertySchema.name?? && !stringUtil.equals(propertyName, propertySchema.name)>
+					<#assign key = propertySchema.name />
+				<#else>
+					<#assign key = propertyName />
+				</#if>
+
+				sb.append("\"${key}\": ");
 
 				<#if allSchemas[propertyType]??>
 					sb.append(String.valueOf(${propertyName}));
@@ -293,7 +311,7 @@ public class ${schemaName} <#if dtoParentClassName?has_content>extends ${dtoPare
 					}
 					else if (${propertyName} instanceof String) {
 						sb.append("\"");
-						sb.append((String)${propertyName});
+						sb.append(_escape((String)${propertyName}));
 						sb.append("\"");
 					}
 					else {
@@ -408,9 +426,7 @@ public class ${schemaName} <#if dtoParentClassName?has_content>extends ${dtoPare
 	</#list>
 
 	private static String _escape(Object object) {
-		String string = String.valueOf(object);
-
-		return string.replaceAll("\"", "\\\\\"");
+		return StringUtil.replace(String.valueOf(object), _JSON_ESCAPE_STRINGS[0], _JSON_ESCAPE_STRINGS[1]);
 	}
 
 	private static boolean _isArray(Object value) {
@@ -436,7 +452,7 @@ public class ${schemaName} <#if dtoParentClassName?has_content>extends ${dtoPare
 			Map.Entry<String, ?> entry = iterator.next();
 
 			sb.append("\"");
-			sb.append(entry.getKey());
+			sb.append(_escape(entry.getKey()));
 			sb.append("\": ");
 
 			Object value = entry.getValue();
@@ -468,7 +484,7 @@ public class ${schemaName} <#if dtoParentClassName?has_content>extends ${dtoPare
 			}
 			else if (value instanceof String) {
 				sb.append("\"");
-				sb.append(value);
+				sb.append(_escape(value));
 				sb.append("\"");
 			}
 			else {
@@ -484,5 +500,10 @@ public class ${schemaName} <#if dtoParentClassName?has_content>extends ${dtoPare
 
 		return sb.toString();
 	}
+
+	private static final String[][] _JSON_ESCAPE_STRINGS = {
+		{"\\", "\"", "\b", "\f", "\n", "\r", "\t"},
+		{"\\\\", "\\\"", "\\b", "\\f", "\\n", "\\r", "\\t"}
+	};
 
 }

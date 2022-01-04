@@ -22,6 +22,7 @@ import com.liferay.jenkins.results.parser.Job;
 import com.liferay.jenkins.results.parser.PortalGitWorkingDirectory;
 import com.liferay.jenkins.results.parser.PortalTestClassJob;
 import com.liferay.jenkins.results.parser.TestSuiteJob;
+import com.liferay.jenkins.results.parser.test.clazz.TestClass;
 
 import java.io.File;
 
@@ -38,6 +39,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  * @author Michael Hashimoto
@@ -126,6 +130,22 @@ public abstract class BatchTestClassGroup extends BaseTestClassGroup {
 		return jobProperties;
 	}
 
+	public JSONObject getJSONObject() {
+		JSONObject jsonObject = new JSONObject();
+
+		JSONArray axesJSONArray = new JSONArray();
+
+		for (AxisTestClassGroup axisTestClassGroup : getAxisTestClassGroups()) {
+			axesJSONArray.put(axisTestClassGroup.getJSONObject());
+		}
+
+		jsonObject.put("axes", axesJSONArray);
+
+		jsonObject.put("batch_name", getBatchName());
+
+		return jsonObject;
+	}
+
 	public Integer getMaximumSlavesPerHost() {
 		String maximumSlavesPerHost = getFirstPropertyValue(
 			"test.batch.maximum.slaves.per.host");
@@ -185,27 +205,6 @@ public abstract class BatchTestClassGroup extends BaseTestClassGroup {
 		}
 
 		return sb.toString();
-	}
-
-	public static class BatchTestClass extends BaseTestClass {
-
-		protected static BatchTestClass getInstance(
-			String batchName,
-			PortalGitWorkingDirectory portalGitWorkingDirectory) {
-
-			File testClassFile = new File(
-				portalGitWorkingDirectory.getWorkingDirectory(),
-				"build-test-batch.xml");
-
-			return new BatchTestClass(batchName, testClassFile);
-		}
-
-		protected BatchTestClass(String batchName, File testClassFile) {
-			super(testClassFile);
-
-			addTestClassMethod(batchName);
-		}
-
 	}
 
 	protected BatchTestClassGroup(

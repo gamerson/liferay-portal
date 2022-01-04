@@ -585,6 +585,9 @@ public class BlogsEntryLocalServiceImpl extends BlogsEntryLocalServiceBaseImpl {
 		for (BlogsEntry entry : entries) {
 			ServiceContext serviceContext = new ServiceContext();
 
+			serviceContext.setAttribute(
+				_INVOKED_BY_CHECK_ENTRIES, Boolean.TRUE);
+
 			String[] trackbacks = StringUtil.split(entry.getTrackbacks());
 
 			serviceContext.setAttribute("trackbacks", trackbacks);
@@ -1901,13 +1904,16 @@ public class BlogsEntryLocalServiceImpl extends BlogsEntryLocalServiceBaseImpl {
 		BlogsGroupServiceSettings blogsGroupServiceSettings =
 			BlogsGroupServiceSettings.getInstance(entry.getGroupId());
 
+		boolean invokedByCheckEntries = GetterUtil.getBoolean(
+			serviceContext.getAttribute(_INVOKED_BY_CHECK_ENTRIES));
 		boolean sendEmailEntryUpdated = GetterUtil.getBoolean(
 			serviceContext.getAttribute("sendEmailEntryUpdated"));
 
 		if (serviceContext.isCommandAdd() &&
 			blogsGroupServiceSettings.isEmailEntryAddedEnabled()) {
 		}
-		else if (sendEmailEntryUpdated && serviceContext.isCommandUpdate() &&
+		else if ((invokedByCheckEntries || sendEmailEntryUpdated) &&
+				 serviceContext.isCommandUpdate() &&
 				 blogsGroupServiceSettings.isEmailEntryUpdatedEnabled()) {
 		}
 		else {
@@ -2385,6 +2391,9 @@ public class BlogsEntryLocalServiceImpl extends BlogsEntryLocalServiceBaseImpl {
 	}
 
 	private static final String _COVER_IMAGE_FOLDER_NAME = "Cover Image";
+
+	private static final String _INVOKED_BY_CHECK_ENTRIES =
+		BlogsEntry.class.getName() + "#INVOKED_BY_CHECK_ENTRIES";
 
 	private static final String _SMALL_IMAGE_FOLDER_NAME = "Small Image";
 

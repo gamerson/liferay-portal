@@ -30,6 +30,8 @@ boolean neverExpire = ParamUtil.getBoolean(request, "neverExpire", true);
 if ((cpInstance != null) && (cpInstance.getExpirationDate() != null)) {
 	neverExpire = false;
 }
+
+boolean discontinued = BeanParamUtil.getBoolean(cpInstance, request, "discontinued");
 %>
 
 <portlet:actionURL name="/cp_definitions/edit_cp_instance" var="editProductInstanceActionURL" />
@@ -163,6 +165,52 @@ if ((cpInstance != null) && (cpInstance.getExpirationDate() != null)) {
 		<aui:input bean="<%= cpInstance %>" formName="fm" model="<%= CPInstance.class %>" name="displayDate" />
 
 		<aui:input bean="<%= cpInstance %>" dateTogglerCheckboxLabel="never-expire" disabled="<%= neverExpire %>" formName="fm" model="<%= CPInstance.class %>" name="expirationDate" />
+	</commerce-ui:panel>
+
+	<commerce-ui:panel
+		elementClasses="pb-5"
+		title='<%= LanguageUtil.get(request, "end-of-life") %>'
+	>
+		<div class="row">
+			<div class="align-items-start col-auto d-flex">
+				<aui:input checked="<%= discontinued %>" name="discontinued" type="toggle-switch" />
+			</div>
+
+			<div class="col">
+				<div class="form-group input-date-wrapper">
+					<label for="discontinuedDate"><liferay-ui:message key="end-of-production-date" /></label>
+
+					<liferay-ui:input-date
+						dayParam="discontinuedDateDay"
+						dayValue="<%= cpInstanceDisplayContext.getDiscontinuedDateField(Calendar.DAY_OF_MONTH) %>"
+						disabled="<%= !discontinued %>"
+						monthParam="discontinuedDateMonth"
+						monthValue="<%= cpInstanceDisplayContext.getDiscontinuedDateField(Calendar.MONTH) %>"
+						name="discontinuedDate"
+						nullable="<%= true %>"
+						showDisableCheckbox="<%= false %>"
+						yearParam="discontinuedDateYear"
+						yearValue="<%= cpInstanceDisplayContext.getDiscontinuedDateField(Calendar.YEAR) %>"
+					/>
+				</div>
+			</div>
+		</div>
+
+		<%
+		String replacementAutocompleteWrapperCssClasses = "row";
+
+		if (!discontinued) {
+			replacementAutocompleteWrapperCssClasses += " d-none";
+		}
+		%>
+
+		<div class="<%= replacementAutocompleteWrapperCssClasses %>" id="<portlet:namespace />replacementAutocompleteWrapper">
+			<div class="col">
+				<label class="control-label" for="replacementCPInstanceId"><%= LanguageUtil.get(request, "replacement") %></label>
+
+				<div id="autocomplete-root"></div>
+			</div>
+		</div>
 	</commerce-ui:panel>
 
 	<c:if test="<%= cpInstanceDisplayContext.hasCustomAttributesAvailable() %>">
@@ -302,6 +350,44 @@ if ((cpInstance != null) && (cpInstance.getExpirationDate() != null)) {
 
 		if (workflowActionInput) {
 			workflowActionInput.val('<%= WorkflowConstants.ACTION_PUBLISH %>');
+		}
+	});
+</aui:script>
+
+<aui:script require="commerce-frontend-js/components/autocomplete/entry as autocomplete, commerce-frontend-js/utilities/eventsDefinitions as events">
+	autocomplete.default('autocomplete', 'autocomplete-root', {
+		apiUrl: '/o/headless-commerce-admin-catalog/v1.0/skus',
+		initialLabel:
+			'<%= cpInstanceDisplayContext.getReplacementCPInstanceLabel() %>',
+		initialValue:
+			'<%= cpInstanceDisplayContext.getReplacementCPInstanceId() %>',
+		inputId: 'replacementId',
+		inputName:
+			'<%= liferayPortletResponse.getNamespace() %>replacementCPInstanceId',
+		itemsKey: 'id',
+		itemsLabel: 'sku',
+	});
+
+	const discontinuedInput = document.getElementById(
+		'<%= liferayPortletResponse.getNamespace() %>discontinued'
+	);
+	const discontinuedDateInput = document.getElementById(
+		'<%= liferayPortletResponse.getNamespace() %>discontinuedDate'
+	);
+	const replacementAutocompleteWrapper = document.getElementById(
+		'<%= liferayPortletResponse.getNamespace() %>replacementAutocompleteWrapper'
+	);
+
+	discontinuedInput.addEventListener('change', (event) => {
+		if (event.target.checked) {
+			discontinuedDateInput.disabled = false;
+			discontinuedDateInput.classList.remove('disabled');
+			replacementAutocompleteWrapper.classList.remove('d-none');
+		}
+		else {
+			discontinuedDateInput.disabled = true;
+			discontinuedDateInput.classList.add('disabled');
+			replacementAutocompleteWrapper.classList.add('d-none');
 		}
 	});
 </aui:script>

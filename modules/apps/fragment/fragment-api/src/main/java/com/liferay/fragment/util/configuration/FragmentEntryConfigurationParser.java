@@ -52,7 +52,8 @@ public interface FragmentEntryConfigurationParser {
 		throws JSONException;
 
 	public Map<String, Object> getContextObjects(
-		JSONObject configurationValuesJSONObject, String configuration);
+		JSONObject configurationValuesJSONObject, String configuration,
+		long[] segmentsEntryIds);
 
 	public Object getFieldValue(
 		FragmentConfigurationField fragmentConfigurationField, Locale locale,

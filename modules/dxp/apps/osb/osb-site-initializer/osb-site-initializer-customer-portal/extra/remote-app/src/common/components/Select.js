@@ -1,8 +1,17 @@
-import ClayForm, {ClaySelectWithOption} from '@clayui/form';
+import ClayForm, {ClaySelect} from '@clayui/form';
+import ClayIcon from '@clayui/icon';
 import {useField} from 'formik';
 import {required, validate} from '../utils/validations.form';
+import WarningBadge from './WarningBadge';
 
-const Select = ({groupStyle, helper, label, validations, ...props}) => {
+const Select = ({
+	groupStyle,
+	helper,
+	label,
+	options,
+	validations,
+	...props
+}) => {
 	if (props.required) {
 		validations = validations
 			? [...validations, (value) => required(value)]
@@ -32,13 +41,32 @@ const Select = ({groupStyle, helper, label, validations, ...props}) => {
 				{`${label} `}
 
 				{props.required && (
-					<span className="ml-n1 text-danger text-paragraph-sm">
-						*
+					<span className="inline-item-after reference-mark text-warning">
+						<ClayIcon symbol="asterisk" />
 					</span>
 				)}
 
-				<ClaySelectWithOption {...field} {...props} />
+				<div className="position-relative">
+					<ClayIcon className="select-icon" symbol="caret-bottom" />
+
+					<ClaySelect {...field} {...props}>
+						{options.map(({disabled, label, value}) => (
+							<ClaySelect.Option
+								disabled={disabled}
+								key={value}
+								label={label}
+								value={value}
+							/>
+						))}
+					</ClaySelect>
+				</div>
 			</label>
+
+			{meta.touched && meta.error && props.required && (
+				<WarningBadge>
+					<span className="pl-1">{meta.error}</span>
+				</WarningBadge>
+			)}
 
 			{helper && <div>{helper}</div>}
 		</ClayForm.Group>

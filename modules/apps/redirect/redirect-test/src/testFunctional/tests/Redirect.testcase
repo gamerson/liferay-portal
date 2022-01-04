@@ -1,6 +1,7 @@
 @component-name = "portal-collaboration"
 definition {
 
+	property portal.acceptance = "true";
 	property portal.release = "true";
 	property portal.upstream = "true";
 	property testray.main.component.name = "Redirect";
@@ -254,7 +255,15 @@ definition {
 	@priority = "4"
 	@refactordone
 	test CanAddExpiredEntryFromActive404 {
+		property test.name.skip.portal.instance = "Redirect#CanAddExpiredEntryFromActive404";
+
 		var portalURL = PropsUtil.get("portal.url");
+
+		Redirect.openToConfigInSystemSettings();
+
+		FormFields.enableCheckbox(fieldName = "enabled");
+
+		PortletEntry.save();
 
 		JSONRedirect.addRedirect(
 			destinationURL = "${portalURL}/web/test-site-name/test-destination-page1",
@@ -289,7 +298,15 @@ definition {
 	@priority = "4"
 	@refactordone
 	test CanAddExpiredEntryFromIgnored404 {
+		property test.name.skip.portal.instance = "Redirect#CanAddExpiredEntryFromIgnored404";
+
 		var portalURL = PropsUtil.get("portal.url");
+
+		Redirect.openToConfigInSystemSettings();
+
+		FormFields.enableCheckbox(fieldName = "enabled");
+
+		PortletEntry.save();
 
 		JSONRedirect.addRedirect(
 			destinationURL = "${portalURL}/web/test-site-name/test-destination-page1",
@@ -330,7 +347,15 @@ definition {
 	@priority = "5"
 	@refactordone
 	test CanAddPermanentEntryFromActive404 {
+		property test.name.skip.portal.instance = "Redirect#CanAddPermanentEntryFromActive404";
+
 		var portalURL = PropsUtil.get("portal.url");
+
+		Redirect.openToConfigInSystemSettings();
+
+		FormFields.enableCheckbox(fieldName = "enabled");
+
+		PortletEntry.save();
 
 		JSONRedirect.addRedirect(
 			destinationURL = "${portalURL}/web/test-site-name/test-destination-page1",
@@ -364,7 +389,15 @@ definition {
 	@priority = "5"
 	@refactordone
 	test CanAddPermanentEntryFromIgnored404 {
+		property test.name.skip.portal.instance = "Redirect#CanAddPermanentEntryFromIgnored404";
+
 		var portalURL = PropsUtil.get("portal.url");
+
+		Redirect.openToConfigInSystemSettings();
+
+		FormFields.enableCheckbox(fieldName = "enabled");
+
+		PortletEntry.save();
 
 		JSONRedirect.addRedirect(
 			destinationURL = "${portalURL}/web/test-site-name/test-destination-page1",
@@ -403,7 +436,15 @@ definition {
 	@priority = "5"
 	@refactordone
 	test CanAddTempEntryFromActive404 {
+		property test.name.skip.portal.instance = "Redirect#CanAddTempEntryFromActive404";
+
 		var portalURL = PropsUtil.get("portal.url");
+
+		Redirect.openToConfigInSystemSettings();
+
+		FormFields.enableCheckbox(fieldName = "enabled");
+
+		PortletEntry.save();
 
 		JSONRedirect.addRedirect(
 			destinationURL = "${portalURL}/web/test-site-name/test-destination-page1",
@@ -436,7 +477,15 @@ definition {
 	@priority = "5"
 	@refactordone
 	test CanAddTempEntryFromIgnored404 {
+		property test.name.skip.portal.instance = "Redirect#CanAddTempEntryFromIgnored404";
+
 		var portalURL = PropsUtil.get("portal.url");
+
+		Redirect.openToConfigInSystemSettings();
+
+		FormFields.enableCheckbox(fieldName = "enabled");
+
+		PortletEntry.save();
 
 		JSONRedirect.addRedirect(
 			destinationURL = "${portalURL}/web/test-site-name/test-destination-page1",
@@ -721,7 +770,15 @@ definition {
 	@priority = "5"
 	@refactordone
 	test CanIgnoreURLAfterReactivation {
+		property test.name.skip.portal.instance = "Redirect#CanIgnoreURLAfterReactivation";
+
 		var portalURL = PropsUtil.get("portal.url");
+
+		Redirect.openToConfigInSystemSettings();
+
+		FormFields.enableCheckbox(fieldName = "enabled");
+
+		PortletEntry.save();
 
 		JSONRedirect.addRedirect(
 			destinationURL = "${portalURL}/web/test-site-name/test-destination-page1",
@@ -821,7 +878,16 @@ definition {
 	@priority = "5"
 	@refactordone
 	test CanOrder404URLsByRequests {
+		property portal.acceptance = "false";
+		property test.name.skip.portal.instance = "Redirect#CanOrder404URLsByRequests";
+
 		var portalURL = PropsUtil.get("portal.url");
+
+		Redirect.openToConfigInSystemSettings();
+
+		FormFields.enableCheckbox(fieldName = "enabled");
+
+		PortletEntry.save();
 
 		JSONLayout.addPublicLayout(
 			groupName = "Test Site Name",
@@ -916,6 +982,8 @@ definition {
 	@priority = "3"
 	@refactordone
 	test CanSearchForEntry {
+		property portal.acceptance = "false";
+
 		var portalURL = PropsUtil.get("portal.url");
 
 		JSONRedirect.addRedirect(
@@ -1023,7 +1091,15 @@ definition {
 	@priority = "5"
 	@refactordone
 	test CanView404URLsAfterReactivating {
+		property test.name.skip.portal.instance = "Redirect#CanView404URLsAfterReactivating";
+
 		var portalURL = PropsUtil.get("portal.url");
+
+		Redirect.openToConfigInSystemSettings();
+
+		FormFields.enableCheckbox(fieldName = "enabled");
+
+		PortletEntry.save();
 
 		for (var i : list "1,2,3") {
 			JSONLayout.addPublicLayout(
@@ -1073,6 +1149,8 @@ definition {
 	@priority = "5"
 	@refactordone
 	test CanViewEntryInfo {
+		property custom.properties = "company.default.time.zone=America/Los_Angeles";
+
 		var portalURL = PropsUtil.get("portal.url");
 
 		JSONRedirect.addRedirect(
@@ -1086,10 +1164,10 @@ definition {
 			Redirect.viewEntryFloatingURL(redirectURL = "${redirectURL}");
 		}
 
-		var currentDate = DateUtil.getFormattedCurrentDate("MMMM d, yyyy");
+		var currentMonth = DateUtil.getFormattedCurrentDate("MMMM");
 
 		Redirect.viewEntryInfo(
-			createDate = "${currentDate}",
+			createDate = "${currentMonth}",
 			createdBy = "Test Test",
 			expirationDate = "January 1, 2100",
 			latestOccurrence = "Never",
@@ -1100,10 +1178,10 @@ definition {
 		Redirect.openRedirectAdmin(siteURLKey = "test-site-name");
 
 		Redirect.viewEntryInfo(
-			createDate = "${currentDate}",
+			createDate = "${currentMonth}",
 			createdBy = "Test Test",
 			expirationDate = "January 1, 2100",
-			latestOccurrence = "${currentDate}",
+			latestOccurrence = "${currentMonth}",
 			type = "Temporary");
 	}
 
@@ -1187,7 +1265,15 @@ definition {
 	@priority = "5"
 	@refactordone
 	test CanViewIgnoredURL {
+		property test.name.skip.portal.instance = "Redirect#CanViewIgnoredURL";
+
 		var portalURL = PropsUtil.get("portal.url");
+
+		Redirect.openToConfigInSystemSettings();
+
+		FormFields.enableCheckbox(fieldName = "enabled");
+
+		PortletEntry.save();
 
 		JSONRedirect.addRedirect(
 			destinationURL = "${portalURL}/web/test-site-name/test-destination-page1",

@@ -25,10 +25,12 @@ import com.liferay.dynamic.data.mapping.model.DDMForm;
 import com.liferay.dynamic.data.mapping.storage.StorageEngine;
 import com.liferay.dynamic.data.mapping.util.DDMDisplayRegistry;
 import com.liferay.petra.string.CharPool;
+import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.WorkflowInstanceLink;
@@ -40,6 +42,8 @@ import com.liferay.portal.kernel.service.ServiceContextFactory;
 import com.liferay.portal.kernel.service.WorkflowInstanceLinkLocalService;
 import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
+import com.liferay.portal.kernel.util.ListUtil;
+import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.MimeTypesUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -66,7 +70,8 @@ import com.liferay.portal.workflow.kaleo.service.KaleoDefinitionVersionLocalServ
 
 import java.io.IOException;
 
-import java.util.Enumeration;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
@@ -121,6 +126,21 @@ import org.osgi.service.component.annotations.Reference;
 	service = Portlet.class
 )
 public class KaleoFormsAdminPortlet extends MVCPortlet {
+
+	public KaleoFormsAdminPortlet() {
+		_parameterNames = ListUtil.fromArray(
+			"backURL", "ddmStructureId", "ddmStructureName", "ddmTemplateId",
+			"historyKey", "kaleoProcessId", "kaleoTaskFormPairsData", "mvcPath",
+			"redirect", "tabs1", "translatedLanguagesDescription",
+			"translatedLanguagesName", "workflowDefinition");
+
+		for (Locale availableLocale : LanguageUtil.getAvailableLocales()) {
+			_parameterNames.add(
+				"description" + LocaleUtil.toLanguageId(availableLocale));
+			_parameterNames.add(
+				"name" + LocaleUtil.toLanguageId(availableLocale));
+		}
+	}
 
 	/**
 	 * Deletes the <code>KaleoDraftDefinition</code> (in the
@@ -377,26 +397,35 @@ public class KaleoFormsAdminPortlet extends MVCPortlet {
 	 *
 	 * @param  resourceRequest the resource request
 	 * @param  resourceResponse the resource response
-	 * @throws Exception if an exception occurred
 	 */
 	protected void saveInPortletSession(
-			ResourceRequest resourceRequest, ResourceResponse resourceResponse)
-		throws Exception {
+		ResourceRequest resourceRequest, ResourceResponse resourceResponse) {
 
-		Enumeration<String> enumeration = resourceRequest.getParameterNames();
+		Map<String, String[]> parameterMap = resourceRequest.getParameterMap();
 
-		while (enumeration.hasMoreElements()) {
-			String name = enumeration.nextElement();
+		PortletSession portletSession = resourceRequest.getPortletSession();
 
-			if (Objects.equals(name, "doAsUserId")) {
+		for (String parameterName : _parameterNames) {
+			if (!parameterMap.containsKey(parameterName)) {
 				continue;
 			}
 
-			PortletSession portletSession = resourceRequest.getPortletSession();
+			portletSession.setAttribute(
+				parameterName,
+				ParamUtil.getString(resourceRequest, parameterName));
+		}
 
-			String value = ParamUtil.getString(resourceRequest, name);
-
-			portletSession.setAttribute(name, value);
+		if (parameterMap.containsKey("kaleoProcessLinkDDMTemplateId")) {
+			portletSession.setAttribute(
+				StringBundler.concat(
+					ParamUtil.getString(
+						resourceRequest, "kaleoProcessLinkDDMStructureId"),
+					ParamUtil.getString(
+						resourceRequest, "kaleoProcessLinkWorkflowDefinition"),
+					ParamUtil.getString(
+						resourceRequest, "kaleoProcessLinkWorkflowTaskName")),
+				ParamUtil.getString(
+					resourceRequest, "kaleoProcessLinkDDMTemplateId"));
 		}
 	}
 
@@ -542,6 +571,8 @@ public class KaleoFormsAdminPortlet extends MVCPortlet {
 
 	@Reference
 	private KaleoProcessService _kaleoProcessService;
+
+	private final List<String> _parameterNames;
 
 	@Reference
 	private WorkflowInstanceLinkLocalService _workflowInstanceLinkLocalService;

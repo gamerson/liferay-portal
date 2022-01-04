@@ -66,7 +66,7 @@ definition {
 			locator1 = "DDMSelectStructure#DDM_STRUCTURE_TABLE_NAME_2");
 	}
 
-	@description = "This is a use case for LPS-82208."
+	@description = "This is a use case for LPS-82208 and LPS-89641."
 	@priority = "5"
 	test CannotDeleteStructureReferencedByDisplayPage {
 		WebContentNavigator.openWebContentAdmin(siteURLKey = "test-site-name");
@@ -99,6 +99,20 @@ definition {
 		WebContentStructures.viewCP(
 			structureDescription = "WC Structure Description",
 			structureName = "WC Structure Name");
+
+		LexiconEntry.gotoEntryMenuItem(
+			menuItem = "Copy",
+			rowEntry = "WC Structure Name");
+
+		PortletEntry.inputName(name = "WC Structure Name Copy");
+
+		AssertClick(
+			locator1 = "Button#COPY",
+			value1 = "Copy");
+
+		LexiconEntry.viewEntryName(rowEntry = "WC Structure Name");
+
+		LexiconEntry.viewEntryName(rowEntry = "WC Structure Name Copy");
 	}
 
 	@description = "This is a use case for LPS-126248. Edit field reference of field options in structure editor."
@@ -232,9 +246,11 @@ definition {
 		PortletEntry.save();
 	}
 
-	@description = "This is a use case for LRQA-61632. Can select different type pages in Link to Page field."
+	@description = "This is a use case for LRQA-61632 and LPS-76981. Can select different type pages in Link to Page field."
 	@priority = "4"
 	test SelectDifferentTypePagesInLinkToPageField {
+		property custom.properties = "redirect.url.ips.allowed=";
+
 		task ("Add a widget page") {
 			JSONLayout.addPublicLayout(
 				groupName = "Test Site Name",
@@ -242,7 +258,7 @@ definition {
 		}
 
 		task ("Add a page based on Blank") {
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
 			ContentPages.addPage(pageName = "Test Content Page");
 
@@ -250,26 +266,26 @@ definition {
 		}
 
 		task ("Add a page based on Search") {
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
-			SitePages.addPublicPage(
+			PagesAdmin.addPublicPage(
 				collectionName = "Global Templates",
 				pageName = "Test Search",
 				pageTemplateName = "Search");
 		}
 
 		task ("Add a page based on Full Page Application") {
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
-			SitePages.addPublicPage(
+			PagesAdmin.addPublicPage(
 				pageName = "Test Full Page Application",
 				sitePageType = "Full Page Application");
 		}
 
 		task ("Add a page based on Page Set") {
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
-			SitePages.addPublicPage(
+			PagesAdmin.addPublicPage(
 				pageName = "Test Page Set",
 				sitePageType = "Page Set");
 
@@ -280,39 +296,55 @@ definition {
 		}
 
 		task ("Add a page based on Embedded") {
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
-			SitePages.addPublicPage(
+			PagesAdmin.addPublicPage(
 				pageName = "Test Embedded",
 				pageTypeURL = "https://www.liferay.com",
 				sitePageType = "Embedded");
 		}
 
 		task ("Add a page based on Link to a Page of This Site") {
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
-			SitePages.addPublicPage(
+			PagesAdmin.addPublicPage(
 				linkPageName = "Test Content Page",
 				pageName = "Test Link To A Page Of This Site",
 				sitePageType = "Link to a Page of This Site");
 		}
 
 		task ("Add a page based on Panel") {
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
-			SitePages.addPublicPage(
+			PagesAdmin.addPublicPage(
 				componentName = "Collaboration",
 				pageName = "Test Panel",
 				sitePageType = "Panel");
 		}
 
 		task ("Add a page based on Link to URL") {
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
-			SitePages.addPublicPage(
+			PagesAdmin.addPublicPage(
 				pageName = "Test Link To URL",
 				pageTypeURL = "https://www.liferay.com",
 				sitePageType = "Link to URL");
+		}
+
+		task ("Assert cancel edit a Link to URL type page will not redirect to the URL") {
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
+
+			PagesAdmin.gotoPageEllipsisMenuItem(
+				menuItem = "Configure",
+				pageName = "Test Link To URL");
+
+			PortletEntry.inputName(name = "Edit Link to URL Page");
+
+			AssertClick(
+				locator1 = "Button#CANCEL",
+				value1 = "Cancel");
+
+			AssertLocation.assertPartialLocation(value1 = "com_liferay_layout_admin_web_portlet_GroupPagesPortlet");
 		}
 
 		task ("Add a structure with 9 Link to Page fields") {

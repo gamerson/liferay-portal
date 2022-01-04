@@ -90,6 +90,8 @@ public class ServletDataImpl implements ServletData {
 			_subscriptionResourceComponentServiceObjects);
 		Query.setUserAccountResourceComponentServiceObjects(
 			_userAccountResourceComponentServiceObjects);
+		Query.setUserGroupResourceComponentServiceObjects(
+			_userGroupResourceComponentServiceObjects);
 		Query.setWebUrlResourceComponentServiceObjects(
 			_webUrlResourceComponentServiceObjects);
 	}

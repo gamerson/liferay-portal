@@ -52,11 +52,16 @@ public class SkuDTOConverter implements DTOConverter<CPInstance, Sku> {
 			(Long)dtoConverterContext.getId());
 
 		CPDefinition cpDefinition = cpInstance.getCPDefinition();
+		CPInstance replacementCPInstance =
+			_cpInstanceService.fetchCProductInstance(
+				cpInstance.getReplacementCProductId(),
+				cpInstance.getReplacementCPInstanceUuid());
 
 		return new Sku() {
 			{
 				cost = cpInstance.getCost();
 				depth = cpInstance.getDepth();
+				discontinued = cpInstance.isDiscontinued();
 				displayDate = cpInstance.getDisplayDate();
 				expirationDate = cpInstance.getExpirationDate();
 				externalReferenceCode = cpInstance.getExternalReferenceCode();
@@ -64,7 +69,6 @@ public class SkuDTOConverter implements DTOConverter<CPInstance, Sku> {
 				height = cpInstance.getHeight();
 				id = cpInstance.getCPInstanceId();
 				manufacturerPartNumber = cpInstance.getManufacturerPartNumber();
-				options = _getOptions(cpInstance);
 				price = cpInstance.getPrice();
 				productId = cpDefinition.getCProductId();
 				productName = LanguageUtils.getLanguageIdMap(
@@ -76,29 +80,52 @@ public class SkuDTOConverter implements DTOConverter<CPInstance, Sku> {
 				unspsc = cpInstance.getUnspsc();
 				weight = cpInstance.getWeight();
 				width = cpInstance.getWidth();
+
+				setOptions(
+					() -> {
+						Map<String, String> options = new HashMap<>();
+
+						List<CPInstanceOptionValueRel>
+							cpInstanceOptionValueRels =
+								_cpInstanceHelper.
+									getCPInstanceCPInstanceOptionValueRels(
+										cpInstance.getCPDefinitionId());
+
+						for (CPInstanceOptionValueRel cpInstanceOptionValueRel :
+								cpInstanceOptionValueRels) {
+
+							options.put(
+								String.valueOf(
+									cpInstanceOptionValueRel.
+										getCPDefinitionOptionRelId()),
+								String.valueOf(
+									cpInstanceOptionValueRel.
+										getCPDefinitionOptionValueRelId()));
+						}
+
+						return options;
+					});
+
+				setReplacementSkuId(
+					() -> {
+						if (replacementCPInstance != null) {
+							return replacementCPInstance.getCPInstanceId();
+						}
+
+						return null;
+					});
+
+				setReplacementSkuExternalReferenceCode(
+					() -> {
+						if (replacementCPInstance != null) {
+							return replacementCPInstance.
+								getExternalReferenceCode();
+						}
+
+						return null;
+					});
 			}
 		};
-	}
-
-	private Map<String, String> _getOptions(CPInstance cpInstance) {
-		Map<String, String> options = new HashMap<>();
-
-		List<CPInstanceOptionValueRel> cpInstanceOptionValueRels =
-			_cpInstanceHelper.getCPInstanceCPInstanceOptionValueRels(
-				cpInstance.getCPDefinitionId());
-
-		for (CPInstanceOptionValueRel cpInstanceOptionValueRel :
-				cpInstanceOptionValueRels) {
-
-			options.put(
-				String.valueOf(
-					cpInstanceOptionValueRel.getCPDefinitionOptionRelId()),
-				String.valueOf(
-					cpInstanceOptionValueRel.
-						getCPDefinitionOptionValueRelId()));
-		}
-
-		return options;
 	}
 
 	@Reference

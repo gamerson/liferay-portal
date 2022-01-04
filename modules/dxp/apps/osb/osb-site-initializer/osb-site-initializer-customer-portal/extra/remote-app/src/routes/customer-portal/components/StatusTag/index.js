@@ -26,8 +26,6 @@ const StatusTag = ({currentStatus}) => {
 			</ClayLabel>
 		);
 	}
-
-	return <div>No Status</div>;
 };
 
 export default StatusTag;

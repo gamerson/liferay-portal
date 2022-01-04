@@ -41,7 +41,6 @@ import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.SystemProperties;
 import com.liferay.portal.kernel.util.Time;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.util.ant.ExpandTask;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -58,6 +57,9 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -66,6 +68,8 @@ import java.util.Properties;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import org.apache.commons.compress.archivers.zip.UnsupportedZipFeatureException;
 import org.apache.commons.io.FileUtils;
@@ -83,10 +87,6 @@ import org.apache.tika.parser.Parser;
 import org.apache.tika.parser.txt.UniversalEncodingDetector;
 import org.apache.tika.sax.BodyContentHandler;
 import org.apache.tika.sax.WriteOutContentHandler;
-import org.apache.tools.ant.DirectoryScanner;
-
-import org.mozilla.intl.chardet.nsDetector;
-import org.mozilla.intl.chardet.nsPSMDetector;
 
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
@@ -509,43 +509,6 @@ public class FileImpl implements com.liferay.portal.kernel.util.File {
 	}
 
 	@Override
-	public String[] find(String directory, String includes, String excludes) {
-		if (directory.length() > 0) {
-			directory = replaceSeparator(directory);
-
-			if (directory.charAt(directory.length() - 1) == CharPool.SLASH) {
-				directory = directory.substring(0, directory.length() - 1);
-			}
-		}
-
-		if (!exists(directory)) {
-			if (_log.isWarnEnabled()) {
-				_log.warn("Directory " + directory + " does not exist");
-			}
-
-			return new String[0];
-		}
-
-		DirectoryScanner directoryScanner = new DirectoryScanner();
-
-		directoryScanner.setBasedir(directory);
-		directoryScanner.setExcludes(StringUtil.split(excludes));
-		directoryScanner.setIncludes(StringUtil.split(includes));
-
-		directoryScanner.scan();
-
-		String[] includedFiles = directoryScanner.getIncludedFiles();
-
-		for (int i = 0; i < includedFiles.length; i++) {
-			includedFiles[i] = StringBundler.concat(
-				directory, StringPool.SLASH,
-				replaceSeparator(includedFiles[i]));
-		}
-
-		return includedFiles;
-	}
-
-	@Override
 	public String getAbsolutePath(File file) {
 		return StringUtil.replace(
 			file.getAbsolutePath(), CharPool.BACK_SLASH, CharPool.SLASH);
@@ -644,33 +607,6 @@ public class FileImpl implements com.liferay.portal.kernel.util.File {
 		int y = fullFileName.lastIndexOf(CharPool.BACK_SLASH);
 
 		return fullFileName.substring(Math.max(x, y) + 1);
-	}
-
-	@Override
-	public boolean isAscii(File file) throws IOException {
-		boolean ascii = true;
-
-		nsDetector detector = new nsDetector(nsPSMDetector.ALL);
-
-		try (InputStream inputStream = new FileInputStream(file)) {
-			byte[] buffer = new byte[1024];
-
-			int len = 0;
-
-			while ((len = inputStream.read(buffer, 0, buffer.length)) != -1) {
-				if (ascii) {
-					ascii = detector.isAscii(buffer, len);
-
-					if (!ascii) {
-						break;
-					}
-				}
-			}
-
-			detector.DataEnd();
-		}
-
-		return ascii;
 	}
 
 	@Override
@@ -996,7 +932,31 @@ public class FileImpl implements com.liferay.portal.kernel.util.File {
 
 	@Override
 	public void unzip(File source, File destination) {
-		ExpandTask.expand(source, destination);
+		Path destinationPath = destination.toPath();
+
+		try (InputStream inputStream = new FileInputStream(source);
+			ZipInputStream zipInputStream = new ZipInputStream(inputStream)) {
+
+			ZipEntry entry = null;
+
+			while ((entry = zipInputStream.getNextEntry()) != null) {
+				Path path = destinationPath.resolve(entry.getName());
+
+				if (entry.isDirectory()) {
+					Files.createDirectories(path);
+				}
+				else {
+					Files.createDirectories(path.getParent());
+
+					Files.copy(
+						zipInputStream, path,
+						StandardCopyOption.REPLACE_EXISTING);
+				}
+			}
+		}
+		catch (IOException ioException) {
+			ReflectionUtil.throwException(ioException);
+		}
 	}
 
 	@Override

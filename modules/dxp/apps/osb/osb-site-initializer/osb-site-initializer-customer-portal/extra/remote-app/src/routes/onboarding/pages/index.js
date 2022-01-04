@@ -2,22 +2,27 @@ import {useContext} from 'react';
 import {AppContext} from '../context';
 import {steps} from '../utils/constants';
 import Invites from './Invites';
-import SetupDXP from './SetupDXP';
+import SetupDXPCloud from './SetupDXPCloud';
+import SuccessDXPCloud from './SuccessDXPCloud';
 import Welcome from './Welcome';
 
 const Pages = () => {
-	const [{step, userAccount}] = useContext(AppContext);
+	const [{project, step, userAccount}] = useContext(AppContext);
 
 	if (step === steps.invites) {
 		return <Invites />;
 	}
 
-	if (step === steps.dxp) {
-		return <SetupDXP />;
+	if (step === steps.dxpCloud) {
+		return <SetupDXPCloud />;
 	}
 
-	if (userAccount) {
-		return <Welcome userAccount={userAccount} />;
+	if (step === steps.successDxpCloud) {
+		return <SuccessDXPCloud />;
+	}
+
+	if (userAccount && project) {
+		return <Welcome project={project} userAccount={userAccount} />;
 	}
 
 	return <Welcome.Skeleton />;

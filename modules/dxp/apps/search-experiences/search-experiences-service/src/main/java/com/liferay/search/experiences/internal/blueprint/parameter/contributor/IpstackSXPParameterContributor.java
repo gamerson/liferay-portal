@@ -20,10 +20,10 @@ import com.liferay.portal.kernel.module.configuration.ConfigurationException;
 import com.liferay.portal.kernel.module.configuration.ConfigurationProvider;
 import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.search.experiences.blueprint.parameter.DoubleSXPParameter;
 import com.liferay.search.experiences.blueprint.parameter.SXPParameter;
-import com.liferay.search.experiences.blueprint.parameter.StringSXPParameter;
 import com.liferay.search.experiences.blueprint.parameter.contributor.SXPParameterContributorDefinition;
+import com.liferay.search.experiences.internal.blueprint.parameter.DoubleSXPParameter;
+import com.liferay.search.experiences.internal.blueprint.parameter.StringSXPParameter;
 import com.liferay.search.experiences.internal.configuration.IpstackConfiguration;
 import com.liferay.search.experiences.internal.web.cache.IpstackWebCacheItem;
 import com.liferay.search.experiences.rest.dto.v1_0.SXPBlueprint;
@@ -57,7 +57,7 @@ public class IpstackSXPParameterContributor implements SXPParameterContributor {
 		}
 
 		String ipAddress = (String)searchContext.getAttribute(
-			"search.experiences.ipaddress");
+			"search.experiences.ip.address");
 
 		if (Validator.isNull(ipAddress)) {
 			return;

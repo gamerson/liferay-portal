@@ -154,7 +154,7 @@ definition {
 
 			Click(
 				key_pageName = "${pageName}",
-				locator1 = "SitePages#LIST_GROUP_ITEM_ELLIPSIS_ICON");
+				locator1 = "PagesAdmin#LIST_GROUP_ITEM_ELLIPSIS_ICON");
 		}
 		else {
 			LexiconEntry.changeDisplayStyle(displayStyle = "list");
@@ -173,7 +173,7 @@ definition {
 
 			Click(
 				key_pageName = "${pageName}",
-				locator1 = "SitePages#LIST_GROUP_ITEM_ELLIPSIS_ICON");
+				locator1 = "PagesAdmin#LIST_GROUP_ITEM_ELLIPSIS_ICON");
 		}
 		else {
 			Click.waitForMenuToggleJSClick(
@@ -221,6 +221,15 @@ definition {
 		}
 		else if ("${validateInvalidFile}" == "true") {
 			Button.clickPublish();
+		}
+		else if ("${workflowSave}" == "true") {
+			Button.clickSaveAsDraft();
+
+			AssertTextEquals(
+				locator1 = "Message#SUCCESS_IMPORT_TRANSLATIONS",
+				value1 = "${successMessage}");
+
+			Click(locator1 = "Button#TRANSLATIONS_DONE");
 		}
 		else {
 			Button.clickPublish();
@@ -441,12 +450,14 @@ definition {
 	}
 
 	macro translateFragmentField {
-		AssertSelectedLabel(
-			locator1 = "Select#SELECT_ID",
-			selectFieldId = "experience-selector",
-			value1 = "Default");
+		if ("${ff}" == "true") {
+			AssertSelectedLabel(
+				locator1 = "Select#SELECT_ID",
+				selectFieldId = "experience-selector",
+				value1 = "Default");
 
-		AssertElementPresent(locator1 = "Translation#BASIC_INFORMATION");
+			AssertElementPresent(locator1 = "Translation#BASIC_INFORMATION");
+		}
 
 		if (isSet(experienceName)) {
 			Select(
@@ -482,11 +493,6 @@ definition {
 		Click.clickNoMouseOver(
 			key_title = "Auto Translate ${fieldName} Field",
 			locator1 = "Button#ANY_TITLE");
-
-		AssertTextEquals(
-			key_fieldName = "${fieldName}",
-			locator1 = "Message#SUCCESS_SPECIFIC_FORM_FIELD_REQUIRED",
-			value1 = "Field Translated");
 	}
 
 	macro translateWithGoogle {

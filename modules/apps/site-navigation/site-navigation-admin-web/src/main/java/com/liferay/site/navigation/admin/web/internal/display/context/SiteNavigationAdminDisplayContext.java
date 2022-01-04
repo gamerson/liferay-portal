@@ -29,12 +29,12 @@ import com.liferay.portal.kernel.portlet.LiferayPortletRequest;
 import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
 import com.liferay.portal.kernel.portlet.LiferayWindowState;
 import com.liferay.portal.kernel.portlet.SearchDisplayStyleUtil;
+import com.liferay.portal.kernel.portlet.SearchOrderByUtil;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.theme.PortletDisplay;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.JavaConstants;
-import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -146,23 +146,26 @@ public class SiteNavigationAdminDisplayContext {
 	}
 
 	public String getOrderByCol() {
-		if (_orderByCol != null) {
+		if (Validator.isNotNull(_orderByCol)) {
 			return _orderByCol;
 		}
 
-		_orderByCol = ParamUtil.getString(
-			_httpServletRequest, "orderByCol", "create-date");
+		_orderByCol = SearchOrderByUtil.getOrderByCol(
+			_httpServletRequest,
+			SiteNavigationAdminPortletKeys.SITE_NAVIGATION_ADMIN,
+			"create-date");
 
 		return _orderByCol;
 	}
 
 	public String getOrderByType() {
-		if (_orderByType != null) {
+		if (Validator.isNotNull(_orderByType)) {
 			return _orderByType;
 		}
 
-		_orderByType = ParamUtil.getString(
-			_httpServletRequest, "orderByType", "asc");
+		_orderByType = SearchOrderByUtil.getOrderByType(
+			_httpServletRequest,
+			SiteNavigationAdminPortletKeys.SITE_NAVIGATION_ADMIN, "asc");
 
 		return _orderByType;
 	}
@@ -215,42 +218,33 @@ public class SiteNavigationAdminDisplayContext {
 				_liferayPortletRequest, getPortletURL(), null,
 				"there-are-no-navigation-menus");
 
-		OrderByComparator<SiteNavigationMenu> orderByComparator =
-			SiteNavigationMenuPortletUtil.getOrderByComparator(
-				getOrderByCol(), getOrderByType());
-
 		searchContainer.setOrderByCol(getOrderByCol());
-		searchContainer.setOrderByComparator(orderByComparator);
+		searchContainer.setOrderByComparator(
+			SiteNavigationMenuPortletUtil.getOrderByComparator(
+				getOrderByCol(), getOrderByType()));
 		searchContainer.setOrderByType(getOrderByType());
 
-		EmptyOnClickRowChecker emptyOnClickRowChecker =
-			new EmptyOnClickRowChecker(_liferayPortletResponse);
-
-		searchContainer.setRowChecker(emptyOnClickRowChecker);
-
-		List<SiteNavigationMenu> menus = null;
-		int menusCount = 0;
-
 		if (Validator.isNotNull(getKeywords())) {
-			menus = _siteNavigationMenuService.getSiteNavigationMenus(
-				themeDisplay.getScopeGroupId(), getKeywords(),
-				searchContainer.getStart(), searchContainer.getEnd(),
-				orderByComparator);
-
-			menusCount = _siteNavigationMenuService.getSiteNavigationMenusCount(
-				themeDisplay.getScopeGroupId(), getKeywords());
+			searchContainer.setResultsAndTotal(
+				() -> _siteNavigationMenuService.getSiteNavigationMenus(
+					themeDisplay.getScopeGroupId(), getKeywords(),
+					searchContainer.getStart(), searchContainer.getEnd(),
+					searchContainer.getOrderByComparator()),
+				_siteNavigationMenuService.getSiteNavigationMenusCount(
+					themeDisplay.getScopeGroupId(), getKeywords()));
 		}
 		else {
-			menus = _siteNavigationMenuService.getSiteNavigationMenus(
-				themeDisplay.getScopeGroupId(), searchContainer.getStart(),
-				searchContainer.getEnd(), orderByComparator);
-
-			menusCount = _siteNavigationMenuService.getSiteNavigationMenusCount(
-				themeDisplay.getScopeGroupId());
+			searchContainer.setResultsAndTotal(
+				() -> _siteNavigationMenuService.getSiteNavigationMenus(
+					themeDisplay.getScopeGroupId(), searchContainer.getStart(),
+					searchContainer.getEnd(),
+					searchContainer.getOrderByComparator()),
+				_siteNavigationMenuService.getSiteNavigationMenusCount(
+					themeDisplay.getScopeGroupId()));
 		}
 
-		searchContainer.setResults(menus);
-		searchContainer.setTotal(menusCount);
+		searchContainer.setRowChecker(
+			new EmptyOnClickRowChecker(_liferayPortletResponse));
 
 		_searchContainer = searchContainer;
 

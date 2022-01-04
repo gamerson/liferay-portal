@@ -210,6 +210,15 @@ public class CPInstancePersistenceTest {
 
 		newCPInstance.setUnspsc(RandomTestUtil.randomString());
 
+		newCPInstance.setDiscontinued(RandomTestUtil.randomBoolean());
+
+		newCPInstance.setDiscontinuedDate(RandomTestUtil.nextDate());
+
+		newCPInstance.setReplacementCPInstanceUuid(
+			RandomTestUtil.randomString());
+
+		newCPInstance.setReplacementCProductId(RandomTestUtil.nextLong());
+
 		newCPInstance.setStatus(RandomTestUtil.nextInt());
 
 		newCPInstance.setStatusByUserId(RandomTestUtil.nextLong());
@@ -323,6 +332,18 @@ public class CPInstancePersistenceTest {
 			newCPInstance.getDeliveryMaxSubscriptionCycles());
 		Assert.assertEquals(
 			existingCPInstance.getUnspsc(), newCPInstance.getUnspsc());
+		Assert.assertEquals(
+			existingCPInstance.isDiscontinued(),
+			newCPInstance.isDiscontinued());
+		Assert.assertEquals(
+			Time.getShortTimestamp(existingCPInstance.getDiscontinuedDate()),
+			Time.getShortTimestamp(newCPInstance.getDiscontinuedDate()));
+		Assert.assertEquals(
+			existingCPInstance.getReplacementCPInstanceUuid(),
+			newCPInstance.getReplacementCPInstanceUuid());
+		Assert.assertEquals(
+			existingCPInstance.getReplacementCProductId(),
+			newCPInstance.getReplacementCProductId());
 		Assert.assertEquals(
 			existingCPInstance.getStatus(), newCPInstance.getStatus());
 		Assert.assertEquals(
@@ -501,8 +522,10 @@ public class CPInstancePersistenceTest {
 			"maxSubscriptionCycles", true, "deliverySubscriptionEnabled", true,
 			"deliverySubscriptionLength", true, "deliverySubscriptionType",
 			true, "deliverySubscriptionTypeSettings", true,
-			"deliveryMaxSubscriptionCycles", true, "unspsc", true, "status",
-			true, "statusByUserId", true, "statusByUserName", true,
+			"deliveryMaxSubscriptionCycles", true, "unspsc", true,
+			"discontinued", true, "discontinuedDate", true,
+			"replacementCPInstanceUuid", true, "replacementCProductId", true,
+			"status", true, "statusByUserId", true, "statusByUserName", true,
 			"statusDate", true);
 	}
 
@@ -893,6 +916,14 @@ public class CPInstancePersistenceTest {
 		cpInstance.setDeliveryMaxSubscriptionCycles(RandomTestUtil.nextLong());
 
 		cpInstance.setUnspsc(RandomTestUtil.randomString());
+
+		cpInstance.setDiscontinued(RandomTestUtil.randomBoolean());
+
+		cpInstance.setDiscontinuedDate(RandomTestUtil.nextDate());
+
+		cpInstance.setReplacementCPInstanceUuid(RandomTestUtil.randomString());
+
+		cpInstance.setReplacementCProductId(RandomTestUtil.nextLong());
 
 		cpInstance.setStatus(RandomTestUtil.nextInt());
 

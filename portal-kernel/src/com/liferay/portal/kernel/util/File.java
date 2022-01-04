@@ -90,8 +90,6 @@ public interface File {
 	public String extractText(
 		InputStream inputStream, String fileName, int maxStringLength);
 
-	public String[] find(String directory, String includes, String excludes);
-
 	public String getAbsolutePath(java.io.File file);
 
 	public byte[] getBytes(Class<?> clazz, String fileName) throws IOException;
@@ -114,8 +112,6 @@ public interface File {
 	public String getPath(String fullFileName);
 
 	public String getShortFileName(String fullFileName);
-
-	public boolean isAscii(java.io.File file) throws IOException;
 
 	public boolean isSameContent(java.io.File file, byte[] bytes, int length);
 

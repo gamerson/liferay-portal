@@ -29,6 +29,7 @@ import com.liferay.headless.admin.user.client.resource.v1_0.UserGroupResource;
 import com.liferay.headless.admin.user.client.serdes.v1_0.UserGroupSerDes;
 import com.liferay.petra.reflect.ReflectionUtil;
 import com.liferay.petra.string.StringBundler;
+import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.json.JSONUtil;
@@ -216,6 +217,12 @@ public abstract class BaseUserGroupResourceTestCase {
 		assertHttpResponseStatusCode(
 			204,
 			userGroupResource.deleteUserGroupHttpResponse(userGroup.getId()));
+
+		assertHttpResponseStatusCode(
+			404, userGroupResource.getUserGroupHttpResponse(userGroup.getId()));
+
+		assertHttpResponseStatusCode(
+			404, userGroupResource.getUserGroupHttpResponse(0L));
 	}
 
 	protected UserGroup testDeleteUserGroup_addUserGroup() throws Exception {
@@ -238,6 +245,128 @@ public abstract class BaseUserGroupResourceTestCase {
 							}
 						})),
 				"JSONObject/data", "Object/deleteUserGroup"));
+
+		JSONArray errorsJSONArray = JSONUtil.getValueAsJSONArray(
+			invokeGraphQLQuery(
+				new GraphQLField(
+					"userGroup",
+					new HashMap<String, Object>() {
+						{
+							put("userGroupId", userGroup.getId());
+						}
+					},
+					new GraphQLField("id"))),
+			"JSONArray/errors");
+
+		Assert.assertTrue(errorsJSONArray.length() > 0);
+	}
+
+	@Test
+	public void testGetUserGroup() throws Exception {
+		UserGroup postUserGroup = testGetUserGroup_addUserGroup();
+
+		UserGroup getUserGroup = userGroupResource.getUserGroup(
+			postUserGroup.getId());
+
+		assertEquals(postUserGroup, getUserGroup);
+		assertValid(getUserGroup);
+	}
+
+	protected UserGroup testGetUserGroup_addUserGroup() throws Exception {
+		throw new UnsupportedOperationException(
+			"This method needs to be implemented");
+	}
+
+	@Test
+	public void testGraphQLGetUserGroup() throws Exception {
+		UserGroup userGroup = testGraphQLUserGroup_addUserGroup();
+
+		Assert.assertTrue(
+			equals(
+				userGroup,
+				UserGroupSerDes.toDTO(
+					JSONUtil.getValueAsString(
+						invokeGraphQLQuery(
+							new GraphQLField(
+								"userGroup",
+								new HashMap<String, Object>() {
+									{
+										put("userGroupId", userGroup.getId());
+									}
+								},
+								getGraphQLFields())),
+						"JSONObject/data", "Object/userGroup"))));
+	}
+
+	@Test
+	public void testGraphQLGetUserGroupNotFound() throws Exception {
+		Long irrelevantUserGroupId = RandomTestUtil.randomLong();
+
+		Assert.assertEquals(
+			"Not Found",
+			JSONUtil.getValueAsString(
+				invokeGraphQLQuery(
+					new GraphQLField(
+						"userGroup",
+						new HashMap<String, Object>() {
+							{
+								put("userGroupId", irrelevantUserGroupId);
+							}
+						},
+						getGraphQLFields())),
+				"JSONArray/errors", "Object/0", "JSONObject/extensions",
+				"Object/code"));
+	}
+
+	@Test
+	public void testPatchUserGroup() throws Exception {
+		UserGroup postUserGroup = testPatchUserGroup_addUserGroup();
+
+		UserGroup randomPatchUserGroup = randomPatchUserGroup();
+
+		@SuppressWarnings("PMD.UnusedLocalVariable")
+		UserGroup patchUserGroup = userGroupResource.patchUserGroup(
+			postUserGroup.getId(), randomPatchUserGroup);
+
+		UserGroup expectedPatchUserGroup = postUserGroup.clone();
+
+		_beanUtilsBean.copyProperties(
+			expectedPatchUserGroup, randomPatchUserGroup);
+
+		UserGroup getUserGroup = userGroupResource.getUserGroup(
+			patchUserGroup.getId());
+
+		assertEquals(expectedPatchUserGroup, getUserGroup);
+		assertValid(getUserGroup);
+	}
+
+	protected UserGroup testPatchUserGroup_addUserGroup() throws Exception {
+		throw new UnsupportedOperationException(
+			"This method needs to be implemented");
+	}
+
+	@Test
+	public void testPutUserGroup() throws Exception {
+		UserGroup postUserGroup = testPutUserGroup_addUserGroup();
+
+		UserGroup randomUserGroup = randomUserGroup();
+
+		UserGroup putUserGroup = userGroupResource.putUserGroup(
+			postUserGroup.getId(), randomUserGroup);
+
+		assertEquals(randomUserGroup, putUserGroup);
+		assertValid(putUserGroup);
+
+		UserGroup getUserGroup = userGroupResource.getUserGroup(
+			putUserGroup.getId());
+
+		assertEquals(randomUserGroup, getUserGroup);
+		assertValid(getUserGroup);
+	}
+
+	protected UserGroup testPutUserGroup_addUserGroup() throws Exception {
+		throw new UnsupportedOperationException(
+			"This method needs to be implemented");
 	}
 
 	protected UserGroup testGraphQLUserGroup_addUserGroup() throws Exception {
@@ -319,6 +448,14 @@ public abstract class BaseUserGroupResourceTestCase {
 
 		for (String additionalAssertFieldName :
 				getAdditionalAssertFieldNames()) {
+
+			if (Objects.equals("actions", additionalAssertFieldName)) {
+				if (userGroup.getActions() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
 
 			if (Objects.equals("description", additionalAssertFieldName)) {
 				if (userGroup.getDescription() == null) {
@@ -433,6 +570,17 @@ public abstract class BaseUserGroupResourceTestCase {
 
 		for (String additionalAssertFieldName :
 				getAdditionalAssertFieldNames()) {
+
+			if (Objects.equals("actions", additionalAssertFieldName)) {
+				if (!equals(
+						(Map)userGroup1.getActions(),
+						(Map)userGroup2.getActions())) {
+
+					return false;
+				}
+
+				continue;
+			}
 
 			if (Objects.equals("description", additionalAssertFieldName)) {
 				if (!Objects.deepEquals(
@@ -572,6 +720,11 @@ public abstract class BaseUserGroupResourceTestCase {
 		sb.append(" ");
 		sb.append(operator);
 		sb.append(" ");
+
+		if (entityFieldName.equals("actions")) {
+			throw new IllegalArgumentException(
+				"Invalid entity field " + entityFieldName);
+		}
 
 		if (entityFieldName.equals("description")) {
 			sb.append("'");

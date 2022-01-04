@@ -16,7 +16,8 @@ import ClayForm, {ClayInput} from '@clayui/form';
 import {useIsMounted} from '@liferay/frontend-js-react-web';
 import React, {useCallback, useState} from 'react';
 
-import {parseCSV} from './FileParsers';
+import parseFile from './FileParsers';
+import {FILE_SCHEMA_EVENT, IMPORT_FILE_FORMATS} from './constants';
 
 function FileUpload({portletNamespace}) {
 	const isMounted = useIsMounted();
@@ -26,11 +27,13 @@ function FileUpload({portletNamespace}) {
 		(event) => {
 			const {files} = event.target;
 			if (files?.length === 0) {
-				return;
+				return Liferay.fire(FILE_SCHEMA_EVENT, {
+					schema: null,
+				});
 			}
 
 			const onComplete = (schema) => {
-				Liferay.fire('file-schema', {
+				Liferay.fire(FILE_SCHEMA_EVENT, {
 					schema,
 				});
 			};
@@ -41,7 +44,7 @@ function FileUpload({portletNamespace}) {
 				}
 			};
 
-			return parseCSV({
+			return parseFile({
 				file: files[0],
 				onComplete,
 				onError,
@@ -54,12 +57,12 @@ function FileUpload({portletNamespace}) {
 
 	return (
 		<ClayForm.Group className={errorMessage ? 'has-error' : ''}>
-			<label htmlFor={inputNameId}>
-				{Liferay.Language.get('csv-file')}
-			</label>
+			<label htmlFor={inputNameId}>{Liferay.Language.get('file')}</label>
 
 			<ClayInput
-				accept=".csv"
+				accept={IMPORT_FILE_FORMATS.map((format) => `.${format}`).join(
+					', '
+				)}
 				id={inputNameId}
 				name={inputNameId}
 				onChange={onFileChange}

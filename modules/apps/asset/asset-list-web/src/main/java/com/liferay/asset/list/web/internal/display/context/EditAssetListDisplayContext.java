@@ -61,6 +61,7 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
 import com.liferay.portal.kernel.portlet.LiferayWindowState;
 import com.liferay.portal.kernel.portlet.PortletProvider;
@@ -84,6 +85,7 @@ import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.segments.constants.SegmentsEntryConstants;
+import com.liferay.segments.constants.SegmentsPortletKeys;
 import com.liferay.segments.model.SegmentsEntry;
 import com.liferay.segments.service.SegmentsEntryLocalServiceUtil;
 import com.liferay.segments.service.SegmentsEntryServiceUtil;
@@ -92,6 +94,7 @@ import com.liferay.staging.StagingGroupHelperUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -594,12 +597,70 @@ public class EditAssetListDisplayContext {
 			unicodeProperties, className, availableClassTypeIds);
 	}
 
+	public Map<String, Object> getData() throws Exception {
+		return HashMapBuilder.<String, Object>put(
+			"assetListEntrySegmentsEntryRels",
+			_getAssetListEntrySegmentsEntryRelJSONArray()
+		).put(
+			"assetListEntryValid",
+			() -> {
+				AssetListEntry assetListEntry = getAssetListEntry();
+
+				return Validator.isNotNull(assetListEntry.getAssetEntryType());
+			}
+		).put(
+			"createNewSegmentURL",
+			() -> PortletURLBuilder.createRenderURL(
+				PortalUtil.getLiferayPortletResponse(_portletResponse),
+				SegmentsPortletKeys.SEGMENTS
+			).setMVCRenderCommandName(
+				"/segments/edit_segments_entry", false
+			).setRedirect(
+				_themeDisplay.getURLCurrent()
+			).setParameter(
+				"type", User.class.getName()
+			).buildString()
+		).put(
+			"openSelectSegmentsEntryDialogMethod",
+			() -> {
+				LiferayPortletResponse liferayPortletResponse =
+					PortalUtil.getLiferayPortletResponse(_portletResponse);
+
+				return liferayPortletResponse.getNamespace() +
+					"openSelectSegmentsEntryDialog";
+			}
+		).put(
+			"segmentsEntriesAvailables",
+			() -> {
+				List<SegmentsEntry> segmentsEntriesAvailables =
+					getAvailableSegmentsEntries();
+
+				return !segmentsEntriesAvailables.isEmpty();
+			}
+		).put(
+			"updateVariationsPriorityURL",
+			() -> {
+				PortletURL assetListPortletURL =
+					PortalUtil.getControlPanelPortletURL(
+						_httpServletRequest, _themeDisplay.getScopeGroup(),
+						AssetListPortletKeys.ASSET_LIST, 0, 0,
+						PortletRequest.ACTION_PHASE);
+
+				return PortletURLBuilder.create(
+					assetListPortletURL
+				).setActionName(
+					"/asset_list/update_variations_priority"
+				).buildString();
+			}
+		).build();
+	}
+
 	public String getDDMStructureDisplayFieldValue() throws Exception {
 		if (_ddmStructureDisplayFieldValue != null) {
 			return _ddmStructureDisplayFieldValue;
 		}
 
-		setDDMStructure();
+		_setDDMStructure();
 
 		return _ddmStructureDisplayFieldValue;
 	}
@@ -609,7 +670,7 @@ public class EditAssetListDisplayContext {
 			return _ddmStructureFieldLabel;
 		}
 
-		setDDMStructure();
+		_setDDMStructure();
 
 		return _ddmStructureFieldLabel;
 	}
@@ -619,7 +680,7 @@ public class EditAssetListDisplayContext {
 			return _ddmStructureFieldName;
 		}
 
-		setDDMStructure();
+		_setDDMStructure();
 
 		return _ddmStructureFieldName;
 	}
@@ -629,7 +690,7 @@ public class EditAssetListDisplayContext {
 			return _ddmStructureFieldValue;
 		}
 
-		setDDMStructure();
+		_setDDMStructure();
 
 		return _ddmStructureFieldValue;
 	}
@@ -1066,55 +1127,6 @@ public class EditAssetListDisplayContext {
 		return _subtypeFieldsFilterEnabled;
 	}
 
-	protected void setDDMStructure() throws Exception {
-		_ddmStructureDisplayFieldValue = StringPool.BLANK;
-		_ddmStructureFieldLabel = StringPool.BLANK;
-		_ddmStructureFieldName = StringPool.BLANK;
-		_ddmStructureFieldValue = null;
-
-		long[] classNameIds = getClassNameIds();
-		long[] classTypeIds = getClassTypeIds();
-
-		if (!isSubtypeFieldsFilterEnabled() || (classNameIds.length != 1) ||
-			(classTypeIds.length != 1)) {
-
-			return;
-		}
-
-		_ddmStructureDisplayFieldValue = ParamUtil.getString(
-			_httpServletRequest, "ddmStructureDisplayFieldValue",
-			_unicodeProperties.getProperty(
-				"ddmStructureDisplayFieldValue", StringPool.BLANK));
-
-		_ddmStructureFieldName = ParamUtil.getString(
-			_httpServletRequest, "ddmStructureFieldName",
-			_unicodeProperties.getProperty(
-				"ddmStructureFieldName", StringPool.BLANK));
-		_ddmStructureFieldValue = ParamUtil.getString(
-			_httpServletRequest, "ddmStructureFieldValue",
-			_unicodeProperties.getProperty(
-				"ddmStructureFieldValue", StringPool.BLANK));
-
-		if (Validator.isNotNull(_ddmStructureFieldName) &&
-			Validator.isNotNull(_ddmStructureFieldValue)) {
-
-			AssetRendererFactory<?> assetRendererFactory =
-				AssetRendererFactoryRegistryUtil.
-					getAssetRendererFactoryByClassNameId(classNameIds[0]);
-
-			ClassTypeReader classTypeReader =
-				assetRendererFactory.getClassTypeReader();
-
-			ClassType classType = classTypeReader.getClassType(
-				classTypeIds[0], _themeDisplay.getLocale());
-
-			ClassTypeField classTypeField = classType.getClassTypeField(
-				_ddmStructureFieldName);
-
-			_ddmStructureFieldLabel = classTypeField.getLabel();
-		}
-	}
-
 	private List<AssetCategory> _filterAssetCategories(long[] categoryIds) {
 		List<AssetCategory> filteredCategories = new ArrayList<>();
 
@@ -1175,6 +1187,55 @@ public class EditAssetListDisplayContext {
 			assetEntryItemSelectorCriterion);
 	}
 
+	private JSONArray _getAssetListEntrySegmentsEntryRelJSONArray() {
+		List<AssetListEntrySegmentsEntryRel> assetListEntrySegmentsEntryRels =
+			getAssetListEntrySegmentsEntryRels();
+
+		Stream<AssetListEntrySegmentsEntryRel> stream =
+			assetListEntrySegmentsEntryRels.stream();
+
+		LiferayPortletResponse liferayPortletResponse =
+			PortalUtil.getLiferayPortletResponse(_portletResponse);
+
+		return JSONUtil.putAll(
+			stream.sorted(
+				Comparator.comparingInt(
+					AssetListEntrySegmentsEntryRel::getPriority)
+			).map(
+				assetListEntrySegmentsEntryRel -> JSONUtil.put(
+					"active",
+					getSegmentsEntryId() ==
+						assetListEntrySegmentsEntryRel.getSegmentsEntryId()
+				).put(
+					"assetListEntrySegmentsEntryRelId",
+					assetListEntrySegmentsEntryRel.
+						getAssetListEntrySegmentsEntryRelId()
+				).put(
+					"deleteAssetListEntryVariationURL",
+					_getDeleteAssetListEntryVariationURL(
+						liferayPortletResponse, assetListEntrySegmentsEntryRel)
+				).put(
+					"editAssetListEntryURL",
+					PortletURLBuilder.createRenderURL(
+						liferayPortletResponse
+					).setMVCPath(
+						"/edit_asset_list_entry.jsp"
+					).setParameter(
+						"assetListEntryId",
+						assetListEntrySegmentsEntryRel.getAssetListEntryId()
+					).setParameter(
+						"segmentsEntryId",
+						assetListEntrySegmentsEntryRel.getSegmentsEntryId()
+					).buildString()
+				).put(
+					"name",
+					getSegmentsEntryName(
+						assetListEntrySegmentsEntryRel.getSegmentsEntryId(),
+						_themeDisplay.getLocale())
+				)
+			).toArray());
+	}
+
 	private Long[] _getClassTypeIds(
 		UnicodeProperties unicodeProperties, String className,
 		Long[] availableClassTypeIds) {
@@ -1228,6 +1289,79 @@ public class EditAssetListDisplayContext {
 		).put(
 			"type", type
 		).build();
+	}
+
+	private String _getDeleteAssetListEntryVariationURL(
+		LiferayPortletResponse liferayPortletResponse,
+		AssetListEntrySegmentsEntryRel assetListEntrySegmentsEntryRel) {
+
+		if ((assetListEntrySegmentsEntryRel.getSegmentsEntryId() ==
+				SegmentsEntryConstants.ID_DEFAULT) ||
+			isLiveGroup()) {
+
+			return "";
+		}
+
+		return PortletURLBuilder.createActionURL(
+			liferayPortletResponse
+		).setActionName(
+			"/asset_list/delete_asset_list_entry_variation"
+		).setParameter(
+			"assetListEntryId",
+			assetListEntrySegmentsEntryRel.getAssetListEntryId()
+		).setParameter(
+			"segmentsEntryId",
+			assetListEntrySegmentsEntryRel.getSegmentsEntryId()
+		).buildString();
+	}
+
+	private void _setDDMStructure() throws Exception {
+		_ddmStructureDisplayFieldValue = StringPool.BLANK;
+		_ddmStructureFieldLabel = StringPool.BLANK;
+		_ddmStructureFieldName = StringPool.BLANK;
+		_ddmStructureFieldValue = null;
+
+		long[] classNameIds = getClassNameIds();
+		long[] classTypeIds = getClassTypeIds();
+
+		if (!isSubtypeFieldsFilterEnabled() || (classNameIds.length != 1) ||
+			(classTypeIds.length != 1)) {
+
+			return;
+		}
+
+		_ddmStructureDisplayFieldValue = ParamUtil.getString(
+			_httpServletRequest, "ddmStructureDisplayFieldValue",
+			_unicodeProperties.getProperty(
+				"ddmStructureDisplayFieldValue", StringPool.BLANK));
+
+		_ddmStructureFieldName = ParamUtil.getString(
+			_httpServletRequest, "ddmStructureFieldName",
+			_unicodeProperties.getProperty(
+				"ddmStructureFieldName", StringPool.BLANK));
+		_ddmStructureFieldValue = ParamUtil.getString(
+			_httpServletRequest, "ddmStructureFieldValue",
+			_unicodeProperties.getProperty(
+				"ddmStructureFieldValue", StringPool.BLANK));
+
+		if (Validator.isNotNull(_ddmStructureFieldName) &&
+			Validator.isNotNull(_ddmStructureFieldValue)) {
+
+			AssetRendererFactory<?> assetRendererFactory =
+				AssetRendererFactoryRegistryUtil.
+					getAssetRendererFactoryByClassNameId(classNameIds[0]);
+
+			ClassTypeReader classTypeReader =
+				assetRendererFactory.getClassTypeReader();
+
+			ClassType classType = classTypeReader.getClassType(
+				classTypeIds[0], _themeDisplay.getLocale());
+
+			ClassTypeField classTypeField = classType.getClassTypeField(
+				_ddmStructureFieldName);
+
+			_ddmStructureFieldLabel = classTypeField.getLabel();
+		}
 	}
 
 	private static final long _DEFAULT_SUBTYPE_SELECTION_ID = 0;

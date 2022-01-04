@@ -36,7 +36,7 @@ export function flushPromises() {
 export function getDummyEvent(eventId = 0, data = {}) {
 	return {
 		applicationId: 'test',
-		eventId,
+		eventId: String(eventId),
 		properties: {
 			a: 1,
 			b: 2,
@@ -67,10 +67,10 @@ export function getDummyEvents(eventsNumber = 5) {
  * @param {Analytics} analyticsInstance - Analytics instance.
  * @param {number} eventsNumber - Number of events to send.
  */
-export function sendDummyEvents(analyticsInstance, eventsNumber) {
+export async function sendDummyEvents(analyticsInstance, eventsNumber) {
 	const events = getDummyEvents(eventsNumber);
 
-	events.forEach((event) => {
+	await events.forEach((event) => {
 		analyticsInstance.send(
 			event.eventId,
 			event.applicationId,
@@ -78,10 +78,10 @@ export function sendDummyEvents(analyticsInstance, eventsNumber) {
 		);
 	});
 }
-export function trackDummyEvents(analyticsInstance, eventsNumber) {
+export async function trackDummyEvents(analyticsInstance, eventsNumber) {
 	const events = getDummyEvents(eventsNumber);
 
-	events.forEach((event) => {
+	await events.forEach((event) => {
 		analyticsInstance.track(event.eventId, event.properties);
 	});
 }

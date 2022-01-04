@@ -104,11 +104,11 @@ const Home = ({userAccount}) => {
 			</div>
 			<div
 				className={classNames('mx-auto', {
-					'col-5': withManyProjects,
+					'col-5 mx-auto project-cards-container': withManyProjects,
 					'col-8 pl-6': !withManyProjects,
 				})}
 			>
-				<div className="d-flex flex-column">
+				<div className="d-flex flex-column w-100">
 					{withManyProjects && (
 						<div className="align-items-center d-flex justify-content-between mb-4 mr-5">
 							<SearchProject

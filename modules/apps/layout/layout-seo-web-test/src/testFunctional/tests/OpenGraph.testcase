@@ -1,6 +1,7 @@
 @component-name = "portal-collaboration"
 definition {
 
+	property portal.acceptance = "true";
 	property portal.release = "true";
 	property portal.upstream = "true";
 	property testray.main.component.name = "SEO";
@@ -590,9 +591,9 @@ definition {
 	test CanViewNewPageWithMetaTags {
 		var portalURL = PropsUtil.get("portal.url");
 
-		SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+		PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
-		SitePages.addPublicPage(
+		PagesAdmin.addPublicPage(
 			customDescription = "This is a new description",
 			customTitle = "This is a new title",
 			openGraph = "true",

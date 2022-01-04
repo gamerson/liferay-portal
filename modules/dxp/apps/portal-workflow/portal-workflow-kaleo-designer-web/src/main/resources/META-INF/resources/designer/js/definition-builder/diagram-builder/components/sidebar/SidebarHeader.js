@@ -13,14 +13,19 @@ import ClayButton, {ClayButtonWithIcon} from '@clayui/button';
 import ClayModal, {useModal} from '@clayui/modal';
 import PropTypes from 'prop-types';
 import React, {useContext, useEffect, useState} from 'react';
+import {isNode} from 'react-flow-renderer';
 
+import {DefinitionBuilderContext} from '../../../DefinitionBuilderContext';
 import {DiagramBuilderContext} from '../../DiagramBuilderContext';
 import {getModalInfo} from './utils';
 
-export default function SidebarHeader({backButtonFunction = () => {}, title}) {
-	const {selectedNode, setElements, setSelectedNode} = useContext(
-		DiagramBuilderContext
-	);
+export default function SidebarHeader({
+	backButtonFunction = () => {},
+	showHeaderButtons,
+	title,
+}) {
+	const {setElements} = useContext(DefinitionBuilderContext);
+	const {selectedItem} = useContext(DiagramBuilderContext);
 	const [
 		showDeleteConfirmationModal,
 		setShowDeleteConfirmationModal,
@@ -33,21 +38,28 @@ export default function SidebarHeader({backButtonFunction = () => {}, title}) {
 		},
 	});
 
-	const deleteNode = () => {
+	const deleteItem = () => {
 		setElements((elements) =>
-			elements.filter((element) => element.id !== selectedNode.id)
+			elements.filter((element) => element.id !== selectedItem.id)
 		);
-		setSelectedNode(null);
-
 		setShowDeleteConfirmationModal(false);
+		backButtonFunction();
 	};
 
 	useEffect(() => {
-		if (selectedNode) {
-			setModalInfo(getModalInfo(selectedNode.type));
+		if (selectedItem) {
+			setModalInfo(
+				getModalInfo(
+					isNode(selectedItem) ? selectedItem.type : 'transition'
+				)
+			);
 
 			const handleKeyDown = (event) => {
-				if (event.key === 'Backspace' || event.key === 'Delete') {
+				if (
+					(event.key === 'Backspace' || event.key === 'Delete') &&
+					document.querySelectorAll('.form-control:focus').length ===
+						0
+				) {
 					setShowDeleteConfirmationModal(true);
 				}
 			};
@@ -58,11 +70,11 @@ export default function SidebarHeader({backButtonFunction = () => {}, title}) {
 				window.removeEventListener('keydown', handleKeyDown);
 			};
 		}
-	}, [selectedNode]);
+	}, [selectedItem]);
 
 	return (
 		<div className="sidebar-header">
-			{selectedNode && (
+			{showHeaderButtons && (
 				<ClayButtonWithIcon
 					className="text-secondary"
 					displayType="unstyled"
@@ -74,7 +86,7 @@ export default function SidebarHeader({backButtonFunction = () => {}, title}) {
 			<div className="spaced-items">
 				<span className="title">{title}</span>
 
-				{selectedNode && (
+				{showHeaderButtons && (
 					<ClayButtonWithIcon
 						className="text-secondary trash-button"
 						displayType="unstyled"
@@ -109,7 +121,7 @@ export default function SidebarHeader({backButtonFunction = () => {}, title}) {
 
 								<ClayButton
 									displayType="danger"
-									onClick={deleteNode}
+									onClick={deleteItem}
 								>
 									{Liferay.Language.get('delete')}
 								</ClayButton>
@@ -124,5 +136,6 @@ export default function SidebarHeader({backButtonFunction = () => {}, title}) {
 
 SidebarHeader.propTypes = {
 	backButtonFunction: PropTypes.func,
+	showHeaderButtons: PropTypes.bool,
 	title: PropTypes.string.isRequired,
 };

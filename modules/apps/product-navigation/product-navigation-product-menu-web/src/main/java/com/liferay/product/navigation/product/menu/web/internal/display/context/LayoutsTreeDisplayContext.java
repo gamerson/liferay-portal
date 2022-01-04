@@ -316,6 +316,13 @@ public class LayoutsTreeDisplayContext {
 				return _setSelPlid(getConfigureLayoutSetURL());
 			}
 		).put(
+			"isPrivateLayoutsEnabled",
+			() -> {
+				Group group = _themeDisplay.getScopeGroup();
+
+				return group.isPrivateLayoutsEnabled();
+			}
+		).put(
 			"namespace", getNamespace()
 		).put(
 			"pageTypeOptions", _getPageTypeOptionsJSONArray()
@@ -470,6 +477,23 @@ public class LayoutsTreeDisplayContext {
 			_getPageTypeSelectedOption());
 	}
 
+	public boolean isPrivateLayoutsEnabled() {
+		if (_privateLayoutsEnabled != null) {
+			return _privateLayoutsEnabled;
+		}
+
+		Group group = _themeDisplay.getScopeGroup();
+
+		if (group.isPrivateLayoutsEnabled()) {
+			_privateLayoutsEnabled = true;
+		}
+		else {
+			_privateLayoutsEnabled = false;
+		}
+
+		return _privateLayoutsEnabled;
+	}
+
 	public boolean isShowConfigureLayout() throws PortalException {
 		if (_isPageHierarchySelectedOption() &&
 			hasConfigureLayoutPermission()) {
@@ -528,6 +552,14 @@ public class LayoutsTreeDisplayContext {
 	}
 
 	private JSONArray _getPagesOptionGroupJSONArray() {
+		if (!isPrivateLayoutsEnabled()) {
+			return JSONUtil.putAll(
+				_getOptionJSONObject(
+					LanguageUtil.get(
+						_themeDisplay.getLocale(), "pages-hierarchy"),
+					ProductNavigationProductMenuWebKeys.PUBLIC_LAYOUT));
+		}
+
 		return JSONUtil.putAll(
 			_getOptionJSONObject(
 				LanguageUtil.get(_themeDisplay.getLocale(), _PUBLIC_PAGES_KEY),
@@ -573,6 +605,10 @@ public class LayoutsTreeDisplayContext {
 		if (Objects.equals(
 				_getPageTypeSelectedOption(),
 				ProductNavigationProductMenuWebKeys.PUBLIC_LAYOUT)) {
+
+			if (!isPrivateLayoutsEnabled()) {
+				return LanguageUtil.get(_themeDisplay.getLocale(), "pages");
+			}
 
 			return LanguageUtil.get(
 				_themeDisplay.getLocale(), _PUBLIC_PAGES_KEY);
@@ -828,6 +864,7 @@ public class LayoutsTreeDisplayContext {
 	private final String _namespace;
 	private Boolean _pageHierarchySelectedOption;
 	private String _pageTypeSelectedOption;
+	private Boolean _privateLayoutsEnabled;
 	private Long _selectedSiteNavigationMenuItemId;
 	private Long _siteNavigationMenuId;
 	private final SiteNavigationMenuItemLocalService

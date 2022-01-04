@@ -85,7 +85,7 @@ definition {
 		task ("Go to Segment and edit it") {
 			ACNavigation.goToSegments();
 
-			ACSegments.editSegment(searchTerm = "New Segment Test");
+			ACSegments.editSegment(segmentName = "New Segment Test");
 		}
 
 		task ("Delete the criteria") {
@@ -104,9 +104,12 @@ definition {
 	}
 
 	@description = "Delete a dynamic segment"
+	@ignore = "true"
 	@priority = "5"
 	test CanDeleteDynamicSegment {
 		property portal.upstream = "quarantine";
+
+		// AC Bug Ticket: LRAC-10060
 
 		ACUtils.createBlogsAndAddToPage();
 

@@ -119,4 +119,22 @@ const sortByEventDate = (a, b) => {
 	return 0;
 };
 
-export {clickEvent, onReady, sortByEventDate};
+const removeDups = (results, items) => {
+	const events = results.flatMap(({value}) => value.events);
+
+	return items.filter(
+		({contextHash, eventDate, eventId}) =>
+			!events.some(
+				({
+					contextHash: resultContextHash,
+					eventDate: resultEventDate,
+					eventId: resultEventId,
+				}) =>
+					contextHash === resultContextHash &&
+					eventId === resultEventId &&
+					eventDate === resultEventDate
+			)
+	);
+};
+
+export {clickEvent, onReady, removeDups, sortByEventDate};

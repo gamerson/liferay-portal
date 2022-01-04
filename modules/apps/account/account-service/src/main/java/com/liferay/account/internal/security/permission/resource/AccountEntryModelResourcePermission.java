@@ -90,9 +90,10 @@ public class AccountEntryModelResourcePermission
 		AccountEntry accountEntry = _accountEntryLocalService.fetchAccountEntry(
 			accountEntryId);
 
-		if (permissionChecker.hasOwnerPermission(
+		if ((accountEntry != null) &&
+			permissionChecker.hasOwnerPermission(
 				permissionChecker.getCompanyId(), AccountEntry.class.getName(),
-				accountEntryId, permissionChecker.getUserId(), actionId)) {
+				accountEntryId, accountEntry.getUserId(), actionId)) {
 
 			return true;
 		}

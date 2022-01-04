@@ -9,8 +9,7 @@
  * distribution rights of the Software.
  */
 
-import boostAllKeywordsMatch from '../../../src/main/resources/META-INF/resources/sxp_blueprint_admin/js/sxp_elements/boostAllKeywordsMatch';
-import pasteAnyElasticsearchQuery from '../../../src/main/resources/META-INF/resources/sxp_blueprint_admin/js/sxp_elements/pasteAnyElasticsearchQuery';
+import textMatchOverMultipleFields from '../../../src/main/resources/META-INF/resources/sxp_blueprint_admin/js/sxp_elements/textMatchOverMultipleFields';
 import {
 	DEFAULT_ADVANCED_CONFIGURATION,
 	DEFAULT_HIGHLIGHT_CONFIGURATION,
@@ -58,61 +57,58 @@ export const ENTITY_JSON = {
 
 export const INDEX_FIELDS = [
 	{
-		language_id_position: -1,
+		languageIdPosition: -1,
 		name: 'ddmTemplateKey',
 		type: 'keyword',
 	},
 	{
-		language_id_position: -1,
+		languageIdPosition: -1,
 		name: 'entryClassPK',
 		type: 'keyword',
 	},
 	{
-		language_id_position: -1,
+		languageIdPosition: -1,
 		name: 'publishDate',
 		type: 'date',
 	},
 	{
-		language_id_position: -1,
+		languageIdPosition: -1,
 		name: 'configurationModelFactoryPid',
 		type: 'keyword',
 	},
 	{
-		language_id_position: 11,
+		languageIdPosition: 11,
 		name: 'description',
 		type: 'text',
 	},
 	{
-		language_id_position: -1,
+		languageIdPosition: -1,
 		name: 'discussion',
 		type: 'keyword',
 	},
 	{
-		language_id_position: -1,
+		languageIdPosition: -1,
 		name: 'screenName',
 		type: 'keyword',
 	},
 	{
-		language_id_position: 15,
+		languageIdPosition: 15,
 		name: 'localized_title',
 		type: 'text',
 	},
 	{
-		language_id_position: -1,
+		languageIdPosition: -1,
 		name: 'catalogBasePriceList',
 		type: 'text',
 	},
 	{
-		language_id_position: -1,
+		languageIdPosition: -1,
 		name: 'path',
 		type: 'keyword',
 	},
 ];
 
-export const QUERY_SXP_ELEMENTS = [
-	boostAllKeywordsMatch,
-	pasteAnyElasticsearchQuery,
-];
+export const QUERY_SXP_ELEMENTS = [textMatchOverMultipleFields];
 
 export const INITIAL_CONFIGURATION = {
 	advancedConfiguration: DEFAULT_ADVANCED_CONFIGURATION,
@@ -193,9 +189,8 @@ export function mockSearchResults(itemsPerPage = 10) {
 	return {
 		page: 0,
 		pageSize: itemsPerPage,
-		request: {},
 		requestString: '',
-		response: {
+		responseString: JSON.stringify({
 			hits: {
 				hits,
 				total: {
@@ -203,8 +198,7 @@ export function mockSearchResults(itemsPerPage = 10) {
 				},
 			},
 			timed_out: false,
-		},
-		responseString: '',
+		}),
 		totalHits: 1000,
 	};
 }

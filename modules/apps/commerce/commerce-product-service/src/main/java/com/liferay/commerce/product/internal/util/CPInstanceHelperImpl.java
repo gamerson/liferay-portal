@@ -15,7 +15,6 @@
 package com.liferay.commerce.product.internal.util;
 
 import com.liferay.adaptive.media.image.html.AMImageHTMLTagFactory;
-import com.liferay.commerce.account.constants.CommerceAccountConstants;
 import com.liferay.commerce.account.util.CommerceAccountHelper;
 import com.liferay.commerce.media.CommerceMediaProvider;
 import com.liferay.commerce.media.CommerceMediaResolver;
@@ -97,6 +96,15 @@ public class CPInstanceHelperImpl implements CPInstanceHelper {
 
 		return _fetchCPInstanceBySKUContributors(
 			cpDefinitionId, serializedDDMFormValues);
+	}
+
+	@Override
+	public CPInstance fetchReplacementCPInstance(
+			long cProductId, String cpInstanceUuid)
+		throws PortalException {
+
+		return _cpInstanceLocalService.fetchCProductInstance(
+			cProductId, cpInstanceUuid);
 	}
 
 	@Override
@@ -272,17 +280,18 @@ public class CPInstanceHelperImpl implements CPInstanceHelper {
 
 	@Override
 	public String getCPInstanceAdaptiveMediaImageHTMLTag(
-			long companyId, long cpInstanceId)
+			long commerceAccountId, long companyId, long cpInstanceId)
 		throws Exception {
 
 		FileVersion fileVersion = getCPInstanceImageFileVersion(
-			companyId, cpInstanceId);
+			commerceAccountId, companyId, cpInstanceId);
 
 		String originalImgTag = StringBundler.concat(
 			"<img class=\"aspect-ratio-bg-cover aspect-ratio-item ",
 			"aspect-ratio-item-center-middle aspect-ratio-item-fluid ",
 			"card-type-asset-icon\" src=\"",
-			getCPInstanceThumbnailSrc(cpInstanceId), "\" />");
+			getCPInstanceThumbnailSrc(commerceAccountId, cpInstanceId),
+			"\" />");
 
 		return _amImageHTMLTagFactory.create(
 			originalImgTag, fileVersion.getFileEntry());
@@ -384,13 +393,23 @@ public class CPInstanceHelperImpl implements CPInstanceHelper {
 
 	@Override
 	public FileVersion getCPInstanceImageFileVersion(
-			long companyId, long cpInstanceId)
+			long commerceAccountId, long companyId, long cpInstanceId)
 		throws Exception {
 
 		CPInstance cpInstance = _cpInstanceLocalService.fetchCPInstance(
 			cpInstanceId);
 
 		if (cpInstance == null) {
+			return null;
+		}
+
+		CPDefinition cpDefinition = _cpDefinitionLocalService.getCPDefinition(
+			cpInstance.getCPDefinitionId());
+
+		if (!_commerceProductViewPermission.contains(
+				PermissionThreadLocal.getPermissionChecker(), commerceAccountId,
+				cpDefinition.getCPDefinitionId())) {
+
 			return null;
 		}
 
@@ -421,10 +440,6 @@ public class CPInstanceHelperImpl implements CPInstanceHelper {
 				}
 			}
 
-			CPDefinition cpDefinition =
-				_cpDefinitionLocalService.getCPDefinition(
-					cpInstance.getCPDefinitionId());
-
 			FileEntry fileEntry =
 				_commerceMediaProvider.getDefaultImageFileEntry(
 					companyId, cpDefinition.getGroupId());
@@ -441,7 +456,8 @@ public class CPInstanceHelperImpl implements CPInstanceHelper {
 	}
 
 	@Override
-	public String getCPInstanceThumbnailSrc(long cpInstanceId)
+	public String getCPInstanceThumbnailSrc(
+			long commerceAccountId, long cpInstanceId)
 		throws Exception {
 
 		CPInstance cpInstance = _cpInstanceLocalService.fetchCPInstance(
@@ -468,14 +484,14 @@ public class CPInstanceHelperImpl implements CPInstanceHelper {
 		if (cpAttachmentFileEntries.isEmpty()) {
 			CPDefinition cpDefinition = cpInstance.getCPDefinition();
 
-			return cpDefinition.getDefaultImageThumbnailSrc();
+			return cpDefinition.getDefaultImageThumbnailSrc(commerceAccountId);
 		}
 
 		CPAttachmentFileEntry cpAttachmentFileEntry =
 			cpAttachmentFileEntries.get(0);
 
 		return _commerceMediaResolver.getThumbnailURL(
-			CommerceAccountConstants.ACCOUNT_ID_GUEST,
+			commerceAccountId,
 			cpAttachmentFileEntry.getCPAttachmentFileEntryId());
 	}
 

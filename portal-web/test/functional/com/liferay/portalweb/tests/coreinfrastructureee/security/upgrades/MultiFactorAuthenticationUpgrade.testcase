@@ -15,7 +15,7 @@ definition {
 		Navigator.openURL();
 	}
 
-	@description = "LRQA-62443 Assert MFA OTP configuration at instance level"
+	@description = "LRQA-62443 Assert MFA OTP configuration at instance level. Verify MFA works at the instance level after upgrade from 7.3.10."
 	@priority = "5"
 	test ViewMFAConfigurationInInstanceLevelAfterUpgrade7310 {
 		property data.archive.type = "data-archive-mfa-instance-level";
@@ -40,11 +40,7 @@ definition {
 		}
 
 		task ("View OTP email sender") {
-			PortalSettings.gotoConfiguration(
-				baseURL = "http://www.able.com:8080",
-				configurationCategory = "Multi-Factor Authentication",
-				configurationName = "Multi-Factor Authentication and Email One-Time Password Configuration",
-				configurationScope = "Virtual Instance Scope");
+			MultiFactorAuthentication.openToConfigInInstanceSettings(baseURL = "http://www.able.com:8080");
 
 			MultiFactorAuthentication.viewOTPEmailSenderCP(
 				emailAddress = "test@www.able.com",
@@ -52,7 +48,7 @@ definition {
 		}
 	}
 
-	@description = "LRQA-62443 Assert MFA OTP configuration at system level"
+	@description = "LRQA-62443 Assert MFA OTP configuration at system level. Verify MFA works at the system level after upgrade from 7.3.10."
 	@priority = "5"
 	test ViewMFAConfigurationInSystemLevelAfterUpgrade7310 {
 		property data.archive.type = "data-archive-mfa-system-level";
@@ -77,10 +73,7 @@ definition {
 		}
 
 		task ("View OTP email sender") {
-			PortalSettings.gotoConfiguration(
-				configurationCategory = "Multi-Factor Authentication",
-				configurationName = "Multi-Factor Authentication and Email One-Time Password Configuration",
-				configurationScope = "Virtual Instance Scope");
+			MultiFactorAuthentication.openToConfigInInstanceSettings();
 
 			MultiFactorAuthentication.viewOTPEmailSenderCP(
 				emailAddress = "test@liferay.com",

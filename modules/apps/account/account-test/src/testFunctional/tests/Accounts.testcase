@@ -67,30 +67,31 @@ definition {
 		}
 	}
 
-	@description = "This test asserts that an account cannot be created if its name exceeds 100 characters and will provide an error message"
+	@description = "This test asserts that an account name will automatically truncate and will stop adding more characters as you type after it reaches the character limit of 100."
 	@priority = "5"
 	test AccountNameCannotExceed100Characters {
-		task ("Try to add account where name character count is over 100") {
-			var accountName = "Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet";
-
+		task ("When a user types an account name with more than 100 characters") {
 			Accounts.openAccountsAdmin();
 
 			LexiconEntry.gotoAdd();
 
-			PortletEntry.inputName(name = "${accountName}");
-
-			Button.clickSave();
+			PortletEntry.inputName(name = "Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet");
 		}
 
-		task ("Assert error is displayed and that account is not saved in Accounts") {
+		task ("Then only the first 100 characters are typed in. No more than 100 characters can be added") {
 			AssertTextEquals(
-				key_alertMessage = "Please enter no more than 100 characters.",
-				locator1 = "Message#ERROR_ENTER_A_VALID_VALUE",
-				value1 = "${key_alertMessage}");
+				locator1 = "TextInput#NAME",
+				value1 = "Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor s");
+
+			AssertTextNotEquals(
+				locator1 = "TextInput#NAME",
+				value1 = "Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet");
+
+			Button.clickSave();
 
 			Accounts.openAccountsAdmin();
 
-			LexiconEntry.viewNoEntry(rowEntry = "${accountName}");
+			LexiconEntry.viewNoEntry(rowEntry = "Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet");
 		}
 	}
 
@@ -167,8 +168,8 @@ definition {
 
 		LexiconEntry.gotoEntry(rowEntry = "Person Account");
 
-		Accounts.addNewUserToPersonAccount(
-			accountName = "Person Account",
+		JSONAccountEntryUser.addAccountEntryUser(
+			accountEntryName = "Person Account",
 			userEmailAddress = "userfn1@liferay.com",
 			userFirstName = "userfn1",
 			userLastName = "userln1",
@@ -469,13 +470,8 @@ definition {
 			accountEntryName = "Account Name",
 			accountEntryType = "Business");
 
-		Accounts.openAccountsAdmin();
-
-		LexiconEntry.gotoEntry(rowEntry = "Account Name");
-
-		Accounts.addNewUserToBusinessAccount(
-			accountName = "Account Name",
-			assigneeName = "userfn",
+		JSONAccountEntryUser.addAccountEntryUser(
+			accountEntryName = "Account Name",
 			userEmailAddress = "userea@liferay.com",
 			userFirstName = "userfn",
 			userLastName = "userln",
@@ -775,14 +771,9 @@ definition {
 				accountEntryName = "Business Account",
 				accountEntryType = "Business");
 
-			Accounts.openAccountsAdmin();
-
-			LexiconEntry.gotoEntry(rowEntry = "Business Account");
-
 			for (var userNum : list "1,2,3,4") {
-				Accounts.addNewUserToBusinessAccount(
-					accountName = "Business Account",
-					assigneeName = "userfn${userNum}",
+				JSONAccountEntryUser.addAccountEntryUser(
+					accountEntryName = "Business Account",
 					userEmailAddress = "userea${userNum}@liferay.com",
 					userFirstName = "userfn${userNum}",
 					userLastName = "userln${userNum}",
@@ -791,6 +782,12 @@ definition {
 		}
 
 		task ("Remove all users from Account so they can later be assigned") {
+			Accounts.openAccountsAdmin();
+
+			LexiconEntry.gotoEntry(rowEntry = "Business Account");
+
+			Accounts.gotoAssigneeTab(assigneeTab = "Users");
+
 			PortletEntry.selectAll();
 
 			ClickNoError(
@@ -1196,14 +1193,9 @@ definition {
 				accountEntryName = "Business Account",
 				accountEntryType = "Business");
 
-			Accounts.openAccountsAdmin();
-
-			LexiconEntry.gotoEntry(rowEntry = "Business Account");
-
 			for (var userNum : list "1,2,3,4,5") {
-				Accounts.addNewUserToBusinessAccount(
-					accountName = "Business Account",
-					assigneeName = "userfn${userNum}",
+				JSONAccountEntryUser.addAccountEntryUser(
+					accountEntryName = "Business Account",
 					userEmailAddress = "userea${userNum}@liferay.com",
 					userFirstName = "userfn${userNum}",
 					userLastName = "userln${userNum}",
@@ -1212,6 +1204,12 @@ definition {
 		}
 
 		task ("Open and click into the Assign Users Modal") {
+			Accounts.openAccountsAdmin();
+
+			LexiconEntry.gotoEntry(rowEntry = "Business Account");
+
+			Accounts.gotoAssigneeTab(assigneeTab = "Users");
+
 			LexiconEntry.gotoAdd();
 
 			WaitForElementPresent(
@@ -2035,29 +2033,22 @@ definition {
 				accountEntryName = "Business Account",
 				accountEntryType = "Business");
 
-			Accounts.openAccountsAdmin();
-
-			LexiconEntry.gotoEntry(rowEntry = "Business Account");
-
-			Accounts.addNewUserToBusinessAccount(
-				accountName = "Business Account",
-				assigneeName = "A-user",
+			JSONAccountEntryUser.addAccountEntryUser(
+				accountEntryName = "Business Account",
 				userEmailAddress = "Z-ea@liferay.com",
 				userFirstName = "A-user",
 				userLastName = "userln2",
 				userScreenName = "A-user");
 
-			Accounts.addNewUserToBusinessAccount(
-				accountName = "Business Account",
-				assigneeName = "B-user",
+			JSONAccountEntryUser.addAccountEntryUser(
+				accountEntryName = "Business Account",
 				userEmailAddress = "Y-ea@liferay.com",
 				userFirstName = "B-user",
 				userLastName = "userln3",
 				userScreenName = "B-user");
 
-			Accounts.addNewUserToBusinessAccount(
-				accountName = "Business Account",
-				assigneeName = "C-user",
+			JSONAccountEntryUser.addAccountEntryUser(
+				accountEntryName = "Business Account",
 				userEmailAddress = "X-ea@liferay.com",
 				userFirstName = "C-user",
 				userLastName = "userln1",
@@ -2065,6 +2056,12 @@ definition {
 		}
 
 		task ("Open and click into the Assign Users Modal") {
+			Accounts.openAccountsAdmin();
+
+			LexiconEntry.gotoEntry(rowEntry = "Business Account");
+
+			Accounts.gotoAssigneeTab(assigneeTab = "Users");
+
 			LexiconEntry.gotoAdd();
 
 			WaitForElementPresent(
@@ -2431,17 +2428,20 @@ definition {
 			accountEntryName = "Person Account",
 			accountEntryType = "Person");
 
-		Accounts.openAccountsAdmin();
-
-		LexiconEntry.gotoEntry(rowEntry = "Person Account");
-
-		Accounts.addNewUserToPersonAccount(
-			accountName = "Person Account",
-			accountUserName = "userfn1",
+		JSONAccountEntryUser.addAccountEntryUser(
+			accountEntryName = "Person Account",
 			userEmailAddress = "userfn1@liferay.com",
 			userFirstName = "userfn1",
 			userLastName = "userln1",
 			userScreenName = "usersn1");
+
+		Accounts.openAccountsAdmin();
+
+		LexiconEntry.gotoEntry(rowEntry = "Person Account");
+
+		AssertElementPresent(
+			key_userName = "userfn1",
+			locator1 = "Account#USER_TABLE_NAME");
 
 		Click(
 			key_text = "times-circle",
@@ -2610,6 +2610,8 @@ definition {
 			addressStreet2 = "High-Tech Zone",
 			addressStreet3 = "1005",
 			phoneNumber = "+86 (0)411 88120855");
+
+		LexiconEntry.viewEntryName(rowEntry = "Liferay Dalian Software Co., Ltd.");
 
 		Accounts.addAddress(
 			addressCity = "Diamond Bar",

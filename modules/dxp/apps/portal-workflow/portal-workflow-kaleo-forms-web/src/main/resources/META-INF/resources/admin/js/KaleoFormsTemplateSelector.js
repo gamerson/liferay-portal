@@ -26,7 +26,8 @@ export default function ({
 	window[`${portletNamespace}selectFormTemplate`] = (
 		classPK,
 		mode,
-		sessionParamName
+		workflowDefinition,
+		workflowTaskName
 	) => {
 		const url = createRenderURL(itemSelectorURL, {
 			classPK,
@@ -34,10 +35,21 @@ export default function ({
 		});
 
 		openSelectionModal({
+			iframeBodyCssClass: '',
 			onSelect: (selectedItem) => {
 				const data = {};
 
-				data[sessionParamName] = selectedItem.ddmtemplateid;
+				data[
+					portletNamespace + 'kaleoProcessLinkDDMStructureId'
+				] = classPK;
+				data[portletNamespace + 'kaleoProcessLinkDDMTemplateId'] =
+					selectedItem.ddmtemplateid;
+				data[
+					portletNamespace + 'kaleoProcessLinkWorkflowDefinition'
+				] = workflowDefinition;
+				data[
+					portletNamespace + 'kaleoProcessLinkWorkflowTaskName'
+				] = workflowTaskName;
 
 				fetch(saveInPortletSessionURL, {
 					body: objectToFormData(data),

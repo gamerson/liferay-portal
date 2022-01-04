@@ -18,7 +18,7 @@ definition {
 			PortalInstances.tearDownCP();
 		}
 		else {
-			Page.tearDownCP();
+			PagesAdmin.tearDownCP();
 		}
 	}
 
@@ -82,7 +82,6 @@ definition {
 
 	@description = "This is a use case for LPS-126597. User can authorize external application multiple times with remember device option. After the first authorization flow login is not needed."
 	@priority = "5"
-	@uitest
 	test ApplicationCanBeAuthorizedWithRememberDeviceEnabled {
 		property test.name.skip.portal.instance = "OAuth2#ExternalApplicationCanBeAuthorizedAndRememberDeviceShouldBeEnabled";
 
@@ -128,7 +127,7 @@ definition {
 		task ("Add an OAuth 2 application") {
 			var baseURL = PropsUtil.get("portal.url");
 
-			Navigator.openSpecificURL(url = "${baseURL}/group/control_panel/manage?p_p_id=com_liferay_oauth2_provider_web_internal_portlet_OAuth2AdminPortlet");
+			OAuth2.openOAuth2Admin();
 
 			OAuth2.addApplication(
 				applicationName = "OAuth Application",
@@ -149,9 +148,7 @@ definition {
 				password = "test",
 				userEmailAddress = "test@liferay.com");
 
-			var baseURL = PropsUtil.get("portal.url");
-
-			Navigator.openSpecificURL(url = "${baseURL}/group/control_panel/manage?p_p_id=com_liferay_oauth2_provider_web_internal_portlet_OAuth2AdminPortlet");
+			OAuth2.openOAuth2Admin(baseURL = "http://localhost:9080");
 
 			LexiconEntry.gotoEntryMenuItem(
 				menuItem = "Edit",
@@ -169,7 +166,7 @@ definition {
 				password = "test",
 				userEmailAddress = "test@liferay.com");
 
-			Navigator.openSpecificURL(url = "${baseURL}/group/control_panel/manage?p_p_id=com_liferay_oauth2_provider_web_internal_portlet_OAuth2AdminPortlet");
+			OAuth2.openOAuth2Admin();
 
 			LexiconEntry.gotoEntryMenuItem(
 				menuItem = "Edit",
@@ -298,10 +295,7 @@ definition {
 		property test.name.skip.portal.instance = "OAuth2#AuthPromptInRequestScopeShouldNotBeVisible";
 
 		task ("Go to OAuth 2 administration") {
-			ApplicationsMenu.gotoPortlet(
-				category = "Security",
-				panel = "Control Panel",
-				portlet = "OAuth 2 Administration");
+			OAuth2.openOAuth2Admin();
 
 			LexiconEntry.gotoEntryMenuItem(
 				menuItem = "Edit",
@@ -322,7 +316,7 @@ definition {
 				applicationName = "Analytics Cloud",
 				checkGlobalScope = "Everything");
 
-			FileInstall.deployFileOnServer(liferayDependencyJars = "com.liferay.oauth2.provider.sample.jar");
+			FileInstall.deployFileOnServer(jarFile = "com.liferay.oauth2.provider.sample.jar");
 		}
 
 		task ("Verify everything.read is checked in sample-app resource panel") {
@@ -350,10 +344,7 @@ definition {
 		}
 
 		task ("Save OAuth 2 scopes configuration") {
-			ApplicationsMenu.gotoPortlet(
-				category = "Security",
-				panel = "Control Panel",
-				portlet = "OAuth 2 Administration");
+			OAuth2.openOAuth2Admin();
 
 			LexiconEntry.gotoEntryMenuItem(
 				menuItem = "Edit",
@@ -389,7 +380,7 @@ definition {
 		task ("Add SAP") {
 			var baseURL = PropsUtil.get("portal.url");
 
-			Navigator.openSpecificURL(url = "${baseURL}/group/control_panel/manage?p_p_id=com_liferay_portal_security_service_access_policy_web_portlet_SAPPortlet");
+			ServiceAccessPolicy.openServiceAccessPolicyAdmin();
 
 			ServiceAccessPolicy.addServiceAccessPolicy(
 				enabled = "true",
@@ -408,7 +399,7 @@ definition {
 		}
 
 		task ("Add OAuth application") {
-			Navigator.openSpecificURL(url = "${baseURL}/group/control_panel/manage?p_p_id=com_liferay_oauth2_provider_web_internal_portlet_OAuth2AdminPortlet");
+			OAuth2.openOAuth2Admin();
 
 			OAuth2.addApplication(
 				applicationName = "OAuth Application",
@@ -482,10 +473,7 @@ definition {
 		}
 
 		task ("Verify WC deleted") {
-			ProductMenu.gotoPortlet(
-				category = "Content & Data",
-				portlet = "Web Content",
-				site = "${siteName}");
+			WebContentNavigator.openWebContentAdmin(siteURLKey = "guest");
 
 			AssertTextNotPresent(value1 = "WC Title");
 		}
@@ -497,10 +485,7 @@ definition {
 		property test.name.skip.portal.instance = "OAuth2#ConfigureOnSystemLevelShouldApplyToInstanceLevel";
 
 		task ("Delete OSGi JAX-RS Default configuration") {
-			ApplicationsMenu.gotoPortlet(
-				category = "Configuration",
-				panel = "Control Panel",
-				portlet = "System Settings");
+			SystemSettings.openSystemSettingsAdmin();
 
 			SystemSettings.gotoConfiguration(
 				configurationCategory = "OAuth 2",
@@ -515,7 +500,7 @@ definition {
 		task ("Verify resource and global scopes are present in OAuth 2 administration entry scopes") {
 			var baseURL = PropsUtil.get("portal.url");
 
-			Navigator.openSpecificURL(url = "${baseURL}/group/control_panel/manage?p_p_id=com_liferay_oauth2_provider_web_internal_portlet_OAuth2AdminPortlet");
+			OAuth2.openOAuth2Admin();
 
 			LexiconEntry.gotoEntryMenuItem(
 				menuItem = "Edit",
@@ -527,14 +512,10 @@ definition {
 		}
 
 		task ("Add able.com as a new virtual instance") {
-			Navigator.openSpecificURL(url = "${baseURL}/group/control_panel/manage?p_p_id=com_liferay_portal_instances_web_portlet_PortalInstancesPortlet");
-
-			PortalInstances.addCP(
-				mailDomain = "www.able.com",
-				virtualHost = "www.able.com",
-				webId = "www.able.com");
-
-			PortalInstances.viewCP(virtualHost = "www.able.com");
+			HeadlessPortalInstanceAPI.addPortalInstance(
+				domain = "www.able.com",
+				portalInstanceId = "www.able.com",
+				virtualHost = "www.able.com");
 		}
 
 		task ("Login at able.com and unassign power user role from the test user") {
@@ -543,9 +524,7 @@ definition {
 				userEmailAddress = "test@www.able.com",
 				virtualHostsURL = "http://www.able.com:8080");
 
-			var baseURL = PropsUtil.get("portal.url");
-
-			Navigator.openSpecificURL(url = "${baseURL}/group/control_panel/manage?p_p_id=com_liferay_users_admin_web_portlet_UsersAdminPortlet");
+			User.openUsersAdmin(baseURL = "http://www.able.com:8080");
 
 			User.unassignRegularRoleCP(
 				regularRoleName = "Power User",
@@ -553,7 +532,7 @@ definition {
 		}
 
 		task ("Verify resource scopes are not present in OAuth 2 administration entry scope") {
-			Navigator.openSpecificURL(url = "${baseURL}/group/control_panel/manage?p_p_id=com_liferay_oauth2_provider_web_internal_portlet_OAuth2AdminPortlet");
+			OAuth2.openOAuth2Admin(baseURL = "http://www.able.com:8080");
 
 			LexiconEntry.gotoEntryMenuItem(
 				menuItem = "Edit",
@@ -576,9 +555,7 @@ definition {
 		property portal.upstream = "true";
 		property test.name.skip.portal.instance = "OAuth2#EditApplicationScopesAndViewLanguageKeys";
 
-		FileInstall.deployFileOnServer(
-			filePath = "coreinfrastructure/security/oauth2",
-			liferayDependencyJars = "com.liferay.oauth2.provider.scope.sample.qa.jar");
+		FileInstall.deployFileOnServer(jarFile = "com.liferay.oauth2.provider.scope.sample.qa.jar");
 
 		task ("Delete OSGi JAX-RS Default configuration") {
 			var baseURL = PropsUtil.get("portal.url");
@@ -591,7 +568,7 @@ definition {
 		}
 
 		task ("Add a new OAuth 2 application") {
-			Navigator.openSpecificURL(url = "${baseURL}/group/control_panel/manage?p_p_id=com_liferay_oauth2_provider_web_internal_portlet_OAuth2AdminPortlet");
+			OAuth2.openOAuth2Admin();
 
 			OAuth2.addApplication(
 				applicationName = "OAuth Application",
@@ -680,7 +657,7 @@ definition {
 		task ("Add a new OAuth 2 application") {
 			var portalURL = PropsUtil.get("portal.url");
 
-			Navigator.openSpecificURL(url = "${portalURL}/group/control_panel/manage?p_p_id=com_liferay_oauth2_provider_web_internal_portlet_OAuth2AdminPortlet");
+			OAuth2.openOAuth2Admin();
 
 			var clientId = "abc123";
 			var clientSecret = "abc123";
@@ -761,7 +738,7 @@ definition {
 		task ("Add a new OAuth 2 application") {
 			var baseURL = PropsUtil.get("portal.url");
 
-			Navigator.openSpecificURL(url = "${baseURL}/group/control_panel/manage?p_p_id=com_liferay_oauth2_provider_web_internal_portlet_OAuth2AdminPortlet");
+			OAuth2.openOAuth2Admin();
 
 			OAuth2.addApplication(
 				applicationName = "OAuth Application",
@@ -856,7 +833,6 @@ definition {
 	}
 
 	@description = "This is a use case for LRQA-47381. User can authorize external applications."
-	@uitest
 	test ExternalApplicationCanBeAuthorized {
 		property custom.properties = "virtual.hosts.default.site.name=Guest";
 		property test.name.skip.portal.instance = "OAuth2#ExternalApplicationCanBeAuthorized";
@@ -883,7 +859,6 @@ definition {
 
 	@description = "This is a use case for LPS-126596. User can authorize trusted external applications."
 	@priority = "3"
-	@uitest
 	test ExternalApplicationCanBeTrustedAndAuthorized {
 		property custom.properties = "virtual.hosts.default.site.name=Guest";
 		property test.name.skip.portal.instance = "OAuth2#ExternalApplicationCanBeTrustedAndAuthorized";
@@ -921,7 +896,7 @@ definition {
 		task ("Add a new external application") {
 			var portalURL = PropsUtil.get("portal.url");
 
-			Navigator.openSpecificURL(url = "${portalURL}/group/control_panel/manage?p_p_id=com_liferay_oauth2_provider_web_internal_portlet_OAuth2AdminPortlet");
+			OAuth2.openOAuth2Admin();
 
 			OAuth2.addApplication(
 				applicationName = "OAuth Application",
@@ -979,7 +954,7 @@ definition {
 		}
 
 		task ("Post client credential token via curl") {
-			Navigator.openSpecificURL(url = "${portalURL}/group/control_panel/manage?p_p_id=com_liferay_oauth2_provider_web_internal_portlet_OAuth2AdminPortlet");
+			OAuth2.openOAuth2Admin();
 
 			LexiconEntry.gotoEntryMenuItem(
 				menuItem = "Edit",
@@ -1011,7 +986,7 @@ definition {
 		task ("Add SAP") {
 			var baseURL = PropsUtil.get("portal.url");
 
-			Navigator.openSpecificURL(url = "${baseURL}/group/control_panel/manage?p_p_id=com_liferay_portal_security_service_access_policy_web_portlet_SAPPortlet");
+			ServiceAccessPolicy.openServiceAccessPolicyAdmin();
 
 			ServiceAccessPolicy.addServiceAccessPolicy(
 				enabled = "true",
@@ -1022,7 +997,7 @@ definition {
 		}
 
 		task ("Add a new OAuth 2 application") {
-			Navigator.openSpecificURL(url = "${baseURL}/group/control_panel/manage?p_p_id=com_liferay_oauth2_provider_web_internal_portlet_OAuth2AdminPortlet");
+			OAuth2.openOAuth2Admin();
 
 			OAuth2.addApplication(
 				applicationName = "OAuth Application",
@@ -1057,7 +1032,7 @@ definition {
 		}
 
 		task ("Edit SAP successfully") {
-			Navigator.openSpecificURL(url = "${baseURL}/group/control_panel/manage?p_p_id=com_liferay_portal_security_service_access_policy_web_portlet_SAPPortlet");
+			ServiceAccessPolicy.openServiceAccessPolicyAdmin();
 
 			ServiceAccessPolicy.editServiceAccessPolicy(
 				enabled = "false",
@@ -1071,7 +1046,7 @@ definition {
 		}
 
 		task ("View OAuth 2 application scope") {
-			Navigator.openSpecificURL(url = "${baseURL}/group/control_panel/manage?p_p_id=com_liferay_oauth2_provider_web_internal_portlet_OAuth2AdminPortlet");
+			OAuth2.openOAuth2Admin();
 
 			OAuth2.viewScopes(
 				applicationName = "OAuth Application",
@@ -1080,7 +1055,7 @@ definition {
 		}
 
 		task ("Edit SAP") {
-			Navigator.openSpecificURL(url = "${baseURL}/group/control_panel/manage?p_p_id=com_liferay_portal_security_service_access_policy_web_portlet_SAPPortlet");
+			ServiceAccessPolicy.openServiceAccessPolicyAdmin();
 
 			ServiceAccessPolicy.editServiceAccessPolicy(
 				enabled = "true",
@@ -1102,7 +1077,7 @@ definition {
 		}
 
 		task ("View and edit the new OAuth 2 application scopes") {
-			Navigator.openSpecificURL(url = "${baseURL}/group/control_panel/manage?p_p_id=com_liferay_oauth2_provider_web_internal_portlet_OAuth2AdminPortlet");
+			OAuth2.openOAuth2Admin();
 
 			OAuth2.viewScopes(
 				applicationName = "OAuth Application",
@@ -1144,7 +1119,7 @@ definition {
 		}
 
 		task ("Go to the scopes of an OAuth 2 application entry navbar") {
-			Navigator.openSpecificURL(url = "${baseURL}/group/control_panel/manage?p_p_id=com_liferay_oauth2_provider_web_internal_portlet_OAuth2AdminPortlet");
+			OAuth2.openOAuth2Admin();
 
 			LexiconEntry.gotoEntryMenuItem(
 				menuItem = "Edit",
@@ -1164,7 +1139,6 @@ definition {
 
 	@description = "This is a use case for LRQA-57134. Refresh token can expire and can be renewed."
 	@priority = "4"
-	@uitest
 	test RefreshTokenTimeCanBeSetExpiredAndRenewed {
 		property custom.properties = "virtual.hosts.default.site.name=Guest";
 		property osgi.module.configuration.file.names = "com.liferay.oauth2.provider.rest.internal.spi.bearer.token.provider.configuration.DefaultBearerTokenProviderConfiguration.config";
@@ -1201,7 +1175,6 @@ definition {
 
 	@description = "This is a use case for LPS-129395. Remember device option should be visible in OAuth 2 admin page if it was set in the application settings."
 	@priority = "5"
-	@uitest
 	test RememberDeviceExternalPropertyShouldBeVisible {
 		property test.name.skip.portal.instance = "OAuth2#RememberDeviceExternalPropertyShouldBeVisible";
 
@@ -1209,7 +1182,7 @@ definition {
 			var portalURL = PropsUtil.get("portal.url");
 			var clientId = "abc123";
 
-			Navigator.openSpecificURL(url = "${portalURL}/group/control_panel/manage?p_p_id=com_liferay_oauth2_provider_web_internal_portlet_OAuth2AdminPortlet");
+			OAuth2.openOAuth2Admin();
 
 			OAuth2.addApplication(
 				applicationName = "Remember Device Application",
@@ -1341,12 +1314,12 @@ definition {
 	test ScopeBundlePrefixesCanBeUpdated {
 		property test.name.skip.portal.instance = "OAuth2#ScopeBundlePrefixesCanBeUpdated";
 
-		FileInstall.deployFileOnServer(liferayDependencyJars = "com.liferay.oauth2.provider.scope.sample.qa.jar");
+		FileInstall.deployFileOnServer(jarFile = "com.liferay.oauth2.provider.scope.sample.qa.jar");
 
 		task ("Add OAuth 2 Application") {
 			var portalURL = PropsUtil.get("portal.url");
 
-			Navigator.openSpecificURL(url = "${portalURL}/group/control_panel/manage?p_p_id=com_liferay_oauth2_provider_web_internal_portlet_OAuth2AdminPortlet");
+			OAuth2.openOAuth2Admin();
 
 			OAuth2.addApplication(
 				applicationName = "OAuth Application",
@@ -1363,10 +1336,7 @@ definition {
 		}
 
 		task ("Delete OSGi JAX-RS Default configuration") {
-			ApplicationsMenu.gotoPortlet(
-				category = "Configuration",
-				panel = "Control Panel",
-				portlet = "System Settings");
+			SystemSettings.openSystemSettingsAdmin();
 
 			SystemSettings.gotoConfiguration(
 				configurationCategory = "OAuth 2",
@@ -1379,10 +1349,7 @@ definition {
 		}
 
 		task ("View scope aliases without prefixes") {
-			ApplicationsMenu.gotoPortlet(
-				category = "Security",
-				panel = "Control Panel",
-				portlet = "OAuth 2 Administration");
+			OAuth2.openOAuth2Admin();
 
 			OAuth2.viewScopeAliases(
 				applicationName = "OAuth Application",
@@ -1399,10 +1366,7 @@ definition {
 		}
 
 		task ("Verify that the added prefix is visible in scope aliases") {
-			ApplicationsMenu.gotoPortlet(
-				category = "Security",
-				panel = "Control Panel",
-				portlet = "OAuth 2 Administration");
+			OAuth2.openOAuth2Admin();
 
 			OAuth2.viewScopeAliases(
 				applicationName = "OAuth Application",
@@ -1417,7 +1381,7 @@ definition {
 		property osgi.module.configurations = "mapping=[&quot;example-scope-1,example-scope-2\=everything.read,everything.write&quot;]${line.separator}osgi.jaxrs.name=&quot;liferay-oauth2-scope-sample-qa-app&quot;${line.separator}passthrough=&quot;false&quot;";
 		property test.name.skip.portal.instance = "OAuth2#ScopeMappingsCanBeUpdated";
 
-		FileInstall.deployFileOnServer(liferayDependencyJars = "com.liferay.oauth2.provider.scope.sample.qa.jar");
+		FileInstall.deployFileOnServer(jarFile = "com.liferay.oauth2.provider.scope.sample.qa.jar");
 
 		task ("Delete OSGi JAX-RS Default configuration") {
 			var baseURL = PropsUtil.get("portal.url");
@@ -1430,7 +1394,7 @@ definition {
 		}
 
 		task ("View installed QA app in scope mapping") {
-			Navigator.openSpecificURL(url = "${baseURL}/group/control_panel/manage?p_p_id=com_liferay_oauth2_provider_web_internal_portlet_OAuth2AdminPortlet");
+			OAuth2.openOAuth2Admin();
 
 			OAuth2.viewScopeMappings(
 				applicationName = "Analytics Cloud",
@@ -1449,16 +1413,10 @@ definition {
 		property test.name.skip.portal.instance = "OAuth2#ScopesShouldBeDisplayedAsListOnInstanceLevel";
 
 		task ("Add CP able.com") {
-			var baseURL = PropsUtil.get("portal.url");
-
-			Navigator.openSpecificURL(url = "${baseURL}/group/control_panel/manage?p_p_id=com_liferay_portal_instances_web_portlet_PortalInstancesPortlet");
-
-			PortalInstances.addCP(
-				mailDomain = "www.able.com",
-				virtualHost = "www.able.com",
-				webId = "www.able.com");
-
-			PortalInstances.viewCP(virtualHost = "www.able.com");
+			HeadlessPortalInstanceAPI.addPortalInstance(
+				domain = "www.able.com",
+				portalInstanceId = "www.able.com",
+				virtualHost = "www.able.com");
 		}
 
 		task ("Login at able.com and unassign power user role from the test user") {
@@ -1467,7 +1425,7 @@ definition {
 				userEmailAddress = "test@www.able.com",
 				virtualHostsURL = "http://www.able.com:8080");
 
-			Navigator.openSpecificURL(url = "${baseURL}/group/control_panel/manage?p_p_id=com_liferay_users_admin_web_portlet_UsersAdminPortlet");
+			User.openUsersAdmin(baseURL = "http://www.able.com:8080");
 
 			User.unassignRegularRoleCP(
 				regularRoleName = "Power User",
@@ -1475,12 +1433,7 @@ definition {
 		}
 
 		task ("Verify user is not able to view Analytics in OAuth 2 administration scopes") {
-			Navigator.openSpecificURL(url = "http://www.able.com:8080");
-
-			ApplicationsMenu.gotoPortlet(
-				category = "Security",
-				panel = "Control Panel",
-				portlet = "OAuth 2 Administration");
+			OAuth2.openOAuth2Admin(baseURL = "http://www.able.com:8080");
 
 			LexiconEntry.gotoEntryMenuItem(
 				menuItem = "Edit",
@@ -1500,7 +1453,7 @@ definition {
 		task ("Add a trusted OAuth 2 application") {
 			var portalURL = PropsUtil.get("portal.url");
 
-			Navigator.openSpecificURL(url = "${portalURL}/group/control_panel/manage?p_p_id=com_liferay_oauth2_provider_web_internal_portlet_OAuth2AdminPortlet");
+			OAuth2.openOAuth2Admin();
 
 			var clientId = "abc123";
 

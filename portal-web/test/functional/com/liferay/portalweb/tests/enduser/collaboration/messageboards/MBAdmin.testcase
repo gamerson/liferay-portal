@@ -96,13 +96,74 @@ definition {
 	}
 
 	@description = "This is a test for LPS-136921. It checks that the ban length and expiration of a user can be changed."
-	@ignore = "true"
 	@priority = "3"
 	test CanChangeBanLengthAndExpiration {
-		property portal.acceptance = "false";
+		property custom.properties = "jsonws.web.service.paths.excludes=${line.separator}message.boards.expire.ban.interval=0${line.separator}company.default.time.zone=America/Los_Angeles";
 
-		// TODO LPS-136921 CanChangeBanLengthAndExpiration pending implementation
+		MessageboardsThread.updateCheckInterval(fieldValue = "1");
 
+		JSONLayout.addPublicLayout(
+			groupName = "Guest",
+			layoutName = "Message Boards Page");
+
+		JSONLayout.addWidgetToPublicLayout(
+			column = "1",
+			groupName = "Guest",
+			layoutName = "Message Boards Page",
+			widgetName = "Message Boards");
+
+		JSONUser.addUser(
+			userEmailAddress = "userea1@liferay.com",
+			userFirstName = "userfn1",
+			userLastName = "userln1",
+			userScreenName = "usersn1");
+
+		JSONUser.setFirstPassword(
+			agreeToTermsAndAnswerReminderQuery = "true",
+			requireReset = "false",
+			userEmailAddress = "userea1@liferay.com");
+
+		PermissionsInline.gotoMessageBoardsPG(pageName = "Message Boards Page");
+
+		for (var permissionDefinitionKey : list "INLINE_PERMISSIONS_REPLY_TO_MESSAGE_CHECKBOX,INLINE_PERMISSIONS_VIEW_CHECKBOX") {
+			Role.definePermissionPG(
+				permissionDefinitionKey = "${permissionDefinitionKey}",
+				roleTitle = "User");
+		}
+
+		JSONMBMessage.addMessage(
+			groupName = "Guest",
+			threadBody = "MB Thread Message Body",
+			threadSubject = "MB Thread Message Subject");
+
+		User.logoutAndLoginPG(
+			userLoginEmailAddress = "userea1@liferay.com",
+			userLoginFullName = "userfn1 userln1");
+
+		Navigator.gotoPage(pageName = "Message Boards Page");
+
+		MessageboardsThread.replyPG(
+			threadReplyBody = "MB Thread1 Reply Body",
+			threadSubject = "MB Thread Message Subject");
+
+		User.logoutAndLoginPG(
+			userLoginEmailAddress = "test@liferay.com",
+			userLoginFullName = "Test Test");
+
+		MessageboardsThread.openToThread(
+			groupName = "Guest",
+			layoutName = "message-boards-page",
+			siteURLKey = "guest",
+			threadSubject = "MB Thread Message Subject");
+
+		MessageboardsThread.banUser(
+			threadReplyBody = "MB Thread1 Reply Body",
+			userName = "userfn1 userln1");
+
+		MessageboardsPortlet.viewBannedUserCP(
+			disableAutoExpire = "true",
+			siteURLKey = "Guest",
+			userScreenName = "userfn1 userln1");
 	}
 
 	@priority = "4"
@@ -178,13 +239,71 @@ definition {
 	}
 
 	@description = "This is a test for LPS-136923. It checks that a user can be unbanned."
-	@ignore = "true"
 	@priority = "3"
 	test CanUnbanUser {
-		property portal.acceptance = "false";
+		JSONLayout.addPublicLayout(
+			groupName = "Guest",
+			layoutName = "Message Boards Page");
 
-		// TODO LPS-136923 CanUnbanUser pending implementation
+		JSONLayout.addWidgetToPublicLayout(
+			column = "1",
+			groupName = "Guest",
+			layoutName = "Message Boards Page",
+			widgetName = "Message Boards");
 
+		JSONUser.addUser(
+			userEmailAddress = "userea@liferay.com",
+			userFirstName = "userfn",
+			userLastName = "userln",
+			userScreenName = "usersn");
+
+		JSONUser.setFirstPassword(
+			agreeToTermsAndAnswerReminderQuery = "true",
+			requireReset = "false",
+			userEmailAddress = "userea@liferay.com");
+
+		PermissionsInline.gotoMessageBoardsPG(pageName = "Message Boards Page");
+
+		for (var permissionDefinitionKey : list "INLINE_PERMISSIONS_REPLY_TO_MESSAGE_CHECKBOX,INLINE_PERMISSIONS_VIEW_CHECKBOX") {
+			Role.definePermissionPG(
+				permissionDefinitionKey = "${permissionDefinitionKey}",
+				roleTitle = "User");
+		}
+
+		JSONMBMessage.addMessage(
+			groupName = "Guest",
+			threadBody = "MB Thread Message Body",
+			threadSubject = "MB Thread Message Subject");
+
+		User.logoutAndLoginPG(
+			userLoginEmailAddress = "userea@liferay.com",
+			userLoginFullName = "userfn userln");
+
+		Navigator.gotoPage(pageName = "Message Boards Page");
+
+		MessageboardsThread.replyPG(
+			threadReplyBody = "MB Thread Reply Body",
+			threadSubject = "MB Thread Message Subject");
+
+		User.logoutAndLoginPG(
+			userLoginEmailAddress = "test@liferay.com",
+			userLoginFullName = "Test Test");
+
+		MessageboardsThread.openToThread(
+			groupName = "Guest",
+			layoutName = "message-boards-page",
+			siteURLKey = "guest",
+			threadSubject = "MB Thread Message Subject");
+
+		MessageboardsThread.banUser(
+			threadReplyBody = "MB Thread Reply Body",
+			userName = "userfn userln");
+
+		MessageboardsThread.unbanUser(
+			siteURLKey = "guest",
+			userScreenName = "userfn userln");
+
+		MessageboardsThread.viewNoBannedUsers();
 	}
 
 }

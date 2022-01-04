@@ -4,7 +4,8 @@ import {NumberControlledInput} from '../../../../../common/components/connectors
 import {PercentageControlledInput} from '../../../../../common/components/connectors/Controlled/Input/WithMask/Percentage';
 import {LegalEntityControlledSelect} from '../../../../../common/components/connectors/Controlled/Select/LegalEntity';
 import {ControlledSwitch} from '../../../../../common/components/connectors/Controlled/Switch';
-import {CardFormActionsWithSave} from '../../../../../common/components/fragments/Card/FormActionsWithSave';
+import {CardFormActions} from '../../../../../common/components/fragments/Card/FormActions';
+import FormCard from '../../../../../common/components/fragments/Card/FormCard';
 import {TIP_EVENT} from '../../../../../common/utils/events';
 import {PERCENTAGE_REGEX_MAX_100} from '../../../../../common/utils/patterns';
 import useFormActions from '../../../hooks/useFormActions';
@@ -20,12 +21,22 @@ import {AVAILABLE_STEPS} from '../../../utils/constants';
 const setFormPath = (value) => `business.${value}`;
 
 export function FormBusiness({form}) {
+	const {selectedStep} = useStepWizard();
 	const {
 		control,
 		formState: {isValid},
 		getValues,
 		setValue,
 	} = useFormContext();
+
+	const {onNext, onPrevious, onSave} = useFormActions(
+		form,
+		AVAILABLE_STEPS.BASICS_BUSINESS_INFORMATION,
+		AVAILABLE_STEPS.EMPLOYEES
+	);
+
+	const {isSelected, updateState} = useTriggerContext();
+
 	const forceValidation = () => {
 		setValue(
 			setFormPath('hasAutoPolicy'),
@@ -39,17 +50,8 @@ export function FormBusiness({form}) {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
-	const {selectedStep} = useStepWizard();
-	const {onNext, onPrevious, onSave} = useFormActions(
-		form,
-		AVAILABLE_STEPS.BASICS_PRODUCT_QUOTE,
-		AVAILABLE_STEPS.EMPLOYEES
-	);
-
-	const {isSelected, updateState} = useTriggerContext();
-
 	return (
-		<div className="card">
+		<FormCard>
 			<div className="card-content">
 				<NumberControlledInput
 					control={control}
@@ -92,6 +94,7 @@ export function FormBusiness({form}) {
 
 				<LegalEntityControlledSelect
 					control={control}
+					inputProps={{className: 'mb-5'}}
 					label="Legal Entity"
 					name={setFormPath('legalEntity')}
 					rules={{
@@ -154,12 +157,12 @@ export function FormBusiness({form}) {
 				)}
 			</div>
 
-			<CardFormActionsWithSave
+			<CardFormActions
 				isValid={isValid}
 				onNext={onNext}
 				onPrevious={onPrevious}
 				onSave={onSave}
 			/>
-		</div>
+		</FormCard>
 	);
 }

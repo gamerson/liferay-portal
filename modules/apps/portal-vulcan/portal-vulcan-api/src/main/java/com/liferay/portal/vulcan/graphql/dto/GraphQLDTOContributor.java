@@ -22,6 +22,7 @@ import com.liferay.portal.vulcan.dto.converter.DTOConverterContext;
 import com.liferay.portal.vulcan.pagination.Page;
 import com.liferay.portal.vulcan.pagination.Pagination;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.osgi.annotation.versioning.ProviderType;
@@ -52,6 +53,20 @@ public interface GraphQLDTOContributor<D, R> {
 	public List<GraphQLDTOProperty> getGraphQLDTOProperties();
 
 	public String getIdName();
+
+	public default List<GraphQLDTOProperty>
+		getRelationshipGraphQLDTOProperties() {
+
+		return Collections.emptyList();
+	}
+
+	public default <T> T getRelationshipValue(
+			DTOConverterContext dtoConverterContext, long id,
+			Class<T> relationshipClass, String relationshipName)
+		throws Exception {
+
+		return null;
+	}
 
 	public String getResourceName();
 

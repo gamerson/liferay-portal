@@ -1,5 +1,16 @@
 components:
     schemas:
+        ListEntry:
+            properties:
+                key:
+                    type: string
+                name:
+                    type: string
+                name_i18n:
+                    additionalProperties:
+                        type: string
+                    readOnly: true
+                    type: object
         ObjectEntry:
             properties:
                 actions:

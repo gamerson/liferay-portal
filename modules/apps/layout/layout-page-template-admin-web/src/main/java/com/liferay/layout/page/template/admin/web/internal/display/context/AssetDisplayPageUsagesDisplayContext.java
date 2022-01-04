@@ -26,20 +26,20 @@ import com.liferay.info.item.ClassPKInfoItemIdentifier;
 import com.liferay.info.item.InfoItemServiceTracker;
 import com.liferay.info.item.provider.InfoItemFieldValuesProvider;
 import com.liferay.info.item.provider.InfoItemObjectProvider;
+import com.liferay.layout.page.template.admin.constants.LayoutPageTemplateAdminPortletKeys;
 import com.liferay.layout.page.template.admin.web.internal.util.comparator.AssetDisplayPageEntryModifiedDateComparator;
 import com.liferay.petra.portlet.url.builder.PortletURLBuilder;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.search.EmptyOnClickRowChecker;
 import com.liferay.portal.kernel.dao.search.SearchContainer;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.portlet.SearchOrderByUtil;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.util.LocaleUtil;
-import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.Validator;
 
-import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -103,8 +103,10 @@ public class AssetDisplayPageUsagesDisplayContext {
 			return _orderByCol;
 		}
 
-		_orderByCol = ParamUtil.getString(
-			_renderRequest, "orderByCol", "modified-date");
+		_orderByCol = SearchOrderByUtil.getOrderByCol(
+			_httpServletRequest,
+			LayoutPageTemplateAdminPortletKeys.LAYOUT_PAGE_TEMPLATES,
+			"asset-display-usage-order-by-col", "modified-date");
 
 		return _orderByCol;
 	}
@@ -114,8 +116,10 @@ public class AssetDisplayPageUsagesDisplayContext {
 			return _orderByType;
 		}
 
-		_orderByType = ParamUtil.getString(
-			_renderRequest, "orderByType", "asc");
+		_orderByType = SearchOrderByUtil.getOrderByType(
+			_httpServletRequest,
+			LayoutPageTemplateAdminPortletKeys.LAYOUT_PAGE_TEMPLATES,
+			"asset-display-usage-order-by-type", "asc");
 
 		return _orderByType;
 	}
@@ -152,39 +156,30 @@ public class AssetDisplayPageUsagesDisplayContext {
 				_renderRequest, getPortletURL(), null,
 				"there-are-no-display-page-template-usages");
 
+		searchContainer.setOrderByCol(getOrderByCol());
+
 		boolean orderByAsc = false;
 
-		String orderByType = getOrderByType();
-
-		if (orderByType.equals("asc")) {
+		if (Objects.equals(getOrderByType(), "asc")) {
 			orderByAsc = true;
 		}
 
-		OrderByComparator<AssetDisplayPageEntry> orderByComparator =
-			new AssetDisplayPageEntryModifiedDateComparator(orderByAsc);
+		searchContainer.setOrderByComparator(
+			new AssetDisplayPageEntryModifiedDateComparator(orderByAsc));
 
-		searchContainer.setOrderByCol(getOrderByCol());
-		searchContainer.setOrderByComparator(orderByComparator);
 		searchContainer.setOrderByType(getOrderByType());
-
-		List<AssetDisplayPageEntry> assetDisplayPageEntries =
+		searchContainer.setResults(
 			AssetDisplayPageEntryServiceUtil.getAssetDisplayPageEntries(
 				getClassNameId(), getClassTypeId(),
 				getLayoutPageTemplateEntryId(), isDefaultTemplate(),
 				searchContainer.getStart(), searchContainer.getEnd(),
-				orderByComparator);
-
-		searchContainer.setResults(assetDisplayPageEntries);
-
+				searchContainer.getOrderByComparator()));
 		searchContainer.setRowChecker(
 			new EmptyOnClickRowChecker(_renderResponse));
-
-		int count =
+		searchContainer.setTotal(
 			AssetDisplayPageEntryServiceUtil.getAssetDisplayPageEntriesCount(
 				getClassNameId(), getClassTypeId(),
-				getLayoutPageTemplateEntryId(), isDefaultTemplate());
-
-		searchContainer.setTotal(count);
+				getLayoutPageTemplateEntryId(), isDefaultTemplate()));
 
 		_searchContainer = searchContainer;
 

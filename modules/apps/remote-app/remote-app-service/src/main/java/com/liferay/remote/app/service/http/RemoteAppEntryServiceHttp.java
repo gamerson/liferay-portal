@@ -53,7 +53,8 @@ public class RemoteAppEntryServiceHttp {
 
 	public static com.liferay.remote.app.model.RemoteAppEntry
 			addCustomElementRemoteAppEntry(
-				HttpPrincipal httpPrincipal, String customElementCSSURLs,
+				HttpPrincipal httpPrincipal, String externalReferenceCode,
+				String customElementCSSURLs,
 				String customElementHTMLElementName, String customElementURLs,
 				String description, String friendlyURLMapping,
 				boolean instanceable,
@@ -69,10 +70,10 @@ public class RemoteAppEntryServiceHttp {
 				_addCustomElementRemoteAppEntryParameterTypes0);
 
 			MethodHandler methodHandler = new MethodHandler(
-				methodKey, customElementCSSURLs, customElementHTMLElementName,
-				customElementURLs, description, friendlyURLMapping,
-				instanceable, nameMap, portletCategoryName, properties,
-				sourceCodeURL);
+				methodKey, externalReferenceCode, customElementCSSURLs,
+				customElementHTMLElementName, customElementURLs, description,
+				friendlyURLMapping, instanceable, nameMap, portletCategoryName,
+				properties, sourceCodeURL);
 
 			Object returnObj = null;
 
@@ -335,8 +336,8 @@ public class RemoteAppEntryServiceHttp {
 	private static final Class<?>[]
 		_addCustomElementRemoteAppEntryParameterTypes0 = new Class[] {
 			String.class, String.class, String.class, String.class,
-			String.class, boolean.class, java.util.Map.class, String.class,
-			String.class, String.class
+			String.class, String.class, boolean.class, java.util.Map.class,
+			String.class, String.class, String.class
 		};
 	private static final Class<?>[] _addIFrameRemoteAppEntryParameterTypes1 =
 		new Class[] {

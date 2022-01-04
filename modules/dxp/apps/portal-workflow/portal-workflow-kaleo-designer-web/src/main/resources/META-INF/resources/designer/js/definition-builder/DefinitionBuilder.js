@@ -14,16 +14,38 @@ import React, {useState} from 'react';
 import '../../css/definition-builder/main.scss';
 import {DefinitionBuilderContextProvider} from './DefinitionBuilderContext';
 import DiagramBuilder from './diagram-builder/DiagramBuilder';
+import {defaultNodes} from './diagram-builder/components/nodes/utils';
 import UpperToolbar from './shared/components/toolbar/UpperToolbar';
+import SourceBuilder from './source-builder/SourceBuilder';
 
 export default function (props) {
+	const [currentEditor, setCurrentEditor] = useState(null);
+	const [deserialize, setDeserialize] = useState(false);
+	const [elements, setElements] = useState(defaultNodes);
 	const [selectedLanguageId, setSelectedLanguageId] = useState('');
+	const [showInvalidContentError, setShowInvalidContentError] = useState(
+		false
+	);
+	const [sourceView, setSourceView] = useState(false);
+	const [definitionTitle, setDefinitionTitle] = useState(props.title);
 	const defaultLanguageId = themeDisplay.getLanguageId();
 
 	const contextProps = {
+		currentEditor,
 		defaultLanguageId,
+		definitionTitle,
+		deserialize,
+		elements,
 		selectedLanguageId,
+		setCurrentEditor,
+		setDefinitionTitle,
+		setDeserialize,
+		setElements,
 		setSelectedLanguageId,
+		setShowInvalidContentError,
+		setSourceView,
+		showInvalidContentError,
+		sourceView,
 	};
 
 	return (
@@ -31,7 +53,11 @@ export default function (props) {
 			<div className="definition-builder-app">
 				<UpperToolbar {...props} />
 
-				<DiagramBuilder version={props.version} />
+				{sourceView ? (
+					<SourceBuilder version={props.version} />
+				) : (
+					<DiagramBuilder version={props.version} />
+				)}
 			</div>
 		</DefinitionBuilderContextProvider>
 	);

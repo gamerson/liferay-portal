@@ -15,12 +15,15 @@
 package com.liferay.account.admin.web.internal.frontend.taglib.servlet.taglib;
 
 import com.liferay.account.admin.web.internal.constants.AccountScreenNavigationEntryConstants;
+import com.liferay.account.admin.web.internal.security.permission.resource.AccountRolePermission;
+import com.liferay.account.constants.AccountActionKeys;
 import com.liferay.account.model.AccountRole;
 import com.liferay.frontend.taglib.servlet.taglib.ScreenNavigationCategory;
 import com.liferay.frontend.taglib.servlet.taglib.ScreenNavigationEntry;
 import com.liferay.frontend.taglib.servlet.taglib.util.JSPRenderer;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.security.permission.PermissionCheckerFactoryUtil;
 
 import java.io.IOException;
 
@@ -72,7 +75,9 @@ public class AccountRoleAssigneesScreenNavigationCategory
 			return false;
 		}
 
-		return true;
+		return AccountRolePermission.contains(
+			PermissionCheckerFactoryUtil.create(user),
+			accountRole.getAccountRoleId(), AccountActionKeys.ASSIGN_USERS);
 	}
 
 	@Override

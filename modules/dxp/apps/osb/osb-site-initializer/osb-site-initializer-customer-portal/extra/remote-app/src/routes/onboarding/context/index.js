@@ -1,8 +1,12 @@
 import {useQuery} from '@apollo/client';
-import {createContext, useEffect, useReducer} from 'react';
+import {createContext, useContext, useEffect, useReducer} from 'react';
+import client from '../../../apolloClient';
 import FormProvider from '../../../common/providers/FormProvider';
 import {LiferayTheme} from '../../../common/services/liferay';
-import {getUserAccount} from '../../../common/services/liferay/graphql/queries';
+import {
+	getKoroneikiAccounts,
+	getUserAccount,
+} from '../../../common/services/liferay/graphql/queries';
 import {
 	PARAMS_KEYS,
 	SearchParams,
@@ -18,13 +22,14 @@ import reducer, {actionTypes} from './reducer';
 const initialForm = {
 	dxp: {
 		admins: [getInitialDxpAdmin()],
-		dataCenterRegion: '',
+		dataCenterRegion: {},
+		disasterDataCenterRegion: {},
 		projectId: '',
 	},
 	invites: [
-		getInitialInvite(roles.creator.id),
-		getInitialInvite(roles.watcher.id),
-		getInitialInvite(roles.watcher.id),
+		getInitialInvite(),
+		getInitialInvite(roles.MEMBER.key),
+		getInitialInvite(roles.MEMBER.key),
 	],
 };
 
@@ -33,11 +38,8 @@ const AppContext = createContext();
 const AppContextProvider = ({assetsPath, children}) => {
 	const [state, dispatch] = useReducer(reducer, {
 		assetsPath,
-		dxp: {
-			organization: 'SuperBank',
-			version: '7.3',
-		},
-		project: {},
+		koroneikiAccount: {},
+		project: undefined,
 		step: steps.welcome,
 		userAccount: undefined,
 	});
@@ -46,29 +48,50 @@ const AppContextProvider = ({assetsPath, children}) => {
 		variables: {id: LiferayTheme.getUserId()},
 	});
 
-	const userAccount = data?.userAccount;
-
-	useEffect(() => {
-		const projectExternalReferenceCode = SearchParams.get(
-			PARAMS_KEYS.PROJECT_APPLICATION_EXTERNAL_REFERENCE_CODE
-		);
-
-		dispatch({
-			payload: {
-				accountKey: projectExternalReferenceCode,
+	const getProject = async (projectExternalReferenceCode, accountBrief) => {
+		const {data: projects} = await client.query({
+			query: getKoroneikiAccounts,
+			variables: {
+				filter: `accountKey eq '${projectExternalReferenceCode}'`,
 			},
-			type: actionTypes.UPDATE_PROJECT,
 		});
-	}, []);
 
-	useEffect(() => {
-		if (userAccount) {
+		if (projects) {
 			dispatch({
-				payload: userAccount,
-				type: actionTypes.UPDATE_USER_ACCOUNT,
+				payload: {
+					...projects.c.koroneikiAccounts.items[0],
+					id: accountBrief.id,
+					name: accountBrief.name,
+				},
+				type: actionTypes.UPDATE_PROJECT,
 			});
 		}
-	}, [userAccount]);
+	};
+
+	useEffect(() => {
+		if (data) {
+			dispatch({
+				payload: data.userAccount,
+				type: actionTypes.UPDATE_USER_ACCOUNT,
+			});
+
+			const projectExternalReferenceCode = SearchParams.get(
+				PARAMS_KEYS.PROJECT_APPLICATION_EXTERNAL_REFERENCE_CODE
+			);
+
+			if (projectExternalReferenceCode) {
+				const accountBrief = data.userAccount.accountBriefs.find(
+					(accountBrief) =>
+						accountBrief.externalReferenceCode ===
+						projectExternalReferenceCode
+				);
+
+				if (accountBrief) {
+					getProject(projectExternalReferenceCode, accountBrief);
+				}
+			}
+		}
+	}, [data]);
 
 	return (
 		<AppContext.Provider value={[state, dispatch]}>
@@ -77,4 +100,6 @@ const AppContextProvider = ({assetsPath, children}) => {
 	);
 };
 
-export {AppContext, AppContextProvider};
+const useOnboarding = () => useContext(AppContext);
+
+export {AppContext, AppContextProvider, useOnboarding};

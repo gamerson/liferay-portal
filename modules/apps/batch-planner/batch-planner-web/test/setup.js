@@ -26,6 +26,7 @@ window.Liferay.Language = {
 
 window.Liferay.ThemeDisplay = {
 	getBCP47LanguageId: () => 'en-US',
+	getPathThemeImages: () => '/assets',
 };
 
 window.Liferay.detach = (name, fn) => {

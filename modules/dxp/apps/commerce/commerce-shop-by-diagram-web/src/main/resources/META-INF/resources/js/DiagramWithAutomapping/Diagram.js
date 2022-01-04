@@ -10,11 +10,13 @@
  */
 
 import ClayLoadingIndicator from '@clayui/loading-indicator';
+import {useIsMounted} from '@liferay/frontend-js-react-web';
 import classNames from 'classnames';
 import {
 	useCommerceAccount,
 	useCommerceCart,
 } from 'commerce-frontend-js/utilities/hooks';
+import {openToast} from 'frontend-js-web';
 import PropTypes from 'prop-types';
 import React, {
 	useCallback,
@@ -27,13 +29,18 @@ import React, {
 import AdminTooltipContent from '../components/AdminTooltipContent';
 import DiagramFooter from '../components/DiagramFooter';
 import Sequence from '../components/Sequence';
+import StorefrontTooltipContent from '../components/StorefrontTooltipContent';
+import TooltipProvider from '../components/TooltipProvider';
 import {DIAGRAM_TABLE_EVENTS} from '../utilities/constants';
-import {loadPins} from '../utilities/data';
+import {
+	deleteMappedProduct,
+	getMappedProducts,
+	saveMappedProduct,
+} from '../utilities/data';
+import {formatMappedProduct} from '../utilities/index';
 import D3Handler from './D3Handler';
 
 import '../../css/diagram.scss';
-import StorefrontTooltipContent from '../components/StorefrontTooltipContent';
-import TooltipProvider from '../components/TooltipProvider';
 
 function Diagram({
 	cartId: initialCartId,
@@ -46,29 +53,38 @@ function Diagram({
 	isAdmin,
 	orderUUID,
 	pinsCSSSelectors,
+	productBaseURL,
 	productId,
 }) {
-	const commerceCart = useCommerceCart({id: initialCartId});
-	const commerceAccount = useCommerceAccount({id: initialAccountId});
-	const chartInstanceRef = useRef(null);
-	const svgRef = useRef(null);
-	const wrapperRef = useRef(null);
-	const zoomHandlerRef = useRef(null);
-	const [pins, setPins] = useState(null);
+	const [mappedProducts, setMappedProducts] = useState(null);
 	const [tooltipData, setTooltipData] = useState(false);
 	const [currentZoom, setCurrentZoom] = useState(1);
 	const [expanded, setExpanded] = useState(false);
 	const [labels, setLabels] = useState([]);
 	const [selectedText, setSelectedText] = useState(null);
 	const [highlightedTexts, setHighlightedTexts] = useState([]);
+	const chartInstanceRef = useRef(null);
+	const commerceAccount = useCommerceAccount({id: initialAccountId});
+	const commerceCart = useCommerceCart({id: initialCartId});
+	const isMounted = useIsMounted();
+	const svgRef = useRef(null);
+	const wrapperRef = useRef(null);
+	const zoomHandlerRef = useRef(null);
 
 	useEffect(() => {
-		loadPins(productId).then(setPins);
-	}, [productId]);
+		getMappedProducts(
+			productId,
+			!isAdmin && channelId,
+			'',
+			1,
+			200,
+			commerceAccount.id
+		).then(({items}) => setMappedProducts(items));
+	}, [channelId, isAdmin, productId, commerceAccount]);
 
 	useEffect(() => {
-		chartInstanceRef.current?.updatePins(pins);
-	}, [pins]);
+		chartInstanceRef.current?.updatePins(mappedProducts);
+	}, [mappedProducts]);
 
 	useEffect(() => {
 		if (!tooltipData) {
@@ -80,12 +96,16 @@ function Diagram({
 		({target}) => {
 			const sequence = target.textContent;
 
-			const selectedPin = pins.find((pin) => pin.sequence === sequence);
+			const mappedProduct = mappedProducts.find(
+				(mappedProduct) => mappedProduct.sequence === sequence
+			);
+
+			const selectedPin = mappedProduct ? {mappedProduct} : null;
 
 			setTooltipData({selectedPin, sequence, target});
 			setSelectedText(target);
 		},
-		[pins]
+		[mappedProducts]
 	);
 
 	const handleMouseEnterOnLabel = useCallback(
@@ -123,7 +143,7 @@ function Diagram({
 				);
 			});
 		};
-	}, [handleClickOnLabel, handleMouseEnterOnLabel, labels, pins]);
+	}, [handleClickOnLabel, handleMouseEnterOnLabel, labels]);
 
 	useEffect(() => {
 		function handleSelectPinByTable({diagramProductId, product}) {
@@ -131,16 +151,17 @@ function Diagram({
 				const pinNode = labels.find(
 					(label) => label.textContent === product.sequence
 				);
-				const selectedPin = pins.find(
-					(pin) => pin.sequence === product.sequence
+				const selectedProduct = mappedProducts.find(
+					(mappedProduct) =>
+						mappedProduct.sequence === product.sequence
 				);
 
-				if (selectedPin) {
+				if (selectedProduct) {
 					setHighlightedTexts([]);
 
 					chartInstanceRef.current.recenterOnPin(pinNode).then(() => {
 						setTooltipData({
-							selectedPin,
+							selectedPin: {mappedProduct: selectedProduct},
 							sequence: pinNode.textContent,
 							target: pinNode,
 						});
@@ -163,7 +184,14 @@ function Diagram({
 		}
 
 		function handlePinsUpdatedByTable() {
-			loadPins(productId).then(setPins);
+			getMappedProducts(
+				productId,
+				!isAdmin && channelId,
+				'',
+				1,
+				200,
+				commerceAccount.id
+			).then(({items}) => setMappedProducts(items));
 		}
 
 		Liferay.on(DIAGRAM_TABLE_EVENTS.SELECT_PIN, handleSelectPinByTable);
@@ -175,7 +203,10 @@ function Diagram({
 			DIAGRAM_TABLE_EVENTS.REMOVE_PIN_HIGHLIGHT,
 			handleRemovePinHighlightByTable
 		);
-		Liferay.on(DIAGRAM_TABLE_EVENTS.PINS_UPDATED, handlePinsUpdatedByTable);
+		Liferay.on(
+			DIAGRAM_TABLE_EVENTS.TABLE_UPDATED,
+			handlePinsUpdatedByTable
+		);
 
 		return () => {
 			Liferay.detach(
@@ -191,11 +222,19 @@ function Diagram({
 				handleRemovePinHighlightByTable
 			);
 			Liferay.detach(
-				DIAGRAM_TABLE_EVENTS.PINS_UPDATED,
+				DIAGRAM_TABLE_EVENTS.TABLE_UPDATED,
 				handlePinsUpdatedByTable
 			);
 		};
-	}, [handleMouseEnterOnLabel, labels, pins, productId]);
+	}, [
+		channelId,
+		commerceAccount,
+		isAdmin,
+		handleMouseEnterOnLabel,
+		labels,
+		mappedProducts,
+		productId,
+	]);
 
 	useLayoutEffect(() => {
 		chartInstanceRef.current = new D3Handler(
@@ -212,6 +251,101 @@ function Diagram({
 			zoomHandlerRef.current
 		);
 	}, [imageURL, isAdmin, pinsCSSSelectors]);
+
+	const handleMappedProductSave = (
+		type,
+		quantity,
+		sequence,
+		linkedProduct
+	) => {
+		const linkedProductDetails = formatMappedProduct(
+			type,
+			quantity,
+			sequence,
+			linkedProduct
+		);
+
+		const update = Boolean(tooltipData.selectedPin?.mappedProduct.id);
+
+		return saveMappedProduct(
+			update ? tooltipData.selectedPin.mappedProduct.id : null,
+			linkedProductDetails,
+			sequence,
+			productId
+		)
+			.then((newMappedProduct) => {
+				if (!isMounted()) {
+					return;
+				}
+
+				setMappedProducts((mappedProducts) => {
+					const updatedMappedProducts = mappedProducts.map(
+						(mappedProduct) =>
+							mappedProduct.sequence === newMappedProduct.sequence
+								? {
+										...mappedProduct,
+										mappedProduct:
+											newMappedProduct.mappedProduct,
+										quantity: newMappedProduct.quantity,
+								  }
+								: mappedProduct
+					);
+
+					return update
+						? updatedMappedProducts.map((updatedMappedProduct) =>
+								updatedMappedProduct.id === newMappedProduct.id
+									? newMappedProduct
+									: updatedMappedProduct
+						  )
+						: [...updatedMappedProducts, newMappedProduct];
+				});
+
+				openToast({
+					message: update
+						? Liferay.Language.get('pin-updated')
+						: Liferay.Language.get('pin-created'),
+					type: 'success',
+				});
+			})
+			.catch((error) => {
+				openToast({
+					message: error.message || error,
+					type: 'danger',
+				});
+
+				throw error;
+			});
+	};
+
+	const handleMappedProductDelete = () => {
+		return deleteMappedProduct(tooltipData.selectedPin.mappedProduct.id)
+			.then(() => {
+				if (!isMounted()) {
+					return;
+				}
+
+				setMappedProducts((mappedProducts) =>
+					mappedProducts.filter(
+						(mappedProduct) =>
+							mappedProduct.id !==
+							tooltipData.selectedPin.mappedProduct.id
+					)
+				);
+
+				openToast({
+					message: Liferay.Language.get('pin-deleted'),
+					type: 'success',
+				});
+			})
+			.catch((error) => {
+				openToast({
+					message: error.message || error,
+					type: 'danger',
+				});
+
+				throw error;
+			});
+	};
 
 	return (
 		<div className={classNames('shop-by-diagram', {expanded})}>
@@ -255,9 +389,10 @@ function Diagram({
 						<AdminTooltipContent
 							closeTooltip={() => setTooltipData(null)}
 							datasetDisplayId={datasetDisplayId}
+							onDelete={handleMappedProductDelete}
+							onSave={handleMappedProductSave}
 							productId={productId}
-							readOnlySequence={false}
-							updatePins={setPins}
+							readOnlySequence={true}
 							{...tooltipData}
 						/>
 					) : (
@@ -268,6 +403,7 @@ function Diagram({
 							channelId={channelId}
 							currencyCode={commerceCurrencyCode}
 							orderUUID={orderUUID}
+							productBaseURL={productBaseURL}
 							{...tooltipData}
 						/>
 					)}
@@ -297,6 +433,7 @@ Diagram.propTypes = {
 	isAdmin: PropTypes.bool.isRequired,
 	orderUUID: PropTypes.string,
 	pinsCSSSelectors: PropTypes.array.isRequired,
+	productBaseURL: PropTypes.string,
 	productId: PropTypes.string.isRequired,
 };
 

@@ -92,6 +92,8 @@ public class SXPBlueprintResourceImpl
 			_sxpBlueprintService.getSXPBlueprint(sxpBlueprintId);
 
 		return Response.ok(
+		).encoding(
+			"UTF-8"
 		).entity(
 			JSONUtil.put(
 				"configuration",
@@ -125,6 +127,12 @@ public class SXPBlueprintResourceImpl
 	public Page<SXPBlueprint> getSXPBlueprintsPage(
 			String search, Filter filter, Pagination pagination, Sort[] sorts)
 		throws Exception {
+
+		if (sorts == null) {
+			sorts = new Sort[] {
+				new Sort("modified_sortable", Sort.LONG_TYPE, true)
+			};
+		}
 
 		return SearchUtil.search(
 			Collections.emptyMap(),

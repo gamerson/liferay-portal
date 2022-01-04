@@ -21,11 +21,13 @@ import classNames from 'classnames';
 import React, {useContext, useMemo, useState} from 'react';
 
 import useForm from '../../../hooks/useForm';
-import {normalizeLanguageId} from '../../../utils/string';
+import {normalizeLanguageId, separateCamelCase} from '../../../utils/string';
 import AutoComplete from '../../form/AutoComplete';
 import Input from '../../form/Input';
 import LayoutContext, {TYPES as EVENT_TYPES} from '../context';
 import {TObjectRelationship} from '../types';
+
+import './ModalAddObjectLayoutTab.scss';
 
 type TTabTypes = {
 	[key: string]: {
@@ -240,14 +242,19 @@ const ModalAddObjectLayoutTab: React.FC<IModalAddObjectLayoutTabProps> = ({
 							label={Liferay.Language.get('relationship')}
 							onChangeQuery={setQuery}
 							onSelectItem={(item) => {
+								const {type} = item;
+								const selectedItem = {
+									...item,
+									type: separateCamelCase(type),
+								};
 								const syntheticEvent: any = {
 									target: {
 										name: 'objectRelationshipId',
-										value: item.id,
+										value: selectedItem.id,
 									},
 								};
 
-								setSelectedRelationship(item);
+								setSelectedRelationship(selectedItem);
 								handleChange(syntheticEvent);
 							}}
 							query={query}
@@ -264,9 +271,9 @@ const ModalAddObjectLayoutTab: React.FC<IModalAddObjectLayoutTabProps> = ({
 										{label[defaultLanguageId] ?? name}
 									</div>
 
-									<div>
+									<div className="object-web-relationship-item-label">
 										<ClayLabel displayType="secondary">
-											{type}
+											{separateCamelCase(type)}
 										</ClayLabel>
 									</div>
 								</div>

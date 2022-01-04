@@ -17,7 +17,7 @@ import classNames from 'classnames';
 
 // @ts-ignore
 
-import {useFormState} from 'data-engine-js-components-web';
+import {SettingsContext, useFormState} from 'data-engine-js-components-web';
 import React, {ChangeEventHandler, FocusEventHandler, useMemo} from 'react';
 import createNumberMask from 'text-mask-addons/dist/createNumberMask';
 
@@ -64,7 +64,6 @@ const getMaskedValue = ({
 	decimalPlaces,
 	includeThousandsSeparator = false,
 	inputMaskFormat,
-	maskChange,
 	symbols,
 	value,
 }: {
@@ -72,22 +71,11 @@ const getMaskedValue = ({
 	decimalPlaces: number;
 	includeThousandsSeparator?: boolean;
 	inputMaskFormat: string;
-	maskChange: boolean;
 	symbols: ISymbols;
 	value: string;
 }): IMaskedNumber => {
 	let mask;
 	if (dataType === 'double') {
-		const symbolsValue = value.match(NON_NUMERIC_REGEX);
-
-		if (
-			maskChange &&
-			symbolsValue &&
-			!value.includes(symbols.decimalSymbol)
-		) {
-			value = value.replace(symbolsValue[0], symbols.decimalSymbol);
-		}
-
 		const config: INumberMaskConfig = {
 			allowDecimal: true,
 			allowLeadingZeroes: true,
@@ -112,7 +100,7 @@ const getMaskedValue = ({
 	});
 
 	const regex = new RegExp(
-		dataType === 'double' ? `[^${symbols.decimalSymbol}|\\d]` : '[^\\d]',
+		dataType === 'double' ? `[^-${symbols.decimalSymbol}\\d]` : '[^\\d]',
 		'g'
 	);
 
@@ -178,6 +166,7 @@ const Numeric: React.FC<IProps> = ({
 	id,
 	inputMask,
 	inputMaskFormat,
+	localizedSymbols: initialLocalizedSymbols,
 	localizedValue,
 	name,
 	onBlur,
@@ -186,31 +175,50 @@ const Numeric: React.FC<IProps> = ({
 	placeholder,
 	predefinedValue,
 	readOnly,
+	settingsContext,
 	symbols: symbolsProp = {decimalSymbol: '.'},
 	value,
 	...otherProps
 }) => {
 	const {editingLanguageId}: {editingLanguageId: Locale} = useFormState();
 
+	const localizedSymbols = settingsContext
+		? SettingsContext.getSettingsContextProperty(
+				settingsContext,
+				'predefinedValue',
+				'localizedSymbols'
+		  )
+		: initialLocalizedSymbols;
+
 	const symbols = useMemo<ISymbols>(() => {
-		return inputMask
-			? {
-					decimalSymbol: symbolsProp.decimalSymbol,
-					thousandsSeparator:
-						symbolsProp.thousandsSeparator === 'none'
-							? null
-							: symbolsProp.thousandsSeparator,
-			  }
-			: symbolsProp;
-	}, [inputMask, symbolsProp]);
+		if (inputMask) {
+			return {
+				decimalSymbol: symbolsProp.decimalSymbol,
+				thousandsSeparator:
+					symbolsProp.thousandsSeparator === 'none'
+						? null
+						: symbolsProp.thousandsSeparator,
+			};
+		}
+
+		return localizedSymbols?.[editingLanguageId] || symbolsProp;
+	}, [editingLanguageId, inputMask, localizedSymbols, symbolsProp]);
 
 	const inputValue = useMemo<IMaskedNumber>(() => {
-		const newValue =
+		let newValue =
 			((localizedValue?.[editingLanguageId] ??
 				localizedValue?.[defaultLanguageId]) ||
 				value) ??
 			predefinedValue ??
 			'';
+
+		if (dataType === 'double') {
+			const symbolsValue = newValue.match(/[^-\d]/g);
+
+			newValue = symbolsValue
+				? newValue.replace(symbolsValue[0], symbols.decimalSymbol)
+				: newValue;
+		}
 
 		return inputMask
 			? getMaskedValue({
@@ -219,8 +227,7 @@ const Numeric: React.FC<IProps> = ({
 					includeThousandsSeparator: Boolean(
 						symbols.thousandsSeparator
 					),
-					inputMaskFormat: inputMaskFormat as string,
-					maskChange: true,
+					inputMaskFormat: String(inputMaskFormat),
 					symbols,
 					value: newValue,
 			  })
@@ -274,8 +281,7 @@ const Numeric: React.FC<IProps> = ({
 			? getMaskedValue({
 					dataType,
 					decimalPlaces,
-					inputMaskFormat: inputMaskFormat as string,
-					maskChange: false,
+					inputMaskFormat: String(inputMaskFormat),
 					symbols,
 					value,
 			  })
@@ -369,6 +375,7 @@ interface IProps {
 	id: string;
 	inputMask?: boolean;
 	inputMaskFormat?: string;
+	localizedSymbols?: LocalizedValue<ISymbols>;
 	localizedValue?: LocalizedValue<string>;
 	name: string;
 	onBlur: FocusEventHandler<HTMLInputElement>;
@@ -377,6 +384,7 @@ interface IProps {
 	placeholder?: string;
 	predefinedValue?: string;
 	readOnly: boolean;
+	settingsContext?: any;
 	symbols: ISymbols;
 	value?: string;
 }

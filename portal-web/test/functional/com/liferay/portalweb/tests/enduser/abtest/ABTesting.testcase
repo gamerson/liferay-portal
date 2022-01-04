@@ -77,9 +77,9 @@ definition {
 		task ("Select the new experience") {
 			Navigator.openWithAppendToBaseURL(urlAppend = "web/test-site-name/content-page");
 
-			ABTest.openABTestPanel();
+			ContentPages.changeExperience(experienceName = "NewAnyoneExperience");
 
-			ABTest.changeExperienceABTest(experience = "NewAnyoneExperience");
+			ABTest.openABTestPanel();
 		}
 
 		task ("Create AB test with a variant") {
@@ -97,7 +97,7 @@ definition {
 		}
 
 		task ("Assert the experiences dropdown menu shows the AB test icon and one help hint for that experience") {
-			Click(locator1 = "PageEditor#EXPERIENCE_DEFAULT_BUTTON_NAME");
+			Click(locator1 = "PageEditor#EXPERIENCE_LABEL");
 
 			AssertElementPresent(locator1 = "ABTest#AB_TEST_BUTTON");
 
@@ -481,11 +481,13 @@ definition {
 	@priority = "3"
 	test CheckABTestPanelAtContentPages {
 		task ("Click on the A/B Test icon and Assert the A/B Test panel is opened") {
-			ABTest.openABTestPanel();
+			if (IsNotVisible(locator1 = "ABTest#AB_TEST_SIDE_BAR")) {
+				Click(locator1 = "ABTest#AB_TEST_BUTTON");
+			}
 		}
 
 		task ("Assert the A/B Test panel is opened") {
-			AssertElementPresent(locator1 = "ABTest#AB_TEST_SIDE_BAR");
+			AssertVisible(locator1 = "ABTest#AB_TEST_SIDE_BAR");
 		}
 	}
 
@@ -493,7 +495,7 @@ definition {
 	@priority = "3"
 	test CheckABTestPanelAtWidgetPages {
 		task ("Create Widget Page") {
-			SitePages.addPublicPage(
+			PagesAdmin.addPublicPage(
 				pageName = "Widget Page Name",
 				sitePageType = "Widget Page");
 		}
@@ -504,6 +506,69 @@ definition {
 
 		task ("Assert 'AB Test' icon is not present") {
 			AssertElementNotPresent(locator1 = "ABTest#AB_TEST_BUTTON");
+		}
+	}
+
+	@description = "LPS-108147: When user opens AB testing panel and AC is connected and synced, the AB testing panel display all its functionalities"
+	@priority = "5"
+	test CheckABTestPanelInfo {
+		property portal.acceptance = "true";
+
+		task ("Open AB Test Panel") {
+			ABTest.openABTestPanel();
+		}
+
+		task ("Assert that the message and the button for creating the AB Test are present") {
+			AssertVisible(
+				key_title = "No active tests were found for the selected experience.",
+				locator1 = "Header#H4_TITLE");
+
+			AssertVisible(
+				key_message = "Create a new A/B test to optimize your page or experience.",
+				locator1 = "ABTest#SIDEBAR_MESSAGE");
+
+			AssertElementPresent(locator1 = "ABTest#CREATE_TEST_BUTTON");
+		}
+	}
+
+	@description = "LPS-108147: When user opens AB testing panel and AC is connected but not synced, the AB testing panel displays instructions to sync to AC ('Don't show me this again' button and the message is not displayed)"
+	@priority = "3"
+	test CheckABTestPanelInfoNotSyncAC {
+		task ("Create a new Site and Page") {
+			JSONGroup.addGroup(groupName = "Test Site Name 2");
+
+			JSONLayout.addPublicLayout(
+				groupName = "Test Site Name 2",
+				layoutName = "Content Page 2",
+				type = "content");
+
+			JSONLayout.publishLayout(
+				groupName = "Test Site Name 2",
+				layoutName = "Content Page 2");
+		}
+
+		task ("Go to the content page created") {
+			ContentPagesNavigator.openViewContentPage(
+				pageName = "Content Page 2",
+				siteName = "Test Site Name 2");
+		}
+
+		task ("Open and assert that Ab Test Panel displays instructions to sync to AC and do not 'Don't show me this again' button and the message is not displayed") {
+			ABTest.openABTestPanel();
+
+			AssertVisible(
+				key_title = "Sync to Liferay Analytics Cloud",
+				locator1 = "Header#H4_TITLE");
+
+			AssertVisible(
+				key_message = "In order to perform an A/B test, your site has to be synced to Liferay Analytics Cloud.",
+				locator1 = "ABTest#SIDEBAR_MESSAGE");
+
+			AssertElementNotPresent(locator1 = "ABTest#HIDE_AB_TEST_BUTTON");
+
+			AssertElementNotPresent(
+				key_title = "Connect to Liferay Analytics Cloud",
+				locator1 = "Header#H4_TITLE");
 		}
 	}
 
@@ -1007,6 +1072,51 @@ definition {
 		}
 	}
 
+	@description = "LPS-99421: The test is removed when the delete action is clicked"
+	@ignore = "true"
+	@priority = "3"
+	test DeleteABTest {
+
+		// TODO LPS-144027 DeleteABTest pending implementation
+
+	}
+
+	@description = "LPS-99421: The test is not removed when the delete action is canceled"
+	@ignore = "true"
+	@priority = "3"
+	test DeleteABTestCancel {
+
+		// TODO LPS-144027 DeleteABTestCancel pending implementation
+
+	}
+
+	@description = "LPS-99421: The test deletion in AC is reflected on DXP"
+	@ignore = "true"
+	@priority = "4"
+	test DeleteABTestInACViewInDXP {
+
+		// TODO LPS-144027 DeleteABTestInACViewInDXP pending implementation
+
+	}
+
+	@description = "LPS-99421: The test deletion in DXP is reflected on AC"
+	@ignore = "true"
+	@priority = "4"
+	test DeleteABTestInDXPViewInAC {
+
+		// TODO LPS-144027 DeleteABTestInDXPViewInAC pending implementation
+
+	}
+
+	@description = "LPS-99421: The delete action shows in the test action menu when the test status allows it"
+	@ignore = "true"
+	@priority = "3"
+	test DeleteButtonShows {
+
+		// TODO LPS-144027 DeleteButtonShows pending implementation
+
+	}
+
 	@description = "LPS-104203: Validate if in the AB Test, when the user delete the clickable element that was set, the warning alert appears"
 	@priority = "4"
 	test DeleteClickableElementWarning {
@@ -1129,9 +1239,9 @@ definition {
 		}
 
 		task ("Create a new A/B test with a new experience") {
-			ABTest.openABTestPanel();
+			ContentPages.changeExperience(experienceName = "NewExp1");
 
-			ABTest.changeExperienceABTest(experience = "NewExp1");
+			ABTest.openABTestPanel();
 
 			ABTest.createABTest(
 				goal = "Bounce Rate",
@@ -1151,7 +1261,7 @@ definition {
 		task ("Delete AB Test") {
 			Navigator.openWithAppendToBaseURL(urlAppend = "web/test-site-name/content-page");
 
-			ABTest.changeExperienceABTest(experience = "NewExp1");
+			ContentPages.changeExperience(experienceName = "NewExp1");
 
 			ABTest.editOrDeleteABTest(value = "Delete");
 		}
@@ -1173,7 +1283,7 @@ definition {
 		task ("Create a new A/B test with a new experience, run and terminate AB Test") {
 			ABTest.openABTestPanel();
 
-			ABTest.changeExperienceABTest(experience = "NewExp1");
+			ContentPages.changeExperience(experienceName = "NewExp1");
 
 			ABTest.createABTest(
 				goal = "Bounce Rate",
@@ -1275,7 +1385,7 @@ definition {
 
 			ABTest.openABTestPanel();
 
-			ABTest.changeExperienceABTest(experience = "NewAnyoneExperience");
+			ContentPages.changeExperience(experienceName = "NewAnyoneExperience");
 		}
 
 		task ("Create AB test with a variant") {
@@ -1293,7 +1403,7 @@ definition {
 		task ("Delete the created experience") {
 			var key_experienceName = "NewAnyoneExperience";
 
-			Click(locator1 = "PageEditor#EXPERIENCE_DEFAULT_BUTTON_NAME");
+			Click(locator1 = "PageEditor#EXPERIENCE_LABEL");
 
 			ClickNoError(locator1 = "PageEditor#EXPERIENCE_DELETE_BUTTON");
 
@@ -1303,13 +1413,13 @@ definition {
 		}
 
 		task ("Assert that experience was deleted") {
-			Click(locator1 = "PageEditor#EXPERIENCE_DEFAULT_BUTTON_NAME");
+			Click(locator1 = "PageEditor#EXPERIENCE_LABEL");
 
 			AssertElementNotPresent(
 				key_experienceName = "NewAnyoneExperience",
 				locator1 = "PageEditor#EXPERIENCE_SELECT_ITEM");
 
-			Click(locator1 = "PageEditor#EXPERIENCE_DEFAULT_BUTTON_NAME");
+			Click(locator1 = "PageEditor#EXPERIENCE_LABEL");
 		}
 	}
 
@@ -1331,7 +1441,7 @@ definition {
 
 			ABTest.openABTestPanel();
 
-			ABTest.changeExperienceABTest(experience = "NewAnyoneExperience");
+			ContentPages.changeExperience(experienceName = "NewAnyoneExperience");
 		}
 
 		task ("Create AB test with a variant, run and terminate test") {
@@ -1349,7 +1459,7 @@ definition {
 		task ("Delete the created experience") {
 			var key_experienceName = "NewAnyoneExperience";
 
-			Click(locator1 = "PageEditor#EXPERIENCE_DEFAULT_BUTTON_NAME");
+			Click(locator1 = "PageEditor#EXPERIENCE_LABEL");
 
 			ClickNoError(locator1 = "PageEditor#EXPERIENCE_DELETE_BUTTON");
 
@@ -1363,7 +1473,7 @@ definition {
 				key_experienceName = "NewAnyoneExperience",
 				locator1 = "PageEditor#EXPERIENCE_SELECT_ITEM");
 
-			Click(locator1 = "PageEditor#EXPERIENCE_DEFAULT_BUTTON_NAME");
+			Click(locator1 = "PageEditor#EXPERIENCE_LABEL");
 		}
 
 		task ("Assert that the ABTest draft keeps appearing") {
@@ -1371,7 +1481,7 @@ definition {
 
 			Navigator.openWithAppendToBaseURL(urlAppend = "web/test-site-name/content-page");
 
-			ABTest.changeExperienceABTest(experience = "NewAnyoneExperience");
+			ContentPages.changeExperience(experienceName = "NewAnyoneExperience");
 
 			AssertTextEquals(
 				key_title = "AB test title",
@@ -1464,7 +1574,7 @@ definition {
 
 			ABTest.openABTestPanel();
 
-			ABTest.changeExperienceABTest(experience = "NewAnyoneExperience");
+			ContentPages.changeExperience(experienceName = "NewAnyoneExperience");
 		}
 
 		task ("Create AB test with a variant, run and terminate test") {
@@ -1484,11 +1594,11 @@ definition {
 		}
 
 		task ("Assert the experiences dropdown menu the AB test icon is not present and change experience") {
-			Click(locator1 = "PageEditor#EXPERIENCE_DEFAULT_BUTTON_NAME");
+			Click(locator1 = "PageEditor#EXPERIENCE_LABEL");
 
 			AssertElementNotPresent(locator1 = "ABTest#AB_TEST_BUTTON");
 
-			Click(locator1 = "PageEditor#EXPERIENCE_DEFAULT_BUTTON_NAME");
+			Click(locator1 = "PageEditor#EXPERIENCE_LABEL");
 
 			PageEditor.changeExperience(newExperience = "NewAnyoneExperience");
 		}
@@ -1524,7 +1634,7 @@ definition {
 
 			ABTest.openABTestPanel();
 
-			ABTest.changeExperienceABTest(experience = "NewAnyoneExperience");
+			ContentPages.changeExperience(experienceName = "NewAnyoneExperience");
 		}
 
 		task ("Create AB test with a variant") {
@@ -1540,7 +1650,7 @@ definition {
 		}
 
 		task ("Assert the experience can be edited") {
-			Click(locator1 = "PageEditor#EXPERIENCE_DEFAULT_BUTTON_NAME");
+			Click(locator1 = "PageEditor#EXPERIENCE_LABEL");
 
 			AssertElementPresent(locator1 = "PageEditor#EXPERIENCE_EDIT_BUTTON");
 		}
@@ -1548,7 +1658,7 @@ definition {
 		task ("Delete AB Test") {
 			Navigator.openWithAppendToBaseURL(urlAppend = "web/test-site-name/content-page");
 
-			ABTest.changeExperienceABTest(experience = "NewAnyoneExperience");
+			ContentPages.changeExperience(experienceName = "NewAnyoneExperience");
 
 			ABTest.editOrDeleteABTest(value = "Delete");
 		}
@@ -2158,7 +2268,7 @@ definition {
 
 			ABTest.openABTestPanel();
 
-			ABTest.changeExperienceABTest(experience = "NewAnyoneExperience");
+			ContentPages.changeExperience(experienceName = "NewAnyoneExperience");
 		}
 
 		task ("Create AB test with a variant and run test") {
@@ -2176,7 +2286,7 @@ definition {
 		}
 
 		task ("Assert the experience cannot be edited") {
-			Click(locator1 = "PageEditor#EXPERIENCE_DEFAULT_BUTTON_NAME");
+			Click(locator1 = "PageEditor#EXPERIENCE_LABEL");
 
 			AssertElementNotPresent(locator1 = "PageEditor#EXPERIENCE_EDIT_BUTTON");
 		}
@@ -2184,7 +2294,7 @@ definition {
 		task ("Terminate AB Test") {
 			Navigator.openWithAppendToBaseURL(urlAppend = "web/test-site-name/content-page");
 
-			ABTest.changeExperienceABTest(experience = "NewAnyoneExperience");
+			ContentPages.changeExperience(experienceName = "NewAnyoneExperience");
 
 			ABTest.terminateTest();
 		}
@@ -2194,13 +2304,9 @@ definition {
 	@priority = "3"
 	test PanelOpenCloseAfterClickIcon {
 		task ("Click on the A/B Test icon and Assert the A/B Test panel is opened") {
-			if (IsElementPresent(locator1 = "ABTest#AB_TEST_SIDE_BAR")) {
-				Click(locator1 = "ABTest#AB_TEST_BUTTON");
-			}
+			ABTest.openABTestPanel();
 
-			Click(locator1 = "ABTest#AB_TEST_BUTTON");
-
-			AssertElementPresent(locator1 = "ABTest#AB_TEST_SIDE_BAR");
+			AssertVisible(locator1 = "ABTest#AB_TEST_SIDE_BAR");
 		}
 
 		task ("Click on the A/B Test icon and Assert the A/B Test panel is closed") {
@@ -2226,7 +2332,7 @@ definition {
 		task ("Create a new A/B test with a new experience") {
 			ABTest.openABTestPanel();
 
-			ABTest.changeExperienceABTest(experience = "NewExp1");
+			ContentPages.changeExperience(experienceName = "NewExp1");
 
 			ABTest.createABTest(
 				goal = "Bounce Rate",
@@ -2240,7 +2346,7 @@ definition {
 		}
 
 		task ("Assert the experience can be edited") {
-			Click(locator1 = "PageEditor#EXPERIENCE_DEFAULT_BUTTON_NAME");
+			Click(locator1 = "PageEditor#EXPERIENCE_LABEL");
 
 			Click(locator1 = "PageEditor#EXPERIENCE_EDIT_BUTTON");
 
@@ -2258,7 +2364,7 @@ definition {
 		task ("Delete AB Test") {
 			Navigator.openWithAppendToBaseURL(urlAppend = "web/test-site-name/content-page");
 
-			ABTest.changeExperienceABTest(experience = "NewExp1");
+			ContentPages.changeExperience(experienceName = "NewExp1");
 
 			ABTest.editOrDeleteABTest(value = "Delete");
 		}
@@ -2282,7 +2388,7 @@ definition {
 		task ("Create a new A/B test with a new experience and run it") {
 			ABTest.openABTestPanel();
 
-			ABTest.changeExperienceABTest(experience = "NewExp1");
+			ContentPages.changeExperience(experienceName = "NewExp1");
 
 			ABTest.createABTest(
 				goal = "Bounce Rate",
@@ -2298,7 +2404,7 @@ definition {
 		}
 
 		task ("Assert the experience cannot be edited") {
-			Click(locator1 = "PageEditor#EXPERIENCE_DEFAULT_BUTTON_NAME");
+			Click(locator1 = "PageEditor#EXPERIENCE_LABEL");
 
 			AssertElementNotPresent(locator1 = "PageEditor#EXPERIENCE_EDIT_BUTTON");
 		}
@@ -2306,7 +2412,7 @@ definition {
 		task ("Terminate AB Test") {
 			Navigator.openWithAppendToBaseURL(urlAppend = "web/test-site-name/content-page");
 
-			ABTest.changeExperienceABTest(experience = "NewExp1");
+			ContentPages.changeExperience(experienceName = "NewExp1");
 
 			ABTest.terminateTest();
 		}
@@ -2384,7 +2490,7 @@ definition {
 		task ("Create a new A/B test with a new experience.") {
 			ABTest.openABTestPanel();
 
-			ABTest.changeExperienceABTest(experience = "NewExp1");
+			ContentPages.changeExperience(experienceName = "NewExp1");
 
 			ABTest.createABTest(
 				goal = "Bounce Rate",
@@ -2408,7 +2514,7 @@ definition {
 		task ("Delete AB Test") {
 			Navigator.openWithAppendToBaseURL(urlAppend = "web/test-site-name/content-page");
 
-			ABTest.changeExperienceABTest(experience = "NewExp1");
+			ContentPages.changeExperience(experienceName = "NewExp1");
 
 			ABTest.editOrDeleteABTest(value = "Delete");
 		}
@@ -2430,7 +2536,7 @@ definition {
 		task ("Create a new A/B test with a new experience and run it") {
 			ABTest.openABTestPanel();
 
-			ABTest.changeExperienceABTest(experience = "NewExp1");
+			ContentPages.changeExperience(experienceName = "NewExp1");
 
 			ABTest.createABTest(
 				goal = "Bounce Rate",
@@ -2456,7 +2562,7 @@ definition {
 		task ("Terminate AB Test") {
 			Navigator.openWithAppendToBaseURL(urlAppend = "web/test-site-name/content-page");
 
-			ABTest.changeExperienceABTest(experience = "NewExp1");
+			ContentPages.changeExperience(experienceName = "NewExp1");
 
 			ABTest.terminateTest();
 		}
@@ -2478,7 +2584,7 @@ definition {
 		task ("Create a new A/B test with a new experience, run and terminate it") {
 			ABTest.openABTestPanel();
 
-			ABTest.changeExperienceABTest(experience = "NewExp1");
+			ContentPages.changeExperience(experienceName = "NewExp1");
 
 			ABTest.createABTest(
 				goal = "Bounce Rate",
@@ -2756,7 +2862,7 @@ definition {
 		}
 
 		task ("Select the new experience") {
-			ABTest.changeExperienceABTest(experience = "NewAnyoneExperience");
+			ContentPages.changeExperience(experienceName = "NewAnyoneExperience");
 		}
 
 		task ("Assert ceate AB Test icon is present") {
@@ -2797,7 +2903,7 @@ definition {
 
 			ABTest.openABTestPanel();
 
-			ABTest.changeExperienceABTest(experience = "NewAnyoneExperience");
+			ContentPages.changeExperience(experienceName = "NewAnyoneExperience");
 
 			ABTest.createABTest(
 				goal = "Bounce Rate",

@@ -1,43 +1,31 @@
-const roles = {
-	admin: {
-		description:
-			'Administrator Description text about this role goes here.',
-		id: 1,
-		name: 'Administrator',
-		responsibles: [
-			'Managin Users & Roles',
-			'Configuring the Plataform',
-			'Setting up sites',
-		],
-	},
-	creator: {
-		description:
-			'Ticket Creator Description text about this role goes here.',
-		id: 2,
-		name: 'Ticket Creator',
-		responsibles: [
-			'Managin Users & Roles',
-			'Configuring the Plataform',
-			'Setting up sites',
-		],
-	},
-	watcher: {
-		description:
-			'Ticket Watcher Description text about this role goes here.',
-		id: 3,
-		name: 'Ticket Watcher',
-		responsibles: [
-			'Managin Users & Roles',
-			'Configuring the Plataform',
-			'Setting up sites',
-		],
-	},
+const steps = {
+	dxpCloud: 2,
+	invites: 1,
+	successDxpCloud: 3,
+	welcome: 0,
 };
 
-const steps = {
-	dxp: 2,
-	invites: 1,
-	welcome: 0,
+const roles = {
+	ADMIN: {
+		key: 'Account Administrator',
+		name: 'Administrator',
+	},
+	MEMBER: {
+		key: 'Account Member',
+		name: 'User',
+	},
+	PARTNER_MANAGER: {
+		key: 'Partner Manager',
+		name: 'Partner Manager',
+	},
+	PARTNER_MEMBER: {
+		key: 'Partner Member',
+		name: 'Partner Member',
+	},
+	REQUESTOR: {
+		key: 'Requestor',
+		name: 'Requestor',
+	},
 };
 
 const getInitialDxpAdmin = () => ({
@@ -47,11 +35,9 @@ const getInitialDxpAdmin = () => ({
 	lastName: '',
 });
 
-const getInitialInvite = (id = roles.watcher.id) => ({
+const getInitialInvite = (roleId = '') => ({
 	email: '',
-	roleId: id,
+	roleId,
 });
 
-const getRoles = () => Object.values(roles);
-
-export {steps, roles, getInitialInvite, getInitialDxpAdmin, getRoles};
+export {steps, getInitialInvite, getInitialDxpAdmin, roles};

@@ -940,6 +940,57 @@ definition {
 			locator1 = "KaleoFormsAdminEditProcessForm#FORM_TABLE_NAME_LINK");
 	}
 
+	macro viewProcessNameByColumns {
+		if (isSet(kfCompanyName)) {
+			AssertElementPresent(
+				key_itemPosition = "2",
+				key_kfProcessName = "${kfCompanyName}",
+				locator1 = "KaleoFormsAdmin#PROCESS_TABLE_NAME_BY_INDEX");
+		}
+
+		if (isSet(kfEmailName)) {
+			AssertElementPresent(
+				key_itemPosition = "3",
+				key_kfProcessName = "${kfEmailName}",
+				locator1 = "KaleoFormsAdmin#PROCESS_TABLE_NAME_BY_INDEX");
+		}
+
+		if (isSet(kfFirstName)) {
+			AssertElementPresent(
+				key_itemPosition = "4",
+				key_kfProcessName = "${kfFirstName}",
+				locator1 = "KaleoFormsAdmin#PROCESS_TABLE_NAME_BY_INDEX");
+		}
+
+		if (isSet(kfInstantMessengerService)) {
+			AssertElementPresent(
+				key_itemPosition = "5",
+				key_kfProcessName = "${kfInstantMessengerService}",
+				locator1 = "KaleoFormsAdmin#PROCESS_TABLE_NAME_BY_INDEX");
+		}
+
+		if (isSet(kfInstantMessenger)) {
+			AssertElementPresent(
+				key_itemPosition = "6",
+				key_kfProcessName = "${kfInstantMessenger}",
+				locator1 = "KaleoFormsAdmin#PROCESS_TABLE_NAME_BY_INDEX");
+		}
+
+		if (isSet(kfStatus)) {
+			AssertElementPresent(
+				key_itemPosition = "7",
+				key_kfProcessName = "${kfStatus}",
+				locator1 = "KaleoFormsAdmin#PROCESS_TABLE_NAME_BY_INDEX");
+		}
+
+		if (isSet(kfAuthor)) {
+			AssertElementPresent(
+				key_itemPosition = "9",
+				key_kfProcessName = "${kfAuthor}",
+				locator1 = "KaleoFormsAdmin#PROCESS_TABLE_NAME_BY_INDEX");
+		}
+	}
+
 	macro viewProcessNoRecords {
 		AssertTextEquals(
 			locator1 = "Message#EMPTY_INFO",

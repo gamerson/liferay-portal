@@ -25,11 +25,13 @@ import com.liferay.item.selector.criteria.FolderItemSelectorReturnType;
 import com.liferay.item.selector.criteria.folder.criterion.FolderItemSelectorCriterion;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.model.Repository;
 import com.liferay.portal.kernel.portlet.RequestBackedPortletURLFactoryUtil;
 import com.liferay.portal.kernel.repository.capabilities.TrashCapability;
 import com.liferay.portal.kernel.repository.model.Folder;
+import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
 import com.liferay.portal.kernel.service.PortletPreferencesLocalService;
 import com.liferay.portal.kernel.service.RepositoryLocalService;
 import com.liferay.portal.kernel.theme.PortletDisplay;
@@ -37,11 +39,13 @@ import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.JavaConstants;
 import com.liferay.portal.kernel.util.KeyValuePair;
+import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.PortletKeys;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.trash.TrashHelper;
 
 import java.util.List;
+import java.util.Objects;
 
 import javax.portlet.PortletPreferences;
 import javax.portlet.PortletURL;
@@ -109,12 +113,6 @@ public class IGConfigurationDisplayContext {
 		return portletDisplay.getNamespace() + "folderSelected";
 	}
 
-	public long getRepositoryId() throws PortalException {
-		_initRepository();
-
-		return _repositoryId;
-	}
-
 	public long getRootFolderId() throws PortalException {
 		_initFolder();
 
@@ -124,7 +122,17 @@ public class IGConfigurationDisplayContext {
 	public String getRootFolderName() throws PortalException {
 		_initFolder();
 
+		if (Objects.equals(_folderName, StringPool.BLANK)) {
+			_folderName = _getFolderName();
+		}
+
 		return _folderName;
+	}
+
+	public long getSelectedRepositoryId() throws PortalException {
+		_initRepository();
+
+		return _selectedRepositoryId;
 	}
 
 	public PortletURL getSelectFolderURL() throws PortalException {
@@ -134,18 +142,22 @@ public class IGConfigurationDisplayContext {
 		folderItemSelectorCriterion.setDesiredItemSelectorReturnTypes(
 			new FolderItemSelectorReturnType());
 
-		if (!isRootFolderInTrash()) {
-			folderItemSelectorCriterion.setFolderId(getRootFolderId());
-		}
-
+		folderItemSelectorCriterion.setFolderId(getRootFolderId());
 		folderItemSelectorCriterion.setIgnoreRootFolder(true);
+		folderItemSelectorCriterion.setRepositoryId(getSelectedRepositoryId());
 		folderItemSelectorCriterion.setSelectedFolderId(getRootFolderId());
-		folderItemSelectorCriterion.setSelectedRepositoryId(getRepositoryId());
+		folderItemSelectorCriterion.setSelectedRepositoryId(
+			getSelectedRepositoryId());
 		folderItemSelectorCriterion.setShowGroupSelector(true);
 
 		return _itemSelector.getItemSelectorURL(
 			RequestBackedPortletURLFactoryUtil.create(_httpServletRequest),
-			getItemSelectedEventName(), folderItemSelectorCriterion);
+			GroupLocalServiceUtil.getGroup(
+				GetterUtil.getLong(
+					getSelectedRepositoryId(),
+					_themeDisplay.getScopeGroupId())),
+			_themeDisplay.getScopeGroupId(), getItemSelectedEventName(),
+			folderItemSelectorCriterion);
 	}
 
 	public boolean isRootFolderInTrash() throws PortalException {
@@ -173,6 +185,26 @@ public class IGConfigurationDisplayContext {
 
 			return null;
 		}
+	}
+
+	private String _getFolderName() {
+		if ((_folderId == null) ||
+			(_folderId == DLFolderConstants.DEFAULT_PARENT_FOLDER_ID)) {
+
+			return LanguageUtil.get(_httpServletRequest, "home");
+		}
+
+		Folder folder = _getFolder();
+
+		if (folder == null) {
+			return StringPool.BLANK;
+		}
+
+		if (_folderInTrash) {
+			return _trashHelper.getOriginalTitle(_folder.getName());
+		}
+
+		return folder.getName();
 	}
 
 	private PortletPreferences _getPortletPreferences() {
@@ -218,13 +250,12 @@ public class IGConfigurationDisplayContext {
 
 		Folder folder = _getFolder();
 
-		if ((folder == null) ||
-			(folder.getGroupId() != _themeDisplay.getScopeGroupId())) {
-
+		if (folder == null) {
 			return;
 		}
 
 		_folder = folder;
+		_folderName = folder.getName();
 
 		if (_folder.isRepositoryCapabilityProvided(TrashCapability.class)) {
 			TrashCapability trashCapability = _folder.getRepositoryCapability(
@@ -239,32 +270,38 @@ public class IGConfigurationDisplayContext {
 	}
 
 	private void _initRepository() {
-		if (_repositoryId != 0) {
+		if (_selectedRepositoryId != 0) {
 			return;
 		}
 
 		DLPortletInstanceSettings dlPortletInstanceSettings =
 			_igRequestHelper.getDLPortletInstanceSettings();
 
-		_repositoryId = dlPortletInstanceSettings.getRepositoryId();
+		_selectedRepositoryId =
+			dlPortletInstanceSettings.getSelectedRepositoryId();
 
-		if (_repositoryId != 0) {
+		if (_selectedRepositoryId != 0) {
 			return;
 		}
 
-		if (_folder == null) {
+		if ((_folder == null) && (_folderId != null) &&
+			(_folderId != DLFolderConstants.DEFAULT_PARENT_FOLDER_ID)) {
+
 			_folder = _getFolder();
 		}
 
 		if (_folder != null) {
-			_repositoryId = _folder.getRepositoryId();
+			_selectedRepositoryId = _folder.getRepositoryId();
 		}
 		else {
-			_repositoryId = _themeDisplay.getScopeGroupId();
+			_selectedRepositoryId = ParamUtil.getLong(
+				_httpServletRequest, "repositoryId",
+				_themeDisplay.getScopeGroupId());
 		}
 
 		try {
-			_repository = _repositoryLocalService.getRepository(_repositoryId);
+			_repository = _repositoryLocalService.getRepository(
+				_selectedRepositoryId);
 
 			_repositoryNotFound = false;
 		}
@@ -290,9 +327,9 @@ public class IGConfigurationDisplayContext {
 		_portletPreferencesLocalService;
 	private final RenderRequest _renderRequest;
 	private Repository _repository;
-	private long _repositoryId;
 	private final RepositoryLocalService _repositoryLocalService;
 	private boolean _repositoryNotFound;
+	private long _selectedRepositoryId;
 	private final ThemeDisplay _themeDisplay;
 	private final TrashHelper _trashHelper;
 

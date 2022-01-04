@@ -139,10 +139,10 @@ class QueueFlushService {
 									this.processing = false;
 								});
 
-							return Promise.all(queue.onFlush())
-								.then(() => {
+							return Promise.allSettled(queue.onFlush())
+								.then((result) => {
 									this._onFlushSuccess();
-									queue.onFlushSuccess();
+									queue.onFlushSuccess(result);
 									releaseLock();
 
 									return Promise.resolve();

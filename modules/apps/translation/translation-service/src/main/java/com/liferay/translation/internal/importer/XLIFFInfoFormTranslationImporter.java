@@ -48,6 +48,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -65,6 +66,7 @@ import net.sf.okapi.common.resource.StartDocument;
 import net.sf.okapi.common.resource.StartSubDocument;
 import net.sf.okapi.common.resource.TextContainer;
 import net.sf.okapi.common.resource.TextFragment;
+import net.sf.okapi.common.resource.TextPart;
 import net.sf.okapi.filters.autoxliff.AutoXLIFFFilter;
 import net.sf.okapi.lib.xliff2.InvalidParameterException;
 import net.sf.okapi.lib.xliff2.XLIFFException;
@@ -149,7 +151,7 @@ public class XLIFFInfoFormTranslationImporter
 				unsafeConsumer, events, sourceLocale, targetLocale,
 				includeSource)
 		).infoItemReference(
-			infoItemReference
+			_getInfoItemReference(events)
 		).build();
 	}
 
@@ -177,8 +179,54 @@ public class XLIFFInfoFormTranslationImporter
 				unsafeConsumer, xliffDocument, sourceLocale, targetLocale,
 				includeSource)
 		).infoItemReference(
-			infoItemReference
+			_getInfoItemReference(xliffDocument)
 		).build();
+	}
+
+	private InfoItemReference _getInfoItemReference(List<Event> events)
+		throws XLIFFFileException {
+
+		Stream<Event> stream = events.stream();
+
+		Optional<Event> optional = stream.filter(
+			Event::isStartSubDocument
+		).findFirst();
+
+		return optional.flatMap(
+			event -> {
+				StartSubDocument startSubDocument = event.getStartSubDocument();
+
+				Matcher matcher = _pattern.matcher(startSubDocument.getName());
+
+				if (!matcher.matches()) {
+					return Optional.empty();
+				}
+
+				return Optional.of(
+					new InfoItemReference(
+						matcher.group(1),
+						GetterUtil.getLong(matcher.group(2))));
+			}
+		).orElseThrow(
+			() -> new XLIFFFileException.MustBeWellFormed(
+				"The XLIFF file is not well formed")
+		);
+	}
+
+	private InfoItemReference _getInfoItemReference(XLIFFDocument xliffDocument)
+		throws XLIFFFileException {
+
+		List<String> fileNodeIds = xliffDocument.getFileNodeIds();
+
+		Matcher matcher = _pattern.matcher(fileNodeIds.get(0));
+
+		if (!matcher.matches()) {
+			throw new XLIFFFileException.MustBeWellFormed(
+				"The XLIFF file is not well formed");
+		}
+
+		return new InfoItemReference(
+			matcher.group(1), GetterUtil.getLong(matcher.group(2)));
 	}
 
 	private long _getSegmentsExperienceClassPK(
@@ -346,27 +394,34 @@ public class XLIFFInfoFormTranslationImporter
 				TextContainer targetTextContainer = iTextUnit.getTarget(
 					targetLocaleId);
 
-				TextFragment targetTextFragment =
-					targetTextContainer.getFirstContent();
+				for (TextPart targetTextPart : targetTextContainer.getParts()) {
+					TextFragment targetTextFragment =
+						targetTextPart.getContent();
 
-				unsafeConsumer.accept(
-					new InfoFieldValue<>(
-						_createInfoField(targetLocale, iTextUnit.getId()),
-						InfoLocalizedValue.builder(
-						).value(
-							targetLocale, targetTextFragment.getText()
-						).value(
-							biConsumer -> {
-								if (includeSource) {
-									TextFragment sourceTextFragment =
-										sourceTextContainer.getFirstContent();
+					if (Validator.isNull(targetTextFragment.getText())) {
+						continue;
+					}
 
-									biConsumer.accept(
-										sourceLocale,
-										sourceTextFragment.getText());
+					unsafeConsumer.accept(
+						new InfoFieldValue<>(
+							_createInfoField(targetLocale, iTextUnit.getId()),
+							InfoLocalizedValue.builder(
+							).value(
+								targetLocale, targetTextFragment.getText()
+							).value(
+								biConsumer -> {
+									if (includeSource) {
+										TextFragment sourceTextFragment =
+											sourceTextContainer.
+												getFirstContent();
+
+										biConsumer.accept(
+											sourceLocale,
+											sourceTextFragment.getText());
+									}
 								}
-							}
-						).build()));
+							).build()));
+				}
 			}
 		}
 	}
@@ -379,37 +434,34 @@ public class XLIFFInfoFormTranslationImporter
 		throws XLIFFFileException {
 
 		for (Unit unit : xliffDocument.getUnits()) {
-			if (unit.getPartCount() != 1) {
-				throw new XLIFFFileException.MustNotHaveMoreThanOne(
-					"The file only can have one unit");
-			}
+			for (int i = 0; i < unit.getPartCount(); i++) {
+				Part part = unit.getPart(i);
 
-			Part part = unit.getPart(0);
+				Fragment targetFragment = part.getTarget();
 
-			Fragment targetFragment = part.getTarget();
+				if (targetFragment == null) {
+					throw new XLIFFFileException.MustBeWellFormed(
+						"There is no translation target");
+				}
 
-			if (targetFragment == null) {
-				throw new XLIFFFileException.MustBeWellFormed(
-					"There is no translation target");
-			}
+				unsafeConsumer.accept(
+					new InfoFieldValue<>(
+						_createInfoField(targetLocale, unit.getId()),
+						InfoLocalizedValue.builder(
+						).value(
+							targetLocale, targetFragment.getPlainText()
+						).value(
+							biConsumer -> {
+								if (includeSource) {
+									Fragment sourceFragment = part.getSource();
 
-			unsafeConsumer.accept(
-				new InfoFieldValue<>(
-					_createInfoField(targetLocale, unit.getId()),
-					InfoLocalizedValue.builder(
-					).value(
-						targetLocale, targetFragment.getPlainText()
-					).value(
-						biConsumer -> {
-							if (includeSource) {
-								Fragment sourceFragment = part.getSource();
-
-								biConsumer.accept(
-									sourceLocale,
-									sourceFragment.getPlainText());
+									biConsumer.accept(
+										sourceLocale,
+										sourceFragment.getPlainText());
+								}
 							}
-						}
-					).build()));
+						).build()));
+			}
 		}
 	}
 
@@ -518,6 +570,10 @@ public class XLIFFInfoFormTranslationImporter
 	private void _validateXLIFFDocumentName(
 			InfoItemReference infoItemReference, String xliffDocumentName)
 		throws XLIFFFileException {
+
+		if (infoItemReference == null) {
+			return;
+		}
 
 		Matcher matcher = _pattern.matcher(xliffDocumentName);
 

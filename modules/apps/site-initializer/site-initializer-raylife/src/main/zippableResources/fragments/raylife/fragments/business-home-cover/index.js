@@ -28,17 +28,22 @@ const fetchHeadless = async (url, options) => {
 };
 
 const businessEmailDeliveredContainer = fragmentElement.querySelector(
-	'.business-email-delivered'
+	'#business-email-delivered'
 );
 const continueQuoteButton = fragmentElement.querySelector('#continue-quote');
 const emailInput = fragmentElement.querySelector('#email');
 const emailContainer = fragmentElement.querySelector('#email-container');
+const emailErrorFeedback = fragmentElement.querySelector(
+	'#email-container .form-feedback-group .form-feedback-item'
+);
+const zipErrorFeedback = fragmentElement.querySelector(
+	'#zip-container .form-feedback-group .form-feedback-item'
+);
+
 const getQuoteForm = fragmentElement.querySelector('#get-quote-form');
 const newQuoteButton = fragmentElement.querySelector('#new-quote-button');
 const newQuoteContainer = fragmentElement.querySelector('#new-quote');
 const newQuoteFormContainer = fragmentElement.querySelector('.new-quote-form');
-const product = fragmentElement.querySelector('#product');
-const productContainer = fragmentElement.querySelector('#product-container');
 const retrieveQuoteButton = fragmentElement.querySelector(
 	'#retrieve-quote-button'
 );
@@ -62,8 +67,11 @@ newQuoteButton.onclick = function () {
 	retrieveQuoteContainer.classList.remove('d-none', 'invisible');
 };
 
+continueQuoteButton.classList.add('disabled');
+
 emailInput.oninput = function () {
 	emailContainer.classList.remove('has-error');
+	emailErrorFeedback.innerText = '';
 
 	if (emailInput.value) {
 		return continueQuoteButton.classList.remove('disabled');
@@ -73,14 +81,11 @@ emailInput.oninput = function () {
 };
 
 continueQuoteButton.onclick = async function () {
-	const errorFeedback = fragmentElement.querySelector(
-		'#email-container .error-feedback span'
-	);
-
 	if (
 		!new RegExp(/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/g).test(emailInput.value)
 	) {
-		errorFeedback.innerText = 'Please enter a valid email address';
+		emailErrorFeedback.innerHTML =
+			'<span class="form-feedback-indicator"></span> Please enter a valid email address';
 
 		return emailContainer.classList.add('has-error');
 	}
@@ -90,8 +95,8 @@ continueQuoteButton.onclick = async function () {
 	);
 
 	if (!raylifeApplicationResponse.items.length) {
-		errorFeedback.innerHTML =
-			'We were unable to find your quote. Please start a new one.';
+		emailErrorFeedback.innerHTML =
+			'<span class="form-feedback-indicator"></span> We were unable to find your quote. Please start a new one.';
 
 		return emailContainer.classList.add('has-error');
 	}
@@ -132,42 +137,21 @@ getQuoteForm.onsubmit = function (event) {
 	const maxCharactersZIP = 5;
 
 	zipContainer.classList.remove('has-error');
-	productContainer.classList.remove('has-error');
+	zipErrorFeedback.innerText = '';
 
 	if (localStorage.getItem('raylife-back-to-edit')) {
 		localStorage.removeItem('raylife-back-to-edit');
 	}
 
-	const getProductName = (productId) => {
-		const options = product.options;
-
-		for (let i = 0; i < options.length; i++) {
-			if (options[i].value === productId) {
-				return options[i].label;
-			}
-		}
-	};
-
-	if (
-		!formProps.zip ||
-		formProps.zip.length !== maxCharactersZIP ||
-		!formProps.product
-	) {
+	if (!formProps.zip || formProps.zip.length !== maxCharactersZIP) {
 		if (!formProps.zip || formProps.zip.length !== maxCharactersZIP) {
+			zipErrorFeedback.innerHTML =
+				'<span class="form-feedback-indicator"></span> Enter a valid 5 digit Zip';
 			zipContainer.classList.add('has-error');
-		}
-		if (!formProps.product) {
-			productContainer.classList.add('has-error');
 		}
 	}
 	else {
-		localStorage.setItem(
-			'raylife-product',
-			JSON.stringify({
-				...formProps,
-				productName: getProductName(formProps.product),
-			})
-		);
+		localStorage.setItem('raylife-product', JSON.stringify(formProps));
 
 		const {pathname} = new URL(Liferay.ThemeDisplay.getCanonicalURL());
 
@@ -180,28 +164,3 @@ fragmentElement.querySelector('#zip').onkeypress = (event) => {
 
 	return !(charCode > 31 && (charCode < 48 || charCode > 57));
 };
-
-(async () => {
-	try {
-		const taxonomyVocabularies = await fetchHeadless(
-			`/o/headless-admin-taxonomy/v1.0/sites/${themeDisplay.getCompanyGroupId()}/taxonomy-vocabularies?filter=name eq 'Raylife'`
-		);
-
-		if (!taxonomyVocabularies?.items[0]) {
-			return console.error('No Taxonomy Vocabulary found');
-		}
-
-		const taxonomyCategories = await fetchHeadless(
-			`/o/headless-admin-taxonomy/v1.0/taxonomy-vocabularies/${taxonomyVocabularies.items[0].id}/taxonomy-categories`
-		);
-
-		taxonomyCategories?.items.forEach((taxonomyVocabulary) => {
-			product.add(
-				new Option(taxonomyVocabulary.name, taxonomyVocabulary.id)
-			);
-		});
-	}
-	catch (error) {
-		console.error(error.message);
-	}
-})();

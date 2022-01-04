@@ -3,7 +3,7 @@
 		"@clayui/alert": "3.40.0",
 		"@clayui/badge": "3.40.0",
 		"@clayui/button": "3.40.0",
-		"@clayui/form": "3.40.0",
+		"@clayui/form": "3.42.0",
 		"@clayui/icon": "3.40.0",
 		"@clayui/layout": "3.40.0",
 		"@clayui/link": "3.40.0",
@@ -35,5 +35,5 @@
 		"test": "env TZ=utc liferay-npm-scripts test",
 		"test:watch": "env TZ=utc liferay-npm-scripts test --watch"
 	},
-	"version": "3.0.27"
+	"version": "3.0.32"
 }

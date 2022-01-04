@@ -31,8 +31,6 @@ import com.liferay.portal.kernel.util.URLCodec;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 
-import java.io.IOException;
-
 import javax.portlet.PortletMode;
 import javax.portlet.PortletRequest;
 import javax.portlet.WindowState;
@@ -59,8 +57,8 @@ public class OAuthAuthorizeStrutsAction implements StrutsAction {
 			HttpServletResponse httpServletResponse)
 		throws Exception {
 
-		if (!isSignedIn()) {
-			return redirectToLogin(httpServletRequest, httpServletResponse);
+		if (!_isSignedIn()) {
+			return _redirectToLogin(httpServletRequest, httpServletResponse);
 		}
 
 		ThemeDisplay themeDisplay =
@@ -92,15 +90,13 @@ public class OAuthAuthorizeStrutsAction implements StrutsAction {
 			).setPortletMode(
 				PortletMode.VIEW
 			).setWindowState(
-				getWindowState(httpServletRequest)
+				_getWindowState(httpServletRequest)
 			).buildString());
 
 		return null;
 	}
 
-	protected WindowState getWindowState(
-		HttpServletRequest httpServletRequest) {
-
+	private WindowState _getWindowState(HttpServletRequest httpServletRequest) {
 		String windowStateString = ParamUtil.getString(
 			httpServletRequest, "windowState");
 
@@ -111,7 +107,7 @@ public class OAuthAuthorizeStrutsAction implements StrutsAction {
 		return LiferayWindowState.POP_UP;
 	}
 
-	protected boolean isSignedIn() {
+	private boolean _isSignedIn() {
 		PermissionChecker permissionChecker =
 			PermissionThreadLocal.getPermissionChecker();
 
@@ -122,10 +118,10 @@ public class OAuthAuthorizeStrutsAction implements StrutsAction {
 		return true;
 	}
 
-	protected String redirectToLogin(
+	private String _redirectToLogin(
 			HttpServletRequest httpServletRequest,
 			HttpServletResponse httpServletResponse)
-		throws IOException {
+		throws Exception {
 
 		ThemeDisplay themeDisplay =
 			(ThemeDisplay)httpServletRequest.getAttribute(

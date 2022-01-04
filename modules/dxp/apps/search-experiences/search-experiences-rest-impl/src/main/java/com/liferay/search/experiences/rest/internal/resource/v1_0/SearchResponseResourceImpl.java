@@ -28,6 +28,7 @@ import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.search.document.Field;
 import com.liferay.portal.search.searcher.SearchRequest;
+import com.liferay.portal.search.searcher.SearchRequestBuilder;
 import com.liferay.portal.search.searcher.SearchRequestBuilderFactory;
 import com.liferay.portal.search.searcher.Searcher;
 import com.liferay.portal.vulcan.pagination.Pagination;
@@ -71,31 +72,7 @@ public class SearchResponseResourceImpl extends BaseSearchResponseResourceImpl {
 		throws Exception {
 
 		try {
-			return toSearchResponse(
-				_searcher.search(
-					_searchRequestBuilderFactory.builder(
-					).companyId(
-						contextCompany.getCompanyId()
-					).emptySearchEnabled(
-						true
-					).includeResponseString(
-						true
-					).from(
-						pagination.getStartPosition()
-					).queryString(
-						queryString
-					).size(
-						pagination.getPageSize()
-					).withSearchRequestBuilder(
-						searchRequestBuilder -> {
-							if (sxpBlueprint != null) {
-								_sxpBlueprintSearchRequestEnhancer.enhance(
-									searchRequestBuilder,
-									String.valueOf(
-										SXPBlueprintUtil.unpack(sxpBlueprint)));
-							}
-						}
-					).build()));
+			return search(pagination, queryString, sxpBlueprint);
 		}
 		catch (RuntimeException runtimeException) {
 			if ((runtimeException.getClass() == RuntimeException.class) &&
@@ -113,23 +90,85 @@ public class SearchResponseResourceImpl extends BaseSearchResponseResourceImpl {
 		}
 	}
 
+	protected SearchResponse search(
+		Pagination pagination, String queryString, SXPBlueprint sxpBlueprint) {
+
+		SearchRequestBuilder searchRequestBuilder =
+			_searchRequestBuilderFactory.builder(
+			).companyId(
+				contextCompany.getCompanyId()
+			).from(
+				pagination.getStartPosition()
+			).queryString(
+				queryString
+			).size(
+				pagination.getPageSize()
+			).withSearchContext(
+				searchContext -> {
+					searchContext.setAttribute(
+						"search.experiences.ip.address",
+						contextHttpServletRequest.getRemoteAddr());
+					searchContext.setTimeZone(contextUser.getTimeZone());
+					searchContext.setUserId(contextUser.getUserId());
+				}
+			);
+
+		RuntimeException runtimeException = new RuntimeException();
+
+		try {
+			if (sxpBlueprint != null) {
+				_sxpBlueprintSearchRequestEnhancer.enhance(
+					searchRequestBuilder,
+					String.valueOf(SXPBlueprintUtil.unpack(sxpBlueprint)));
+			}
+		}
+		catch (Exception exception) {
+			runtimeException.addSuppressed(exception);
+		}
+
+		if (_hasErrors(runtimeException)) {
+			throw runtimeException;
+		}
+
+		try {
+			SearchResponse searchResponse = toSearchResponse(
+				_searcher.search(searchRequestBuilder.build()));
+
+			// TODO Add warnings to search response DTO for client side
+			// rendering
+
+			if (ArrayUtil.isNotEmpty(runtimeException.getSuppressed())) {
+				if (_log.isWarnEnabled()) {
+					_log.warn(runtimeException);
+				}
+			}
+
+			return searchResponse;
+		}
+		catch (Exception exception) {
+			runtimeException.addSuppressed(exception);
+		}
+
+		throw runtimeException;
+	}
+
 	protected SearchResponse toSearchResponse(
-			com.liferay.portal.search.searcher.SearchResponse searchResponse)
+			com.liferay.portal.search.searcher.SearchResponse searchResponse1)
 		throws Exception {
 
-		SearchRequest portalSearchRequest = searchResponse.getRequest();
+		SearchRequest portalSearchRequest = searchResponse1.getRequest();
 
-		return new SearchResponse() {
+		SearchResponse searchResponse2 = new SearchResponse() {
 			{
-				documents = _toDocuments(searchResponse.getDocumentsStream());
+				documents = _toDocuments(searchResponse1.getDocumentsStream());
 				page = portalSearchRequest.getFrom();
 				pageSize = portalSearchRequest.getSize();
-				request = _createJSONObject(searchResponse.getRequestString());
-				requestString = searchResponse.getRequestString();
+				request = _createJSONObject(searchResponse1.getRequestString());
+				requestString = searchResponse1.getRequestString();
 				response = _createJSONObject(
-					searchResponse.getResponseString());
-				responseString = searchResponse.getResponseString();
-				totalHits = searchResponse.getTotalHits();
+					searchResponse1.getResponseString());
+				responseString = searchResponse1.getResponseString();
+				totalHits = searchResponse1.getTotalHits();
 			}
 
 			private JSONObject _createJSONObject(String string) {
@@ -142,6 +181,8 @@ public class SearchResponseResourceImpl extends BaseSearchResponseResourceImpl {
 			}
 
 		};
+
+		return SearchResponse.unsafeToDTO(searchResponse2.toString());
 	}
 
 	private AssetRenderer<?> _getAssetRenderer(Map<String, Field> fields) {
@@ -165,6 +206,38 @@ public class SearchResponseResourceImpl extends BaseSearchResponseResourceImpl {
 		}
 
 		return null;
+	}
+
+	private boolean _hasErrors(Throwable throwable1) {
+		if (_isWarning(throwable1)) {
+			return false;
+		}
+
+		if ((throwable1.getClass() == RuntimeException.class) &&
+			Validator.isBlank(throwable1.getMessage())) {
+
+			for (Throwable throwable2 : throwable1.getSuppressed()) {
+				if (_hasErrors(throwable2)) {
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		return true;
+	}
+
+	private boolean _isWarning(Throwable throwable) {
+		Class<? extends Throwable> clazz = throwable.getClass();
+
+		String simpleName = clazz.getSimpleName();
+
+		if (simpleName.equals("InvalidElementInstanceException")) {
+			return true;
+		}
+
+		return false;
 	}
 
 	private Map<String, DocumentField> _toDocumentFields(

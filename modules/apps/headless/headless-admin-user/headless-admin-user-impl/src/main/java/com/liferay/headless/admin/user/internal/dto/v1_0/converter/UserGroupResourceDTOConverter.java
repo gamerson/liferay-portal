@@ -20,6 +20,7 @@ import com.liferay.portal.kernel.service.UserGroupLocalService;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.vulcan.dto.converter.DTOConverter;
+import com.liferay.portal.vulcan.dto.converter.DTOConverterContext;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -43,7 +44,7 @@ public class UserGroupResourceDTOConverter
 
 	@Override
 	public com.liferay.headless.admin.user.dto.v1_0.UserGroup toDTO(
-			UserGroup userGroup)
+			DTOConverterContext dtoConverterContext, UserGroup userGroup)
 		throws PortalException {
 
 		if (userGroup == null) {
@@ -52,6 +53,7 @@ public class UserGroupResourceDTOConverter
 
 		return new com.liferay.headless.admin.user.dto.v1_0.UserGroup() {
 			{
+				actions = dtoConverterContext.getActions();
 				description = userGroup.getDescription();
 				id = userGroup.getUserGroupId();
 				name = userGroup.getName();

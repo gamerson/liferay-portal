@@ -33,7 +33,7 @@
 		<div class="liferay-online-list row">
 			<#list entries as curCPCatalogEntry>
 				<#assign
-					image = curCPCatalogEntry.getDefaultImageFileUrl()
+					image = cpContentHelper.getDefaultImageFileURL(commerceAccountId, curCPCatalogEntry.getCPDefinitionId())
 
 					friendlyURL = cpContentHelper.getFriendlyURL(curCPCatalogEntry, themeDisplay)
 
@@ -49,7 +49,7 @@
 
 					group_id = commerceContext.getCommerceChannelGroupId()
 
-					publicFriendlyURL = themeDisplay.getPathFriendlyURLPublic() + themeDisplay.getSiteGroup().getFriendlyURL()
+					publicFriendlyURL = themeDisplay.getPortalURL() + themeDisplay.getPathFriendlyURLPublic() + themeDisplay.getSiteGroup().getFriendlyURL()
 				/>
 
 				<div class="col-md-4 mb-5">

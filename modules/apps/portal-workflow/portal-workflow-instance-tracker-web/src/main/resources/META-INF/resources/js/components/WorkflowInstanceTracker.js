@@ -27,6 +27,7 @@ import {
 	nodeTypes,
 } from '../util/util';
 import CurrentNodes from './CurrentNodes';
+import ErrorFeedback from './ErrorFeedback';
 
 const eventObserver = new EventObserver();
 
@@ -134,6 +135,10 @@ export default function WorkflowInstanceTracker({workflowInstanceId}) {
 	const onLoad = (reactFlowInstance) => {
 		reactFlowInstance.fitView();
 	};
+
+	if (layoutedElements.length === 0) {
+		return <ErrorFeedback />;
+	}
 
 	return (
 		<div className="workflow-instance-tracker">

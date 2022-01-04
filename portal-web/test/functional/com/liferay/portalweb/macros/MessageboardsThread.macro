@@ -122,7 +122,19 @@ definition {
 			value1 = "${threadSubject}");
 
 		if (isSet(source)) {
-			CKEditor.addSourceContent(content = "${threadBody}");
+			Click(locator1 = "CKEditor#TOOLBAR_SOURCE_BUTTON");
+
+			if (IsVisible(locator1 = "CKEditor#BODY_FIELD_SOURCE_ON_2")) {
+				Type(
+					locator1 = "CKEditor#BODY_FIELD_SOURCE_ON_2",
+					value1 = "${threadBody}");
+			}
+
+			if (IsElementPresent(locator1 = "CKEditor#BODY_FIELD_SOURCE_ON")) {
+				Type.typeCodeMirrorEditorNoError(
+					locator1 = "CKEditor#BODY_FIELD_SOURCE_ON",
+					value1 = "${threadBody}");
+			}
 		}
 		else {
 			SelectFrame.selectFrameNoLoading(locator1 = "CKEditor#BODY_FIELD_IFRAME");
@@ -1153,6 +1165,20 @@ definition {
 		JSONRecycleBin.emptyRecycleBin();
 	}
 
+	macro unbanUser {
+		MessageBoardsAdmin.openMessageBoardsAdmin(siteURLKey = "${siteURLKey}");
+
+		AssertClick(
+			locator1 = "MessageBoards#NAVIGATION_BANNED_USERS",
+			value1 = "Banned Users");
+
+		LexiconEntry.openEntryMenu(rowEntry = "${userScreenName}");
+
+		MenuItem.click(menuItem = "Unban This User");
+
+		Alert.viewSuccessMessage();
+	}
+
 	macro unlockPG {
 		MessageboardsThread.openToThread(
 			groupName = "${groupName}",
@@ -1165,6 +1191,19 @@ definition {
 		MenuItem.click(menuItem = "Unlock");
 
 		Alert.viewSuccessMessage();
+	}
+
+	macro updateCheckInterval {
+		var baseURL = PropsUtil.get("portal.url");
+
+		Open(locator1 = "${baseURL}/group/control_panel/manage?p_p_id=com_liferay_configuration_admin_web_portlet_SystemSettingsPortlet&_com_liferay_configuration_admin_web_portlet_SystemSettingsPortlet_factoryPid=com.liferay.message.boards.configuration.MBConfiguration&_com_liferay_configuration_admin_web_portlet_SystemSettingsPortlet_mvcRenderCommandName=%2Fconfiguration_admin%2Fedit_configuration");
+
+		Type(
+			key_text = "Expire Ban Job Interval",
+			locator1 = "TextInput#ANY",
+			value1 = "${fieldValue}");
+
+		SystemSettings.saveConfiguration();
 	}
 
 	macro viewAnonymousPostingCheckboxCP {
@@ -1208,6 +1247,12 @@ definition {
 			key_threadBody = "${threadBody}",
 			locator1 = "MessageBoardsThread#THREAD_BODY",
 			value1 = "${threadBody}");
+	}
+
+	macro viewBannedUserAuthenticationMessage {
+		AssertTextEquals.assertPartialText(
+			locator1 = "Message#ERROR_DISMISSIBLE",
+			value1 = "You have been banned by the moderator.");
 	}
 
 	macro viewBBCodeNoXSS {
@@ -1473,6 +1518,12 @@ definition {
 		}
 
 		AssertElementNotPresent(locator1 = "Checkbox#ANONYMOUS");
+	}
+
+	macro viewNoBannedUsers {
+		AssertTextEquals.assertText(
+			locator1 = "Message#EMPTY_INFO",
+			value1 = "There are no banned users.");
 	}
 
 	macro viewNoPG {

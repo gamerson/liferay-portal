@@ -14,7 +14,6 @@
 
 package com.liferay.commerce.product.model.impl;
 
-import com.liferay.commerce.account.constants.CommerceAccountConstants;
 import com.liferay.commerce.media.CommerceMediaResolverUtil;
 import com.liferay.commerce.product.exception.CPDefinitionMetaDescriptionException;
 import com.liferay.commerce.product.exception.CPDefinitionMetaKeywordsException;
@@ -52,6 +51,7 @@ import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.portal.kernel.util.UnicodePropertiesBuilder;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.kernel.workflow.WorkflowConstants;
 
 import java.util.List;
 import java.util.Locale;
@@ -200,7 +200,8 @@ public class CPDefinitionImpl extends CPDefinitionBaseImpl {
 	@Override
 	public List<CPInstance> getCPInstances() {
 		return CPInstanceLocalServiceUtil.getCPDefinitionInstances(
-			getCPDefinitionId(), QueryUtil.ALL_POS, QueryUtil.ALL_POS);
+			getCPDefinitionId(), WorkflowConstants.STATUS_ANY,
+			QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
 	}
 
 	@Override
@@ -219,22 +220,9 @@ public class CPDefinitionImpl extends CPDefinitionBaseImpl {
 	}
 
 	@Override
-	public String getDefaultImageFileURL() throws PortalException {
-		CPAttachmentFileEntry cpAttachmentFileEntry =
-			CPDefinitionLocalServiceUtil.getDefaultImageCPAttachmentFileEntry(
-				getCPDefinitionId());
+	public String getDefaultImageThumbnailSrc(long commerceAccountId)
+		throws Exception {
 
-		if (cpAttachmentFileEntry == null) {
-			return CommerceMediaResolverUtil.getDefaultURL(getGroupId());
-		}
-
-		return CommerceMediaResolverUtil.getURL(
-			CommerceAccountConstants.ACCOUNT_ID_GUEST,
-			cpAttachmentFileEntry.getCPAttachmentFileEntryId());
-	}
-
-	@Override
-	public String getDefaultImageThumbnailSrc() throws Exception {
 		CPAttachmentFileEntry cpAttachmentFileEntry =
 			CPDefinitionLocalServiceUtil.getDefaultImageCPAttachmentFileEntry(
 				getCPDefinitionId());
@@ -244,7 +232,7 @@ public class CPDefinitionImpl extends CPDefinitionBaseImpl {
 		}
 
 		return CommerceMediaResolverUtil.getThumbnailURL(
-			CommerceAccountConstants.ACCOUNT_ID_GUEST,
+			commerceAccountId,
 			cpAttachmentFileEntry.getCPAttachmentFileEntryId());
 	}
 

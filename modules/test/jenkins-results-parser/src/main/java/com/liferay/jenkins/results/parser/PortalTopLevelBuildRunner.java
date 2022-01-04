@@ -34,28 +34,32 @@ public abstract class PortalTopLevelBuildRunner
 			portalTopLevelBuildData.getPortalUpstreamBranchName(),
 			portalTopLevelBuildData.getTopLevelJobName());
 
-		WorkspaceGitRepository workspaceGitRepository =
+		for (WorkspaceGitRepository workspaceGitRepository :
+				_workspace.getWorkspaceGitRepositories()) {
+
+			workspaceGitRepository.addPropertyOption(
+				String.valueOf(portalTopLevelBuildData.getBuildProfile()));
+			workspaceGitRepository.addPropertyOption(
+				workspaceGitRepository.getUpstreamBranchName());
+
+			String dockerEnabled = System.getenv("DOCKER_ENABLED");
+
+			if ((dockerEnabled != null) && dockerEnabled.equals("true")) {
+				workspaceGitRepository.addPropertyOption("docker");
+			}
+
+			if (JenkinsResultsParserUtil.isWindows()) {
+				workspaceGitRepository.addPropertyOption("windows");
+			}
+			else {
+				workspaceGitRepository.addPropertyOption("unix");
+			}
+		}
+
+		WorkspaceGitRepository primaryWorkspaceGitRepository =
 			_workspace.getPrimaryWorkspaceGitRepository();
 
-		workspaceGitRepository.addPropertyOption(
-			String.valueOf(portalTopLevelBuildData.getBuildProfile()));
-		workspaceGitRepository.addPropertyOption(
-			portalTopLevelBuildData.getPortalUpstreamBranchName());
-
-		String dockerEnabled = System.getenv("DOCKER_ENABLED");
-
-		if ((dockerEnabled != null) && dockerEnabled.equals("true")) {
-			workspaceGitRepository.addPropertyOption("docker");
-		}
-
-		if (JenkinsResultsParserUtil.isWindows()) {
-			workspaceGitRepository.addPropertyOption("windows");
-		}
-		else {
-			workspaceGitRepository.addPropertyOption("unix");
-		}
-
-		workspaceGitRepository.setGitHubURL(
+		primaryWorkspaceGitRepository.setGitHubURL(
 			portalTopLevelBuildData.getPortalGitHubURL());
 
 		return _workspace;

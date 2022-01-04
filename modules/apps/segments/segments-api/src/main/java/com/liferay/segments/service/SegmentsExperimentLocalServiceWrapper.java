@@ -270,6 +270,15 @@ public class SegmentsExperimentLocalServiceWrapper
 	}
 
 	@Override
+	public com.liferay.segments.model.SegmentsExperience
+		fetchControlSegmentExperience(
+			com.liferay.segments.model.SegmentsExperience segmentsExperience) {
+
+		return _segmentsExperimentLocalService.fetchControlSegmentExperience(
+			segmentsExperience);
+	}
+
+	@Override
 	public SegmentsExperiment fetchSegmentsExperiment(
 		long segmentsExperimentId) {
 

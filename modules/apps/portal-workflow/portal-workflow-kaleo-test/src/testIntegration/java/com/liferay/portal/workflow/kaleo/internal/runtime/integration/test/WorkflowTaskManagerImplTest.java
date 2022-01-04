@@ -1293,7 +1293,9 @@ public class WorkflowTaskManagerImplTest extends BaseWorkflowManagerTestCase {
 	private BlogsEntry _addBlogsEntry(User user) throws Exception {
 		return _blogsEntryLocalService.addEntry(
 			user.getUserId(), StringUtil.randomString(),
-			StringUtil.randomString(), new Date(), _serviceContext);
+			StringUtil.randomString(),
+			new Date(System.currentTimeMillis() - Time.SECOND),
+			_serviceContext);
 	}
 
 	private DLFileEntryType _addFileEntryType() throws Exception {

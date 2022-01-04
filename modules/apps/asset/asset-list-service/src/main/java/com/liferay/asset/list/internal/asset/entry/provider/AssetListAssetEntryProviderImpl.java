@@ -27,11 +27,13 @@ import com.liferay.asset.list.asset.entry.provider.AssetListAssetEntryProvider;
 import com.liferay.asset.list.asset.entry.query.processor.AssetListAssetEntryQueryProcessor;
 import com.liferay.asset.list.constants.AssetListEntryTypeConstants;
 import com.liferay.asset.list.internal.configuration.AssetListConfiguration;
+import com.liferay.asset.list.internal.configuration.FFCollectionsVariationsPrioritizationConfigurationUtil;
 import com.liferay.asset.list.internal.dynamic.data.mapping.util.DDMIndexerUtil;
 import com.liferay.asset.list.model.AssetListEntry;
 import com.liferay.asset.list.model.AssetListEntryAssetEntryRel;
 import com.liferay.asset.list.model.AssetListEntryAssetEntryRelModel;
 import com.liferay.asset.list.model.AssetListEntrySegmentsEntryRel;
+import com.liferay.asset.list.model.AssetListEntrySegmentsEntryRelModel;
 import com.liferay.asset.list.service.AssetListEntryAssetEntryRelLocalService;
 import com.liferay.asset.list.service.AssetListEntrySegmentsEntryRelLocalService;
 import com.liferay.asset.util.AssetHelper;
@@ -525,10 +527,35 @@ public class AssetListAssetEntryProviderImpl
 		int end) {
 
 		if (_assetListConfiguration.combineAssetsFromAllSegmentsManual()) {
-			return _assetListEntryAssetEntryRelLocalService.
-				getAssetListEntryAssetEntryRels(
-					assetListEntry.getAssetListEntryId(),
-					_getCombinedSegmentsEntryIds(segmentsEntryIds), start, end);
+			if (!FFCollectionsVariationsPrioritizationConfigurationUtil.
+					prioritizationEnabled()) {
+
+				return _assetListEntryAssetEntryRelLocalService.
+					getAssetListEntryAssetEntryRels(
+						assetListEntry.getAssetListEntryId(),
+						_getCombinedSegmentsEntryIds(segmentsEntryIds), start,
+						end);
+			}
+
+			List<AssetListEntryAssetEntryRel> assetListEntryAssetEntryRels =
+				new ArrayList<>();
+
+			segmentsEntryIds = _sortSegmentsByPriority(
+				assetListEntry, segmentsEntryIds);
+
+			for (long segmentId : segmentsEntryIds) {
+				assetListEntryAssetEntryRels.addAll(
+					ListUtil.sort(
+						_assetListEntryAssetEntryRelLocalService.
+							getAssetListEntryAssetEntryRels(
+								assetListEntry.getAssetListEntryId(),
+								new long[] {segmentId}, QueryUtil.ALL_POS,
+								QueryUtil.ALL_POS),
+						Comparator.comparing(
+							AssetListEntryAssetEntryRelModel::getPosition)));
+			}
+
+			return assetListEntryAssetEntryRels;
 		}
 
 		return _assetListEntryAssetEntryRelLocalService.
@@ -840,26 +867,52 @@ public class AssetListAssetEntryProviderImpl
 	private long _getFirstSegmentsEntryId(
 		AssetListEntry assetListEntry, long[] segmentsEntryIds) {
 
+		if (!FFCollectionsVariationsPrioritizationConfigurationUtil.
+				prioritizationEnabled()) {
+
+			LongStream longStream = Arrays.stream(segmentsEntryIds);
+
+			return longStream.filter(
+				segmentsEntryId -> {
+					if (segmentsEntryId == SegmentsEntryConstants.ID_DEFAULT) {
+						return false;
+					}
+
+					AssetListEntrySegmentsEntryRel
+						assetListEntrySegmentsEntryRel =
+							_assetListEntrySegmentsEntryRelLocalService.
+								fetchAssetListEntrySegmentsEntryRel(
+									assetListEntry.getAssetListEntryId(),
+									segmentsEntryId);
+
+					return assetListEntrySegmentsEntryRel != null;
+				}
+			).findFirst(
+			).orElse(
+				SegmentsEntryConstants.ID_DEFAULT
+			);
+		}
+
+		if (segmentsEntryIds.length == 0) {
+			return SegmentsEntryConstants.ID_DEFAULT;
+		}
+
 		LongStream longStream = Arrays.stream(segmentsEntryIds);
 
-		return longStream.filter(
-			segmentsEntryId -> {
-				if (segmentsEntryId == SegmentsEntryConstants.ID_DEFAULT) {
-					return false;
-				}
-
-				AssetListEntrySegmentsEntryRel assetListEntrySegmentsEntryRel =
+		Stream<AssetListEntrySegmentsEntryRel>
+			assetListEntrySegmentsEntryRelStream = longStream.mapToObj(
+				segmentsEntryId ->
 					_assetListEntrySegmentsEntryRelLocalService.
 						fetchAssetListEntrySegmentsEntryRel(
 							assetListEntry.getAssetListEntryId(),
-							segmentsEntryId);
+							segmentsEntryId));
 
-				return assetListEntrySegmentsEntryRel != null;
-			}
-		).findFirst(
-		).orElse(
-			SegmentsEntryConstants.ID_DEFAULT
-		);
+		return assetListEntrySegmentsEntryRelStream.filter(
+			Objects::nonNull
+		).min(
+			Comparator.comparing(AssetListEntrySegmentsEntryRel::getPriority)
+		).get(
+		).getSegmentsEntryId();
 	}
 
 	private String[] _getKeywords(UnicodeProperties unicodeProperties) {
@@ -1163,6 +1216,28 @@ public class AssetListAssetEntryProviderImpl
 			siteGroupId, notAnyAssetTagNames);
 
 		assetEntryQuery.setNotAnyTagIds(notAnyAssetTagIds);
+	}
+
+	private long[] _sortSegmentsByPriority(
+		AssetListEntry assetListEntry, long[] segmentsEntryIds) {
+
+		LongStream longStream = Arrays.stream(segmentsEntryIds);
+
+		Stream<AssetListEntrySegmentsEntryRel>
+			assetListEntrySegmentsEntryRelStream = longStream.mapToObj(
+				segmentsEntryId ->
+					_assetListEntrySegmentsEntryRelLocalService.
+						fetchAssetListEntrySegmentsEntryRel(
+							assetListEntry.getAssetListEntryId(),
+							segmentsEntryId));
+
+		return assetListEntrySegmentsEntryRelStream.filter(
+			Objects::nonNull
+		).sorted(
+			Comparator.comparing(AssetListEntrySegmentsEntryRel::getPriority)
+		).mapToLong(
+			AssetListEntrySegmentsEntryRelModel::getSegmentsEntryId
+		).toArray();
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(

@@ -42,6 +42,7 @@ DLPortletInstanceSettingsHelper dlPortletInstanceSettingsHelper = new DLPortletI
 
 	<liferay-frontend:edit-form-body>
 		<liferay-frontend:fieldset-group>
+			<aui:input name="preferences--selectedRepositoryId--" type="hidden" value="<%= dlAdminDisplayContext.getSelectedRepositoryId() %>" />
 			<aui:input name="preferences--rootFolderId--" type="hidden" value="<%= dlAdminDisplayContext.getRootFolderId() %>" />
 			<aui:input name="preferences--displayViews--" type="hidden" />
 			<aui:input name="preferences--entryColumns--" type="hidden" />
@@ -103,10 +104,10 @@ DLPortletInstanceSettingsHelper dlPortletInstanceSettingsHelper = new DLPortletI
 					<aui:button name="selectFolderButton" value="select" />
 
 					<%
-					String taglibRemoveFolder = "Liferay.Util.removeEntitySelection('rootFolderId', 'rootFolderName', this, '" + liferayPortletResponse.getNamespace() + "');";
+					String taglibRemoveFolder = "Liferay.Util.removeEntitySelection('rootFolderId', 'rootFolderName', this, '" + liferayPortletResponse.getNamespace() + "'); Liferay.Util.removeEntitySelection('selectedRepositoryId', '', this, '" + liferayPortletResponse.getNamespace() + "');";
 					%>
 
-					<aui:button disabled="<%= dlAdminDisplayContext.getRootFolderId() <= 0 %>" name="removeFolderButton" onClick="<%= taglibRemoveFolder %>" value="remove" />
+					<aui:button disabled="<%= (dlAdminDisplayContext.getRootFolderId() == DLFolderConstants.DEFAULT_PARENT_FOLDER_ID) && (dlAdminDisplayContext.getSelectedRepositoryId() == scopeGroupId) %>" name="removeFolderButton" onClick="<%= taglibRemoveFolder %>" value="remove" />
 				</div>
 			</liferay-frontend:fieldset>
 
@@ -163,6 +164,14 @@ DLPortletInstanceSettingsHelper dlPortletInstanceSettingsHelper = new DLPortletI
 
 								Liferay.Util.selectFolder(folderData, '<portlet:namespace />');
 
+								var repositoryIdElement = document.querySelector(
+									'#<portlet:namespace />selectedRepositoryId'
+								);
+
+								if (repositoryIdElement != null) {
+									repositoryIdElement.value = selectedItem.repositoryid;
+								}
+
 								var rootFolderInTrashWarning = document.querySelector(
 									'#<portlet:namespace />rootFolderInTrash'
 								);
@@ -183,14 +192,15 @@ DLPortletInstanceSettingsHelper dlPortletInstanceSettingsHelper = new DLPortletI
 							FolderItemSelectorCriterion folderItemSelectorCriterion = new FolderItemSelectorCriterion();
 
 							folderItemSelectorCriterion.setDesiredItemSelectorReturnTypes(new FolderItemSelectorReturnType());
-							folderItemSelectorCriterion.setFolderId((dlAdminDisplayContext.isRootFolderInTrash() || dlAdminDisplayContext.isRootFolderNotFound()) ? DLFolderConstants.DEFAULT_PARENT_FOLDER_ID : dlAdminDisplayContext.getRootFolderId());
+							folderItemSelectorCriterion.setFolderId(dlAdminDisplayContext.getRootFolderId());
 							folderItemSelectorCriterion.setIgnoreRootFolder(true);
+							folderItemSelectorCriterion.setRepositoryId(dlAdminDisplayContext.getSelectedRepositoryId());
 							folderItemSelectorCriterion.setSelectedFolderId(dlAdminDisplayContext.getRootFolderId());
-							folderItemSelectorCriterion.setSelectedRepositoryId(dlAdminDisplayContext.getRepositoryId());
+							folderItemSelectorCriterion.setSelectedRepositoryId(dlAdminDisplayContext.getSelectedRepositoryId());
 							folderItemSelectorCriterion.setShowGroupSelector(true);
 							folderItemSelectorCriterion.setShowMountFolder(false);
 
-							PortletURL selectFolderURL = itemSelector.getItemSelectorURL(RequestBackedPortletURLFactoryUtil.create(request), portletDisplay.getNamespace() + "folderSelected", folderItemSelectorCriterion);
+							PortletURL selectFolderURL = itemSelector.getItemSelectorURL(RequestBackedPortletURLFactoryUtil.create(request), GroupLocalServiceUtil.getGroup(GetterUtil.getLong(dlAdminDisplayContext.getSelectedRepositoryId(), themeDisplay.getScopeGroupId())), themeDisplay.getScopeGroupId(), portletDisplay.getNamespace() + "folderSelected", folderItemSelectorCriterion);
 							%>
 
 							url: '<%= HtmlUtil.escapeJS(selectFolderURL.toString()) %>',

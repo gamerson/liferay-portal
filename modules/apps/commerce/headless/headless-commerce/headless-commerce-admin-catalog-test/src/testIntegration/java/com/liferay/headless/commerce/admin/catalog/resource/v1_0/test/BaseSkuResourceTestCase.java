@@ -189,6 +189,7 @@ public abstract class BaseSkuResourceTestCase {
 		sku.setExternalReferenceCode(regex);
 		sku.setGtin(regex);
 		sku.setManufacturerPartNumber(regex);
+		sku.setReplacementSkuExternalReferenceCode(regex);
 		sku.setSku(regex);
 		sku.setUnspsc(regex);
 
@@ -201,6 +202,8 @@ public abstract class BaseSkuResourceTestCase {
 		Assert.assertEquals(regex, sku.getExternalReferenceCode());
 		Assert.assertEquals(regex, sku.getGtin());
 		Assert.assertEquals(regex, sku.getManufacturerPartNumber());
+		Assert.assertEquals(
+			regex, sku.getReplacementSkuExternalReferenceCode());
 		Assert.assertEquals(regex, sku.getSku());
 		Assert.assertEquals(regex, sku.getUnspsc());
 	}
@@ -1001,6 +1004,22 @@ public abstract class BaseSkuResourceTestCase {
 				continue;
 			}
 
+			if (Objects.equals("discontinued", additionalAssertFieldName)) {
+				if (sku.getDiscontinued() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("discontinuedDate", additionalAssertFieldName)) {
+				if (sku.getDiscontinuedDate() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
 			if (Objects.equals("displayDate", additionalAssertFieldName)) {
 				if (sku.getDisplayDate() == null) {
 					valid = false;
@@ -1119,6 +1138,25 @@ public abstract class BaseSkuResourceTestCase {
 
 			if (Objects.equals("purchasable", additionalAssertFieldName)) {
 				if (sku.getPurchasable() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals(
+					"replacementSkuExternalReferenceCode",
+					additionalAssertFieldName)) {
+
+				if (sku.getReplacementSkuExternalReferenceCode() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("replacementSkuId", additionalAssertFieldName)) {
+				if (sku.getReplacementSkuId() == null) {
 					valid = false;
 				}
 
@@ -1258,6 +1296,27 @@ public abstract class BaseSkuResourceTestCase {
 
 			if (Objects.equals("depth", additionalAssertFieldName)) {
 				if (!Objects.deepEquals(sku1.getDepth(), sku2.getDepth())) {
+					return false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("discontinued", additionalAssertFieldName)) {
+				if (!Objects.deepEquals(
+						sku1.getDiscontinued(), sku2.getDiscontinued())) {
+
+					return false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("discontinuedDate", additionalAssertFieldName)) {
+				if (!Objects.deepEquals(
+						sku1.getDiscontinuedDate(),
+						sku2.getDiscontinuedDate())) {
+
 					return false;
 				}
 
@@ -1421,6 +1480,31 @@ public abstract class BaseSkuResourceTestCase {
 				continue;
 			}
 
+			if (Objects.equals(
+					"replacementSkuExternalReferenceCode",
+					additionalAssertFieldName)) {
+
+				if (!Objects.deepEquals(
+						sku1.getReplacementSkuExternalReferenceCode(),
+						sku2.getReplacementSkuExternalReferenceCode())) {
+
+					return false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("replacementSkuId", additionalAssertFieldName)) {
+				if (!Objects.deepEquals(
+						sku1.getReplacementSkuId(),
+						sku2.getReplacementSkuId())) {
+
+					return false;
+				}
+
+				continue;
+			}
+
 			if (Objects.equals("sku", additionalAssertFieldName)) {
 				if (!Objects.deepEquals(sku1.getSku(), sku2.getSku())) {
 					return false;
@@ -1558,6 +1642,42 @@ public abstract class BaseSkuResourceTestCase {
 		if (entityFieldName.equals("depth")) {
 			throw new IllegalArgumentException(
 				"Invalid entity field " + entityFieldName);
+		}
+
+		if (entityFieldName.equals("discontinued")) {
+			throw new IllegalArgumentException(
+				"Invalid entity field " + entityFieldName);
+		}
+
+		if (entityFieldName.equals("discontinuedDate")) {
+			if (operator.equals("between")) {
+				sb = new StringBundler();
+
+				sb.append("(");
+				sb.append(entityFieldName);
+				sb.append(" gt ");
+				sb.append(
+					_dateFormat.format(
+						DateUtils.addSeconds(sku.getDiscontinuedDate(), -2)));
+				sb.append(" and ");
+				sb.append(entityFieldName);
+				sb.append(" lt ");
+				sb.append(
+					_dateFormat.format(
+						DateUtils.addSeconds(sku.getDiscontinuedDate(), 2)));
+				sb.append(")");
+			}
+			else {
+				sb.append(entityFieldName);
+
+				sb.append(" ");
+				sb.append(operator);
+				sb.append(" ");
+
+				sb.append(_dateFormat.format(sku.getDiscontinuedDate()));
+			}
+
+			return sb.toString();
 		}
 
 		if (entityFieldName.equals("displayDate")) {
@@ -1701,6 +1821,20 @@ public abstract class BaseSkuResourceTestCase {
 				"Invalid entity field " + entityFieldName);
 		}
 
+		if (entityFieldName.equals("replacementSkuExternalReferenceCode")) {
+			sb.append("'");
+			sb.append(
+				String.valueOf(sku.getReplacementSkuExternalReferenceCode()));
+			sb.append("'");
+
+			return sb.toString();
+		}
+
+		if (entityFieldName.equals("replacementSkuId")) {
+			throw new IllegalArgumentException(
+				"Invalid entity field " + entityFieldName);
+		}
+
 		if (entityFieldName.equals("sku")) {
 			sb.append("'");
 			sb.append(String.valueOf(sku.getSku()));
@@ -1772,6 +1906,8 @@ public abstract class BaseSkuResourceTestCase {
 		return new Sku() {
 			{
 				depth = RandomTestUtil.randomDouble();
+				discontinued = RandomTestUtil.randomBoolean();
+				discontinuedDate = RandomTestUtil.nextDate();
 				displayDate = RandomTestUtil.nextDate();
 				expirationDate = RandomTestUtil.nextDate();
 				externalReferenceCode = StringUtil.toLowerCase(
@@ -1786,6 +1922,9 @@ public abstract class BaseSkuResourceTestCase {
 				productId = RandomTestUtil.randomLong();
 				published = RandomTestUtil.randomBoolean();
 				purchasable = RandomTestUtil.randomBoolean();
+				replacementSkuExternalReferenceCode = StringUtil.toLowerCase(
+					RandomTestUtil.randomString());
+				replacementSkuId = RandomTestUtil.randomLong();
 				sku = StringUtil.toLowerCase(RandomTestUtil.randomString());
 				unspsc = StringUtil.toLowerCase(RandomTestUtil.randomString());
 				weight = RandomTestUtil.randomDouble();

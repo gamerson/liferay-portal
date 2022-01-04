@@ -36,9 +36,12 @@ definition {
 	}
 
 	@description = "Feature ID: Legacy | Automation ID: LRAC-8588 | Test Summary: Assert segment overview shows criteria"
+	@ignore = "true"
 	@priority = "3"
 	test AssertSegmentOverviewShowsCriteria {
 		property portal.upstream = "quarantine";
+
+		// AC Bug Ticket: LRAC-10060
 
 		task ("Create Blog and Add to Page") {
 			ACUtils.createBlogsAndAddToPage();
@@ -103,10 +106,13 @@ definition {
 	}
 
 	@description = "Edit a dynamic segment and check the edits are saved"
+	@ignore = "true"
 	@priority = "5"
 	test CanEditDynamicSegmentCheckEditSaved {
 		property portal.acceptance = "false";
 		property portal.upstream = "quarantine";
+
+		// AC Bug Ticket: LRAC-10060
 
 		ACUtils.createBlogsAndAddToPage();
 
@@ -182,7 +188,7 @@ definition {
 
 		ACNavigation.goToSegments();
 
-		ACSegments.editSegment(searchTerm = "Dynamic Segment Test");
+		ACSegments.editSegment(segmentName = "Dynamic Segment Test");
 
 		ACSegments.editWebBehaviorCriterion(
 			activitiesOption = "has not",
@@ -210,9 +216,12 @@ definition {
 	}
 
 	@description = "Feature ID: Legacy | Automation ID: LRAC-8135 | Test Summary: Edit a static segment and check the edits are saved"
+	@ignore = "true"
 	@priority = "5"
 	test CanEditStaticSegmentCheckEditSaved {
 		property portal.upstream = "quarantine";
+
+		// AC Bug Ticket: LRAC-10060
 
 		var usernameList = "ac,liferay";
 		var emailList = "ac@liferay.com,liferay@liferay.com";
@@ -265,7 +274,7 @@ definition {
 
 		ACNavigation.goToSegments();
 
-		ACSegments.editSegment(searchTerm = "Static Segment Test");
+		ACSegments.editSegment(segmentName = "Static Segment Test");
 
 		ACSegments.addStaticMember(tableMember = "liferay liferay");
 
@@ -281,9 +290,12 @@ definition {
 	}
 
 	@description = "Feature ID: Legacy | Automation ID: LRAC-8136 | Test Summary: Rename Individuals Segment"
+	@ignore = "true"
 	@priority = "5"
 	test CanRenameIndividualsSegment {
 		property portal.upstream = "quarantine";
+
+		// AC Bug Ticket: LRAC-10060
 
 		ACUtils.createBlogsAndAddToPage();
 
@@ -331,7 +343,7 @@ definition {
 
 		ACSegments.viewSegmentName(searchTerm = "Dynamic Segment Test");
 
-		ACSegments.editSegment(searchTerm = "Dynamic Segment Test");
+		ACSegments.editSegment(segmentName = "Dynamic Segment Test");
 
 		ACSegments.nameSegment(segmentName = "Rename Dynamic Segment Test");
 
@@ -434,7 +446,7 @@ definition {
 
 		ACNavigation.goToSegments();
 
-		ACSegments.editSegment(searchTerm = "Static Segment Test");
+		ACSegments.editSegment(segmentName = "Static Segment Test");
 
 		ACSegments.viewEditorLabel(labelName = "Static Segment");
 
@@ -501,7 +513,7 @@ definition {
 		task ("Edit Segment and go to Add Member") {
 			ACNavigation.goToSegments();
 
-			ACSegments.editSegment(searchTerm = "Static Segment Test");
+			ACSegments.editSegment(segmentName = "Static Segment Test");
 
 			Click(locator1 = "ACSegments#ADD_MEMBERS_BUTTON");
 		}
@@ -671,7 +683,7 @@ definition {
 		task ("Go to Segments and edit") {
 			ACNavigation.goToSegments();
 
-			ACSegments.editSegment(searchTerm = "Static Segment Test");
+			ACSegments.editSegment(segmentName = "Static Segment Test");
 
 			Click(locator1 = "ACSegments#ADD_MEMBERS_BUTTON");
 		}
@@ -753,7 +765,7 @@ definition {
 		task ("Go to Segments and edit") {
 			ACNavigation.goToSegments();
 
-			ACSegments.editSegment(searchTerm = "New Segment Test");
+			ACSegments.editSegment(segmentName = "New Segment Test");
 
 			ACSegments.viewEditorLabel(labelName = "Static Segment");
 		}
@@ -771,7 +783,7 @@ definition {
 		task ("Assert undo adding Segment member") {
 			ACNavigation.goToSegments();
 
-			ACSegments.editSegment(searchTerm = "New Segment Test");
+			ACSegments.editSegment(segmentName = "New Segment Test");
 
 			AssertElementNotPresent(
 				categoryName = "liferay liferay",
@@ -904,7 +916,7 @@ definition {
 		task ("Go to segments and assert the static members") {
 			ACNavigation.goToSegments();
 
-			ACSegments.editSegment(searchTerm = "Static Segment Test");
+			ACSegments.editSegment(segmentName = "Static Segment Test");
 
 			ACUtils.viewNameList(nameList = "${nameList}");
 		}
@@ -926,7 +938,7 @@ definition {
 		task ("Go to segments and assert if the member is still there") {
 			ACNavigation.goToSegments();
 
-			ACSegments.editSegment(searchTerm = "Static Segment Test");
+			ACSegments.editSegment(segmentName = "Static Segment Test");
 
 			ACSegments.searchMember(findMember = "ac ac");
 
@@ -1015,7 +1027,7 @@ definition {
 
 			ACNavigation.goToSegments();
 
-			ACSegments.editSegment(searchTerm = "Static Segment Test");
+			ACSegments.editSegment(segmentName = "Static Segment Test");
 		}
 
 		task ("Assert element present in ac ac") {

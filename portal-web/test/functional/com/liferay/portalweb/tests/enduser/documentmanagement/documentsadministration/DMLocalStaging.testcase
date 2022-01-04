@@ -49,6 +49,8 @@ definition {
 	@description = "This is a test for LPS-136819. It checks that a file version can be deleted and published."
 	@priority = "4"
 	test CanPublishDeletedFileVersion {
+		property portal.acceptance = "true";
+
 		JSONDocument.addFileWithUploadedFile(
 			dmDocumentDescription = "DM Document Description",
 			dmDocumentTitle = "Document_2.jpg",
@@ -140,6 +142,8 @@ definition {
 	@description = "This is a test for LPS-136818. It checks that a folder with multiple files can be published using the SAP."
 	@priority = "4"
 	test CanPublishFolderWithMultipleFilesViaSAP {
+		property portal.acceptance = "true";
+
 		JSONFolder.addFolder(
 			dmFolderDescription = "DM Folder Description",
 			dmFolderName = "DM Folder Name",
@@ -296,16 +300,6 @@ definition {
 			relatedAssetsTitle = "Web Content Title");
 	}
 
-	@description = "This is a test for LPS-136821. It checks that a repository can be published."
-	@ignore = "true"
-	@priority = "3"
-	test CanPublishRepository {
-		property portal.acceptance = "false";
-
-		// TODO LPS-136821 CanPublishRepository pending implementation
-
-	}
-
 	@description = "This is a test for LPS-136826. It checks that a shortcut can be published using the normal publication process."
 	@priority = "3"
 	test CanPublishShortcut {
@@ -342,6 +336,8 @@ definition {
 	@description = "This is a test for LPS-136817. It checks that a shortcut can be published using the SAP."
 	@priority = "4"
 	test CanPublishShortcutViaSAP {
+		property portal.acceptance = "true";
+
 		JSONGroup.addGroup(groupName = "Test Site Name");
 
 		JSONDocument.addFileWithUploadedFile(
@@ -371,6 +367,8 @@ definition {
 	@description = "This is a test for LPS-136822. It checks that a document type can be updated and published using the normal publication process."
 	@priority = "3"
 	test CanPublishUpdatedDocumentType {
+		property osgi.app.includes = "document-library-google-docs";
+
 		JSONLayout.addWidgetToPublicLayout(
 			column = "1",
 			groupName = "Site Name (Staging)",
@@ -481,19 +479,60 @@ definition {
 	}
 
 	@description = "This is a test for LPS-136831. It checks that a file can be replaced and republished."
-	@ignore = "true"
 	@priority = "3"
 	test CanReplaceFileAndRepublish {
-		property portal.acceptance = "false";
+		JSONDocument.addFileWithUploadedFile(
+			dmDocumentDescription = "DM Document Description",
+			dmDocumentTitle = "DM Document Title",
+			groupName = "Site Name-staging",
+			mimeType = "image/jpeg",
+			sourceFileName = "Document_1.jpeg");
 
-		// TODO LPS-136831 CanReplaceFileAndRepublish pending implementation
+		Navigator.gotoStagedSitePage(
+			pageName = "Staging DM Page",
+			siteName = "Site Name");
 
+		Staging.gotoPublishToLive();
+
+		Staging.publishToLive();
+
+		DMNavigator.openToEntryInAdmin(
+			dmDocumentTitle = "DM Document Title",
+			groupName = "Site Name",
+			siteURLKey = "site-name");
+
+		DMDocument.viewCP(dmDocumentTitle = "DM Document Title");
+
+		DMNavigator.openDocumentsAndMediaAdmin(siteURLKey = "site-name-staging");
+
+		DMDocument.editCP(
+			dmDocumentFileEdit = "Document_2.jpg",
+			dmDocumentFileNameEdit = "File Name Edit.jpg",
+			dmDocumentTitle = "DM Document Title",
+			dmDocumentTitleEdit = "DM Document Title Edit");
+
+		Navigator.gotoStagedSitePage(
+			pageName = "Staging DM Page",
+			siteName = "Site Name");
+
+		Staging.gotoPublishToLive();
+
+		Staging.publishToLive();
+
+		DMNavigator.openToEntryInAdmin(
+			dmDocumentTitle = "DM Document Title Edit",
+			groupName = "Site Name",
+			siteURLKey = "site-name");
+
+		DMDocument.viewCP(dmDocumentTitle = "DM Document Title Edit");
 	}
 
 	@description = "This is a use case for LPS-74621."
 	@priority = "3"
 	@refactorneeded
 	test CommentDMDocumentOnLiveSite {
+		property testray.component.names = "Comment";
+
 		Navigator.gotoStagedSitePage(
 			pageName = "Staging DM Page",
 			siteName = "Site Name");
@@ -592,6 +631,8 @@ definition {
 	@priority = "5"
 	@refactorneeded
 	test DeleteDocumentWithCustomType {
+		property portal.acceptance = "true";
+
 		DMNavigator.gotoDocumentType();
 
 		DMDocumentType.add(
@@ -644,6 +685,8 @@ definition {
 	@priority = "5"
 	@refactorneeded
 	test EditDocumentWithCustomType {
+		property portal.acceptance = "true";
+
 		DMNavigator.gotoDocumentType();
 
 		DMDocumentType.add(
@@ -712,6 +755,8 @@ definition {
 	@priority = "5"
 	@refactordone
 	test PendingEntryWillNotBePublishedToLive {
+		property portal.acceptance = "true";
+
 		JSONFolder.addFolder(
 			dmFolderDescription = "DM Folder Description",
 			dmFolderName = "DM Folder 1",
@@ -757,6 +802,8 @@ definition {
 	@description = "LPS-90557 - Publishing deletion of shortcut target results in PortletDataException."
 	@priority = "5"
 	test PublishDeletionOfShortcutTarget {
+		property portal.acceptance = "true";
+
 		DMNavigator.gotoAddDocumentTypeCP();
 
 		DMDocument.editDocument(
@@ -884,6 +931,8 @@ definition {
 	@priority = "4"
 	@refactorneeded
 	test PublishDocumentTypeViaSAP {
+		property portal.acceptance = "true";
+
 		DMNavigator.gotoDocumentType();
 
 		DMDocumentType.add(
@@ -998,6 +1047,8 @@ definition {
 	@priority = "5"
 	@refactorneeded
 	test PublishEditsToDocumentUsingCustomTypeAndSet {
+		property portal.acceptance = "true";
+
 		DMNavigator.gotoMetadataSets();
 
 		DMMetadataSet.addTitle(metadataSetName = "Document Metadata Set Name");
@@ -1184,6 +1235,7 @@ definition {
 	@priority = "5"
 	@refactorneeded
 	test PublishSubfolderWithDocumentsViaSAP {
+		property portal.acceptance = "true";
 		property test.name.skip.portal.instance = "StagingDM#PublishSubfolderWithDocumentsViaSAP";
 
 		JSONFolder.addFolder(
@@ -1587,6 +1639,8 @@ definition {
 	@priority = "4"
 	@refactorneeded
 	test ViewWebContentWithDeletedImage {
+		property portal.acceptance = "true";
+
 		DMDocument.addCP(
 			dmDocumentDescription = "DM Document Description",
 			dmDocumentFile = "Document_2.jpg",
@@ -1678,6 +1732,8 @@ definition {
 	@priority = "4"
 	@refactorneeded
 	test ViewWebContentWithRepublishedImage {
+		property portal.acceptance = "true";
+
 		DMDocument.addCP(
 			dmDocumentDescription = "DM Document Description",
 			dmDocumentFile = "Document_2.jpg",

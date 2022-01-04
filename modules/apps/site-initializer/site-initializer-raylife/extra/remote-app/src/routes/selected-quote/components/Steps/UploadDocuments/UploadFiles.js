@@ -27,7 +27,7 @@ const UploadFiles = ({dropAreaProps, files, setFiles, title}) => {
 
 	return (
 		<>
-			<div className="upload-file">
+			<div className="d-flex upload-file">
 				<PreviewDocuments
 					files={files}
 					onRemoveFile={onRemoveFile}
@@ -43,19 +43,22 @@ const UploadFiles = ({dropAreaProps, files, setFiles, title}) => {
 			</div>
 
 			{showBadgeInfo && (
-				<div className="upload-alert">
+				<div className="c-mt-3 upload-alert">
 					<InfoBadge>
-						<div className="alert-content">
-							<div className="alert-description">
-								{dropAreaProps.limitFiles}
-								file upload limit reached for {title}.
+						<div className="alert-content align-items-center d-flex justify-content-between w-100">
+							<div className="alert-description font-weight-normal text-paragraph">
+								{dropAreaProps.limitFiles} file upload limit
+								reached for {title}.
 							</div>
 
 							<div
-								className="closeIcon"
+								className="align-items-center c-mr-4 close-icon d-flex justify-content-center"
 								onClick={() => setShowBadgeInfo(!showBadgeInfo)}
 							>
-								<ClayIcon symbol="times" />
+								<ClayIcon
+									className="flex-shrink-0"
+									symbol="times"
+								/>
 							</div>
 						</div>
 					</InfoBadge>

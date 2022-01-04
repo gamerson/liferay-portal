@@ -84,7 +84,11 @@ definition {
 
 		SelectFieldText(locator1 = "CKEditor#BODY");
 
-		SelectFrame(value1 = "relative=top");
+		var windowID = selenium.getTitle();
+
+		SelectWindow(locator1 = "title=${windowID}");
+
+		WaitForLiferayEvent.initializeLiferayEventLog();
 
 		Click(
 			key_fieldLabel = "${fieldLabel}",
@@ -110,6 +114,13 @@ definition {
 				key_nodeName = "${pageName}",
 				locator1 = "Treeview#NODE_UNSELECTED",
 				value1 = "${pageName}");
+		}
+
+		if (isSet(entryExternalURL)) {
+			AssertTextEquals(
+				key_text = "URL",
+				locator1 = "TextInput#ANY",
+				value1 = "${entryExternalURL}");
 		}
 
 		Click(locator1 = "CKEditor#OK_BUTTON");

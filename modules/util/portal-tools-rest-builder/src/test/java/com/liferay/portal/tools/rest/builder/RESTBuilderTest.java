@@ -26,6 +26,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import java.util.List;
+import java.util.stream.Stream;
+
 import org.apache.commons.io.FileUtils;
 
 import org.junit.Assert;
@@ -56,6 +59,11 @@ public class RESTBuilderTest {
 
 		_assertResourceFilesExist(filesPath, "Document");
 		_assertResourceFilesExist(filesPath, "Folder");
+		_assertResourceFilesExist(filesPath, "Test");
+
+		_assertPropertiesWithHyphens(
+			filesPath, "Test", "property-with-hyphens");
+		_assertPropertiesWithXML(filesPath, "Test", "xmlProperty");
 
 		_assertForcePredictableOperationId(filesPath);
 
@@ -84,6 +92,54 @@ public class RESTBuilderTest {
 			Files.readAllBytes(queryJavaFile.toPath()), StandardCharsets.UTF_8);
 
 		Assert.assertFalse(text.contains("ForcePredictableOperationIdTest"));
+	}
+
+	private void _assertPropertiesWithHyphens(
+			String filesPath, String resourceName, String propertyName)
+		throws Exception {
+
+		File dtoResourceFile = new File(
+			_getResourcePath(
+				filesPath,
+				"/sample-api/src/main/java/com/example/sample/dto/v1_0_0/",
+				resourceName, ".java"));
+
+		List<String> lines = Files.readAllLines(dtoResourceFile.toPath());
+
+		Stream<String> stream = lines.stream();
+
+		Assert.assertTrue(
+			stream.anyMatch(
+				line -> line.contains(
+					"access = JsonProperty.Access.READ_WRITE, value = \"" +
+						propertyName + "\"")));
+
+		stream = lines.stream();
+
+		Assert.assertTrue(
+			stream.anyMatch(
+				line -> line.contains(
+					"sb.append(\"\\\"" + propertyName + "\\\": \");")));
+	}
+
+	private void _assertPropertiesWithXML(
+			String filesPath, String resourceName, String xmlPropertyName)
+		throws Exception {
+
+		File dtoResourceFile = new File(
+			_getResourcePath(
+				filesPath,
+				"/sample-api/src/main/java/com/example/sample/dto/v1_0_0/",
+				resourceName, ".java"));
+
+		List<String> lines = Files.readAllLines(dtoResourceFile.toPath());
+
+		Stream<String> stream = lines.stream();
+
+		Assert.assertTrue(
+			stream.anyMatch(
+				line -> line.contains(
+					"@XmlElement(name = \"" + xmlPropertyName + "\")")));
 	}
 
 	private void _assertResourceFilesExist(

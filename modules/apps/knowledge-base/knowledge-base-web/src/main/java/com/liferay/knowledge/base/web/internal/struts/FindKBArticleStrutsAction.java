@@ -80,6 +80,8 @@ public class FindKBArticleStrutsAction implements StrutsAction {
 			HttpServletResponse httpServletResponse)
 		throws Exception {
 
+		String backURL = ParamUtil.getString(
+			httpServletRequest, "p_l_back_url");
 		long plid = ParamUtil.getLong(httpServletRequest, "plid");
 		long resourcePrimKey = ParamUtil.getLong(
 			httpServletRequest, "resourcePrimKey");
@@ -120,9 +122,13 @@ public class FindKBArticleStrutsAction implements StrutsAction {
 			portletURL = getDynamicPortletURL(plid, status, httpServletRequest);
 		}
 
+		if (Validator.isNotNull(backURL)) {
+			portletURL.setParameter("backURL", backURL);
+		}
+
 		if (maximized) {
-			portletURL.setWindowState(LiferayWindowState.MAXIMIZED);
 			portletURL.setPortletMode(PortletMode.VIEW);
+			portletURL.setWindowState(LiferayWindowState.MAXIMIZED);
 		}
 
 		httpServletResponse.sendRedirect(portletURL.toString());

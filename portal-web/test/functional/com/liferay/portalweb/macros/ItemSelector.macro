@@ -983,6 +983,46 @@ definition {
 			locator1 = "ItemSelector#VIEWER_FOOTER_IMAGE");
 	}
 
+	macro viewRelevantSelections {
+		SelectFrame(locator1 = "ItemSelector#ITEM_SELECTOR_IFRAME");
+
+		if (isSet(addDocumentOptions)) {
+			ItemSelector.switchTab(navTab = "Documents and Media");
+
+			LexiconEntry.gotoAdd();
+
+			for (var menuItem : list "File Upload,Folder,Google Drive Shortcut,External Video Shortcut") {
+				MenuItem.viewPresent(menuItem = "${menuItem}");
+			}
+		}
+
+		if (isSet(addImageOptions)) {
+			LexiconEntry.gotoAdd();
+
+			for (var menuItem : list "File Upload,Folder") {
+				MenuItem.viewPresent(menuItem = "${menuItem}");
+			}
+
+			for (var menuItem : list "External Video Shortcut,Google Drive Shortcut") {
+				MenuItem.viewNotPresent(menuItem = "${menuItem}");
+			}
+		}
+
+		if (isSet(addVideoOptions)) {
+			ItemSelector.switchTab(navTab = "Documents and Media");
+
+			LexiconEntry.gotoAdd();
+
+			for (var menuItem : list "File Upload,Folder,External Video Shortcut") {
+				MenuItem.viewPresent(menuItem = "${menuItem}");
+			}
+
+			for (var menuItem : list "Google Drive Shortcut") {
+				MenuItem.viewNotPresent(menuItem = "${menuItem}");
+			}
+		}
+	}
+
 	macro viewWCCurrentSiteFilterResults {
 		LexiconEntry.changeDisplayStyle(displayStyle = "list");
 

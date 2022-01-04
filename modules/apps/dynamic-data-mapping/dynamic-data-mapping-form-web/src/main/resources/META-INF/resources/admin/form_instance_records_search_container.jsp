@@ -46,6 +46,19 @@ PortletURL portletURL = ddmFormViewFormInstanceRecordsDisplayContext.getPortletU
 	sortingURL="<%= ddmFormViewFormInstanceRecordsDisplayContext.getSortingURL() %>"
 />
 
+<c:if test="<%= ddmFormAdminDisplayContext.isExpirationDateEnabled() && DDMFormInstanceExpirationStatusUtil.isFormExpired(ddmFormViewFormInstanceRecordsDisplayContext.getDDMFormInstance(), timeZone) %>">
+	<clay:stripe
+		dismissible="<%= true %>"
+		displayType="warning"
+		message="the-form-is-expired-and-is-no-longer-available-for-editing-or-submitting-new-answers"
+	/>
+</c:if>
+
+<clay:stripe
+	displayType="info"
+	message="view-current-fields-warning-message"
+/>
+
 <clay:container-fluid
 	id='<%= liferayPortletResponse.getNamespace() + "viewEntriesContainer" %>'
 >

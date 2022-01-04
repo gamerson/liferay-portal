@@ -61,6 +61,7 @@ describe('ImportMappingItem', () => {
 
 	it('must call the onChange method on user click dropdown item not selected', () => {
 		const onChangeMock = jest.fn();
+
 		const {getByLabelText, getByText} = render(
 			<ImportMappingItem {...BASE_PROPS} onChange={onChangeMock} />
 		);
@@ -75,6 +76,7 @@ describe('ImportMappingItem', () => {
 
 	it('must not call the onChange method on user click dropdown item selected', () => {
 		const onChangeMock = jest.fn();
+
 		const {getByLabelText, getByRole} = render(
 			<ImportMappingItem
 				field={field}
@@ -83,7 +85,7 @@ describe('ImportMappingItem', () => {
 				selectableFields={selectableFields.filter(
 					(field) => field.label !== selectableFields[0].label
 				)}
-				selectedField={selectableFields[0]}
+				selectedField={selectableFields[0].value}
 			/>
 		);
 
@@ -105,7 +107,7 @@ describe('ImportMappingItem', () => {
 				selectableFields={selectableFields.filter(
 					(fields) => fields.label !== selectableFields[0].label
 				)}
-				selectedField={selectableFields[0]}
+				selectedField={selectableFields[0].value}
 			/>
 		);
 

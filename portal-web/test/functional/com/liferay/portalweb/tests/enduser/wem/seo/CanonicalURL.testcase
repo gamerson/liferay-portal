@@ -32,9 +32,9 @@ definition {
 			groupName = "Site Name",
 			layoutName = "Canonical URL Test Page");
 
-		SitePages.openPagesAdmin(siteURLKey = "site-name");
+		PagesAdmin.openPagesAdmin(siteURLKey = "site-name");
 
-		SitePages.gotoPageMenuItem(
+		PagesAdmin.gotoPageEllipsisMenuItem(
 			menuItem = "Configure",
 			pageName = "Canonical URL Test Page");
 
@@ -132,23 +132,15 @@ definition {
 			groupName = "Site Name",
 			layoutName = "Test Page");
 
-		SitePages.openPagesAdmin(siteURLKey = "site-name");
+		PagesAdmin.openPagesAdmin(siteURLKey = "site-name");
 
-		SitePages.gotoPageMenuItem(
+		PagesAdmin.gotoPageEllipsisMenuItem(
 			menuItem = "Configure",
 			pageName = "Test Page");
 
-		Navigator.gotoNavTab(navTab = "SEO");
-
-		Page.configureCanonicalURL(customCanonicalURL = "localhost:8080/english-canonical-url");
-
-		Page.configureCanonicalURL(
-			customCanonicalURL = "localhost:8080/spain-canonical-url",
-			locale = "es-ES");
-
-		Page.configureCanonicalURL(
-			customCanonicalURL = "localhost:8080/chinese-canonical-url",
-			locale = "zh-CN");
+		PagesAdmin.addLocalizedCanonicalURL(
+			localeList = "en-US,es-ES,zh-CN",
+			localizedCanonicalUrlList = "localhost:8080/english-canonical-url,localhost:8080/spain-canonical-url,localhost:8080/chinese-canonical-url");
 
 		User.logoutPG();
 
@@ -174,9 +166,9 @@ definition {
 			groupName = "Site Name",
 			layoutName = "Canonical URL Test Page");
 
-		SitePages.openPagesAdmin(siteURLKey = "site-name");
+		PagesAdmin.openPagesAdmin(siteURLKey = "site-name");
 
-		SitePages.gotoPageMenuItem(
+		PagesAdmin.gotoPageEllipsisMenuItem(
 			menuItem = "Configure",
 			pageName = "Canonical URL Test Page");
 
@@ -291,9 +283,9 @@ definition {
 			category = "Site Builder",
 			portlet = "Pages");
 
-		SitePages.addPublicPage(pageName = "Page1");
+		PagesAdmin.addPublicPage(pageName = "Page1");
 
-		SitePages.addPublicPage(pageName = "Page2");
+		PagesAdmin.addPublicPage(pageName = "Page2");
 
 		Site.openSiteSettingsAdmin(siteURLKey = "guest");
 

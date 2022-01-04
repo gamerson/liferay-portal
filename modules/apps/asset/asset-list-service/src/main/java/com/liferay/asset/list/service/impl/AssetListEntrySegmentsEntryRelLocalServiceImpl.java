@@ -67,6 +67,10 @@ public class AssetListEntrySegmentsEntryRelLocalServiceImpl
 		assetListEntrySegmentsEntryRel.setSegmentsEntryId(segmentsEntryId);
 		assetListEntrySegmentsEntryRel.setTypeSettings(typeSettings);
 
+		assetListEntrySegmentsEntryRel.setPriority(
+			assetListEntrySegmentsEntryRelPersistence.countByAssetListEntryId(
+				assetListEntryId));
+
 		return assetListEntrySegmentsEntryRelPersistence.update(
 			assetListEntrySegmentsEntryRel);
 	}
@@ -143,6 +147,15 @@ public class AssetListEntrySegmentsEntryRelLocalServiceImpl
 	}
 
 	@Override
+	public List<AssetListEntrySegmentsEntryRel>
+		fetchAssetListEntrySegmentsEntryRels(
+			long assetListEntryId, long[] segmentsEntryId) {
+
+		return assetListEntrySegmentsEntryRelPersistence.findByA_S_C(
+			assetListEntryId, segmentsEntryId);
+	}
+
+	@Override
 	public AssetListEntrySegmentsEntryRel getAssetListEntrySegmentsEntryRel(
 			long assetListEntryId, long segmentsEntryId)
 		throws PortalException {
@@ -180,6 +193,30 @@ public class AssetListEntrySegmentsEntryRelLocalServiceImpl
 
 		return assetListEntrySegmentsEntryRelPersistence.update(
 			assetListEntrySegmentsEntryRel);
+	}
+
+	@Override
+	public void updateVariationsPriority(long[] variationsPriority) {
+		for (int priority = 0; priority < variationsPriority.length;
+			 priority++) {
+
+			AssetListEntrySegmentsEntryRel assetListEntrySegmentsEntryRel =
+				null;
+
+			try {
+				assetListEntrySegmentsEntryRel =
+					getAssetListEntrySegmentsEntryRel(
+						variationsPriority[priority]);
+			}
+			catch (PortalException portalException) {
+				portalException.printStackTrace();
+			}
+
+			assetListEntrySegmentsEntryRel.setPriority(priority);
+
+			updateAssetListEntrySegmentsEntryRel(
+				assetListEntrySegmentsEntryRel);
+		}
 	}
 
 	@Reference

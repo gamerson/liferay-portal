@@ -3,7 +3,8 @@ definition {
 	macro _configureExportSiteOptions {
 		if (isSet(larFileName)) {
 			Type(
-				locator1 = "SitePagesExport#EXPORT_PROCESS_NAME",
+				inputFieldId = "ExportPortlet_name",
+				locator1 = "TextInput#INPUT_ID",
 				value1 = "${larFileName}");
 		}
 
@@ -102,7 +103,8 @@ definition {
 	macro _exportSite {
 		if (isSet(larFileName)) {
 			Type(
-				locator1 = "SitePagesExport#EXPORT_PROCESS_NAME",
+				inputFieldId = "ExportPortlet_name",
+				locator1 = "TextInput#INPUT_ID",
 				value1 = "${larFileName}");
 		}
 
@@ -153,13 +155,14 @@ definition {
 		AssertVisible(locator1 = "Button#BACK");
 
 		AssertClickNoError(
-			locator1 = "SitePagesImport#IMPORT_BUTTON",
+			key_text = "Import",
+			locator1 = "Button#ANY",
 			value1 = "Import");
 
 		Pause(locator1 = "5000");
 
 		AssertTextEquals(
-			locator1 = "SitePagesImport#CURRENT_AND_PREVIOUS_STATUS_1",
+			locator1 = "ExportImport#CURRENT_AND_PREVIOUS_STATUS_1",
 			value1 = "Successful");
 	}
 
@@ -191,44 +194,44 @@ definition {
 				value1 = "${larFileName}");
 		}
 
-		while ((IsElementNotPresent(locator1 = "Button#CONTINUE")) && (IsElementNotPresent(locator1 = "SitePagesImport#VALIDATION_ERROR_MESSAGE_HEADER"))) {
+		while ((IsElementNotPresent(locator1 = "Button#CONTINUE")) && (IsElementNotPresent(locator1 = "ExportImport#VALIDATION_ERROR_MESSAGE_HEADER"))) {
 			Pause(locator1 = "1000");
 		}
 
 		if ("${cannotImport}" == "true") {
 			AssertTextEquals(
-				locator1 = "SitePagesImport#VALIDATION_ERROR_MESSAGE_HEADER",
+				locator1 = "ExportImport#VALIDATION_ERROR_MESSAGE_HEADER",
 				value1 = "The file ${larFileName} cannot be imported.");
 		}
 		else if (isSet(importSchemaVersionMismatching)) {
 			AssertTextEquals(
-				locator1 = "SitePagesImport#VALIDATION_ERROR_MESSAGE_HEADER",
+				locator1 = "ExportImport#VALIDATION_ERROR_MESSAGE_HEADER",
 				value1 = "The file ${larFileName} cannot be imported.");
 
 			AssertTextPresent(
-				locator1 = "SitePagesImport#VALIDATION_ERROR_MESSAGE",
+				locator1 = "ExportImport#VALIDATION_ERROR_MESSAGE",
 				value1 = "LAR schema version 1.0.0 does not match deployed export/import schema version 4.0.0.");
 		}
 		else if (isSet(importValidationMissingItem)) {
 			AssertTextEquals(
-				locator1 = "SitePagesImport#VALIDATION_ERROR_MESSAGE_HEADER",
+				locator1 = "ExportImport#VALIDATION_ERROR_MESSAGE_HEADER",
 				value1 = "The file ${larFileName} cannot be imported.");
 
 			AssertTextEquals(
-				locator1 = "SitePagesImport#VALIDATION_ERROR_MESSAGE",
+				locator1 = "ExportImport#VALIDATION_ERROR_MESSAGE",
 				value1 = "There are missing references that could not be found in the current environment. Please import the following elements first:");
 
 			AssertTextEquals.assertPartialText(
-				locator1 = "SitePagesImport#VALIDATION_ERROR_LIST_ITEM",
+				locator1 = "ExportImport#VALIDATION_ERROR_LIST_ITEM",
 				value1 = "${importValidationMissingItem}");
 		}
 		else if (isSet(import6210buildNumber)) {
 			AssertTextEquals(
-				locator1 = "SitePagesImport#VALIDATION_ERROR_MESSAGE_HEADER",
+				locator1 = "ExportImport#VALIDATION_ERROR_MESSAGE_HEADER",
 				value1 = "The file ${larFileName} cannot be imported.");
 
 			AssertTextPresent(
-				locator1 = "SitePagesImport#VALIDATION_ERROR_MESSAGE",
+				locator1 = "ExportImport#VALIDATION_ERROR_MESSAGE",
 				value1 = "LAR build number 6210 does not match portal build number");
 		}
 		else {
@@ -299,36 +302,36 @@ definition {
 		}
 
 		if (isSet(importValidationMissingItem) || isSet(importCampaignValidationError) || isSet(importCampaignValidationError)) {
-			while ((IsElementNotPresent(locator1 = "SitePagesImport#VALIDATION_ERROR_MESSAGE")) && (IsElementNotPresent(locator1 = "ExportImport#CURRENT_AND_PREVIOUS_STATUS_1"))) {
+			while ((IsElementNotPresent(locator1 = "ExportImport#VALIDATION_ERROR_MESSAGE")) && (IsElementNotPresent(locator1 = "ExportImport#CURRENT_AND_PREVIOUS_STATUS_1"))) {
 				Pause(locator1 = "1000");
 			}
 		}
 
 		if (isSet(importValidationMissingItem)) {
 			AssertTextEquals.assertPartialText(
-				locator1 = "SitePagesImport#VALIDATION_ERROR_MESSAGE_HEADER",
+				locator1 = "ExportImport#VALIDATION_ERROR_MESSAGE_HEADER",
 				value1 = "cannot be imported.");
 
 			AssertTextEquals(
-				locator1 = "SitePagesImport#VALIDATION_ERROR_MESSAGE",
+				locator1 = "ExportImport#VALIDATION_ERROR_MESSAGE",
 				value1 = "There are missing references that could not be found in the current environment. Please import the following elements first:");
 
 			AssertTextEquals.assertPartialText(
-				locator1 = "SitePagesImport#VALIDATION_ERROR_LIST_ITEM",
+				locator1 = "ExportImport#VALIDATION_ERROR_LIST_ITEM",
 				value1 = "${importValidationMissingItem}");
 		}
 
 		if ("${importCampaignValidationError}" == "true") {
 			AssertTextEquals(
-				locator1 = "SitePagesImport#VALIDATION_ERROR_MESSAGE",
+				locator1 = "ExportImport#VALIDATION_ERROR_MESSAGE",
 				value1 = "The following data will not be imported:");
 
 			AssertTextEquals.assertPartialText(
-				locator1 = "SitePagesImport#VALIDATION_ERROR_LIST_ITEM",
+				locator1 = "ExportImport#VALIDATION_ERROR_LIST_ITEM",
 				value1 = "Campaign Tracking Action");
 
 			AssertTextEquals.assertPartialText(
-				locator1 = "SitePagesImport#VALIDATION_ERROR_LIST_ITEM",
+				locator1 = "ExportImport#VALIDATION_ERROR_LIST_ITEM",
 				value1 = "The original Referenced Asset does not exist in the current environment.");
 		}
 
@@ -353,11 +356,12 @@ definition {
 
 	macro clickExportButton {
 		AssertClick(
-			locator1 = "SitePagesExport#EXPORT_BUTTON",
+			key_text = "Export",
+			locator1 = "Button#ANY",
 			value1 = "Export");
 
-		AssertTextEquals.assertPartialText(
-			locator1 = "SitePagesExport#CURRENT_AND_PREVIOUS_STATUS",
+		AssertTextEquals(
+			locator1 = "ExportImport#CURRENT_AND_PREVIOUS_STATUS_1",
 			value1 = "Successful");
 	}
 
@@ -422,16 +426,16 @@ definition {
 	}
 
 	macro downloadLar {
-		Click(locator1 = "SitePagesExport#CURRENT_AND_PREVIOUS_DOWNLOAD");
+		Click(locator1 = "Icon#EXPORT");
 
 		DownloadTempFile();
 	}
 
 	macro editExportTemplateCP {
-		var key_exportTemplateName = "${exportTemplateName}";
-
 		AssertClick(
-			locator1 = "SitePagesExport#EXPORT_TEMPLATES_TABLE_NAME",
+			key_columnName = "title",
+			key_tableEntry = "${exportTemplateName}",
+			locator1 = "LexiconTable#TABLE_ENTRY_COLUMN_LINK",
 			value1 = "${exportTemplateName}");
 
 		PortletEntry.inputName(name = "${exportTemplateNameEdit}");
@@ -452,24 +456,25 @@ definition {
 
 		if (isSet(larFileName)) {
 			Type(
-				locator1 = "SitePagesExport#EXPORT_PROCESS_NAME",
+				inputFieldId = "ExportPortlet_name",
+				locator1 = "TextInput#INPUT_ID",
 				value1 = "${larFileName}");
 		}
 
 		LAR.exportWithAssertionOnSuccess();
 
 		if (isSet(larFileName)) {
-			AssertTextEquals.assertPartialText(
-				locator1 = "SitePagesExport#CURRENT_AND_PREVIOUS_NAME",
+			AssertTextEquals(
+				locator1 = "ExportImport#CURRENT_AND_PREVIOUS_NAME",
 				value1 = "${larFileName}");
 		}
 		else {
-			AssertTextEquals.assertPartialText(
-				locator1 = "SitePagesExport#CURRENT_AND_PREVIOUS_NAME",
+			AssertTextEquals(
+				locator1 = "ExportImport#CURRENT_AND_PREVIOUS_NAME",
 				value1 = "${exportTemplateName}");
 		}
 
-		AssertElementPresent(locator1 = "SitePagesExport#CURRENT_AND_PREVIOUS_DOWNLOAD");
+		AssertElementPresent(locator1 = "Icon#EXPORT");
 	}
 
 	macro exportPortlet {
@@ -499,7 +504,7 @@ definition {
 			LAR.openExportAdmin(siteScopeName = "${siteScopeName}");
 		}
 
-		Click(locator1 = "SitePagesExport#CUSTOM_EXPORT_BUTTON");
+		Click(locator1 = "Icon#PLUS");
 
 		if ("${privateLayout}" == "true") {
 			Click(locator1 = "PagesConfiguration#CHANGE_TO_PRIVATE_PAGES");
@@ -530,11 +535,12 @@ definition {
 
 	macro exportWithAssertionOnSuccess {
 		AssertClick(
-			locator1 = "SitePagesExport#EXPORT_BUTTON",
+			key_text = "Export",
+			locator1 = "Button#ANY",
 			value1 = "Export");
 
 		AssertTextEquals(
-			locator1 = "SitePagesExport#CURRENT_AND_PREVIOUS_STATUS",
+			locator1 = "ExportImport#CURRENT_AND_PREVIOUS_STATUS_1",
 			value1 = "Successful");
 	}
 
@@ -710,47 +716,53 @@ definition {
 			rowEntry = "${larFileName}");
 
 		AssertTextEquals(
-			locator1 = "SitePagesExport#CURRENT_AND_PREVIOUS_STATUS",
+			locator1 = "ExportImport#CURRENT_AND_PREVIOUS_STATUS_1",
 			value1 = "Successful");
 	}
 
 	macro saveExportTemplateCP {
 		Button.clickSave();
 
-		var key_exportTemplateName = "${exportTemplateName}";
-
 		AssertTextEquals(
-			locator1 = "SitePagesExport#EXPORT_TEMPLATES_TABLE_NAME",
+			key_columnName = "title",
+			key_tableEntry = "${exportTemplateName}",
+			locator1 = "LexiconTable#TABLE_ENTRY_INFO",
 			value1 = "${exportTemplateName}");
 
 		AssertTextEquals(
-			locator1 = "SitePagesExport#EXPORT_TEMPLATES_TABLE_DESCRIPTION",
+			key_columnName = "description",
+			key_tableEntry = "${exportTemplateDescription}",
+			locator1 = "LexiconTable#TABLE_ENTRY_INFO",
 			value1 = "${exportTemplateDescription}");
 	}
 
 	macro searchTemplate {
 		Search.searchCP(searchTerm = "${exportTemplateName}");
 
-		var key_exportTemplateName = "${exportTemplateName}";
-
 		AssertTextEquals(
-			locator1 = "SitePagesExport#EXPORT_TEMPLATES_TABLE_NAME",
+			key_columnName = "title",
+			key_tableEntry = "${exportTemplateName}",
+			locator1 = "LexiconTable#TABLE_ENTRY_INFO",
 			value1 = "${exportTemplateName}");
 
 		AssertTextEquals(
-			locator1 = "SitePagesExport#EXPORT_TEMPLATES_TABLE_DESCRIPTION",
+			key_columnName = "description",
+			key_tableEntry = "${exportTemplateDescription}",
+			locator1 = "LexiconTable#TABLE_ENTRY_INFO",
 			value1 = "${exportTemplateDescription}");
 	}
 
 	macro viewExportTemplateCP {
-		var key_exportTemplateName = "${exportTemplateName}";
-
 		AssertTextEquals(
-			locator1 = "SitePagesExport#EXPORT_TEMPLATES_TABLE_NAME",
+			key_columnName = "title",
+			key_tableEntry = "${exportTemplateName}",
+			locator1 = "LexiconTable#TABLE_ENTRY_INFO",
 			value1 = "${exportTemplateName}");
 
 		AssertTextEquals(
-			locator1 = "SitePagesExport#EXPORT_TEMPLATES_TABLE_DESCRIPTION",
+			key_columnName = "description",
+			key_tableEntry = "${exportTemplateDescription}",
+			locator1 = "LexiconTable#TABLE_ENTRY_INFO",
 			value1 = "${exportTemplateDescription}");
 	}
 

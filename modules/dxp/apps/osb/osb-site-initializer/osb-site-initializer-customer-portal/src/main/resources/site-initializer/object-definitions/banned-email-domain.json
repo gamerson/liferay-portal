@@ -1,0 +1,23 @@
+{
+	"label": {
+		"en-US": "Banned Email Domain"
+	},
+	"name": "BannedEmailDomain",
+	"objectFields": [
+		{
+			"indexed": true,
+			"indexedAsKeyword": false,
+			"label": {
+				"en-US": "Domain"
+			},
+			"name": "domain",
+			"required": true,
+			"type": "String"
+		}
+	],
+	"pluralLabel": {
+		"en_US": "Banned Email Domains"
+	},
+	"scope": "company",
+	"system": false
+}

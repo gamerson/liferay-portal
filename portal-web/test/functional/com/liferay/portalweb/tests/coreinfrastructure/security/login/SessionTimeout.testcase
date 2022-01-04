@@ -24,7 +24,6 @@ definition {
 
 	@description = "This is a use case for LPS-75977. Redirect on expire"
 	@priority = "5"
-	@uitest
 	test RedirectOnExpire {
 		property custom.properties = "session.timeout=2${line.separator}session.timeout.redirect.on.expire=true";
 		property test.name.skip.portal.instance = "SessionTimeout#RedirectOnExpire";
@@ -65,7 +64,6 @@ definition {
 
 	@description = "This is a use cae for LRQA-7765. Remember me checked"
 	@priority = "4"
-	@uitest
 	test RememberMeChecked {
 		property custom.properties = "session.timeout=2";
 		property web.xml.timeout = "2";
@@ -81,7 +79,7 @@ definition {
 		}
 
 		task ("Assert session expired message") {
-			User.viewExpiredSessionErrorMessage(message = "Danger:Due to inactivity, your session has expired. Please save any data you may have entered before refreshing the page.");
+			User.viewExpiredSessionErrorMessage(message = "Danger:Due to inactivity, your session has expired. Before you continue, make sure your entered data is saved locally.");
 		}
 
 		task ("Refresh and sign in") {
@@ -101,9 +99,6 @@ definition {
 			Pause(locator1 = "120000");
 
 			User.viewSessionNotExpired(sigin = "False");
-
-			//AssertElementNotPresent(locator1 = "Home#ERROR_MESSAGE_EXPIRED_SESSION");
-
 		}
 
 		task ("Refresh and assert welcome message") {
@@ -125,7 +120,7 @@ definition {
 		task ("Wait for session expired") {
 			Pause(locator1 = "120000");
 
-			User.viewExpiredSessionErrorMessage(message = "Danger:Due to inactivity, your session has expired. Please save any data you may have entered before refreshing the page.");
+			User.viewExpiredSessionErrorMessage(message = "Danger:Due to inactivity, your session has expired. Before you continue, make sure your entered data is saved locally.");
 		}
 
 		task ("Refresh and assert user sign in present") {

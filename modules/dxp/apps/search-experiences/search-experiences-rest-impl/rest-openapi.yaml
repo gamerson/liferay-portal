@@ -32,10 +32,8 @@ components:
                     properties:
                         parameterName:
                             type: string
-                        values:
-                            items:
-                                type: object
-                            type: array
+                        value:
+                            type: object
                     type: object
                 allConditions:
                     items:
@@ -51,10 +49,6 @@ components:
                             type: string
                         value:
                             type: object
-                        values:
-                            items:
-                                type: object
-                            type: array
                     type: object
                 equals:
                     properties:
@@ -86,28 +80,25 @@ components:
                             type: object
                         parameterName:
                             type: string
-                        value:
-                            type: object
-                        values:
-                            items:
-                                type: object
-                            type: array
                     type: object
             type: object
         Configuration:
             properties:
                 advancedConfiguration:
                     properties:
-                        excludes:
-                            items:
-                                type: string
-                            type: array
-                        fetchSource:
-                            type: boolean
-                        includes:
-                            items:
-                                type: string
-                            type: array
+                        source:
+                            properties:
+                                excludes:
+                                    items:
+                                        type: string
+                                    type: array
+                                fetchSource:
+                                    type: boolean
+                                includes:
+                                    items:
+                                        type: string
+                                    type: array
+                            type: object
                     type: object
                 aggregationConfiguration:
                     properties:
@@ -130,10 +121,14 @@ components:
                             type: boolean
                         includeResponseString:
                             type: boolean
+                        queryString:
+                            type: string
                         searchableAssetTypes:
                             items:
                                 type: string
                             type: array
+                        timeZoneId:
+                            type: string
                     type: object
                 highlightConfiguration:
                     properties:
@@ -203,6 +198,10 @@ components:
                                         type: array
                                 type: object
                             type: array
+                    type: object
+                searchContextAttributes:
+                    additionalProperties:
+                        type: object
                     type: object
                 sortConfiguration:
                     properties:
@@ -341,7 +340,7 @@ components:
                 min:
                     type: object
                 type:
-                    enum: [Date, Double, Float, Integer, IntegerArray, Long, LongArray, String, StringArray, TimeRange]
+                    enum: [Boolean, Date, Double, Float, Integer, IntegerArray, Long, LongArray, String, StringArray, TimeRange]
                     type: string
             type: object
         QueryPrefilterContributor:

@@ -7,23 +7,29 @@
 		{
 			"indexed": true,
 			"indexedAsKeyword": false,
-			"indexedLanguageId": "",
 			"label": {
 				"en-US": "Account Key"
 			},
-			"listTypeDefinitionId": 0,
 			"name": "accountKey",
+			"required": true,
+			"type": "String"
+		},
+		{
+			"indexed": true,
+			"indexedAsKeyword": false,
+			"label": {
+				"en-US": "AC Workspace Name"
+			},
+			"name": "acWorkspaceName",
 			"required": false,
 			"type": "String"
 		},
 		{
 			"indexed": true,
 			"indexedAsKeyword": false,
-			"indexedLanguageId": "",
 			"label": {
 				"en-US": "Code"
 			},
-			"listTypeDefinitionId": 0,
 			"name": "code",
 			"required": false,
 			"type": "String"
@@ -31,11 +37,9 @@
 		{
 			"indexed": true,
 			"indexedAsKeyword": false,
-			"indexedLanguageId": "",
 			"label": {
 				"en-US": "Data Region"
 			},
-			"listTypeDefinitionId": 0,
 			"name": "dataRegion",
 			"required": false,
 			"type": "String"
@@ -43,59 +47,19 @@
 		{
 			"indexed": true,
 			"indexedAsKeyword": false,
-			"indexedLanguageId": "",
 			"label": {
-				"en-US": "Liferay Contact Email Address"
+				"en-US": "DXP Version"
 			},
-			"listTypeDefinitionId": 0,
-			"name": "liferayContactEmailAddress",
+			"name": "dxpVersion",
 			"required": false,
 			"type": "String"
 		},
 		{
 			"indexed": true,
 			"indexedAsKeyword": false,
-			"indexedLanguageId": "",
-			"label": {
-				"en-US": "Liferay Contact Name"
-			},
-			"listTypeDefinitionId": 0,
-			"name": "liferayContactName",
-			"required": false,
-			"type": "String"
-		},
-		{
-			"indexed": true,
-			"indexedAsKeyword": false,
-			"indexedLanguageId": "",
-			"label": {
-				"en-US": "Liferay Contact Role"
-			},
-			"listTypeDefinitionId": 0,
-			"name": "liferayContactRole",
-			"required": false,
-			"type": "String"
-		},
-		{
-			"indexed": true,
-			"indexedAsKeyword": false,
-			"indexedLanguageId": "",
-			"label": {
-				"en-US": "Liferay Version"
-			},
-			"listTypeDefinitionId": 0,
-			"name": "liferayVersion",
-			"required": false,
-			"type": "String"
-		},
-		{
-			"indexed": true,
-			"indexedAsKeyword": false,
-			"indexedLanguageId": "",
 			"label": {
 				"en-US": "Max Requestors"
 			},
-			"listTypeDefinitionId": 0,
 			"name": "maxRequestors",
 			"required": false,
 			"type": "Integer"
@@ -103,11 +67,19 @@
 		{
 			"indexed": true,
 			"indexedAsKeyword": false,
-			"indexedLanguageId": "",
+			"label": {
+				"en-US": "Partner"
+			},
+			"name": "partner",
+			"required": false,
+			"type": "Boolean"
+		},
+		{
+			"indexed": true,
+			"indexedAsKeyword": false,
 			"label": {
 				"en-US": "Region"
 			},
-			"listTypeDefinitionId": 0,
 			"name": "region",
 			"required": false,
 			"type": "String"
@@ -115,11 +87,9 @@
 		{
 			"indexed": true,
 			"indexedAsKeyword": false,
-			"indexedLanguageId": "",
 			"label": {
 				"en-US": "SLA Current"
 			},
-			"listTypeDefinitionId": 0,
 			"name": "slaCurrent",
 			"required": false,
 			"type": "String"
@@ -127,23 +97,9 @@
 		{
 			"indexed": true,
 			"indexedAsKeyword": false,
-			"indexedLanguageId": "",
-			"label": {
-				"en-US": "SLA Current End Date"
-			},
-			"listTypeDefinitionId": 0,
-			"name": "slaCurrentEndDate",
-			"required": false,
-			"type": "Date"
-		},
-		{
-			"indexed": true,
-			"indexedAsKeyword": false,
-			"indexedLanguageId": "",
 			"label": {
 				"en-US": "SLA Current Start Date"
 			},
-			"listTypeDefinitionId": 0,
 			"name": "slaCurrentStartDate",
 			"required": false,
 			"type": "Date"
@@ -151,11 +107,19 @@
 		{
 			"indexed": true,
 			"indexedAsKeyword": false,
-			"indexedLanguageId": "",
+			"label": {
+				"en-US": "SLA Current End Date"
+			},
+			"name": "slaCurrentEndDate",
+			"required": false,
+			"type": "Date"
+		},
+		{
+			"indexed": true,
+			"indexedAsKeyword": false,
 			"label": {
 				"en-US": "SLA Expired"
 			},
-			"listTypeDefinitionId": 0,
 			"name": "slaExpired",
 			"required": false,
 			"type": "String"
@@ -163,23 +127,9 @@
 		{
 			"indexed": true,
 			"indexedAsKeyword": false,
-			"indexedLanguageId": "",
-			"label": {
-				"en-US": "SLA Expired End Date"
-			},
-			"listTypeDefinitionId": 0,
-			"name": "slaExpiredEndDate",
-			"required": false,
-			"type": "Date"
-		},
-		{
-			"indexed": true,
-			"indexedAsKeyword": false,
-			"indexedLanguageId": "",
 			"label": {
 				"en-US": "SLA Expired Start Date"
 			},
-			"listTypeDefinitionId": 0,
 			"name": "slaExpiredStartDate",
 			"required": false,
 			"type": "Date"
@@ -187,11 +137,19 @@
 		{
 			"indexed": true,
 			"indexedAsKeyword": false,
-			"indexedLanguageId": "",
+			"label": {
+				"en-US": "SLA Expired End Date"
+			},
+			"name": "slaExpiredEndDate",
+			"required": false,
+			"type": "Date"
+		},
+		{
+			"indexed": true,
+			"indexedAsKeyword": false,
 			"label": {
 				"en-US": "SLA Future"
 			},
-			"listTypeDefinitionId": 0,
 			"name": "slaFuture",
 			"required": false,
 			"type": "String"
@@ -199,11 +157,19 @@
 		{
 			"indexed": true,
 			"indexedAsKeyword": false,
-			"indexedLanguageId": "",
+			"label": {
+				"en-US": "SLA Future Start Date"
+			},
+			"name": "slaFutureStartDate",
+			"required": false,
+			"type": "Date"
+		},
+		{
+			"indexed": true,
+			"indexedAsKeyword": false,
 			"label": {
 				"en-US": "SLA Future End Date"
 			},
-			"listTypeDefinitionId": 0,
 			"name": "slaFutureEndDate",
 			"required": false,
 			"type": "Date"
@@ -211,14 +177,32 @@
 		{
 			"indexed": true,
 			"indexedAsKeyword": false,
-			"indexedLanguageId": "",
 			"label": {
-				"en-US": "SLA Future Start Date"
+				"en-US": "Liferay Contact Name"
 			},
-			"listTypeDefinitionId": 0,
-			"name": "slaFutureStartDate",
+			"name": "liferayContactName",
 			"required": false,
-			"type": "Date"
+			"type": "String"
+		},
+		{
+			"indexed": true,
+			"indexedAsKeyword": false,
+			"label": {
+				"en-US": "Liferay Contact Role"
+			},
+			"name": "liferayContactRole",
+			"required": false,
+			"type": "String"
+		},
+		{
+			"indexed": true,
+			"indexedAsKeyword": false,
+			"label": {
+				"en-US": "Liferay Contact Email Address"
+			},
+			"name": "liferayContactEmailAddress",
+			"required": false,
+			"type": "String"
 		}
 	],
 	"pluralLabel": {

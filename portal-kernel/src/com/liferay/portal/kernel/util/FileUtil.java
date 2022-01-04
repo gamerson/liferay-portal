@@ -165,12 +165,6 @@ public class FileUtil {
 		return _file.extractText(inputStream, fileName, maxStringLength);
 	}
 
-	public static String[] find(
-		String directory, String includes, String excludes) {
-
-		return _file.find(directory, includes, excludes);
-	}
-
 	public static String getAbsolutePath(File file) {
 		return _file.getAbsolutePath(file);
 	}
@@ -220,10 +214,6 @@ public class FileUtil {
 
 	public static String getShortFileName(String fullFileName) {
 		return _file.getShortFileName(fullFileName);
-	}
-
-	public static boolean isAscii(File file) throws IOException {
-		return _file.isAscii(file);
 	}
 
 	public static boolean isSameContent(File file, byte[] bytes, int length) {

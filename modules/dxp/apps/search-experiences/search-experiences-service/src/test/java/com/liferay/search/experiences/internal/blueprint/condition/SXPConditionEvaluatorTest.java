@@ -20,28 +20,25 @@ import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.test.rule.LiferayUnitTestRule;
-import com.liferay.search.experiences.blueprint.parameter.BooleanSXPParameter;
-import com.liferay.search.experiences.blueprint.parameter.DateSXPParameter;
-import com.liferay.search.experiences.blueprint.parameter.DoubleSXPParameter;
-import com.liferay.search.experiences.blueprint.parameter.FloatSXPParameter;
-import com.liferay.search.experiences.blueprint.parameter.IntegerArraySXPParameter;
-import com.liferay.search.experiences.blueprint.parameter.IntegerSXPParameter;
-import com.liferay.search.experiences.blueprint.parameter.LongArraySXPParameter;
-import com.liferay.search.experiences.blueprint.parameter.LongSXPParameter;
 import com.liferay.search.experiences.blueprint.parameter.SXPParameter;
-import com.liferay.search.experiences.blueprint.parameter.StringArraySXPParameter;
-import com.liferay.search.experiences.blueprint.parameter.StringSXPParameter;
+import com.liferay.search.experiences.internal.blueprint.parameter.BooleanSXPParameter;
+import com.liferay.search.experiences.internal.blueprint.parameter.DateSXPParameter;
+import com.liferay.search.experiences.internal.blueprint.parameter.DoubleSXPParameter;
+import com.liferay.search.experiences.internal.blueprint.parameter.FloatSXPParameter;
+import com.liferay.search.experiences.internal.blueprint.parameter.IntegerArraySXPParameter;
+import com.liferay.search.experiences.internal.blueprint.parameter.IntegerSXPParameter;
+import com.liferay.search.experiences.internal.blueprint.parameter.LongArraySXPParameter;
+import com.liferay.search.experiences.internal.blueprint.parameter.LongSXPParameter;
 import com.liferay.search.experiences.internal.blueprint.parameter.SXPParameterData;
+import com.liferay.search.experiences.internal.blueprint.parameter.StringArraySXPParameter;
+import com.liferay.search.experiences.internal.blueprint.parameter.StringSXPParameter;
 import com.liferay.search.experiences.rest.dto.v1_0.Condition;
 import com.liferay.search.experiences.rest.dto.v1_0.Exists;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-
-import java.time.Duration;
-import java.time.Instant;
+import java.time.ZonedDateTime;
 
 import java.util.Date;
+import java.util.TimeZone;
 import java.util.function.Consumer;
 
 import org.junit.Assert;
@@ -162,6 +159,84 @@ public class SXPConditionEvaluatorTest {
 	}
 
 	@Test
+	public void testDateEquals() throws Exception {
+		TimeZone timeZone = TimeZone.getDefault();
+
+		ZonedDateTime zonedDateTime = ZonedDateTime.of(
+			2021, 12, 25, 6, 33, 59, 768, timeZone.toZoneId());
+
+		_setSXPParameters(
+			new DateSXPParameter(
+				"date", true, Date.from(zonedDateTime.toInstant())));
+
+		Assert.assertTrue(
+			_evaluate(
+				_getConditionJSONObject(
+					"equals", "date", _consumeValue("20211225"),
+					_consumeFormat("yyyyMMdd"))));
+		Assert.assertTrue(
+			_evaluate(
+				_getConditionJSONObject(
+					"equals", "date", _consumeValue("063359"),
+					_consumeFormat("HHmmss"))));
+		Assert.assertTrue(
+			_evaluate(
+				_getNotJSONObject(
+					_getConditionJSONObject(
+						"equals", "date", _consumeValue("20211231"),
+						_consumeFormat("yyyyMMdd")))));
+		Assert.assertTrue(
+			_evaluate(
+				_getNotJSONObject(
+					_getConditionJSONObject(
+						"equals", "date", _consumeValue("110011"),
+						_consumeFormat("HHmmss")))));
+	}
+
+	@Test
+	public void testDateRange() throws Exception {
+		TimeZone timeZone = TimeZone.getDefault();
+
+		ZonedDateTime zonedDateTime = ZonedDateTime.of(
+			2021, 12, 25, 6, 33, 59, 768, timeZone.toZoneId());
+
+		_setSXPParameters(
+			new DateSXPParameter(
+				"date", true, Date.from(zonedDateTime.toInstant())));
+
+		Assert.assertTrue(
+			_evaluate(
+				_getRangeJSONObject(
+					"date", "gt", "2021-12-24", "lt", "2021-12-26",
+					_consumeFormat("yyyy-MM-dd"))));
+		Assert.assertTrue(
+			_evaluate(
+				_getRangeJSONObject(
+					"date", "gte", "2021-12-25", "lte", "2021-12-26",
+					_consumeFormat("yyyy-MM-dd"))));
+		Assert.assertTrue(
+			_evaluate(
+				_getRangeJSONObject(
+					"date", "gte", "2021-12-24", "lte", "2021-12-25",
+					_consumeFormat("yyyy-MM-dd"))));
+		Assert.assertTrue(
+			_evaluate(
+				_getRangeJSONObject(
+					"date", "gt", "06.01.02", "lt", "07.11.12",
+					_consumeFormat("HH.mm.ss"))));
+		Assert.assertTrue(
+			_evaluate(
+				_getRangeJSONObject(
+					"date", "gte", "06.33.59", "lte", "07.11.12",
+					_consumeFormat("HH.mm.ss"))));
+		Assert.assertTrue(
+			_evaluate(
+				_getRangeJSONObject(
+					"date", "gte", "06.01.02", "lte", "06.33.59",
+					_consumeFormat("HH.mm.ss"))));
+	}
+
+	@Test
 	public void testEmpty() throws Exception {
 		_condition = null;
 
@@ -178,11 +253,6 @@ public class SXPConditionEvaluatorTest {
 			_evaluate(
 				_getConditionJSONObject(
 					"equals", "boolean", _consumeValue(true))));
-		Assert.assertTrue(
-			_evaluate(
-				_getConditionJSONObject(
-					"equals", "date", _consumeValue(_toDateString(0)),
-					_consumFormat())));
 		Assert.assertTrue(
 			_evaluate(
 				_getConditionJSONObject(
@@ -223,10 +293,6 @@ public class SXPConditionEvaluatorTest {
 
 	@Test
 	public void testGreaterThan() throws Exception {
-		Assert.assertTrue(
-			_evaluate(
-				_getRangeJSONObject(
-					"date", "gt", _toDateString(-1), _consumFormat())));
 		Assert.assertTrue(_evaluate(_getRangeJSONObject("double", "gt", 0.0D)));
 		Assert.assertTrue(_evaluate(_getRangeJSONObject("float", "gt", 0.0F)));
 		Assert.assertTrue(_evaluate(_getRangeJSONObject("integer", "gt", 0)));
@@ -235,10 +301,6 @@ public class SXPConditionEvaluatorTest {
 
 	@Test
 	public void testGreaterThanEquals() throws Exception {
-		Assert.assertTrue(
-			_evaluate(
-				_getRangeJSONObject(
-					"date", "gte", _toDateString(0), _consumFormat())));
 		Assert.assertTrue(
 			_evaluate(_getRangeJSONObject("double", "gte", 1.0D)));
 		Assert.assertTrue(_evaluate(_getRangeJSONObject("float", "gte", 1.0F)));
@@ -271,10 +333,6 @@ public class SXPConditionEvaluatorTest {
 
 	@Test
 	public void testLessThan() throws Exception {
-		Assert.assertTrue(
-			_evaluate(
-				_getRangeJSONObject(
-					"date", "lt", _toDateString(1), _consumFormat())));
 		Assert.assertTrue(_evaluate(_getRangeJSONObject("double", "lt", 2.0D)));
 		Assert.assertTrue(_evaluate(_getRangeJSONObject("float", "lt", 2.0F)));
 		Assert.assertTrue(_evaluate(_getRangeJSONObject("integer", "lt", 2)));
@@ -283,11 +341,6 @@ public class SXPConditionEvaluatorTest {
 
 	@Test
 	public void testLessThanEquals() throws Exception {
-		Assert.assertTrue(
-			_evaluate(
-				_getRangeJSONObject(
-					"date", "lte", _toDateString("yyyyMMddHHmmssS", 0),
-					_consumeFormat("yyyyMMddHHmmssS"))));
 		Assert.assertTrue(
 			_evaluate(_getRangeJSONObject("double", "lte", 1.0D)));
 		Assert.assertTrue(_evaluate(_getRangeJSONObject("float", "lte", 1.0F)));
@@ -488,12 +541,6 @@ public class SXPConditionEvaluatorTest {
 			_evaluate(
 				_getNotJSONObject(
 					_getConditionJSONObject(
-						"equals", "date", _consumeValue(_toDateString(-1)),
-						_consumFormat()))));
-		Assert.assertTrue(
-			_evaluate(
-				_getNotJSONObject(
-					_getConditionJSONObject(
 						"equals", "double", _consumeValue(2.0D)))));
 		Assert.assertTrue(
 			_evaluate(
@@ -551,12 +598,6 @@ public class SXPConditionEvaluatorTest {
 		Assert.assertTrue(
 			_evaluate(
 				_getNotJSONObject(
-					_getRangeJSONObject(
-						"date", "gte", _toDateString(1), "lt", _toDateString(2),
-						_consumFormat()))));
-		Assert.assertTrue(
-			_evaluate(
-				_getNotJSONObject(
 					_getRangeJSONObject("double", "gte", 2.0D, "lt", 3.0D))));
 		Assert.assertTrue(
 			_evaluate(
@@ -574,11 +615,6 @@ public class SXPConditionEvaluatorTest {
 
 	@Test
 	public void testRange() throws Exception {
-		Assert.assertTrue(
-			_evaluate(
-				_getRangeJSONObject(
-					"date", "gte", _toDateString(-1), "lt", _toDateString(1),
-					_consumFormat())));
 		Assert.assertTrue(
 			_evaluate(_getRangeJSONObject("double", "gte", 0.0D, "lt", 2.0D)));
 		Assert.assertTrue(
@@ -602,11 +638,7 @@ public class SXPConditionEvaluatorTest {
 	}
 
 	private Consumer<JSONObject> _consumeValues(Object... values) {
-		return _consume("values", JSONUtil.putAll(values));
-	}
-
-	private Consumer<JSONObject> _consumFormat() {
-		return _consumeFormat("yyyyMMdd");
+		return _consume("value", JSONUtil.putAll(values));
 	}
 
 	private boolean _evaluate() {
@@ -665,31 +697,11 @@ public class SXPConditionEvaluatorTest {
 			null, SetUtil.fromArray(sxpParameters));
 	}
 
-	private String _toDateString(int offset) {
-		return _toDateString("yyyyMMdd", offset);
-	}
-
-	private String _toDateString(String format, long offset) {
-		DateFormat dateFormat = new SimpleDateFormat(format);
-
-		if (offset == 0) {
-			return dateFormat.format(_date);
-		}
-
-		Instant instant = _date.toInstant();
-
-		return dateFormat.format(
-			Date.from(instant.plus(Duration.ofDays(offset))));
-	}
-
-	private static final Date _date = new Date();
-
 	private Condition _condition = new Condition();
 	private SXPParameterData _sxpParameterData = new SXPParameterData(
 		"test",
 		SetUtil.fromArray(
 			new BooleanSXPParameter("boolean", true, true),
-			new DateSXPParameter("date", true, _date),
 			new DoubleSXPParameter("double", true, 1.0D),
 			new FloatSXPParameter("float", true, 1.0F),
 			new IntegerSXPParameter("integer", true, 1),

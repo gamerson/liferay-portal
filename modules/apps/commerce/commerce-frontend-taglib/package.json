@@ -1,9 +1,9 @@
 {
 	"dependencies": {
-		"clay-icon": "2.22.4",
-		"clay-modal": "2.22.4",
-		"clay-pagination-bar": "2.22.4",
-		"clay-table": "2.22.4",
+		"clay-icon": "2.23.2",
+		"clay-modal": "2.23.2",
+		"clay-pagination-bar": "2.23.2",
+		"clay-table": "2.23.2",
 		"frontend-js-web": "*",
 		"metal-component": "2.16.8",
 		"metal-soy": "2.16.9",
@@ -15,5 +15,5 @@
 		"checkFormat": "liferay-npm-scripts check",
 		"format": "liferay-npm-scripts format"
 	},
-	"version": "14.0.3"
+	"version": "15.0.3"
 }

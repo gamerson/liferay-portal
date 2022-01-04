@@ -20,6 +20,7 @@ import com.liferay.frontend.taglib.servlet.taglib.util.JSPRenderer;
 import com.liferay.item.selector.ItemSelector;
 import com.liferay.item.selector.criteria.InfoItemItemSelectorReturnType;
 import com.liferay.item.selector.criteria.info.item.criterion.InfoItemItemSelectorCriterion;
+import com.liferay.layout.display.page.LayoutDisplayPageMultiSelectionProvider;
 import com.liferay.layout.display.page.LayoutDisplayPageObjectProvider;
 import com.liferay.petra.portlet.url.builder.PortletURLBuilder;
 import com.liferay.petra.string.StringPool;
@@ -39,6 +40,7 @@ import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.kernel.xml.Element;
 import com.liferay.site.navigation.constants.SiteNavigationWebKeys;
+import com.liferay.site.navigation.menu.item.display.page.internal.configuration.FFDisplayPageSiteNavigationMenuItemConfigurationUtil;
 import com.liferay.site.navigation.menu.item.display.page.internal.constants.SiteNavigationMenuItemTypeDisplayPageWebKeys;
 import com.liferay.site.navigation.model.SiteNavigationMenuItem;
 import com.liferay.site.navigation.type.SiteNavigationMenuItemType;
@@ -47,6 +49,7 @@ import java.io.IOException;
 
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.portlet.PortletURL;
 import javax.portlet.RenderRequest;
@@ -123,8 +126,30 @@ public class DisplayPageTypeSiteNavigationMenuItemType
 
 	@Override
 	public String getAddTitle(Locale locale) {
-		return LanguageUtil.format(
-			locale, "select-x", _displayPageTypeContext.getLabel(locale));
+		if (!FFDisplayPageSiteNavigationMenuItemConfigurationUtil.
+				multipleSelectionEnabled()) {
+
+			return LanguageUtil.format(
+				locale, "select-x", _displayPageTypeContext.getLabel(locale));
+		}
+
+		String label = _displayPageTypeContext.getLabel(locale);
+
+		Optional<LayoutDisplayPageMultiSelectionProvider<?>>
+			layoutDisplayPageMultiSelectionProviderOptional =
+				_displayPageTypeContext.
+					getLayoutDisplayPageMultiSelectionProviderOptional();
+
+		if (layoutDisplayPageMultiSelectionProviderOptional.isPresent()) {
+			LayoutDisplayPageMultiSelectionProvider<?>
+				layoutDisplayPageMultiSelectionProvider =
+					layoutDisplayPageMultiSelectionProviderOptional.get();
+
+			label = layoutDisplayPageMultiSelectionProvider.getPluralLabel(
+				locale);
+		}
+
+		return LanguageUtil.format(locale, "select-x", label);
 	}
 
 	@Override
@@ -134,7 +159,16 @@ public class DisplayPageTypeSiteNavigationMenuItemType
 		return PortletURLBuilder.createActionURL(
 			renderResponse
 		).setActionName(
-			"/navigation_menu/add_display_page_type_site_navigation_menu_item"
+			() -> {
+				if (isMultiSelection()) {
+					return "/navigation_menu" +
+						"/add_multiple_display_page_type_site_navigation_" +
+							"menu_item";
+				}
+
+				return "/navigation_menu" +
+					"/add_display_page_type_site_navigation_menu_item";
+			}
 		).setParameter(
 			"siteNavigationMenuItemType", getType()
 		).buildPortletURL();
@@ -175,6 +209,16 @@ public class DisplayPageTypeSiteNavigationMenuItemType
 	@Override
 	public String getLabel(Locale locale) {
 		return _displayPageTypeContext.getLabel(locale);
+	}
+
+	@Override
+	public String getName(String typeSettings) {
+		UnicodeProperties typeSettingsUnicodeProperties =
+			UnicodePropertiesBuilder.fastLoad(
+				typeSettings
+			).build();
+
+		return typeSettingsUnicodeProperties.get("title");
 	}
 
 	@Override
@@ -306,6 +350,25 @@ public class DisplayPageTypeSiteNavigationMenuItemType
 	@Override
 	public boolean isItemSelector() {
 		return true;
+	}
+
+	public boolean isMultiSelection() {
+		if (!FFDisplayPageSiteNavigationMenuItemConfigurationUtil.
+				multipleSelectionEnabled()) {
+
+			return false;
+		}
+
+		Optional<LayoutDisplayPageMultiSelectionProvider<?>>
+			layoutDisplayPageMultiSelectionProviderOptional =
+				_displayPageTypeContext.
+					getLayoutDisplayPageMultiSelectionProviderOptional();
+
+		if (layoutDisplayPageMultiSelectionProviderOptional.isPresent()) {
+			return true;
+		}
+
+		return false;
 	}
 
 	@Override

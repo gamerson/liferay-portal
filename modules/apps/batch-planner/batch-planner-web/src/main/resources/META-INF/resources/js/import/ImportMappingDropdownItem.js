@@ -19,11 +19,11 @@ import PropTypes from 'prop-types';
 import React, {useCallback} from 'react';
 
 const ImportMappingDropdownItem = ({item, onClick, selectedItem}) => {
-	const selected = selectedItem?.value === item.value;
+	const selected = selectedItem === item.value;
 
 	const onItemClick = useCallback(() => {
 		if (!selected) {
-			onClick(item);
+			onClick(item.value);
 		}
 	}, [item, onClick, selected]);
 
@@ -50,7 +50,7 @@ export const ImportFieldPropType = {
 ImportMappingDropdownItem.propTypes = {
 	item: PropTypes.shape(ImportFieldPropType).isRequired,
 	onClick: PropTypes.func.isRequired,
-	selectedItem: PropTypes.shape(ImportFieldPropType),
+	selectedItem: PropTypes.string,
 };
 
 export default ImportMappingDropdownItem;

@@ -33,7 +33,7 @@ definition {
 
 			WebContent.tearDownCP();
 
-			Page.tearDownCP();
+			PagesAdmin.tearDownCP();
 		}
 	}
 
@@ -427,9 +427,11 @@ definition {
 			key_text = "Delete",
 			locator1 = "Button#ANY_DISABLED");
 
-		Page.uploadFileForLogo(logoFile = "Document_2.png");
+		PagesAdmin.uploadLogo(logoFile = "Document_2.png");
 
-		AssertElementPresent(locator1 = "Button#DELETE_LAYOUT_LOGO");
+		AssertElementPresent(
+			key_text = "Delete",
+			locator1 = "Button#ANY");
 
 		AssertElementNotPresent(
 			key_text = "Delete",
@@ -445,7 +447,8 @@ definition {
 			configurationScope = "Virtual Instance Scope");
 
 		AssertClick(
-			locator1 = "Button#DELETE_LAYOUT_LOGO",
+			key_text = "Delete",
+			locator1 = "Button#ANY",
 			value1 = "Delete");
 
 		PortletEntry.save();
@@ -521,7 +524,7 @@ definition {
 			category = "Site Builder",
 			portlet = "Pages");
 
-		SitePages.togglePrivacy(privacy = "Public Pages");
+		PagesAdmin.togglePrivacy(privacy = "Public Pages");
 
 		Click(
 			key_pageName = "Public Pages",
@@ -697,9 +700,7 @@ definition {
 
 		Organization.addSiteCP(orgName = "Organization Name");
 
-		PortalSettings.editConfigurationUsersDefaultUserAssociationsOrganizationSitesCP(orgName = "Organization Name");
-
-		PortalSettings.viewConfigurationUsersDefaultUserAssociationsOrganizationSitesCP(orgName = "Organization Name");
+		PortalSettings.editConfigurationUsersDefaultUserAssociationsCP(orgName = "Organization Name");
 
 		JSONUser.addUser(
 			userEmailAddress = "userea@liferay.com",
@@ -728,9 +729,7 @@ definition {
 
 		Role.add(roleTitle = "Roles Regrole Name");
 
-		PortalSettings.editConfigurationUsersDefaultUserAssociationsRolesCP(roleTitle = "Roles Regrole Name");
-
-		PortalSettings.viewConfigurationUsersDefaultUserAssociationsRolesCP(roleTitle = "Roles Regrole Name");
+		PortalSettings.editConfigurationUsersDefaultUserAssociationsCP(roleTitle = "Roles Regrole Name");
 
 		JSONUser.addUser(
 			userEmailAddress = "userea@liferay.com",
@@ -757,9 +756,7 @@ definition {
 
 		Site.addBlankCP(siteName = "Site Name");
 
-		PortalSettings.editConfigurationUsersDefaultUserAssociationsSitesCP(siteName = "Site Name");
-
-		PortalSettings.viewConfigurationUsersDefaultUserAssociationsSitesCP(siteName = "Site Name");
+		PortalSettings.editConfigurationUsersDefaultUserAssociationsCP(siteName = "Site Name");
 
 		JSONUser.addUser(
 			userEmailAddress = "userea@liferay.com",
@@ -786,9 +783,7 @@ definition {
 
 		UserGroup.addCP(userGroupName = "UG UserGroup Name");
 
-		PortalSettings.editConfigurationUsersDefaultUserAssociationsUserGroupsCP(userGroupName = "UG UserGroup Name");
-
-		PortalSettings.viewConfigurationUsersDefaultUserAssociationsUserGroupsCP(userGroupName = "UG UserGroup Name");
+		PortalSettings.editConfigurationUsersDefaultUserAssociationsCP(userGroupName = "UG UserGroup Name");
 
 		JSONUser.addUser(
 			userEmailAddress = "userea@liferay.com",
@@ -1311,7 +1306,7 @@ definition {
 			category = "Site Builder",
 			portlet = "Pages");
 
-		SitePages.addPublicPage(pageName = "AP Test Page");
+		PagesAdmin.addPublicPage(pageName = "AP Test Page");
 
 		Navigator.openSiteURL(siteName = "Site Name");
 
@@ -1336,7 +1331,7 @@ definition {
 			category = "Site Builder",
 			portlet = "Pages");
 
-		SitePages.addPublicPage(pageName = "AP Test Page");
+		PagesAdmin.addPublicPage(pageName = "AP Test Page");
 
 		Navigator.gotoPage(pageName = "AP Test Page");
 

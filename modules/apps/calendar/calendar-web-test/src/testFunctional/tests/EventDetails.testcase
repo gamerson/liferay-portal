@@ -18,11 +18,11 @@ definition {
 			category = "Site Builder",
 			portlet = "Pages");
 
-		SitePages.addPublicPage(
+		PagesAdmin.addPublicPage(
 			pageName = "Calendar Page",
 			sitePageType = "Widget Page");
 
-		SitePages.configurePage(
+		PagesAdmin.configurePage(
 			columnName = "1 Column",
 			pageName = "Calendar Page",
 			privacy = "Public Pages",
@@ -56,7 +56,7 @@ definition {
 
 			CalendarConfiguration.tearDown();
 
-			Page.tearDownCP();
+			PagesAdmin.tearDownCP();
 
 			JSONUser.tearDownNonAdminUsers();
 
@@ -65,48 +65,151 @@ definition {
 	}
 
 	@description = "LRQA-71888 - Verify that the user can decline an event via Scheduler"
-	@ignore = "Test Stub"
 	@priority = "3"
 	test CanDeclineEventViaScheduler {
+		CalendarNavigator.gotoAddEventViaMyCalendars(user = "Test Test");
 
-		// TODO LRQA-71909 CanDeclineEventViaScheduler pending implementation
+		CalendarEvent.editTitle(eventTitle = "Calendar Event Title");
 
+		CalendarEvent.publish();
+
+		IFrame.closeFrame();
+
+		CalendarScheduler.selectSpecificEvent(eventTitle = "Calendar Event Title");
+
+		CalendarScheduler.gotoDetailsViaDialogBox();
+
+		CalendarEvent.clickDeclineButton();
+
+		CalendarEvent.viewStatusViaDetails(status = "DENIED");
 	}
 
 	@description = "LRQA-71888 - Verify that the user can delete a rate status into a event"
-	@ignore = "Test Stub"
 	@priority = "3"
 	test CanDeleteRateIntoAEvent {
+		var siteName = TestCase.getSiteName(siteName = "${siteName}");
 
-		// TODO LRQA-71911 CanDeleteRateIntoAEvent pending implementation
+		Calendar.chooseSiteCalendarMenulistOption(
+			menuListOption = "Calendar Settings",
+			siteCalendarName = "${siteName}",
+			siteName = "${siteName}");
 
+		SelectFrame(locator1 = "IFrame#MODAL_BODY");
+
+		CalendarMyCalendars.checkboxOption(checkboxName = "Enable Ratings");
+
+		PortletEntry.save();
+
+		Navigator.gotoPage(pageName = "Calendar Page");
+
+		CalendarNavigator.gotoAddEvent();
+
+		CalendarEvent.add(
+			eventTitle = "Calendar Event Title",
+			eventType = "Regular",
+			pageName = "Calendar Page");
+
+		Navigator.gotoPage(pageName = "Calendar Page");
+
+		CalendarScheduler.selectSpecificEventNoRefresh(eventTitle = "Calendar Event Title");
+
+		CalendarScheduler.gotoDetailsViaDialogBox();
+
+		Ratings.rateStar(ratingStarCount = "3");
+
+		Ratings.viewRateStar(
+			averageRatingStarCount = "3.0",
+			ratingStarCount = "3");
+
+		Ratings.revokeStarsRating();
 	}
 
 	@description = "LRQA-71888 - Verify that the user can edit event details via Scheduler"
-	@ignore = "Test Stub"
 	@priority = "3"
 	test CanEditEventViaScheduler {
+		CalendarNavigator.gotoAddEvent();
 
-		// TODO LRQA-71908 CanEditEventViaScheduler pending implementation
+		CalendarEvent.add(
+			eventTitle = "Calendar Event Title",
+			eventType = "Regular",
+			pageName = "Calendar Page");
 
+		CalendarScheduler.editTitleAndCalendar(
+			calendarName = "Test Test",
+			currentEventTitle = "Calendar Event Title",
+			eventTitle = "Calendar Event Title Edited");
+
+		CalendarScheduler.selectSpecificEvent(eventTitle = "Calendar Event Title Edited");
+
+		CalendarScheduler.viewEventTitleViaDialogBox(eventTitle = "Calendar Event Title Edited");
+
+		CalendarScheduler.viewEventUsersViaDialogBox(usersList = "Test Test");
 	}
 
 	@description = "LRQA-71888 - Verify that the user can rate a event"
-	@ignore = "Test Stub"
 	@priority = "3"
 	test CanRateAEvent {
+		var siteName = TestCase.getSiteName(siteName = "${siteName}");
 
-		// TODO LRQA-71910 CanRateAEvent pending implementation
+		Calendar.chooseSiteCalendarMenulistOption(
+			menuListOption = "Calendar Settings",
+			siteCalendarName = "${siteName}",
+			siteName = "${siteName}");
 
+		SelectFrame(locator1 = "IFrame#MODAL_BODY");
+
+		CalendarMyCalendars.checkboxOption(checkboxName = "Enable Ratings");
+
+		PortletEntry.save();
+
+		Navigator.gotoPage(pageName = "Calendar Page");
+
+		CalendarNavigator.gotoAddEvent();
+
+		CalendarEvent.add(
+			eventTitle = "Calendar Event Title",
+			eventType = "Regular",
+			pageName = "Calendar Page");
+
+		Navigator.gotoPage(pageName = "Calendar Page");
+
+		CalendarScheduler.selectSpecificEventNoRefresh(eventTitle = "Calendar Event Title");
+
+		CalendarScheduler.gotoDetailsViaDialogBox();
+
+		Ratings.rateStar(ratingStarCount = "3");
+
+		Ratings.viewRateStar(
+			averageRatingStarCount = "3.0",
+			ratingStarCount = "3");
+
+		MouseOver(
+			key_ratingStarCount = "3",
+			locator1 = "Ratings#YOUR_RATING_STAR_RESULT");
+
+		AssertElementPresent(
+			key_message = "You have rated this 3 stars out of 5.",
+			locator1 = "Ratings#RATED_TOOLTIP_MESSAGE",
+			value1 = "${key_message}");
 	}
 
 	@description = "LRQA-71888 - Verify that the user can view the fields Title, Starts, Ends, Rresources in event details page"
-	@ignore = "Test Stub"
 	@priority = "3"
 	test CanViewValuesInEventDetailsPage {
+		CalendarNavigator.gotoAddEvent();
 
-		// TODO LRQA-71904 CanViewValuesInEventDetailsPage pending implementation
+		CalendarEvent.add(
+			eventTitle = "Calendar Event Title",
+			eventType = "Regular",
+			pageName = "Calendar Page");
 
+		Navigator.gotoPage(pageName = "Calendar Page");
+
+		CalendarScheduler.selectSpecificEvent(eventTitle = "Calendar Event Title");
+
+		CalendarScheduler.gotoDetailsViaDialogBox();
+
+		CalendarEvent.viewDetailsFields();
 	}
 
 	@priority = "5"
@@ -669,48 +772,109 @@ definition {
 	}
 
 	@description = "LRQA-71888 - Verify that the event status is Any when the user Maybe attend the event"
-	@ignore = "Test Stub"
 	@priority = "3"
 	test EventStatusIsAnyWhenUserMaybeAttend {
+		CalendarNavigator.gotoAddEvent();
 
-		// TODO LRQA-71907 EventStatusIsAnyWhenUserMaybeAttend pending implementation
+		CalendarEvent.add(
+			eventTitle = "Calendar Event Title",
+			eventType = "Regular",
+			pageName = "Calendar Page");
 
+		Navigator.gotoPage(pageName = "Calendar Page");
+
+		CalendarNavigator.gotoEventDetails(eventTitle = "Calendar Event Title");
+
+		CalendarEvent.clickMaybeButton();
+
+		CalendarEvent.viewStatusViaDetails(status = "ANY");
 	}
 
 	@description = "LRQA-71888 - Verify that the event status is -Approved- when the Calendar has no workflow assigned"
-	@ignore = "Test Stub"
 	@priority = "4"
 	test EventStatusIsApprovedWhenNoWorkflowAssigned {
+		CalendarNavigator.gotoAddEvent();
 
-		// TODO LRQA-71903 EventStatusIsApprovedWhenNoWorkflowAssigned pending implementation
+		CalendarEvent.add(
+			eventTitle = "Calendar Event Title",
+			eventType = "Regular",
+			pageName = "Calendar Page");
 
+		Navigator.gotoPage(pageName = "Calendar Page");
+
+		CalendarScheduler.selectSpecificEvent(eventTitle = "Calendar Event Title");
+
+		CalendarScheduler.gotoDetailsViaDialogBox();
+
+		CalendarEvent.viewStatusViaDetails(status = "Approved");
 	}
 
 	@description = "LRQA-71888 - Verify that the event status is Denied when the user declines an event"
-	@ignore = "Test Stub"
 	@priority = "3"
 	test EventStatusIsDeniedWhenUserDeclines {
+		CalendarNavigator.gotoAddEvent();
 
-		// TODO LRQA-71906 EventStatusIsDeniedWhenUserDeclines pending implementation
+		CalendarEvent.add(
+			eventTitle = "Calendar Event Title",
+			eventType = "Regular",
+			pageName = "Calendar Page");
 
+		Navigator.gotoPage(pageName = "Calendar Page");
+
+		CalendarNavigator.gotoEventDetails(eventTitle = "Calendar Event Title");
+
+		CalendarEvent.clickDeclineButton();
+
+		CalendarEvent.viewStatusViaDetails(status = "DENIED");
 	}
 
 	@description = "LRQA-71888 - Verify that the event status is -Pending- when the Calendar has the Single Approver assigned"
-	@ignore = "Test Stub"
 	@priority = "5"
 	test EventStatusIsPendingWhenWorkflowIsAssigned {
+		Workflow.openWorkflowProcessBuilderConfiguration();
 
-		// TODO LRQA-71902 EventStatusIsPendingWhenWorkflowIsAssigned pending implementation
+		Workflow.configureWorkflow(
+			workflowDefinition = "Single Approver",
+			workflowResourceValue = "Calendar Event");
 
+		Navigator.gotoPage(pageName = "Calendar Page");
+
+		CalendarNavigator.gotoAddEvent();
+
+		CalendarEvent.editTitle(eventTitle = "Calendar Event Title");
+
+		CalendarEvent.setDatesToday();
+
+		CalendarEvent.setTimes(
+			endDateTime = "08:00 PM",
+			startDateTime = "07:00 PM");
+
+		Button.clickSubmitForPublication();
+
+		Navigator.gotoPage(pageName = "Calendar Page");
+
+		CalendarNavigator.gotoEventDetails(eventTitle = "Calendar Event Title");
+
+		CalendarEvent.viewStatusViaDetails(status = "PENDING");
 	}
 
 	@description = "LRQA-71888 - Verify that the buttons Maybe and Decline are displayed"
-	@ignore = "Test Stub"
 	@priority = "4"
 	test MaybeAndDeclineButtonAreDisplayed {
+		CalendarNavigator.gotoAddEvent();
 
-		// TODO LRQA-71905 MaybeAndDeclineButtonAreDisplayed pending implementation
+		CalendarEvent.add(
+			eventTitle = "Calendar Event Title",
+			eventType = "Regular",
+			pageName = "Calendar Page");
 
+		Navigator.gotoPage(pageName = "Calendar Page");
+
+		CalendarScheduler.selectSpecificEvent(eventTitle = "Calendar Event Title");
+
+		CalendarScheduler.gotoDetailsViaDialogBox();
+
+		CalendarEvent.viewMaybeAndDeclineButtons();
 	}
 
 	@description = "This is a use case for LPS-54548."
@@ -849,13 +1013,13 @@ definition {
 
 		JSONGroup.addGroup(groupName = "Site Name");
 
-		SitePages.openPagesAdmin(siteURLKey = "site-name");
+		PagesAdmin.openPagesAdmin(siteURLKey = "site-name");
 
 		ProductMenu.gotoPortlet(
 			category = "Site Builder",
 			portlet = "Pages");
 
-		SitePages.addPublicPage(
+		PagesAdmin.addPublicPage(
 			pageName = "Calendar Page",
 			sitePageType = "Widget Page");
 

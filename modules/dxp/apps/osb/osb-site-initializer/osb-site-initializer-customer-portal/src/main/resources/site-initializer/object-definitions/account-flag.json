@@ -1,0 +1,53 @@
+{
+	"label": {
+		"en-US": "Account Flag"
+	},
+	"name": "AccountFlag",
+	"objectFields": [
+		{
+			"indexed": true,
+			"indexedAsKeyword": false,
+			"label": {
+				"en-US": "Account Key"
+			},
+			"name": "accountKey",
+			"required": true,
+			"type": "String"
+		},
+		{
+			"indexed": true,
+			"indexedAsKeyword": false,
+			"label": {
+				"en-US": "User UUID"
+			},
+			"name": "userUuid",
+			"required": true,
+			"type": "String"
+		},
+		{
+			"indexed": true,
+			"indexedAsKeyword": false,
+			"label": {
+				"en-US": "Name"
+			},
+			"name": "name",
+			"required": true,
+			"type": "String"
+		},
+		{
+			"indexed": true,
+			"indexedAsKeyword": false,
+			"label": {
+				"en-US": "Value"
+			},
+			"name": "value",
+			"required": false,
+			"type": "Integer"
+		}
+	],
+	"pluralLabel": {
+		"en_US": "Account Flags"
+	},
+	"scope": "company",
+	"system": false
+}

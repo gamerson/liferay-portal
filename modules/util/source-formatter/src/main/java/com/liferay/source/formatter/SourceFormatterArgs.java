@@ -64,10 +64,6 @@ public class SourceFormatterArgs {
 
 	public static final boolean SHOW_DEBUG_INFORMATION = false;
 
-	public static final boolean SHOW_DOCUMENTATION = false;
-
-	public static final boolean SHOW_STATUS_UPDATES = false;
-
 	public static final boolean VALIDATE_COMMIT_MESSAGES = false;
 
 	public void addRecentChangesFileNames(
@@ -179,14 +175,6 @@ public class SourceFormatterArgs {
 		return _showDebugInformation;
 	}
 
-	public boolean isShowDocumentation() {
-		return _showDocumentation;
-	}
-
-	public boolean isShowStatusUpdates() {
-		return _showStatusUpdates;
-	}
-
 	public boolean isValidateCommitMessages() {
 		return _validateCommitMessages;
 	}
@@ -292,14 +280,6 @@ public class SourceFormatterArgs {
 		_showDebugInformation = showDebugInformation;
 	}
 
-	public void setShowDocumentation(boolean showDocumentation) {
-		_showDocumentation = showDocumentation;
-	}
-
-	public void setShowStatusUpdates(boolean showStatusUpdates) {
-		_showStatusUpdates = showStatusUpdates;
-	}
-
 	public void setSkipCheckNames(List<String> skipCheckNames) {
 		_skipCheckNames = skipCheckNames;
 	}
@@ -336,8 +316,6 @@ public class SourceFormatterArgs {
 	private int _processorThreadCount = PROCESSOR_THREAD_COUNT;
 	private final Set<String> _recentChangesFileNames = new HashSet<>();
 	private boolean _showDebugInformation = SHOW_DEBUG_INFORMATION;
-	private boolean _showDocumentation = SHOW_DOCUMENTATION;
-	private boolean _showStatusUpdates = SHOW_STATUS_UPDATES;
 	private List<String> _skipCheckNames = new ArrayList<>();
 	private List<String> _sourceFormatterProperties = new ArrayList<>();
 	private boolean _validateCommitMessages = VALIDATE_COMMIT_MESSAGES;

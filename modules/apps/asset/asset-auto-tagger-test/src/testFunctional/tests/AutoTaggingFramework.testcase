@@ -24,7 +24,7 @@ definition {
 		else {
 			DMDocument.tearDownCP();
 
-			Page.tearDownCP();
+			PagesAdmin.tearDownCP();
 
 			Site.tearDownCP();
 
@@ -39,7 +39,7 @@ definition {
 		property app.server.bundles.size = "1";
 		property cluster.enabled = "true";
 		property minimum.slave.ram = "24";
-		property test.name.skip.portal.instance = "DMAutoTagging#AutoTagImagesOnSeparateNodes";
+		property test.name.skip.portal.instance = "AutoTaggingFramework#AutoTagImagesOnSeparateNodes";
 
 		Clustering.viewClusterStatusInConsole();
 
@@ -91,7 +91,7 @@ definition {
 
 		DMDocument.viewCP(dmDocumentTitle = "DM Document JPG Node2");
 
-		AutoTagging.assertAutoTagPresent(tagName = "carton");
+		DMDocument.viewTagInfo(tagName = "carton");
 
 		User.logoutPG(
 			nodePort = "9080",
@@ -109,7 +109,7 @@ definition {
 
 		DMDocument.viewCP(dmDocumentTitle = "DM Document JPG Node2");
 
-		AutoTagging.assertAutoTagPresent(tagName = "carton");
+		DMDocument.viewTagInfo(tagName = "carton");
 
 		DMNavigator.openDocumentsAndMediaAdmin(siteURLKey = "guest");
 
@@ -127,7 +127,7 @@ definition {
 
 		DMDocument.viewCP(dmDocumentTitle = "DM Document JPG Node1");
 
-		AutoTagging.assertAutoTagPresent(tagName = "jersey");
+		DMDocument.viewTagInfo(tagName = "jersey");
 
 		User.logoutPG(
 			password = "test",
@@ -146,7 +146,7 @@ definition {
 
 		DMDocument.viewCP(dmDocumentTitle = "DM Document JPG Node1");
 
-		AutoTagging.assertAutoTagPresent(tagName = "jersey");
+		DMDocument.viewTagInfo(tagName = "jersey");
 
 		User.logoutPG(
 			nodePort = "9080",
@@ -162,7 +162,7 @@ definition {
 	@priority = "4"
 	@refactordone
 	test CanAddAndRemoveImageAutoTagViaGogoShell {
-		property test.name.skip.portal.instance = "DMAutoTagging#CanAddAndRemoveImageAutoTagViaGogoShell";
+		property test.name.skip.portal.instance = "AutoTaggingFramework#CanAddAndRemoveImageAutoTagViaGogoShell";
 
 		var companyId = JSONCompany.getCompanyId();
 
@@ -180,7 +180,7 @@ definition {
 
 		DMDocument.viewCP(dmDocumentTitle = "DM Document JPG");
 
-		AutoTagging.assertAutoTagPresent(tagName = "carton");
+		DMDocument.viewTagInfo(tagName = "carton");
 
 		GogoShell.openGogoShellAdmin();
 
@@ -195,7 +195,7 @@ definition {
 
 		DMDocument.viewCP(dmDocumentTitle = "DM Document JPG");
 
-		AutoTagging.assertNoAutoTag(tagName = "carton");
+		DMDocument.viewNoTagInfo(tagName = "carton");
 
 		GogoShell.openGogoShellAdmin();
 
@@ -210,7 +210,7 @@ definition {
 
 		DMDocument.viewCP(dmDocumentTitle = "DM Document JPG");
 
-		AutoTagging.assertAutoTagPresent(tagName = "carton");
+		DMDocument.viewTagInfo(tagName = "carton");
 	}
 
 	@description = "This test covers LPS-94208. It asserts that a document is auto tagged when OpenNLP Auto-Tagging is enabled."
@@ -219,7 +219,7 @@ definition {
 	test CanAddAutoTagAfterEnablingOpenNLP {
 		property environment.acceptance = "true";
 		property portal.acceptance = "true";
-		property test.name.skip.portal.instance = "DMAutoTagging#CanAddAutoTagAfterEnablingOpenNLP";
+		property test.name.skip.portal.instance = "AutoTaggingFramework#CanAddAutoTagAfterEnablingOpenNLP";
 		property websphere.ssl.truststore.enabled = "true";
 
 		AutoTagging.enableOpenNLP(
@@ -241,7 +241,7 @@ definition {
 		DMDocument.viewCP(dmDocumentTitle = "DM Document DOCX");
 
 		for (var tagName : list "alice,adventures") {
-			AutoTagging.assertAutoTagPresent(tagName = "${tagName}");
+			DMDocument.viewTagInfo(tagName = "${tagName}");
 		}
 	}
 
@@ -249,7 +249,7 @@ definition {
 	@priority = "4"
 	@refactordone
 	test CanCheckMaxNumberOfTagsBetweenInstanceLevelAndPortalLevel {
-		property test.name.skip.portal.instance = "DMAutoTagging#CanCheckMaxNumberOfTagsBetweenInstanceLevelAndPortalLevel";
+		property test.name.skip.portal.instance = "AutoTaggingFramework#CanCheckMaxNumberOfTagsBetweenInstanceLevelAndPortalLevel";
 
 		AutoTagging.enableAutoTagging(
 			enableAutoTaggingFor = "System Settings",
@@ -265,7 +265,7 @@ definition {
 	@priority = "4"
 	@refactordone
 	test CanConfigureImageAutoTaggingPerSite {
-		property test.name.skip.portal.instance = "DMAutoTagging#CanConfigureImageAutoTaggingPerSite";
+		property test.name.skip.portal.instance = "AutoTaggingFramework#CanConfigureImageAutoTaggingPerSite";
 
 		JSONGroup.addGroup(groupName = "Site Name AutoTag Enabled");
 
@@ -297,7 +297,7 @@ definition {
 
 		DMDocument.viewCP(dmDocumentTitle = "DM Document JPG");
 
-		AutoTagging.assertAutoTagPresent(tagName = "carton");
+		DMDocument.viewTagInfo(tagName = "carton");
 
 		JSONDocument.addFileWithUploadedFile(
 			dmDocumentDescription = "DM Document Description",
@@ -313,7 +313,7 @@ definition {
 
 		DMDocument.viewCP(dmDocumentTitle = "DM Document JPG");
 
-		AutoTagging.assertNoAutoTag(tagName = "carton");
+		AssetCategorization.viewNoTag(tagName = "carton");
 	}
 
 }

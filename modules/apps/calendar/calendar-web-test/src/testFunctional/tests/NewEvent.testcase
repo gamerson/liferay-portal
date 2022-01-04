@@ -18,11 +18,11 @@ definition {
 			category = "Site Builder",
 			portlet = "Pages");
 
-		SitePages.addPublicPage(
+		PagesAdmin.addPublicPage(
 			pageName = "Calendar Page",
 			sitePageType = "Widget Page");
 
-		SitePages.configurePage(
+		PagesAdmin.configurePage(
 			columnName = "1 Column",
 			pageName = "Calendar Page",
 			privacy = "Public Pages",
@@ -56,7 +56,7 @@ definition {
 
 			CalendarConfiguration.tearDown();
 
-			Page.tearDownCP();
+			PagesAdmin.tearDownCP();
 
 			JSONUser.tearDownNonAdminUsers();
 
@@ -187,7 +187,7 @@ definition {
 			userEmailAddress = "userea@liferay.com",
 			userScreenName = "usersn");
 
-		SitePages.openPagesAdmin(siteURLKey = "guest");
+		PagesAdmin.openPagesAdmin(siteURLKey = "guest");
 
 		ProductMenu.gotoPortlet(
 			category = "People",
@@ -808,11 +808,11 @@ definition {
 			category = "Site Builder",
 			portlet = "Pages");
 
-		SitePages.addPublicPage(
+		PagesAdmin.addPublicPage(
 			pageName = "AP Page",
 			sitePageType = "Widget Page");
 
-		SitePages.configurePage(
+		PagesAdmin.configurePage(
 			columnName = "1 Column",
 			pageName = "AP Page",
 			privacy = "Public Pages",
@@ -878,22 +878,78 @@ definition {
 			relatedAssetTitle = "Blogs Entry Title");
 	}
 
-	@description = "LRQA-71887 - Verify that the user can add an Event with a workflow assigned"
-	@ignore = "Test Stub"
+	@description = "Verify that the user can add an Event with a workflow assigned"
 	@priority = "4"
 	test CanAddEventWithWorkflowAssigned {
+		Workflow.openWorkflowProcessBuilderConfiguration();
 
-		// TODO LRQA-71914 CanAddEventWithWorkflowAssigned pending implementation
+		Workflow.configureWorkflow(
+			workflowDefinition = "Single Approver",
+			workflowResourceValue = "Calendar Event");
 
+		Navigator.gotoPage(pageName = "Calendar Page");
+
+		CalendarNavigator.gotoAddEvent();
+
+		CalendarEvent.editTitle(eventTitle = "Calendar Event Title");
+
+		CalendarEvent.setDatesToday();
+
+		CalendarEvent.setTimes(
+			endDateTime = "08:00 PM",
+			startDateTime = "07:00 PM");
+
+		Button.clickSubmitForPublication();
+
+		IFrame.closeFrame();
+
+		CalendarEvent.view(eventTitle = "Calendar Event Title");
 	}
 
-	@description = "LRQA-71887 - Verify that the user can Approve an Event"
-	@ignore = "Test Stub"
+	@description = "Verify that the user can Approve an Event"
 	@priority = "4"
 	test CanApproveEvent {
+		Workflow.openWorkflowProcessBuilderConfiguration();
 
-		// TODO LRQA-71915 CanApproveEvent pending implementation
+		Workflow.configureWorkflow(
+			workflowDefinition = "Single Approver",
+			workflowResourceValue = "Calendar Event");
 
+		Navigator.gotoPage(pageName = "Calendar Page");
+
+		CalendarNavigator.gotoAddEvent();
+
+		CalendarEvent.editTitle(eventTitle = "Calendar Event Title");
+
+		CalendarEvent.setDatesToday();
+
+		CalendarEvent.setTimes(
+			endDateTime = "08:00 PM",
+			startDateTime = "07:00 PM");
+
+		Button.clickSubmitForPublication();
+
+		IFrame.closeFrame();
+
+		CalendarEvent.view(eventTitle = "Calendar Event Title");
+
+		UserBar.gotoDropdownItem(dropdownItem = "My Workflow Tasks");
+
+		Workflow.assignToMeTaskByActions(
+			workflowAssetTitle = "Calendar Event Title",
+			workflowAssetType = "Calendar Event",
+			workflowTask = "Review");
+
+		Workflow.approveTaskByActions(
+			workflowAssetTitle = "Calendar Event Title",
+			workflowAssetType = "Calendar Event",
+			workflowTask = "Review");
+
+		Navigator.gotoPage(pageName = "Calendar Page");
+
+		CalendarNavigator.gotoEventDetails(eventTitle = "Calendar Event Title");
+
+		CalendarEvent.viewStatusViaDetails(status = "Approved");
 	}
 
 	@description = "This is a use case for LPS-45616."
@@ -959,30 +1015,106 @@ definition {
 	}
 
 	@description = "LRQA-71887 - Verify that the user can edit the event after it has been published"
-	@ignore = "Test Stub"
 	@priority = "4"
 	test CanEditEvent {
+		CalendarNavigator.gotoAddEvent();
 
-		// TODO LRQA-71913 CanEditEvent pending implementation
+		CalendarEvent.editTitle(eventTitle = "Calendar Event Title");
 
+		CalendarEvent.setDatesToday();
+
+		CalendarEvent.setTimes(
+			endDateTime = "08:00 PM",
+			startDateTime = "07:00 PM");
+
+		Button.clickPublish();
+
+		IFrame.closeFrame();
+
+		CalendarEvent.view(eventTitle = "Calendar Event Title");
+
+		CalendarEvent.addDescription(
+			eventTitle = "Calendar Event Title",
+			fieldName = "Description",
+			fieldValue = "Calendar Event Description");
+
+		Button.clickPublish();
+
+		IFrame.closeFrame();
+
+		CalendarNavigator.gotoEventDetails(eventTitle = "Calendar Event Title");
+
+		CalendarEvent.viewDescription(eventDescription = "Calendar Event Description");
 	}
 
 	@description = "LRQA-71887 - Verify that the user can Reject an event"
-	@ignore = "Test Stub"
 	@priority = "3"
 	test CanRejectEvent {
+		Workflow.openWorkflowProcessBuilderConfiguration();
 
-		// TODO LRQA-71916 CanRejectEvent pending implementation
+		Workflow.configureWorkflow(
+			workflowDefinition = "Single Approver",
+			workflowResourceValue = "Calendar Event");
 
+		Navigator.gotoPage(pageName = "Calendar Page");
+
+		CalendarNavigator.gotoAddEvent();
+
+		CalendarEvent.editTitle(eventTitle = "Calendar Event Title");
+
+		CalendarEvent.setDatesToday();
+
+		CalendarEvent.setTimes(
+			endDateTime = "08:00 PM",
+			startDateTime = "07:00 PM");
+
+		Button.clickSubmitForPublication();
+
+		IFrame.closeFrame();
+
+		CalendarEvent.view(eventTitle = "Calendar Event Title");
+
+		UserBar.gotoDropdownItem(dropdownItem = "My Workflow Tasks");
+
+		Workflow.assignToMeTaskByActions(
+			workflowAssetTitle = "Calendar Event Title",
+			workflowAssetType = "Calendar Event",
+			workflowTask = "Review");
+
+		Workflow.rejectTaskByActions(
+			workflowAssetTitle = "Calendar Event Title",
+			workflowAssetType = "Calendar Event",
+			workflowTask = "Review");
+
+		Navigator.gotoPage(pageName = "Calendar Page");
+
+		CalendarNavigator.gotoEventDetails(eventTitle = "Calendar Event Title");
+
+		CalendarEvent.viewStatusViaDetails(status = "Pending");
 	}
 
 	@description = "LRQA-71887 - Verify that the user can save a new event as Draft"
-	@ignore = "Test Stub"
 	@priority = "4"
 	test CanSaveAsDraft {
+		CalendarNavigator.gotoAddEvent();
 
-		// TODO LRQA-71912 CanSaveAsDraft pending implementation
+		Button.viewPresent(button = "Save as Draft");
 
+		CalendarEvent.editTitle(eventTitle = "Calendar Event Title");
+
+		CalendarEvent.setDatesToday();
+
+		CalendarEvent.setTimes(
+			endDateTime = "03:00 PM",
+			startDateTime = "02:00 PM");
+
+		Button.clickSaveAsDraft();
+
+		Navigator.gotoPage(pageName = "Calendar Page");
+
+		CalendarNavigator.gotoEventDetails(eventTitle = "Calendar Event Title");
+
+		CalendarEvent.viewStatusViaDetails(status = "Draft");
 	}
 
 	@description = "LRQA-71887 - Verify that the user can select Start / End dates from the datepicker component"

@@ -1,4 +1,5 @@
 const EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+const LOWCASE_NUMBERS_REGEX = /^[0-9a-z]+$/;
 
 const required = (value) => {
 	if (!value) {
@@ -12,9 +13,19 @@ const maxLength = (value, max) => {
 	}
 };
 
-const email = (value) => {
+const isValidEmail = (value, bannedEmailDomains) => {
 	if (!EMAIL_REGEX.test(value)) {
-		return 'Please insert a valid email.';
+		return 'Please insert a valid e-mail.';
+	}
+
+	if (bannedEmailDomains.includes(value.split('@')[1])) {
+		return 'E-mail domain not allowed.';
+	}
+};
+
+const isLowercaseAndNumbers = (value) => {
+	if (!LOWCASE_NUMBERS_REGEX.test(value)) {
+		return 'Lowercase letters and numbers only.';
 	}
 };
 
@@ -34,4 +45,4 @@ const validate = (validations, value) => {
 	return error;
 };
 
-export {required, maxLength, email, validate};
+export {isLowercaseAndNumbers, isValidEmail, maxLength, required, validate};

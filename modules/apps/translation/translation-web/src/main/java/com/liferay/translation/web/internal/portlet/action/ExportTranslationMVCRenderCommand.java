@@ -23,14 +23,16 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.Language;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCRenderCommand;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
-import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.translation.constants.TranslationPortletKeys;
 import com.liferay.translation.exporter.TranslationInfoItemFieldValuesExporterTracker;
 import com.liferay.translation.web.internal.configuration.FFLayoutExperienceSelectorConfiguration;
 import com.liferay.translation.web.internal.display.context.ExportTranslationDisplayContext;
+import com.liferay.translation.web.internal.helper.TranslationRequestHelper;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -65,24 +67,28 @@ public class ExportTranslationMVCRenderCommand implements MVCRenderCommand {
 			ThemeDisplay themeDisplay =
 				(ThemeDisplay)renderRequest.getAttribute(WebKeys.THEME_DISPLAY);
 
-			long classNameId = ParamUtil.getLong(renderRequest, "classNameId");
-			long classPK = ParamUtil.getLong(renderRequest, "classPK");
-			long groupId = ParamUtil.getLong(renderRequest, "groupId");
+			TranslationRequestHelper translationRequestHelper =
+				new TranslationRequestHelper(
+					_infoItemServiceTracker, renderRequest);
 
-			String className = _portal.getClassName(classNameId);
-
-			Object model = _getModel(className, classPK);
+			List<Object> models = _getModels(
+				translationRequestHelper.getModelClassName(),
+				translationRequestHelper.getModelClassPKs());
 
 			renderRequest.setAttribute(
 				ExportTranslationDisplayContext.class.getName(),
 				new ExportTranslationDisplayContext(
-					classNameId, classPK,
-					_ffLayoutExperienceSelectorConfiguration, groupId,
+					translationRequestHelper.getClassNameId(),
+					translationRequestHelper.getModelClassPKs(),
+					_ffLayoutExperienceSelectorConfiguration,
+					translationRequestHelper.getGroupId(),
 					_portal.getHttpServletRequest(renderRequest),
 					_infoItemServiceTracker,
 					_portal.getLiferayPortletRequest(renderRequest),
-					_portal.getLiferayPortletResponse(renderResponse), model,
-					_getTitle(className, model, themeDisplay.getLocale()),
+					_portal.getLiferayPortletResponse(renderResponse), models,
+					_getTitle(
+						translationRequestHelper.getModelClassName(),
+						models.get(0), themeDisplay.getLocale()),
 					_translationInfoItemFieldValuesExporterTracker));
 
 			return "/export_translation.jsp";
@@ -100,14 +106,20 @@ public class ExportTranslationMVCRenderCommand implements MVCRenderCommand {
 				FFLayoutExperienceSelectorConfiguration.class, properties);
 	}
 
-	private Object _getModel(String className, long classPK)
+	private List<Object> _getModels(String className, long[] classPKs)
 		throws PortalException {
 
 		InfoItemObjectProvider<Object> infoItemObjectProvider =
 			_infoItemServiceTracker.getFirstInfoItemService(
 				InfoItemObjectProvider.class, className);
 
-		return infoItemObjectProvider.getInfoItem(classPK);
+		List<Object> models = new ArrayList<>(classPKs.length);
+
+		for (long classPK : classPKs) {
+			models.add(infoItemObjectProvider.getInfoItem(classPK));
+		}
+
+		return models;
 	}
 
 	private String _getTitle(String className, Object model, Locale locale) {

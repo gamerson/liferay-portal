@@ -323,9 +323,9 @@
 			<message key="builder.use" value="Use ''{0}'' ({1}, {2})" />
 			<message key="builder.use.instead" value="Use ''{0}'' instead of new instance of ''{1}''" />
 		</module>
-		<module name="com.liferay.source.formatter.checkstyle.checks.DeprecatedUsageCheck">
+		<module name="com.liferay.source.formatter.checkstyle.checks.DeprecatedAPICheck">
 			<property name="category" value="Bug Prevention" />
-			<property name="description" value="Finds calls to deprecated classes or methods." />
+			<property name="description" value="Finds calls to deprecated classes, constructors, fields or methods." />
 			<property name="enabled" value="false" />
 			<message key="constructor.call.deprecated" value="Constructor ''{0}'' has been deprecated" />
 			<message key="field.call.deprecated" value="Field ''{0}'' has been deprecated" />
@@ -794,10 +794,21 @@
 			<property name="description" value="Finds cases where the variable should be wrapped into an inner class in order to defer array elements initialization." />
 			<message key="variable.info.unwrapped" value="Wrap the variable ''{0}'' into an inner class ''Concealer'' in order to defer array elements initialization, see LPS-72768" />
 		</module>
+		<module name="com.liferay.source.formatter.checkstyle.checks.UpgradeDeprecatedAPICheck">
+			<property name="category" value="Upgrade" />
+			<property name="description" value="Finds calls to deprecated classes, constructors, fields or methods after an upgrade" />
+			<message key="constructor.call.deprecated" value="Constructor ''{0}'' has been deprecated in version ''{1}''" />
+			<message key="field.call.deprecated" value="Field ''{0}'' has been deprecated in version ''{1}''" />
+			<message key="method.call.deprecated" value="Method ''{0}'' has been deprecated in version ''{1}''" />
+			<message key="type.call.deprecated" value="Type ''{0}'' has been deprecated in version ''{1}''" />
+		</module>
 		<module name="com.liferay.source.formatter.checkstyle.checks.UpgradeRemovedAPICheck">
 			<property name="category" value="Upgrade" />
 			<property name="description" value="Finds cases where calls are made to removed API after an upgrade." />
-			<message key="class.not.found" value="Class ''{0}'' no longer exists, or has been moved, in version ''{1}''" />
+			<message key="class.not.found.1" value="Class ''{0}'' no longer exists, or has been moved, in version ''{1}''" />
+			<message key="class.not.found.2" value="Class ''{0}'' no longer exists in version ''{1}'', possible changed to ''{2}''" />
+			<message key="class.not.found.3" value="Class ''{0}'' no longer exists in version ''{1}'', possible changed to one of the following: {2}" />
+			<message key="constructor.not.found" value="Constructor for ''{0}'' no longer exists, or the signature has changed, in version ''{1}''" />
 			<message key="method.not.found" value="Method ''{0}'' no longer exists, or the signature has changed, in class ''{1}'' for version ''{2}''" />
 			<message key="variable.not.found" value="Variable ''{0}'' no longer exists in class ''{1}'' for version ''{2}''" />
 		</module>

@@ -34,9 +34,9 @@ definition {
 
 		JSONPublications.selectPublication(publicationName = "Publication Name");
 
-		SitePages.openPagesAdmin(siteURLKey = "guest");
+		PagesAdmin.openPagesAdmin(siteURLKey = "guest");
 
-		SitePages.gotoPageMenuItem(
+		PagesAdmin.gotoPageEllipsisMenuItem(
 			menuItem = "Configure",
 			pageName = "Test Page");
 
@@ -53,11 +53,11 @@ definition {
 			changeType = "Added",
 			changeUser = "Test Test");
 
-		SitePages.openPagesAdmin(siteURLKey = "guest");
+		PagesAdmin.openPagesAdmin(siteURLKey = "guest");
 
-		SitePages.deletePage(pageName = "Test Page");
+		PagesAdmin.deletePage(pageName = "Test Page");
 
-		SitePages.openPagesAdmin(siteURLKey = "guest");
+		PagesAdmin.openPagesAdmin(siteURLKey = "guest");
 
 		Page.viewNoPG(pageName = "Test Page");
 
@@ -113,7 +113,7 @@ definition {
 			groupName = "Guest",
 			title = "WC WebContent Title");
 
-		SitePages.openPagesAdmin(siteURLKey = "guest");
+		PagesAdmin.openPagesAdmin(siteURLKey = "guest");
 
 		ContentPages.addPrivatePage(pageName = "Test Page");
 
@@ -246,51 +246,55 @@ definition {
 
 		JSONPublications.selectPublication(publicationName = "Publication Name");
 
-		SitePages.openPagesAdmin(siteURLKey = "guest");
+		PagesAdmin.openPagesAdmin(siteURLKey = "guest");
 
-		SitePages.gotoPageMenuItem(
+		PagesAdmin.gotoPageEllipsisMenuItem(
 			menuItem = "Configure",
 			pageName = "Test Page");
 
-		Page.editFriendlyURL(friendlyURLEdit = "/test-page-edited");
+		PagesAdmin.editFriendlyURL(friendlyURLEdit = "/test-page-edited");
 
-		AssertVisible(
-			key_friendlyURL = "/test-page-edited",
-			locator1 = "SitePages#FRIENDLY_URL");
+		AssertTextEquals(
+			key_text = "Friendly URL",
+			locator1 = "TextInput#ANY",
+			value1 = "/test-page-edited");
 
 		Publications.workOnProduction();
 
-		AssertVisible(
-			key_friendlyURL = "/test-page",
-			locator1 = "SitePages#FRIENDLY_URL");
+		AssertTextEquals(
+			key_text = "Friendly URL",
+			locator1 = "TextInput#ANY",
+			value1 = "/test-page");
 
 		JSONPublications.publishPublication(publicationName = "Publication Name");
 
 		Publications.viewPublicationPublished(publicationName = "Publication Name");
 
-		SitePages.openPagesAdmin(siteURLKey = "guest");
+		PagesAdmin.openPagesAdmin(siteURLKey = "guest");
 
-		SitePages.gotoPageMenuItem(
+		PagesAdmin.gotoPageEllipsisMenuItem(
 			menuItem = "Configure",
 			pageName = "Test Page");
 
-		AssertVisible(
-			key_friendlyURL = "/test-page-edited",
-			locator1 = "SitePages#FRIENDLY_URL");
+		AssertTextEquals(
+			key_text = "Friendly URL",
+			locator1 = "TextInput#ANY",
+			value1 = "/test-page-edited");
 
 		PublicationsNavigator.openPublicationsHistory();
 
 		Publications.revertPublication(publicationName = "Publication Name");
 
-		SitePages.openPagesAdmin(siteURLKey = "guest");
+		PagesAdmin.openPagesAdmin(siteURLKey = "guest");
 
-		SitePages.gotoPageMenuItem(
+		PagesAdmin.gotoPageEllipsisMenuItem(
 			menuItem = "Configure",
 			pageName = "Test Page");
 
-		AssertVisible(
-			key_friendlyURL = "/test-page",
-			locator1 = "SitePages#FRIENDLY_URL");
+		AssertTextEquals(
+			key_text = "Friendly URL",
+			locator1 = "TextInput#ANY",
+			value1 = "/test-page");
 	}
 
 }

@@ -133,6 +133,8 @@ definition {
 	@description = "This is a test for LPS-125985. The Page Creater can configure configuration template of widget in page editor."
 	@priority = "5"
 	test ConfigureConfigurationTemplateOfAssetPublisherInPageEditor {
+		property portal.acceptance = "true";
+
 		task ("Add a web content") {
 			JSONWebcontent.addWebContent(
 				content = "Web Content Content",
@@ -299,11 +301,11 @@ definition {
 				key_text = "Publish",
 				locator1 = "Button#ANY_ENABLED");
 
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
 			WaitForPageLoad();
 
-			SitePages.clickPageMenu(pageName = "Test Content Page Name");
+			PagesAdmin.openPageEllipsisMenu(pageName = "Test Content Page Name");
 
 			MenuItem.viewNotPresent(menuItem = "Discard Draft");
 		}
@@ -319,7 +321,7 @@ definition {
 		}
 
 		task ("Discard the draft") {
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
 			PageEditor.clickDiscardDraft(pageName = "Test Content Page Name");
 		}
@@ -337,11 +339,11 @@ definition {
 				key_text = "Publish",
 				locator1 = "Button#ANY_ENABLED");
 
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
 			WaitForPageLoad();
 
-			SitePages.clickPageMenu(pageName = "Test Content Page Name");
+			PagesAdmin.openPageEllipsisMenu(pageName = "Test Content Page Name");
 
 			MenuItem.viewNotPresent(menuItem = "Discard Draft");
 		}
@@ -361,11 +363,11 @@ definition {
 				key_text = "Publish",
 				locator1 = "Button#ANY_ENABLED");
 
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
 			WaitForPageLoad();
 
-			SitePages.clickPageMenu(pageName = "Test Content Page Name");
+			PagesAdmin.openPageEllipsisMenu(pageName = "Test Content Page Name");
 
 			MenuItem.viewPresent(menuItem = "Discard Draft");
 		}
@@ -389,11 +391,11 @@ definition {
 				key_text = "Publish",
 				locator1 = "Button#ANY_ENABLED");
 
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
 			WaitForPageLoad();
 
-			SitePages.clickPageMenu(pageName = "Test Content Page Name");
+			PagesAdmin.openPageEllipsisMenu(pageName = "Test Content Page Name");
 
 			MenuItem.viewNotPresent(menuItem = "Discard Draft");
 		}
@@ -414,11 +416,11 @@ definition {
 				key_text = "Publish",
 				locator1 = "Button#ANY_ENABLED");
 
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
 			WaitForPageLoad();
 
-			SitePages.clickPageMenu(pageName = "Test Content Page Name");
+			PagesAdmin.openPageEllipsisMenu(pageName = "Test Content Page Name");
 
 			MenuItem.viewPresent(menuItem = "Discard Draft");
 		}
@@ -447,11 +449,11 @@ definition {
 				key_text = "Publish",
 				locator1 = "Button#ANY_ENABLED");
 
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
 			WaitForPageLoad();
 
-			SitePages.clickPageMenu(pageName = "Test Content Page Name");
+			PagesAdmin.openPageEllipsisMenu(pageName = "Test Content Page Name");
 
 			MenuItem.viewNotPresent(menuItem = "Discard Draft");
 		}
@@ -472,11 +474,11 @@ definition {
 				key_text = "Publish",
 				locator1 = "Button#ANY_ENABLED");
 
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
 			WaitForPageLoad();
 
-			SitePages.clickPageMenu(pageName = "Test Content Page Name");
+			PagesAdmin.openPageEllipsisMenu(pageName = "Test Content Page Name");
 
 			MenuItem.viewPresent(menuItem = "Discard Draft");
 		}
@@ -502,11 +504,11 @@ definition {
 				key_text = "Publish",
 				locator1 = "Button#ANY_ENABLED");
 
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
 			WaitForPageLoad();
 
-			SitePages.clickPageMenu(pageName = "Test Content Page Name");
+			PagesAdmin.openPageEllipsisMenu(pageName = "Test Content Page Name");
 
 			MenuItem.viewNotPresent(menuItem = "Discard Draft");
 		}
@@ -886,7 +888,7 @@ definition {
 		}
 
 		task ("Add a page based on content page template") {
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
 			ContentPages.addPage(
 				collectionName = "Page Template Collection",
@@ -1387,7 +1389,7 @@ definition {
 		}
 
 		task ("Add a page based on content page template") {
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
 			ContentPages.addPage(
 				collectionName = "Page Template Collection",
@@ -1502,7 +1504,7 @@ definition {
 		}
 
 		task ("Assert the Asset Publisher is invisible to Guest") {
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
 			User.logoutPG();
 

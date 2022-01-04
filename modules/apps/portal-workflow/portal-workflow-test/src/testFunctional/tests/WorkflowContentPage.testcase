@@ -27,7 +27,7 @@ definition {
 			panel = "Site Administration",
 			portlet = "Pages");
 
-		SitePages.addPublicPage(pageName = "Page Comments Page");
+		PagesAdmin.addPublicPage(pageName = "Page Comments Page");
 
 		Navigator.gotoPage(pageName = "Page Comments Page");
 
@@ -43,7 +43,7 @@ definition {
 		else {
 			PageComment.tearDownPG(pageName = "Page Comments Page");
 
-			Page.tearDownPG();
+			PagesAdmin.tearDownCP();
 
 			Workflow.tearDownPortalWorkflow();
 
@@ -198,6 +198,8 @@ definition {
 	@description = "Verify that the user can reject a Content Page"
 	@priority = "5"
 	test CanRejectContentPageWithWorkflow {
+		property portal.upstream = "quarantine";
+
 		ApplicationsMenu.gotoPortlet(
 			category = "Workflow",
 			panel = "Applications",
@@ -336,7 +338,10 @@ definition {
 			category = "Site Builder",
 			portlet = "Pages");
 
-		AssertElementPresent(locator1 = "SitePages#SITE_PENDING_STATUS");
+		PagesAdmin.viewPageStatus(
+			index = "2",
+			pageName = "Test Page Name",
+			status = "Pending");
 	}
 
 }

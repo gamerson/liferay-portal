@@ -2491,9 +2491,9 @@ public abstract class BaseWebDriverImpl implements LiferaySelenium, WebDriver {
 			}
 		}
 		else if (locator.equals("relative=top")) {
-			_frameWebElements = new Stack<>();
+			_frameWebElements.clear();
 
-			targetLocator.window(_defaultWindowHandle);
+			targetLocator.defaultContent();
 		}
 		else {
 			_frameWebElements.push(getWebElement(locator));
@@ -3990,7 +3990,8 @@ public abstract class BaseWebDriverImpl implements LiferaySelenium, WebDriver {
 					object = getWebElement(argument);
 				}
 				catch (ElementNotFoundPoshiRunnerException |
-					   InvalidSelectorException exception) {
+					   InvalidSelectorException | NullPointerException
+						   exception) {
 
 					object = argument;
 				}
@@ -4829,7 +4830,7 @@ public abstract class BaseWebDriverImpl implements LiferaySelenium, WebDriver {
 	private Alert _alert;
 	private String _clipBoard = "";
 	private String _defaultWindowHandle;
-	private Stack<WebElement> _frameWebElements = new Stack<>();
+	private final Stack<WebElement> _frameWebElements = new Stack<>();
 	private int _navigationBarHeight = 120;
 	private String _primaryTestSuiteName;
 	private int _totalPauseDuration;

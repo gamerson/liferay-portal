@@ -5,6 +5,7 @@ definition {
 	property custom.properties = "javascript.single.page.application.enabled=false${line.separator}jsonws.web.service.paths.excludes=";
 	property databases.size = "1";
 	property dummy.socket.proxy.disabled = "true";
+	property minimum.slave.ram = "24";
 	property portal.release = "true";
 	property portal.upstream = "true";
 	property test.run.environment = "EE";
@@ -18,7 +19,6 @@ definition {
 
 	@description = "This is a use case for LPS-32577. Add user inherited roles as SAML attribute statements."
 	@priority = "5"
-	@uitest
 	test AddUserInheritedRolesAsSAMLAttributeStatements {
 		property test.name.skip.portal.instance = "SAML#AddUserInheritedRolesAsSAMLAttributeStatements";
 
@@ -117,10 +117,8 @@ definition {
 
 	@description = "This is a use case for LRQA-57574 TC-1: Combines SAML.CreateAndSyncUserAfterSAMLSetupWithMatchingScreenNameAttribute and OAuth2.AuthorizeExternalApplication to verify that the portal works when OAuth 2 and SAML are both enabled with a synced user on SP."
 	@priority = "4"
-	@uitest
 	test AssertAuthorizationOnOAuth2WithSAMLConnectionWithExistingUser {
 		property app.server.bundles.size = "1";
-		property minimum.slave.ram = "24";
 		property test.name.skip.portal.instance = "SAML#AssertAuthorizationOnOAuth2WithSAMLConnectionWithExistingUser";
 
 		task ("Enable SAML debug logs") {
@@ -239,7 +237,6 @@ definition {
 	@priority = "4"
 	test AssertAuthorizationOnOAuth2WithSAMLConnectionWithoutExistingUser {
 		property app.server.bundles.size = "1";
-		property minimum.slave.ram = "24";
 		property test.name.skip.portal.instance = "SAML#AssertAuthorizationOnOAuth2WithSAMLConnectionWithoutExistingUser";
 
 		task ("Enable SAML debug logs") {
@@ -348,7 +345,6 @@ definition {
 
 	@description = "LPS-123218 TC-6: Assertion for: empty attribute mapping cannot be used for user matching."
 	@priority = "4"
-	@uitest
 	test AssertEmptyMappingCannotBeUsedForUserMatching {
 		property app.server.bundles.size = "0";
 		property portal.upstream = "true";
@@ -377,7 +373,6 @@ definition {
 
 	@description = "LPS-123218 TC-2 Assertion for: first name cannot be used for user matching even if LDAP import is enabled."
 	@priority = "4"
-	@uitest
 	test AssertFirstNameCannotBeUsedForUserMatchingEvenWithLDAPEnabled {
 		property apacheds.enabled = "true";
 		property app.server.bundles.size = "0";
@@ -418,7 +413,6 @@ definition {
 
 	@description = "This is a use case for LPS-105165. Assert instance admin cannot configure IdP when disable IdP role."
 	@priority = "5"
-	@uitest
 	test AssertInstanceAdminCannotConfigureIdPWhenDisableIdPRole {
 		property test.name.skip.portal.instance = "SAML#AssertInstanceAdminCannotConfigureIdPWhenDisableIdPRole";
 
@@ -433,14 +427,10 @@ definition {
 		}
 
 		task ("Add CP able.com") {
-			PortalInstances.openVirtualInstancesAdmin();
-
-			PortalInstances.addCP(
-				mailDomain = "www.able.com",
-				virtualHost = "www.able.com",
-				webId = "www.able.com");
-
-			PortalInstances.viewCP(virtualHost = "www.able.com");
+			HeadlessPortalInstanceAPI.addPortalInstance(
+				domain = "www.able.com",
+				portalInstanceId = "www.able.com",
+				virtualHost = "www.able.com");
 		}
 
 		task ("Assert IdP role disabled message in SAML admin") {
@@ -698,7 +688,6 @@ definition {
 
 	@description = "This is a use case for LRQA-47412. Assert signed SAML metadata."
 	@priority = "4"
-	@uitest
 	test AssertSignedSAMLMetadata {
 		property test.name.skip.portal.instance = "SAML#AssertSignedSAMLMetadata";
 
@@ -774,7 +763,6 @@ definition {
 
 	@description = "This is a use case for LRQA-35866. Assert SSO idle session takes predence over IdP session time out."
 	@priority = "4"
-	@uitest
 	test AssertSSOIdleSessionTakesPrecedenceOverIdPSessionTimeout {
 		property custom.properties = "session.timeout=2${line.separator}javascript.single.page.application.enabled=false${line.separator}jsonws.web.service.paths.excludes=";
 		property test.name.skip.portal.instance = "SAML#AssertSSOIdleSessionTakesPrecedenceOverIdPSessionTimeout";
@@ -867,6 +855,94 @@ definition {
 			Refresh();
 
 			User.viewLoggedOutPG();
+		}
+	}
+
+	@description = "LPS-143338. Assert SSO reject assertion when nameId value is null."
+	@priority = "4"
+	test AssertSSORejectAssertionWithoutANameIDValue {
+		property app.server.bundles.size = "0";
+		property test.name.skip.portal.instance = "SAML#AssertSSORejectAssertionWithoutANameIDValue";
+
+		var identityProviderEntityId = "samlidp";
+		var serviceProviderEntityId = "samlsp";
+
+		task ("Add virtual instance able.com") {
+			HeadlessPortalInstanceAPI.addPortalInstance(
+				domain = "www.able.com",
+				portalInstanceId = "www.able.com",
+				virtualHost = "www.able.com");
+
+			User.logoutPG();
+
+			User.viewLoggedOutPG();
+		}
+
+		task ("Setup IdP at localhost:8080 and SP at able.com:8080") {
+			SAML.setupIDP(
+				idpURL = "http://localhost:8080",
+				samlEntityID = "${identityProviderEntityId}",
+				userEmailAddress = "test@liferay.com");
+
+			SAML.setupSP(
+				encryptionCertificate = "true",
+				samlEntityID = "${serviceProviderEntityId}",
+				spURL = "http://www.able.com:8080",
+				userEmailAddress = "test@www.able.com");
+		}
+
+		task ("Add IdP configurations to SP and enable SP roles") {
+			SAML.addIDPConfigurationsToServiceProvider(
+				idpAttributeMapping = "emailAddress",
+				idpAttributeMappingText = "emailAddress",
+				idpEntityID = "${identityProviderEntityId}",
+				idpKeepAliveURL = "http://localhost:8080/c/portal/saml/keep_alive",
+				idpURL = "http://localhost:8080",
+				nameIdentifierFormat = "Unspecified",
+				spURL = "http://www.able.com:8080",
+				userEmailAddress = "test@www.able.com",
+				userResolution = "dynamic");
+
+			SAML.enableSPRoles(
+				samlEntityID = "${serviceProviderEntityId}",
+				spURL = "http://www.able.com:8080",
+				userEmailAddress = "test@www.able.com");
+		}
+
+		task ("Add SP configurations to IdP") {
+			SAML.addSPConfigurationsToIdentityProvider(
+				idpURL = "http://localhost:8080",
+				nameIdentifierAttributeName = "expando:inputField",
+				nameIdentifierFormat = "Unspecified",
+				spAttributes = '''emailAddress
+					firstName
+					lastName
+					screenName''',
+				spEntityID = "${serviceProviderEntityId}",
+				spKeepAliveURL = "http://www.able.com:8080/c/portal/saml/keep_alive",
+				spURL = "http://www.able.com:8080");
+		}
+
+		task ("Add new user") {
+			JSONUser.addUser(
+				userEmailAddress = "usera@liferay.com",
+				userFirstName = "user",
+				userLastName = "a",
+				userScreenName = "usera");
+
+			JSONUser.setFirstPassword(
+				agreeToTermsAndAnswerReminderQuery = "true",
+				requireReset = "false",
+				userEmailAddress = "usera@liferay.com");
+		}
+
+		task ("SSO with new user to SP and assert authentication failed error message") {
+			User.firstLoginUI(
+				emailPassword = "test",
+				specificURL = "http://www.able.com:8080",
+				userEmailAddress = "usera@liferay.com");
+
+			SAML.viewUnableToProcessSAMLRequest();
 		}
 	}
 
@@ -976,7 +1052,6 @@ definition {
 
 	@description = "This is a use case for LPS-88924 - Using virtual instances. Assert SSO with encryption and decryption."
 	@priority = "4"
-	@uitest
 	test AssertSSOWithEncryptionAndDecryption {
 		property app.server.bundles.size = "0";
 		property test.name.skip.portal.instance = "SAML#AssertSSOWithEncryptionAndDecryption";
@@ -992,7 +1067,14 @@ definition {
 		}
 
 		task ("Add virtual instance able.com") {
-			SAML.addVirtualInstances(virtualHosts = "www.able.com");
+			HeadlessPortalInstanceAPI.addPortalInstance(
+				domain = "www.able.com",
+				portalInstanceId = "www.able.com",
+				virtualHost = "www.able.com");
+
+			User.logoutPG();
+
+			User.viewLoggedOutPG();
 		}
 
 		task ("Setup IdP") {
@@ -1241,7 +1323,6 @@ definition {
 
 	@description = "This is a use case for LPS-105170 TC-5: Verification for portal User Attributes when they are duplicated in the mapping  when saving the SAML configuration - Using virtual instances."
 	@priority = "3"
-	@uitest
 	test AssertVerificationForDuplicatedUserAttributeMappingSAML {
 		property app.server.bundles.size = "0";
 		property portal.upstream = "true";
@@ -1252,7 +1333,14 @@ definition {
 		}
 
 		task ("Add virtual instance able.com") {
-			SAML.addVirtualInstances(virtualHosts = "www.able.com");
+			HeadlessPortalInstanceAPI.addPortalInstance(
+				domain = "www.able.com",
+				portalInstanceId = "www.able.com",
+				virtualHost = "www.able.com");
+
+			User.logoutPG();
+
+			User.viewLoggedOutPG();
 		}
 
 		task ("Setup IDP as localhost:8080 and SP as able.com:8080") {
@@ -1325,7 +1413,6 @@ definition {
 
 	@description = "This is a use case for LPS-105170 TC-4: Verification for portal User Attributes when they are without SAML attribute value in the mapping when saving the SAML configuration - Using virtual instances."
 	@priority = "3"
-	@uitest
 	test AssertVerificationForEmptyUserAttributeMappingSAML {
 		property app.server.bundles.size = "0";
 		property portal.upstream = "true";
@@ -1336,7 +1423,14 @@ definition {
 		}
 
 		task ("Add virtual instance able.com") {
-			SAML.addVirtualInstances(virtualHosts = "www.able.com");
+			HeadlessPortalInstanceAPI.addPortalInstance(
+				domain = "www.able.com",
+				portalInstanceId = "www.able.com",
+				virtualHost = "www.able.com");
+
+			User.logoutPG();
+
+			User.viewLoggedOutPG();
 		}
 
 		task ("Setup IDP as localhost:8080 and SP as able.com:8080") {
@@ -1528,7 +1622,14 @@ definition {
 		}
 
 		task ("Add virtual instance able.com") {
-			SAML.addVirtualInstances(virtualHosts = "www.able.com");
+			HeadlessPortalInstanceAPI.addPortalInstance(
+				domain = "www.able.com",
+				portalInstanceId = "www.able.com",
+				virtualHost = "www.able.com");
+
+			User.logoutPG();
+
+			User.viewLoggedOutPG();
 		}
 
 		task ("Logout, setup IdP and SP") {
@@ -1614,7 +1715,14 @@ definition {
 		}
 
 		task ("Add virtual instance able.com") {
-			SAML.addVirtualInstances(virtualHosts = "www.able.com");
+			HeadlessPortalInstanceAPI.addPortalInstance(
+				domain = "www.able.com",
+				portalInstanceId = "www.able.com",
+				virtualHost = "www.able.com");
+
+			User.logoutPG();
+
+			User.viewLoggedOutPG();
 		}
 
 		task ("Logout, setup IdP and SP") {
@@ -1698,7 +1806,14 @@ definition {
 		}
 
 		task ("Add virtual instance able.com") {
-			SAML.addVirtualInstances(virtualHosts = "www.able.com");
+			HeadlessPortalInstanceAPI.addPortalInstance(
+				domain = "www.able.com",
+				portalInstanceId = "www.able.com",
+				virtualHost = "www.able.com");
+
+			User.logoutPG();
+
+			User.viewLoggedOutPG();
 		}
 
 		task ("Logout, setup IdP and SP") {
@@ -1781,11 +1896,19 @@ definition {
 		}
 
 		task ("Add vitual instance able.com and baker.com") {
-			SAML.addVirtualInstances(virtualHosts = "www.able.com");
+			HeadlessPortalInstanceAPI.addPortalInstance(
+				domain = "www.able.com",
+				portalInstanceId = "www.able.com",
+				virtualHost = "www.able.com");
 
-			User.firstLoginUI();
+			HeadlessPortalInstanceAPI.addPortalInstance(
+				domain = "www.baker.com",
+				portalInstanceId = "www.baker.com",
+				virtualHost = "www.baker.com");
 
-			SAML.addVirtualInstances(virtualHosts = "www.baker.com");
+			User.logoutPG();
+
+			User.viewLoggedOutPG();
 		}
 
 		task ("Setup IdP samlidp1 at localhost:8080 and samlidp2 at baker.com:8080") {
@@ -1908,7 +2031,6 @@ definition {
 
 	@description = "This is a use case for LPS-105170 TC-8: Verifying that deleting a User will sync with the SP site - Using virtual instances."
 	@priority = "3"
-	@uitest
 	test DeleteUserAfterSAMLSetupAndVerify {
 		property app.server.bundles.size = "0";
 		property portal.upstream = "true";
@@ -1919,7 +2041,14 @@ definition {
 		}
 
 		task ("Add virtul instance able.com") {
-			SAML.addVirtualInstances(virtualHosts = "www.able.com");
+			HeadlessPortalInstanceAPI.addPortalInstance(
+				domain = "www.able.com",
+				portalInstanceId = "www.able.com",
+				virtualHost = "www.able.com");
+
+			User.logoutPG();
+
+			User.viewLoggedOutPG();
 		}
 
 		task ("Setup IdP samlidp at localhost:8080") {
@@ -2030,19 +2159,12 @@ definition {
 		}
 
 		task ("configure samlidp as IdP") {
-			var baseURL = PropsUtil.get("portal.url");
-
-			Navigator.openSpecificURL(url = "${baseURL}/group/control_panel/manage?p_p_id=com_liferay_configuration_admin_web_portlet_SystemSettingsPortlet&_com_liferay_configuration_admin_web_portlet_SystemSettingsPortlet_mvcRenderCommandName=%2Fconfiguration_admin%2Fedit_configuration&_com_liferay_configuration_admin_web_portlet_SystemSettingsPortlet_pid=com.liferay.saml.runtime.configuration.SamlConfiguration");
-
-			SAML.goToSAMLAdmin();
-
 			SAML.configureLiferaySAMLAsIdP(samlEntityID = "samlidp");
 		}
 	}
 
 	@description = "This is a use case for LPS-108077. Import encryption certificate from PKCS12 keystore file."
 	@priority = "5"
-	@uitest
 	test ImportEncryptionCertificateFromPKCS12KeystoreFile {
 		property test.name.skip.portal.instance = "SAML#ImportEncryptionCertificateFromPKCS12KeystoreFile";
 
@@ -2077,8 +2199,6 @@ definition {
 		}
 
 		task ("Convert encryption certificate") {
-			Navigator.openSpecificURL(url = "http://www.able.com:9080");
-
 			SAML.goToSAMLAdmin(baseURL = "http://www.able.com:9080");
 
 			SAML.downloadCertificate(certificate = "ENCRYPTION");
@@ -2160,7 +2280,6 @@ definition {
 
 	@description = "LPS-105169 TC-3: SP initiated login should not sync IdP&SP user attributes if not part of attribute mapping - Using virtual instances."
 	@priority = "4"
-	@uitest
 	test SPInitiatedSSODoesNotSyncAttributesIfNotMapped {
 		property app.server.bundles.size = "0";
 		property portal.upstream = "quarantine";
@@ -2170,7 +2289,14 @@ definition {
 		var serviceProviderEntityId = "samlsp";
 
 		task ("Add virtual instance able.com") {
-			SAML.addVirtualInstances(virtualHosts = "www.able.com");
+			HeadlessPortalInstanceAPI.addPortalInstance(
+				domain = "www.able.com",
+				portalInstanceId = "www.able.com",
+				virtualHost = "www.able.com");
+
+			User.logoutPG();
+
+			User.viewLoggedOutPG();
 		}
 
 		task ("Setup IdP at localhost:8080 and SP at able.com:8080") {
@@ -2277,7 +2403,14 @@ definition {
 		var serviceProviderEntityId = "samlsp";
 
 		task ("Add virtual instance able.com") {
-			SAML.addVirtualInstances(virtualHosts = "www.able.com");
+			HeadlessPortalInstanceAPI.addPortalInstance(
+				domain = "www.able.com",
+				portalInstanceId = "www.able.com",
+				virtualHost = "www.able.com");
+
+			User.logoutPG();
+
+			User.viewLoggedOutPG();
 		}
 
 		task ("Setup IdP as localhost:8080") {
@@ -2388,7 +2521,14 @@ definition {
 		var serviceProviderEntityId = "samlsp";
 
 		task ("Add virtual instance able.com") {
-			SAML.addVirtualInstances(virtualHosts = "www.able.com");
+			HeadlessPortalInstanceAPI.addPortalInstance(
+				domain = "www.able.com",
+				portalInstanceId = "www.able.com",
+				virtualHost = "www.able.com");
+
+			User.logoutPG();
+
+			User.viewLoggedOutPG();
 		}
 
 		task ("Setup IdP as localhost:8080") {
@@ -2494,7 +2634,19 @@ definition {
 		var serviceProviderEntityId = "samlsp";
 
 		task ("Add 2 virtual instances") {
-			SAML.addVirtualInstances(virtualHosts = "www.able.com,www.baker.com");
+			HeadlessPortalInstanceAPI.addPortalInstance(
+				domain = "www.able.com",
+				portalInstanceId = "www.able.com",
+				virtualHost = "www.able.com");
+
+			HeadlessPortalInstanceAPI.addPortalInstance(
+				domain = "www.baker.com",
+				portalInstanceId = "www.baker.com",
+				virtualHost = "www.baker.com");
+
+			User.logoutPG();
+
+			User.viewLoggedOutPG();
 		}
 
 		task ("Setup IdP at localhost:8080 and baker.com:8080") {
@@ -2848,17 +3000,15 @@ definition {
 		property test.name.skip.portal.instance = "SAML#ViewIdPSingleLogoutWithMultipleSPs";
 
 		task ("Add CP able.com and baker.com") {
-			PortalInstances.openVirtualInstancesAdmin();
+			HeadlessPortalInstanceAPI.addPortalInstance(
+				domain = "www.able.com",
+				portalInstanceId = "www.able.com",
+				virtualHost = "www.able.com");
 
-			PortalInstances.addCP(
-				mailDomain = "www.able.com",
-				virtualHost = "www.able.com",
-				webId = "www.able.com");
-
-			PortalInstances.addCP(
-				mailDomain = "www.baker.com",
-				virtualHost = "www.baker.com",
-				webId = "www.baker.com");
+			HeadlessPortalInstanceAPI.addPortalInstance(
+				domain = "www.baker.com",
+				portalInstanceId = "www.baker.com",
+				virtualHost = "www.baker.com");
 		}
 
 		task ("Edit user screen name to localhost") {
@@ -2993,7 +3143,6 @@ definition {
 
 	@description = "This is a use case for LRQA-31886. View single logout and force auth with multiple SPs."
 	@priority = "4"
-	@uitest
 	test ViewSingleLogoutAndForceAuthWithMultipleSPs {
 		property test.name.skip.portal.instance = "SAML#ViewSingleLogoutAndForceAuthWithMultipleSPs";
 
@@ -3263,19 +3412,14 @@ definition {
 
 	@description = "This is a use case for LPS-88089. View SP initiated SSO with multiple IdPs and assert render login portlet without IdPs matched."
 	@priority = "4"
-	@uitest
 	test ViewSPInitiatedSSOWithMultipleIdPsAndAssertRenderLoginPortletWithoutIdpsMatched {
 		property test.name.skip.portal.instance = "SAML#ViewSPInitiatedSSOWithMultipleIdPsAndAssertRenderLoginPortletWithoutIdpsMatched";
 
 		task ("Add CP able.com") {
-			PortalInstances.openVirtualInstancesAdmin();
-
-			PortalInstances.addCP(
-				mailDomain = "www.able.com",
-				virtualHost = "www.able.com",
-				webId = "www.able.com");
-
-			PortalInstances.viewCP(virtualHost = "www.able.com");
+			HeadlessPortalInstanceAPI.addPortalInstance(
+				domain = "www.able.com",
+				portalInstanceId = "www.able.com",
+				virtualHost = "www.able.com");
 		}
 
 		task ("Login at able.com and edit email information") {
@@ -3477,7 +3621,14 @@ definition {
 		}
 
 		task ("Add virtual instance able.com") {
-			SAML.addVirtualInstances(virtualHosts = "www.able.com");
+			HeadlessPortalInstanceAPI.addPortalInstance(
+				domain = "www.able.com",
+				portalInstanceId = "www.able.com",
+				virtualHost = "www.able.com");
+
+			User.logoutPG();
+
+			User.viewLoggedOutPG();
 		}
 
 		task ("Setup IdP and SP") {
@@ -3587,7 +3738,14 @@ definition {
 		}
 
 		task ("Add virtual intance able.com") {
-			SAML.addVirtualInstances(virtualHosts = "www.able.com");
+			HeadlessPortalInstanceAPI.addPortalInstance(
+				domain = "www.able.com",
+				portalInstanceId = "www.able.com",
+				virtualHost = "www.able.com");
+
+			User.logoutPG();
+
+			User.viewLoggedOutPG();
 		}
 
 		task ("Setup IdP and SP") {
@@ -3698,7 +3856,19 @@ definition {
 		}
 
 		task ("Add virtual instances able.com and baker.com") {
-			SAML.addVirtualInstances(virtualHosts = "www.able.com,www.baker.com");
+			HeadlessPortalInstanceAPI.addPortalInstance(
+				domain = "www.able.com",
+				portalInstanceId = "www.able.com",
+				virtualHost = "www.able.com");
+
+			HeadlessPortalInstanceAPI.addPortalInstance(
+				domain = "www.baker.com",
+				portalInstanceId = "www.baker.com",
+				virtualHost = "www.baker.com");
+
+			User.logoutPG();
+
+			User.viewLoggedOutPG();
 		}
 
 		task ("Setup IdPs and SP") {
@@ -3833,7 +4003,14 @@ definition {
 		}
 
 		task ("Add virtual instance able.com") {
-			SAML.addVirtualInstances(virtualHosts = "www.able.com");
+			HeadlessPortalInstanceAPI.addPortalInstance(
+				domain = "www.able.com",
+				portalInstanceId = "www.able.com",
+				virtualHost = "www.able.com");
+
+			User.logoutPG();
+
+			User.viewLoggedOutPG();
 		}
 
 		task ("Setup IdP and SP") {
@@ -3944,7 +4121,19 @@ definition {
 		}
 
 		task ("Add virtual instances able.com and baker.com") {
-			SAML.addVirtualInstances(virtualHosts = "www.able.com,www.baker.com");
+			HeadlessPortalInstanceAPI.addPortalInstance(
+				domain = "www.able.com",
+				portalInstanceId = "www.able.com",
+				virtualHost = "www.able.com");
+
+			HeadlessPortalInstanceAPI.addPortalInstance(
+				domain = "www.baker.com",
+				portalInstanceId = "www.baker.com",
+				virtualHost = "www.baker.com");
+
+			User.logoutPG();
+
+			User.viewLoggedOutPG();
 		}
 
 		task ("Setup IdP and SPs") {
@@ -4114,14 +4303,10 @@ definition {
 		property test.name.skip.portal.instance = "SAML#ViewSPInitiatedSSOWithTransientNameId";
 
 		task ("Add CP able.com") {
-			PortalInstances.openVirtualInstancesAdmin();
-
-			PortalInstances.addCP(
-				mailDomain = "www.able.com",
-				virtualHost = "www.able.com",
-				webId = "www.able.com");
-
-			PortalInstances.viewCP(virtualHost = "www.able.com");
+			HeadlessPortalInstanceAPI.addPortalInstance(
+				domain = "www.able.com",
+				portalInstanceId = "www.able.com",
+				virtualHost = "www.able.com");
 		}
 
 		task ("Configure samlidp as IdP and samlsp as SP") {

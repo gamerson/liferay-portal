@@ -20,12 +20,13 @@ import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.kernel.service.GroupLocalService;
-import com.liferay.portal.kernel.service.LayoutLocalService;
-import com.liferay.search.experiences.blueprint.parameter.BooleanSXPParameter;
-import com.liferay.search.experiences.blueprint.parameter.LongSXPParameter;
+import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.search.experiences.blueprint.parameter.SXPParameter;
-import com.liferay.search.experiences.blueprint.parameter.StringSXPParameter;
 import com.liferay.search.experiences.blueprint.parameter.contributor.SXPParameterContributorDefinition;
+import com.liferay.search.experiences.internal.blueprint.parameter.BooleanSXPParameter;
+import com.liferay.search.experiences.internal.blueprint.parameter.LongArraySXPParameter;
+import com.liferay.search.experiences.internal.blueprint.parameter.LongSXPParameter;
+import com.liferay.search.experiences.internal.blueprint.parameter.StringSXPParameter;
 import com.liferay.search.experiences.rest.dto.v1_0.SXPBlueprint;
 
 import java.util.Arrays;
@@ -39,18 +40,35 @@ import java.util.Set;
 public class ContextSXPParameterContributor implements SXPParameterContributor {
 
 	public ContextSXPParameterContributor(
-		GroupLocalService groupLocalService, Language language,
-		LayoutLocalService layoutLocalService) {
+		GroupLocalService groupLocalService, Language language) {
 
 		_groupLocalService = groupLocalService;
 		_language = language;
-		_layoutLocalService = layoutLocalService;
 	}
 
 	@Override
 	public void contribute(
 		SearchContext searchContext, SXPBlueprint sxpBlueprint,
 		Set<SXPParameter> sxpParameters) {
+
+		long[] commerceAccountGroupIds = (long[])searchContext.getAttribute(
+			"commerceAccountGroupIds");
+
+		if (commerceAccountGroupIds != null) {
+			sxpParameters.add(
+				new LongArraySXPParameter(
+					"commerceAccountGroupIds", true,
+					ArrayUtil.toArray(commerceAccountGroupIds)));
+		}
+
+		Long commerceChannelGroupId = (Long)searchContext.getAttribute(
+			"commerceChannelGroupId");
+
+		if (commerceChannelGroupId != null) {
+			sxpParameters.add(
+				new LongSXPParameter(
+					"commerceChannelGroupId", true, commerceChannelGroupId));
+		}
 
 		sxpParameters.add(
 			new LongSXPParameter(
@@ -67,8 +85,7 @@ public class ContextSXPParameterContributor implements SXPParameterContributor {
 				"context.language", true, locale.getLanguage()));
 		sxpParameters.add(
 			new StringSXPParameter(
-				"context.language_id", true,
-				"_" + _language.getLanguageId(locale)));
+				"context.language_id", true, _language.getLanguageId(locale)));
 
 		Layout layout = searchContext.getLayout();
 
@@ -134,6 +151,5 @@ public class ContextSXPParameterContributor implements SXPParameterContributor {
 
 	private final GroupLocalService _groupLocalService;
 	private final Language _language;
-	private final LayoutLocalService _layoutLocalService;
 
 }

@@ -81,6 +81,11 @@
 	<td></td>
 </tr>
 <tr>
+	<td>UPDATE_DUE_DATE_DROPDOWN</td>
+	<td>//div[@class='dropdown-menu show']//button[@class='dropdown-item'][contains(text(),'Update Due Date')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>TRANSITION_DROPDOWN</td>
 	<td>//div[@class='dropdown-menu show']//button[@class='dropdown-item'][contains(text(),'Transition')]</td>
 	<td></td>
@@ -372,7 +377,7 @@
 </tr>
 <tr>
 	<td>WORKFLOW_FILTER_TAB_NAME</td>
-	<td>//li[contains(@class,'tbar-item')]//*[contains(text(),'${key_value}')]</td>
+	<td>//div[contains(@class,'label-section')]//*[contains(text(),'${key_value}')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -458,6 +463,36 @@
 <tr>
 	<td>WORKFLOW_ALL_ITEMS_ASSERT_ITEM</td>
 	<td>//span[contains(text(),'${key_columnName}')]/../../../../..//tr[contains(.,'${key_fieldName}')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>CHECKBOX_CUSTOM_CONTROL</td>
+	<td>//input[@class='custom-control-input']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>TRACK_APPROVAL_PANEL</td>
+	<td>//div[contains(@class,'workflow-instance-tracker')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>TRACK_APPROVAL_CURRENT_NODE</td>
+	<td>//div[contains(@class,'current-node')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>TRACK_APPROVAL_REACT_CONTROLS</td>
+	<td>//div[contains(@class,'react-flow__controls')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>TRACK_APPROVAL_NODE</td>
+	<td>//span[contains(@class, 'truncate-container')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>TRACK_APPROVAL_BODY</td>
+	<td>//div[contains(@class, 'modal-title') and contains(.,'Track Workflow')]//..//..//div[contains(@class,'modal-body')]</td>
 	<td></td>
 </tr>
 </tbody>

@@ -330,15 +330,13 @@ definition {
 		}
 
 		task ("View friendly URL doesn't change") {
-			SitePages.openPagesAdmin(siteURLKey = "site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "site-name");
 
-			SitePages.gotoPageMenuItem(
+			PagesAdmin.gotoPageEllipsisMenuItem(
 				menuItem = "Configure",
 				pageName = "Site Page");
 
-			Page.viewFriendlyURL(
-				pageName = "Site Page",
-				siteFriendlyURL = "${portalURL}/web/site-name");
+			PagesAdmin.viewBaseFriendlyURL(siteFriendlyURL = "${portalURL}/web/site-name");
 		}
 	}
 

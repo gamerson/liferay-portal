@@ -352,6 +352,31 @@ public class LayoutReferencesExportImportContentProcessor
 
 						url = urlWithoutLocale;
 					}
+					else if (urlWithoutLocale.indexOf(StringPool.SLASH, 1) ==
+								-1) {
+
+						if (!localePath.equals(
+								_PRIVATE_GROUP_SERVLET_MAPPING) &&
+							!localePath.equals(_PRIVATE_USER_SERVLET_MAPPING) &&
+							!localePath.equals(_PUBLIC_GROUP_SERVLET_MAPPING)) {
+
+							urlSB.append(localePath);
+
+							url = urlWithoutLocale;
+						}
+						else {
+							Layout layout =
+								_layoutLocalService.fetchLayoutByFriendlyURL(
+									group.getGroupId(), false,
+									urlWithoutLocale);
+
+							if (layout != null) {
+								urlSB.append(localePath);
+
+								url = urlWithoutLocale;
+							}
+						}
+					}
 				}
 
 				boolean privateLayout = false;
@@ -975,6 +1000,27 @@ public class LayoutReferencesExportImportContentProcessor
 					_isVirtualHostDefined(urlSB)) {
 
 					url = urlWithoutLocale;
+				}
+				else if (urlWithoutLocale.indexOf(StringPool.SLASH, 1) == -1) {
+					if (!localePath.equals(_PRIVATE_GROUP_SERVLET_MAPPING) &&
+						!localePath.equals(_PRIVATE_USER_SERVLET_MAPPING) &&
+						!localePath.equals(_PUBLIC_GROUP_SERVLET_MAPPING)) {
+
+						urlSB.append(localePath);
+
+						url = urlWithoutLocale;
+					}
+					else {
+						Layout layout =
+							_layoutLocalService.fetchLayoutByFriendlyURL(
+								group.getGroupId(), false, urlWithoutLocale);
+
+						if (layout != null) {
+							urlSB.append(localePath);
+
+							url = urlWithoutLocale;
+						}
+					}
 				}
 			}
 

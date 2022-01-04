@@ -30,6 +30,7 @@ import com.liferay.portal.vulcan.aggregation.Aggregation;
 import com.liferay.portal.vulcan.dto.converter.DTOConverterContext;
 import com.liferay.portal.vulcan.graphql.dto.GraphQLDTOContributor;
 import com.liferay.portal.vulcan.graphql.dto.GraphQLDTOProperty;
+import com.liferay.portal.vulcan.list.type.ListEntry;
 import com.liferay.portal.vulcan.pagination.Page;
 import com.liferay.portal.vulcan.pagination.Pagination;
 
@@ -63,9 +64,17 @@ public class ObjectDefinitionGraphQLDTOContributor
 			GraphQLDTOProperty.of(
 				objectDefinition.getPKObjectFieldName(), Long.class));
 
+		List<GraphQLDTOProperty> relationshipGraphQLDTOProperties =
+			new ArrayList<>();
+
 		for (ObjectField objectField : objectFields) {
-			if (Objects.equals(
-					objectField.getRelationshipType(), "oneToMany")) {
+			if (objectField.getListTypeDefinitionId() != 0) {
+				graphQLDTOProperties.add(
+					GraphQLDTOProperty.of(
+						objectField.getName(), ListEntry.class));
+			}
+			else if (Objects.equals(
+						objectField.getRelationshipType(), "oneToMany")) {
 
 				String objectFieldName = objectField.getName();
 
@@ -80,8 +89,8 @@ public class ObjectDefinitionGraphQLDTOContributor
 				String relationshipName = StringUtil.replaceLast(
 					relationshipIdName, "Id", "");
 
-				graphQLDTOProperties.add(
-					GraphQLDTOProperty.of(relationshipName, Object.class));
+				relationshipGraphQLDTOProperties.add(
+					GraphQLDTOProperty.of(relationshipName, Map.class));
 			}
 			else {
 				graphQLDTOProperties.add(
@@ -98,7 +107,8 @@ public class ObjectDefinitionGraphQLDTOContributor
 			StringUtil.removeSubstring(
 				objectDefinition.getPKObjectFieldName(), "c_"),
 			objectDefinition, objectEntryManager, objectScopeProvider,
-			objectDefinition.getShortName(), objectDefinition.getName());
+			relationshipGraphQLDTOProperties, objectDefinition.getShortName(),
+			objectDefinition.getName());
 	}
 
 	@Override
@@ -176,6 +186,40 @@ public class ObjectDefinitionGraphQLDTOContributor
 	}
 
 	@Override
+	public List<GraphQLDTOProperty> getRelationshipGraphQLDTOProperties() {
+		return _relationshipGraphQLDTOProperties;
+	}
+
+	@Override
+	public <T> T getRelationshipValue(
+			DTOConverterContext dtoConverterContext, long id,
+			Class<T> relationshipClass, String relationshipName)
+		throws Exception {
+
+		if (!Objects.equals(relationshipClass, Map.class)) {
+			return null;
+		}
+
+		ObjectEntry objectEntry = _objectEntryManager.getObjectEntry(
+			dtoConverterContext, _objectDefinition, id);
+
+		Map<String, Object> properties = objectEntry.getProperties();
+
+		String relationshipIdName = relationshipName + "Id";
+
+		Object relationshipId = properties.get(relationshipIdName);
+
+		if (!(relationshipId instanceof Long)) {
+			return null;
+		}
+
+		return (T)_toMap(
+			_objectEntryManager.getObjectEntry(
+				dtoConverterContext, null, (long)relationshipId),
+			relationshipIdName);
+	}
+
+	@Override
 	public String getResourceName() {
 		return _resourceName;
 	}
@@ -207,8 +251,9 @@ public class ObjectDefinitionGraphQLDTOContributor
 		List<GraphQLDTOProperty> graphQLDTOProperties, String idName,
 		ObjectDefinition objectDefinition,
 		ObjectEntryManager objectEntryManager,
-		ObjectScopeProvider objectScopeProvider, String resourceName,
-		String typeName) {
+		ObjectScopeProvider objectScopeProvider,
+		List<GraphQLDTOProperty> relationshipGraphQLDTOProperties,
+		String resourceName, String typeName) {
 
 		_companyId = companyId;
 		_entityModel = entityModel;
@@ -217,14 +262,21 @@ public class ObjectDefinitionGraphQLDTOContributor
 		_objectDefinition = objectDefinition;
 		_objectEntryManager = objectEntryManager;
 		_objectScopeProvider = objectScopeProvider;
+		_relationshipGraphQLDTOProperties = relationshipGraphQLDTOProperties;
 		_resourceName = resourceName;
 		_typeName = typeName;
 	}
 
 	private Map<String, Object> _toMap(ObjectEntry objectEntry) {
+		return _toMap(objectEntry, getIdName());
+	}
+
+	private Map<String, Object> _toMap(
+		ObjectEntry objectEntry, String objectEntryIdName) {
+
 		Map<String, Object> properties = objectEntry.getProperties();
 
-		properties.put(getIdName(), objectEntry.getId());
+		properties.put(objectEntryIdName, objectEntry.getId());
 
 		return properties;
 	}
@@ -273,6 +325,7 @@ public class ObjectDefinitionGraphQLDTOContributor
 	private final ObjectDefinition _objectDefinition;
 	private final ObjectEntryManager _objectEntryManager;
 	private final ObjectScopeProvider _objectScopeProvider;
+	private final List<GraphQLDTOProperty> _relationshipGraphQLDTOProperties;
 	private final String _resourceName;
 	private final String _typeName;
 

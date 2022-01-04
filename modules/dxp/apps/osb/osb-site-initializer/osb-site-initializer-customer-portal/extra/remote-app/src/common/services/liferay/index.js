@@ -13,6 +13,21 @@ const getUserId = () => {
 	}
 };
 
+const getScopeGroupId = () => {
+	try {
+		// eslint-disable-next-line no-undef
+		if (!Liferay.ThemeDisplay) {
+			new Error('themeDisplay is not defined');
+		}
+
+		// eslint-disable-next-line no-undef
+		return Liferay.ThemeDisplay.getScopeGroupId();
+	}
+	catch (error) {
+		console.warn(error.message);
+	}
+};
+
 const getLiferaySiteName = () => {
 	let siteName = '/web/customer-portal';
 	try {
@@ -38,5 +53,6 @@ const getLiferaySiteName = () => {
 
 export const LiferayTheme = {
 	getLiferaySiteName,
+	getScopeGroupId,
 	getUserId,
 };

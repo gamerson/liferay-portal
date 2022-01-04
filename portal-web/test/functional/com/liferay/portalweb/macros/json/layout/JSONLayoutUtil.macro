@@ -133,6 +133,9 @@ definition {
 		else if ("${widgetName}" == "Profile") {
 			var portletId = "com_liferay_contacts_web_portlet_ProfilePortlet";
 		}
+		else if ("${widgetName}" == "Product Details") {
+			var portletId = "com_liferay_commerce_product_content_web_internal_portlet_CPContentPortlet";
+		}
 		else if ("${widgetName}" == "Questions") {
 			var portletId = "com_liferay_questions_web_internal_portlet_QuestionsPortlet";
 		}
@@ -168,6 +171,9 @@ definition {
 		}
 		else if ("${widgetName}" == "Tags Navigation") {
 			var portletId = "com_liferay_asset_tags_navigation_web_portlet_AssetTagsNavigationPortlet";
+		}
+		else if ("${widgetName}" == "Tree Menu") {
+			var portletId = "com_liferay_wiki_navigation_web_portlet_WikiNavigationTreeMenuPortlet";
 		}
 		else if ("${widgetName}" == "Type Facet") {
 			var portletId = "com_liferay_portal_search_web_type_facet_portlet_TypeFacetPortlet";

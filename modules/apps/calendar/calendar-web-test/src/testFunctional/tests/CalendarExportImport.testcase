@@ -18,11 +18,11 @@ definition {
 			category = "Site Builder",
 			portlet = "Pages");
 
-		SitePages.addPublicPage(
+		PagesAdmin.addPublicPage(
 			pageName = "Calendar Page",
 			sitePageType = "Widget Page");
 
-		SitePages.configurePage(
+		PagesAdmin.configurePage(
 			columnName = "1 Column",
 			pageName = "Calendar Page",
 			privacy = "Public Pages",
@@ -52,17 +52,76 @@ definition {
 
 			CalendarConfiguration.tearDown();
 
-			Page.tearDownCP();
+			PagesAdmin.tearDownCP();
 		}
 	}
 
 	@description = "LRQA-71361 - Verify that user can export a file at import Export/Import navigation menu"
-	@ignore = "Test Stub"
 	@priority = "4"
 	test CanExportAFile {
+		CalendarNavigator.gotoConfiguration();
 
-		// TODO LRQA-71614 CanExportAFile pending implementation
+		CalendarConfiguration.selectTimeFormat(timeFormat = "24 Hour");
 
+		CalendarConfiguration.selectDefaultDuration(defaultDuration = "15 Minutes");
+
+		CalendarConfiguration.selectDefaultView(defaultView = "Agenda");
+
+		CalendarConfiguration.selectWeekStartsOn(weekStartDay = "Saturday");
+
+		CalendarConfiguration.save();
+
+		CalendarExportImport.closeFrame();
+
+		CalendarExportImport.gotoPortletExportImport();
+
+		CalendarExportImport.selectConfigurationIFrame();
+
+		CalendarExportImport.gotoExportTab(subTab = "New Export Process");
+
+		CalendarExportImport.exportAndDownloadACalendarFile();
+
+		CalendarExportImport.closeFrame();
+
+		CalendarExportImport.removeWidgetCalendar();
+
+		Refresh();
+
+		Portlet.addPG(
+			pageName = "Calendar Page",
+			portletName = "Calendar");
+
+		CalendarNavigator.gotoConfiguration();
+
+		CalendarConfiguration.viewSelectTimeFormat(timeFormat = "Locale");
+
+		CalendarConfiguration.viewSelectDefaultDuration(defaultDuration = "60 Minutes");
+
+		CalendarConfiguration.viewSelectDefaultView(defaultView = "Week");
+
+		CalendarConfiguration.viewSelectWeekStartsOn(weekStartDay = "Sunday");
+
+		CalendarExportImport.closeFrame();
+
+		CalendarExportImport.gotoPortletExportImport();
+
+		CalendarExportImport.selectConfigurationIFrame();
+
+		CalendarExportImport.gotoImportTab(subTab = "New Import Process");
+
+		CalendarExportImport.importCalendarFile(calendarFile = "Calendar-202111251634.portlet.lar");
+
+		CalendarExportImport.closeFrame();
+
+		CalendarNavigator.gotoConfiguration();
+
+		CalendarConfiguration.viewSelectTimeFormat(timeFormat = "24 Hour");
+
+		CalendarConfiguration.viewSelectDefaultDuration(defaultDuration = "15 Minutes");
+
+		CalendarConfiguration.viewSelectDefaultView(defaultView = "Agenda");
+
+		CalendarConfiguration.viewSelectWeekStartsOn(weekStartDay = "Saturday");
 	}
 
 	@description = "This is a use case for LPS-57992."
@@ -88,12 +147,39 @@ definition {
 	}
 
 	@description = "LRQA-71361 - Verify that user can import a file at import Export/Import navigation menu"
-	@ignore = "Test Stub"
 	@priority = "4"
 	test CanImportAFile {
+		CalendarNavigator.gotoConfiguration();
 
-		// TODO LRQA-71615 CanImportAFile pending implementation
+		CalendarConfiguration.viewSelectTimeFormat(timeFormat = "Locale");
 
+		CalendarConfiguration.viewSelectDefaultDuration(defaultDuration = "60 Minutes");
+
+		CalendarConfiguration.viewSelectDefaultView(defaultView = "Week");
+
+		CalendarConfiguration.viewSelectWeekStartsOn(weekStartDay = "Sunday");
+
+		CalendarExportImport.closeFrame();
+
+		CalendarExportImport.gotoPortletExportImport();
+
+		CalendarExportImport.selectConfigurationIFrame();
+
+		CalendarExportImport.gotoImportTab(subTab = "New Import Process");
+
+		CalendarExportImport.importCalendarFile(calendarFile = "Calendar-202111251634.portlet.lar");
+
+		CalendarExportImport.closeFrame();
+
+		CalendarNavigator.gotoConfiguration();
+
+		CalendarConfiguration.viewSelectTimeFormat(timeFormat = "24 Hour");
+
+		CalendarConfiguration.viewSelectDefaultDuration(defaultDuration = "15 Minutes");
+
+		CalendarConfiguration.viewSelectDefaultView(defaultView = "Agenda");
+
+		CalendarConfiguration.viewSelectWeekStartsOn(weekStartDay = "Saturday");
 	}
 
 	@description = "This is a use case for LPS-53072."
@@ -182,30 +268,53 @@ definition {
 	}
 
 	@description = "LRQA-71361 - Verify that the user can view the message: -Failed to import empty file.- after import empty file."
-	@ignore = "Test Stub"
 	@priority = "3"
 	test CanViewMessageAfterImportEmptyFile {
+		CalendarExportImport.gotoPortletExportImport();
 
-		// TODO LRQA-71616 CanViewMessageAfterImportEmptyFile pending implementation
+		CalendarExportImport.selectConfigurationIFrame();
 
+		CalendarExportImport.gotoImportTab(subTab = "New Import Process");
+
+		CalendarExportImport.importCalendarFile(
+			calendarFile = "Calendar-empty-file.portlet.lar.portlet.lar",
+			importValidationErrorMessage = "The file Calendar-empty-file.portlet.lar.portlet.lar cannot be imported.");
 	}
 
 	@description = "LRQA-71361 - Verify that user can view the new exported process status in the Current and Previous tab"
-	@ignore = "Test Stub"
 	@priority = "3"
 	test CanViewProcessStatusExported {
+		CalendarExportImport.gotoPortletExportImport();
 
-		// TODO LRQA-71613 CanViewProcessStatusExported pending implementation
+		CalendarExportImport.selectConfigurationIFrame();
 
+		CalendarExportImport.gotoExportTab(subTab = "New Export Process");
+
+		CalendarExportImport.exportCalendarFile();
+
+		CalendarExportImport.gotoExportTab(subTab = "New Export Process");
+
+		CalendarExportImport.viewExportedCalendarFileName();
+
+		CalendarExportImport.viewSuccessStatusOnCurrentAndPreviousTab();
 	}
 
 	@description = "LRQA-71361 - Verify that user can view the new imported process status in the Current and Previous tab"
-	@ignore = "Test Stub"
 	@priority = "3"
 	test CanViewProcessStatusImported {
+		CalendarExportImport.gotoPortletExportImport();
 
-		// TODO LRQA-71612 CanViewProcessStatusImported pending implementation
+		CalendarExportImport.selectConfigurationIFrame();
 
+		CalendarExportImport.gotoImportTab(subTab = "Current and Previous");
+
+		CalendarExportImport.viewNoProcessesOnCurrentAndPreviousTab();
+
+		CalendarExportImport.gotoImportTab(subTab = "New Import Process");
+
+		CalendarExportImport.importCalendarFile(calendarFile = "Calendar-202111251634.portlet.lar");
+
+		CalendarExportImport.viewSuccessStatusOnCurrentAndPreviousTab();
 	}
 
 }

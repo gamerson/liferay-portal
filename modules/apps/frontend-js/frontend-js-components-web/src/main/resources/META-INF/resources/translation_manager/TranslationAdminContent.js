@@ -102,6 +102,9 @@ const TranslationAdminContent = ({
 								availableLocales.length > 0
 							}
 							hasLeftSymbols
+							menuElementAttrs={{
+								className: 'dropdown-menu-width-shrink',
+							}}
 							onActiveChange={setCreationMenuActive}
 							trigger={
 								<ClayButtonWithIcon
@@ -120,6 +123,7 @@ const TranslationAdminContent = ({
 											key={availableLocale.label}
 											onClick={() => {
 												onAddLocale(availableLocale.id);
+												setCreationMenuActive(false);
 											}}
 											symbolLeft={availableLocale.symbol}
 										>

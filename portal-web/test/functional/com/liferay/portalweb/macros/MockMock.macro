@@ -70,6 +70,18 @@ definition {
 		AssertTextEquals.assertPartialText(
 			locator1 = "MockMock#MOCKMOCK_MESSAGE_BODY",
 			value1 = "${content}");
+
+		if (isSet(fromAddress)) {
+			AssertTextEquals.assertPartialText(
+				locator1 = "MockMock#MOCKMOCK_MESSAGE_BODY",
+				value1 = "${fromAddress}");
+		}
+
+		if (isSet(toName)) {
+			AssertTextEquals.assertPartialText(
+				locator1 = "MockMock#MOCKMOCK_MESSAGE_BODY",
+				value1 = "${toName}");
+		}
 	}
 
 	macro clickBodyLink {
@@ -194,10 +206,14 @@ definition {
 			subject = "${subject}");
 
 		var bodyContent = selenium.getText("MockMock#MOCKMOCK_MESSAGE_BODY");
-		var bodyContent = StringUtil.extractLast("${bodyContent}", "href=&quot;");
-		var bodyURL = StringUtil.extractFirst("${bodyContent}", "&quot;");
+		var bodyContent = StringUtil.extractLast("${bodyContent}", "href=\"");
+		var bodyURL = StringUtil.extractFirst("${bodyContent}", "\"");
 
 		Navigator.openSpecificURL(url = "${bodyURL}");
+	}
+
+	macro openMockMock {
+		MockMock._gotoMail();
 	}
 
 	macro viewMail {
@@ -214,7 +230,9 @@ definition {
 
 		MockMock._viewMailMessage(
 			content = "${content}",
-			subject = "${subject}");
+			fromAddress = "${fromAddress}",
+			subject = "${subject}",
+			toName = "${toName}");
 
 		MockMock._backtoInbox();
 	}
@@ -246,6 +264,23 @@ definition {
 		MockMock._gotoMail();
 
 		AssertElementPresent(locator1 = "MockMock#MOCKMOCK_NO_EMAIL_IN_QUEUE");
+	}
+
+	macro viewUnformattedHTMLText {
+		MockMock._gotoMail();
+
+		MockMock._viewMailFromInbox(
+			asset = "${asset}",
+			recipient = "${recipient}",
+			sender = "${sender}");
+
+		MockMock._gotoMailMessage(
+			asset = "${subject}",
+			recipient = "${recipient}");
+
+		AssertTextEquals.assertPartialText(
+			locator1 = "MockMock#MOCKMOCK_HTML_BODY_UNFORMATTED_FIELD",
+			value1 = "${unFormattedContent}");
 	}
 
 }

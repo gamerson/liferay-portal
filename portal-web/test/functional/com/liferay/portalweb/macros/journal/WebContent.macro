@@ -28,6 +28,12 @@ definition {
 			}
 		}
 
+		if (isSet(webContentDescription)) {
+			CKEditor.addContentInWebContent(
+				content = "${webContentDescription}",
+				fieldLabel = "Description");
+		}
+
 		if (isSet(embedImage)) {
 			var key_imageFileName = "${imageFileName}";
 
@@ -463,7 +469,8 @@ definition {
 		Panel.expandPanel(panel = "Friendly URL");
 
 		Type.typePause(
-			locator1 = "TextInput#FRIENDLY_URL",
+			inputFieldId = "friendlyURL",
+			locator1 = "TextInput#INPUT_ID",
 			value1 = "${friendlyUrl}");
 
 		PortletEntry.publish();
@@ -1324,7 +1331,8 @@ definition {
 		Panel.expandPanel(panel = "Friendly URL");
 
 		Type.typePause(
-			locator1 = "TextInput#FRIENDLY_URL",
+			inputFieldId = "friendlyURL",
+			locator1 = "TextInput#INPUT_ID",
 			value1 = "${webContentFriendlyURL}");
 	}
 
@@ -1544,14 +1552,6 @@ definition {
 
 			return "${folderId}";
 		}
-	}
-
-	macro gotoPublish {
-		WebContentNavigator.gotoEntryMenuItem(
-			entry = "${webContentTitle}",
-			menuItem = "Publish to Live");
-
-		AssertConfirm(value1 = "Are you sure you want to publish the selected web content?");
 	}
 
 	macro increaseDisplayDate {
@@ -2020,16 +2020,20 @@ definition {
 		AssertElementPresent(locator1 = "WCD#WEB_CONTENT_AUDIO");
 	}
 
-	macro viewAvailableLanguagesPGViaWCD {
+	macro viewAvailableLanguages {
 		Click(locator1 = "Button#LOCALIZATION_GENERIC");
 
-		AssertElementPresent(
-			key_locale = "${locale1}",
-			locator1 = "Translation#LOCALIZATION_NAME");
+		for (var availableLanguage : list "${availableLanguageList}") {
+			AssertElementPresent(
+				key_locale = "${availableLanguage}",
+				locator1 = "Translation#LOCALIZATION_NAME");
+		}
 
-		AssertElementNotPresent(
-			key_locale = "${locale2}",
-			locator1 = "Translation#LOCALIZATION_NAME");
+		for (var unavailableLanguage : list "${unavailableLanguageList}") {
+			AssertElementNotPresent(
+				key_locale = "${unavailableLanguage}",
+				locator1 = "Translation#LOCALIZATION_NAME");
+		}
 	}
 
 	macro viewCategorizationCategoryCP {
@@ -2304,7 +2308,8 @@ definition {
 		Panel.expandPanel(panel = "Friendly URL");
 
 		AssertTextEquals(
-			locator1 = "TextInput#FRIENDLY_URL",
+			inputFieldId = "friendlyURL",
+			locator1 = "TextInput#INPUT_ID",
 			value1 = "${friendlyUrl}");
 	}
 
@@ -2519,8 +2524,8 @@ definition {
 
 		if (isSet(displayPageTemplateName)) {
 			AssertTextEquals(
-				inputFieldId = "defaultDisplayPageNameInput",
-				locator1 = "TextInput#INPUT_ID",
+				key_titleName = "${displayPageTemplateType} Display Page Template",
+				locator1 = "TextInput#INPUT_CONTAINS_TITLE",
 				value1 = "${displayPageTemplateName}");
 		}
 	}

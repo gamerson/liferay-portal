@@ -86,9 +86,7 @@ describe('EditSXPBlueprintForm', () => {
 				(sxpElement) => ({
 					sxpElement,
 					type: 10,
-					uiConfigurationValues: getUIConfigurationValues(
-						sxpElement.elementDefinition.uiConfiguration
-					),
+					uiConfigurationValues: getUIConfigurationValues(sxpElement),
 				})
 			),
 		});
@@ -114,7 +112,11 @@ describe('EditSXPBlueprintForm', () => {
 		const sxpElementCountBefore = container.querySelectorAll('.sxp-element')
 			.length;
 
-		fireEvent.click(container.querySelectorAll('.panel-header')[0]);
+		container
+			.querySelectorAll('.lexicon-icon-angle-right')
+			.forEach((header) => {
+				fireEvent.click(header);
+			});
 
 		fireEvent.mouseOver(queryAllByLabelText('add')[0]);
 
@@ -137,9 +139,7 @@ describe('EditSXPBlueprintForm', () => {
 				(sxpElement) => ({
 					sxpElement,
 					type: 10,
-					uiConfigurationValues: getUIConfigurationValues(
-						sxpElement.elementDefinition.uiConfiguration
-					),
+					uiConfigurationValues: getUIConfigurationValues(sxpElement),
 				})
 			),
 		});

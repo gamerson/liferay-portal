@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import com.liferay.petra.function.UnsafeSupplier;
 import com.liferay.petra.string.StringBundler;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.vulcan.graphql.annotation.GraphQLField;
 import com.liferay.portal.vulcan.graphql.annotation.GraphQLName;
 import com.liferay.portal.vulcan.util.ObjectMapperUtil;
@@ -206,6 +207,34 @@ public class GeneralConfiguration implements Serializable {
 	protected Boolean includeResponseString;
 
 	@Schema
+	public String getQueryString() {
+		return queryString;
+	}
+
+	public void setQueryString(String queryString) {
+		this.queryString = queryString;
+	}
+
+	@JsonIgnore
+	public void setQueryString(
+		UnsafeSupplier<String, Exception> queryStringUnsafeSupplier) {
+
+		try {
+			queryString = queryStringUnsafeSupplier.get();
+		}
+		catch (RuntimeException re) {
+			throw re;
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	@GraphQLField
+	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
+	protected String queryString;
+
+	@Schema
 	public String[] getSearchableAssetTypes() {
 		return searchableAssetTypes;
 	}
@@ -233,6 +262,34 @@ public class GeneralConfiguration implements Serializable {
 	@GraphQLField
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected String[] searchableAssetTypes;
+
+	@Schema
+	public String getTimeZoneId() {
+		return timeZoneId;
+	}
+
+	public void setTimeZoneId(String timeZoneId) {
+		this.timeZoneId = timeZoneId;
+	}
+
+	@JsonIgnore
+	public void setTimeZoneId(
+		UnsafeSupplier<String, Exception> timeZoneIdUnsafeSupplier) {
+
+		try {
+			timeZoneId = timeZoneIdUnsafeSupplier.get();
+		}
+		catch (RuntimeException re) {
+			throw re;
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	@GraphQLField
+	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
+	protected String timeZoneId;
 
 	@Override
 	public boolean equals(Object object) {
@@ -340,6 +397,20 @@ public class GeneralConfiguration implements Serializable {
 			sb.append(includeResponseString);
 		}
 
+		if (queryString != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"queryString\": ");
+
+			sb.append("\"");
+
+			sb.append(_escape(queryString));
+
+			sb.append("\"");
+		}
+
 		if (searchableAssetTypes != null) {
 			if (sb.length() > 1) {
 				sb.append(", ");
@@ -364,6 +435,20 @@ public class GeneralConfiguration implements Serializable {
 			sb.append("]");
 		}
 
+		if (timeZoneId != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"timeZoneId\": ");
+
+			sb.append("\"");
+
+			sb.append(_escape(timeZoneId));
+
+			sb.append("\"");
+		}
+
 		sb.append("}");
 
 		return sb.toString();
@@ -377,9 +462,9 @@ public class GeneralConfiguration implements Serializable {
 	public String xClassName;
 
 	private static String _escape(Object object) {
-		String string = String.valueOf(object);
-
-		return string.replaceAll("\"", "\\\\\"");
+		return StringUtil.replace(
+			String.valueOf(object), _JSON_ESCAPE_STRINGS[0],
+			_JSON_ESCAPE_STRINGS[1]);
 	}
 
 	private static boolean _isArray(Object value) {
@@ -405,7 +490,7 @@ public class GeneralConfiguration implements Serializable {
 			Map.Entry<String, ?> entry = iterator.next();
 
 			sb.append("\"");
-			sb.append(entry.getKey());
+			sb.append(_escape(entry.getKey()));
 			sb.append("\": ");
 
 			Object value = entry.getValue();
@@ -437,7 +522,7 @@ public class GeneralConfiguration implements Serializable {
 			}
 			else if (value instanceof String) {
 				sb.append("\"");
-				sb.append(value);
+				sb.append(_escape(value));
 				sb.append("\"");
 			}
 			else {
@@ -453,5 +538,10 @@ public class GeneralConfiguration implements Serializable {
 
 		return sb.toString();
 	}
+
+	private static final String[][] _JSON_ESCAPE_STRINGS = {
+		{"\\", "\"", "\b", "\f", "\n", "\r", "\t"},
+		{"\\\\", "\\\"", "\\b", "\\f", "\\n", "\\r", "\\t"}
+	};
 
 }

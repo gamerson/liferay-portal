@@ -152,21 +152,27 @@ definition {
 		property osgi.module.configuration.file.names = "com.liferay.frontend.js.a11y.web.internal.configuration.FFA11yConfiguration.config";
 		property osgi.module.configurations = "enable=B&quot;true&quot;";
 
-		Navigator.gotoPage(pageName = "Blank Test Page");
+		task ("Navigate to a page with no violations") {
+			Navigator.gotoPage(pageName = "Blank Test Page");
+		}
 
-		// Workaround for side panel sometimes displaying previous violations inccorectly LPS-138624
+		// Workaround for side panel sometimes displaying previous violations incorrectly LPS-138624
 
 		if (IsElementPresent(locator1 = "A11yTool#VIOLATION_PANEL_HEADER")) {
 			Refresh();
 		}
 
-		if (IsElementPresent(locator1 = "A11yTool#VIOLATION_PANEL_HEADER")) {
-			AssertElementPresent(locator1 = "A11yTool#VIOLATION_PANEL_NO_VIOLATIONS");
+		task ("Assert no violations are listed in the side panel") {
+			if (IsElementPresent(locator1 = "A11yTool#VIOLATION_PANEL_HEADER")) {
+				AssertElementPresent(locator1 = "A11yTool#VIOLATION_PANEL_NO_VIOLATIONS");
+			}
 		}
 
-		AssertElementNotPresent(locator1 = "A11yTool#HIGHLIGHTED_ELEMENT");
+		task ("Assert there are no highlighted violations or icons") {
+			AssertElementNotPresent(locator1 = "A11yTool#HIGHLIGHTED_ELEMENT");
 
-		AssertElementNotPresent(locator1 = "A11yTool#HIGHLIGHTED_ELEMENT_ICON");
+			AssertElementNotPresent(locator1 = "A11yTool#HIGHLIGHTED_ELEMENT_ICON");
+		}
 
 		takeScreenshot();
 	}
@@ -183,13 +189,17 @@ definition {
 			Refresh();
 		}
 
-		AssertElementPresent(
-			key_text = "",
-			locator1 = "A11yTool#VIOLATION_PANEL_RULE_LIST_ITEM");
+		task ("Assert violations are displayed in the side panel") {
+			AssertElementPresent(
+				key_text = "",
+				locator1 = "A11yTool#VIOLATION_PANEL_RULE_LIST_ITEM");
+		}
 
-		AssertElementPresent(locator1 = "A11yTool#HIGHLIGHTED_ELEMENT");
+		task ("Assert there are highlighted violations with icons") {
+			AssertElementPresent(locator1 = "A11yTool#HIGHLIGHTED_ELEMENT");
 
-		AssertElementPresent(locator1 = "A11yTool#HIGHLIGHTED_ELEMENT_ICON");
+			AssertElementPresent(locator1 = "A11yTool#HIGHLIGHTED_ELEMENT_ICON");
+		}
 
 		takeScreenshot();
 	}
@@ -271,7 +281,7 @@ definition {
 
 		task ("Click on an occurrence") {
 			Click(
-				key_text = "Occurrence 2",
+				key_text = "Occurrence 1",
 				locator1 = "A11yTool#VIOLATION_PANEL_OCCURRENCE_LIST_ITEM");
 		}
 
@@ -282,11 +292,58 @@ definition {
 				locator1 = "A11yTool#VIOLATION_PANEL_TARGET_CODE_HEADER");
 
 			AssertElementPresent(
-				key_text = "button:nth-child(10)",
+				key_text = "button:nth-child(9)",
 				locator1 = "A11yTool#VIOLATION_PANEL_OCCURRENCE_TARGET_SELECTOR");
 		}
 
 		task ("Assert the correct code is displayed on the side panel") {
+			AssertElementPresent(
+				key_header = "Code",
+				key_label = "Code of the Element",
+				locator1 = "A11yTool#VIOLATION_PANEL_TARGET_CODE_HEADER");
+
+			AssertElementPresent(
+				key_text = "<button></button>",
+				locator1 = "A11yTool#VIOLATION_PANEL_OCCURRENCE_CODE_ELEMENT");
+		}
+
+		takeScreenshot();
+	}
+
+	@description = "LPS-142330. Verifies the correct target and code is displayed for the second occurrence."
+	@priority = "3"
+	test CanDisplayTargetCodeOfSecondViolation {
+		property osgi.module.configuration.file.names = "com.liferay.frontend.js.a11y.web.internal.configuration.FFA11yConfiguration.config";
+		property osgi.module.configurations = "enable=B&quot;true&quot;";
+
+		// Workaround for side panel sometimes not displaying LPS-141442
+
+		while (IsElementNotPresent(locator1 = "A11yTool#VIOLATION_PANEL_HEADER")) {
+			Refresh();
+		}
+
+		task ("Click the rule violation in the panel") {
+			Click(
+				key_text = "button-name",
+				locator1 = "A11yTool#VIOLATION_PANEL_RULE_LIST_ITEM");
+		}
+
+		task ("Click on the 2nd occurrence") {
+			Click(
+				key_text = "Occurrence 2",
+				locator1 = "A11yTool#VIOLATION_PANEL_OCCURRENCE_LIST_ITEM");
+		}
+
+		task ("Assert occurrence 2's target and code information is correctly displayed") {
+			AssertElementPresent(
+				key_header = "Target",
+				key_label = "Target Selector",
+				locator1 = "A11yTool#VIOLATION_PANEL_TARGET_CODE_HEADER");
+
+			AssertElementPresent(
+				key_text = "button:nth-child(10)",
+				locator1 = "A11yTool#VIOLATION_PANEL_OCCURRENCE_TARGET_SELECTOR");
+
 			AssertElementPresent(
 				key_header = "Code",
 				key_label = "Code of the Element",
@@ -445,6 +502,43 @@ definition {
 		takeScreenshot();
 	}
 
+	@description = "LPS-142331 Assert that user can filter violations by all impact."
+	@priority = "3"
+	test CanFilterViolationsByAllImpact {
+		property osgi.module.configuration.file.names = "com.liferay.frontend.js.a11y.web.internal.configuration.FFA11yConfiguration.config";
+		property osgi.module.configurations = "enable=B&quot;true&quot;";
+
+		// Workaround for side panel sometimes not displaying LPS-141442
+
+		while (IsElementNotPresent(locator1 = "A11yTool#VIOLATION_PANEL_HEADER")) {
+			Refresh();
+		}
+
+		task ("Set and check the filters.") {
+			A11yTool.openFilterPanel();
+
+			A11yTool.checkFilter(filterType = "critical");
+
+			A11yTool.checkFilter(filterType = "serious");
+
+			A11yTool.checkFilter(filterType = "moderate");
+
+			A11yTool.checkFilter(filterType = "minor");
+
+			A11yTool.closeFilterPanel();
+		}
+
+		task ("Show four violations and assert elements are highlighted.") {
+			A11yTool.assertAllImpactViolationsPresentInSidePanel();
+
+			A11yTool.assertAllImpactViolationsPresentOnPage();
+
+			AssertElementPresent(locator1 = "A11yTool#HIGHLIGHTED_ELEMENT");
+
+			AssertElementPresent(locator1 = "A11yTool#HIGHLIGHTED_ELEMENT_ICON");
+		}
+	}
+
 	@description = "LPS-141820. Verifies violations can be filtered by 'Critical' only. Also verifies all violations are present when unfiltered."
 	@priority = "5"
 	test CanFilterViolationsByCriticalImpactOnly {
@@ -554,15 +648,19 @@ definition {
 			Refresh();
 		}
 
-		Click(locator1 = "A11yTool#FILTER_ELEMENT_ICON");
+		task ("Open the filter panel") {
+			A11yTool.openFilterPanel();
+		}
 
-		AssertElementPresent(locator1 = "A11yTool#FILTER_BY_IMPACT_HEADER");
+		task ("Assert toggles to filter by impact and category are displayed") {
+			AssertElementPresent(locator1 = "A11yTool#FILTER_BY_IMPACT_HEADER");
 
-		AssertElementPresent(locator1 = "A11yTool#FILTER_BY_CATEGORY_HEADER");
+			AssertElementPresent(locator1 = "A11yTool#FILTER_BY_CATEGORY_HEADER");
 
-		AssertElementPresent(
-			key_text = "",
-			locator1 = "A11yTool#FILTER_LIST_ITEM");
+			AssertElementPresent(
+				key_text = "",
+				locator1 = "A11yTool#FILTER_LIST_ITEM");
+		}
 
 		takeScreenshot();
 	}
@@ -758,9 +856,11 @@ definition {
 			Refresh();
 		}
 
-		AssertElementPresent(
-			key_text = "",
-			locator1 = "A11yTool#VIOLATION_PANEL_RULE_LIST_ITEM");
+		task ("Assert the side panel is displayed") {
+			AssertElementPresent(
+				key_text = "",
+				locator1 = "A11yTool#VIOLATION_PANEL_RULE_LIST_ITEM");
+		}
 
 		takeScreenshot();
 	}

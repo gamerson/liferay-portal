@@ -57,9 +57,7 @@ definition {
 			depotName = "Test Depot Name",
 			dmDocumentTitle = "DM Document Title");
 
-		DMDocument.expandInfo();
-
-		AutoTagging.assertAutoTagPresent(tagName = "computers");
+		DMDocument.viewTagInfo(tagName = "computers");
 	}
 
 	@description = "This test ensures that an Image in a depot can be auto-tagged after enabling GCV."
@@ -83,9 +81,7 @@ definition {
 			depotName = "Test Depot Name",
 			dmDocumentTitle = "Commerce_Black");
 
-		DMDocument.expandInfo();
-
-		AutoTagging.assertAutoTagPresent(tagName = "t-shirt");
+		DMDocument.viewTagInfo(tagName = "t-shirt");
 	}
 
 	@description = "This test ensures that a web content article with text in a depot can be auto-tagged after enabling GCNL."
@@ -176,11 +172,9 @@ definition {
 			groupName = "Site Name",
 			siteURLKey = "site-name");
 
-		DMDocument.expandInfo();
+		DMDocument.viewTagInfo(tagName = "manualtag");
 
-		AutoTagging.assertAutoTagPresent(tagName = "manualtag");
-
-		AutoTagging.assertNoAutoTag(tagName = "computers");
+		DMDocument.viewNoTagInfo(tagName = "computers");
 	}
 
 	@description = "This test ensures that an image with a tag added by manual can not be auto-tagged after publishing."
@@ -204,11 +198,9 @@ definition {
 			groupName = "Site Name",
 			siteURLKey = "site-name");
 
-		DMDocument.expandInfo();
+		DMDocument.viewTagInfo(tagName = "manualtag");
 
-		AutoTagging.assertAutoTagPresent(tagName = "manualtag");
-
-		AutoTagging.assertNoAutoTag(tagName = "t-shirt");
+		DMDocument.viewNoTagInfo(tagName = "t-shirt");
 	}
 
 	@description = "This test ensures that a WC article with a tag added by manual can not be auto-tagged after publishing."
@@ -323,9 +315,7 @@ definition {
 
 		DMDocument.viewCP(dmDocumentTitle = "Document_1");
 
-		for (var tagName : list "computers,electronics") {
-			AutoTagging.assertNoAutoTag(tagName = "${tagName}");
-		}
+		DMDocument.viewNoTagInfo(tagName = "computers,electronics");
 	}
 
 	@description = "This test ensures that a tag added in an image through GCVI can be removed."
@@ -363,9 +353,7 @@ definition {
 
 		DMDocument.viewCP(dmDocumentTitle = "Commerce_Black");
 
-		for (var tagName : list "pattern,carmine") {
-			AutoTagging.assertNoAutoTag(tagName = "${tagName}");
-		}
+		DMDocument.viewNoTagInfo(tagName = "pattern,carmine");
 	}
 
 	@description = "This test ensures that a tag added in a WC article through GCNL can be removed."
@@ -482,9 +470,7 @@ definition {
 			groupName = "Site Name",
 			siteURLKey = "site-name");
 
-		DMDocument.expandInfo();
-
-		AutoTagging.assertAutoTagPresent(tagName = "computers");
+		DMDocument.viewTagInfo(tagName = "computers");
 	}
 
 	@description = "This test ensures that auto tags can be published to live with the Image."
@@ -517,10 +503,8 @@ definition {
 			groupName = "Site Name",
 			siteURLKey = "site-name");
 
-		DMDocument.expandInfo();
-
 		for (var tagName : list "sleeve,t-shirt,pattern") {
-			AutoTagging.assertAutoTagPresent(tagName = "${tagName}");
+			DMDocument.viewTagInfo(tagName = "${tagName}");
 		}
 	}
 

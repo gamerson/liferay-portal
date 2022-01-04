@@ -14,52 +14,65 @@
 
 import ClayButton from '@clayui/button';
 import {useModal} from '@clayui/modal';
-import React, {useCallback, useEffect, useState} from 'react';
+import PropTypes from 'prop-types';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 
 import SaveTemplateModal from './SaveTemplateModal';
+import {
+	SCHEMA_SELECTED_EVENT,
+	TEMPLATE_SELECTED_EVENT,
+	TEMPLATE_SOILED,
+} from './constants';
 
 function SaveTemplate({
+	forceDisable,
 	formSaveAsTemplateDataQuerySelector,
 	formSaveAsTemplateURL,
 	portletNamespace,
 }) {
 	const [disable, setDisable] = useState(true);
-	const [visible, setVisible] = useState(false);
 	const {observer, onClose} = useModal({
 		onClose: () => setVisible(false),
 	});
+	const useTemplateMappingRef = useRef();
+
+	const [visible, setVisible] = useState(false);
 	const onButtonClick = useCallback(() => {
 		setVisible(true);
 	}, [setVisible]);
 
 	useEffect(() => {
-		const externalInput = document.querySelector(
-			`#${portletNamespace}internalClassName`
-		);
-
-		if (!externalInput) {
-			setDisable(false);
-
-			return;
+		function handleSchemaChange({schema}) {
+			if (schema && !useTemplateMappingRef.current) {
+				setDisable(false);
+			}
 		}
 
-		function handleExternalInputChange() {
+		function handleTemplateSelection({template}) {
+			setDisable(!!template);
+			useTemplateMappingRef.current = !!template;
+		}
+
+		function handleTemplateSoiled() {
+			useTemplateMappingRef.current = false;
 			setDisable(false);
 		}
 
-		externalInput.addEventListener('change', handleExternalInputChange);
+		Liferay.on(SCHEMA_SELECTED_EVENT, handleSchemaChange);
+		Liferay.on(TEMPLATE_SELECTED_EVENT, handleTemplateSelection);
+		Liferay.on(TEMPLATE_SOILED, handleTemplateSoiled);
 
-		return () =>
-			externalInput.removeEventListener(
-				'change',
-				handleExternalInputChange
-			);
+		return () => {
+			Liferay.detach(SCHEMA_SELECTED_EVENT, handleSchemaChange);
+			Liferay.detach(TEMPLATE_SELECTED_EVENT, handleTemplateSelection);
+			Liferay.detach(TEMPLATE_SOILED, handleTemplateSoiled);
+		};
 	}, [portletNamespace]);
 
 	return (
 		<span className="mr-3">
 			<ClayButton
-				disabled={disable}
+				disabled={disable || forceDisable}
 				displayType="secondary"
 				id={`${portletNamespace}saveTemplate`}
 				onClick={onButtonClick}
@@ -80,5 +93,12 @@ function SaveTemplate({
 		</span>
 	);
 }
+
+SaveTemplate.propTypes = {
+	forceDisable: PropTypes.bool,
+	formSaveAsTemplateDataQuerySelector: PropTypes.string.isRequired,
+	formSaveAsTemplateURL: PropTypes.string.isRequired,
+	portletNamespace: PropTypes.string.isRequired,
+};
 
 export default SaveTemplate;

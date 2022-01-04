@@ -61,7 +61,10 @@ public class CollectionStyledLayoutStructureItem
 				collectionStyledLayoutStructureItem._numberOfItemsPerPage) ||
 			!Objects.equals(
 				_paginationType,
-				collectionStyledLayoutStructureItem._paginationType)) {
+				collectionStyledLayoutStructureItem._paginationType) ||
+			!Objects.equals(
+				_showAllItems,
+				collectionStyledLayoutStructureItem._showAllItems)) {
 
 			return false;
 		}
@@ -184,7 +187,12 @@ public class CollectionStyledLayoutStructureItem
 	}
 
 	public void setShowAllItems(Boolean showAllItems) {
-		_showAllItems = showAllItems;
+		if (showAllItems == null) {
+			_showAllItems = false;
+		}
+		else {
+			_showAllItems = showAllItems;
+		}
 	}
 
 	public void setTemplateKey(String templateKey) {

@@ -39,7 +39,7 @@ public class RemoteAppEntryServiceWrapper
 	@Override
 	public com.liferay.remote.app.model.RemoteAppEntry
 			addCustomElementRemoteAppEntry(
-				String customElementCSSURLs,
+				String externalReferenceCode, String customElementCSSURLs,
 				String customElementHTMLElementName, String customElementURLs,
 				String description, String friendlyURLMapping,
 				boolean instanceable,
@@ -49,9 +49,10 @@ public class RemoteAppEntryServiceWrapper
 		throws com.liferay.portal.kernel.exception.PortalException {
 
 		return _remoteAppEntryService.addCustomElementRemoteAppEntry(
-			customElementCSSURLs, customElementHTMLElementName,
-			customElementURLs, description, friendlyURLMapping, instanceable,
-			nameMap, portletCategoryName, properties, sourceCodeURL);
+			externalReferenceCode, customElementCSSURLs,
+			customElementHTMLElementName, customElementURLs, description,
+			friendlyURLMapping, instanceable, nameMap, portletCategoryName,
+			properties, sourceCodeURL);
 	}
 
 	@Override

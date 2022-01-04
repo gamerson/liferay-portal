@@ -33,7 +33,7 @@ IGConfigurationDisplayContext igConfigurationDisplayContext = (IGConfigurationDi
 	<aui:input name="<%= Constants.CMD %>" type="hidden" value="<%= Constants.UPDATE %>" />
 	<aui:input name="redirect" type="hidden" value="<%= configurationRenderURL %>" />
 	<aui:input name="preferences--mimeTypes--" type="hidden" />
-	<aui:input name="preferences--repositoryId--" type="hidden" value="<%= igConfigurationDisplayContext.getRepositoryId() %>" />
+	<aui:input name="preferences--selectedRepositoryId--" type="hidden" value="<%= igConfigurationDisplayContext.getSelectedRepositoryId() %>" />
 	<aui:input name="preferences--rootFolderId--" type="hidden" value="<%= igConfigurationDisplayContext.getRootFolderId() %>" />
 
 	<liferay-frontend:edit-form-body>
@@ -90,10 +90,10 @@ IGConfigurationDisplayContext igConfigurationDisplayContext = (IGConfigurationDi
 						<aui:button name="openFolderSelectorButton" value="select" />
 
 						<%
-						String taglibRemoveFolder = "Liferay.Util.removeEntitySelection('rootFolderId', 'rootFolderName', this, '" + liferayPortletResponse.getNamespace() + "');";
+						String taglibRemoveFolder = "Liferay.Util.removeEntitySelection('rootFolderId', 'rootFolderName', this, '" + liferayPortletResponse.getNamespace() + "'); Liferay.Util.removeEntitySelection('selectedRepositoryId', '', this, '" + liferayPortletResponse.getNamespace() + "');";
 						%>
 
-						<aui:button disabled="<%= igConfigurationDisplayContext.getRootFolderId() == DLFolderConstants.DEFAULT_PARENT_FOLDER_ID %>" name="removeFolderButton" onClick="<%= taglibRemoveFolder %>" value="remove" />
+						<aui:button disabled="<%= (igConfigurationDisplayContext.getRootFolderId() == DLFolderConstants.DEFAULT_PARENT_FOLDER_ID) && (igConfigurationDisplayContext.getSelectedRepositoryId() == scopeGroupId) %>" name="removeFolderButton" onClick="<%= taglibRemoveFolder %>" value="remove" />
 					</div>
 				</aui:field-wrapper>
 			</liferay-frontend:fieldset>
@@ -133,7 +133,7 @@ IGConfigurationDisplayContext igConfigurationDisplayContext = (IGConfigurationDi
 					Liferay.Util.selectFolder(folderData, '<portlet:namespace />');
 
 					var repositoryIdElement = document.querySelector(
-						'#<portlet:namespace />repositoryId'
+						'#<portlet:namespace />selectedRepositoryId'
 					);
 
 					if (repositoryIdElement != null) {

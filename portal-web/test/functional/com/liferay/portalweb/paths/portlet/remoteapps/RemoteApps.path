@@ -56,6 +56,11 @@
 	<td></td>
 </tr>
 <tr>
+	<td>VANILLA_COUNTER_PAGE_COLUMN_N</td>
+	<td>//div[contains(@id,'main-content')]//div[contains(@class, 'col')]['${column_number}']//vanilla-counter</td>
+	<td></td>
+</tr>
+<tr>
 	<td>VANILLA_COUNTER_REMOTE_APP</td>
 	<td>//vanilla-counter</td>
 	<td></td>

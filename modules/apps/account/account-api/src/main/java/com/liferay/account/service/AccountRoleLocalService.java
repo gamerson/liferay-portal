@@ -139,7 +139,8 @@ public interface AccountRoleLocalService
 	public AccountRole deleteAccountRole(long accountRoleId)
 		throws PortalException;
 
-	public void deleteAccountRolesByCompanyId(long companyId);
+	public void deleteAccountRolesByCompanyId(long companyId)
+		throws PortalException;
 
 	/**
 	 * @throws PortalException
@@ -302,6 +303,10 @@ public interface AccountRoleLocalService
 		long companyId, long[] accountEntryIds, String keywords,
 		LinkedHashMap<String, Object> params, int start, int end,
 		OrderByComparator<?> orderByComparator);
+
+	public void setUserAccountRoles(
+			long accountEntryId, long[] accountRoleIds, long userId)
+		throws PortalException;
 
 	public void unassociateUser(
 			long accountEntryId, long accountRoleId, long userId)

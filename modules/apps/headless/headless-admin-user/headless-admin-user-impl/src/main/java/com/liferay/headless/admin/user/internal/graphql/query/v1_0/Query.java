@@ -26,6 +26,7 @@ import com.liferay.headless.admin.user.dto.v1_0.SegmentUser;
 import com.liferay.headless.admin.user.dto.v1_0.Site;
 import com.liferay.headless.admin.user.dto.v1_0.Subscription;
 import com.liferay.headless.admin.user.dto.v1_0.UserAccount;
+import com.liferay.headless.admin.user.dto.v1_0.UserGroup;
 import com.liferay.headless.admin.user.dto.v1_0.WebUrl;
 import com.liferay.headless.admin.user.resource.v1_0.AccountResource;
 import com.liferay.headless.admin.user.resource.v1_0.AccountRoleResource;
@@ -39,6 +40,7 @@ import com.liferay.headless.admin.user.resource.v1_0.SegmentUserResource;
 import com.liferay.headless.admin.user.resource.v1_0.SiteResource;
 import com.liferay.headless.admin.user.resource.v1_0.SubscriptionResource;
 import com.liferay.headless.admin.user.resource.v1_0.UserAccountResource;
+import com.liferay.headless.admin.user.resource.v1_0.UserGroupResource;
 import com.liferay.headless.admin.user.resource.v1_0.WebUrlResource;
 import com.liferay.petra.function.UnsafeConsumer;
 import com.liferay.petra.function.UnsafeFunction;
@@ -168,6 +170,14 @@ public class Query {
 
 		_userAccountResourceComponentServiceObjects =
 			userAccountResourceComponentServiceObjects;
+	}
+
+	public static void setUserGroupResourceComponentServiceObjects(
+		ComponentServiceObjects<UserGroupResource>
+			userGroupResourceComponentServiceObjects) {
+
+		_userGroupResourceComponentServiceObjects =
+			userGroupResourceComponentServiceObjects;
 	}
 
 	public static void setWebUrlResourceComponentServiceObjects(
@@ -997,6 +1007,21 @@ public class Query {
 			this::_populateResourceContext,
 			userAccountResource -> userAccountResource.getUserAccount(
 				userAccountId));
+	}
+
+	/**
+	 * Invoke this method with the command line:
+	 *
+	 * curl -H 'Content-Type: text/plain; charset=utf-8' -X 'POST' 'http://localhost:8080/o/graphql' -d $'{"query": "query {userGroup(userGroupId: ___){actions, description, id, name, usersCount}}"}' -u 'test@liferay.com:test'
+	 */
+	@GraphQLField
+	public UserGroup userGroup(@GraphQLName("userGroupId") Long userGroupId)
+		throws Exception {
+
+		return _applyComponentServiceObjects(
+			_userGroupResourceComponentServiceObjects,
+			this::_populateResourceContext,
+			userGroupResource -> userGroupResource.getUserGroup(userGroupId));
 	}
 
 	/**
@@ -2062,6 +2087,39 @@ public class Query {
 
 	}
 
+	@GraphQLName("UserGroupPage")
+	public class UserGroupPage {
+
+		public UserGroupPage(Page userGroupPage) {
+			actions = userGroupPage.getActions();
+
+			items = userGroupPage.getItems();
+			lastPage = userGroupPage.getLastPage();
+			page = userGroupPage.getPage();
+			pageSize = userGroupPage.getPageSize();
+			totalCount = userGroupPage.getTotalCount();
+		}
+
+		@GraphQLField
+		protected Map<String, Map> actions;
+
+		@GraphQLField
+		protected java.util.Collection<UserGroup> items;
+
+		@GraphQLField
+		protected long lastPage;
+
+		@GraphQLField
+		protected long page;
+
+		@GraphQLField
+		protected long pageSize;
+
+		@GraphQLField
+		protected long totalCount;
+
+	}
+
 	@GraphQLName("WebUrlPage")
 	public class WebUrlPage {
 
@@ -2328,6 +2386,19 @@ public class Query {
 		userAccountResource.setRoleLocalService(_roleLocalService);
 	}
 
+	private void _populateResourceContext(UserGroupResource userGroupResource)
+		throws Exception {
+
+		userGroupResource.setContextAcceptLanguage(_acceptLanguage);
+		userGroupResource.setContextCompany(_company);
+		userGroupResource.setContextHttpServletRequest(_httpServletRequest);
+		userGroupResource.setContextHttpServletResponse(_httpServletResponse);
+		userGroupResource.setContextUriInfo(_uriInfo);
+		userGroupResource.setContextUser(_user);
+		userGroupResource.setGroupLocalService(_groupLocalService);
+		userGroupResource.setRoleLocalService(_roleLocalService);
+	}
+
 	private void _populateResourceContext(WebUrlResource webUrlResource)
 		throws Exception {
 
@@ -2365,6 +2436,8 @@ public class Query {
 		_subscriptionResourceComponentServiceObjects;
 	private static ComponentServiceObjects<UserAccountResource>
 		_userAccountResourceComponentServiceObjects;
+	private static ComponentServiceObjects<UserGroupResource>
+		_userGroupResourceComponentServiceObjects;
 	private static ComponentServiceObjects<WebUrlResource>
 		_webUrlResourceComponentServiceObjects;
 

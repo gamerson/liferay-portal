@@ -17,19 +17,18 @@ package com.liferay.account.admin.web.internal.portlet.action;
 import com.liferay.account.constants.AccountPortletKeys;
 import com.liferay.account.model.AccountRole;
 import com.liferay.account.service.AccountRoleLocalService;
+import com.liferay.account.service.AccountRoleService;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.service.RoleLocalService;
 import com.liferay.portal.kernel.servlet.SessionErrors;
-import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.Http;
 import com.liferay.portal.kernel.util.LocalizationUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.kernel.util.WebKeys;
 
 import java.util.Locale;
 import java.util.Map;
@@ -54,27 +53,6 @@ import org.osgi.service.component.annotations.Reference;
 )
 public class EditAccountRoleMVCActionCommand extends BaseMVCActionCommand {
 
-	protected AccountRole addAccountRole(ActionRequest actionRequest)
-		throws Exception {
-
-		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
-			WebKeys.THEME_DISPLAY);
-
-		long accountEntryId = ParamUtil.getLong(
-			actionRequest, "accountEntryId");
-		String name = ParamUtil.getString(actionRequest, "name");
-		Map<Locale, String> titleMap = LocalizationUtil.getLocalizationMap(
-			actionRequest, "title");
-		Map<Locale, String> descriptionMap =
-			LocalizationUtil.getLocalizationMap(actionRequest, "description");
-
-		_roleLocalService.validateName(name);
-
-		return _accountRoleLocalService.addAccountRole(
-			themeDisplay.getUserId(), accountEntryId, name, titleMap,
-			descriptionMap);
-	}
-
 	@Override
 	protected void doProcessAction(
 			ActionRequest actionRequest, ActionResponse actionResponse)
@@ -86,14 +64,14 @@ public class EditAccountRoleMVCActionCommand extends BaseMVCActionCommand {
 			String redirect = ParamUtil.getString(actionRequest, "redirect");
 
 			if (cmd.equals(Constants.ADD)) {
-				AccountRole accountRole = addAccountRole(actionRequest);
+				AccountRole accountRole = _addAccountRole(actionRequest);
 
 				redirect = _http.setParameter(
 					redirect, actionResponse.getNamespace() + "accountRoleId",
 					accountRole.getAccountRoleId());
 			}
 			else if (cmd.equals(Constants.UPDATE)) {
-				updateAccountRole(actionRequest);
+				_updateAccountRole(actionRequest);
 			}
 
 			if (Validator.isNotNull(redirect)) {
@@ -116,7 +94,24 @@ public class EditAccountRoleMVCActionCommand extends BaseMVCActionCommand {
 		}
 	}
 
-	protected void updateAccountRole(ActionRequest actionRequest)
+	private AccountRole _addAccountRole(ActionRequest actionRequest)
+		throws Exception {
+
+		long accountEntryId = ParamUtil.getLong(
+			actionRequest, "accountEntryId");
+		String name = ParamUtil.getString(actionRequest, "name");
+		Map<Locale, String> titleMap = LocalizationUtil.getLocalizationMap(
+			actionRequest, "title");
+		Map<Locale, String> descriptionMap =
+			LocalizationUtil.getLocalizationMap(actionRequest, "description");
+
+		_roleLocalService.validateName(name);
+
+		return _accountRoleService.addAccountRole(
+			accountEntryId, name, titleMap, descriptionMap);
+	}
+
+	private void _updateAccountRole(ActionRequest actionRequest)
 		throws PortalException {
 
 		long accountRoleId = ParamUtil.getLong(actionRequest, "accountRoleId");
@@ -140,6 +135,9 @@ public class EditAccountRoleMVCActionCommand extends BaseMVCActionCommand {
 
 	@Reference
 	private AccountRoleLocalService _accountRoleLocalService;
+
+	@Reference
+	private AccountRoleService _accountRoleService;
 
 	@Reference
 	private Http _http;

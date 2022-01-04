@@ -1,12 +1,12 @@
 import React, {useContext, useState} from 'react';
 import {useFormContext} from 'react-hook-form';
-import {CardFormActionsWithSave} from '../../../../../../../common/components/fragments/Card/FormActionsWithSave';
-import {LiferayService} from '../../../../../../../common/services/liferay';
-import {STORAGE_KEYS, Storage} from '../../../../../../../common/services/liferay/storage';
-import {clearExitAlert} from '../../../../../../../common/utils/exitAlert';
+import {CardFormActions} from '../../../../../../../common/components/fragments/Card/FormActions';
+import FormCard from '../../../../../../../common/components/fragments/Card/FormCard';
 import {smoothScroll} from '../../../../../../../common/utils/scroll';
-import {AppContext} from '../../../../../context/AppContext';
-import {setSelectedProduct} from '../../../../../context/actions';
+import {
+	ActionTypes,
+	AppContext,
+} from '../../../../../context/AppContextProvider';
 import {useStepWizard} from '../../../../../hooks/useStepWizard';
 import {AVAILABLE_STEPS} from '../../../../../utils/constants';
 import {BusinessTypeSearch} from './Search';
@@ -22,36 +22,36 @@ export function FormBasicBusinessType({form}) {
 
 		if (state.selectedProduct !== newSelectedProduct) {
 			setValue('business', '');
-			dispatch(setSelectedProduct(newSelectedProduct));
+			dispatch({
+				payload: newSelectedProduct,
+				type: ActionTypes.SET_SELECTED_PRODUCT,
+			});
 		}
 
 		smoothScroll();
 	};
 
 	const goToPreviousPage = () => {
-		clearExitAlert();
+		setSection(AVAILABLE_STEPS.BASICS_PRODUCT_QUOTE);
 
-		window.location.href = LiferayService.getLiferaySiteName();
-
-		if (Storage.itemExist(STORAGE_KEYS.BACK_TO_EDIT)) {
-			Storage.removeItem(STORAGE_KEYS.BACK_TO_EDIT);
-		}
+		smoothScroll();
 	};
 
 	return (
-		<div className="card">
-			<div className="card-content">
+		<FormCard>
+			<div className="d-flex flex-column mb-5">
 				<BusinessTypeSearch
 					form={form}
 					setNewSelectedProduct={setNewSelectedProduct}
+					taxonomyVocabularyId={state.taxonomyVocabulary.id}
 				/>
 			</div>
 
-			<CardFormActionsWithSave
+			<CardFormActions
 				isValid={!!form?.basics?.businessCategoryId}
 				onNext={goToNextForm}
 				onPrevious={goToPreviousPage}
 			/>
-		</div>
+		</FormCard>
 	);
 }

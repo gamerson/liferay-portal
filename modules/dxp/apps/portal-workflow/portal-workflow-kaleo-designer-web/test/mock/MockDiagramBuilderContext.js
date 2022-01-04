@@ -10,6 +10,7 @@
  */
 
 import React, {useState} from 'react';
+import {ReactFlowProvider} from 'react-flow-renderer';
 
 import {DiagramBuilderContextProvider} from '../../src/main/resources/META-INF/resources/designer/js/definition-builder/diagram-builder/DiagramBuilderContext';
 import {defaultNodes} from '../../src/main/resources/META-INF/resources/designer/js/definition-builder/diagram-builder/components/nodes/utils';
@@ -18,23 +19,23 @@ export default function MockDiagramBuilderContext({
 	children,
 	mockSelectedNode = null,
 }) {
-	const [availableArea] = useState(null);
+	const [collidingElements] = useState(null);
 	const [, setElements] = useState(defaultNodes);
-	const [selectedNode, setSelectedNode] = useState(mockSelectedNode);
-	const [selectedNodeNewId, setSelectedNodeNewId] = useState(null);
+	const [selectedItem, setSelectedItem] = useState(mockSelectedNode);
+	const [selectedItemNewId, setSelectedItemNewId] = useState(null);
 
 	const contextProps = {
-		availableArea,
-		selectedNode,
-		selectedNodeNewId,
+		collidingElements,
+		selectedItem,
+		selectedItemNewId,
 		setElements,
-		setSelectedNode,
-		setSelectedNodeNewId,
+		setSelectedItem,
+		setSelectedItemNewId,
 	};
 
 	return (
 		<DiagramBuilderContextProvider {...contextProps}>
-			{children}
+			<ReactFlowProvider>{children}</ReactFlowProvider>
 		</DiagramBuilderContextProvider>
 	);
 }

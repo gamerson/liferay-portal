@@ -79,7 +79,7 @@ public class CPInstanceCacheModel
 
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler(87);
+		StringBundler sb = new StringBundler(95);
 
 		sb.append("{mvccVersion=");
 		sb.append(mvccVersion);
@@ -159,6 +159,14 @@ public class CPInstanceCacheModel
 		sb.append(deliveryMaxSubscriptionCycles);
 		sb.append(", unspsc=");
 		sb.append(unspsc);
+		sb.append(", discontinued=");
+		sb.append(discontinued);
+		sb.append(", discontinuedDate=");
+		sb.append(discontinuedDate);
+		sb.append(", replacementCPInstanceUuid=");
+		sb.append(replacementCPInstanceUuid);
+		sb.append(", replacementCProductId=");
+		sb.append(replacementCProductId);
 		sb.append(", status=");
 		sb.append(status);
 		sb.append(", statusByUserId=");
@@ -330,6 +338,24 @@ public class CPInstanceCacheModel
 			cpInstanceImpl.setUnspsc(unspsc);
 		}
 
+		cpInstanceImpl.setDiscontinued(discontinued);
+
+		if (discontinuedDate == Long.MIN_VALUE) {
+			cpInstanceImpl.setDiscontinuedDate(null);
+		}
+		else {
+			cpInstanceImpl.setDiscontinuedDate(new Date(discontinuedDate));
+		}
+
+		if (replacementCPInstanceUuid == null) {
+			cpInstanceImpl.setReplacementCPInstanceUuid("");
+		}
+		else {
+			cpInstanceImpl.setReplacementCPInstanceUuid(
+				replacementCPInstanceUuid);
+		}
+
+		cpInstanceImpl.setReplacementCProductId(replacementCProductId);
 		cpInstanceImpl.setStatus(status);
 		cpInstanceImpl.setStatusByUserId(statusByUserId);
 
@@ -413,6 +439,12 @@ public class CPInstanceCacheModel
 
 		deliveryMaxSubscriptionCycles = objectInput.readLong();
 		unspsc = objectInput.readUTF();
+
+		discontinued = objectInput.readBoolean();
+		discontinuedDate = objectInput.readLong();
+		replacementCPInstanceUuid = objectInput.readUTF();
+
+		replacementCProductId = objectInput.readLong();
 
 		status = objectInput.readInt();
 
@@ -554,6 +586,18 @@ public class CPInstanceCacheModel
 			objectOutput.writeUTF(unspsc);
 		}
 
+		objectOutput.writeBoolean(discontinued);
+		objectOutput.writeLong(discontinuedDate);
+
+		if (replacementCPInstanceUuid == null) {
+			objectOutput.writeUTF("");
+		}
+		else {
+			objectOutput.writeUTF(replacementCPInstanceUuid);
+		}
+
+		objectOutput.writeLong(replacementCProductId);
+
 		objectOutput.writeInt(status);
 
 		objectOutput.writeLong(statusByUserId);
@@ -607,6 +651,10 @@ public class CPInstanceCacheModel
 	public String deliverySubscriptionTypeSettings;
 	public long deliveryMaxSubscriptionCycles;
 	public String unspsc;
+	public boolean discontinued;
+	public long discontinuedDate;
+	public String replacementCPInstanceUuid;
+	public long replacementCProductId;
 	public int status;
 	public long statusByUserId;
 	public String statusByUserName;

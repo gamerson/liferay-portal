@@ -152,30 +152,34 @@ public class PublishLayoutMVCActionCommand
 				serviceContext, Collections.emptyMap());
 		}
 		else {
-			layout = _layoutCopyHelper.copyLayout(draftLayout, layout);
+			_layoutCopyHelper.copyLayout(draftLayout, layout);
 
-			layout.setType(draftLayout.getType());
-			layout.setStatus(WorkflowConstants.STATUS_APPROVED);
-
-			String layoutPrototypeUuid = layout.getLayoutPrototypeUuid();
-
-			layout.setLayoutPrototypeUuid(null);
-
-			_layoutLocalService.updateLayout(layout);
+			layout = _layoutLocalService.getLayout(layout.getPlid());
 
 			draftLayout = _layoutLocalService.getLayout(draftLayout.getPlid());
 
 			UnicodeProperties typeSettingsUnicodeProperties =
 				draftLayout.getTypeSettingsProperties();
 
+			String layoutPrototypeUuid = layout.getLayoutPrototypeUuid();
+
 			if (Validator.isNotNull(layoutPrototypeUuid)) {
 				typeSettingsUnicodeProperties.setProperty(
 					"layoutPrototypeUuid", layoutPrototypeUuid);
 			}
 
+			typeSettingsUnicodeProperties.put(
+				"published", Boolean.TRUE.toString());
+
 			draftLayout.setStatus(WorkflowConstants.STATUS_APPROVED);
 
 			_layoutLocalService.updateLayout(draftLayout);
+
+			layout.setType(draftLayout.getType());
+			layout.setLayoutPrototypeUuid(null);
+			layout.setStatus(WorkflowConstants.STATUS_APPROVED);
+
+			_layoutLocalService.updateLayout(layout);
 
 			_updateLayoutRevision(layout, serviceContext);
 		}

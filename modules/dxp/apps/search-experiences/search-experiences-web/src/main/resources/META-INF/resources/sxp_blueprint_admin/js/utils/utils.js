@@ -505,55 +505,39 @@ export function parseCustomSXPElement(sxpElement, uiConfigurationValues) {
 }
 
 /**
- * Function for getting all the default values from a UI configuration.
+ * Function for getting all the default values from an SXPElement. For non-custom
+ * json elements, returns the configuration values after looping over all fieldSets.
+ * For custom json elements, returns a stringified sxpElement for the editor.
  *
- * Example:
- * getUIConfigurationValues({
- * 	fieldSets: [
- * 		{
- * 			fields: [
- * 				{
- * 					defaultValue: 10,
- * 					label: 'Boost',
- * 					name: 'boost',
- * 					type: 'slider',
- * 				},
- * 			],
- * 		},
- * 		{
- * 			fields: [
- * 				{
- * 					defaultValue: 'en_US',
- * 					label: 'Language',
- * 					name: 'language',
- * 					type: 'text',
- * 				},
- * 			],
- * 		},
- * 	],
- * });
- * => {boost: 10, language: 'en_US'}
- *
- * @param {object} uiConfiguration Object with UI configuration
+ * @param {object} sxpElement SXPElement with elementDefinition
  * @return {object}
  */
-export function getUIConfigurationValues(uiConfiguration = {}) {
-	return cleanUIConfiguration(uiConfiguration).fieldSets.reduce(
-		(allValues, fieldSet) => {
-			const uiConfigurationValues = fieldSet.fields.reduce(
-				(acc, curr) => ({
-					...acc,
-					[`${curr.name}`]: getDefaultValue(curr),
-				}),
-				{}
-			);
+export function getUIConfigurationValues(sxpElement = {}) {
+	const uiConfiguration = sxpElement.elementDefinition?.uiConfiguration;
 
-			// gets uiConfigurationValues within each fields array
+	if (uiConfiguration) {
+		return cleanUIConfiguration(uiConfiguration).fieldSets.reduce(
+			(uiConfigurationValues, fieldSet) => {
+				const fieldsUIConfigurationValues = fieldSet.fields.reduce(
+					(acc, curr) => ({
+						...acc,
+						[`${curr.name}`]: getDefaultValue(curr),
+					}),
+					{}
+				);
 
-			return {...allValues, ...uiConfigurationValues};
-		},
-		{}
-	);
+				// gets uiConfigurationValues within each fields array
+
+				return {
+					...uiConfigurationValues,
+					...fieldsUIConfigurationValues,
+				};
+			},
+			{}
+		);
+	}
+
+	return {sxpElement: JSON.stringify(sxpElement, null, '\t')};
 }
 
 /**
@@ -640,4 +624,25 @@ export function getClauseContributorsConfig(
 	});
 
 	return {clauseContributorsExcludes, clauseContributorsIncludes};
+}
+
+/**
+ * Converts the attributes list to the format expected by the
+ * `searchContextAttributes` property.
+ *
+ * For example:
+ * Input: [{key: 'key1', value: 'value1'}, {key: 'key2', value: 'value2'}]
+ * Output: {key1: 'value1', key2: 'value2'}
+ * @param {array} attributes A list of objects with `key` and `value` properties.
+ */
+export function transformToSearchContextAttributes(attributes) {
+	return attributes
+		.filter((attribute) => attribute.key) // Removes empty keys
+		.reduce(
+			(searchContextAttributes, attribute) => ({
+				...searchContextAttributes,
+				[attribute.key]: attribute.value,
+			}),
+			{}
+		);
 }

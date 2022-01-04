@@ -151,6 +151,31 @@ definition {
 			value1 = "${siteName}");
 	}
 
+	macro addLocalizedName {
+		Click(
+			key_itemName = "Site Configuration",
+			locator1 = "ListGroupItem#ITEM_TEXT");
+
+		var list1 = ListUtil.newListFromString("${localeList}");
+		var list2 = ListUtil.newListFromString("${localizedNameList}");
+		var size = ListUtil.size("${list1}");
+		var i = "0";
+
+		while ("${i}" != "${size}") {
+			var locale = ListUtil.get("${list1}", "${i}");
+			var localizedName = ListUtil.get("${list2}", "${i}");
+
+			PortletEntry.inputLocalizedName(
+				language = "${locale}",
+				localizedName = "${localizedName}");
+
+			var i = ${i} + 1;
+			var i = StringUtil.valueOf("${i}");
+		}
+
+		PortletEntry.save();
+	}
+
 	macro addSiteTemplateCP {
 		Site.addCP(
 			membershipType = "${membershipType}",
@@ -478,7 +503,7 @@ definition {
 			category = "Site Builder",
 			portlet = "Pages");
 
-		SitePages.togglePrivacy(privacy = "${pageName}");
+		PagesAdmin.togglePrivacy(privacy = "${pageName}");
 
 		Click(
 			key_pageName = "${pageName}",
@@ -486,7 +511,7 @@ definition {
 
 		Panel.expandPanel(panel = "Logo");
 
-		Page.uploadFileForLogo(logoFile = "${logoFile}");
+		PagesAdmin.uploadLogo(logoFile = "${logoFile}");
 	}
 
 	macro configureCurrentLanguagesCP {
@@ -783,7 +808,7 @@ definition {
 		Button.click(button = "Import");
 
 		AssertTextEquals(
-			locator1 = "SitePagesImport#CURRENT_AND_PREVIOUS_STATUS_1",
+			locator1 = "ExportImport#CURRENT_AND_PREVIOUS_STATUS_1",
 			value1 = "Successful");
 	}
 

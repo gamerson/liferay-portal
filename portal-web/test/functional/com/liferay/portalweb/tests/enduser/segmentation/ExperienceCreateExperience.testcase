@@ -13,45 +13,25 @@ definition {
 
 		User.firstLoginPG();
 
-		task ("Uncheck verify strangers email option") {
-			Navigator.openURL();
+		Navigator.openURL();
 
-			ApplicationsMenu.gotoPortlet(
-				category = "Configuration",
-				panel = "Control Panel",
-				portlet = "Instance Settings");
-
-			SystemSettings.gotoConfiguration(
-				configurationCategory = "User Authentication",
-				configurationName = "General",
-				configurationScope = "Virtual Instance Scope");
-
-			PortalSettings.uncheckStrangersVerifyEmailCheckbox();
-		}
-
-		for (var num : list "1,2") {
+		task ("Create an user using JSONWS") {
 			JSONUser.addUser(
-				jobTitle = "Test Engineer${num}",
-				userEmailAddress = "userea${num}@liferay.com",
-				userFirstName = "userfn${num}",
-				userLastName = "userln${num}",
-				userScreenName = "usersn${num}");
+				jobTitle = "Test Engineer1",
+				userEmailAddress = "userea1@liferay.com",
+				userFirstName = "userfn1",
+				userLastName = "userln1",
+				userScreenName = "usersn1");
 
 			JSONUser.setFirstPassword(
 				agreeToTermsAndAnswerReminderQuery = "true",
 				requireReset = "false",
-				userEmailAddress = "userea${num}@liferay.com");
+				userEmailAddress = "userea1@liferay.com");
 
 			JSONRole.assignRoleToUser(
 				roleTitle = "Administrator",
-				userEmailAddress = "userea${num}@liferay.com");
+				userEmailAddress = "userea1@liferay.com");
 		}
-
-		JSONOrganization.addOrganization(organizationName = "organization Name");
-
-		JSONOrganization.assignUserToOrganization(
-			organizationName = "organization Name",
-			userEmailAddress = "userea2@liferay.com");
 
 		JSONGroup.addGroup(groupName = "Test Site Name");
 
@@ -68,8 +48,10 @@ definition {
 			PortalInstances.tearDownCP();
 		}
 		else {
-			Site.tearDownCP();
+			JSONGroup.deleteGroupByName(groupName = "Test Site Name");
 		}
+
+		JSONUser.deleteUserByEmailAddress(userEmailAddress = "userea1@liferay.com");
 	}
 
 	@description = "This is a use case for LPS-106776. When the user creates a new experience, it is always placed in the last position of the list, always below the default experience and always set as non-active"
@@ -183,6 +165,22 @@ definition {
 	test AddNewExperienceBasedOtherSegmentsSegment {
 		property portal.acceptance = "false";
 
+		JSONUser.addUser(
+			jobTitle = "Test Engineer2",
+			userEmailAddress = "userea2@liferay.com",
+			userFirstName = "userfn2",
+			userLastName = "userln2",
+			userScreenName = "usersn2");
+
+		JSONUser.setFirstPassword(
+			agreeToTermsAndAnswerReminderQuery = "true",
+			requireReset = "false",
+			userEmailAddress = "userea2@liferay.com");
+
+		JSONRole.assignRoleToUser(
+			roleTitle = "Administrator",
+			userEmailAddress = "userea2@liferay.com");
+
 		for (var num : list "1,2") {
 			JSONSegmentsentry.addSegment(
 				fieldName = "Last Name",
@@ -191,6 +189,18 @@ definition {
 				segmentName = "Segment With User${num}",
 				text = "userln${num}");
 		}
+
+		ApplicationsMenu.gotoPortlet(
+			category = "Configuration",
+			panel = "Control Panel",
+			portlet = "Instance Settings");
+
+		SystemSettings.gotoConfiguration(
+			configurationCategory = "User Authentication",
+			configurationName = "General",
+			configurationScope = "Virtual Instance Scope");
+
+		PortalSettings.uncheckStrangersVerifyEmailCheckbox();
 
 		Segmentation.openSegmentsAdmin(siteURLKey = "test-site-name");
 
@@ -255,12 +265,32 @@ definition {
 				locator1 = "Experience#FRAGMENT_HEADING",
 				value1 = "User1 and User2 will see this heading");
 		}
+
+		JSONUser.deleteUserByEmailAddress(userEmailAddress = "userea2@liferay.com");
 	}
 
 	@description = "This is a test for LPS-130309."
 	@priority = "5"
 	test AddNewExperienceOrganizationCountrySegment {
 		property portal.acceptance = "false";
+
+		JSONOrganization.addOrganization(organizationName = "organization Name");
+
+		JSONOrganization.assignUserToOrganization(
+			organizationName = "organization Name",
+			userEmailAddress = "userea1@liferay.com");
+
+		ApplicationsMenu.gotoPortlet(
+			category = "Configuration",
+			panel = "Control Panel",
+			portlet = "Instance Settings");
+
+		SystemSettings.gotoConfiguration(
+			configurationCategory = "User Authentication",
+			configurationName = "General",
+			configurationScope = "Virtual Instance Scope");
+
+		PortalSettings.uncheckStrangersVerifyEmailCheckbox();
 
 		ApplicationsMenu.gotoPortlet(
 			category = "Users",
@@ -293,7 +323,7 @@ definition {
 			locator1 = "Segmentation#MEMBERS_MATCHED",
 			value1 = "1 Member");
 
-		Segmentation.viewMembers(memberName = "userfn2 userln2");
+		Segmentation.viewMembers(memberName = "userfn1 userln1");
 
 		Button.clickSave();
 
@@ -326,19 +356,39 @@ definition {
 
 		User.logoutAndLoginPG(
 			freeLogin = "true",
-			userLoginEmailAddress = "userea2@liferay.com",
-			userLoginFullName = "userfn2 userln2");
+			userLoginEmailAddress = "userea1@liferay.com",
+			userLoginFullName = "userfn1 userln1");
 
 		Navigator.openWithAppendToBaseURL(urlAppend = "web/test-site-name/experience-content-page");
 
 		AssertTextEquals(
 			locator1 = "Experience#FRAGMENT_HEADING",
 			value1 = "Org users will see this heading");
+
+		JSONOrganization.deleteOrganizationByName(organizationName = "organization Name");
 	}
 
 	@description = "This is a test for LPS-130302."
 	@priority = "5"
 	test AddNewExperienceOrganizationDateModifiedSegment {
+		JSONOrganization.addOrganization(organizationName = "organization Name");
+
+		JSONOrganization.assignUserToOrganization(
+			organizationName = "organization Name",
+			userEmailAddress = "userea1@liferay.com");
+
+		ApplicationsMenu.gotoPortlet(
+			category = "Configuration",
+			panel = "Control Panel",
+			portlet = "Instance Settings");
+
+		SystemSettings.gotoConfiguration(
+			configurationCategory = "User Authentication",
+			configurationName = "General",
+			configurationScope = "Virtual Instance Scope");
+
+		PortalSettings.uncheckStrangersVerifyEmailCheckbox();
+
 		Segmentation.openSegmentsAdmin(siteURLKey = "test-site-name");
 
 		LexiconEntry.gotoAdd();
@@ -355,7 +405,7 @@ definition {
 			locator1 = "Segmentation#MEMBERS_MATCHED",
 			value1 = "1 Member");
 
-		Segmentation.viewMembers(memberName = "userfn2 userln2");
+		Segmentation.viewMembers(memberName = "userfn1 userln1");
 
 		Button.clickSave();
 
@@ -388,20 +438,40 @@ definition {
 
 		User.logoutAndLoginPG(
 			freeLogin = "true",
-			userLoginEmailAddress = "userea2@liferay.com",
-			userLoginFullName = "userfn2 userln2");
+			userLoginEmailAddress = "userea1@liferay.com",
+			userLoginFullName = "userfn1 userln1");
 
 		Navigator.openWithAppendToBaseURL(urlAppend = "web/test-site-name/experience-content-page");
 
 		AssertTextEquals(
 			locator1 = "Experience#FRAGMENT_HEADING",
 			value1 = "Org users will see this heading");
+
+		JSONOrganization.deleteOrganizationByName(organizationName = "organization Name");
 	}
 
 	@description = "This is a test for LPS-130303."
 	@priority = "5"
 	test AddNewExperienceOrganizationHierarchyPathSegment {
 		property portal.acceptance = "false";
+
+		JSONOrganization.addOrganization(organizationName = "organization Name");
+
+		JSONOrganization.assignUserToOrganization(
+			organizationName = "organization Name",
+			userEmailAddress = "userea1@liferay.com");
+
+		ApplicationsMenu.gotoPortlet(
+			category = "Configuration",
+			panel = "Control Panel",
+			portlet = "Instance Settings");
+
+		SystemSettings.gotoConfiguration(
+			configurationCategory = "User Authentication",
+			configurationName = "General",
+			configurationScope = "Virtual Instance Scope");
+
+		PortalSettings.uncheckStrangersVerifyEmailCheckbox();
 
 		Segmentation.openSegmentsAdmin(siteURLKey = "test-site-name");
 
@@ -421,7 +491,7 @@ definition {
 			locator1 = "Segmentation#MEMBERS_MATCHED",
 			value1 = "1 Member");
 
-		Segmentation.viewMembers(memberName = "userfn2 userln2");
+		Segmentation.viewMembers(memberName = "userfn1 userln1");
 
 		Button.clickSave();
 
@@ -454,20 +524,40 @@ definition {
 
 		User.logoutAndLoginPG(
 			freeLogin = "true",
-			userLoginEmailAddress = "userea2@liferay.com",
-			userLoginFullName = "userfn2 userln2");
+			userLoginEmailAddress = "userea1@liferay.com",
+			userLoginFullName = "userfn1 userln1");
 
 		Navigator.openWithAppendToBaseURL(urlAppend = "web/test-site-name/experience-content-page");
 
 		AssertTextEquals(
 			locator1 = "Experience#FRAGMENT_HEADING",
 			value1 = "Org users will see this heading");
+
+		JSONOrganization.deleteOrganizationByName(organizationName = "organization Name");
 	}
 
 	@description = "This is a test for LPS-130304."
 	@priority = "5"
 	test AddNewExperienceOrganizationNameSegment {
 		property portal.acceptance = "false";
+
+		JSONOrganization.addOrganization(organizationName = "organization Name");
+
+		JSONOrganization.assignUserToOrganization(
+			organizationName = "organization Name",
+			userEmailAddress = "userea1@liferay.com");
+
+		ApplicationsMenu.gotoPortlet(
+			category = "Configuration",
+			panel = "Control Panel",
+			portlet = "Instance Settings");
+
+		SystemSettings.gotoConfiguration(
+			configurationCategory = "User Authentication",
+			configurationName = "General",
+			configurationScope = "Virtual Instance Scope");
+
+		PortalSettings.uncheckStrangersVerifyEmailCheckbox();
 
 		Segmentation.openSegmentsAdmin(siteURLKey = "test-site-name");
 
@@ -487,7 +577,7 @@ definition {
 			locator1 = "Segmentation#MEMBERS_MATCHED",
 			value1 = "1 Member");
 
-		Segmentation.viewMembers(memberName = "userfn2 userln2");
+		Segmentation.viewMembers(memberName = "userfn1 userln1");
 
 		Button.clickSave();
 
@@ -520,20 +610,40 @@ definition {
 
 		User.logoutAndLoginPG(
 			freeLogin = "true",
-			userLoginEmailAddress = "userea2@liferay.com",
-			userLoginFullName = "userfn2 userln2");
+			userLoginEmailAddress = "userea1@liferay.com",
+			userLoginFullName = "userfn1 userln1");
 
 		Navigator.openWithAppendToBaseURL(urlAppend = "web/test-site-name/experience-content-page");
 
 		AssertTextEquals(
 			locator1 = "Experience#FRAGMENT_HEADING",
 			value1 = "Org users will see this heading");
+
+		JSONOrganization.deleteOrganizationByName(organizationName = "organization Name");
 	}
 
 	@description = "This is a test for LPS-130306."
 	@priority = "5"
 	test AddNewExperienceOrganizationOrganizationSegment {
 		property portal.acceptance = "false";
+
+		JSONOrganization.addOrganization(organizationName = "organization Name");
+
+		JSONOrganization.assignUserToOrganization(
+			organizationName = "organization Name",
+			userEmailAddress = "userea1@liferay.com");
+
+		ApplicationsMenu.gotoPortlet(
+			category = "Configuration",
+			panel = "Control Panel",
+			portlet = "Instance Settings");
+
+		SystemSettings.gotoConfiguration(
+			configurationCategory = "User Authentication",
+			configurationName = "General",
+			configurationScope = "Virtual Instance Scope");
+
+		PortalSettings.uncheckStrangersVerifyEmailCheckbox();
 
 		Segmentation.openSegmentsAdmin(siteURLKey = "test-site-name");
 
@@ -580,14 +690,16 @@ definition {
 
 		User.logoutAndLoginPG(
 			freeLogin = "true",
-			userLoginEmailAddress = "userea2@liferay.com",
-			userLoginFullName = "userfn2 userln2");
+			userLoginEmailAddress = "userea1@liferay.com",
+			userLoginFullName = "userfn1 userln1");
 
 		Navigator.openWithAppendToBaseURL(urlAppend = "web/test-site-name/experience-content-page");
 
 		AssertTextEquals(
 			locator1 = "Experience#FRAGMENT_HEADING",
 			value1 = "Org users will see this heading");
+
+		JSONOrganization.deleteOrganizationByName(organizationName = "organization Name");
 	}
 
 	@description = "This is a test for LPS-130307."
@@ -595,11 +707,29 @@ definition {
 	test AddNewExperienceOrganizationParentOrganizationSegment {
 		property portal.acceptance = "false";
 
+		JSONOrganization.addOrganization(organizationName = "organization Name");
+
+		JSONOrganization.assignUserToOrganization(
+			organizationName = "organization Name",
+			userEmailAddress = "userea1@liferay.com");
+
 		JSONOrganization.addOrganization(organizationName = "Suborganization Name");
 
 		JSONOrganization.assignUserToOrganization(
 			organizationName = "Suborganization Name",
-			userEmailAddress = "userea2@liferay.com");
+			userEmailAddress = "userea1@liferay.com");
+
+		ApplicationsMenu.gotoPortlet(
+			category = "Configuration",
+			panel = "Control Panel",
+			portlet = "Instance Settings");
+
+		SystemSettings.gotoConfiguration(
+			configurationCategory = "User Authentication",
+			configurationName = "General",
+			configurationScope = "Virtual Instance Scope");
+
+		PortalSettings.uncheckStrangersVerifyEmailCheckbox();
 
 		User.openUsersAdmin();
 
@@ -631,7 +761,7 @@ definition {
 			locator1 = "Segmentation#MEMBERS_MATCHED",
 			value1 = "1 Member");
 
-		Segmentation.viewMembers(memberName = "userfn2 userln2");
+		Segmentation.viewMembers(memberName = "userfn1 userln1");
 
 		Button.clickSave();
 
@@ -664,20 +794,40 @@ definition {
 
 		User.logoutAndLoginPG(
 			freeLogin = "true",
-			userLoginEmailAddress = "userea2@liferay.com",
-			userLoginFullName = "userfn2 userln2");
+			userLoginEmailAddress = "userea1@liferay.com",
+			userLoginFullName = "userfn1 userln1");
 
 		Navigator.openWithAppendToBaseURL(urlAppend = "web/test-site-name/experience-content-page");
 
 		AssertTextEquals(
 			locator1 = "Experience#FRAGMENT_HEADING",
 			value1 = "Org users will see this heading");
+
+		JSONOrganization.deleteOrganizationByName(organizationName = "organization Name");
 	}
 
 	@description = "This is a test for LPS-130310."
 	@priority = "5"
 	test AddNewExperienceOrganizationRegionSegment {
 		property portal.acceptance = "false";
+
+		JSONOrganization.addOrganization(organizationName = "organization Name");
+
+		JSONOrganization.assignUserToOrganization(
+			organizationName = "organization Name",
+			userEmailAddress = "userea1@liferay.com");
+
+		ApplicationsMenu.gotoPortlet(
+			category = "Configuration",
+			panel = "Control Panel",
+			portlet = "Instance Settings");
+
+		SystemSettings.gotoConfiguration(
+			configurationCategory = "User Authentication",
+			configurationName = "General",
+			configurationScope = "Virtual Instance Scope");
+
+		PortalSettings.uncheckStrangersVerifyEmailCheckbox();
 
 		ApplicationsMenu.gotoPortlet(
 			category = "Users",
@@ -714,7 +864,7 @@ definition {
 			locator1 = "Segmentation#MEMBERS_MATCHED",
 			value1 = "1 Member");
 
-		Segmentation.viewMembers(memberName = "userfn2 userln2");
+		Segmentation.viewMembers(memberName = "userfn1 userln1");
 
 		Button.clickSave();
 
@@ -747,20 +897,40 @@ definition {
 
 		User.logoutAndLoginPG(
 			freeLogin = "true",
-			userLoginEmailAddress = "userea2@liferay.com",
-			userLoginFullName = "userfn2 userln2");
+			userLoginEmailAddress = "userea1@liferay.com",
+			userLoginFullName = "userfn1 userln1");
 
 		Navigator.openWithAppendToBaseURL(urlAppend = "web/test-site-name/experience-content-page");
 
 		AssertTextEquals(
 			locator1 = "Experience#FRAGMENT_HEADING",
 			value1 = "Org users will see this heading");
+
+		JSONOrganization.deleteOrganizationByName(organizationName = "organization Name");
 	}
 
 	@description = "This is a test for LPS-130311."
 	@priority = "5"
 	test AddNewExperienceOrganizationTagSegment {
 		property portal.acceptance = "false";
+
+		JSONOrganization.addOrganization(organizationName = "organization Name");
+
+		JSONOrganization.assignUserToOrganization(
+			organizationName = "organization Name",
+			userEmailAddress = "userea1@liferay.com");
+
+		ApplicationsMenu.gotoPortlet(
+			category = "Configuration",
+			panel = "Control Panel",
+			portlet = "Instance Settings");
+
+		SystemSettings.gotoConfiguration(
+			configurationCategory = "User Authentication",
+			configurationName = "General",
+			configurationScope = "Virtual Instance Scope");
+
+		PortalSettings.uncheckStrangersVerifyEmailCheckbox();
 
 		ApplicationsMenu.gotoPortlet(
 			category = "Users",
@@ -791,7 +961,7 @@ definition {
 			locator1 = "Segmentation#MEMBERS_MATCHED",
 			value1 = "1 Member");
 
-		Segmentation.viewMembers(memberName = "userfn2 userln2");
+		Segmentation.viewMembers(memberName = "userfn1 userln1");
 
 		Button.clickSave();
 
@@ -824,14 +994,16 @@ definition {
 
 		User.logoutAndLoginPG(
 			freeLogin = "true",
-			userLoginEmailAddress = "userea2@liferay.com",
-			userLoginFullName = "userfn2 userln2");
+			userLoginEmailAddress = "userea1@liferay.com",
+			userLoginFullName = "userfn1 userln1");
 
 		Navigator.openWithAppendToBaseURL(urlAppend = "web/test-site-name/experience-content-page");
 
 		AssertTextEquals(
 			locator1 = "Experience#FRAGMENT_HEADING",
 			value1 = "Org users will see this heading");
+
+		JSONOrganization.deleteOrganizationByName(organizationName = "organization Name");
 	}
 
 	@description = "This is a test for LPS-130308."
@@ -839,6 +1011,18 @@ definition {
 	test AddNewExperienceOrganizationTypeSegment {
 		property portal.acceptance = "false";
 		property test.name.skip.portal.instance = "ExperienceCreateExperience#AddNewExperienceOrganizationTypeSegment";
+
+		ApplicationsMenu.gotoPortlet(
+			category = "Configuration",
+			panel = "Control Panel",
+			portlet = "Instance Settings");
+
+		SystemSettings.gotoConfiguration(
+			configurationCategory = "User Authentication",
+			configurationName = "General",
+			configurationScope = "Virtual Instance Scope");
+
+		PortalSettings.uncheckStrangersVerifyEmailCheckbox();
 
 		ApplicationsMenu.gotoPortlet(
 			category = "Configuration",
@@ -870,7 +1054,7 @@ definition {
 
 		JSONOrganization.assignUserToOrganization(
 			organizationName = "United States",
-			userEmailAddress = "userea2@liferay.com");
+			userEmailAddress = "userea1@liferay.com");
 
 		Segmentation.openSegmentsAdmin(siteURLKey = "test-site-name");
 
@@ -890,7 +1074,7 @@ definition {
 			locator1 = "Segmentation#MEMBERS_MATCHED",
 			value1 = "1 Member");
 
-		Segmentation.viewMembers(memberName = "userfn2 userln2");
+		Segmentation.viewMembers(memberName = "userfn1 userln1");
 
 		Button.clickSave();
 
@@ -923,14 +1107,16 @@ definition {
 
 		User.logoutAndLoginPG(
 			freeLogin = "true",
-			userLoginEmailAddress = "userea2@liferay.com",
-			userLoginFullName = "userfn2 userln2");
+			userLoginEmailAddress = "userea1@liferay.com",
+			userLoginFullName = "userfn1 userln1");
 
 		Navigator.openWithAppendToBaseURL(urlAppend = "web/test-site-name/experience-content-page");
 
 		AssertTextEquals(
 			locator1 = "Experience#FRAGMENT_HEADING",
 			value1 = "Org users will see this heading");
+
+		JSONOrganization.deleteOrganizationByName(organizationName = "United States");
 	}
 
 	@description = "This is a test for LPS-130327."
@@ -1034,6 +1220,18 @@ definition {
 			userLastName = "userln",
 			userScreenName = "usersn");
 
+		ApplicationsMenu.gotoPortlet(
+			category = "Configuration",
+			panel = "Control Panel",
+			portlet = "Instance Settings");
+
+		SystemSettings.gotoConfiguration(
+			configurationCategory = "User Authentication",
+			configurationName = "General",
+			configurationScope = "Virtual Instance Scope");
+
+		PortalSettings.uncheckStrangersVerifyEmailCheckbox();
+
 		Segmentation.openSegmentsAdmin(siteURLKey = "test-site-name");
 
 		LexiconEntry.gotoAdd();
@@ -1094,6 +1292,18 @@ definition {
 	@priority = "5"
 	test AddNewExperienceSessionDeviceBrandSegment {
 		property portal.acceptance = "false";
+
+		ApplicationsMenu.gotoPortlet(
+			category = "Configuration",
+			panel = "Control Panel",
+			portlet = "Instance Settings");
+
+		SystemSettings.gotoConfiguration(
+			configurationCategory = "User Authentication",
+			configurationName = "General",
+			configurationScope = "Virtual Instance Scope");
+
+		PortalSettings.uncheckStrangersVerifyEmailCheckbox();
 
 		Segmentation.openSegmentsAdmin(siteURLKey = "test-site-name");
 
@@ -1156,6 +1366,18 @@ definition {
 	test AddNewExperienceSessionDeviceModelSegment {
 		property portal.acceptance = "false";
 
+		ApplicationsMenu.gotoPortlet(
+			category = "Configuration",
+			panel = "Control Panel",
+			portlet = "Instance Settings");
+
+		SystemSettings.gotoConfiguration(
+			configurationCategory = "User Authentication",
+			configurationName = "General",
+			configurationScope = "Virtual Instance Scope");
+
+		PortalSettings.uncheckStrangersVerifyEmailCheckbox();
+
 		Segmentation.openSegmentsAdmin(siteURLKey = "test-site-name");
 
 		LexiconEntry.gotoAdd();
@@ -1217,6 +1439,18 @@ definition {
 	test AddNewExperienceSessionDeviceScreenResolutionHeightSegment {
 		property portal.acceptance = "false";
 
+		ApplicationsMenu.gotoPortlet(
+			category = "Configuration",
+			panel = "Control Panel",
+			portlet = "Instance Settings");
+
+		SystemSettings.gotoConfiguration(
+			configurationCategory = "User Authentication",
+			configurationName = "General",
+			configurationScope = "Virtual Instance Scope");
+
+		PortalSettings.uncheckStrangersVerifyEmailCheckbox();
+
 		Segmentation.openSegmentsAdmin(siteURLKey = "test-site-name");
 
 		LexiconEntry.gotoAdd();
@@ -1277,6 +1511,18 @@ definition {
 	@priority = "5"
 	test AddNewExperienceSessionDeviceScreenResolutionWidthSegment {
 		property portal.acceptance = "false";
+
+		ApplicationsMenu.gotoPortlet(
+			category = "Configuration",
+			panel = "Control Panel",
+			portlet = "Instance Settings");
+
+		SystemSettings.gotoConfiguration(
+			configurationCategory = "User Authentication",
+			configurationName = "General",
+			configurationScope = "Virtual Instance Scope");
+
+		PortalSettings.uncheckStrangersVerifyEmailCheckbox();
 
 		Segmentation.openSegmentsAdmin(siteURLKey = "test-site-name");
 
@@ -1440,6 +1686,18 @@ definition {
 	test AddNewExperienceSessionLastSignInDateSegment {
 		property portal.acceptance = "false";
 
+		ApplicationsMenu.gotoPortlet(
+			category = "Configuration",
+			panel = "Control Panel",
+			portlet = "Instance Settings");
+
+		SystemSettings.gotoConfiguration(
+			configurationCategory = "User Authentication",
+			configurationName = "General",
+			configurationScope = "Virtual Instance Scope");
+
+		PortalSettings.uncheckStrangersVerifyEmailCheckbox();
+
 		Segmentation.openSegmentsAdmin(siteURLKey = "test-site-name");
 
 		LexiconEntry.gotoAdd();
@@ -1499,6 +1757,18 @@ definition {
 	test AddNewExperienceSessionLocalDateSegment {
 		property portal.acceptance = "false";
 
+		ApplicationsMenu.gotoPortlet(
+			category = "Configuration",
+			panel = "Control Panel",
+			portlet = "Instance Settings");
+
+		SystemSettings.gotoConfiguration(
+			configurationCategory = "User Authentication",
+			configurationName = "General",
+			configurationScope = "Virtual Instance Scope");
+
+		PortalSettings.uncheckStrangersVerifyEmailCheckbox();
+
 		Segmentation.openSegmentsAdmin(siteURLKey = "test-site-name");
 
 		LexiconEntry.gotoAdd();
@@ -1557,6 +1827,18 @@ definition {
 	@priority = "5"
 	test AddNewExperienceSessionReferrerURLSegment {
 		property portal.acceptance = "false";
+
+		ApplicationsMenu.gotoPortlet(
+			category = "Configuration",
+			panel = "Control Panel",
+			portlet = "Instance Settings");
+
+		SystemSettings.gotoConfiguration(
+			configurationCategory = "User Authentication",
+			configurationName = "General",
+			configurationScope = "Virtual Instance Scope");
+
+		PortalSettings.uncheckStrangersVerifyEmailCheckbox();
 
 		Segmentation.openSegmentsAdmin(siteURLKey = "test-site-name");
 
@@ -1625,6 +1907,18 @@ definition {
 	@priority = "5"
 	test AddNewExperienceSessionRequestParametersSegment {
 		property portal.acceptance = "false";
+
+		ApplicationsMenu.gotoPortlet(
+			category = "Configuration",
+			panel = "Control Panel",
+			portlet = "Instance Settings");
+
+		SystemSettings.gotoConfiguration(
+			configurationCategory = "User Authentication",
+			configurationName = "General",
+			configurationScope = "Virtual Instance Scope");
+
+		PortalSettings.uncheckStrangersVerifyEmailCheckbox();
 
 		Segmentation.openSegmentsAdmin(siteURLKey = "test-site-name");
 
@@ -1770,6 +2064,18 @@ definition {
 	test AddNewExperienceSessionURLSegment {
 		property portal.acceptance = "false";
 
+		ApplicationsMenu.gotoPortlet(
+			category = "Configuration",
+			panel = "Control Panel",
+			portlet = "Instance Settings");
+
+		SystemSettings.gotoConfiguration(
+			configurationCategory = "User Authentication",
+			configurationName = "General",
+			configurationScope = "Virtual Instance Scope");
+
+		PortalSettings.uncheckStrangersVerifyEmailCheckbox();
+
 		Segmentation.openSegmentsAdmin(siteURLKey = "test-site-name");
 
 		LexiconEntry.gotoAdd();
@@ -1830,6 +2136,18 @@ definition {
 	@priority = "5"
 	test AddNewExperienceSessionUserAgentSegment {
 		property portal.acceptance = "false";
+
+		ApplicationsMenu.gotoPortlet(
+			category = "Configuration",
+			panel = "Control Panel",
+			portlet = "Instance Settings");
+
+		SystemSettings.gotoConfiguration(
+			configurationCategory = "User Authentication",
+			configurationName = "General",
+			configurationScope = "Virtual Instance Scope");
+
+		PortalSettings.uncheckStrangersVerifyEmailCheckbox();
 
 		Segmentation.openSegmentsAdmin(siteURLKey = "test-site-name");
 
@@ -1892,6 +2210,18 @@ definition {
 	test AddNewExperienceUserDateModifiedSegment {
 		property portal.acceptance = "false";
 
+		ApplicationsMenu.gotoPortlet(
+			category = "Configuration",
+			panel = "Control Panel",
+			portlet = "Instance Settings");
+
+		SystemSettings.gotoConfiguration(
+			configurationCategory = "User Authentication",
+			configurationName = "General",
+			configurationScope = "Virtual Instance Scope");
+
+		PortalSettings.uncheckStrangersVerifyEmailCheckbox();
+
 		Segmentation.openSegmentsAdmin(siteURLKey = "test-site-name");
 
 		LexiconEntry.gotoAdd();
@@ -1904,7 +2234,7 @@ definition {
 
 		AssertTextEquals(
 			locator1 = "Segmentation#MEMBERS_MATCHED",
-			value1 = "3 Members");
+			value1 = "2 Members");
 
 		Segmentation.viewMembers(memberName = "userfn1 userln1");
 
@@ -1954,6 +2284,18 @@ definition {
 	test AddNewExperienceUserDateOfBirthSegment {
 		property portal.acceptance = "false";
 
+		ApplicationsMenu.gotoPortlet(
+			category = "Configuration",
+			panel = "Control Panel",
+			portlet = "Instance Settings");
+
+		SystemSettings.gotoConfiguration(
+			configurationCategory = "User Authentication",
+			configurationName = "General",
+			configurationScope = "Virtual Instance Scope");
+
+		PortalSettings.uncheckStrangersVerifyEmailCheckbox();
+
 		Segmentation.openSegmentsAdmin(siteURLKey = "test-site-name");
 
 		LexiconEntry.gotoAdd();
@@ -1966,7 +2308,7 @@ definition {
 
 		AssertTextEquals(
 			locator1 = "Segmentation#MEMBERS_MATCHED",
-			value1 = "3 Members");
+			value1 = "2 Members");
 
 		Segmentation.viewMembers(memberName = "userfn1 userln1");
 
@@ -2015,6 +2357,18 @@ definition {
 	@priority = "5"
 	test AddNewExperienceUserEmailAddressSegment {
 		property portal.acceptance = "false";
+
+		ApplicationsMenu.gotoPortlet(
+			category = "Configuration",
+			panel = "Control Panel",
+			portlet = "Instance Settings");
+
+		SystemSettings.gotoConfiguration(
+			configurationCategory = "User Authentication",
+			configurationName = "General",
+			configurationScope = "Virtual Instance Scope");
+
+		PortalSettings.uncheckStrangersVerifyEmailCheckbox();
 
 		Segmentation.openSegmentsAdmin(siteURLKey = "test-site-name");
 
@@ -2080,6 +2434,18 @@ definition {
 	test AddNewExperienceUserFirstNameSegment {
 		property portal.acceptance = "false";
 
+		ApplicationsMenu.gotoPortlet(
+			category = "Configuration",
+			panel = "Control Panel",
+			portlet = "Instance Settings");
+
+		SystemSettings.gotoConfiguration(
+			configurationCategory = "User Authentication",
+			configurationName = "General",
+			configurationScope = "Virtual Instance Scope");
+
+		PortalSettings.uncheckStrangersVerifyEmailCheckbox();
+
 		Segmentation.openSegmentsAdmin(siteURLKey = "test-site-name");
 
 		LexiconEntry.gotoAdd();
@@ -2143,6 +2509,18 @@ definition {
 	@priority = "5"
 	test AddNewExperienceUserJobTitleSegment {
 		property portal.acceptance = "false";
+
+		ApplicationsMenu.gotoPortlet(
+			category = "Configuration",
+			panel = "Control Panel",
+			portlet = "Instance Settings");
+
+		SystemSettings.gotoConfiguration(
+			configurationCategory = "User Authentication",
+			configurationName = "General",
+			configurationScope = "Virtual Instance Scope");
+
+		PortalSettings.uncheckStrangersVerifyEmailCheckbox();
 
 		Segmentation.openSegmentsAdmin(siteURLKey = "test-site-name");
 
@@ -2208,6 +2586,18 @@ definition {
 	test AddNewExperienceUserLastNameSegment {
 		property portal.acceptance = "false";
 
+		ApplicationsMenu.gotoPortlet(
+			category = "Configuration",
+			panel = "Control Panel",
+			portlet = "Instance Settings");
+
+		SystemSettings.gotoConfiguration(
+			configurationCategory = "User Authentication",
+			configurationName = "General",
+			configurationScope = "Virtual Instance Scope");
+
+		PortalSettings.uncheckStrangersVerifyEmailCheckbox();
+
 		Segmentation.openSegmentsAdmin(siteURLKey = "test-site-name");
 
 		LexiconEntry.gotoAdd();
@@ -2271,6 +2661,18 @@ definition {
 	@priority = "5"
 	test AddNewExperienceUserNameSegment {
 		property portal.acceptance = "false";
+
+		ApplicationsMenu.gotoPortlet(
+			category = "Configuration",
+			panel = "Control Panel",
+			portlet = "Instance Settings");
+
+		SystemSettings.gotoConfiguration(
+			configurationCategory = "User Authentication",
+			configurationName = "General",
+			configurationScope = "Virtual Instance Scope");
+
+		PortalSettings.uncheckStrangersVerifyEmailCheckbox();
 
 		Segmentation.openSegmentsAdmin(siteURLKey = "test-site-name");
 
@@ -2336,6 +2738,18 @@ definition {
 	test AddNewExperienceUserRoleSegment {
 		property portal.acceptance = "false";
 
+		ApplicationsMenu.gotoPortlet(
+			category = "Configuration",
+			panel = "Control Panel",
+			portlet = "Instance Settings");
+
+		SystemSettings.gotoConfiguration(
+			configurationCategory = "User Authentication",
+			configurationName = "General",
+			configurationScope = "Virtual Instance Scope");
+
+		PortalSettings.uncheckStrangersVerifyEmailCheckbox();
+
 		Segmentation.openSegmentsAdmin(siteURLKey = "test-site-name");
 
 		LexiconEntry.gotoAdd();
@@ -2350,7 +2764,7 @@ definition {
 
 		AssertTextEquals(
 			locator1 = "Segmentation#MEMBERS_MATCHED",
-			value1 = "3 Members");
+			value1 = "2 Members");
 
 		Segmentation.viewMembers(memberName = "userfn1 userln1");
 
@@ -2399,6 +2813,18 @@ definition {
 	@priority = "5"
 	test AddNewExperienceUserScreenNameSegment {
 		property portal.acceptance = "false";
+
+		ApplicationsMenu.gotoPortlet(
+			category = "Configuration",
+			panel = "Control Panel",
+			portlet = "Instance Settings");
+
+		SystemSettings.gotoConfiguration(
+			configurationCategory = "User Authentication",
+			configurationName = "General",
+			configurationScope = "Virtual Instance Scope");
+
+		PortalSettings.uncheckStrangersVerifyEmailCheckbox();
 
 		Segmentation.openSegmentsAdmin(siteURLKey = "test-site-name");
 
@@ -2467,7 +2893,7 @@ definition {
 
 		JSONGroup.assignUserToGroup(
 			groupName = "Test Site Name",
-			userEmailAddress = "userea2@liferay.com");
+			userEmailAddress = "userea1@liferay.com");
 
 		JSONRole.addSiteRole(
 			roleKey = "Site Role Name",
@@ -2476,7 +2902,19 @@ definition {
 		JSONGroup.assignGroupRoleToUser(
 			groupName = "Test Site Name",
 			roleTitle = "Site Role Name",
-			userEmailAddress = "userea2@liferay.com");
+			userEmailAddress = "userea1@liferay.com");
+
+		ApplicationsMenu.gotoPortlet(
+			category = "Configuration",
+			panel = "Control Panel",
+			portlet = "Instance Settings");
+
+		SystemSettings.gotoConfiguration(
+			configurationCategory = "User Authentication",
+			configurationName = "General",
+			configurationScope = "Virtual Instance Scope");
+
+		PortalSettings.uncheckStrangersVerifyEmailCheckbox();
 
 		SearchAdministration.executeReindex();
 
@@ -2490,7 +2928,7 @@ definition {
 
 		Segmentation.fillProperty(selectCheckbox = "Site Role Name");
 
-		Segmentation.viewMembers(memberName = "userfn2 userln2");
+		Segmentation.viewMembers(memberName = "userfn1 userln1");
 
 		Button.clickSave();
 
@@ -2524,8 +2962,8 @@ definition {
 		PageEditor.clickPublish();
 
 		User.logoutAndLoginPG(
-			userLoginEmailAddress = "userea2@liferay.com",
-			userLoginFullName = "userfn2 userln2");
+			userLoginEmailAddress = "userea1@liferay.com",
+			userLoginFullName = "userfn1 userln1");
 
 		Navigator.openWithAppendToBaseURL(urlAppend = "web/test-site-name/experience-content-page");
 
@@ -2541,7 +2979,19 @@ definition {
 
 		JSONGroup.assignUserToGroup(
 			groupName = "Test Site Name",
-			userEmailAddress = "userea2@liferay.com");
+			userEmailAddress = "userea1@liferay.com");
+
+		ApplicationsMenu.gotoPortlet(
+			category = "Configuration",
+			panel = "Control Panel",
+			portlet = "Instance Settings");
+
+		SystemSettings.gotoConfiguration(
+			configurationCategory = "User Authentication",
+			configurationName = "General",
+			configurationScope = "Virtual Instance Scope");
+
+		PortalSettings.uncheckStrangersVerifyEmailCheckbox();
 
 		Segmentation.openSegmentsAdmin(siteURLKey = "test-site-name");
 
@@ -2553,7 +3003,7 @@ definition {
 
 		Segmentation.fillProperty(selectLink = "Test Site Name");
 
-		Segmentation.viewMembers(memberName = "userfn2 userln2");
+		Segmentation.viewMembers(memberName = "userfn1 userln1");
 
 		Button.clickSave();
 
@@ -2587,8 +3037,8 @@ definition {
 		PageEditor.clickPublish();
 
 		User.logoutAndLoginPG(
-			userLoginEmailAddress = "userea2@liferay.com",
-			userLoginFullName = "userfn2 userln2");
+			userLoginEmailAddress = "userea1@liferay.com",
+			userLoginFullName = "userfn1 userln1");
 
 		Navigator.openWithAppendToBaseURL(urlAppend = "web/test-site-name/experience-content-page");
 
@@ -2608,6 +3058,18 @@ definition {
 			userFirstName = "userfn",
 			userLastName = "userln",
 			userScreenName = "usersn");
+
+		ApplicationsMenu.gotoPortlet(
+			category = "Configuration",
+			panel = "Control Panel",
+			portlet = "Instance Settings");
+
+		SystemSettings.gotoConfiguration(
+			configurationCategory = "User Authentication",
+			configurationName = "General",
+			configurationScope = "Virtual Instance Scope");
+
+		PortalSettings.uncheckStrangersVerifyEmailCheckbox();
 
 		Segmentation.openSegmentsAdmin(siteURLKey = "test-site-name");
 
@@ -2671,6 +3133,18 @@ definition {
 		JSONGroup.assignUserToGroup(
 			groupName = "Test Site Name",
 			userEmailAddress = "userea1@liferay.com");
+
+		ApplicationsMenu.gotoPortlet(
+			category = "Configuration",
+			panel = "Control Panel",
+			portlet = "Instance Settings");
+
+		SystemSettings.gotoConfiguration(
+			configurationCategory = "User Authentication",
+			configurationName = "General",
+			configurationScope = "Virtual Instance Scope");
+
+		PortalSettings.uncheckStrangersVerifyEmailCheckbox();
 
 		Site.openSiteTeamsAdmin(siteURLKey = "test-site-name");
 
@@ -2751,6 +3225,18 @@ definition {
 			userEmailAddress = "userea1@liferay.com",
 			userGroupName = "UG UserGroup Name");
 
+		ApplicationsMenu.gotoPortlet(
+			category = "Configuration",
+			panel = "Control Panel",
+			portlet = "Instance Settings");
+
+		SystemSettings.gotoConfiguration(
+			configurationCategory = "User Authentication",
+			configurationName = "General",
+			configurationScope = "Virtual Instance Scope");
+
+		PortalSettings.uncheckStrangersVerifyEmailCheckbox();
+
 		SearchAdministration.executeReindex();
 
 		Segmentation.openSegmentsAdmin(siteURLKey = "test-site-name");
@@ -2812,6 +3298,18 @@ definition {
 	test AddNewExperienceUserUserSegment {
 		property portal.acceptance = "false";
 
+		ApplicationsMenu.gotoPortlet(
+			category = "Configuration",
+			panel = "Control Panel",
+			portlet = "Instance Settings");
+
+		SystemSettings.gotoConfiguration(
+			configurationCategory = "User Authentication",
+			configurationName = "General",
+			configurationScope = "Virtual Instance Scope");
+
+		PortalSettings.uncheckStrangersVerifyEmailCheckbox();
+
 		Segmentation.openSegmentsAdmin(siteURLKey = "test-site-name");
 
 		LexiconEntry.gotoAdd();
@@ -2871,6 +3369,20 @@ definition {
 	@uitest
 	test AddTwoExperiencesBelowDefault {
 		property portal.acceptance = "true";
+
+		task ("Uncheck verify strangers email option") {
+			ApplicationsMenu.gotoPortlet(
+				category = "Configuration",
+				panel = "Control Panel",
+				portlet = "Instance Settings");
+
+			SystemSettings.gotoConfiguration(
+				configurationCategory = "User Authentication",
+				configurationName = "General",
+				configurationScope = "Virtual Instance Scope");
+
+			PortalSettings.uncheckStrangersVerifyEmailCheckbox();
+		}
 
 		task ("Add segment for the user created") {
 			JSONSegmentsentry.addSegment(
@@ -2966,6 +3478,20 @@ definition {
 	@uitest
 	test AddTwoExperiencesOverDefault {
 		property portal.acceptance = "true";
+
+		task ("Uncheck verify strangers email option") {
+			ApplicationsMenu.gotoPortlet(
+				category = "Configuration",
+				panel = "Control Panel",
+				portlet = "Instance Settings");
+
+			SystemSettings.gotoConfiguration(
+				configurationCategory = "User Authentication",
+				configurationName = "General",
+				configurationScope = "Virtual Instance Scope");
+
+			PortalSettings.uncheckStrangersVerifyEmailCheckbox();
+		}
 
 		task ("Add segment for the user created") {
 			JSONSegmentsentry.addSegment(
@@ -3244,30 +3770,185 @@ definition {
 	}
 
 	@description = "LPS-90585: Validate in the list of Experiences if the decrease priority button working properly"
-	@ignore = "true"
 	@priority = "4"
 	test DecreaseExperiencePriority {
+		property portal.acceptance = "true";
 
-		// TODO LPS-90585 DecreaseExperiencePriority pending implementation
+		task ("Create Name Segment") {
+			JSONSegmentsentry.addSegment(
+				fieldName = "Screen Name",
+				groupName = "Test Site Name",
+				operator = "contains",
+				segmentName = "Name Segment",
+				text = "Test");
+		}
 
+		task ("Go to Experience Content Page") {
+			ContentPagesNavigator.openEditContentPage(
+				pageName = "Experience Content Page",
+				siteName = "Test Site Name");
+		}
+
+		task ("Create an experience and add on content page") {
+			PageEditor.addExperience(
+				experienceName = "Segment Name Experience",
+				segmentName = "Name Segment");
+		}
+
+		task ("Add an element to page") {
+			PageEditor.addFragment(
+				collectionName = "Basic Components",
+				fragmentName = "Heading");
+		}
+
+		task ("Priorize experience") {
+			if (IsElementPresent(locator1 = "PageEditor#EXPERIENCE_DROPDOWN")) {
+				Click(locator1 = "PageEditor#EXPERIENCE_LABEL");
+			}
+
+			PageEditor.prioritizeExperience(experienceName = "Segment Name Experience");
+		}
+
+		task ("Assert the experience is 'Active'") {
+			PageEditor.viewExperienceActive(experienceName = "Segment Name Experience");
+		}
+
+		task ("Depriorize experience") {
+			PageEditor.deprioritizeExperience(experienceName = "Segment Name Experience");
+		}
+
+		task ("Assert the experience is not 'Active'") {
+			if (IsElementNotPresent(locator1 = "PageEditor#EXPERIENCE_DROPDOWN")) {
+				Click(locator1 = "PageEditor#EXPERIENCE_LABEL");
+			}
+
+			AssertElementNotPresent(
+				key_experienceName = "Segment Name Experience",
+				locator1 = "PageEditor#EXPERIENCE_ACTIVE_LABEL");
+		}
+
+		task ("Publish and go to experience content page") {
+			Button.clickPublish();
+
+			Navigator.openWithAppendToBaseURL(urlAppend = "web/test-site-name/experience-content-page");
+		}
 	}
 
 	@description = "LPS-90585: Validate if the Default segment doesn't offer any option to be prioritized"
-	@ignore = "true"
 	@priority = "3"
 	test DefaultExperienceCantBePrioritized {
+		task ("Create Name Segment") {
+			JSONSegmentsentry.addSegment(
+				fieldName = "Screen Name",
+				groupName = "Test Site Name",
+				operator = "contains",
+				segmentName = "Name Segment",
+				text = "Test");
+		}
 
-		// TODO LPS-90585 DefaultExperienceCantBePrioritized pending implementation
+		task ("Go to Experience Content Page") {
+			ContentPagesNavigator.openEditContentPage(
+				pageName = "Experience Content Page",
+				siteName = "Test Site Name");
+		}
 
+		task ("Create an experience and add on content page") {
+			PageEditor.addExperience(
+				experienceName = "Segment Name Experience",
+				segmentName = "Name Segment");
+		}
+
+		task ("Add an element to page") {
+			PageEditor.addFragment(
+				collectionName = "Basic Components",
+				fragmentName = "Heading");
+		}
+
+		task ("Priorize experience") {
+			if (IsElementPresent(locator1 = "PageEditor#EXPERIENCE_DROPDOWN")) {
+				Click(locator1 = "PageEditor#EXPERIENCE_LABEL");
+			}
+
+			PageEditor.prioritizeExperience(experienceName = "Segment Name Experience");
+		}
+
+		task ("Assert Default segment buttons is not present") {
+			AssertElementNotPresent(
+				key_index = "2",
+				locator1 = "PageEditor#EXPERIENCE_PRIORITIZE_BUTTON");
+		}
+
+		task ("Publish and go to experience content page") {
+			Button.clickPublish();
+
+			Navigator.openWithAppendToBaseURL(urlAppend = "web/test-site-name/experience-content-page");
+		}
 	}
 
 	@description = "LPS-90585: Validate in the list of Experiences if the default option is always the last option"
-	@ignore = "true"
 	@priority = "3"
 	test DefaultExperienceLastOption {
+		task ("Create Name Segment") {
+			JSONSegmentsentry.addSegment(
+				fieldName = "Screen Name",
+				groupName = "Test Site Name",
+				operator = "contains",
+				segmentName = "Name Segment",
+				text = "Test");
+		}
 
-		// TODO LPS-90585 DefaultExperienceLastOption pending implementation
+		task ("Create Email Segment") {
+			JSONSegmentsentry.addSegment(
+				fieldName = "Email Address",
+				groupName = "Test Site Name",
+				operator = "contains",
+				segmentName = "Segment Email Address",
+				text = "test@liferay.com");
+		}
 
+		task ("Go to Experience Content Page") {
+			ContentPagesNavigator.openEditContentPage(
+				pageName = "Experience Content Page",
+				siteName = "Test Site Name");
+		}
+
+		task ("Create an experience and add on content page") {
+			PageEditor.addExperience(
+				experienceName = "Segment Name Experience",
+				segmentName = "Name Segment");
+
+			Refresh();
+		}
+
+		task ("Create an experience with Segment Email") {
+			PageEditor.addExperience(
+				experienceName = "Segment Email Experience",
+				segmentName = "Segment Email Address");
+		}
+
+		task ("Priorize experiences") {
+			for (var index : list "1,2") {
+				if (IsElementNotPresent(locator1 = "PageEditor#EXPERIENCE_DROPDOWN")) {
+					Click(locator1 = "PageEditor#EXPERIENCE_LABEL");
+				}
+
+				Click(
+					key_index = "${index}",
+					locator1 = "PageEditor#EXPERIENCE_PRIORITIZE_BUTTON");
+			}
+		}
+
+		task ("Assert that Default Segment is active and at the bottom") {
+			PageEditor.viewExperienceActive(experienceName = "Default");
+
+			PageEditor.viewExperiencesNameOrder(experienceName = "Segment Name Experience,Segment Email Experience,Default");
+		}
+
+		task ("Publish and go to experience content page") {
+			Button.clickPublish();
+
+			Navigator.openWithAppendToBaseURL(urlAppend = "web/test-site-name/experience-content-page");
+		}
 	}
 
 	@description = "LPS-86285: Validate in the content page if, the user can discard the section when he is editing the experiences (not published)	"
@@ -3872,12 +4553,21 @@ definition {
 	@description = "LPS-91946: Given: in the Site Editor => Page => Content Editor; Having at least on Segment created.
 	When: trying to create a new experience without filling the Experience Name input
 	Then: the modal does not hides away and the Experience Name input reports an error"
-	@ignore = "true"
 	@priority = "4"
-	test RequiredField {
+	test RequiredExperienceNameField {
+		task ("Try to create new experience without name") {
+			ContentPages.gotoPageEditor();
 
-		// TODO LPS-91946 RequiredField pending implementation
+			PageEditor.addExperience(
+				experienceName = "",
+				segmentName = "Anyone");
+		}
 
+		task ("Check if the warning message appears") {
+			AssertTextEquals(
+				locator1 = "Message#WARNING_FEEDBACK",
+				value1 = "An experience name is required.");
+		}
 	}
 
 }

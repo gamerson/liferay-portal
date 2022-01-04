@@ -31,9 +31,7 @@ String[] types = GetterUtil.getStringValues(request.getAttribute(AccountWebKeys.
 		<clay:col
 			md="6"
 		>
-			<aui:input label="account-name" name="name" required="<%= true %>" type="text" value="<%= accountEntryDisplay.getName() %>">
-				<aui:validator name="maxLength"><%= ModelHintsUtil.getMaxLength(AccountEntry.class.getName(), "name") %></aui:validator>
-			</aui:input>
+			<aui:input bean="<%= accountEntryDisplay.getAccountEntry() %>" label="account-name" model="<%= AccountEntry.class %>" name="name" />
 
 			<c:choose>
 				<c:when test="<%= accountEntryDisplay.getAccountEntryId() > 0 %>">

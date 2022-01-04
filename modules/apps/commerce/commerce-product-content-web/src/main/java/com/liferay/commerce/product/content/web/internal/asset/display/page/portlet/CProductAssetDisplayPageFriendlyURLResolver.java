@@ -19,6 +19,7 @@ import com.liferay.asset.display.page.portlet.BaseAssetDisplayPageFriendlyURLRes
 import com.liferay.asset.display.page.util.AssetDisplayPageUtil;
 import com.liferay.asset.kernel.model.AssetTag;
 import com.liferay.asset.kernel.service.AssetTagLocalService;
+import com.liferay.commerce.account.constants.CommerceAccountConstants;
 import com.liferay.commerce.account.model.CommerceAccount;
 import com.liferay.commerce.account.util.CommerceAccountHelper;
 import com.liferay.commerce.product.catalog.CPCatalogEntry;
@@ -313,13 +314,13 @@ public class CProductAssetDisplayPageFriendlyURLResolver
 			long groupId, HttpServletRequest httpServletRequest)
 		throws PortalException {
 
+		long commerceAccountId = CommerceAccountConstants.ACCOUNT_ID_GUEST;
+
 		CommerceAccount commerceAccount =
 			_commerceAccountHelper.getCurrentCommerceAccount(
 				_commerceChannelLocalService.
 					getCommerceChannelGroupIdBySiteGroupId(groupId),
 				httpServletRequest);
-
-		long commerceAccountId = 0;
 
 		if (commerceAccount != null) {
 			commerceAccountId = commerceAccount.getCommerceAccountId();

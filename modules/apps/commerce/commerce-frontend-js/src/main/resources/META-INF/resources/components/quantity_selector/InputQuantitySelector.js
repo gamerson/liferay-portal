@@ -13,63 +13,92 @@
  */
 
 import {ClayInput} from '@clayui/form';
-import React, {useEffect, useMemo, useRef, useState} from 'react';
+import {debounce} from 'frontend-js-web';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 
-import QuantityControls, {UPDATE_AFTER} from './utils/index';
+import {
+	getMinQuantity,
+	getProductMaxQuantity,
+} from '../../utilities/quantities';
 
 function InputQuantitySelector({
+	className,
+	disabled,
 	maxQuantity,
 	minQuantity,
 	multipleQuantity,
+	name,
 	onUpdate,
-	quantity: startingQuantity,
-	...props
+	quantity,
 }) {
-	const quantityControls = useMemo(
-		() =>
-			new QuantityControls({
-				maxQuantity,
-				minQuantity,
-				multipleQuantity,
-			}),
-		[maxQuantity, minQuantity, multipleQuantity]
+	const inputMax = useMemo(
+		() => getProductMaxQuantity(maxQuantity, multipleQuantity),
+		[maxQuantity, multipleQuantity]
 	);
 
-	const [selectedQuantity, setSelectedQuantity] = useState(
-		Math.max(startingQuantity, quantityControls.min)
+	const inputMin = useMemo(
+		() => getMinQuantity(minQuantity, multipleQuantity),
+		[multipleQuantity, minQuantity]
 	);
 
-	const keypressDebounceRef = useRef();
+	const [typedQuantity, setTypedQuantity] = useState(quantity);
 
 	useEffect(() => {
-		clearTimeout(keypressDebounceRef.current);
+		setTypedQuantity(quantity);
+	}, [quantity]);
 
-		keypressDebounceRef.current = setTimeout(() => {
-			setSelectedQuantity(() => {
-				const quantity = quantityControls.getLowerBound(
-					selectedQuantity > quantityControls.max
-						? quantityControls.max
-						: selectedQuantity
-				);
+	const getValidInputNumber = useCallback(
+		(value) => {
+			if (!value || value < inputMin) {
+				return inputMin;
+			}
 
-				onUpdate(quantity);
+			if (inputMax && value > inputMax) {
+				return inputMax;
+			}
 
-				return quantity;
-			});
-		}, UPDATE_AFTER);
-	}, [onUpdate, quantityControls, selectedQuantity]);
+			if (multipleQuantity > 1) {
+				return value - (value % multipleQuantity);
+			}
+
+			return value;
+		},
+		[inputMax, inputMin, multipleQuantity]
+	);
+
+	const debouncedSetFixedValue = useMemo(() => {
+		return debounce((value) => {
+			const validInput = getValidInputNumber(Number(value));
+
+			setTypedQuantity(validInput);
+
+			onUpdate(validInput);
+		}, 500);
+	}, [getValidInputNumber, onUpdate]);
 
 	return (
 		<ClayInput
-			{...props}
-			{...quantityControls.getConfiguration()}
-			onChange={({target}) =>
-				setSelectedQuantity(parseInt(target.value, 10))
-			}
+			className={className}
+			disabled={disabled}
+			max={inputMax || ''}
+			min={inputMin}
+			name={name}
+			onChange={({target}) => {
+				setTypedQuantity(target.value);
+
+				debouncedSetFixedValue(target.value);
+			}}
+			step={multipleQuantity > 1 ? multipleQuantity : ''}
 			type="number"
-			value={selectedQuantity.toString()}
+			value={String(typedQuantity || '')}
 		/>
 	);
 }
+
+InputQuantitySelector.defaultProps = {
+	maxQuantity: '',
+	minQuantity: 1,
+	multipleQuantity: 1,
+};
 
 export default InputQuantitySelector;

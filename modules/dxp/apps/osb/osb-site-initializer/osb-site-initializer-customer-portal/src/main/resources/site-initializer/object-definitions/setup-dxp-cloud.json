@@ -1,0 +1,54 @@
+{
+	"label": {
+		"en-US": "Setup DXP Cloud"
+	},
+	"name": "SetupDXPCloud",
+	"objectFields": [
+		{
+			"indexed": true,
+			"indexedAsKeyword": false,
+			"label": {
+				"en-US": "Admins"
+			},
+			"name": "admins",
+			"required": true,
+			"type": "String"
+		},
+		{
+			"indexed": true,
+			"indexedAsKeyword": false,
+			"label": {
+				"en-US": "Data Center Region"
+			},
+			"name": "dataCenterRegion",
+			"required": true,
+			"type": "String"
+		},
+		{
+			"indexed": true,
+			"indexedAsKeyword": false,
+			"label": {
+				"en-US": "Project Id"
+			},
+			"name": "projectId",
+			"required": true,
+			"type": "String"
+		},
+		{
+			"indexed": true,
+			"indexedAsKeyword": false,
+			"label": {
+				"en-US": "Disaster Data Center Region"
+			},
+			"name": "disasterDataCenterRegion",
+			"required": false,
+			"type": "String"
+		}
+	],
+	"panelCategoryKey": "control_panel.object",
+	"pluralLabel": {
+		"en_US": "Setups DXP Cloud"
+	},
+	"scope": "site",
+	"system": false
+}

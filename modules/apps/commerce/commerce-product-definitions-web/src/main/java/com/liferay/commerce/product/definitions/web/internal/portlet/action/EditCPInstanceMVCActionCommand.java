@@ -30,6 +30,7 @@ import com.liferay.commerce.product.exception.NoSuchSkuContributorCPDefinitionOp
 import com.liferay.commerce.product.model.CPDefinition;
 import com.liferay.commerce.product.model.CPInstance;
 import com.liferay.commerce.product.service.CPDefinitionLocalService;
+import com.liferay.commerce.product.service.CPDefinitionOptionRelLocalService;
 import com.liferay.commerce.product.service.CPInstanceService;
 import com.liferay.petra.portlet.url.builder.PortletURLBuilder;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -241,13 +242,42 @@ public class EditCPInstanceMVCActionCommand extends BaseMVCActionCommand {
 
 		boolean neverExpire = ParamUtil.getBoolean(
 			actionRequest, "neverExpire");
-
 		String unspsc = ParamUtil.getString(actionRequest, "unspsc");
+		boolean discontinued = ParamUtil.getBoolean(
+			actionRequest, "discontinued");
+
+		CPInstance cpInstance = null;
+
+		String replacementCPInstanceUuid = null;
+		long replacementCProductId = 0;
+
+		long replacementCPInstanceId = ParamUtil.getLong(
+			actionRequest, "replacementCPInstanceId");
+
+		if (replacementCPInstanceId > 0) {
+			CPInstance replacementCPInstance =
+				_cpInstanceService.fetchCPInstance(replacementCPInstanceId);
+
+			if (replacementCPInstance != null) {
+				replacementCPInstanceUuid =
+					replacementCPInstance.getCPInstanceUuid();
+
+				CPDefinition replacementCPDefinition =
+					replacementCPInstance.getCPDefinition();
+
+				replacementCProductId = replacementCPDefinition.getCProductId();
+			}
+		}
+
+		int discontinuedDateMonth = ParamUtil.getInteger(
+			actionRequest, "discontinuedDateMonth");
+		int discontinuedDateDay = ParamUtil.getInteger(
+			actionRequest, "discontinuedDateDay");
+		int discontinuedDateYear = ParamUtil.getInteger(
+			actionRequest, "discontinuedDateYear");
 
 		ServiceContext serviceContext = ServiceContextFactory.getInstance(
 			CPInstance.class.getName(), actionRequest);
-
-		CPInstance cpInstance = null;
 
 		if (cpInstanceId > 0) {
 			cpInstance = _cpInstanceService.updateCPInstance(
@@ -255,7 +285,10 @@ public class EditCPInstanceMVCActionCommand extends BaseMVCActionCommand {
 				published, displayDateMonth, displayDateDay, displayDateYear,
 				displayDateHour, displayDateMinute, expirationDateMonth,
 				expirationDateDay, expirationDateYear, expirationDateHour,
-				expirationDateMinute, neverExpire, unspsc, serviceContext);
+				expirationDateMinute, neverExpire, unspsc, discontinued,
+				replacementCPInstanceUuid, replacementCProductId,
+				discontinuedDateMonth, discontinuedDateDay,
+				discontinuedDateYear, serviceContext);
 		}
 		else {
 			long cpDefinitionId = ParamUtil.getLong(
@@ -264,16 +297,20 @@ public class EditCPInstanceMVCActionCommand extends BaseMVCActionCommand {
 			CPDefinition cpDefinition =
 				_cpDefinitionLocalService.getCPDefinition(cpDefinitionId);
 
-			String ddmFormValues = ParamUtil.getString(
-				actionRequest, "ddmFormValues");
-
 			cpInstance = _cpInstanceService.addCPInstance(
 				cpDefinitionId, cpDefinition.getGroupId(), sku, gtin,
-				manufacturerPartNumber, purchasable, ddmFormValues, published,
-				displayDateMonth, displayDateDay, displayDateYear,
+				manufacturerPartNumber, purchasable,
+				_cpDefinitionOptionRelLocalService.
+					getCPDefinitionOptionRelCPDefinitionOptionValueRelIds(
+						cpDefinitionId,
+						ParamUtil.getString(actionRequest, "ddmFormValues")),
+				published, displayDateMonth, displayDateDay, displayDateYear,
 				displayDateHour, displayDateMinute, expirationDateMonth,
 				expirationDateDay, expirationDateYear, expirationDateHour,
-				expirationDateMinute, neverExpire, unspsc, serviceContext);
+				expirationDateMinute, neverExpire, unspsc, discontinued,
+				replacementCPInstanceUuid, replacementCProductId,
+				discontinuedDateMonth, discontinuedDateDay,
+				discontinuedDateYear, serviceContext);
 		}
 
 		// Update pricing info
@@ -420,6 +457,10 @@ public class EditCPInstanceMVCActionCommand extends BaseMVCActionCommand {
 
 	@Reference
 	private CPDefinitionLocalService _cpDefinitionLocalService;
+
+	@Reference
+	private CPDefinitionOptionRelLocalService
+		_cpDefinitionOptionRelLocalService;
 
 	@Reference
 	private CPInstanceService _cpInstanceService;

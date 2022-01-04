@@ -12,9 +12,14 @@
  * details.
  */
 
-import {PARSE_FILE_CHUNK_SIZE} from './constants';
+import {
+	CSV_FORMAT,
+	JSONL_FORMAT,
+	JSON_FORMAT,
+	PARSE_FILE_CHUNK_SIZE,
+} from './constants';
 
-function extractFieldsFromCSV(content, fieldSeparator) {
+export function extractFieldsFromCSV(content, fieldSeparator = ',') {
 	if (content.indexOf('\n') > -1) {
 		const splitLines = content.split('\n');
 
@@ -24,14 +29,62 @@ function extractFieldsFromCSV(content, fieldSeparator) {
 	}
 }
 
-export function parseCSV({fieldSeparator = ',', file, onComplete, onError}) {
+export function extractFieldsFromJSONL(content) {
+	let contentToParse;
+
+	if (content.indexOf('\n') > -1) {
+		const splitLines = content.split('\n');
+
+		contentToParse = splitLines.find((line) => line.length > 0);
+	}
+	else {
+		contentToParse = content;
+	}
+
+	try {
+		const data = JSON.parse(contentToParse);
+
+		return Object.keys(data);
+	}
+	catch (error) {
+		console.error(error);
+
+		return;
+	}
+}
+
+export function extractFieldsFromJSON(content) {
+	const jsonArray = content.split('');
+	let parsedJSON;
+
+	jsonArray.shift();
+
+	for (let index = 0; index < jsonArray.length - 1; index++) {
+		if (jsonArray[index] === '}') {
+			const partialJson = jsonArray.slice(0, index + 1).join('');
+
+			try {
+				parsedJSON = JSON.parse(partialJson);
+
+				return Object.keys(parsedJSON);
+			}
+			catch (error) {
+				console.error(error);
+			}
+		}
+	}
+}
+
+function parseInChunk({chunkParser, file, onComplete, onError, options}) {
 	let abort = false;
 	const fileSize = file.size;
 	let offset = 0;
 
 	const chunkReaderBlock = (_offset, length, _file) => {
 		const reader = new FileReader();
+
 		const blob = _file.slice(_offset, length + _offset);
+
 		reader.addEventListener('load', readEventHandler);
 		reader.readAsText(blob);
 	};
@@ -43,10 +96,7 @@ export function parseCSV({fieldSeparator = ',', file, onComplete, onError}) {
 
 		offset += event.target.result.length;
 
-		const fields = extractFieldsFromCSV(
-			event.target.result,
-			fieldSeparator
-		);
+		const fields = chunkParser(event.target.result, options);
 
 		if (fields) {
 			return onComplete(fields);
@@ -63,4 +113,22 @@ export function parseCSV({fieldSeparator = ',', file, onComplete, onError}) {
 	return () => {
 		abort = true;
 	};
+}
+
+const parseOperators = {
+	[CSV_FORMAT]: extractFieldsFromCSV,
+	[JSON_FORMAT]: extractFieldsFromJSON,
+	[JSONL_FORMAT]: extractFieldsFromJSONL,
+};
+
+export default function parseFile({file, onComplete, onError, options}) {
+	const extension = file.name.substring(file.name.lastIndexOf('.') + 1);
+
+	return parseInChunk({
+		chunkParser: parseOperators[extension],
+		file,
+		onComplete,
+		onError,
+		options,
+	});
 }

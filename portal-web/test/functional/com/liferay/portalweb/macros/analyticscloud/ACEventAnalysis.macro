@@ -1,0 +1,177 @@
+definition {
+
+	macro addBreakdown {
+		var key_buttonName = "${attributeName}";
+
+		ACEventAnalysis.clickToAddBreakdownButton();
+
+		ACEventAnalysis.searchEventAnalysis(searchItem = "${attributeName}");
+
+		Click(locator1 = "ACUtils#GENERIC_BUTTON");
+	}
+
+	macro addEvent {
+		var key_buttonName = "${customEventName}";
+
+		ACEventAnalysis.clickToAddEventButton();
+
+		ACEventAnalysis.searchEventAnalysis(searchItem = "${customEventName}");
+
+		while (IsElementNotPresent(locator1 = "ACUtils#GENERIC_BUTTON") && (maxIterations = "50")) {
+			TestUtils.hardRefresh();
+
+			ACEventAnalysis.clickToAddEventButton();
+
+			ACEventAnalysis.searchEventAnalysis(searchItem = "${customEventName}");
+		}
+
+		Click(locator1 = "ACUtils#GENERIC_BUTTON");
+	}
+
+	macro addFilter {
+		ACEventAnalysis.clickToAddFilterButton();
+
+		ACEventAnalysis.searchEventAnalysis(searchItem = "${filterName}");
+
+		Click(
+			key_filterName = "${filterName}",
+			locator1 = "ACEventAnalysis#CHOOSE_FILTER");
+
+		Select(
+			locator1 = "Select#SELECT",
+			value1 = "${optionValue}");
+
+		Type(
+			locator1 = "ACEventAnalysis#INPUT_CONDITION",
+			value1 = "${inputValue}");
+
+		Click(
+			key_buttonName = "Done",
+			locator1 = "ACUtils#GENERIC_BUTTON");
+	}
+
+	macro changeAttributeDataType {
+		var key_buttonName = "${attributeName}";
+
+		MouseOver(locator1 = "ACUtils#GENERIC_BUTTON");
+
+		if ("${editOption}" == "Description") {
+			Click(locator1 = "ACEventAnalysis#EDIT_PENCIL");
+
+			ACCustomEvents.changeAttributeDataType(newDataType = "${newDataType}");
+		}
+
+		if ("${editOption}" == "Filter") {
+			Click(locator1 = "ACEventAnalysis#FILTER_BUTTON");
+
+			Click(locator1 = "ACEventAnalysis#EDIT_PENCIL");
+
+			ACCustomEvents.changeAttributeDataType(newDataType = "${newDataType}");
+		}
+	}
+
+	macro clickToAddBreakdownButton {
+		var key_sectionType = "breakdown";
+
+		Click(locator1 = "ACEventAnalysis#ADD_ATTRIBUTE_BUTTON");
+	}
+
+	macro clickToAddEventButton {
+		var key_DefinitionsOptions = "event-analysis/create";
+
+		if (IsElementPresent(locator1 = "ACSettings#DEFINITIONS_OPTIONS")) {
+			Click(locator1 = "ACSettings#DEFINITIONS_OPTIONS");
+		}
+
+		Click(locator1 = "ACEventAnalysis#ADD_EVENT_BUTTON");
+	}
+
+	macro clickToAddFilterButton {
+		var key_sectionType = "filter";
+
+		Click(locator1 = "ACEventAnalysis#ADD_ATTRIBUTE_BUTTON");
+	}
+
+	macro removeFromAnalysis {
+		var key_removeValue = "${removeValue}";
+
+		Click(locator1 = "ACEventAnalysis#REMOVE_BUTTON");
+	}
+
+	macro searchEventAnalysis {
+		Type(
+			locator1 = "ACEventAnalysis#SEARCH_BAR_EVENT_ANALYSE",
+			value1 = "${searchItem}");
+	}
+
+	macro viewAnalysisDashboard {
+		if (isSet(eventName)) {
+			AssertElementPresent(
+				key_buttonName = "${eventName}",
+				locator1 = "ACUtils#GENERIC_BUTTON");
+		}
+
+		if (isSet(attributeName)) {
+			AssertElementPresent(
+				key_attributeName = "${attributeName}",
+				locator1 = "ACEventAnalysis#VIEW_DASHBOARD_INFORMATION");
+		}
+
+		if (isSet(filterName)) {
+			AssertElementPresent(
+				key_attributeName = "${filterName}",
+				locator1 = "ACEventAnalysis#VIEW_DASHBOARD_INFORMATION");
+		}
+	}
+
+	macro viewAnalysisInformation {
+		for (var informationValue : list "${informationValueList}") {
+			var key_informationValue = "${informationValue}";
+
+			AssertElementPresent(locator1 = "ACEventAnalysis#VIEW_ANALYSIS_INFORMATION");
+		}
+	}
+
+	macro viewChangedAttributeDataType {
+		var key_buttonName = "${attributeName}";
+
+		MouseOver(locator1 = "ACUtils#GENERIC_BUTTON");
+
+		ACCustomEvents.viewDataType(typeValue = "${newDataType}");
+
+		if (("${newDataType}" != "STRING") && ("${newDataType}" != "BOOLEAN")) {
+			Click(locator1 = "ACEventAnalysis#FILTER_BUTTON");
+		}
+
+		if (("${newDataType}" == "NUMBER") || ("${newDataType}" == "DURATION")) {
+			AssertElementPresent(locator1 = "ACEventAnalysis#INPUT_CONDITION");
+		}
+
+		if ("${newDataType}" == "DATE") {
+			AssertElementPresent(locator1 = "Select#SELECT");
+		}
+	}
+
+	macro viewEventAnalysisList {
+		for (var name : list "${eventList}") {
+			var key_buttonName = "${name}";
+
+			while (IsElementNotPresent(locator1 = "ACUtils#GENERIC_BUTTON") && (maxIterations = "50")) {
+				ACEventAnalysis.searchEventAnalysis(searchItem = "${name}");
+			}
+
+			AssertTextEquals(
+				locator1 = "ACUtils#GENERIC_BUTTON",
+				value1 = "${name}");
+		}
+	}
+
+	macro viewEventAnalysisListNotPresent {
+		for (var name : list "${eventList}") {
+			var key_buttonName = "${name}";
+
+			AssertElementNotPresent(locator1 = "ACUtils#GENERIC_BUTTON");
+		}
+	}
+
+}

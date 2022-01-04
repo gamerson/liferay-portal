@@ -23,6 +23,7 @@ import com.liferay.exportimport.test.util.TestUserIdStrategy;
 import com.liferay.journal.test.util.JournalTestUtil;
 import com.liferay.layout.test.util.LayoutFriendlyURLRandomizerBumper;
 import com.liferay.layout.test.util.LayoutTestUtil;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.Layout;
@@ -35,6 +36,7 @@ import com.liferay.portal.kernel.test.randomizerbumpers.UniqueStringRandomizerBu
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.util.GroupTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
+import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.Time;
 import com.liferay.portal.kernel.xml.Document;
@@ -224,7 +226,7 @@ public class LayoutReferencesExportImportContentProcessorTest {
 	}
 
 	@Test
-	public void testExportDefaultGroupRelativeURLHostImportDefaultGroup()
+	public void testExportDefaultGroupRelativeURLImportDefaultGroup()
 		throws Exception {
 
 		Group exportGroup = GroupTestUtil.addGroup();
@@ -275,6 +277,25 @@ public class LayoutReferencesExportImportContentProcessorTest {
 			_exportAndImportLayoutURL(
 				exportLayout.getFriendlyURL(), exportGroup, importGroup, true,
 				false));
+	}
+
+	@Test
+	public void testExportDefaultGroupRelativeURLWithLocaleImportDefaultGroup()
+		throws Exception {
+
+		Group exportGroup = GroupTestUtil.addGroup();
+
+		Layout exportLayout = LayoutTestUtil.addLayout(exportGroup);
+
+		Group importGroup = GroupTestUtil.addGroup();
+
+		Assert.assertEquals(
+			StringPool.SLASH + LocaleUtil.getDefault() +
+				exportLayout.getFriendlyURL(),
+			_exportAndImportLayoutURL(
+				StringPool.SLASH + LocaleUtil.getDefault() +
+					exportLayout.getFriendlyURL(),
+				exportGroup, importGroup, true, true));
 	}
 
 	@Test

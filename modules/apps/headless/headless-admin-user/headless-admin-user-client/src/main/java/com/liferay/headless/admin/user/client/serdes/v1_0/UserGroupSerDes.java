@@ -53,6 +53,16 @@ public class UserGroupSerDes {
 
 		sb.append("{");
 
+		if (userGroup.getActions() != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"actions\": ");
+
+			sb.append(_toJSON(userGroup.getActions()));
+		}
+
 		if (userGroup.getDescription() != null) {
 			if (sb.length() > 1) {
 				sb.append(", ");
@@ -119,6 +129,13 @@ public class UserGroupSerDes {
 
 		Map<String, String> map = new TreeMap<>();
 
+		if (userGroup.getActions() == null) {
+			map.put("actions", null);
+		}
+		else {
+			map.put("actions", String.valueOf(userGroup.getActions()));
+		}
+
 		if (userGroup.getDescription() == null) {
 			map.put("description", null);
 		}
@@ -167,7 +184,14 @@ public class UserGroupSerDes {
 			UserGroup userGroup, String jsonParserFieldName,
 			Object jsonParserFieldValue) {
 
-			if (Objects.equals(jsonParserFieldName, "description")) {
+			if (Objects.equals(jsonParserFieldName, "actions")) {
+				if (jsonParserFieldValue != null) {
+					userGroup.setActions(
+						(Map)UserGroupSerDes.toMap(
+							(String)jsonParserFieldValue));
+				}
+			}
+			else if (Objects.equals(jsonParserFieldName, "description")) {
 				if (jsonParserFieldValue != null) {
 					userGroup.setDescription((String)jsonParserFieldValue);
 				}

@@ -33,6 +33,7 @@ import com.liferay.segments.model.SegmentsEntry;
 import com.liferay.segments.model.SegmentsExperience;
 import com.liferay.segments.service.SegmentsEntryLocalServiceUtil;
 import com.liferay.segments.service.SegmentsExperienceLocalServiceUtil;
+import com.liferay.segments.service.SegmentsExperimentLocalServiceUtil;
 
 import java.util.List;
 
@@ -112,6 +113,14 @@ public class SegmentsExperienceSelectorDisplayContext {
 		if (segmentsExperience == null) {
 			return SegmentsExperienceConstants.getDefaultSegmentsExperienceName(
 				_themeDisplay.getLocale());
+		}
+
+		SegmentsExperience controlSegmentsExperience =
+			SegmentsExperimentLocalServiceUtil.fetchControlSegmentExperience(
+				segmentsExperience);
+
+		if (controlSegmentsExperience != null) {
+			segmentsExperience = controlSegmentsExperience;
 		}
 
 		return segmentsExperience.getName(_themeDisplay.getLocale());

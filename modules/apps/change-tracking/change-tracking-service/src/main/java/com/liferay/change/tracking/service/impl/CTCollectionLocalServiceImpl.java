@@ -31,6 +31,7 @@ import com.liferay.change.tracking.internal.conflict.ModificationConflictInfo;
 import com.liferay.change.tracking.internal.helper.CTTableMapperHelper;
 import com.liferay.change.tracking.internal.reference.TableReferenceDefinitionManager;
 import com.liferay.change.tracking.internal.resolver.ConstraintResolverKey;
+import com.liferay.change.tracking.mapping.CTMappingTableInfo;
 import com.liferay.change.tracking.model.CTAutoResolutionInfo;
 import com.liferay.change.tracking.model.CTCollection;
 import com.liferay.change.tracking.model.CTEntry;
@@ -473,6 +474,26 @@ public class CTCollectionLocalServiceImpl
 
 		return ctCollectionPersistence.findByC_S(
 			companyId, status, start, end, orderByComparator);
+	}
+
+	@Override
+	public List<CTMappingTableInfo> getCTMappingTableInfos(
+		long ctCollectionId) {
+
+		List<CTMappingTableInfo> ctMappingTableInfos = new ArrayList<>();
+
+		for (CTTableMapperHelper ctTableMapperHelper :
+				_ctServiceRegistry.getCTTableMapperHelpers()) {
+
+			CTMappingTableInfo ctMappingTableInfo =
+				ctTableMapperHelper.getCTMappingTableInfo(ctCollectionId);
+
+			if (ctMappingTableInfo != null) {
+				ctMappingTableInfos.add(ctMappingTableInfo);
+			}
+		}
+
+		return ctMappingTableInfos;
 	}
 
 	@Override

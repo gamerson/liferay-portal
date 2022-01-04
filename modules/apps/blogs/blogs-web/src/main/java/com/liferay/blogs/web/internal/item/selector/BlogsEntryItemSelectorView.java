@@ -298,21 +298,16 @@ public class BlogsEntryItemSelectorView
 				BlogsUtil.getOrderByComparator(
 					getOrderByCol(), getOrderByType()));
 			entriesSearchContainer.setOrderByType(getOrderByType());
-
-			entriesSearchContainer.setTotal(
-				_blogsEntryService.getGroupEntriesCount(
-					themeDisplay.getScopeGroupId(),
-					WorkflowConstants.STATUS_APPROVED));
-
-			List<BlogsEntry> entriesResults =
-				_blogsEntryService.getGroupEntries(
+			entriesSearchContainer.setResultsAndTotal(
+				() -> _blogsEntryService.getGroupEntries(
 					themeDisplay.getScopeGroupId(),
 					WorkflowConstants.STATUS_APPROVED,
 					entriesSearchContainer.getStart(),
 					entriesSearchContainer.getEnd(),
-					entriesSearchContainer.getOrderByComparator());
-
-			entriesSearchContainer.setResults(entriesResults);
+					entriesSearchContainer.getOrderByComparator()),
+				_blogsEntryService.getGroupEntriesCount(
+					themeDisplay.getScopeGroupId(),
+					WorkflowConstants.STATUS_APPROVED));
 
 			return entriesSearchContainer;
 		}

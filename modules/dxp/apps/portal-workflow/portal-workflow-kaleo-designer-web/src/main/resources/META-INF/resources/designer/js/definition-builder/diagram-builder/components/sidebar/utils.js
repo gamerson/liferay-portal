@@ -9,8 +9,20 @@
  * distribution rights of the Software.
  */
 
-function getModalInfo(nodeType) {
-	if (nodeType === 'end') {
+function isIdDuplicated(elements, id) {
+	let duplicated = false;
+
+	elements.map((element) => {
+		if (element.id === id) {
+			duplicated = true;
+		}
+	});
+
+	return duplicated;
+}
+
+function getModalInfo(itemType) {
+	if (itemType === 'end') {
 		return {
 			message: Liferay.Language.get(
 				'are-you-sure-you-want-to-delete-the-selected-end-node'
@@ -18,7 +30,7 @@ function getModalInfo(nodeType) {
 			title: Liferay.Language.get('delete-end-node'),
 		};
 	}
-	else if (nodeType === 'start') {
+	else if (itemType === 'start') {
 		return {
 			message: Liferay.Language.get(
 				'are-you-sure-you-want-to-delete-the-selected-start-node'
@@ -26,7 +38,7 @@ function getModalInfo(nodeType) {
 			title: Liferay.Language.get('delete-start-node'),
 		};
 	}
-	else if (nodeType === 'state') {
+	else if (itemType === 'state') {
 		return {
 			message: Liferay.Language.get(
 				'are-you-sure-you-want-to-delete-the-selected-state-node'
@@ -34,9 +46,25 @@ function getModalInfo(nodeType) {
 			title: Liferay.Language.get('delete-state-node'),
 		};
 	}
+	else if (itemType === 'task') {
+		return {
+			message: Liferay.Language.get(
+				'are-you-sure-you-want-to-delete-the-selected-task-node'
+			),
+			title: Liferay.Language.get('delete-task-node'),
+		};
+	}
+	else if (itemType === 'transition') {
+		return {
+			message: Liferay.Language.get(
+				'are-you-sure-you-want-to-delete-the-selected-transition'
+			),
+			title: Liferay.Language.get('delete-transition'),
+		};
+	}
 	else {
 		return {};
 	}
 }
 
-export {getModalInfo};
+export {getModalInfo, isIdDuplicated};

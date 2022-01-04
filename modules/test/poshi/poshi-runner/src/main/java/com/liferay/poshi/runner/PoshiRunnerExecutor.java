@@ -862,7 +862,8 @@ public class PoshiRunnerExecutor {
 
 			if (argument == null) {
 				if (i == 0) {
-					if (selenium.equals("assertAlertText") ||
+					if (_isJavaScriptMethod(selenium) ||
+						selenium.equals("assertAlertText") ||
 						selenium.equals("assertConfirmation") ||
 						selenium.equals("assertConsoleTextNotPresent") ||
 						selenium.equals("assertConsoleTextPresent") ||
@@ -887,13 +888,6 @@ public class PoshiRunnerExecutor {
 						argument = PoshiVariablesUtil.getStringFromCommandMap(
 							"value1");
 					}
-					else if (selenium.equals("executeJavaScript") ||
-							 selenium.equals("getJavaScriptResult") ||
-							 selenium.equals("waitForJavaScript")) {
-
-						argument = PoshiVariablesUtil.getStringFromCommandMap(
-							"javaScript");
-					}
 					else {
 						argument = PoshiVariablesUtil.getStringFromCommandMap(
 							"locator1");
@@ -906,14 +900,9 @@ public class PoshiRunnerExecutor {
 					if (selenium.equals("clickAt")) {
 						argument = "";
 					}
-					else if (selenium.equals("executeJavaScript") ||
-							 selenium.equals("getJavaScriptResult")) {
-
-						argument = null;
-					}
-					else if (selenium.equals("waitForJavaScript")) {
+					else if (_isJavaScriptMethod(selenium)) {
 						argument = PoshiVariablesUtil.getStringFromCommandMap(
-							"message");
+							"value2");
 					}
 				}
 				else if (i == 2) {
@@ -921,11 +910,9 @@ public class PoshiRunnerExecutor {
 						argument = PoshiVariablesUtil.getStringFromCommandMap(
 							"value1");
 					}
-					else if (selenium.equals("executeJavaScript") ||
-							 selenium.equals("getJavaScriptResult") ||
-							 selenium.equals("waitForJavaScript")) {
-
-						argument = null;
+					else if (_isJavaScriptMethod(selenium)) {
+						argument = PoshiVariablesUtil.getStringFromCommandMap(
+							"value3");
 					}
 					else {
 						argument = PoshiVariablesUtil.getStringFromCommandMap(
@@ -1345,6 +1332,20 @@ public class PoshiRunnerExecutor {
 		}
 
 		return null;
+	}
+
+	private boolean _isJavaScriptMethod(String methodName) {
+		if (methodName.equals("assertJavaScript") ||
+			methodName.equals("executeJavaScript") ||
+			methodName.equals("getJavaScriptResult") ||
+			methodName.equals("waitForJavaScript") ||
+			methodName.equals("waitForJavaScriptNoError") ||
+			methodName.equals("verifyJavaScript")) {
+
+			return true;
+		}
+
+		return false;
 	}
 
 	private static final Pattern _locatorKeyPattern = Pattern.compile(

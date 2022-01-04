@@ -29,6 +29,8 @@ definition {
 	@description = "This is a test for LPS-136855. It checks that a pending file cannot be added to another asset."
 	@priority = "4"
 	test CannotAddPendingFileToAsset {
+		property portal.acceptance = "true";
+
 		JSONGroup.addGroup(groupName = "Site Name");
 
 		JSONLayout.addPublicLayout(
@@ -76,18 +78,65 @@ definition {
 	}
 
 	@description = "This is a test for LPS-136854. It checks that the single approver workflow can be removed from a folder."
-	@ignore = "true"
 	@priority = "3"
 	test CanRemoveWorkflowFromFolder {
-		property portal.acceptance = "false";
+		JSONGroup.addGroup(groupName = "Site Name");
 
-		// TODO LPS-136854 CanRemoveWorkflowFromFolder pending implementation
+		JSONFolder.addFolder(
+			dmFolderDescription = "DM Folder Description",
+			dmFolderName = "DM Folder Name",
+			groupName = "Site Name");
 
+		DMNavigator.openDocumentsAndMediaAdmin(siteURLKey = "site-name");
+
+		DMFolder.configureWorkflowCP(
+			dmFolderName = "DM Folder Name",
+			workflowDefinition = "Single Approver",
+			workflowRestriction = "Default Workflow");
+
+		DMNavigator.openToFolderInAdmin(
+			dmFolderName = "DM Folder Name",
+			groupName = "Site Name",
+			siteURLKey = "site-name");
+
+		DMDocument.addWithWorkflowCP(
+			dmDocumentFile = "Document_1.jpg",
+			dmDocumentTitle = "Document_1.jpg");
+
+		DMDocument.viewStatus(
+			dmDocumentStatus = "Pending",
+			dmDocumentTitle = "Document_1.jpg");
+
+		DMNavigator.openDocumentsAndMediaAdmin(siteURLKey = "site-name");
+
+		DMFolder.configureWorkflowCP(
+			dmFolderName = "DM Folder Name",
+			workflowDefinition = "No Workflow",
+			workflowRestriction = "Default Workflow");
+
+		JSONDocument.addFileWithUploadedFile(
+			dmDocumentDescription = "DM Document Description",
+			dmDocumentTitle = "DM Document Title",
+			folderName = "DM Folder Name",
+			groupName = "Site Name",
+			mimeType = "image/jpeg",
+			sourceFileName = "Document_2.jpeg");
+
+		DMNavigator.openToFolderInAdmin(
+			dmFolderName = "DM Folder Name",
+			groupName = "Site Name",
+			siteURLKey = "site-name");
+
+		DMDocument.viewStatus(
+			dmDocumentStatus = "Approved",
+			dmDocumentTitle = "DM Document Title");
 	}
 
 	@description = "This is a test for LPS-136853. It checks that a file can be resubmitted after it has been rejected."
 	@priority = "4"
 	test CanResubmitRejectedDocument {
+		property portal.acceptance = "true";
+
 		JSONFolder.addFolder(
 			dmFolderDescription = "DM Folder Description",
 			dmFolderName = "DM Folder Name",

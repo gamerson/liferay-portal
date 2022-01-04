@@ -148,7 +148,7 @@
 		</not>
 	</condition>
 
-	<property name="aspectj.agent" value="-javaagent:${project.dir}/lib/portal/aspectj-weaver.jar" />
+	<property name="aspectj.agent" value="-javaagent:${project.dir}/lib/development/aspectj-weaver.jar" />
 	<property name="aspectj.configuration" value="com/liferay/aspectj/aop.xml" />
 	<property name="definitions.dir" value="${project.dir}/definitions" />
 	<property name="doc.dir" value="${project.dir}/api" />
@@ -1247,7 +1247,7 @@ information.
 			<trycatch>
 				<try>
 					<taskdef
-						classname="com.liferay.util.ant.ManifestHelperTask"
+						classname="com.liferay.ant.manifest.helper.ManifestHelperTask"
 						classpathref="project.classpath"
 						name="liferay-manifest-helper"
 					/>
@@ -1257,7 +1257,7 @@ information.
 					<ant dir="${project.dir}/util-java" inheritAll="false" target="compile" />
 
 					<taskdef
-						classname="com.liferay.util.ant.ManifestHelperTask"
+						classname="com.liferay.ant.manifest.helper.ManifestHelperTask"
 						classpathref="project.classpath"
 						name="liferay-manifest-helper"
 					/>
@@ -2101,8 +2101,8 @@ rerun your task.
 			<isset property="class.names" />
 			<then>
 				<taskdef
-					classname="com.liferay.util.ant.GetFileSetTask"
-					classpath="${project.dir}/util-java/util-java.jar"
+					classname="com.liferay.ant.get.file.set.GetFileSetTask"
+					classpathref="project.classpath"
 					name="get-file-set"
 				/>
 

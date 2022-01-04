@@ -21,6 +21,7 @@ import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItemList;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItemListBuilder;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.ViewTypeItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.ViewTypeItemList;
+import com.liferay.password.policies.admin.constants.PasswordPoliciesAdminPortletKeys;
 import com.liferay.password.policies.admin.web.internal.search.AddOrganizationPasswordPolicyChecker;
 import com.liferay.password.policies.admin.web.internal.search.AddUserPasswordPolicyChecker;
 import com.liferay.password.policies.admin.web.internal.search.DeleteOrganizationPasswordPolicyChecker;
@@ -35,6 +36,7 @@ import com.liferay.portal.kernel.model.Organization;
 import com.liferay.portal.kernel.model.OrganizationConstants;
 import com.liferay.portal.kernel.model.PasswordPolicy;
 import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.portlet.SearchOrderByUtil;
 import com.liferay.portal.kernel.service.OrganizationLocalServiceUtil;
 import com.liferay.portal.kernel.service.PasswordPolicyLocalServiceUtil;
 import com.liferay.portal.kernel.service.UserLocalServiceUtil;
@@ -74,11 +76,8 @@ public class EditPasswordPolicyAssignmentsManagementToolbarDisplayContext {
 		_displayStyle = displayStyle;
 		_mvcPath = mvcPath;
 
-		long passwordPolicyId = ParamUtil.getLong(
-			httpServletRequest, "passwordPolicyId");
-
 		_passwordPolicy = PasswordPolicyLocalServiceUtil.fetchPasswordPolicy(
-			passwordPolicyId);
+			ParamUtil.getLong(httpServletRequest, "passwordPolicyId"));
 	}
 
 	public List<DropdownItem> getActionDropdownItems() {
@@ -149,10 +148,14 @@ public class EditPasswordPolicyAssignmentsManagementToolbarDisplayContext {
 	}
 
 	public String getOrderByType() {
-		if (Validator.isNull(_orderByType)) {
-			_orderByType = ParamUtil.getString(
-				_httpServletRequest, "orderByType", "asc");
+		if (Validator.isNotNull(_orderByType)) {
+			return _orderByType;
 		}
+
+		_orderByType = SearchOrderByUtil.getOrderByType(
+			_httpServletRequest,
+			PasswordPoliciesAdminPortletKeys.PASSWORD_POLICIES_ADMIN,
+			"edit-password-policy-order-by-type", "asc");
 
 		return _orderByType;
 	}
@@ -178,8 +181,6 @@ public class EditPasswordPolicyAssignmentsManagementToolbarDisplayContext {
 				Long.valueOf(_passwordPolicy.getPasswordPolicyId()));
 		}
 
-		organizationSearch.setRowChecker(rowChecker);
-
 		ThemeDisplay themeDisplay =
 			(ThemeDisplay)_httpServletRequest.getAttribute(
 				WebKeys.THEME_DISPLAY);
@@ -190,21 +191,22 @@ public class EditPasswordPolicyAssignmentsManagementToolbarDisplayContext {
 		OrganizationSearchTerms searchTerms =
 			(OrganizationSearchTerms)organizationSearch.getSearchTerms();
 
-		List<Organization> results = OrganizationLocalServiceUtil.search(
-			themeDisplay.getCompanyId(), parentOrganizationId, getKeywords(),
-			searchTerms.getType(), searchTerms.getRegionIdObj(),
-			searchTerms.getCountryIdObj(), organizationParams,
-			organizationSearch.getStart(), organizationSearch.getEnd(),
-			organizationSearch.getOrderByComparator());
+		organizationSearch.setResults(
+			OrganizationLocalServiceUtil.search(
+				themeDisplay.getCompanyId(), parentOrganizationId,
+				getKeywords(), searchTerms.getType(),
+				searchTerms.getRegionIdObj(), searchTerms.getCountryIdObj(),
+				organizationParams, organizationSearch.getStart(),
+				organizationSearch.getEnd(),
+				organizationSearch.getOrderByComparator()));
 
-		int total = OrganizationLocalServiceUtil.searchCount(
-			themeDisplay.getCompanyId(), parentOrganizationId,
-			searchTerms.getKeywords(), searchTerms.getType(),
-			searchTerms.getRegionIdObj(), searchTerms.getCountryIdObj(),
-			organizationParams);
-
-		organizationSearch.setResults(results);
-		organizationSearch.setTotal(total);
+		organizationSearch.setRowChecker(rowChecker);
+		organizationSearch.setTotal(
+			OrganizationLocalServiceUtil.searchCount(
+				themeDisplay.getCompanyId(), parentOrganizationId,
+				searchTerms.getKeywords(), searchTerms.getType(),
+				searchTerms.getRegionIdObj(), searchTerms.getCountryIdObj(),
+				organizationParams));
 
 		return organizationSearch;
 	}
@@ -301,8 +303,6 @@ public class EditPasswordPolicyAssignmentsManagementToolbarDisplayContext {
 				Long.valueOf(_passwordPolicy.getPasswordPolicyId()));
 		}
 
-		userSearch.setRowChecker(rowChecker);
-
 		ThemeDisplay themeDisplay =
 			(ThemeDisplay)_httpServletRequest.getAttribute(
 				WebKeys.THEME_DISPLAY);
@@ -310,17 +310,17 @@ public class EditPasswordPolicyAssignmentsManagementToolbarDisplayContext {
 		UserSearchTerms searchTerms =
 			(UserSearchTerms)userSearch.getSearchTerms();
 
-		List<User> results = UserLocalServiceUtil.search(
-			themeDisplay.getCompanyId(), searchTerms.getKeywords(),
-			searchTerms.getStatus(), userParams, userSearch.getStart(),
-			userSearch.getEnd(), userSearch.getOrderByComparator());
+		userSearch.setResults(
+			UserLocalServiceUtil.search(
+				themeDisplay.getCompanyId(), searchTerms.getKeywords(),
+				searchTerms.getStatus(), userParams, userSearch.getStart(),
+				userSearch.getEnd(), userSearch.getOrderByComparator()));
 
-		int total = UserLocalServiceUtil.searchCount(
-			themeDisplay.getCompanyId(), searchTerms.getKeywords(),
-			searchTerms.getStatus(), userParams);
-
-		userSearch.setResults(results);
-		userSearch.setTotal(total);
+		userSearch.setRowChecker(rowChecker);
+		userSearch.setTotal(
+			UserLocalServiceUtil.searchCount(
+				themeDisplay.getCompanyId(), searchTerms.getKeywords(),
+				searchTerms.getStatus(), userParams));
 
 		return userSearch;
 	}

@@ -24,6 +24,7 @@ import com.liferay.dispatch.model.DispatchLog;
 import com.liferay.dispatch.model.DispatchTrigger;
 import com.liferay.dispatch.service.DispatchLogLocalService;
 import com.liferay.dispatch.service.DispatchTriggerLocalService;
+import com.liferay.dispatch.service.persistence.DispatchTriggerUtil;
 import com.liferay.dispatch.service.test.util.CronExpressionUtil;
 import com.liferay.dispatch.service.test.util.DispatchTriggerTestUtil;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
@@ -37,6 +38,7 @@ import com.liferay.portal.kernel.test.rule.SynchronousDestinationTestRule;
 import com.liferay.portal.kernel.test.util.CompanyTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.UserTestUtil;
+import com.liferay.portal.kernel.util.SystemProperties;
 import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
@@ -101,6 +103,58 @@ public class DispatchTriggerLocalServiceTest {
 		Assert.assertEquals(
 			"Add dispatch trigger with no name",
 			DispatchTriggerNameException.class, exceptionClass);
+	}
+
+	@Test
+	public void testDeleteDispatchTrigger() throws Exception {
+		Company company = CompanyTestUtil.addCompany();
+
+		User user = UserTestUtil.addUser(company);
+
+		DispatchTrigger dispatchTrigger1 = DispatchTriggerUtil.create(
+			RandomTestUtil.nextLong());
+
+		dispatchTrigger1.setCompanyId(user.getCompanyId());
+		dispatchTrigger1.setUserId(user.getUserId());
+		dispatchTrigger1.setActive(true);
+		dispatchTrigger1.setSystem(true);
+
+		dispatchTrigger1 = _addDispatchTrigger(
+			DispatchTriggerTestUtil.randomDispatchTrigger(dispatchTrigger1, 1));
+
+		DispatchTrigger dispatchTrigger2 = DispatchTriggerUtil.create(
+			RandomTestUtil.nextLong());
+
+		dispatchTrigger2.setCompanyId(user.getCompanyId());
+		dispatchTrigger2.setUserId(user.getUserId());
+		dispatchTrigger2.setActive(true);
+		dispatchTrigger2.setSystem(false);
+
+		dispatchTrigger2 = _addDispatchTrigger(
+			DispatchTriggerTestUtil.randomDispatchTrigger(dispatchTrigger2, 2));
+
+		String liferayMode = SystemProperties.get("liferay.mode");
+
+		try {
+			SystemProperties.clear("liferay.mode");
+
+			_dispatchTriggerLocalService.deleteDispatchTrigger(
+				dispatchTrigger1);
+
+			Assert.assertNotNull(
+				_dispatchTriggerLocalService.fetchDispatchTrigger(
+					dispatchTrigger1.getDispatchTriggerId()));
+
+			_dispatchTriggerLocalService.deleteDispatchTrigger(
+				dispatchTrigger2);
+
+			Assert.assertNull(
+				_dispatchTriggerLocalService.fetchDispatchTrigger(
+					dispatchTrigger2.getDispatchTriggerId()));
+		}
+		finally {
+			SystemProperties.set("liferay.mode", liferayMode);
+		}
 	}
 
 	@Test

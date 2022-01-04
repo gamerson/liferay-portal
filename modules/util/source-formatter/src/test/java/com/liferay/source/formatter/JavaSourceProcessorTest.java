@@ -23,7 +23,8 @@ public class JavaSourceProcessorTest extends BaseSourceProcessorTestCase {
 
 	@Test
 	public void testAttributeOrder() throws Exception {
-		test("AttributeOrder.testjava",
+		test(
+			"AttributeOrder.testjava",
 			new String[] {
 				"Attribute 'dataDefinitionId' should come after attribute " +
 					"'appDeployments'",

@@ -17,16 +17,19 @@ import ClayForm, {ClayInput} from '@clayui/form';
 import ClayIcon from '@clayui/icon';
 import ClayModal from '@clayui/modal';
 import {useIsMounted} from '@liferay/frontend-js-react-web';
-import {fetch} from 'frontend-js-web';
+import {fetch, openToast} from 'frontend-js-web';
 import React, {useState} from 'react';
 
 import {HEADERS} from './constants';
 
 async function saveTemplate(formDataQuerySelector, updateData, url) {
 	const mainFormData = document.querySelector(formDataQuerySelector);
-	Liferay.Util.setFormValues(mainFormData, updateData);
-
 	const formData = new FormData(mainFormData);
+
+	for (const [key, value] of Object.entries(updateData)) {
+		formData.append(key, value);
+	}
+
 	const response = await fetch(url, {
 		body: formData,
 		headers: HEADERS,
@@ -49,7 +52,7 @@ const SaveTemplateModal = ({
 	const [loadingResponse, setLoadingResponse] = useState(false);
 	const [inputValue, setInputValue] = useState('');
 
-	const _handleSubmit = async (event) => {
+	const handleSubmit = async (event) => {
 		event.preventDefault();
 
 		try {
@@ -66,6 +69,11 @@ const SaveTemplateModal = ({
 					setErrorMessage(saveTemplateResponse.error);
 				}
 				else {
+					openToast({
+						message: Liferay.Language.get('template-was-created'),
+						type: 'success',
+					});
+
 					closeModal();
 				}
 			}
@@ -84,7 +92,7 @@ const SaveTemplateModal = ({
 				{Liferay.Language.get('save-as-template')}
 			</ClayModal.Header>
 
-			<ClayForm id={`${namespace}form`} onSubmit={_handleSubmit}>
+			<ClayForm id={`${namespace}form`} onSubmit={handleSubmit}>
 				<ClayModal.Body>
 					<ClayForm.Group className={errorMessage ? 'has-error' : ''}>
 						<label htmlFor={inputNameId}>

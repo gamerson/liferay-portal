@@ -58,16 +58,31 @@ public class ViewMVCRenderCommand implements MVCRenderCommand {
 		throws PortletException {
 
 		try {
-			return doRender(renderRequest);
+			return _render(renderRequest);
 		}
 		catch (PortalException portalException) {
 			throw new PortletException(portalException);
 		}
 	}
 
-	protected String doRender(RenderRequest renderRequest)
-		throws PortalException {
+	@Reference(unbind = "-")
+	protected void setGroupLocalService(GroupLocalService groupLocalService) {
+		_groupLocalService = groupLocalService;
+	}
 
+	@Reference(unbind = "-")
+	protected void setSocialRequestLocalService(
+		SocialRequestLocalService socialRequestLocalService) {
+
+		_socialRequestLocalService = socialRequestLocalService;
+	}
+
+	@Reference(unbind = "-")
+	protected void setUserLocalService(UserLocalService userLocalService) {
+		_userLocalService = userLocalService;
+	}
+
+	private String _render(RenderRequest renderRequest) throws PortalException {
 		ThemeDisplay themeDisplay = (ThemeDisplay)renderRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
@@ -94,23 +109,6 @@ public class ViewMVCRenderCommand implements MVCRenderCommand {
 		}
 
 		return "/view.jsp";
-	}
-
-	@Reference(unbind = "-")
-	protected void setGroupLocalService(GroupLocalService groupLocalService) {
-		_groupLocalService = groupLocalService;
-	}
-
-	@Reference(unbind = "-")
-	protected void setSocialRequestLocalService(
-		SocialRequestLocalService socialRequestLocalService) {
-
-		_socialRequestLocalService = socialRequestLocalService;
-	}
-
-	@Reference(unbind = "-")
-	protected void setUserLocalService(UserLocalService userLocalService) {
-		_userLocalService = userLocalService;
 	}
 
 	private GroupLocalService _groupLocalService;

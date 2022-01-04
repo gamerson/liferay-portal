@@ -42,20 +42,13 @@ definition {
 		property custom.properties = "module.framework.properties.file.install.dir=${liferay.home}/daploy,${liferay.home}/osgi/modules,${liferay.home}/osgi/war,${liferay.home}/osgi/configs,${liferay.home}/osgi/marketplace";
 		property test.name.skip.portal.instance = "FileInstall#CustomizeNewWatchedDirectory";
 
-		var liferayHome = PropsUtil.get("liferay.home.dir.name");
-		var deployDir = "${liferayHome}/daploy";
-
-		var dependencyFilePath = TestCase.getDependenciesDirPath(fileName = "com.liferay.cluster.test.module.jar");
-
-		ArchiveUtil.archive("${dependencyFilePath}", "${deployDir}/com.liferay.cluster.test.module.jar");
-
-		Pause(locator1 = "10000");
+		Clustering.deployClusteringModule(nodePort = "8080");
 
 		GogoShell.openGogoShellAdmin();
 
-		GogoShell.executeCommand(commandName = "lb | grep 'Test Module'");
+		GogoShell.executeCommand(commandName = "lb | grep 'Cluster Multiple Sample'");
 
-		GogoShell.viewOutput(outputContent = "Liferay Cluster Test Module");
+		GogoShell.viewOutput(outputContent = "Cluster Multiple Sample");
 
 		GogoShell.viewOutput(outputContent = "Active");
 	}
@@ -65,22 +58,15 @@ definition {
 		property custom.properties = "module.framework.properties.file.install.subdir.mode=recurse";
 		property test.name.skip.portal.instance = "FileInstall#CustomizeRecursiveSubdirectoryMode";
 
-		var liferayHome = PropsUtil.get("liferay.home.dir.name");
-		var deployDir = "${liferayHome}/osgi/modules/recurse";
+		Clustering.deployClusteringModule(nodePort = "8080");
 
-		var dependencyFilePath = TestCase.getDependenciesDirPath(fileName = "com.liferay.cluster.test.module.jar");
-
-		ArchiveUtil.archive("${dependencyFilePath}", "${deployDir}/com.liferay.cluster.test.module.jar");
-
-		Pause(locator1 = "10000");
-
-		AssertConsoleTextPresent(value1 = "STARTED com.liferay.cluster.test.module_");
+		AssertConsoleTextPresent(value1 = "STARTED com.liferay.portal.cluster.multiple.sample_");
 
 		GogoShell.openGogoShellAdmin();
 
-		GogoShell.executeCommand(commandName = "lb | grep 'Test Module'");
+		GogoShell.executeCommand(commandName = "lb | grep 'Cluster Sample'");
 
-		GogoShell.viewOutput(outputContent = "Liferay Cluster Test Module");
+		GogoShell.viewOutput(outputContent = "Cluster Sample");
 
 		GogoShell.viewOutput(outputContent = "Active");
 	}
@@ -90,24 +76,17 @@ definition {
 		property custom.properties = "module.framework.properties.file.install.subdir.mode=skip";
 		property test.name.skip.portal.instance = "FileInstall#CustomizeSkipSubdirectoryMode";
 
-		var liferayHome = PropsUtil.get("liferay.home.dir.name");
-		var deployDir = "${liferayHome}/deploy/recurse";
-
-		var dependencyFilePath = TestCase.getDependenciesDirPath(fileName = "com.liferay.cluster.test.module.jar");
-
-		ArchiveUtil.archive("${dependencyFilePath}", "${deployDir}/com.liferay.cluster.test.module.jar");
-
-		Pause(locator1 = "10000");
+		Clustering.deployClusteringModule(nodePort = "8080");
 
 		GogoShell.openGogoShellAdmin();
 
-		AssertConsoleTextNotPresent(value1 = "STARTED com.liferay.cluster.test.module_");
+		AssertConsoleTextNotPresent(value1 = "STARTED com.liferay.portal.cluster.multiple.sample_");
 
-		GogoShell.executeCommand(commandName = "lb | grep 'Test Module'");
+		GogoShell.executeCommand(commandName = "lb | grep 'Cluster Sample'");
 
 		GogoShell.viewOutput(outputContent = "false");
 
-		GogoShell.viewNoOutput(outputContent = "Liferay Cluster Test Module");
+		GogoShell.viewNoOutput(outputContent = "Cluster Sample");
 
 		GogoShell.viewNoOutput(outputContent = "Active");
 	}
@@ -132,33 +111,33 @@ definition {
 	test UninstallJarOffline {
 		property test.name.skip.portal.instance = "FileInstall#UninstallJarOffline";
 
-		FileInstall.deployFileOnServer(liferayDependencyJars = "com.liferay.cluster.test.module.jar");
+		Clustering.deployClusteringModule(nodePort = "8080");
 
 		GogoShell.openGogoShellAdmin();
 
-		AssertConsoleTextPresent(value1 = "STARTED com.liferay.cluster.test.module_");
+		AssertConsoleTextPresent(value1 = "STARTED com.liferay.portal.cluster.multiple.sample_");
 
-		GogoShell.executeCommand(commandName = "lb | grep 'Test Module'");
+		GogoShell.executeCommand(commandName = "lb | grep 'Cluster Sample'");
 
-		GogoShell.viewOutput(outputContent = "Liferay Cluster Test Module");
+		GogoShell.viewOutput(outputContent = "Cluster Sample");
 
 		GogoShell.viewOutput(outputContent = "Active");
 
 		Portlet.shutdownServer();
 
-		FileInstall.deleteJarOffline(liferayDependencyJars = "com.liferay.cluster.test.module.jar");
+		FileInstall.deletePortalJarOffline(jarFile = "com.liferay.portal.cluster.multiple.sample.jar");
 
 		Portlet.startServer(keepOSGiState = "true");
 
 		GogoShell.openGogoShellAdmin();
 
-		AssertConsoleTextNotPresent(value1 = "STARTED com.liferay.cluster.test.module_");
+		AssertConsoleTextNotPresent(value1 = "STARTED com.liferay.portal.cluster.multiple.sample_");
 
-		GogoShell.executeCommand(commandName = "lb | grep 'Test Module'");
+		GogoShell.executeCommand(commandName = "lb | grep 'Cluster Sample'");
 
 		GogoShell.viewOutput(outputContent = "false");
 
-		GogoShell.viewNoOutput(outputContent = "Liferay Cluster Test Module");
+		GogoShell.viewNoOutput(outputContent = "Cluster Sample");
 
 		GogoShell.viewNoOutput(outputContent = "Active");
 	}
@@ -169,7 +148,7 @@ definition {
 	test UninstallWarOffline {
 		property test.name.skip.portal.instance = "FileInstall#UninstallWarOffline";
 
-		FileInstall.deployFileOnServer(liferayDependencyJars = "test-theme.war");
+		FileInstall.deployFileOnServer(jarFile = "test-theme.war");
 
 		GogoShell.openGogoShellAdmin();
 
@@ -183,7 +162,7 @@ definition {
 
 		Portlet.shutdownServer();
 
-		FileInstall.deleteWarOffline(liferayDependencyWars = "test-theme.war");
+		FileInstall.deleteWarOffline(warFile = "test-theme.war");
 
 		Portlet.startServer(keepOSGiState = "true");
 

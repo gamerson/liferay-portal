@@ -15,6 +15,7 @@
 package com.liferay.translation.web.internal.portlet.action;
 
 import com.liferay.document.library.kernel.exception.FileSizeException;
+import com.liferay.info.item.InfoItemFieldValues;
 import com.liferay.info.item.InfoItemReference;
 import com.liferay.info.item.InfoItemServiceTracker;
 import com.liferay.info.item.provider.InfoItemObjectProvider;
@@ -55,6 +56,7 @@ import com.liferay.translation.snapshot.TranslationSnapshot;
 import com.liferay.translation.snapshot.TranslationSnapshotProvider;
 import com.liferay.translation.url.provider.TranslationURLProvider;
 import com.liferay.translation.web.internal.display.context.ImportTranslationResultsDisplayContext;
+import com.liferay.translation.web.internal.helper.TranslationRequestHelper;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -98,18 +100,19 @@ public class ImportTranslationMVCActionCommand extends BaseMVCActionCommand {
 			ThemeDisplay themeDisplay =
 				(ThemeDisplay)actionRequest.getAttribute(WebKeys.THEME_DISPLAY);
 
-			long classNameId = ParamUtil.getLong(actionRequest, "classNameId");
-			long classPK = ParamUtil.getLong(actionRequest, "classPK");
-			long groupId = ParamUtil.getLong(actionRequest, "groupId");
 			String title = ParamUtil.getString(actionRequest, "title");
 
-			String className = _portal.getClassName(classNameId);
+			TranslationRequestHelper translationRequestHelper =
+				new TranslationRequestHelper(
+					_infoItemServiceTracker, actionRequest);
 
 			InfoItemObjectProvider<Object> infoItemObjectProvider =
 				_infoItemServiceTracker.getFirstInfoItemService(
-					InfoItemObjectProvider.class, className);
+					InfoItemObjectProvider.class,
+					translationRequestHelper.getModelClassName());
 
-			Object object = infoItemObjectProvider.getInfoItem(classPK);
+			Object object = infoItemObjectProvider.getInfoItem(
+				translationRequestHelper.getModelClassPK());
 
 			UploadPortletRequest uploadPortletRequest =
 				_portal.getUploadPortletRequest(actionRequest);
@@ -119,7 +122,8 @@ public class ImportTranslationMVCActionCommand extends BaseMVCActionCommand {
 			_checkContentType(uploadPortletRequest.getContentType("file"));
 
 			_checkPermission(
-				className, classPK, object,
+				translationRequestHelper.getModelClassName(),
+				translationRequestHelper.getModelClassPK(), object,
 				themeDisplay.getPermissionChecker());
 
 			Map<String, String> failureMessages = new HashMap<>();
@@ -128,9 +132,11 @@ public class ImportTranslationMVCActionCommand extends BaseMVCActionCommand {
 			String fileName = uploadPortletRequest.getFileName("file");
 
 			_processUploadedFile(
-				actionRequest, uploadPortletRequest, groupId, className,
-				classPK, fileName, successMessages, failureMessages,
-				themeDisplay.getLocale());
+				actionRequest, uploadPortletRequest,
+				translationRequestHelper.getGroupId(),
+				translationRequestHelper.getModelClassName(),
+				translationRequestHelper.getModelClassPK(), fileName,
+				successMessages, failureMessages, themeDisplay.getLocale());
 
 			String portletResource = ParamUtil.getString(
 				actionRequest, "portletResource");
@@ -151,13 +157,13 @@ public class ImportTranslationMVCActionCommand extends BaseMVCActionCommand {
 				).setRedirect(
 					ParamUtil.getString(actionRequest, "redirect")
 				).setParameter(
-					"classNameId", classNameId
+					"classNameId", translationRequestHelper.getClassNameId()
 				).setParameter(
-					"classPK", classPK
+					"classPK", translationRequestHelper.getModelClassPK()
 				).setParameter(
 					"fileName", fileName
 				).setParameter(
-					"groupId", groupId
+					"groupId", translationRequestHelper.getGroupId()
 				).setParameter(
 					"title", title
 				).buildString());
@@ -175,9 +181,12 @@ public class ImportTranslationMVCActionCommand extends BaseMVCActionCommand {
 			httpSession.setAttribute(
 				ImportTranslationResultsDisplayContext.class.getName(),
 				new ImportTranslationResultsDisplayContext(
-					classNameId, classPK, themeDisplay.getCompanyId(), groupId,
-					failureMessages, fileName, successMessages, title,
-					workflowAction, _workflowDefinitionLinkLocalService));
+					translationRequestHelper.getClassNameId(),
+					translationRequestHelper.getModelClassPK(),
+					themeDisplay.getCompanyId(),
+					translationRequestHelper.getGroupId(), failureMessages,
+					fileName, successMessages, title, workflowAction,
+					_workflowDefinitionLinkLocalService));
 		}
 		catch (Exception exception) {
 			try {
@@ -269,6 +278,16 @@ public class ImportTranslationMVCActionCommand extends BaseMVCActionCommand {
 		}
 	}
 
+	private InfoItemReference _getInfoItemReference(
+		String className, long classPK) {
+
+		if (classPK == 0) {
+			return null;
+		}
+
+		return new InfoItemReference(className, classPK);
+	}
+
 	private void _importXLIFFFile(
 			ActionRequest actionRequest, long groupId, String className,
 			long classPK, InputStream inputStream)
@@ -276,14 +295,16 @@ public class ImportTranslationMVCActionCommand extends BaseMVCActionCommand {
 
 		TranslationSnapshot translationSnapshot =
 			_translationSnapshotProvider.getTranslationSnapshot(
-				groupId, new InfoItemReference(className, classPK),
+				groupId, _getInfoItemReference(className, classPK),
 				inputStream);
+
+		InfoItemFieldValues infoItemFieldValues =
+			translationSnapshot.getInfoItemFieldValues();
 
 		_translationEntryService.addOrUpdateTranslationEntry(
 			groupId,
 			_language.getLanguageId(translationSnapshot.getTargetLocale()),
-			new InfoItemReference(className, classPK),
-			translationSnapshot.getInfoItemFieldValues(),
+			infoItemFieldValues.getInfoItemReference(), infoItemFieldValues,
 			ServiceContextFactory.getInstance(actionRequest));
 	}
 

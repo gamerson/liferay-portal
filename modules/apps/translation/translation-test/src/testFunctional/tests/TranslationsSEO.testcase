@@ -1,6 +1,7 @@
 @component-name = "portal-collaboration"
 definition {
 
+	property portal.acceptance = "true";
 	property portal.release = "true";
 	property portal.upstream = "true";
 	property testray.main.component.name = "Translations Management";
@@ -45,9 +46,9 @@ definition {
 			portlet = "General",
 			siteURLKey = "test-site-name");
 
-		Page.addPageTranslations(
-			pageTranslation = "es-ES",
-			pageTranslationName = "Página de traducción");
+		PagesAdmin.addLocalizedName(
+			localeList = "es-ES",
+			localizedNameList = "Página de traducción");
 
 		TranslationsSEO.disableOnlyTranslatedHreflangs(configurationScope = "System Settings");
 
@@ -229,9 +230,9 @@ definition {
 			portlet = "General",
 			siteURLKey = "test-site-name");
 
-		Page.addPageTranslations(
-			pageTranslation = "es-ES",
-			pageTranslationName = "Página de traducción");
+		PagesAdmin.addLocalizedName(
+			localeList = "es-ES",
+			localizedNameList = "Página de traducción");
 
 		Navigator.openSpecificURL(url = "${portalURL}/c/portal/logout");
 

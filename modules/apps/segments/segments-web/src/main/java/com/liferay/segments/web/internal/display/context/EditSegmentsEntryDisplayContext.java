@@ -32,7 +32,6 @@ import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.ResourceActionsUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.HashMapBuilder;
-import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.LocalizationUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
@@ -232,7 +231,7 @@ public class EditSegmentsEntryDisplayContext {
 		).put(
 			"propertyGroups", _getPropertyGroupsJSONArray()
 		).put(
-			"redirect", HtmlUtil.escape(getRedirect())
+			"redirect", getRedirect()
 		).put(
 			"requestMembersCountURL", _getSegmentsEntryClassPKsCountURL()
 		).put(

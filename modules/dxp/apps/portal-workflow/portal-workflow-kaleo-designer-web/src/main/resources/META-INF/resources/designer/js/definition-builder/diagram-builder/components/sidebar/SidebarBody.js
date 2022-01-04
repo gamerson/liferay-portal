@@ -10,8 +10,9 @@
  */
 
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, {useContext} from 'react';
 
+import {DiagramBuilderContext} from '../../DiagramBuilderContext';
 import {nodeDescription, nodeTypes} from '../nodes/utils';
 
 const onDragStart = (event, nodeType) => {
@@ -20,6 +21,8 @@ const onDragStart = (event, nodeType) => {
 };
 
 export default function SidebarBody({children, displayDefaultContent = true}) {
+	const {setCollidingElements} = useContext(DiagramBuilderContext);
+
 	return (
 		<div className="sidebar-body">
 			{displayDefaultContent
@@ -28,6 +31,7 @@ export default function SidebarBody({children, displayDefaultContent = true}) {
 							descriptionSidebar={nodeDescription[key]}
 							draggable
 							key={index}
+							onDragEnd={() => setCollidingElements(null)}
 							onDragStart={(event) => onDragStart(event, key)}
 						/>
 				  ))

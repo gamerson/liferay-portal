@@ -1979,6 +1979,10 @@ components:
                             description:
                                 The fragment viewport's padding top.
                             type: string
+                        textAlign:
+                            description:
+                                The fragment viewport's text align.
+                            type: string
                     type: object
                 id:
                     # @review
@@ -3104,6 +3108,11 @@ components:
                         The type of pagination.
                     enum: [None, Regular, Simple]
                     type: string
+                showAllItems:
+                    # @review
+                    description:
+                        Whether to show all items when pagination is enabled.
+                    type: boolean
                 templateKey:
                     # @review
                     description:
@@ -4783,7 +4792,7 @@ components:
 info:
     description:
         "A Java client JAR is available for use with the group ID 'com.liferay', artifact ID
-        'com.liferay.headless.delivery.client', and version '4.0.15'."
+        'com.liferay.headless.delivery.client', and version '4.0.17'."
     license:
         name: "Apache 2.0"
         url: "http://www.apache.org/licenses/LICENSE-2.0.html"

@@ -14,15 +14,18 @@
 
 import '@testing-library/jest-dom/extend-expect';
 import {
+	act,
 	cleanup,
 	fireEvent,
 	render,
+	wait,
 	waitForElement,
 } from '@testing-library/react';
 import fetchMock from 'fetch-mock';
 import React from 'react';
 
 import SaveTemplate from '../../../src/main/resources/META-INF/resources/js/SaveTemplate';
+import {SCHEMA_SELECTED_EVENT} from '../../../src/main/resources/META-INF/resources/js/constants';
 
 const INPUT_VALUE_TEST = 'test';
 const BASE_PROPS = {
@@ -30,6 +33,10 @@ const BASE_PROPS = {
 	formSaveAsTemplateURL: 'https://formUrl.test',
 	portletNamespace: 'test',
 };
+
+function fireSchemaChangeEvent() {
+	Liferay.fire(SCHEMA_SELECTED_EVENT, {schema: 'something'});
+}
 
 describe('SaveTemplateModal', () => {
 	beforeEach(() => {
@@ -55,10 +62,52 @@ describe('SaveTemplateModal', () => {
 		).toBeInTheDocument();
 	});
 
+	it('must initially has button disabled', () => {
+		const {getByText} = render(<SaveTemplate {...BASE_PROPS} />);
+
+		expect(
+			getByText(Liferay.Language.get('save-as-template'))
+		).toBeDisabled();
+	});
+
+	it('must enable button on Schema Change Event', () => {
+		const {getByText} = render(<SaveTemplate {...BASE_PROPS} />);
+
+		act(() => {
+			fireSchemaChangeEvent();
+		});
+
+		expect(
+			getByText(Liferay.Language.get('save-as-template'))
+		).not.toBeDisabled();
+	});
+
+	it('must has button disabled if forceDisable property is true', () => {
+		const {getByText} = render(
+			<SaveTemplate {...BASE_PROPS} forceDisable={true} />
+		);
+
+		act(() => {
+			fireSchemaChangeEvent();
+		});
+
+		expect(
+			getByText(Liferay.Language.get('save-as-template'))
+		).toBeDisabled();
+	});
+
 	it('must show modal when the button is clicked', async () => {
 		const {getByText} = render(<SaveTemplate {...BASE_PROPS} />);
 
-		fireEvent.click(getByText(Liferay.Language.get('save-as-template')));
+		act(() => {
+			fireSchemaChangeEvent();
+		});
+
+		act(() => {
+			fireEvent.click(
+				getByText(Liferay.Language.get('save-as-template'))
+			);
+		});
 
 		const saveButton = await waitForElement(() =>
 			getByText(Liferay.Language.get('save'))
@@ -71,9 +120,15 @@ describe('SaveTemplateModal', () => {
 		it('must has button disabled if no text input provided', async () => {
 			const {getByText} = render(<SaveTemplate {...BASE_PROPS} />);
 
-			fireEvent.click(
-				getByText(Liferay.Language.get('save-as-template'))
-			);
+			act(() => {
+				fireSchemaChangeEvent();
+			});
+
+			act(() => {
+				fireEvent.click(
+					getByText(Liferay.Language.get('save-as-template'))
+				);
+			});
 
 			const saveButton = await waitForElement(() =>
 				getByText(Liferay.Language.get('save'))
@@ -88,16 +143,24 @@ describe('SaveTemplateModal', () => {
 				<SaveTemplate {...BASE_PROPS} />
 			);
 
-			fireEvent.click(
-				getByText(Liferay.Language.get('save-as-template'))
-			);
+			act(() => {
+				fireSchemaChangeEvent();
+			});
+
+			act(() => {
+				fireEvent.click(
+					getByText(Liferay.Language.get('save-as-template'))
+				);
+			});
 
 			await waitForElement(() => getByText(Liferay.Language.get('save')));
 
-			fireEvent.change(
-				getByPlaceholderText(Liferay.Language.get('template-name')),
-				{target: {value: testName}}
-			);
+			act(() => {
+				fireEvent.change(
+					getByPlaceholderText(Liferay.Language.get('template-name')),
+					{target: {value: testName}}
+				);
+			});
 
 			expect(getByText(Liferay.Language.get('save'))).not.toBeDisabled();
 		});
@@ -111,24 +174,40 @@ describe('SaveTemplateModal', () => {
 			);
 
 			const testName = 'test';
-			const {getByPlaceholderText, getByText} = render(
+			const {getByPlaceholderText, getByText, queryByLabelText} = render(
 				<SaveTemplate {...BASE_PROPS} />
 			);
 
-			fireEvent.click(
-				getByText(Liferay.Language.get('save-as-template'))
-			);
+			act(() => {
+				fireSchemaChangeEvent();
+			});
+
+			act(() => {
+				fireEvent.click(
+					getByText(Liferay.Language.get('save-as-template'))
+				);
+			});
 
 			await waitForElement(() => getByText(Liferay.Language.get('save')));
 
-			fireEvent.change(
-				getByPlaceholderText(Liferay.Language.get('template-name')),
-				{target: {value: testName}}
-			);
+			act(() => {
+				fireEvent.change(
+					getByPlaceholderText(Liferay.Language.get('template-name')),
+					{target: {value: testName}}
+				);
+			});
 
-			fireEvent.click(getByText(Liferay.Language.get('save')));
+			act(() => {
+				fireEvent.click(getByText(Liferay.Language.get('save')));
+			});
 
 			expect(mockedApi.called()).toBe(true);
+
+			await wait(() => {
+				expect(
+					queryByLabelText(Liferay.Language.get('name'))
+				).toBeNull();
+			});
 		});
 	});
 });

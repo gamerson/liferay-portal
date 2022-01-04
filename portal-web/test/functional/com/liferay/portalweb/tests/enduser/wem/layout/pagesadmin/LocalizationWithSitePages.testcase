@@ -44,16 +44,15 @@ definition {
 		}
 
 		task ("Add a translation of page to es-ES") {
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
-			SitePages.gotoPageMenuItem(
+			PagesAdmin.gotoPageEllipsisMenuItem(
 				menuItem = "Configure",
 				pageName = "Home");
 
-			Page.addPageTranslations(
-				page = "Home",
-				pageTranslation = "es-ES",
-				pageTranslationName = "Casa");
+			PagesAdmin.addLocalizedName(
+				localeList = "es-ES",
+				localizedNameList = "Casa");
 		}
 
 		task ("View page name is translated when change locale to es-ES") {
@@ -81,17 +80,16 @@ definition {
 		}
 
 		task ("Add a translation of child page to es-ES") {
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
-			SitePages.gotoPageMenuItem(
+			PagesAdmin.gotoPageEllipsisMenuItem(
 				menuItem = "Configure",
 				pageName = "Blog Page",
 				parentPagesHierarchy = "Home");
 
-			Page.addPageTranslations(
-				page = "Blog Page",
-				pageTranslation = "es-ES",
-				pageTranslationName = "Blog Página");
+			PagesAdmin.addLocalizedName(
+				localeList = "es-ES",
+				localizedNameList = "Blog Página");
 		}
 
 		task ("View child page name is transled when changing site language to es-ES") {

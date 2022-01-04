@@ -107,7 +107,10 @@ public class CPInstanceModelImpl
 		{"deliverySubscriptionType", Types.VARCHAR},
 		{"deliverySubTypeSettings", Types.VARCHAR},
 		{"deliveryMaxSubscriptionCycles", Types.BIGINT},
-		{"unspsc", Types.VARCHAR}, {"status", Types.INTEGER},
+		{"unspsc", Types.VARCHAR}, {"discontinued", Types.BOOLEAN},
+		{"discontinuedDate", Types.TIMESTAMP},
+		{"replacementCPInstanceUuid", Types.VARCHAR},
+		{"replacementCProductId", Types.BIGINT}, {"status", Types.INTEGER},
 		{"statusByUserId", Types.BIGINT}, {"statusByUserName", Types.VARCHAR},
 		{"statusDate", Types.TIMESTAMP}
 	};
@@ -155,6 +158,10 @@ public class CPInstanceModelImpl
 		TABLE_COLUMNS_MAP.put("deliverySubTypeSettings", Types.VARCHAR);
 		TABLE_COLUMNS_MAP.put("deliveryMaxSubscriptionCycles", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("unspsc", Types.VARCHAR);
+		TABLE_COLUMNS_MAP.put("discontinued", Types.BOOLEAN);
+		TABLE_COLUMNS_MAP.put("discontinuedDate", Types.TIMESTAMP);
+		TABLE_COLUMNS_MAP.put("replacementCPInstanceUuid", Types.VARCHAR);
+		TABLE_COLUMNS_MAP.put("replacementCProductId", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("status", Types.INTEGER);
 		TABLE_COLUMNS_MAP.put("statusByUserId", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("statusByUserName", Types.VARCHAR);
@@ -162,7 +169,7 @@ public class CPInstanceModelImpl
 	}
 
 	public static final String TABLE_SQL_CREATE =
-		"create table CPInstance (mvccVersion LONG default 0 not null,uuid_ VARCHAR(75) null,externalReferenceCode VARCHAR(75) null,CPInstanceId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,CPDefinitionId LONG,CPInstanceUuid VARCHAR(75) null,sku VARCHAR(75) null,gtin VARCHAR(75) null,manufacturerPartNumber VARCHAR(75) null,purchasable BOOLEAN,width DOUBLE,height DOUBLE,depth DOUBLE,weight DOUBLE,price DECIMAL(30, 16) null,promoPrice DECIMAL(30, 16) null,cost DECIMAL(30, 16) null,published BOOLEAN,displayDate DATE null,expirationDate DATE null,lastPublishDate DATE null,overrideSubscriptionInfo BOOLEAN,subscriptionEnabled BOOLEAN,subscriptionLength INTEGER,subscriptionType VARCHAR(75) null,subscriptionTypeSettings TEXT null,maxSubscriptionCycles LONG,deliverySubscriptionEnabled BOOLEAN,deliverySubscriptionLength INTEGER,deliverySubscriptionType VARCHAR(75) null,deliverySubTypeSettings VARCHAR(75) null,deliveryMaxSubscriptionCycles LONG,unspsc VARCHAR(75) null,status INTEGER,statusByUserId LONG,statusByUserName VARCHAR(75) null,statusDate DATE null)";
+		"create table CPInstance (mvccVersion LONG default 0 not null,uuid_ VARCHAR(75) null,externalReferenceCode VARCHAR(75) null,CPInstanceId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,CPDefinitionId LONG,CPInstanceUuid VARCHAR(75) null,sku VARCHAR(75) null,gtin VARCHAR(75) null,manufacturerPartNumber VARCHAR(75) null,purchasable BOOLEAN,width DOUBLE,height DOUBLE,depth DOUBLE,weight DOUBLE,price DECIMAL(30, 16) null,promoPrice DECIMAL(30, 16) null,cost DECIMAL(30, 16) null,published BOOLEAN,displayDate DATE null,expirationDate DATE null,lastPublishDate DATE null,overrideSubscriptionInfo BOOLEAN,subscriptionEnabled BOOLEAN,subscriptionLength INTEGER,subscriptionType VARCHAR(75) null,subscriptionTypeSettings TEXT null,maxSubscriptionCycles LONG,deliverySubscriptionEnabled BOOLEAN,deliverySubscriptionLength INTEGER,deliverySubscriptionType VARCHAR(75) null,deliverySubTypeSettings VARCHAR(75) null,deliveryMaxSubscriptionCycles LONG,unspsc VARCHAR(75) null,discontinued BOOLEAN,discontinuedDate DATE null,replacementCPInstanceUuid VARCHAR(75) null,replacementCProductId LONG,status INTEGER,statusByUserId LONG,statusByUserName VARCHAR(75) null,statusDate DATE null)";
 
 	public static final String TABLE_SQL_DROP = "drop table CPInstance";
 
@@ -318,6 +325,11 @@ public class CPInstanceModelImpl
 		model.setDeliveryMaxSubscriptionCycles(
 			soapModel.getDeliveryMaxSubscriptionCycles());
 		model.setUnspsc(soapModel.getUnspsc());
+		model.setDiscontinued(soapModel.isDiscontinued());
+		model.setDiscontinuedDate(soapModel.getDiscontinuedDate());
+		model.setReplacementCPInstanceUuid(
+			soapModel.getReplacementCPInstanceUuid());
+		model.setReplacementCProductId(soapModel.getReplacementCProductId());
 		model.setStatus(soapModel.getStatus());
 		model.setStatusByUserId(soapModel.getStatusByUserId());
 		model.setStatusByUserName(soapModel.getStatusByUserName());
@@ -655,6 +667,28 @@ public class CPInstanceModelImpl
 		attributeGetterFunctions.put("unspsc", CPInstance::getUnspsc);
 		attributeSetterBiConsumers.put(
 			"unspsc", (BiConsumer<CPInstance, String>)CPInstance::setUnspsc);
+		attributeGetterFunctions.put(
+			"discontinued", CPInstance::getDiscontinued);
+		attributeSetterBiConsumers.put(
+			"discontinued",
+			(BiConsumer<CPInstance, Boolean>)CPInstance::setDiscontinued);
+		attributeGetterFunctions.put(
+			"discontinuedDate", CPInstance::getDiscontinuedDate);
+		attributeSetterBiConsumers.put(
+			"discontinuedDate",
+			(BiConsumer<CPInstance, Date>)CPInstance::setDiscontinuedDate);
+		attributeGetterFunctions.put(
+			"replacementCPInstanceUuid",
+			CPInstance::getReplacementCPInstanceUuid);
+		attributeSetterBiConsumers.put(
+			"replacementCPInstanceUuid",
+			(BiConsumer<CPInstance, String>)
+				CPInstance::setReplacementCPInstanceUuid);
+		attributeGetterFunctions.put(
+			"replacementCProductId", CPInstance::getReplacementCProductId);
+		attributeSetterBiConsumers.put(
+			"replacementCProductId",
+			(BiConsumer<CPInstance, Long>)CPInstance::setReplacementCProductId);
 		attributeGetterFunctions.put("status", CPInstance::getStatus);
 		attributeSetterBiConsumers.put(
 			"status", (BiConsumer<CPInstance, Integer>)CPInstance::setStatus);
@@ -1458,6 +1492,77 @@ public class CPInstanceModelImpl
 
 	@JSON
 	@Override
+	public boolean getDiscontinued() {
+		return _discontinued;
+	}
+
+	@JSON
+	@Override
+	public boolean isDiscontinued() {
+		return _discontinued;
+	}
+
+	@Override
+	public void setDiscontinued(boolean discontinued) {
+		if (_columnOriginalValues == Collections.EMPTY_MAP) {
+			_setColumnOriginalValues();
+		}
+
+		_discontinued = discontinued;
+	}
+
+	@JSON
+	@Override
+	public Date getDiscontinuedDate() {
+		return _discontinuedDate;
+	}
+
+	@Override
+	public void setDiscontinuedDate(Date discontinuedDate) {
+		if (_columnOriginalValues == Collections.EMPTY_MAP) {
+			_setColumnOriginalValues();
+		}
+
+		_discontinuedDate = discontinuedDate;
+	}
+
+	@JSON
+	@Override
+	public String getReplacementCPInstanceUuid() {
+		if (_replacementCPInstanceUuid == null) {
+			return "";
+		}
+		else {
+			return _replacementCPInstanceUuid;
+		}
+	}
+
+	@Override
+	public void setReplacementCPInstanceUuid(String replacementCPInstanceUuid) {
+		if (_columnOriginalValues == Collections.EMPTY_MAP) {
+			_setColumnOriginalValues();
+		}
+
+		_replacementCPInstanceUuid = replacementCPInstanceUuid;
+	}
+
+	@JSON
+	@Override
+	public long getReplacementCProductId() {
+		return _replacementCProductId;
+	}
+
+	@Override
+	public void setReplacementCProductId(long replacementCProductId) {
+		if (_columnOriginalValues == Collections.EMPTY_MAP) {
+			_setColumnOriginalValues();
+		}
+
+		_replacementCProductId = replacementCProductId;
+	}
+
+	@JSON
+	@Override
 	public int getStatus() {
 		return _status;
 	}
@@ -1735,6 +1840,11 @@ public class CPInstanceModelImpl
 		cpInstanceImpl.setDeliveryMaxSubscriptionCycles(
 			getDeliveryMaxSubscriptionCycles());
 		cpInstanceImpl.setUnspsc(getUnspsc());
+		cpInstanceImpl.setDiscontinued(isDiscontinued());
+		cpInstanceImpl.setDiscontinuedDate(getDiscontinuedDate());
+		cpInstanceImpl.setReplacementCPInstanceUuid(
+			getReplacementCPInstanceUuid());
+		cpInstanceImpl.setReplacementCProductId(getReplacementCProductId());
 		cpInstanceImpl.setStatus(getStatus());
 		cpInstanceImpl.setStatusByUserId(getStatusByUserId());
 		cpInstanceImpl.setStatusByUserName(getStatusByUserName());
@@ -1817,6 +1927,14 @@ public class CPInstanceModelImpl
 		cpInstanceImpl.setDeliveryMaxSubscriptionCycles(
 			this.<Long>getColumnOriginalValue("deliveryMaxSubscriptionCycles"));
 		cpInstanceImpl.setUnspsc(this.<String>getColumnOriginalValue("unspsc"));
+		cpInstanceImpl.setDiscontinued(
+			this.<Boolean>getColumnOriginalValue("discontinued"));
+		cpInstanceImpl.setDiscontinuedDate(
+			this.<Date>getColumnOriginalValue("discontinuedDate"));
+		cpInstanceImpl.setReplacementCPInstanceUuid(
+			this.<String>getColumnOriginalValue("replacementCPInstanceUuid"));
+		cpInstanceImpl.setReplacementCProductId(
+			this.<Long>getColumnOriginalValue("replacementCProductId"));
 		cpInstanceImpl.setStatus(
 			this.<Integer>getColumnOriginalValue("status"));
 		cpInstanceImpl.setStatusByUserId(
@@ -2119,6 +2237,31 @@ public class CPInstanceModelImpl
 			cpInstanceCacheModel.unspsc = null;
 		}
 
+		cpInstanceCacheModel.discontinued = isDiscontinued();
+
+		Date discontinuedDate = getDiscontinuedDate();
+
+		if (discontinuedDate != null) {
+			cpInstanceCacheModel.discontinuedDate = discontinuedDate.getTime();
+		}
+		else {
+			cpInstanceCacheModel.discontinuedDate = Long.MIN_VALUE;
+		}
+
+		cpInstanceCacheModel.replacementCPInstanceUuid =
+			getReplacementCPInstanceUuid();
+
+		String replacementCPInstanceUuid =
+			cpInstanceCacheModel.replacementCPInstanceUuid;
+
+		if ((replacementCPInstanceUuid != null) &&
+			(replacementCPInstanceUuid.length() == 0)) {
+
+			cpInstanceCacheModel.replacementCPInstanceUuid = null;
+		}
+
+		cpInstanceCacheModel.replacementCProductId = getReplacementCProductId();
+
 		cpInstanceCacheModel.status = getStatus();
 
 		cpInstanceCacheModel.statusByUserId = getStatusByUserId();
@@ -2270,6 +2413,10 @@ public class CPInstanceModelImpl
 	private String _deliverySubscriptionTypeSettings;
 	private long _deliveryMaxSubscriptionCycles;
 	private String _unspsc;
+	private boolean _discontinued;
+	private Date _discontinuedDate;
+	private String _replacementCPInstanceUuid;
+	private long _replacementCProductId;
 	private int _status;
 	private long _statusByUserId;
 	private String _statusByUserName;
@@ -2353,6 +2500,12 @@ public class CPInstanceModelImpl
 		_columnOriginalValues.put(
 			"deliveryMaxSubscriptionCycles", _deliveryMaxSubscriptionCycles);
 		_columnOriginalValues.put("unspsc", _unspsc);
+		_columnOriginalValues.put("discontinued", _discontinued);
+		_columnOriginalValues.put("discontinuedDate", _discontinuedDate);
+		_columnOriginalValues.put(
+			"replacementCPInstanceUuid", _replacementCPInstanceUuid);
+		_columnOriginalValues.put(
+			"replacementCProductId", _replacementCProductId);
 		_columnOriginalValues.put("status", _status);
 		_columnOriginalValues.put("statusByUserId", _statusByUserId);
 		_columnOriginalValues.put("statusByUserName", _statusByUserName);
@@ -2460,13 +2613,21 @@ public class CPInstanceModelImpl
 
 		columnBitmasks.put("unspsc", 274877906944L);
 
-		columnBitmasks.put("status", 549755813888L);
+		columnBitmasks.put("discontinued", 549755813888L);
 
-		columnBitmasks.put("statusByUserId", 1099511627776L);
+		columnBitmasks.put("discontinuedDate", 1099511627776L);
 
-		columnBitmasks.put("statusByUserName", 2199023255552L);
+		columnBitmasks.put("replacementCPInstanceUuid", 2199023255552L);
 
-		columnBitmasks.put("statusDate", 4398046511104L);
+		columnBitmasks.put("replacementCProductId", 4398046511104L);
+
+		columnBitmasks.put("status", 8796093022208L);
+
+		columnBitmasks.put("statusByUserId", 17592186044416L);
+
+		columnBitmasks.put("statusByUserName", 35184372088832L);
+
+		columnBitmasks.put("statusDate", 70368744177664L);
 
 		_columnBitmasks = Collections.unmodifiableMap(columnBitmasks);
 	}

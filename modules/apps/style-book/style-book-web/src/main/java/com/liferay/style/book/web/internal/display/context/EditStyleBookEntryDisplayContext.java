@@ -43,12 +43,12 @@ import com.liferay.portal.kernel.model.LayoutSet;
 import com.liferay.portal.kernel.model.Theme;
 import com.liferay.portal.kernel.portlet.PortletURLFactoryUtil;
 import com.liferay.portal.kernel.portlet.RequestBackedPortletURLFactoryUtil;
+import com.liferay.portal.kernel.security.auth.AuthTokenUtil;
 import com.liferay.portal.kernel.service.LayoutLocalServiceUtil;
 import com.liferay.portal.kernel.service.LayoutSetLocalServiceUtil;
 import com.liferay.portal.kernel.theme.PortletDisplay;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.Constants;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
@@ -98,8 +98,6 @@ public class EditStyleBookEntryDisplayContext {
 
 	public Map<String, Object> getStyleBookEditorData() throws Exception {
 		return HashMapBuilder.<String, Object>put(
-			"defaultUserId", _themeDisplay.getDefaultUserId()
-		).put(
 			"frontendTokenDefinition", _getFrontendTokenDefinitionJSONObject()
 		).put(
 			"frontendTokensValues",
@@ -297,7 +295,7 @@ public class EditStyleBookEntryDisplayContext {
 	}
 
 	private JSONObject _getPageOptionJSONObject() {
-		int total = LayoutLocalServiceUtil.getLayoutsCount(
+		int total = LayoutLocalServiceUtil.getPublishedLayoutsCount(
 			_getPreviewItemsGroupId());
 
 		return JSONUtil.put(
@@ -321,16 +319,15 @@ public class EditStyleBookEntryDisplayContext {
 		).put(
 			"recentLayouts",
 			() -> {
-				List<Layout> layouts = LayoutLocalServiceUtil.getLayouts(
-					_getPreviewItemsGroupId(), 0, Math.min(total, 4),
-					new LayoutModifiedDateComparator(false));
+				List<Layout> layouts =
+					LayoutLocalServiceUtil.getPublishedLayouts(
+						_getPreviewItemsGroupId(), 0, Math.min(total, 4),
+						new LayoutModifiedDateComparator(false));
 
 				Stream<Layout> layoutsStream = layouts.stream();
 
 				return JSONUtil.putAll(
-					layoutsStream.filter(
-						layout -> !_isExcludedLayout(layout)
-					).map(
+					layoutsStream.map(
 						layout -> JSONUtil.put(
 							"name", layout.getName(_themeDisplay.getLocale())
 						).put(
@@ -364,6 +361,10 @@ public class EditStyleBookEntryDisplayContext {
 			String layoutURL = HttpUtil.addParameter(
 				PortalUtil.getLayoutFullURL(layout, _themeDisplay), "p_l_mode",
 				Constants.PREVIEW);
+
+			layoutURL = HttpUtil.addParameter(
+				layoutURL, "p_p_auth",
+				AuthTokenUtil.getToken(_httpServletRequest));
 
 			return HttpUtil.addParameter(
 				layoutURL, "styleBookEntryPreview", true);
@@ -469,27 +470,6 @@ public class EditStyleBookEntryDisplayContext {
 		Theme theme = layoutSet.getTheme();
 
 		return theme.getName();
-	}
-
-	private boolean _isExcludedLayout(Layout layout) {
-		if (!layout.isTypeContent()) {
-			return false;
-		}
-
-		Layout draftLayout = layout.fetchDraftLayout();
-
-		if (draftLayout != null) {
-			boolean published = GetterUtil.getBoolean(
-				draftLayout.getTypeSettingsProperty("published"));
-
-			return !published;
-		}
-
-		if (layout.isApproved() && !layout.isHidden() && !layout.isSystem()) {
-			return false;
-		}
-
-		return true;
 	}
 
 	private void _setViewAttributes() {

@@ -21,6 +21,7 @@ import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.model.Role;
 import com.liferay.portal.kernel.model.UserGroup;
 import com.liferay.portal.kernel.portlet.SearchDisplayStyleUtil;
+import com.liferay.portal.kernel.portlet.SearchOrderByUtil;
 import com.liferay.portal.kernel.service.RoleLocalServiceUtil;
 import com.liferay.portal.kernel.service.UserGroupServiceUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
@@ -36,7 +37,6 @@ import com.liferay.site.memberships.constants.SiteMembershipsPortletKeys;
 import com.liferay.site.memberships.web.internal.util.GroupUtil;
 
 import java.util.LinkedHashMap;
-import java.util.List;
 
 import javax.portlet.PortletURL;
 import javax.portlet.RenderRequest;
@@ -109,22 +109,27 @@ public class UserGroupsDisplayContext {
 	}
 
 	public String getOrderByCol() {
-		if (_orderByCol != null) {
+		if (Validator.isNotNull(_orderByCol)) {
 			return _orderByCol;
 		}
 
-		_orderByCol = ParamUtil.getString(_renderRequest, "orderByCol", "name");
+		_orderByCol = SearchOrderByUtil.getOrderByCol(
+			_httpServletRequest,
+			SiteMembershipsPortletKeys.SITE_MEMBERSHIPS_ADMIN,
+			"order-by-col-usergroups", "name");
 
 		return _orderByCol;
 	}
 
 	public String getOrderByType() {
-		if (_orderByType != null) {
+		if (Validator.isNotNull(_orderByType)) {
 			return _orderByType;
 		}
 
-		_orderByType = ParamUtil.getString(
-			_renderRequest, "orderByType", "asc");
+		_orderByType = SearchOrderByUtil.getOrderByType(
+			_httpServletRequest,
+			SiteMembershipsPortletKeys.SITE_MEMBERSHIPS_ADMIN,
+			"order-by-type-usergroups", "asc");
 
 		return _orderByType;
 	}
@@ -248,9 +253,6 @@ public class UserGroupsDisplayContext {
 						_groupId, themeDisplay.getLocale())),
 				false));
 
-		userGroupSearch.setRowChecker(
-			new EmptyOnClickRowChecker(_renderResponse));
-
 		UserGroupDisplayTerms searchTerms =
 			(UserGroupDisplayTerms)userGroupSearch.getSearchTerms();
 
@@ -274,18 +276,18 @@ public class UserGroupsDisplayContext {
 				}
 			).build();
 
-		int userGroupsCount = UserGroupServiceUtil.searchCount(
-			themeDisplay.getCompanyId(), searchTerms.getKeywords(),
-			userGroupParams);
+		userGroupSearch.setResultsAndTotal(
+			() -> UserGroupServiceUtil.search(
+				themeDisplay.getCompanyId(), searchTerms.getKeywords(),
+				userGroupParams, userGroupSearch.getStart(),
+				userGroupSearch.getEnd(),
+				userGroupSearch.getOrderByComparator()),
+			UserGroupServiceUtil.searchCount(
+				themeDisplay.getCompanyId(), searchTerms.getKeywords(),
+				userGroupParams));
 
-		userGroupSearch.setTotal(userGroupsCount);
-
-		List<UserGroup> userGroups = UserGroupServiceUtil.search(
-			themeDisplay.getCompanyId(), searchTerms.getKeywords(),
-			userGroupParams, userGroupSearch.getStart(),
-			userGroupSearch.getEnd(), userGroupSearch.getOrderByComparator());
-
-		userGroupSearch.setResults(userGroups);
+		userGroupSearch.setRowChecker(
+			new EmptyOnClickRowChecker(_renderResponse));
 
 		_userGroupSearch = userGroupSearch;
 

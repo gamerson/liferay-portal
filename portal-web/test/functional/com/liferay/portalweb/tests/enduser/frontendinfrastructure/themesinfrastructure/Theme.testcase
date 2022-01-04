@@ -17,7 +17,7 @@ definition {
 			PortalInstances.tearDownCP();
 		}
 		else {
-			Page.tearDownCP();
+			PagesAdmin.tearDownCP();
 
 			FileInstall.deleteWarOffline(liferayDependencyWars = "test-theme.war");
 		}
@@ -64,7 +64,7 @@ definition {
 			locator1 = "build-test.xml",
 			value1 = "delete-portal-theme -Dtheme-name=classic-theme");
 
-		FileInstall.deployFileOnServer(liferayDependencyJars = "test-theme.war");
+		FileInstall.deployFileOnServer(jarFile = "test-theme.war");
 
 		Portlet.startServer(deleteLiferayHome = "false");
 
@@ -91,7 +91,7 @@ definition {
 
 		User.firstLoginPG();
 
-		FileInstall.deployFileOnServer(liferayDependencyJars = "${appName}.war");
+		FileInstall.deployFileOnServer(jarFile = "${appName}.war");
 
 		WaitForConsoleTextPresent(value1 = "STARTED ${appName}");
 
@@ -103,7 +103,7 @@ definition {
 			category = "Site Builder",
 			portlet = "Pages");
 
-		Page.changeCurrentTheme(
+		PagesAdmin.changeWidgetPageCurrentTheme(
 			pageName = "Theme Test Page",
 			themeName = "test-theme-7-4");
 
@@ -132,8 +132,7 @@ definition {
 
 		Theme.viewClassicThemeBackgroundColor();
 
-		Page.viewCurrentTheme(
-			page = "Public Pages",
+		PagesAdmin.viewWidgetPageCurrentTheme(
 			pageName = "Theme Test Page",
 			themeName = "Classic");
 
@@ -152,8 +151,7 @@ definition {
 
 		Theme.viewTestThemeBackgroundColor();
 
-		Page.viewCurrentTheme(
-			page = "Public Pages",
+		PagesAdmin.viewWidgetPageCurrentTheme(
 			pageName = "Theme Test Page",
 			themeName = "test-theme-7-4");
 	}
@@ -168,7 +166,7 @@ definition {
 
 		User.firstLoginPG();
 
-		FileInstall.deployFileOnServer(liferayDependencyJars = "${appName}.war");
+		FileInstall.deployFileOnServer(jarFile = "${appName}.war");
 
 		WaitForConsoleTextPresent(value1 = "STARTED ${appName}");
 
@@ -180,7 +178,7 @@ definition {
 			category = "Site Builder",
 			portlet = "Pages");
 
-		Page.changeCurrentTheme(
+		PagesAdmin.changeWidgetPageCurrentTheme(
 			pageName = "Theme Test Page",
 			themeName = "test-theme-7-4");
 
@@ -209,20 +207,21 @@ definition {
 
 		Theme.viewClassicThemeBackgroundColor();
 
-		Page.viewCurrentTheme(
-			page = "Public Pages",
+		PagesAdmin.viewWidgetPageCurrentTheme(
 			pageName = "Theme Test Page",
 			themeName = "Classic");
 
-		Click(locator1 = "SitePagesEditPage#CHANGE_CURRENT_THEME_BUTTON");
+		Click(
+			key_text = "Change Current Theme",
+			locator1 = "Button#ANY");
 
 		SelectFrame(locator1 = "IFrame#MODAL_BODY");
 
 		LexiconCard.viewCardNotPresent(card = "test-theme-7-4");
 
-		FileInstall.deleteWarOffline(liferayDependencyWars = "test-theme.war");
+		FileInstall.deleteWarOffline(warFile = "test-theme.war");
 
-		FileInstall.deployFileOnServer(liferayDependencyJars = "${appName}.war");
+		FileInstall.deployFileOnServer(jarFile = "${appName}.war");
 
 		Pause(locator1 = "30000");
 
@@ -232,12 +231,13 @@ definition {
 
 		Theme.viewClassicThemeBackgroundColor();
 
-		Page.viewCurrentTheme(
-			page = "Public Pages",
+		PagesAdmin.viewWidgetPageCurrentTheme(
 			pageName = "Theme Test Page",
 			themeName = "Classic");
 
-		Click(locator1 = "SitePagesEditPage#CHANGE_CURRENT_THEME_BUTTON");
+		Click(
+			key_text = "Change Current Theme",
+			locator1 = "Button#ANY");
 
 		SelectFrame(locator1 = "IFrame#MODAL_BODY");
 

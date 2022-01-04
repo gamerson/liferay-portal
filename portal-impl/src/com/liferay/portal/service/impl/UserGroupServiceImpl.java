@@ -166,10 +166,12 @@ public class UserGroupServiceImpl extends UserGroupServiceBaseImpl {
 	 */
 	@Override
 	public UserGroup getUserGroup(long userGroupId) throws PortalException {
+		UserGroup userGroup = userGroupLocalService.getUserGroup(userGroupId);
+
 		UserGroupPermissionUtil.check(
 			getPermissionChecker(), userGroupId, ActionKeys.VIEW);
 
-		return userGroupLocalService.getUserGroup(userGroupId);
+		return userGroup;
 	}
 
 	/**

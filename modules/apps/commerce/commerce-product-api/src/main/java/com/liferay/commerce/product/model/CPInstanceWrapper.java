@@ -93,6 +93,11 @@ public class CPInstanceWrapper
 			"deliveryMaxSubscriptionCycles",
 			getDeliveryMaxSubscriptionCycles());
 		attributes.put("unspsc", getUnspsc());
+		attributes.put("discontinued", isDiscontinued());
+		attributes.put("discontinuedDate", getDiscontinuedDate());
+		attributes.put(
+			"replacementCPInstanceUuid", getReplacementCPInstanceUuid());
+		attributes.put("replacementCProductId", getReplacementCProductId());
 		attributes.put("status", getStatus());
 		attributes.put("statusByUserId", getStatusByUserId());
 		attributes.put("statusByUserName", getStatusByUserName());
@@ -350,6 +355,32 @@ public class CPInstanceWrapper
 			setUnspsc(unspsc);
 		}
 
+		Boolean discontinued = (Boolean)attributes.get("discontinued");
+
+		if (discontinued != null) {
+			setDiscontinued(discontinued);
+		}
+
+		Date discontinuedDate = (Date)attributes.get("discontinuedDate");
+
+		if (discontinuedDate != null) {
+			setDiscontinuedDate(discontinuedDate);
+		}
+
+		String replacementCPInstanceUuid = (String)attributes.get(
+			"replacementCPInstanceUuid");
+
+		if (replacementCPInstanceUuid != null) {
+			setReplacementCPInstanceUuid(replacementCPInstanceUuid);
+		}
+
+		Long replacementCProductId = (Long)attributes.get(
+			"replacementCProductId");
+
+		if (replacementCProductId != null) {
+			setReplacementCProductId(replacementCProductId);
+		}
+
 		Integer status = (Integer)attributes.get("status");
 
 		if (status != null) {
@@ -529,6 +560,26 @@ public class CPInstanceWrapper
 	}
 
 	/**
+	 * Returns the discontinued of this cp instance.
+	 *
+	 * @return the discontinued of this cp instance
+	 */
+	@Override
+	public boolean getDiscontinued() {
+		return model.getDiscontinued();
+	}
+
+	/**
+	 * Returns the discontinued date of this cp instance.
+	 *
+	 * @return the discontinued date of this cp instance
+	 */
+	@Override
+	public Date getDiscontinuedDate() {
+		return model.getDiscontinuedDate();
+	}
+
+	/**
 	 * Returns the display date of this cp instance.
 	 *
 	 * @return the display date of this cp instance
@@ -696,6 +747,26 @@ public class CPInstanceWrapper
 	@Override
 	public boolean getPurchasable() {
 		return model.getPurchasable();
+	}
+
+	/**
+	 * Returns the replacement cp instance uuid of this cp instance.
+	 *
+	 * @return the replacement cp instance uuid of this cp instance
+	 */
+	@Override
+	public String getReplacementCPInstanceUuid() {
+		return model.getReplacementCPInstanceUuid();
+	}
+
+	/**
+	 * Returns the replacement c product ID of this cp instance.
+	 *
+	 * @return the replacement c product ID of this cp instance
+	 */
+	@Override
+	public long getReplacementCProductId() {
+		return model.getReplacementCProductId();
 	}
 
 	/**
@@ -903,6 +974,16 @@ public class CPInstanceWrapper
 	@Override
 	public boolean isDenied() {
 		return model.isDenied();
+	}
+
+	/**
+	 * Returns <code>true</code> if this cp instance is discontinued.
+	 *
+	 * @return <code>true</code> if this cp instance is discontinued; <code>false</code> otherwise
+	 */
+	@Override
+	public boolean isDiscontinued() {
+		return model.isDiscontinued();
 	}
 
 	/**
@@ -1147,6 +1228,26 @@ public class CPInstanceWrapper
 	}
 
 	/**
+	 * Sets whether this cp instance is discontinued.
+	 *
+	 * @param discontinued the discontinued of this cp instance
+	 */
+	@Override
+	public void setDiscontinued(boolean discontinued) {
+		model.setDiscontinued(discontinued);
+	}
+
+	/**
+	 * Sets the discontinued date of this cp instance.
+	 *
+	 * @param discontinuedDate the discontinued date of this cp instance
+	 */
+	@Override
+	public void setDiscontinuedDate(Date discontinuedDate) {
+		model.setDiscontinuedDate(discontinuedDate);
+	}
+
+	/**
 	 * Sets the display date of this cp instance.
 	 *
 	 * @param displayDate the display date of this cp instance
@@ -1314,6 +1415,26 @@ public class CPInstanceWrapper
 	@Override
 	public void setPurchasable(boolean purchasable) {
 		model.setPurchasable(purchasable);
+	}
+
+	/**
+	 * Sets the replacement cp instance uuid of this cp instance.
+	 *
+	 * @param replacementCPInstanceUuid the replacement cp instance uuid of this cp instance
+	 */
+	@Override
+	public void setReplacementCPInstanceUuid(String replacementCPInstanceUuid) {
+		model.setReplacementCPInstanceUuid(replacementCPInstanceUuid);
+	}
+
+	/**
+	 * Sets the replacement c product ID of this cp instance.
+	 *
+	 * @param replacementCProductId the replacement c product ID of this cp instance
+	 */
+	@Override
+	public void setReplacementCProductId(long replacementCProductId) {
+		model.setReplacementCProductId(replacementCProductId);
 	}
 
 	/**

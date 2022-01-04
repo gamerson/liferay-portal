@@ -31,15 +31,9 @@ definition {
 	test CanNavigateByClickingInSections {
 		ApplicationsMenu.gotoSite(key_site = "Raylife");
 
-		RaylifeHomePage.getAQuote();
-
-		RaylifeIndustry.typeIndustry();
-
-		Click(locator1 = "Raylife#BUTTON_CONTINUE");
+		RaylifeHomePage.startFlow();
 
 		RaylifeContactInfo.typeAllBasicsInfoFields();
-
-		Click(locator1 = "Raylife#BUTTON_CONTINUE");
 
 		Click(locator1 = "Raylife#BUTTON_CONTINUE");
 
@@ -47,15 +41,25 @@ definition {
 			label = "business.yearsOfExperience",
 			value = "3");
 
-		Click(locator1 = "RaylifeNavigation#SECTION_COMPLETED");
+		Click(
+			locator1 = "RaylifeNavigation#SECTION_COMPLETED",
+			section = "Basics");
 
-		AssertElementPresent(locator1 = "RaylifeNavigation#SECTION_COMPLETED_SELECTED");
+		AssertElementPresent(
+			locator1 = "RaylifeNavigation#SECTION_COMPLETED_SELECTED",
+			section = "Basics");
 
-		Click(locator1 = "RaylifeNavigation#SECTION_INCOMPLETED");
+		Click(
+			locator1 = "RaylifeNavigation#SECTION_INCOMPLETED",
+			section = "Business");
 
-		AssertElementPresent(locator1 = "RaylifeNavigation#SECTION_INCOMPLETED_SELECTED");
+		AssertElementPresent(
+			locator1 = "RaylifeNavigation#SECTION_INCOMPLETED_SELECTED",
+			section = "Business");
 
-		Click(locator1 = "RaylifeNavigation#SECTION_COMPLETED");
+		Click(
+			locator1 = "RaylifeNavigation#SECTION_COMPLETED",
+			section = "Basics");
 
 		Click(locator1 = "Raylife#BUTTON_PREVIOUS");
 	}
@@ -65,21 +69,19 @@ definition {
 	test SectionIsCompleted {
 		ApplicationsMenu.gotoSite(site = "Raylife");
 
-		RaylifeHomePage.getAQuote();
-
-		RaylifeIndustry.typeIndustry();
-
-		Click(locator1 = "Raylife#BUTTON_CONTINUE");
+		RaylifeHomePage.startFlow();
 
 		RaylifeContactInfo.typeAllBasicsInfoFields();
 
 		Click(locator1 = "Raylife#BUTTON_CONTINUE");
 
-		Click(locator1 = "Raylife#BUTTON_CONTINUE");
+		AssertElementPresent(
+			locator1 = "RaylifeNavigation#SECTION_COMPLETED",
+			section = "Basics");
 
-		AssertElementPresent(locator1 = "RaylifeNavigation#SECTION_COMPLETED");
-
-		Click(locator1 = "RaylifeNavigation#SECTION_COMPLETED");
+		Click(
+			locator1 = "RaylifeNavigation#SECTION_COMPLETED",
+			section = "Basics");
 
 		Click(locator1 = "Raylife#BUTTON_PREVIOUS");
 	}
@@ -89,15 +91,15 @@ definition {
 	test SectionIsHighlighted {
 		ApplicationsMenu.gotoSite(site = "Raylife");
 
-		RaylifeHomePage.getAQuote();
+		RaylifeHomePage.startFlow();
 
-		RaylifeIndustry.typeIndustry();
+		AssertElementPresent(
+			locator1 = "RaylifeNavigation#SECTION_INCOMPLETED_SELECTED",
+			section = "Basics");
 
-		Click(locator1 = "Raylife#BUTTON_CONTINUE");
-
-		AssertElementPresent(locator1 = "RaylifeNavigation#SECTION_INCOMPLETED_SELECTED");
-
-		Click(locator1 = "Raylife#BUTTON_PREVIOUS");
+		Click(
+			locator1 = "RaylifeNavigation#SECTION_INCOMPLETED_SELECTED",
+			section = "Basics");
 
 		Click(locator1 = "Raylife#BUTTON_PREVIOUS");
 	}
@@ -107,15 +109,15 @@ definition {
 	test SectionIsIncomplete {
 		ApplicationsMenu.gotoSite(site = "Raylife");
 
-		RaylifeHomePage.getAQuote();
+		RaylifeHomePage.startFlow();
 
-		RaylifeIndustry.typeIndustry();
+		AssertElementPresent(
+			locator1 = "RaylifeNavigation#SECTION_UNSTARTED",
+			section = "Basics");
 
-		Click(locator1 = "Raylife#BUTTON_CONTINUE");
-
-		AssertElementPresent(locator1 = "RaylifeNavigation#SECTION_UNSTARTED");
-
-		Click(locator1 = "Raylife#BUTTON_PREVIOUS");
+		Click(
+			locator1 = "RaylifeNavigation#SECTION_INCOMPLETED_SELECTED",
+			section = "Basics");
 
 		Click(locator1 = "Raylife#BUTTON_PREVIOUS");
 	}

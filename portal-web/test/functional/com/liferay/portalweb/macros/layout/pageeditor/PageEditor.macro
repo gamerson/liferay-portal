@@ -548,13 +548,15 @@ definition {
 
 		Click(locator1 = "Button#SAVE");
 
-		AssertClick(
-			locator1 = "PageEditor#EXPERIENCE_BUTTON_NAME",
-			value1 = "${experienceName}");
+		if ("${experienceName}" != "") {
+			AssertClick(
+				locator1 = "PageEditor#EXPERIENCE_BUTTON_NAME",
+				value1 = "${experienceName}");
 
-		AssertElementPresent(
-			key_experienceName = "${experienceName}",
-			locator1 = "PageEditor#EXPERIENCE_SELECT_ITEM");
+			AssertElementPresent(
+				key_experienceName = "${experienceName}",
+				locator1 = "PageEditor#EXPERIENCE_SELECT_ITEM");
+		}
 	}
 
 	macro addFragment {
@@ -967,7 +969,7 @@ definition {
 	macro clickDiscardDraft {
 		WaitForPageLoad();
 
-		SitePages.clickPageMenu(pageName = "${pageName}");
+		PagesAdmin.openPageEllipsisMenu(pageName = "${pageName}");
 
 		MenuItem.clickNoError(menuItem = "Discard Draft");
 
@@ -1297,6 +1299,36 @@ definition {
 		}
 	}
 
+	macro createPageTemplate {
+		Click(
+			key_text = "page-template",
+			locator1 = "Icon#ANY");
+
+		if (isSet(experienceName)) {
+			AssertTextEquals(
+				locator1 = "Message#WARNING_FEEDBACK",
+				value1 = "The page template is based on the current experience.");
+		}
+
+		PortletEntry.inputName(name = "${pageTemplateName}");
+
+		Select(
+			key_fieldLabel = "Page Template Collection",
+			locator1 = "Select#GENERIC_SELECT_FIELD",
+			value1 = "${collectionName}");
+
+		Button.click(button = "Create");
+
+		if (IsElementPresent(locator1 = "Message#ERROR_DISMISSIBLE")) {
+			AssertTextEquals.assertPartialText(
+				locator1 = "Message#ERROR_DISMISSIBLE",
+				value1 = "${alertMessage}");
+		}
+		else {
+			Alert.viewSuccessMessage();
+		}
+	}
+
 	macro deleteComment {
 		MouseOver(locator1 = "PageEditor#FRAGMENT_SIDEBAR_ELLIPSIS");
 
@@ -1330,6 +1362,24 @@ definition {
 			locator1 = "PageEditor#EXPERIENCE_SELECT_ITEM");
 
 		Click(locator1 = "PageEditor#EXPERIENCE_DEFAULT_BUTTON_NAME");
+	}
+
+	macro deprioritizeExperience {
+		var key_experienceName = "${experienceName}";
+
+		if (IsElementPresent(locator1 = "PageEditor#EXPERIENCE_DROPDOWN")) {
+			Click(locator1 = "PageEditor#EXPERIENCE_LABEL");
+		}
+
+		AssertTextEquals(
+			locator1 = "PageEditor#EXPERIENCE_LABEL",
+			value1 = "Experience");
+
+		AssertClick(
+			locator1 = "PageEditor#EXPERIENCE_BUTTON_NAME",
+			value1 = "${experienceName}");
+
+		Click(locator1 = "PageEditor#EXPERIENCE_DEPRIORITIZE_BUTTON");
 	}
 
 	macro duplicateExperience {
@@ -1506,6 +1556,10 @@ definition {
 				NavItem.click(navItem = "Collection Providers");
 
 				LexiconCard.clickCard(card = "${infoListProviderName}");
+
+				Refresh();
+
+				Click.clickNoWaitForVisible(locator1 = "Fragment#FRAGMENT_HEADER_ANY");
 
 				PageEditor.viewItemSelectorText(
 					fieldLabel = "Collection",
@@ -2973,6 +3027,10 @@ definition {
 	}
 
 	macro prioritizeExperience {
+		if (!(isSet(key_index))) {
+			var key_index = "1";
+		}
+
 		var key_experienceName = "${experienceName}";
 
 		AssertTextEquals(
@@ -3543,6 +3601,57 @@ definition {
 		AssertElementPresent(locator1 = "PageEditor#EMPTY_MESSAGE");
 	}
 
+	macro viewElementInsideModule {
+		if (!(isSet(position))) {
+			var position = "1";
+		}
+
+		AssertElementPresent(
+			key_columnNumber = "${moduleNumber}",
+			key_elementHeader = "//div[contains(@class,'page-editor')]//li[contains(.,'${elementName}')]",
+			key_position = "${position}",
+			locator1 = "PageEditor#GRID_COLUMN_NESTED_ELEMENT");
+	}
+
+	macro viewElementNotPresentInsideModule {
+		if (!(isSet(position))) {
+			var position = "1";
+		}
+
+		AssertElementNotPresent(
+			key_columnNumber = "${moduleNumber}",
+			key_elementHeader = "//div[contains(@class,'page-editor')]//li[contains(.,'${elementName}')]",
+			key_position = "${position}",
+			locator1 = "PageEditor#GRID_COLUMN_NESTED_ELEMENT");
+	}
+
+	macro viewExperienceActive {
+		if (IsElementNotPresent(locator1 = "PageEditor#EXPERIENCE_DROPDOWN")) {
+			Click(locator1 = "PageEditor#EXPERIENCE_LABEL");
+		}
+
+		AssertElementPresent(
+			key_experienceName = "${experienceName}",
+			locator1 = "PageEditor#EXPERIENCE_ACTIVE_LABEL");
+	}
+
+	macro viewExperiencesNameOrder {
+		var index = "0";
+
+		if (IsElementNotPresent(locator1 = "PageEditor#EXPERIENCE_DROPDOWN")) {
+			Click(locator1 = "PageEditor#EXPERIENCE_LABEL");
+		}
+
+		for (var experienceName : list "${experienceName}") {
+			var index = ${index} + 1;
+
+			AssertElementPresent(
+				key_experienceName = "${experienceName}",
+				key_index = "${index}",
+				locator1 = "PageEditor#EXPERIENCE_ORDER_NAMES");
+		}
+	}
+
 	macro viewFragment {
 		if (!(isSet(position))) {
 			var position = "1";
@@ -3701,6 +3810,10 @@ definition {
 	}
 
 	macro viewFragmentStyle {
+		if (!(isSet(position))) {
+			var position = "1";
+		}
+
 		if (isSet(alignment)) {
 			var fragmentName = StringUtil.upperCaseFirstLetter("${fragmentName}");
 
@@ -3766,6 +3879,7 @@ definition {
 				AssertElementPresent(
 					key_fragmentName = "${fragmentName}",
 					key_headingLevel = "${headingLevel}",
+					key_position = "${position}",
 					locator1 = "Fragment#FRAGMENT_CONFIGURATION_HEADER");
 			}
 		}
@@ -3877,6 +3991,7 @@ definition {
 
 			AssertElementPresent(
 				key_fragmentName = "${fragmentName}",
+				key_position = "${position}",
 				key_textColor = "${textColor}",
 				locator1 = "Fragment#FRAGMENT_CONFIGURATION_TEXT_COLOR");
 		}

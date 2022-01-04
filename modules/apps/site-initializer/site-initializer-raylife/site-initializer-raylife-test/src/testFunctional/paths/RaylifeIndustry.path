@@ -12,22 +12,27 @@
 <tbody>
 <tr>
 	<td>SELECTED_INDUSTRY</td>
-	<td>css=liferay-remote-app-raylife>>>#businessType</td>
+	<td>//div[contains(@class, 'radio-card')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>BUTTON_TIP_INDUSTRY</td>
-	<td>css=liferay-remote-app-raylife>>>.btn.badge.bottom-list</td>
+	<td>//span[contains(@class, 'btn-info-panel')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>MAX_NUMBER_OF_CHARACTERS</td>
-	<td>css=liferay-remote-app-raylife>>>[maxlength='255']</td>
+	<td>//input[contains(@class, 'search') and contains (@maxlength, '255')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>BUTTON_HIGHLIGHTED</td>
-	<td>css=liferay-remote-app-raylife>>>.btn.badge.bottom-list.open</td>
+	<td>//span[contains(@class, 'inverse-primary')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>INDUSTRY_LABEL</td>
+	<td>//label[contains(.,'${label}')]</td>
 	<td></td>
 </tr>
 </tbody>

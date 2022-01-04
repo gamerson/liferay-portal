@@ -30,12 +30,22 @@ import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.LocalizationUtil;
 import com.liferay.portal.kernel.workflow.WorkflowHandler;
 import com.liferay.portal.kernel.workflow.WorkflowHandlerRegistryUtil;
+import com.liferay.portal.workflow.kaleo.definition.NodeType;
+import com.liferay.portal.workflow.kaleo.model.KaleoDefinitionVersion;
 import com.liferay.portal.workflow.kaleo.model.KaleoInstance;
+import com.liferay.portal.workflow.kaleo.model.KaleoNode;
+import com.liferay.portal.workflow.kaleo.model.KaleoTask;
 import com.liferay.portal.workflow.kaleo.model.KaleoTaskAssignmentInstance;
 import com.liferay.portal.workflow.kaleo.model.KaleoTaskInstanceToken;
+import com.liferay.portal.workflow.kaleo.model.KaleoTransition;
+import com.liferay.portal.workflow.kaleo.service.KaleoNodeLocalService;
 import com.liferay.portal.workflow.kaleo.service.KaleoTaskAssignmentInstanceLocalService;
+import com.liferay.portal.workflow.kaleo.service.KaleoTaskLocalService;
+import com.liferay.portal.workflow.metrics.model.AddNodeRequest;
 import com.liferay.portal.workflow.metrics.model.AddTaskRequest;
+import com.liferay.portal.workflow.metrics.model.AddTransitionRequest;
 import com.liferay.portal.workflow.metrics.model.Assignment;
+import com.liferay.portal.workflow.metrics.model.DeleteTransitionRequest;
 import com.liferay.portal.workflow.metrics.model.RoleAssignment;
 import com.liferay.portal.workflow.metrics.model.UserAssignment;
 
@@ -58,14 +68,69 @@ import org.osgi.service.component.annotations.Reference;
 @Component(immediate = true, service = IndexerHelper.class)
 public class IndexerHelper {
 
+	public AddNodeRequest createAddNodeRequest(
+		KaleoDefinitionVersion kaleoDefinitionVersion, KaleoNode kaleoNode) {
+
+		AddNodeRequest.Builder builder = new AddNodeRequest.Builder();
+
+		return builder.companyId(
+			kaleoNode.getCompanyId()
+		).createDate(
+			kaleoNode.getCreateDate()
+		).initial(
+			kaleoNode.isInitial()
+		).modifiedDate(
+			kaleoNode.getModifiedDate()
+		).name(
+			kaleoNode.getName()
+		).nodeId(
+			kaleoNode.getKaleoNodeId()
+		).processId(
+			kaleoNode.getKaleoDefinitionId()
+		).processVersion(
+			kaleoDefinitionVersion.getVersion()
+		).terminal(
+			kaleoNode.isTerminal()
+		).type(
+			kaleoNode.getType()
+		).build();
+	}
+
+	public AddNodeRequest createAddNodeRequest(
+		KaleoDefinitionVersion kaleoDefinitionVersion, KaleoTask kaleoTask) {
+
+		AddNodeRequest.Builder builder = new AddNodeRequest.Builder();
+
+		return builder.companyId(
+			kaleoTask.getCompanyId()
+		).createDate(
+			kaleoTask.getCreateDate()
+		).initial(
+			false
+		).modifiedDate(
+			kaleoTask.getModifiedDate()
+		).name(
+			kaleoTask.getName()
+		).nodeId(
+			kaleoTask.getKaleoTaskId()
+		).processId(
+			kaleoTask.getKaleoDefinitionId()
+		).processVersion(
+			kaleoDefinitionVersion.getVersion()
+		).terminal(
+			false
+		).type(
+			NodeType.TASK.name()
+		).build();
+	}
+
 	public AddTaskRequest createAddTaskRequest(
 		KaleoInstance kaleoInstance,
 		KaleoTaskInstanceToken kaleoTaskInstanceToken, String processVersion) {
 
-		AddTaskRequest.Builder addTaskRequestBuilder =
-			new AddTaskRequest.Builder();
+		AddTaskRequest.Builder builder = new AddTaskRequest.Builder();
 
-		addTaskRequestBuilder.assetTitleMap(
+		builder.assetTitleMap(
 			createAssetTitleLocalizationMap(
 				kaleoTaskInstanceToken.getClassName(),
 				kaleoTaskInstanceToken.getClassPK(),
@@ -96,14 +161,14 @@ public class IndexerHelper {
 		);
 
 		if (kaleoInstance != null) {
-			addTaskRequestBuilder.instanceCompleted(
+			builder.instanceCompleted(
 				kaleoInstance.isCompleted()
 			).instanceCompletionDate(
 				kaleoInstance.getCompletionDate()
 			);
 		}
 
-		return addTaskRequestBuilder.instanceId(
+		return builder.instanceId(
 			kaleoTaskInstanceToken.getKaleoInstanceId()
 		).modifiedDate(
 			kaleoTaskInstanceToken.getModifiedDate()
@@ -119,6 +184,42 @@ public class IndexerHelper {
 			kaleoTaskInstanceToken.getKaleoTaskInstanceTokenId()
 		).userId(
 			kaleoTaskInstanceToken.getUserId()
+		).build();
+	}
+
+	public AddTransitionRequest createAddTransitionRequest(
+			KaleoTransition kaleoTransition, String processVersion)
+		throws PortalException {
+
+		AddTransitionRequest.Builder builder =
+			new AddTransitionRequest.Builder();
+
+		return builder.companyId(
+			kaleoTransition.getCompanyId()
+		).createDate(
+			kaleoTransition.getCreateDate()
+		).modifiedDate(
+			kaleoTransition.getModifiedDate()
+		).name(
+			kaleoTransition.getName()
+		).nodeId(
+			_getNodeId(kaleoTransition.getKaleoNodeId())
+		).processId(
+			kaleoTransition.getKaleoDefinitionId()
+		).processVersion(
+			processVersion
+		).sourceNodeId(
+			_getNodeId(kaleoTransition.getSourceKaleoNodeId())
+		).sourceNodeName(
+			kaleoTransition.getSourceKaleoNodeName()
+		).targetNodeId(
+			_getNodeId(kaleoTransition.getTargetKaleoNodeId())
+		).targetNodeName(
+			kaleoTransition.getTargetKaleoNodeName()
+		).transitionId(
+			kaleoTransition.getKaleoTransitionId()
+		).userId(
+			kaleoTransition.getUserId()
 		).build();
 	}
 
@@ -173,6 +274,19 @@ public class IndexerHelper {
 		}
 
 		return localizationMap;
+	}
+
+	public DeleteTransitionRequest createDeleteTransitionRequest(
+		KaleoTransition kaleoTransition) {
+
+		DeleteTransitionRequest.Builder builder =
+			new DeleteTransitionRequest.Builder();
+
+		return builder.companyId(
+			kaleoTransition.getCompanyId()
+		).transitionId(
+			kaleoTransition.getKaleoTransitionId()
+		).build();
 	}
 
 	public List<Assignment> toAssignments(
@@ -238,14 +352,36 @@ public class IndexerHelper {
 		return null;
 	}
 
+	private long _getNodeId(long kaleoNodeId) throws PortalException {
+		KaleoNode kaleoNode = _kaleoNodeLocalService.fetchKaleoNode(
+			kaleoNodeId);
+
+		if ((kaleoNode == null) ||
+			!Objects.equals(kaleoNode.getType(), NodeType.TASK.name())) {
+
+			return kaleoNodeId;
+		}
+
+		KaleoTask kaleoTask = _kaleoTaskLocalService.getKaleoNodeKaleoTask(
+			kaleoNode.getKaleoNodeId());
+
+		return kaleoTask.getKaleoTaskId();
+	}
+
 	private static final Log _log = LogFactoryUtil.getLog(IndexerHelper.class);
 
 	@Reference
 	private AssetEntryLocalService _assetEntryLocalService;
 
 	@Reference
+	private KaleoNodeLocalService _kaleoNodeLocalService;
+
+	@Reference
 	private KaleoTaskAssignmentInstanceLocalService
 		_kaleoTaskAssignmentInstanceLocalService;
+
+	@Reference
+	private KaleoTaskLocalService _kaleoTaskLocalService;
 
 	@Reference
 	private UserLocalService _userLocalService;

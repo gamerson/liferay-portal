@@ -144,7 +144,9 @@ public class AccountRoleLocalServiceUtil {
 		return getService().deleteAccountRole(accountRoleId);
 	}
 
-	public static void deleteAccountRolesByCompanyId(long companyId) {
+	public static void deleteAccountRolesByCompanyId(long companyId)
+		throws PortalException {
+
 		getService().deleteAccountRolesByCompanyId(companyId);
 	}
 
@@ -355,6 +357,14 @@ public class AccountRoleLocalServiceUtil {
 		return getService().searchAccountRoles(
 			companyId, accountEntryIds, keywords, params, start, end,
 			orderByComparator);
+	}
+
+	public static void setUserAccountRoles(
+			long accountEntryId, long[] accountRoleIds, long userId)
+		throws PortalException {
+
+		getService().setUserAccountRoles(
+			accountEntryId, accountRoleIds, userId);
 	}
 
 	public static void unassociateUser(

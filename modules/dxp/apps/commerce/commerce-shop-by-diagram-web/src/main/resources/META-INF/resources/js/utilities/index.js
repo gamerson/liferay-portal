@@ -9,6 +9,9 @@
  * distribution rights of the Software.
  */
 
+import {isProductPurchasable} from 'commerce-frontend-js/utilities/index';
+import {getProductMinQuantity} from 'commerce-frontend-js/utilities/quantities';
+
 import {DIAGRAM_LABELS_MAX_LENGTH, DRAG_AND_DROP_THRESHOLD} from './constants';
 
 export const TOOLTIP_DISTANCE_FROM_TARGET = 10;
@@ -109,27 +112,48 @@ export function formatLabel(label) {
 	return label;
 }
 
+export function formatMappedProductForTable(mappedProducts, isAdmin) {
+	return mappedProducts.map((mappedProduct) => {
+		return {
+			...mappedProduct,
+			initialQuantity:
+				isAdmin || mappedProduct.type !== 'sku'
+					? 0
+					: getProductMinQuantity(mappedProduct.productConfiguration),
+			selectable:
+				isAdmin || mappedProduct.type !== 'sku'
+					? false
+					: isProductPurchasable(
+							mappedProduct.availability,
+							mappedProduct.productConfiguration,
+							mappedProduct.purchasable
+					  ),
+		};
+	});
+}
+
 export function formatProductOptions(skuOptions, productOptions) {
 	const optionsData = Object.entries(skuOptions);
 
-	if (!optionsData.length) {
-		return 'null';
-	}
+	return optionsData.reduce((formattedOptions, optionData) => {
+		const [optionId, optionValueId] = optionData;
 
-	const [optionId, optionValueId] = optionsData[0];
-
-	const option = productOptions.find(
-		(productOption) => String(productOption.id) === String(optionId)
-	);
-
-	const optionValue =
-		option &&
-		option.productOptionValues.find(
-			(productOptionValue) =>
-				String(productOptionValue.id) === String(optionValueId)
+		const option = productOptions.find(
+			(productOption) => String(productOption.id) === String(optionId)
 		);
 
-	return JSON.stringify([{key: option.key, value: [optionValue.key]}]);
+		const optionValue =
+			option &&
+			option.productOptionValues.find(
+				(productOptionValue) =>
+					String(productOptionValue.id) === String(optionValueId)
+			);
+
+		return [
+			...formattedOptions,
+			{key: option.key, value: [optionValue.key]},
+		];
+	}, []);
 }
 
 export function getProductURL(productBaseURL, productURLs) {
@@ -138,4 +162,11 @@ export function getProductURL(productBaseURL, productURLs) {
 		productURLs[Liferay.ThemeDisplay.getDefaultLanguageId()];
 
 	return productBaseURL + productShortLink;
+}
+
+export function getProductName(product) {
+	return (
+		product.productName[Liferay.ThemeDisplay.getLanguageId()] ||
+		product.productName[Liferay.ThemeDisplay.getDefaultLanguageId()]
+	);
 }

@@ -10,10 +10,27 @@
 </thead>
 
 <tbody>
-<!-- DISPLAY_NAME_OR_DESCRIPTION -->
+<!-- BUTTON_TO_SEND_MANY_CUSTOM_EVENTS -->
+<tr>
+	<td>SEND_CUSTOM_EVENTS</td>
+	<td>//button[@onclick]</td>
+	<td></td>
+</tr>
+<!-- EVENT_LIST_COLUMN-->
 <tr>
 	<td>DISPLAY_NAME_OR_DESCRIPTION_LIST</td>
 	<td>//td[contains(@class,'text-truncate')and text()='${key_nameValue}']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SAMPLE_RAW_DATA_LIST</td>
+	<td>//th/ancestor::table//a[text()='${key_attributeName}']/ancestor::tr//td[contains(@class,'table-cell-expand-smaller')]</td>
+	<td></td>
+</tr>
+<!-- SAMPLE_RAW_DATA_TABLE-->
+<tr>
+	<td>SAMPLE_RAW_DATA_IN_ORDER</td>
+	<td>xpath=(//td[contains(@class,'table-cell-expand-small')])[${index}]</td>
 	<td></td>
 </tr>
 <!-- DATA_TYPE -->
@@ -47,6 +64,17 @@
 <tr>
 	<td>INPUT_BUTTON</td>
 	<td>//input[@type='submit']</td>
+	<td></td>
+</tr>
+<!-- BLOCK_CUSTOM_EVENT -->
+<tr>
+	<td>BLOCK_CUSTOM_EVENT_LIST</td>
+	<td>//a[contains(@href,'block-list')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>BLOCK_UNBLOCK_EVENT_BUTTON</td>
+	<td>//*[text()='${key_nameList}']/ancestor::tr//div[@class='quick-action-menu']//button[contains(@alt,'${key_actionButton}')]</td>
 	<td></td>
 </tr>
 </tbody>

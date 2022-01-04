@@ -694,6 +694,70 @@ public interface CPInstanceModel
 	public void setUnspsc(String unspsc);
 
 	/**
+	 * Returns the discontinued of this cp instance.
+	 *
+	 * @return the discontinued of this cp instance
+	 */
+	public boolean getDiscontinued();
+
+	/**
+	 * Returns <code>true</code> if this cp instance is discontinued.
+	 *
+	 * @return <code>true</code> if this cp instance is discontinued; <code>false</code> otherwise
+	 */
+	public boolean isDiscontinued();
+
+	/**
+	 * Sets whether this cp instance is discontinued.
+	 *
+	 * @param discontinued the discontinued of this cp instance
+	 */
+	public void setDiscontinued(boolean discontinued);
+
+	/**
+	 * Returns the discontinued date of this cp instance.
+	 *
+	 * @return the discontinued date of this cp instance
+	 */
+	public Date getDiscontinuedDate();
+
+	/**
+	 * Sets the discontinued date of this cp instance.
+	 *
+	 * @param discontinuedDate the discontinued date of this cp instance
+	 */
+	public void setDiscontinuedDate(Date discontinuedDate);
+
+	/**
+	 * Returns the replacement cp instance uuid of this cp instance.
+	 *
+	 * @return the replacement cp instance uuid of this cp instance
+	 */
+	@AutoEscape
+	public String getReplacementCPInstanceUuid();
+
+	/**
+	 * Sets the replacement cp instance uuid of this cp instance.
+	 *
+	 * @param replacementCPInstanceUuid the replacement cp instance uuid of this cp instance
+	 */
+	public void setReplacementCPInstanceUuid(String replacementCPInstanceUuid);
+
+	/**
+	 * Returns the replacement c product ID of this cp instance.
+	 *
+	 * @return the replacement c product ID of this cp instance
+	 */
+	public long getReplacementCProductId();
+
+	/**
+	 * Sets the replacement c product ID of this cp instance.
+	 *
+	 * @param replacementCProductId the replacement c product ID of this cp instance
+	 */
+	public void setReplacementCProductId(long replacementCProductId);
+
+	/**
 	 * Returns the status of this cp instance.
 	 *
 	 * @return the status of this cp instance

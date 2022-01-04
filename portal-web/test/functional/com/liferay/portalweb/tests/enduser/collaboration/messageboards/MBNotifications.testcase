@@ -3,6 +3,7 @@ definition {
 
 	property portal.release = "true";
 	property portal.upstream = "true";
+	property testray.component.names = "Notifications";
 	property testray.main.component.name = "Message Boards";
 
 	setUp {
@@ -79,17 +80,12 @@ definition {
 			siteURLKey = "guest",
 			source = "true",
 			threadBody = '''<p><a href="http://www.liferay.com">Welcome to LIFERAY</a></p>''',
-			threadSubject = "MB Thread Message Subject");
+			threadSubject = "MB Thread Message HTML Subject");
 
-		MockMock.viewMail(
-			asset = "MB Thread Message Subject",
-			content = "Welcome to LIFERAY",
-			recipient = "userfn userln",
-			sender = "Test Test",
-			subject = "MB Thread Message Subject");
+		MockMock.openMockMock();
 
 		MockMock.clickBodyLink(
-			asset = "MB Thread Message Subject",
+			asset = "MB Thread Message HTML Subject",
 			bodyLink = "Welcome to LIFERAY",
 			recipient = "userfn userln");
 
@@ -153,15 +149,15 @@ definition {
 			groupName = "Guest",
 			layoutName = "message-boards-page",
 			siteURLKey = "guest",
-			threadBody = "MB Body",
-			threadSubject = "MB Thread Message Subject");
+			threadBody = "MB Localized Template Body",
+			threadSubject = "MB Localized Template Subject");
 
-		MockMock.viewMail(
-			asset = "MB Thread Message Subject",
-			content = "MB Body este es un campo de tablero de mensajes",
+		MockMock.viewUnformattedHTMLText(
+			asset = "MB Localized Template Subject",
 			recipient = "userfn userln",
 			sender = "Test Test",
-			subject = "MB Thread Message Subject");
+			subject = "MB Localized Template Subject",
+			unFormattedContent = "MB Localized Template Body este es un campo de tablero de mensajes");
 	}
 
 	@priority = "4"
@@ -501,7 +497,7 @@ definition {
 			category = "Site Builder",
 			portlet = "Pages");
 
-		SitePages.addPublicPage(
+		PagesAdmin.addPublicPage(
 			pageName = "Message Boards Page",
 			sitePageType = "Widget Page");
 

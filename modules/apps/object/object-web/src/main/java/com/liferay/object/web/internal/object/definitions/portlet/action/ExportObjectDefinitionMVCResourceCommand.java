@@ -23,6 +23,7 @@ import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.portlet.PortletResponseUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCResourceCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCResourceCommand;
@@ -88,6 +89,18 @@ public class ExportObjectDefinitionMVCResourceCommand
 		JSONObject objectDefinitionJSONObject =
 			JSONFactoryUtil.createJSONObject(objectDefinition.toString());
 
+		for (ObjectField objectField : objectDefinition.getObjectFields()) {
+			if (Objects.equals(
+					objectField.getId(),
+					objectDefinition.getTitleObjectFieldId())) {
+
+				objectDefinitionJSONObject.put(
+					"titleObjectFieldName", objectField.getName());
+
+				break;
+			}
+		}
+
 		ExportImportObjectDefinitiontUtil.apply(
 			objectDefinitionJSONObject,
 			objectLayoutColumnJSONObject -> {
@@ -114,17 +127,21 @@ public class ExportObjectDefinitionMVCResourceCommand
 					return null;
 				}
 
-				objectLayoutColumnJSONObject.put(
-					"objectFieldName", objectField.getName());
-
-				return objectLayoutColumnJSONObject;
+				return JSONUtil.put(
+					"objectFieldName", objectField.getName()
+				).put(
+					"priority", objectLayoutColumnJSONObject.get("priority")
+				).put(
+					"size", objectLayoutColumnJSONObject.get("size")
+				);
 			});
 
 		_sanitizeJSON(
 			objectDefinitionJSONObject,
 			new String[] {
 				"dateCreated", "dateModified", "id", "listTypeDefinitionId",
-				"objectDefinitionId", "objectFieldId", "objectRelationshipId"
+				"objectDefinitionId", "objectFieldId", "objectRelationshipId",
+				"titleObjectFieldId"
 			});
 
 		String objectDefinitionJSON = objectDefinitionJSONObject.toString();

@@ -964,6 +964,13 @@ components:
             type: object
         UserGroup:
             properties:
+                actions:
+                    additionalProperties:
+                        additionalProperties:
+                            type: string
+                        type: object
+                    readOnly: true
+                    type: object
                 description:
                     type: string
                 id:
@@ -1004,7 +1011,7 @@ components:
 info:
     description:
         "A Java client JAR is available for use with the group ID 'com.liferay', artifact ID
-        'com.liferay.headless.admin.user.client', and version '4.0.12'."
+        'com.liferay.headless.admin.user.client', and version '4.0.16'."
     license:
         name: "Apache 2.0"
         url: "http://www.apache.org/licenses/LICENSE-2.0.html"
@@ -3849,9 +3856,6 @@ paths:
                         application/xml:
                             schema:
                                 $ref: "#/components/schemas/UserGroup"
-                    # @review
-                    description:
-                        "User group successfully created"
             tags: ["UserGroup"]
     "/user-groups/{userGroupId}":
         delete:
@@ -3868,6 +3872,79 @@ paths:
                     content:
                         application/json: {}
                         application/xml: {}
+            tags: ["UserGroup"]
+        get:
+            operationId: getUserGroup
+            parameters:
+                - in: path
+                  name: userGroupId
+                  required: true
+                  schema:
+                      format: int64
+                      type: integer
+            responses:
+                200:
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/UserGroup"
+                        application/xml:
+                            schema:
+                                $ref: "#/components/schemas/UserGroup"
+            tags: ["UserGroup"]
+        patch:
+            operationId: patchUserGroup
+            parameters:
+                - in: path
+                  name: userGroupId
+                  required: true
+                  schema:
+                      format: int64
+                      type: integer
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/UserGroup"
+                    application/xml:
+                        schema:
+                            $ref: "#/components/schemas/UserGroup"
+            responses:
+                200:
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/UserGroup"
+                        application/xml:
+                            schema:
+                                $ref: "#/components/schemas/UserGroup"
+            tags: ["UserGroup"]
+        put:
+            operationId: putUserGroup
+            parameters:
+                - in: path
+                  name: userGroupId
+                  required: true
+                  schema:
+                      format: int64
+                      type: integer
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/UserGroup"
+                    application/xml:
+                        schema:
+                            $ref: "#/components/schemas/UserGroup"
+            responses:
+                200:
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/UserGroup"
+                        application/xml:
+                            schema:
+                                $ref: "#/components/schemas/UserGroup"
             tags: ["UserGroup"]
     "/web-urls/{webUrlId}":
         get:

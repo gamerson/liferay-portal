@@ -28,6 +28,7 @@ import com.liferay.portal.kernel.portlet.LiferayPortletRequest;
 import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
 import com.liferay.portal.kernel.portlet.PortletURLUtil;
 import com.liferay.portal.kernel.portlet.RequestBackedPortletURLFactoryUtil;
+import com.liferay.portal.kernel.portlet.SearchOrderByUtil;
 import com.liferay.portal.kernel.service.ClassNameLocalServiceUtil;
 import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.servlet.taglib.ui.Menu;
@@ -51,6 +52,7 @@ import com.liferay.sharing.security.permission.SharingPermission;
 import com.liferay.sharing.service.SharingEntryLocalService;
 import com.liferay.sharing.servlet.taglib.ui.SharingEntryMenuItemContributor;
 import com.liferay.sharing.util.comparator.SharingEntryModifiedDateComparator;
+import com.liferay.sharing.web.internal.constants.SharingPortletKeys;
 import com.liferay.sharing.web.internal.filter.SharedAssetsFilterItemTracker;
 import com.liferay.sharing.web.internal.item.selector.SharedAssetsFilterItemItemSelectorCriterion;
 import com.liferay.sharing.web.internal.servlet.taglib.ui.SharingEntryMenuItemContributorRegistry;
@@ -176,6 +178,18 @@ public class ViewSharedAssetsDisplayContext {
 		).build();
 	}
 
+	public String getOrderByCol() {
+		if (Validator.isNotNull(_orderByCol)) {
+			return _orderByCol;
+		}
+
+		_orderByCol = SearchOrderByUtil.getOrderByCol(
+			_httpServletRequest, SharingPortletKeys.SHARED_ASSETS,
+			"modified-date");
+
+		return _orderByCol;
+	}
+
 	public PortletURL getSelectAssetTypeURL() {
 		return _itemSelector.getItemSelectorURL(
 			RequestBackedPortletURLFactoryUtil.create(_liferayPortletRequest),
@@ -219,13 +233,11 @@ public class ViewSharedAssetsDisplayContext {
 					_httpServletRequest));
 		}
 
-		boolean containsManageCollaboratorsPermission =
-			_sharingPermission.containsManageCollaboratorsPermission(
+		if (_sharingPermission.containsManageCollaboratorsPermission(
 				_themeDisplay.getPermissionChecker(),
 				sharingEntry.getClassNameId(), sharingEntry.getClassPK(),
-				_themeDisplay.getScopeGroupId());
+				_themeDisplay.getScopeGroupId())) {
 
-		if (containsManageCollaboratorsPermission) {
 			menuItems.add(
 				_sharingMenuItemFactory.createManageCollaboratorsMenuItem(
 					sharingEntry.getClassName(), sharingEntry.getClassPK(),
@@ -247,7 +259,14 @@ public class ViewSharedAssetsDisplayContext {
 	}
 
 	public String getSortingOrder() {
-		return ParamUtil.getString(_httpServletRequest, "orderByType", "asc");
+		if (Validator.isNotNull(_orderByType)) {
+			return _orderByType;
+		}
+
+		_orderByType = SearchOrderByUtil.getOrderByType(
+			_httpServletRequest, SharingPortletKeys.SHARED_ASSETS, "asc");
+
+		return _orderByType;
 	}
 
 	public PortletURL getSortingURL() throws PortletException {
@@ -256,9 +275,7 @@ public class ViewSharedAssetsDisplayContext {
 		).setParameter(
 			"orderByType",
 			() -> {
-				String orderByType = getSortingOrder();
-
-				if (Objects.equals(orderByType, "asc")) {
+				if (Objects.equals(getSortingOrder(), "asc")) {
 					return "desc";
 				}
 
@@ -300,45 +317,28 @@ public class ViewSharedAssetsDisplayContext {
 	}
 
 	public void populateResults(SearchContainer<SharingEntry> searchContainer) {
-		long classNameId = 0;
-
-		String className = ParamUtil.getString(
-			_httpServletRequest, "className");
-
-		if (Validator.isNotNull(className)) {
-			classNameId = ClassNameLocalServiceUtil.getClassNameId(className);
-		}
+		long classNameId = ClassNameLocalServiceUtil.getClassNameId(
+			ParamUtil.getString(_httpServletRequest, "className"));
 
 		if (_isIncoming()) {
-			int total = _sharingEntryLocalService.getToUserSharingEntriesCount(
-				_themeDisplay.getUserId(), classNameId);
-
-			searchContainer.setTotal(total);
-
-			List<SharingEntry> sharingEntries =
-				_sharingEntryLocalService.getToUserSharingEntries(
+			searchContainer.setResultsAndTotal(
+				() -> _sharingEntryLocalService.getToUserSharingEntries(
 					_themeDisplay.getUserId(), classNameId,
 					searchContainer.getStart(), searchContainer.getEnd(),
 					new SharingEntryModifiedDateComparator(
-						Objects.equals(getSortingOrder(), "asc")));
-
-			searchContainer.setResults(sharingEntries);
+						Objects.equals(getSortingOrder(), "asc"))),
+				_sharingEntryLocalService.getToUserSharingEntriesCount(
+					_themeDisplay.getUserId(), classNameId));
 		}
 		else {
-			int total =
-				_sharingEntryLocalService.getFromUserSharingEntriesCount(
-					_themeDisplay.getUserId(), classNameId);
-
-			searchContainer.setTotal(total);
-
-			List<SharingEntry> sharingEntries =
-				_sharingEntryLocalService.getFromUserSharingEntries(
+			searchContainer.setResultsAndTotal(
+				() -> _sharingEntryLocalService.getFromUserSharingEntries(
 					_themeDisplay.getUserId(), classNameId,
 					searchContainer.getStart(), searchContainer.getEnd(),
 					new SharingEntryModifiedDateComparator(
-						Objects.equals(getSortingOrder(), "asc")));
-
-			searchContainer.setResults(sharingEntries);
+						Objects.equals(getSortingOrder(), "asc"))),
+				_sharingEntryLocalService.getFromUserSharingEntriesCount(
+					_themeDisplay.getUserId(), classNameId));
 		}
 	}
 
@@ -412,11 +412,8 @@ public class ViewSharedAssetsDisplayContext {
 	private List<DropdownItem> _getOrderByDropdownItems() {
 		return DropdownItemListBuilder.add(
 			dropdownItem -> {
-				String orderByCol = ParamUtil.getString(
-					_httpServletRequest, "orderByCol", "sharedDate");
-
 				dropdownItem.setActive(
-					Objects.equals(orderByCol, "sharedDate"));
+					Objects.equals(getOrderByCol(), "sharedDate"));
 
 				dropdownItem.setHref(
 					_getCurrentSortingURL(), "orderByCol", "sharedDate");
@@ -478,6 +475,8 @@ public class ViewSharedAssetsDisplayContext {
 	private final ItemSelector _itemSelector;
 	private final LiferayPortletRequest _liferayPortletRequest;
 	private final LiferayPortletResponse _liferayPortletResponse;
+	private String _orderByCol;
+	private String _orderByType;
 	private final SharedAssetsFilterItemTracker _sharedAssetsFilterItemTracker;
 	private final SharingConfigurationFactory _sharingConfigurationFactory;
 	private final Function<SharingEntry, SharingEntryInterpreter>

@@ -38,6 +38,7 @@ import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.JavaConstants;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.WebKeys;
+import com.liferay.portal.kernel.workflow.WorkflowConstants;
 
 import java.io.IOException;
 
@@ -112,7 +113,8 @@ public class ObjectEntryItemSelectorView
 			servletRequest, servletResponse, infoItemItemSelectorCriterion,
 			portletURL, itemSelectedEventName, search,
 			new ObjectItemSelectorViewDescriptor(
-				(HttpServletRequest)servletRequest, _objectDefinition,
+				(HttpServletRequest)servletRequest,
+				infoItemItemSelectorCriterion, _objectDefinition,
 				_objectScopeProviderRegistry, portletURL));
 	}
 
@@ -220,11 +222,13 @@ public class ObjectEntryItemSelectorView
 
 		public ObjectItemSelectorViewDescriptor(
 			HttpServletRequest httpServletRequest,
+			InfoItemItemSelectorCriterion infoItemItemSelectorCriterion,
 			ObjectDefinition objectDefinition,
 			ObjectScopeProviderRegistry objectScopeProviderRegistry,
 			PortletURL portletURL) {
 
 			_httpServletRequest = httpServletRequest;
+			_infoItemItemSelectorCriterion = infoItemItemSelectorCriterion;
 			_objectDefinition = objectDefinition;
 			_objectScopeProviderRegistry = objectScopeProviderRegistry;
 			_portletURL = portletURL;
@@ -258,10 +262,25 @@ public class ObjectEntryItemSelectorView
 					_portletRequest, _portletURL, null,
 					"no-entries-were-found");
 
-			List<ObjectEntry> objectEntries =
-				_objectEntryLocalService.getObjectEntries(
+			List<ObjectEntry> objectEntries = null;
+
+			List<ItemSelectorReturnType> desiredItemSelectorReturnTypes =
+				_infoItemItemSelectorCriterion.
+					getDesiredItemSelectorReturnTypes();
+
+			if (desiredItemSelectorReturnTypes.get(0) instanceof
+					InfoItemItemSelectorReturnType) {
+
+				objectEntries = _objectEntryLocalService.getObjectEntries(
+					_getGroupId(), _objectDefinition.getObjectDefinitionId(),
+					WorkflowConstants.STATUS_APPROVED,
+					searchContainer.getStart(), searchContainer.getEnd());
+			}
+			else {
+				objectEntries = _objectEntryLocalService.getObjectEntries(
 					_getGroupId(), _objectDefinition.getObjectDefinitionId(),
 					searchContainer.getStart(), searchContainer.getEnd());
+			}
 
 			searchContainer.setResults(objectEntries);
 
@@ -287,6 +306,8 @@ public class ObjectEntryItemSelectorView
 		}
 
 		private final HttpServletRequest _httpServletRequest;
+		private final InfoItemItemSelectorCriterion
+			_infoItemItemSelectorCriterion;
 		private final ObjectDefinition _objectDefinition;
 		private final ObjectScopeProviderRegistry _objectScopeProviderRegistry;
 		private final PortletRequest _portletRequest;

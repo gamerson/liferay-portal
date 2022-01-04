@@ -420,6 +420,14 @@ public class LayoutClassedModelUsageLocalServiceWrapper
 	}
 
 	@Override
+	public java.util.List<LayoutClassedModelUsage> getLayoutClassedModelUsages(
+		long companyId, long classNameId, long containerType) {
+
+		return _layoutClassedModelUsageLocalService.getLayoutClassedModelUsages(
+			companyId, classNameId, containerType);
+	}
+
+	@Override
 	public java.util.List<LayoutClassedModelUsage>
 		getLayoutClassedModelUsagesByPlid(long plid) {
 

@@ -108,8 +108,7 @@ definition {
 	test BlacklistModuleWar {
 		property test.name.skip.portal.instance = "BundleBlacklist#BlacklistModuleWar";
 
-		Page.viewCurrentTheme(
-			page = "Public Pages",
+		PagesAdmin.viewWidgetPageCurrentTheme(
 			pageName = "Search",
 			themeName = "Classic Theme");
 
@@ -129,17 +128,157 @@ definition {
 
 		AssertConsoleTextPresent(value1 = "STOPPED classic-theme");
 
-		SitePages.openPagesAdmin(siteURLKey = "guest");
+		PagesAdmin.openPagesAdmin(siteURLKey = "guest");
 
-		SitePages.gotoPageMenuItem(
+		PagesAdmin.gotoPageEllipsisMenuItem(
 			menuItem = "Configure",
 			pageName = "Search");
 
 		Navigator.gotoNavTab(navTab = "Look and Feel");
 
-		AssertTextNotPresent(
-			locator1 = "SitePagesEditPage#VIEW_THEME",
-			value1 = "Classic Theme");
+		AssertTextNotPresent(value1 = "Classic Theme");
+	}
+
+	@priority = "3"
+	test CanEnableBlacklistedModuleJarAfterRestart {
+		property osgi.module.configurations = "blacklistBundleSymbolicNames=[&quot;com.liferay.gogo.shell.web&quot;]";
+		property test.name.skip.portal.instance = "BundleBlacklist#CanEnableBlacklistedModuleJarAfterRestart";
+
+		BundleBlacklist.viewProductMenuBlacklistedModule(
+			category = "System",
+			consoleText = "Stopping blacklisted bundle com.liferay.gogo.shell.web",
+			panel = "Control Panel",
+			portlet = "Gogo Shell");
+
+		ApplicationsMenu.gotoPortlet(
+			category = "Configuration",
+			panel = "Control Panel",
+			portlet = "System Settings");
+
+		SystemSettings.gotoConfiguration(
+			configurationCategory = "Module Container",
+			configurationName = "Bundle Blacklist",
+			configurationScope = "System Scope");
+
+		BundleBlacklist.blacklistModuleAndComponentConfiguration(
+			label = "Blacklist Bundle Symbolic Names",
+			symbolicName = " ");
+
+		Portlet.shutdownServer();
+
+		Portlet.startServer(keepOSGiState = "true");
+
+		AssertConsoleTextPresent(value1 = "STARTED com.liferay.gogo.shell.web");
+
+		Navigator.openURL();
+
+		ApplicationsMenu.gotoPortlet(
+			category = "System",
+			panel = "Control Panel",
+			portlet = "Gogo Shell");
+	}
+
+	@priority = "3"
+	test CanEnableBlacklistedModuleLPKGAfterRestart {
+		property osgi.app.includes = "gogo-shell";
+		property test.name.skip.portal.instance = "BundleBlacklist#CanEnableBlacklistedModuleLPKGAfterRestart";
+
+		var testRunEnvironment = PropsUtil.get("test.run.environment");
+
+		if ("${testRunEnvironment}" == "EE") {
+			var symbolicName = "Liferay Foundation - Liferay Gogo Shell - Impl";
+		}
+		else {
+			var symbolicName = "Liferay CE Foundation - Liferay CE Gogo Shell - Impl";
+		}
+
+		OSGiConfig.deployOSGiConfigFile(
+			OSGiConfigFileName = "com.liferay.portal.bundle.blacklist.internal.configuration.BundleBlacklistConfiguration.config",
+			OSGiConfigs = "blacklistBundleSymbolicNames=[&quot;${symbolicName}&quot; ]");
+
+		Pause(locator1 = "10000");
+
+		BundleBlacklist.viewProductMenuBlacklistedModule(
+			category = "System",
+			consoleText = "STOPPED ${symbolicName}",
+			panel = "Control Panel",
+			portlet = "Gogo Shell");
+
+		ApplicationsMenu.gotoPortlet(
+			category = "Configuration",
+			panel = "Control Panel",
+			portlet = "System Settings");
+
+		SystemSettings.gotoConfiguration(
+			configurationCategory = "Module Container",
+			configurationName = "Bundle Blacklist",
+			configurationScope = "System Scope");
+
+		BundleBlacklist.blacklistModuleAndComponentConfiguration(
+			label = "Blacklist Bundle Symbolic Names",
+			symbolicName = " ");
+
+		Portlet.shutdownServer();
+
+		Portlet.startServer(keepOSGiState = "true");
+
+		AssertConsoleTextPresent(value1 = "STARTED ${symbolicName}");
+
+		Navigator.openURL();
+
+		ApplicationsMenu.gotoPortlet(
+			category = "System",
+			panel = "Control Panel",
+			portlet = "Gogo Shell");
+	}
+
+	@priority = "3"
+	test CanEnableBlacklistedModuleWarAfterRestart {
+		property osgi.module.configurations = "blacklistBundleSymbolicNames=[&quot;minium-theme&quot;]";
+		property test.name.skip.portal.instance = "BundleBlacklist#CanEnableBlacklistedModuleWarAfterRestart";
+
+		AssertConsoleTextPresent(value1 = "Stopping blacklisted bundle minium-theme");
+
+		ApplicationsMenu.gotoPortlet(
+			category = "Configuration",
+			panel = "Control Panel",
+			portlet = "System Settings");
+
+		SystemSettings.gotoConfiguration(
+			configurationCategory = "Module Container",
+			configurationName = "Bundle Blacklist",
+			configurationScope = "System Scope");
+
+		BundleBlacklist.blacklistModuleAndComponentConfiguration(
+			label = "Blacklist Bundle Symbolic Names",
+			symbolicName = " ");
+
+		Portlet.shutdownServer();
+
+		Portlet.startServer(keepOSGiState = "true");
+
+		AssertConsoleTextPresent(value1 = "STARTED minium-theme");
+
+		PagesAdmin.openPagesAdmin(siteURLKey = "guest");
+
+		PagesAdmin.gotoPageEllipsisMenuItem(
+			menuItem = "Configure",
+			pageName = "Search");
+
+		Navigator.gotoNavTab(navTab = "Look and Feel");
+
+		Theme.configureLookAndFeelSpecificLook();
+
+		Click(
+			key_text = "Change Current Theme",
+			locator1 = "Button#ANY");
+
+		SelectFrame(locator1 = "IFrame#MODAL_BODY");
+
+		AssertElementPresent(
+			key_card = "Minium",
+			locator1 = "Card#CARD_TITLE",
+			value1 = "Minium");
 	}
 
 	@priority = "3"
@@ -194,17 +333,19 @@ definition {
 
 		AssertConsoleTextPresent(value1 = "Stopping blacklisted bundle minium-theme");
 
-		SitePages.openPagesAdmin(siteURLKey = "guest");
+		PagesAdmin.openPagesAdmin(siteURLKey = "guest");
 
-		SitePages.gotoPageMenuItem(
+		PagesAdmin.gotoPageEllipsisMenuItem(
 			menuItem = "Configure",
 			pageName = "Search");
 
 		Navigator.gotoNavTab(navTab = "Look and Feel");
 
-		Click(locator1 = "SitePagesEditPage#REGULAR_UNIQUE_LOOK_AND_FEEL");
+		Theme.configureLookAndFeelSpecificLook();
 
-		Click(locator1 = "SitePagesEditPage#CHANGE_CURRENT_THEME_BUTTON");
+		Click(
+			key_text = "Change Current Theme",
+			locator1 = "Button#ANY");
 
 		SelectFrame(locator1 = "IFrame#MODAL_BODY");
 
@@ -231,17 +372,19 @@ definition {
 
 		AssertConsoleTextPresent(value1 = "Reinstalling bundle minium-theme");
 
-		SitePages.openPagesAdmin(siteURLKey = "guest");
+		PagesAdmin.openPagesAdmin(siteURLKey = "guest");
 
-		SitePages.gotoPageMenuItem(
+		PagesAdmin.gotoPageEllipsisMenuItem(
 			menuItem = "Configure",
 			pageName = "Search");
 
 		Navigator.gotoNavTab(navTab = "Look and Feel");
 
-		Click(locator1 = "SitePagesEditPage#REGULAR_UNIQUE_LOOK_AND_FEEL");
+		Theme.configureLookAndFeelSpecificLook();
 
-		Click(locator1 = "SitePagesEditPage#CHANGE_CURRENT_THEME_BUTTON");
+		Click(
+			key_text = "Change Current Theme",
+			locator1 = "Button#ANY");
 
 		SelectFrame(locator1 = "IFrame#MODAL_BODY");
 
@@ -249,6 +392,35 @@ definition {
 			key_card = "Minium",
 			locator1 = "Card#CARD_TITLE",
 			value1 = "Minium");
+	}
+
+	@priority = "3"
+	test EnableBlacklistedModuleAfterShutdown {
+		property osgi.module.configurations = "blacklistBundleSymbolicNames=[&quot;com.liferay.gogo.shell.web&quot;]";
+		property test.name.skip.portal.instance = "BundleBlacklist#EnableBlacklistedModuleAfterShutdown";
+
+		BundleBlacklist.viewProductMenuBlacklistedModule(
+			category = "System",
+			consoleText = "Stopping blacklisted bundle com.liferay.gogo.shell.web",
+			panel = "Control Panel",
+			portlet = "Gogo Shell");
+
+		Portlet.shutdownServer();
+
+		OSGiConfig.deleteOSGiConfigFile(OSGiConfigFileName = "com.liferay.portal.bundle.blacklist.internal.configuration.BundleBlacklistConfiguration.config");
+
+		Portlet.startServer(
+			deleteLiferayHome = "false",
+			keepOSGiState = "true");
+
+		AssertConsoleTextPresent(value1 = "STARTED com.liferay.gogo.shell.web");
+
+		Navigator.openURL();
+
+		ApplicationsMenu.gotoPortlet(
+			category = "System",
+			panel = "Control Panel",
+			portlet = "Gogo Shell");
 	}
 
 	@priority = "5"
@@ -306,9 +478,7 @@ definition {
 
 		Portlet.shutdownServer();
 
-		Portlet.startServer(
-			deleteLiferayHome = "false",
-			keepOSGiState = "true");
+		Portlet.startServer(keepOSGiState = "true");
 
 		Navigator.openURL();
 
@@ -392,17 +562,19 @@ definition {
 
 		Portlet.startServer(keepOSGiState = "true");
 
-		SitePages.openPagesAdmin(siteURLKey = "guest");
+		PagesAdmin.openPagesAdmin(siteURLKey = "guest");
 
-		SitePages.gotoPageMenuItem(
+		PagesAdmin.gotoPageEllipsisMenuItem(
 			menuItem = "Configure",
 			pageName = "Search");
 
 		Navigator.gotoNavTab(navTab = "Look and Feel");
 
-		Click(locator1 = "SitePagesEditPage#REGULAR_UNIQUE_LOOK_AND_FEEL");
+		Theme.configureLookAndFeelSpecificLook();
 
-		Click(locator1 = "SitePagesEditPage#CHANGE_CURRENT_THEME_BUTTON");
+		Click(
+			key_text = "Change Current Theme",
+			locator1 = "Button#ANY");
 
 		SelectFrame(locator1 = "IFrame#MODAL_BODY");
 

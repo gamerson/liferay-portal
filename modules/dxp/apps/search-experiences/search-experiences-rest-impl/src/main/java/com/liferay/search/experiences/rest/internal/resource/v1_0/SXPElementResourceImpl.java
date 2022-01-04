@@ -88,6 +88,8 @@ public class SXPElementResourceImpl
 			_sxpElementService.getSXPElement(sxpElementId);
 
 		return Response.ok(
+		).encoding(
+			"UTF-8"
 		).entity(
 			JSONUtil.put(
 				"description_i18n",
@@ -118,6 +120,12 @@ public class SXPElementResourceImpl
 	public Page<SXPElement> getSXPElementsPage(
 			String search, Filter filter, Pagination pagination, Sort[] sorts)
 		throws Exception {
+
+		if (sorts == null) {
+			sorts = new Sort[] {
+				new Sort("modified_sortable", Sort.LONG_TYPE, true)
+			};
+		}
 
 		return SearchUtil.search(
 			Collections.emptyMap(),
