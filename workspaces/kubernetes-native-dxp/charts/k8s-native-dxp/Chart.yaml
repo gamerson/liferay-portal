@@ -1,0 +1,4 @@
+apiVersion: v1
+description: LXC Kubernetes Native DXP
+name: lxc-k8s-native-dxp
+version: 0.1.0

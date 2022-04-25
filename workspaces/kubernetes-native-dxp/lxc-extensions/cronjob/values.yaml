@@ -1,0 +1,5 @@
+description: This is an example LXC Extension Cronjob
+image: cronjob
+scopes:
+- Liferay.Headless.Admin.User.read
+- Liferay.Headless.Admin.User.write

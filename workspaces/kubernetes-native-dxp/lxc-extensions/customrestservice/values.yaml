@@ -1,0 +1,5 @@
+description: This is an example LXC Extension Custom Rest Service
+image: customrestservice
+scopes:
+- Liferay.Headless.Admin.User.read
+- Liferay.Headless.Admin.User.write

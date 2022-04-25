@@ -1,0 +1,14 @@
+description: This is an example LXC Extension Remote App
+image: liferayhelloworld
+remoteAppConfig: |
+  name="Liferay Hello World"
+  description=""
+  type="customElement"
+  iFrameURL=""
+  elementName="liferay-hello-world"
+  webComponentUrl=["https://$[conf:cloud.liferay.com.domain.0]/static/js/main.5934f0de.js"]
+  webComponentCssUrl=["https://$[conf:cloud.liferay.com.domain.0]/static/css/main.9877909d.css"]
+  friendlyURLMapping=""
+  instanceable="false"
+  portletDisplayCategory="remote-app"
+  portletServiceProperties="foo=bar"

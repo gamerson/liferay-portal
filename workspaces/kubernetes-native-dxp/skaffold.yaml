@@ -35,16 +35,32 @@ build:
         paths:
         - lxc-extensions/cronjob/curl.sh
 deploy:
-  kustomize:
-    paths:
-    - k8s/dxp/
-    - k8s/liferayhelloworld/
-    - k8s/customrestservice/
-    - k8s/cronjob/
-    - k8s/common/
-    hooks:
-      after:
-      - host:
-          command: ["./darwin_patch.sh"]
-          os:
-          - darwin
+  helm:
+    releases:
+      - name: cronjob
+        chartPath: charts/cronjob
+        artifactOverrides:
+          image: cronjob
+        valuesFiles:
+          - "lxc-extensions/cronjob/values.yaml"
+          - "values.yaml"
+      - name: customrestservice
+        chartPath: charts/customrestservice
+        artifactOverrides:
+          image: customrestservice
+        valuesFiles:
+          - "lxc-extensions/customrestservice/values.yaml"
+          - "values.yaml"
+      - name: liferayhelloworld
+        chartPath: charts/remoteapp
+        artifactOverrides:
+          image: liferayhelloworld
+        valuesFiles:
+          - "lxc-extensions/liferayhelloworld/values.yaml"
+          - "values.yaml"
+      - name: k8s-native-dxp
+        chartPath: charts/k8s-native-dxp
+        artifactOverrides:
+          image: k8s-native-dxp
+        valuesFiles:
+          - "values.yaml"
