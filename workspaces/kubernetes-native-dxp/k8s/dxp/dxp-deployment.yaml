@@ -21,7 +21,7 @@ spec:
         runAsUser: 0
       initContainers:
         - name: init-dxp-pv
-          image: k8s-native-dxp
+          image: k8s-native-dxp:localdev
           command:
           - bash
           - -c
@@ -31,8 +31,8 @@ spec:
             mountPath: "/opt/liferay/data-pv"
       containers:
         - name: dxp
-          image: k8s-native-dxp
-          imagePullPolicy: Never
+          image: k8s-native-dxp:localdev
+          #imagePullPolicy: Never
           resources:
             limits:
               cpu: "4000m"
