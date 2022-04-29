@@ -1,0 +1,3 @@
+v1alpha1.extension_repo(name='default', url='https://github.com/gamerson/tilt-extensions')
+for tiltfile in str(local("find ./*/ -name Tiltfile")).splitlines():
+  include(tiltfile)
