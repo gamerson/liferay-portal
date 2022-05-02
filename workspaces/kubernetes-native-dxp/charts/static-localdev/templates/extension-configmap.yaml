@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{.Release.Name | lower}}-dxp-configs
+  labels:
+    cloud.liferay.com/serviceId: "{{.Release.Name | lower}}"
+    dxp.liferay.com/configs: "true"
+    projectCustomer: "yes"
+    projectId: {{ .Values.projectId }}
+    projectSandbox: ""
+    projectTrial: "no"
+    projectType: ""
+  annotations:
+    cloud.liferay.com/context-data: '{"domains":["{{.Release.Name | lower}}.localdev.me"]}'
+data:
+{{- range $key, $val := .Values.configFiles }}
+  {{ $key }}: |-
+{{ $val | indent 4}}
+{{- end }}
+{{- end -}}

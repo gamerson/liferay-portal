@@ -1,0 +1,5 @@
+image:
+  repository: gamerson/dxp-localdev
+
+extensions:
+  - name: designpackfire

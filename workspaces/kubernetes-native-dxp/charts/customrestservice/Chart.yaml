@@ -1,4 +1,0 @@
-apiVersion: v1
-description: LXC Extension Custom Rest Service
-name: lxc-extension-customrestservice
-version: 0.1.0

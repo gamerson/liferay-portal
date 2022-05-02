@@ -1,0 +1,5 @@
+image:
+  repository: static-localdev
+  tag: latest
+  pullPolicy: IfNotPresent
+projectId: lcd13978

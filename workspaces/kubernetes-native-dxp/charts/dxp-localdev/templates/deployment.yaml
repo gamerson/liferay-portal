@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{.Release.Name | lower}}"
+  labels:
+    app: dxp
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name | lower | quote }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dxp
+  revisionHistoryLimit: 5
+  progressDeadlineSeconds: 300
+  minReadySeconds: 10
+  template:
+    metadata:
+      labels:
+        app: dxp
+    spec:
+      securityContext:
+        runAsUser: 0
+      initContainers:
+        - name: init-{{ .Release.Name }}-pv
+          image: "{{ .Values.image.repository }}"
+          command:
+          - bash
+          - -c
+          - if [ -z "$(ls -A /opt/liferay/data-pv)" ]; then chown -R 1000:1000 /opt/liferay/data-pv; ls -l /opt/liferay; cp -r /opt/liferay/data/* /opt/liferay/data-pv/; fi
+          volumeMounts:
+          - name: {{ .Release.Name }}-persistent-storage
+            mountPath: "/opt/liferay/data-pv"
+      containers:
+        - name: {{ .Release.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          resources:
+            limits:
+              cpu: "4000m"
+              memory: "8096Mi"
+          livenessProbe:
+            failureThreshold: 360
+            httpGet:
+              path: /c/portal/layout
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 300
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 30
+          env:
+            - name: LIFERAY_JPDA_ENABLED
+              value: "true"
+            - name: LIFERAY_WEB_PERIOD_SERVER_PERIOD_PROTOCOL
+              value: https
+            - name: LIFERAY_MODULE_PERIOD_FRAMEWORK_PERIOD_PROPERTIES_PERIOD_ORG_PERIOD_APACHE_PERIOD_FELIX_PERIOD_CONFIGADMIN_PERIOD_PLUGIN_PERIOD_INTERPOLATION_PERIOD_SECRETSDIR
+              value: /opt/liferay/osgi/configs,/var/run/secrets/kubernetes.io/serviceaccount
+            - name: LCP_SERVICE_DOMAIN
+              value: localdev.me
+            - name: LCP_PROJECT_ID
+              value: dxp
+            - name: WEBSERVER_SERVICE_HOST
+              value: ""
+          ports:
+          - containerPort: 8080
+          - containerPort: 8000
+          - containerPort: 11311
+          volumeMounts:
+          - name: {{ .Release.Name }}-persistent-storage
+            mountPath: "/opt/liferay/data"
+      volumes:
+        - name: {{ .Release.Name }}-persistent-storage
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-persistent-volume-claim

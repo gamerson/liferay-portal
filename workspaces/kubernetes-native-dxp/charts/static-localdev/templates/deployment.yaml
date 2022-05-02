@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{.Release.Name | lower}}"
+  labels:
+    app: "{{.Release.Name | lower}}"
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name | lower | quote }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: "{{.Release.Name | lower}}"
+  template:
+    metadata:
+      labels:
+        app: "{{.Release.Name | lower}}"
+    spec:
+      containers:
+      - name: "{{.Release.Name | lower}}"
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        resources:
+          limits:
+            memory: "50Mi"
+            cpu: "50m"
+        ports:
+        - containerPort: 80
+        env:
+          - name: LCP_SERVICE_DOMAIN
+            value: localdev.me
+          - name: LCP_PROJECT_ID
+            value: dxp
+          - name: WEBSERVER_SERVICE_HOST
+            value: ""

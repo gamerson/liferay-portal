@@ -2,8 +2,7 @@
     "private": true,
     "workspaces": {
         "packages": [
-            "extensions/firedesignpack",
-            "extensions/liferayhelloworld"
+            "extensions/designpackfire"
         ]
     }
 }
