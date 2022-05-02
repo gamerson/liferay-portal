@@ -1,0 +1,8 @@
+projectId: lcd13978
+image:
+  repository: designpackfire
+configFiles:
+  com.liferay.design.pack.factory.configuration.v1.DesignPackConfiguration-designpackfire.config: |
+    charset="UTF-8"
+    clayCss="https://$[conf:cloud.liferay.com.domain.0]/clay.css"
+    mainCss="https://$[conf:cloud.liferay.com.domain.0]/main.css"

@@ -1,38 +1,34 @@
 v1alpha1.extension_repo(name='default', url='https://github.com/gamerson/tilt-extensions')
-load('ext://lxc', 'lxc_extension')
+load('ext://lxc', 'lxc_extension_helm')
 
-k8s_yaml(kustomize('../kubernetes-native-dxp/k8s/dxp'))
-k8s_yaml(kustomize('../kubernetes-native-dxp/k8s/common'))
+k8s_yaml(
+  helm(
+    '../kubernetes-native-dxp/charts/dxp-localdev',
+    name='dxp-localdev',
+    values=['./values-dxp-localdev.yaml'],
+  )
+)
 
-lxc_extension(
-  name='liferayhelloworld',
-  command='./lxc/extensions/liferayhelloworld/build.sh',
+lxc_extension_helm(
+  name='designpackfire',
+  command='cd ./extensions/designpackfire && gradle build && docker build -t $EXPECTED_REF .',
   deps=[
-    './lxc/extensions/liferayhelloworld/src', 
-    './lxc/extensions/liferayhelloworld/package.json'
+    './extensions/designpackfire/src',
+    'package.json'
   ],
   ignore=[
-    './lxc/extensions/liferayhelloworld/build', 
-    './lxc/extensions/liferayhelloworld/node_modules'
+    './extensions/designpackfire/build', 
+    './extensions/designpackfire/dist'
   ],
-  kustomize_path='../kubernetes-native-dxp/k8s/liferayhelloworld'
+  chart_path='../kubernetes-native-dxp/charts/static-localdev',
+  values=['./extensions/designpackfire/values.yaml']
 )
 
-lxc_extension(
-  'dynamicjscss',
-  command='cd ./lxc/static/dynamicjscss && docker build -t $EXPECTED_REF .',
-  deps=['./lxc/static/dynamicjscss/src'],
-  ignore=[],
-  kustomize_path='../kubernetes-native-dxp/k8s/dynamicjscss'
-)
-
-lxc_extension(
-  name='customrestservice',
-  command='cd ./lxc/extensions/customrestservice && mvn clean package && docker build -t $EXPECTED_REF .',
-  deps=[
-    './lxc/extensions/customrestservice/src', 
-    './lxc/extensions/customrestservice/pom.xml'
-  ],
-  ignore=['./lxc/extensions/customrestservice/target'],
-  kustomize_path='../kubernetes-native-dxp/k8s/customrestservice'
-)
+#lxc_extension(
+#  name='dynamicjscss',
+#  command='cd ./extensions/dynamicjscss && docker build -t $EXPECTED_REF .',
+#  deps=['./extensions/dynamicjscss/src'],
+#  ignore=[],
+#  chart_path='../kubernetes-native-dxp/charts/static-localdev',
+#  values=['./extensions/dynamicjscss/values.yaml']
+#)

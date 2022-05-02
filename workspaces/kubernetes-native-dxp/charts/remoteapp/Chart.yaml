@@ -1,4 +1,0 @@
-apiVersion: v1
-description: LXC Extension Remote App
-name: lxc-extension-remoteapp
-version: 0.1.0
