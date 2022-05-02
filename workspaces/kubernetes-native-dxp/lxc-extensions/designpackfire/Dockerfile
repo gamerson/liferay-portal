@@ -5,7 +5,8 @@ COPY Caddyfile /etc/caddy/Caddyfile
 
 RUN \
   unzip /static/designpackfire.zip -d /static && \
-  rm /static/designpackfire.zip
+  rm /static/designpackfire.zip && \
+  echo READY > /static/index.html
 
 RUN \
 	caddy fmt --overwrite /etc/caddy/Caddyfile && \
