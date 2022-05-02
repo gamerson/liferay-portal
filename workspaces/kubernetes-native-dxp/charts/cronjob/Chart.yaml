@@ -1,0 +1,4 @@
+apiVersion: v1
+description: LXC Extension Cronjob
+name: lxc-extension-cronjob
+version: 0.1.0

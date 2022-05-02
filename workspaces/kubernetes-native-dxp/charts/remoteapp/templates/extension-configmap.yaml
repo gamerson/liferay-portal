@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-dxp-configs
+  labels:
+    cloud.liferay.com/serviceId: {{ .Release.Name }}
+    dxp.liferay.com/configs: "true"
+    projectCustomer: "yes"
+    projectId: {{ .Values.projectId }}
+    projectSandbox: ""
+    projectTrial: "no"
+    projectType: ""
+  annotations:
+    cloud.liferay.com/context-data: '{"domains":["{{ .Release.Name }}.localdev.me"]}'
+data:
+  com.liferay.remote.app.factory.configuration.v1.RemoteAppFactoryConfiguration-{{ .Release.Name }}.config: |
+    {{ .Values.remoteAppConfig }}
