@@ -13,7 +13,7 @@ docReady(function() {
 	modal.innerHTML = `
 		<div class="the-modal-content">
 			<span class="the-modal-close">&times;</span>
-			<p>Some 123 text in the Modal..</p>
+			<p>Some text in the Modal..</p>
 		</div>
 	`;
 

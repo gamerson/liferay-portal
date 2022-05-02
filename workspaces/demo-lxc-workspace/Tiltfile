@@ -6,33 +6,33 @@ k8s_yaml(kustomize('../kubernetes-native-dxp/k8s/common'))
 
 lxc_extension(
   name='liferayhelloworld',
-  command='./lxc/extensions/liferayhelloworld/build.sh',
+  command='./extensions/liferayhelloworld/build.sh',
   deps=[
-    './lxc/extensions/liferayhelloworld/src', 
-    './lxc/extensions/liferayhelloworld/package.json'
+    './extensions/liferayhelloworld/src', 
+    './extensions/liferayhelloworld/package.json'
   ],
   ignore=[
-    './lxc/extensions/liferayhelloworld/build', 
-    './lxc/extensions/liferayhelloworld/node_modules'
+    './extensions/liferayhelloworld/build', 
+    './extensions/liferayhelloworld/node_modules'
   ],
   kustomize_path='../kubernetes-native-dxp/k8s/liferayhelloworld'
 )
 
 lxc_extension(
   'dynamicjscss',
-  command='cd ./lxc/static/dynamicjscss && docker build -t $EXPECTED_REF .',
-  deps=['./lxc/static/dynamicjscss/src'],
+  command='cd ./extensions/dynamicjscss && docker build -t $EXPECTED_REF .',
+  deps=['./extensions/dynamicjscss/src'],
   ignore=[],
   kustomize_path='../kubernetes-native-dxp/k8s/dynamicjscss'
 )
 
 lxc_extension(
   name='customrestservice',
-  command='cd ./lxc/extensions/customrestservice && mvn clean package && docker build -t $EXPECTED_REF .',
+  command='cd ./extensions/customrestservice && mvn clean package && docker build -t $EXPECTED_REF .',
   deps=[
-    './lxc/extensions/customrestservice/src', 
-    './lxc/extensions/customrestservice/pom.xml'
+    './extensions/customrestservice/src', 
+    './extensions/customrestservice/pom.xml'
   ],
-  ignore=['./lxc/extensions/customrestservice/target'],
+  ignore=['./extensions/customrestservice/target'],
   kustomize_path='../kubernetes-native-dxp/k8s/customrestservice'
 )

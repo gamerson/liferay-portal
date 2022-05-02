@@ -13,9 +13,9 @@ echo "[run_local] Build the liferayhelloworld PoC"
 yarn install && yarn build-local &&\
   docker build -t $IMAGE .
 
-cat ../../../../kubernetes-native-dxp/k8s/liferayhelloworld/extension-configmap.yaml.template \
-	> ../../../../kubernetes-native-dxp/k8s/liferayhelloworld/extension-configmap.yaml &&
+cat ../../../kubernetes-native-dxp/k8s/liferayhelloworld/extension-configmap.yaml.template \
+	> ../../../kubernetes-native-dxp/k8s/liferayhelloworld/extension-configmap.yaml &&
 sed -e 's/^/    /' com.liferay.remote.app.factory.configuration.v1.RemoteAppFactoryConfiguration-liferayhelloworld.config \
-	>> ../../../../kubernetes-native-dxp/k8s/liferayhelloworld/extension-configmap.yaml
+	>> ../../../kubernetes-native-dxp/k8s/liferayhelloworld/extension-configmap.yaml
 
 
