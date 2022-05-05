@@ -26,5 +26,3 @@
 /plugins-sdk/lib
 test-results
 
-k8s/liferayhelloworld/extension-configmap.yaml
-lxc-extensions/liferayhelloworld/com.liferay.remote.app.factory.configuration.v1.RemoteAppFactoryConfiguration-liferayhelloworld.config

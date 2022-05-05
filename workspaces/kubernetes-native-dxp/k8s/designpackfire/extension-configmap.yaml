@@ -5,15 +5,7 @@ metadata:
   labels:
     cloud.liferay.com/serviceId: designpackfire
     dxp.liferay.com/configs: "true"
-    projectCustomer: "yes"
-    projectId: lcd13977
-    projectSandbox: ""
-    projectTrial: "no"
-    projectType: ""
   annotations:
     cloud.liferay.com/context-data: '{"domains":["designpackfire.localdev.me"]}'
 data:
-  com.liferay.design.pack.factory.configuration.v1.DesignPackConfiguration-designpackfire.config: |
-    charset="UTF-8"
-    clayCss="https://$[conf:cloud.liferay.com.domain.0]/clay.css"
-    mainCss="https://$[conf:cloud.liferay.com.domain.0]/main.css"
+  default: "empty"
