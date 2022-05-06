@@ -32,12 +32,6 @@ import aQute.bnd.annotation.metatype.Meta;
 public interface DesignPackConfiguration {
 
 	@Meta.AD(
-		description = "company-id-description", name = "company-id",
-		type = Meta.Type.Long
-	)
-	public long companyId();
-
-	@Meta.AD(
 		description = "charset-description", name = "charset",
 		type = Meta.Type.Long
 	)

@@ -1,0 +1,11 @@
+Bundle-SymbolicName: designpackfire
+Bundle-Version: 1.0.0
+Web-ContextPath: /designpackfire
+Require-Capability:\
+	osgi.extender;\
+		filter:="(&(osgi.extender=osgi.configurator)(version>=1.0)(!(version>=2.0)))"
+-includeresource:\
+	{LCP.json},\
+	{OSGI-INF/configurator/=configurator/osgi.config.json},\
+	Dockerfile,\
+	META-INF/resources/=build/buildTheme/css;filter:=*.css;recursive:=false

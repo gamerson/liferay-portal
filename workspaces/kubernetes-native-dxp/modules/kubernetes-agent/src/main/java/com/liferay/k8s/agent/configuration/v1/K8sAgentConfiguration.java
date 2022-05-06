@@ -32,8 +32,10 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 public interface K8sAgentConfiguration {
 
 	@Meta.AD(
-		deflt = "dxp=configmap", description = "label-selector-description",
-		name = "label-selector", type = Meta.Type.String
+		deflt = "dxp.liferay.com/configs=true",
+		description = "label-selector-description", name = "label-selector",
+		type = Meta.Type.String,
+		required = false
 	)
 	public String labelSelector();
 

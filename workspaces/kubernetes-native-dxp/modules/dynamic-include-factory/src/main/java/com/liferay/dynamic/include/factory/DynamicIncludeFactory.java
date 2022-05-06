@@ -16,9 +16,10 @@ package com.liferay.dynamic.include.factory;
 
 import com.liferay.dynamic.include.factory.configuration.v1.DynamicIncludeConfiguration;
 import com.liferay.petra.string.StringBundler;
+import com.liferay.petra.string.StringUtil;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
-import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.servlet.taglib.DynamicInclude;
+import com.liferay.portal.kernel.util.Portal;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -30,11 +31,10 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
-import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Raymond Augé
@@ -47,26 +47,25 @@ import org.osgi.service.component.annotations.Deactivate;
 public class DynamicIncludeFactory implements DynamicInclude {
 
 	@Activate
-	public DynamicIncludeFactory(Map<String, Object> properties) {
+	public DynamicIncludeFactory(
+		@Reference Portal portal, Map<String, Object> properties) {
+
+		_portal = portal;
+
 		_dynamicIncludeConfiguration = ConfigurableUtil.createConfigurable(
 			DynamicIncludeConfiguration.class, properties);
 
-		Instant now = Instant.now();
+		_lastModified = String.valueOf(Instant.now().toEpochMilli());
 
-		List<String> urlList = new ArrayList<>();
+		boolean replaceTokens = false;
 
 		for (String url : _dynamicIncludeConfiguration.urls()) {
-			if (url.indexOf('?') > -1) {
-				url += "&t=".concat(String.valueOf(now.toEpochMilli()));
+			if (url.contains(_TOKEN)) {
+				replaceTokens = true;
 			}
-			else {
-				url += "?t=".concat(String.valueOf(now.toEpochMilli()));
-			}
-
-			urlList.add(url);
 		}
 
-		_urls = urlList;
+		_replaceTokens = replaceTokens;
 	}
 
 	@Override
@@ -75,32 +74,34 @@ public class DynamicIncludeFactory implements DynamicInclude {
 			HttpServletResponse httpServletResponse, String key)
 		throws IOException {
 
-		if (!_urls.isEmpty()) {
-			PrintWriter printWriter = httpServletResponse.getWriter();
+		PrintWriter printWriter = httpServletResponse.getWriter();
 
-			for (String url : _urls) {
-				if (url.indexOf(".js") > -1) {
-					printWriter.println(
-						StringBundler.concat(
-							"<script charset=\"",
-							_dynamicIncludeConfiguration.charset(),
-							"\" data-senna-track=\"temporary\" src=\"", url,
-							"\" type=\"text/javascript\"></script>"
-						));
-				}
-				else if (url.indexOf(".css") > -1) {
-					printWriter.println(
-						StringBundler.concat(
-							"<link charset=\"",
-							_dynamicIncludeConfiguration.charset(),
-							" data-senna-track=\"temporary\" href=\"", url,
-							"\" rel=\"stylesheet\" type=\"text/css\"/>"
-						));
-				}
+		String portalURL = _portal.getPortalURL(httpServletRequest);
+
+		for (String url : _dynamicIncludeConfiguration.urls()) {
+			if (url.indexOf(".js") > -1) {
+				printWriter.println(
+					StringBundler.concat(
+						"<script charset=\"",
+						_dynamicIncludeConfiguration.charset(),
+						"\" data-senna-track=\"temporary\" src=\"",
+						_replaceTokens(url, portalURL), "?t=", _lastModified,
+						"\" type=\"text/javascript\"></script>"
+					));
 			}
-
-			printWriter.flush();
+			else if (url.indexOf(".css") > -1) {
+				printWriter.println(
+					StringBundler.concat(
+						"<link charset=\"",
+						_dynamicIncludeConfiguration.charset(),
+						" data-senna-track=\"temporary\" href=\"",
+						_replaceTokens(url, portalURL), "?t=", _lastModified,
+						"\" rel=\"stylesheet\" type=\"text/css\"/>"
+					));
+			}
 		}
+
+		printWriter.flush();
 	}
 
 	@Override
@@ -110,7 +111,19 @@ public class DynamicIncludeFactory implements DynamicInclude {
 		dynamicIncludeRegistry.register(_dynamicIncludeConfiguration.key());
 	}
 
+	private String _replaceTokens(String content, String portalURL) {
+		if (!_replaceTokens) {
+			return content;
+		}
+
+		return StringUtil.replace(content, _TOKEN, portalURL);
+	}
+
+	private static final String _TOKEN = "${portalURL}";
+
 	private final DynamicIncludeConfiguration _dynamicIncludeConfiguration;
-	private final List<String> _urls;
+	private final String _lastModified;
+	private final Portal _portal;
+	private final boolean _replaceTokens;
 
 }

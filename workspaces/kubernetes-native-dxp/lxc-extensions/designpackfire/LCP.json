@@ -1,6 +1,6 @@
 {
   "kind": "Deployment",
-  "id": "designpackfire",
+  "id": "${Bundle-SymbolicName}",
   "cpu": 0.1,
   "scale": 1,
   "memory": 50,

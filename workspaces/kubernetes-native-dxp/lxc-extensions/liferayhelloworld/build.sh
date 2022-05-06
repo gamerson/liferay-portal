@@ -8,14 +8,44 @@ if [[ ! -z "${EXPECTED_REF}" ]]; then
   IMAGE=${EXPECTED_REF}
 fi
 
-echo "[run_local] Build the liferayhelloworld PoC"
+ID=liferayhelloworld
 
-yarn install && yarn build-local &&\
-  docker build -t $IMAGE .
+echo "[run_local] Build the $ID PoC"
 
-cat ../../k8s/liferayhelloworld/extension-configmap.yaml.template \
-	> ../../k8s/liferayhelloworld/extension-configmap.yaml &&
-sed -e 's/^/    /' com.liferay.remote.app.factory.configuration.v1.RemoteAppFactoryConfiguration-liferayhelloworld.config \
-	>> ../../k8s/liferayhelloworld/extension-configmap.yaml
+yarn install && yarn build-local
 
+JS=$(jq '[.files[] | "$[conf:host.service.address]" + select(endswith(".js"))]' build/asset-manifest.json)
+CSS=$(jq '[.files[] | "$[conf:host.service.address]" + select(endswith(".css"))]' build/asset-manifest.json)
 
+jq ".[\"com.liferay.remote.app.factory.configuration.v1.RemoteAppFactoryConfiguration~$ID\"].webComponentUrl |= $JS" \
+	configurator/osgi.config.json >\
+	configurator/osgi.config.json.tmp &&\
+	mv configurator/osgi.config.json.tmp configurator/osgi.config.json
+
+jq ".[\"com.liferay.remote.app.factory.configuration.v1.RemoteAppFactoryConfiguration~$ID\"].webComponentCssUrl |= $CSS" \
+	configurator/osgi.config.json >\
+	configurator/osgi.config.json.tmp &&\
+	mv configurator/osgi.config.json.tmp configurator/osgi.config.json
+
+cat << EOF > ../../k8s/$ID/extension-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: $ID-dxp-configs
+  labels:
+    cloud.liferay.com/serviceId: $ID
+    dxp.liferay.com/configs: "true"
+  annotations:
+    cloud.liferay.com/context-data: '{"domains":["$ID.localdev.me"]}'
+data:
+  osgi.config.json: |
+EOF
+sed -e 's/^/    /' configurator/osgi.config.json \
+	>> ../../k8s/$ID/extension-configmap.yaml
+
+./assemble.sh
+
+unzip build/libs/*.jar -d build/unzip
+
+cd build/unzip
+docker build -t $IMAGE .

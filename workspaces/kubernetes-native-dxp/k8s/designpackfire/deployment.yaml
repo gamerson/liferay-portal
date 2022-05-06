@@ -31,3 +31,5 @@ spec:
             value: dxp
           - name: WEBSERVER_SERVICE_HOST
             value: ""
+          - name: CORS_ALLOWED_ORIGIN
+            value: dxp.localdev.me,other.localdev.me

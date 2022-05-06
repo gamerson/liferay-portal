@@ -10,5 +10,6 @@ Import-Package:\
 	!org.bouncycastle.*,\
 	!org.conscrypt.*,\
 	*
+-conditionalpackage: org.apache.felix.configurator.impl.*
 -fixupmessages: Classes found in the wrong directory
 -noclassforname: true

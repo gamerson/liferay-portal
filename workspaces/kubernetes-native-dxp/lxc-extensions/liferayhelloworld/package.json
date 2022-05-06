@@ -13,7 +13,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "build-local": "react-scripts build && ./create_app_config.sh -n \"Liferay Hello World\" -e liferay-hello-world -p \"foo=bar\" > com.liferay.remote.app.factory.configuration.v1.RemoteAppFactoryConfiguration-liferayhelloworld.config",
+    "build-local": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

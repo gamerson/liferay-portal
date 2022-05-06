@@ -1,8 +1,8 @@
-load('ext://lxc', 'lxc_extension') 
+load('ext://lxc', 'lxc_extension')
 lxc_extension(
   name='dynamicjscss',
   command='./build.sh',
-  deps=['./src', './pom.xml'],
-  ignore=['./target'],
+  deps=['./'],
+  ignore=['./build'],
   kustomize_path='../../k8s/dynamicjscss'
 )

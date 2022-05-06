@@ -147,6 +147,7 @@ public class Oauth2ApplicationFactoryHeadlessServer {
 					oAuth2Application.getOAuth2ApplicationId(),
 					oAuth2Application.getOAuth2ApplicationScopeAliasesId(),
 					oAuth2Application.getAllowedGrantTypesList(),
+					oAuth2Application.getClientAuthenticationMethod(),
 					oAuth2Application.getClientCredentialUserId(),
 					oAuth2Application.getClientId(),
 					oAuth2Application.getClientProfile(),
@@ -155,7 +156,7 @@ public class Oauth2ApplicationFactoryHeadlessServer {
 					oAuth2Application.getFeaturesList(),
 					_oAuth2ApplicationHeadlessServerConfiguration.homePageURL(),
 					oAuth2Application.getIconFileEntryId(),
-					oAuth2Application.getName(),
+					oAuth2Application.getJwks(), oAuth2Application.getName(),
 					oAuth2Application.getPrivacyPolicyURL(),
 					redirectURIsList, oAuth2Application.getRememberDevice(),
 					oAuth2Application.getTrustedApplication());
@@ -323,13 +324,13 @@ public class Oauth2ApplicationFactoryHeadlessServer {
 				serviceUser.getScreenName(),
 				ListUtil.fromArray(
 					GrantType.CLIENT_CREDENTIALS , GrantType.JWT_BEARER),
-				serviceUser.getUserId(),
+				null, serviceUser.getUserId(),
 				OAuth2SecureRandomGenerator.generateClientId(),
 				ClientProfile.HEADLESS_SERVER.id(),
 				OAuth2SecureRandomGenerator.generateClientSecret(), null,
 				Arrays.asList("token.introspection"),
 				_oAuth2ApplicationHeadlessServerConfiguration.homePageURL(), 0,
-				_getName(), null, redirectURIsList, false, true, null,
+				null, _getName(), null, redirectURIsList, false, true, null,
 				serviceContext);
 
 		Role serviceRole = _getOrAddServiceRole(

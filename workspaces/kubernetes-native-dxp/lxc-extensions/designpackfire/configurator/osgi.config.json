@@ -1,0 +1,9 @@
+{
+    "com.liferay.design.pack.factory.configuration.v1.DesignPackConfiguration~designpackfire": {
+        ":configurator:policy": "force",
+        "charset": "UTF-8",
+        "clayCss": "$[conf:host.service.address]/clay.css",
+        "mainCss": "$[conf:host.service.address]/main.css",
+        "host.service.address": "${portalURL}/o${Web-ContextPath}"
+    }
+}

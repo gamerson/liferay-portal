@@ -1,16 +1,3 @@
-FROM caddy:2.4.6
+FROM rotty3000/lxc-static-resources:latest
 
-COPY dist/designpackfire.zip /static/designpackfire.zip
-COPY Caddyfile /etc/caddy/Caddyfile
-
-RUN \
-  unzip /static/designpackfire.zip -d /static && \
-  rm /static/designpackfire.zip && \
-  echo READY > /static/index.html
-
-RUN \
-	caddy fmt --overwrite /etc/caddy/Caddyfile && \
-	caddy validate --config /etc/caddy/Caddyfile && \
-	cat /etc/caddy/Caddyfile
-
-EXPOSE 8080/tcp
+COPY META-INF/resources /resources/

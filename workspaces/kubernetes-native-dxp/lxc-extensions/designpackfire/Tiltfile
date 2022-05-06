@@ -2,7 +2,7 @@ load('ext://lxc', 'lxc_extension')
 lxc_extension(
   name='designpackfire',
   command='./build.sh',
-  deps=['./src', 'package.json'],
+  deps=['./'],
   ignore=['./build', './dist'],
   kustomize_path='../../k8s/designpackfire'
 )

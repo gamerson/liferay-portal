@@ -1,8 +1,9 @@
 load('ext://lxc', 'lxc_extension')
+#local('./build.sh')
 lxc_extension(
   name='liferayhelloworld',
   command='./build.sh',
-  deps=['./public', './src', './package.json'],
+  deps=['./bnd.bnd', './build.sh', './src',],
   ignore=['./build', './node_modules'],
   kustomize_path='../../k8s/liferayhelloworld'
 )

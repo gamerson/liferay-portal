@@ -138,6 +138,7 @@ public class Oauth2ApplicationFactoryUserAgent {
 					oAuth2Application.getOAuth2ApplicationId(),
 					oAuth2Application.getOAuth2ApplicationScopeAliasesId(),
 					oAuth2Application.getAllowedGrantTypesList(),
+					oAuth2Application.getClientAuthenticationMethod(),
 					oAuth2Application.getClientCredentialUserId(),
 					oAuth2Application.getClientId(),
 					oAuth2Application.getClientProfile(),
@@ -146,7 +147,7 @@ public class Oauth2ApplicationFactoryUserAgent {
 					oAuth2Application.getFeaturesList(),
 					_oAuth2ApplicationUserAgentConfiguration.homePageURL(),
 					oAuth2Application.getIconFileEntryId(),
-					oAuth2Application.getName(),
+					oAuth2Application.getJwks(), oAuth2Application.getName(),
 					_oAuth2ApplicationUserAgentConfiguration.privacyPolicyURL(),
 					redirectURIsList, oAuth2Application.getRememberDevice(),
 					oAuth2Application.getTrustedApplication());
@@ -266,13 +267,13 @@ public class Oauth2ApplicationFactoryUserAgent {
 				company.getCompanyId(), user.getUserId(), user.getScreenName(),
 				ListUtil.fromArray(
 					GrantType.AUTHORIZATION_CODE_PKCE, GrantType.JWT_BEARER),
-				user.getUserId(),
+				null, user.getUserId(),
 				OAuth2SecureRandomGenerator.generateClientId(),
 				ClientProfile.USER_AGENT_APPLICATION.id(), null,
 				_oAuth2ApplicationUserAgentConfiguration.description(),
 				Arrays.asList("token.introspection"),
 				_oAuth2ApplicationUserAgentConfiguration.homePageURL(), 0,
-				_getName(),
+				null, _getName(),
 				_oAuth2ApplicationUserAgentConfiguration.privacyPolicyURL(),
 				redirectURIsList, false, true, null,
 				new ServiceContext());

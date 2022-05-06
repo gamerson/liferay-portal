@@ -49,14 +49,25 @@ import io.fabric8.kubernetes.client.informers.SharedIndexInformer;
 import io.fabric8.kubernetes.client.informers.SharedInformerEventListener;
 import io.fabric8.kubernetes.client.informers.SharedInformerFactory;
 
+import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 
+import org.apache.felix.configurator.impl.json.BinUtil;
+import org.apache.felix.configurator.impl.json.BinaryManager;
+import org.apache.felix.configurator.impl.json.JSONUtil;
+import org.apache.felix.configurator.impl.json.JSONUtil.Report;
+import org.apache.felix.configurator.impl.model.ConfigurationFile;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.annotations.Activate;
@@ -77,11 +88,13 @@ public class K8sAgentImpl implements K8sAgent {
 
 	@Activate
 	public K8sAgentImpl(
+			BundleContext bundleContext,
 			@Reference CompanyLocalService companyLocalService,
 			@Reference ConfigurationAdmin configurationAdmin,
 			Map<String, Object> properties)
 		throws Exception {
 
+		_bundle = bundleContext.getBundle();
 		_companyLocalService = companyLocalService;
 		_configurationAdmin = configurationAdmin;
 
@@ -134,7 +147,7 @@ public class K8sAgentImpl implements K8sAgent {
 			public void onUpdate(
 				ConfigMap oldConfigMap, ConfigMap newConfigMap) {
 
-				_modified(oldConfigMap, newConfigMap);
+				_update(oldConfigMap, newConfigMap);
 			}
 		});
 
@@ -290,13 +303,17 @@ public class K8sAgentImpl implements K8sAgent {
 		for (Map.Entry<String, String> entry : entrySet) {
 			String configName = entry.getKey();
 
-			if (!configName.endsWith(_FILE_EXT)) {
-				continue;
-			}
-
 			try {
-				_processConfigMapConfigFileEntry(
-					configName, entry.getValue(), configMap.getMetadata());
+				if (configName.endsWith(_FILE_EXT)) {
+					_processConfigMapConfigFileEntry(
+						configName, _fromStringContent(
+							configName, entry.getValue()),
+						configMap.getMetadata());
+				}
+				else if (configName.endsWith(_FILE_JSON_EXT)) {
+					_processConfigMapConfigJSONResource(
+						configName, entry.getValue(), configMap);
+				}
 			}
 			catch (Exception exception) {
 				_log.error(exception);
@@ -321,22 +338,48 @@ public class K8sAgentImpl implements K8sAgent {
 			return;
 		}
 
-		Set<Map.Entry<String, String>> entrySet = data.entrySet();
+		ObjectMeta metadata = configMap.getMetadata();
 
-		for (Map.Entry<String, String> entry : entrySet) {
-			String configName = entry.getKey();
+		String configurationFilter = StringBundler.concat(
+			StringPool.OPEN_PARENTHESIS, _K8S_CONFIG_UID, StringPool.EQUAL,
+			metadata.getUid(), StringPool.CLOSE_PARENTHESIS);
 
-			if (!configName.endsWith(_FILE_EXT)) {
-				continue;
-			}
+		try {
+			Configuration[] configurations =
+				_configurationAdmin.listConfigurations(configurationFilter);
 
-			try {
-				_uninstallConfigMapConfigFileEntry(configName);
-			}
-			catch (Exception exception) {
-				_log.error(exception);
+			if (configurations != null) {
+				for (Configuration configuration : configurations) {
+					try {
+						configuration.delete();
+					}
+					catch (Exception exception) {
+						_log.error(exception);
+					}
+				}
 			}
 		}
+		catch (Exception exception) {
+			_log.error(exception);
+		}
+	}
+
+	private Dictionary<String, Object> _fromStringContent(
+			String configName, String configurationContent)
+		throws IOException {
+
+		Dictionary<String, Object> dictionary = new HashMapDictionary<>();
+
+		ConfigurationProperties configurationProperties =
+			ConfigurationPropertiesFactory.create(
+				configName, configurationContent,
+				PropsValues.MODULE_FRAMEWORK_FILE_INSTALL_CONFIG_ENCODING);
+
+		for (String key : configurationProperties.keySet()) {
+			dictionary.put(key, configurationProperties.get(key));
+		}
+
+		return dictionary;
 	}
 
 	private Configuration _findExistingConfiguration(String fileName)
@@ -344,7 +387,7 @@ public class K8sAgentImpl implements K8sAgent {
 
 		Configuration[] configurations = _configurationAdmin.listConfigurations(
 			StringBundler.concat(
-				StringPool.OPEN_PARENTHESIS, _KUBERNETES_CONFIG_KEY,
+				StringPool.OPEN_PARENTHESIS, _K8S_CONFIG_KEY,
 				StringPool.EQUAL, fileName, StringPool.CLOSE_PARENTHESIS));
 
 		if ((configurations != null) && (configurations.length > 0)) {
@@ -402,9 +445,10 @@ public class K8sAgentImpl implements K8sAgent {
 		return _configurationAdmin.getConfiguration(pid, StringPool.QUESTION);
 	}
 
-	private void _modified(ConfigMap onlyConfigMap, ConfigMap newConfigMap) {
+	private void _update(ConfigMap oldConfigMap, ConfigMap newConfigMap) {
 		if (_log.isDebugEnabled()) {
-			_log.debug(StringBundler.concat("Modifying:", newConfigMap));
+			_log.debug(
+				StringBundler.concat("Updating:", newConfigMap));
 		}
 
 		Map<String, String> data = newConfigMap.getData();
@@ -416,14 +460,16 @@ public class K8sAgentImpl implements K8sAgent {
 			for (Map.Entry<String, String> entry : entrySet) {
 				String configName = entry.getKey();
 
-				if (!configName.endsWith(_FILE_EXT)) {
-					continue;
-				}
-
 				try {
-					_processConfigMapConfigFileEntry(
-						configName, entry.getValue(),
-						newConfigMap.getMetadata());
+					if (configName.endsWith(_FILE_EXT)) {
+						_processConfigMapConfigFileEntry(
+							configName, _fromStringContent(
+								configName, entry.getValue()), metadata);
+					}
+					else if (configName.endsWith(_FILE_JSON_EXT)) {
+						_processConfigMapConfigJSONResource(
+							configName, entry.getValue(), newConfigMap);
+					}
 				}
 				catch (Exception exception) {
 					_log.error(exception);
@@ -433,24 +479,28 @@ public class K8sAgentImpl implements K8sAgent {
 
 		// Remove left over configurations which were deleted from the ConfigMap
 
+		ObjectMeta oldMetadata = oldConfigMap.getMetadata();
+
+		String configurationFilter = StringBundler.concat(
+			StringPool.OPEN_PARENTHESIS, StringPool.AMPERSAND,
+			StringPool.OPEN_PARENTHESIS, _K8S_CONFIG_UID, StringPool.EQUAL,
+			metadata.getUid(), StringPool.CLOSE_PARENTHESIS,
+			StringPool.OPEN_PARENTHESIS, _K8S_CONFIG_RESOURCE_VERSION,
+			StringPool.EQUAL, oldMetadata.getResourceVersion(),
+			StringPool.CLOSE_PARENTHESIS, StringPool.CLOSE_PARENTHESIS
+		);
+
 		try {
 			Configuration[] configurations =
-				_configurationAdmin.listConfigurations(
-					StringBundler.concat(
-						StringPool.OPEN_PARENTHESIS, _KUBERNETES_CONFIG_UID,
-						StringPool.EQUAL, metadata.getUid(),
-						StringPool.CLOSE_PARENTHESIS));
+				_configurationAdmin.listConfigurations(configurationFilter);
 
 			if (configurations != null) {
 				for (Configuration configuration : configurations) {
-					Dictionary<String, Object> properties =
-						configuration.getProperties();
-
-					String configKey = GetterUtil.getString(
-						properties.get(_KUBERNETES_CONFIG_KEY));
-
-					if (data == null || !data.containsKey(configKey)) {
+					try {
 						configuration.delete();
+					}
+					catch (Exception exception) {
+						_log.error(exception);
 					}
 				}
 			}
@@ -485,7 +535,8 @@ public class K8sAgentImpl implements K8sAgent {
 	}
 
 	private void _processConfigMapConfigFileEntry(
-			String configName, String configurationContent, ObjectMeta metadata)
+			String configName, Dictionary<String, Object> dictionary,
+			ObjectMeta metadata)
 		throws Exception {
 
 		String resourceVersion = metadata.getResourceVersion();
@@ -502,7 +553,7 @@ public class K8sAgentImpl implements K8sAgent {
 				configuration.getProperties();
 
 			String existingResourceVersion = GetterUtil.getString(
-				properties.get(_KUBERNETES_CONFIG_RESOURCE_VERSION));
+				properties.get(_K8S_CONFIG_RESOURCE_VERSION));
 
 			if (Objects.equals(resourceVersion, existingResourceVersion)) {
 				if (_log.isDebugEnabled()) {
@@ -529,28 +580,14 @@ public class K8sAgentImpl implements K8sAgent {
 				Configuration.ConfigurationAttribute.READ_ONLY);
 		}
 
-		Dictionary<String, Object> dictionary = new HashMapDictionary<>();
-
-		ConfigurationProperties configurationProperties =
-			ConfigurationPropertiesFactory.create(
-				configName, configurationContent,
-				PropsValues.MODULE_FRAMEWORK_FILE_INSTALL_CONFIG_ENCODING);
-
-		for (String key : configurationProperties.keySet()) {
-			dictionary.put(key, configurationProperties.get(key));
-		}
-
 		Map<String, String> labels = metadata.getLabels();
 
 		for (String key : labels.keySet()) {
-			String modifiedKey = null;
+			String modifiedKey = _K8S_PROPERTY_KEY.concat(key);
 
 			if (key.contains(StringPool.SLASH)) {
 				modifiedKey = StringUtil.replace(
 					key, CharPool.SLASH , CharPool.PERIOD);
-			}
-			else {
-				modifiedKey = "lxc.".concat(key);
 			}
 
 			dictionary.put(modifiedKey, labels.get(key));
@@ -563,7 +600,8 @@ public class K8sAgentImpl implements K8sAgent {
 
 		String environment = jsonObject.getString("environment", "default");
 
-		dictionary.put("cloud.liferay.com.environment", environment);
+		dictionary.put(
+			_K8S_PROPERTY_KEY.concat("lxc.environment"), environment);
 
 		Company company = _getCompanyIdByEnvironment(environment);
 
@@ -576,16 +614,19 @@ public class K8sAgentImpl implements K8sAgent {
 		for (int i = 0; i < jsonArray.length(); i++) {
 			serviceDomains.add(jsonArray.getString(i));
 
-			dictionary.put(
-				"cloud.liferay.com.domain." + i, jsonArray.getString(i));
+			if (i == 0) {
+				dictionary.put(
+					"host.service.address",
+					"https://".concat(jsonArray.getString(i)));
+			}
 		}
 
 		dictionary.put(
-			"cloud.liferay.com.domains", serviceDomains.toArray(new String[0]));
+			"host.service.domains", serviceDomains.toArray(new String[0]));
 
-		dictionary.put(_KUBERNETES_CONFIG_KEY, configName);
-		dictionary.put(_KUBERNETES_CONFIG_UID, metadata.getUid());
-		dictionary.put(_KUBERNETES_CONFIG_RESOURCE_VERSION, resourceVersion);
+		dictionary.put(_K8S_CONFIG_KEY, configName);
+		dictionary.put(_K8S_CONFIG_UID, metadata.getUid());
+		dictionary.put(_K8S_CONFIG_RESOURCE_VERSION, resourceVersion);
 
 		if (_log.isDebugEnabled()) {
 			_log.debug("Created Configuration " + dictionary);
@@ -597,49 +638,97 @@ public class K8sAgentImpl implements K8sAgent {
 			Configuration.ConfigurationAttribute.READ_ONLY);
 	}
 
-	private void _uninstallConfigMapConfigFileEntry(String configName)
+	private void _processConfigMapConfigJSONResource(
+			final String configName, final String configurationContent,
+			final ConfigMap configMap)
 		throws Exception {
 
-		String[] pid = _parsePid(configName);
+		final URL url = new URL("file", null, configName);
+		final Report report = new JSONUtil.Report();
+		final BinaryManager binaryManager = new BinaryManager(new BinUtil.ResourceProvider() {
 
-		String logString = StringPool.BLANK;
+			@Override
+			public long getBundleId() {
+				return _bundle.getBundleId();
+			}
 
-		if (pid[1] != null) {
-			logString = StringPool.TILDE + pid[1];
+			@Override
+			public URL getEntry(String path) {
+				// TODO figure this out...
+				return null;
+			}
+
+			@Override
+			public String getIdentifier() {
+				return configName;
+			}
+
+			@Override
+			public Enumeration<URL> findEntries(String path, String filePattern) {
+				// TODO figure this out...
+				return Collections.emptyEnumeration();
+			}
+
+		},
+		report);
+
+		ConfigurationFile configurationFile = JSONUtil.readJSON(
+			binaryManager, configName, url, _bundle.getBundleId(),
+			configurationContent, report);
+
+		for(final String warning : report.warnings) {
+			if (_log.isWarnEnabled()) {
+				_log.warn(warning);
+			}
+		}
+		for(final String error : report.errors) {
+			if (_log.isErrorEnabled()) {
+				_log.error(error);
+			}
 		}
 
-		if (_log.isInfoEnabled()) {
-			_log.info(
-				StringBundler.concat(
-					"Deleting configuration from ", pid[0], logString,
-					".config"));
+		if (configurationFile == null) {
+			return;
 		}
 
-		Configuration configuration = _findExistingConfiguration(configName);
+		for (org.apache.felix.configurator.impl.model.Config config :
+				configurationFile.getConfigurations()) {
 
-		if (configuration != null) {
-			configuration.delete();
+			try {
+				_processConfigMapConfigFileEntry(
+					config.getPid(), config.getProperties(),
+					configMap.getMetadata());
+			}
+			catch (Exception exception) {
+				_log.error(exception);
+			}
+
 		}
 	}
 
 	private static final String _AGENT_NAME = "Kubernetes Configuration Agent";
 
-	private static final String _FILE_EXT = ".config";
-
-	private static final String _KUBERNETES_CONFIG_KEY =
-		".kubernetes.config.key";
-
-	private static final String _KUBERNETES_CONFIG_RESOURCE_VERSION =
-		".kubernetes.config.resource.version";
-
-	private static final String _KUBERNETES_CONFIG_UID =
-		".kubernetes.config.uid";
-
 	private static final String _CONTEXT_ANNOTATION =
 		"cloud.liferay.com/context-data";
 
+	private static final String _FILE_EXT = ".config";
+
+	private static final String _FILE_JSON_EXT = ".config.json";
+
+	private static final String _K8S_CONFIG_KEY =
+		".kubernetes.config.key";
+
+	private static final String _K8S_CONFIG_RESOURCE_VERSION =
+		".kubernetes.config.resource.version";
+
+	private static final String _K8S_CONFIG_UID =
+		".kubernetes.config.uid";
+
+	private static final String _K8S_PROPERTY_KEY = "k8s.";
+
 	private static final Log _log = LogFactoryUtil.getLog(K8sAgentImpl.class);
 
+	private final Bundle _bundle;
 	private final CompanyLocalService _companyLocalService;
 	private final ConfigurationAdmin _configurationAdmin;
 	private final SharedIndexInformer<ConfigMap> _sharedIndexInformer;
