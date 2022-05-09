@@ -1,0 +1,9 @@
+.classpath
+.gradle/
+.project
+.settings/
+build/
+bundles/
+dist/
+node_modules/
+node_modules_cache/
