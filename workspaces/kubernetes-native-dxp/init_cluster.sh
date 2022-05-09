@@ -50,9 +50,9 @@ else
     exit 1
 fi
 
-if [ `which skaffold` ]; then
-    skaffold dev
-else
-    echo "Please install skaffold. See https://skaffold.dev/docs/install/"
-    exit 1
-fi
+# if [ `which skaffold` ]; then
+#     skaffold dev
+# else
+#     echo "Please install skaffold. See https://skaffold.dev/docs/install/"
+#     exit 1
+# fi
