@@ -267,7 +267,7 @@ public class Oauth2ApplicationFactoryUserAgent {
 				company.getCompanyId(), user.getUserId(), user.getScreenName(),
 				ListUtil.fromArray(
 					GrantType.AUTHORIZATION_CODE_PKCE, GrantType.JWT_BEARER),
-				null, user.getUserId(),
+				"none", user.getUserId(),
 				OAuth2SecureRandomGenerator.generateClientId(),
 				ClientProfile.USER_AGENT_APPLICATION.id(), null,
 				_oAuth2ApplicationUserAgentConfiguration.description(),

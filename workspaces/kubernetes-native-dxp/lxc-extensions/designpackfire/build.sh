@@ -12,6 +12,16 @@ ID=designpackfire
 
 echo "[run_local] Build the $ID PoC"
 
+../../gradlew clean build
+
+./assemble.sh
+
+## The rest simulates what LCP does
+
+unzip build/libs/*.jar -d build/unzip
+
+(cd build/unzip && docker build -t $IMAGE .)
+
 cat << EOF > ../../k8s/$ID/extension-configmap.yaml
 apiVersion: v1
 kind: ConfigMap
@@ -25,14 +35,5 @@ metadata:
 data:
   osgi.config.json: |
 EOF
-sed -e 's/^/    /' configurator/osgi.config.json \
+sed -e 's/^/    /' build/unzip/OSGI-INF/configurator/osgi.config.json \
 	>> ../../k8s/$ID/extension-configmap.yaml
-
-../../gradlew clean build
-
-./assemble.sh
-
-unzip build/libs/*.jar -d build/unzip
-
-cd build/unzip
-docker build -t $IMAGE .

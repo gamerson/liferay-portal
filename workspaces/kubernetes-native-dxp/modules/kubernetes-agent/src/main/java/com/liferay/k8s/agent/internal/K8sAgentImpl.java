@@ -511,7 +511,14 @@ public class K8sAgentImpl implements K8sAgent {
 	}
 
 	private String[] _parsePid(String path) {
-		String pid = path.substring(0, path.lastIndexOf(CharPool.PERIOD));
+		String pid = path;
+
+		if (path.endsWith(_FILE_EXT)) {
+			pid = path.substring(0, path.length() - _FILE_EXT.length());
+		}
+		else if (path.endsWith(_FILE_JSON_EXT)) {
+			pid = path.substring(0, path.length() - _FILE_JSON_EXT.length());
+		}
 
 		int index = pid.indexOf(CharPool.TILDE);
 

@@ -70,7 +70,7 @@ public interface RemoteAppFactoryConfiguration {
 	public String[] webComponentTopJsUrl();
 
 	@Meta.AD(
-		description = "friendly-url-mapping-description",
+		deflt = "", description = "friendly-url-mapping-description",
 		name = "friendly-url-mapping", required = false
 	)
 	public String friendlyURLMapping();
