@@ -36,7 +36,8 @@ Require-Capability:\
         "charset": "UTF-8",\n\
         "clayCss": "$[conf:host.service.address]/clay.css",\n\
         "mainCss": "$[conf:host.service.address]/main.css",\n\
-        "host.service.address": "${portalURL}/o/${project.name}"\n\
+        "host.service.address": "/o/${project.name}",\n\
+        "timestamp": "${tstamp}"\n\
     }\n\
 }',\
 	Dockerfile;literal='\

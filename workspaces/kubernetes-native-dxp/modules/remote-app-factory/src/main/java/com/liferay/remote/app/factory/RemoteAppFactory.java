@@ -80,10 +80,10 @@ public class RemoteAppFactory {
 			_remoteAppEntryLocalService.addOrUpdateCustomElementRemoteAppEntry(
 				externalReferenceCode, defaultAdminUser.getUserId(),
 				StringUtil.merge(
-					remoteAppFactoryConfiguration.webComponentCssUrl(), ","),
+					remoteAppFactoryConfiguration.webComponentCssUrl(), "\n"),
 				remoteAppFactoryConfiguration.elementName(),
 				StringUtil.merge(
-					remoteAppFactoryConfiguration.webComponentUrl(), ","),
+					remoteAppFactoryConfiguration.webComponentUrl(), "\n"),
 				false, remoteAppFactoryConfiguration.description(),
 				remoteAppFactoryConfiguration.friendlyURLMapping(),
 				remoteAppFactoryConfiguration.instanceable(), nameMap,

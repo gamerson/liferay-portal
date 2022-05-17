@@ -39,10 +39,12 @@ Require-Capability:\
           "$[conf:host.service.address]/modal.js",\n\
           "$[conf:host.service.address]/modal.css"\n\
         ],\n\
-        "host.service.address": "${portalURL}/o/${project.name}"\n\
+        "host.service.address": "/o/${project.name}",\n\
+        "timestamp": "${tstamp}"\n\
     }\n\
 }',\
 	Dockerfile;literal='\
 FROM rotty3000/lxc-static-resources:latest\n\
 COPY META-INF/resources /resources/',\
-	META-INF/resources/=build/buildTheme/css;filter:=*.css;recursive:=false
+	META-INF/resources/=src;filter:=*.js;recursive:=false,\
+	META-INF/resources/=src;filter:=*.css;recursive:=false
