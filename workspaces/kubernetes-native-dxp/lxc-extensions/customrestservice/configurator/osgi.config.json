@@ -4,6 +4,7 @@
         "name": "$[conf:cloud.liferay.com.serviceId]",
         "homePageURL": "$[conf:host.service.address]",
         "description": "This a custom REST service DEMO",
-        "scopes": ["Liferay.Headless.Admin.User.everything"]
+        "scopes": ["Liferay.Headless.Admin.User.everything"],
+        "timestamp": "${tstamp}"
     }
 }

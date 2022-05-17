@@ -12,6 +12,7 @@
     ],
     "instanceable": "false",
     "portletDisplayCategory": "remote-app",
-    "host.service.address": "/o${Web-ContextPath}"
+    "host.service.address": "/o${Web-ContextPath}",
+    "timestamp": "${tstamp}"
   }
 }

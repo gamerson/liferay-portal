@@ -27,7 +27,8 @@ metadata:
 data:
   osgi.config.json: |
 EOF
-sed -e 's/^/    /' configurator/osgi.config.json \
+tstamp=$(date +%s)
+sed -e "s/\${tstamp}/${tstamp}/g" -e 's/^/    /' configurator/osgi.config.json \
 	>> ../../k8s/$ID/extension-configmap.yaml
 
 docker build -t $IMAGE .

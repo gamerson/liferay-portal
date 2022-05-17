@@ -30,7 +30,7 @@ import org.osgi.service.component.propertytypes.ServiceRanking;
  * @author Raymond Augé
  */
 @Component(immediate = true, service = K8sConfigurationPropertiesMutator.class)
-@ServiceRanking(-2000)
+@ServiceRanking(2000)
 public class K8sLabelsMutator implements K8sConfigurationPropertiesMutator {
 
 	@Override

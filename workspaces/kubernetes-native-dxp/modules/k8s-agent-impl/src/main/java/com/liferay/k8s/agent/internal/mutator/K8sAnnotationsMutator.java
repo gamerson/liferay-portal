@@ -36,7 +36,7 @@ import org.osgi.service.component.propertytypes.ServiceRanking;
  * @author Raymond Augé
  */
 @Component(immediate = true, service = K8sConfigurationPropertiesMutator.class)
-@ServiceRanking(-1000)
+@ServiceRanking(1900)
 public class K8sAnnotationsMutator
 	implements K8sConfigurationPropertiesMutator {
 
@@ -57,11 +57,15 @@ public class K8sAnnotationsMutator
 
 			JsonNode environmentJsonNode = jsonNode.get("environment");
 
+			String environment = "default";
+
 			if (environmentJsonNode != null) {
-				properties.put(
-					K8sAgentConstants.K8S_PROPERTY_KEY.concat("lxc.environment"),
-					environmentJsonNode.textValue());
+				environment = environmentJsonNode.textValue();
 			}
+
+			properties.put(
+				K8sAgentConstants.K8S_PROPERTY_KEY.concat("lxc.environment"),
+				environment);
 
 			List<String> serviceDomains = new ArrayList<>();
 

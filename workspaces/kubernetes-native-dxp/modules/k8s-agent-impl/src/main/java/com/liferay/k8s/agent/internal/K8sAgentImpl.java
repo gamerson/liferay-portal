@@ -75,6 +75,7 @@ import org.osgi.service.component.annotations.ReferencePolicyOption;
 @Component(
 	configurationPid = "com.liferay.k8s.agent.configuration.v1.K8sAgentConfiguration",
 	configurationPolicy = ConfigurationPolicy.REQUIRE, immediate = true,
+	property = {"k8sConfiguratPropertiesMutators.cardinality.minimum:Integer=3"},
 	service = K8sAgent.class
 )
 public class K8sAgentImpl implements K8sAgent {
@@ -83,7 +84,9 @@ public class K8sAgentImpl implements K8sAgent {
 	public K8sAgentImpl(
 			BundleContext bundleContext,
 			@Reference ConfigurationAdmin configurationAdmin,
-			@Reference(policyOption = ReferencePolicyOption.GREEDY) List
+			@Reference(
+				name = "k8sConfiguratPropertiesMutators",
+				policyOption = ReferencePolicyOption.GREEDY) List
 				<K8sConfigurationPropertiesMutator>
 					k8sConfiguratPropertiesMutators,
 			Map<String, Object> properties)
