@@ -14,7 +14,6 @@
 
 package com.liferay.design.pack.factory;
 
-import com.liferay.design.pack.factory.DesignPackFactory;
 import com.liferay.design.pack.factory.configuration.v1.DesignPackConfiguration;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringUtil;
@@ -24,6 +23,7 @@ import com.liferay.portal.kernel.util.Portal;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+
 import java.time.Instant;
 import java.util.Map;
 
@@ -40,8 +40,7 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(
 	configurationPid = "com.liferay.design.pack.factory.configuration.v1.DesignPackConfiguration",
-	configurationPolicy = ConfigurationPolicy.REQUIRE,
-	immediate = true,
+	configurationPolicy = ConfigurationPolicy.REQUIRE, immediate = true,
 	service = DynamicInclude.class
 )
 public class DesignPackFactory implements DynamicInclude {
@@ -56,11 +55,14 @@ public class DesignPackFactory implements DynamicInclude {
 			ConfigurableUtil.createConfigurable(
 				DesignPackConfiguration.class, properties);
 
-		_lastModified = String.valueOf(Instant.now().toEpochMilli());
+		Instant now = Instant.now();
 
-		if (_designPackConfiguration.clayCss().contains(_TOKEN) ||
-				_designPackConfiguration.mainCss().contains(_TOKEN)) {
+		_lastModified = String.valueOf(now.toEpochMilli());
 
+		String classCss = _designPackConfiguration.clayCss();
+		String mainCss = _designPackConfiguration.mainCss();
+
+		if (classCss.contains(_TOKEN) || mainCss.contains(_TOKEN)) {
 			_replaceTokens = true;
 		}
 		else {
@@ -84,18 +86,18 @@ public class DesignPackFactory implements DynamicInclude {
 				"\" data-senna-track=\"temporary\" type=\"text/javascript\">",
 				"  document.querySelector('#liferayAUICSS').href = '",
 				_replaceTokens(_designPackConfiguration.clayCss(), portalURL),
-				"?t=", _lastModified, "';",
-				"  document.querySelector('#liferayThemeCSS').href = '",
+				"?t=", _lastModified,
+				"';  document.querySelector('#liferayThemeCSS').href = '",
 				_replaceTokens(_designPackConfiguration.mainCss(), portalURL),
-				"?t=", _lastModified, "';", "</script>"
-			));
+				"?t=", _lastModified, "';</script>"));
 
 		printWriter.flush();
 	}
 
 	@Override
 	public void register(DynamicIncludeRegistry dynamicIncludeRegistry) {
-		dynamicIncludeRegistry.register("/html/common/themes/top_head.jsp#post");
+		dynamicIncludeRegistry.register(
+			"/html/common/themes/top_head.jsp#post");
 	}
 
 	private String _replaceTokens(String content, String portalURL) {

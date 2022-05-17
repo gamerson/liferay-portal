@@ -12,7 +12,7 @@
  * details.
  */
 
-package com.liferay.dynamic.include.factory.configuration.v1;
+package com.liferay.k8s.agent.configuration.v1;
 
 import aQute.bnd.annotation.metatype.Meta;
 
@@ -24,26 +24,22 @@ import org.osgi.service.component.annotations.ComponentPropertyType;
 @ComponentPropertyType
 @Meta.OCD(
 	factory = true,
-	id = "com.liferay.dynamic.include.factory.configuration.v1.DynamicIncludeConfiguration",
-	localization = "content/Language",
-	name = "dynamic-include-configuration-name"
+	id = "com.liferay.k8s.agent.configuration.v1.K8sAgentConfiguration",
+	localization = "content/Language", name = "k8s-agent-configuration-name"
 )
-public @interface DynamicIncludeConfiguration {
+public @interface K8sAgentConfiguration {
 
 	@Meta.AD(
-		deflt = "UTF-8", description = "charset-description", name = "charset",
+		deflt = "dxp.liferay.com/configs=true",
+		description = "label-selector-description", name = "label-selector",
 		required = false, type = Meta.Type.String
 	)
-	public String charset();
+	public String labelSelector();
 
 	@Meta.AD(
-		description = "key-description", name = "key", type = Meta.Type.String
+		description = "namespace-description", name = "namespace",
+		type = Meta.Type.String
 	)
-	public String key();
-
-	@Meta.AD(
-		description = "urls-description", name = "urls", type = Meta.Type.String
-	)
-	public String[] urls();
+	public String namespace();
 
 }

@@ -1,8 +1,0 @@
-dependencies {
-	compileOnly group: "com.liferay", name: "org.apache.felix.configurator", version: "1.0.14.LIFERAY-PATCHED-2"
-	compileOnly group: "com.liferay.portal", name: "release.dxp.api"
-
-	compileInclude('io.fabric8:kubernetes-client:5.12.2') {
-		exclude group: "org.slf4j", module: "slf4j-api"
-	}
-}

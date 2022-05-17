@@ -14,16 +14,11 @@
 
 package com.liferay.design.pack.factory.configuration.v1;
 
-import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClassDefinition;
-
 import aQute.bnd.annotation.metatype.Meta;
 
 /**
  * @author Raymond Augé
  */
-@ExtendedObjectClassDefinition(
-	category = "hidden", scope = ExtendedObjectClassDefinition.Scope.COMPANY
-)
 @Meta.OCD(
 	factory = true,
 	id = "com.liferay.design.pack.factory.configuration.v1.DesignPackConfiguration",
@@ -32,21 +27,15 @@ import aQute.bnd.annotation.metatype.Meta;
 public interface DesignPackConfiguration {
 
 	@Meta.AD(
-		description = "charset-description", name = "charset",
-		type = Meta.Type.Long
+		deflt = "UTF-8", description = "charset-description", name = "charset",
+		required = false, type = Meta.Type.Long
 	)
 	public String charset();
 
-	@Meta.AD(
-		description = "clay-css-description",
-		name = "clay-css"
-	)
+	@Meta.AD(description = "clay-css-description", name = "clay-css")
 	public String clayCss();
 
-	@Meta.AD(
-		description = "main-css-description",
-		name = "main-css"
-	)
+	@Meta.AD(description = "main-css-description", name = "main-css")
 	public String mainCss();
 
 }

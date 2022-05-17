@@ -23,9 +23,8 @@ import com.liferay.portal.kernel.util.Portal;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -55,7 +54,9 @@ public class DynamicIncludeFactory implements DynamicInclude {
 		_dynamicIncludeConfiguration = ConfigurableUtil.createConfigurable(
 			DynamicIncludeConfiguration.class, properties);
 
-		_lastModified = String.valueOf(Instant.now().toEpochMilli());
+		Instant now = Instant.now();
+
+		_lastModified = String.valueOf(now.toEpochMilli());
 
 		boolean replaceTokens = false;
 
@@ -86,8 +87,7 @@ public class DynamicIncludeFactory implements DynamicInclude {
 						_dynamicIncludeConfiguration.charset(),
 						"\" data-senna-track=\"temporary\" src=\"",
 						_replaceTokens(url, portalURL), "?t=", _lastModified,
-						"\" type=\"text/javascript\"></script>"
-					));
+						"\" type=\"text/javascript\"></script>"));
 			}
 			else if (url.indexOf(".css") > -1) {
 				printWriter.println(
@@ -96,8 +96,7 @@ public class DynamicIncludeFactory implements DynamicInclude {
 						_dynamicIncludeConfiguration.charset(),
 						" data-senna-track=\"temporary\" href=\"",
 						_replaceTokens(url, portalURL), "?t=", _lastModified,
-						"\" rel=\"stylesheet\" type=\"text/css\"/>"
-					));
+						"\" rel=\"stylesheet\" type=\"text/css\"/>"));
 			}
 		}
 
@@ -106,8 +105,6 @@ public class DynamicIncludeFactory implements DynamicInclude {
 
 	@Override
 	public void register(DynamicIncludeRegistry dynamicIncludeRegistry) {
-		// css -> /html/common/themes/top_head.jsp#post
-		// js ->  /html/common/themes/top_js.jspf#resources
 		dynamicIncludeRegistry.register(_dynamicIncludeConfiguration.key());
 	}
 
