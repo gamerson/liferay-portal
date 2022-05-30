@@ -1,0 +1,10 @@
+{
+    "com.liferay.design.pack.factory.configuration.v1.FaviconConfiguration~jamon": {
+        "type": "favicon",
+        ":configurator:policy": "force",
+        "charset": "UTF-8",
+        "description": "Jamon Icon",
+        "url": "$[conf:host.service.address]/favicon.ico",
+        "timestamp": "${tstamp}"
+    }
+}
