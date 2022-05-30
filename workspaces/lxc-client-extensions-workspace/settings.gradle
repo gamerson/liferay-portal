@@ -7,7 +7,9 @@ buildscript {
 	}
 
 	repositories {
-		mavenLocal()
+		maven {
+			url "${rootDir}/../repo"
+		}
 		maven {
 			url "https://repository-cdn.liferay.com/nexus/content/groups/public"
 		}
