@@ -1,0 +1,4 @@
+image:
+  repository: dxp-localdev
+  tag: latest
+  pullPolicy: IfNotPresent

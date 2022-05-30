@@ -1,0 +1,13 @@
+{{- $osgiConfigJsonPath := printf "%s/%s" .Values.pwd .Values.osgiConfigJsonPath -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{.Release.Name | lower}}-dxp-configs
+  labels:
+    cloud.liferay.com/serviceId: "{{.Release.Name | lower}}"
+    dxp.liferay.com/configs: "true"
+  annotations:
+    cloud.liferay.com/context-data: '{"domains":["{{.Release.Name | lower}}.localdev.me"]}'
+data:
+  osgi.config.json: |
+{{ .Files.Get $osgiConfigJsonPath| indent 4 }}

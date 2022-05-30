@@ -1,0 +1,7 @@
+image:
+  repository: k8s-native-dxp
+  tag: latest
+  pullPolicy: Never
+
+extensions:
+  - name: designpackfire

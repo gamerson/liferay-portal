@@ -1,0 +1,17 @@
+def darwin_patch(yaml):
+  if str(local("uname")).strip() == "Darwin":
+    ip = str(local('minikube ip')).strip()
+    patched = local('yq \'.spec.template.spec += {"hostAliases": [{"ip":"' + ip + '", "hostnames": ["dxp.localdev.me"]}]}\'', stdin=str(yaml))
+    return patched
+  else:
+    return yaml
+
+def lxc_extension(name='', command='', deps=[], ignore=[], chart_path='', set=[]):
+  custom_build(name, command, deps, ignore=ignore)
+  k8s_yaml(
+    darwin_patch(
+      helm(
+        chart_path, name=name, set=set
+      )
+    )
+  )

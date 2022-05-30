@@ -1,0 +1,28 @@
+load('../shared/tilt-extensions/Tiltfile', 'lxc_extension')
+
+#k8s_yaml(
+  #helm(
+    #'../shared/helm-charts/dxp-localdev',
+    #name='dxp-localdev',
+    #values=['./values-dxp-localdev.yaml'],
+  #)
+#)
+
+lxc_extension(
+  name='designpackfire',
+  command='cd ./design-packs/fire && ../../gradlew build && unzip -of dist/designpackfire-1.0.0.zip -d build/tilt/ && docker build -t $EXPECTED_REF build/tilt',
+  deps=[
+    './design-packs/fire/src',
+    './design-packs/fire/package.json'
+  ],
+  ignore=[
+    './design-packs/fire/build', 
+    './design-packs/fire/dist'
+  ],
+  chart_path='../shared/helm-charts/static-localdev',
+  set=[
+    'osgiConfigJsonPath=design-packs/fire/build/tilt/OSGI-INF/configurator/osgi.config.json',
+    'pwd=' + str(local('pwd')).strip(),
+    'image.repository=designpackfire'
+  ]
+)
