@@ -3,6 +3,11 @@ favicon:
     name: jamon
     description: "Jamon for Life"
     url: favicon.ico
+  v2:
+    name: jamon
+    description: "Jamon for Life"
+    url: favicon.ico
+    hdUrl: favicon2x.ico
 themeCss:
   v1:
     name: tortilla

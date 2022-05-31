@@ -4,6 +4,12 @@
       "url": "$[conf:host.service.address]/favicon.ico",
       "timestamp": "${tstamp}"
   },
+  "com.liferay.client.extensions.factory.configuration.v2.FaviconConfiguration~jamon": {
+      "description": "Jamon Icon",
+      "url": "$[conf:host.service.address]/favicon.ico",
+      "hdUrl": "$[conf:host.service.address]/favicon2x.ico",
+      "timestamp": "${tstamp}"
+  },
   "com.liferay.client.extensions.factory.configuration.v1.ThemeCssConfiguration~tortilla": {
     "description": "Tortilla Theme CSS",
     "mainCss": "$[conf:host.service.address]/main.css",
