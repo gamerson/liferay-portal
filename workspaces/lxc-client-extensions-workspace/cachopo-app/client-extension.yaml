@@ -1,0 +1,30 @@
+cachopoapp:
+  type: customElement
+  description: "Cachopo App"
+  sourceCodeUrl: &scu "https://github.com/liferay/cachopo-app"
+  customElementName: cachopoapp-element
+  useEsModules: true
+  urls:
+  - main.js
+  - foobar.js
+  cssUrls:
+  - main.css
+  - foobar.css
+  instanceable: true
+  portletCategoryName: sample
+  friendlyUrlMapping: /abc
+  properties:
+  - "foo=bar"
+  - "fizz=buzz"
+
+sepia:
+  type: iframeElement
+  description: "Black ink"
+  sourceCodeUrl: *scu
+    url: "https://raw.githubusercontent.com/liferay/seipia-app/app.html"
+    instanceable: true
+    portletCategoryName: sample
+    friendlyUrlMapping: /sepia
+    properties:
+    - "foo=bar"
+    - "fizz=buzz"
