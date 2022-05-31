@@ -1,8 +1,9 @@
 {
   "com.liferay.client.extensions.factory.configuration.v1.FaviconConfiguration~jamon": {
       "description": "Jamon Icon",
-      "url": "$[conf:host.service.address]/favicon.ico",
-      "timestamp": "${tstamp}"
+      "url": "favicon.ico",
+      "__timestamp": "${tstamp}",
+      "__hostAddressPrefix": "${portalURL}${pathContext}/o/${project.name}"
   },
   "com.liferay.client.extensions.factory.configuration.v2.FaviconConfiguration~jamon": {
       "description": "Jamon Icon",

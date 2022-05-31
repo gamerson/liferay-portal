@@ -1,24 +1,28 @@
-favicon:
-  v1:
-    name: jamon
-    description: "Jamon for Life"
-    url: favicon.ico
-  v2:
-    name: jamon
-    description: "Jamon for Life"
-    url: favicon.ico
-    hdUrl: favicon2x.ico
-themeCss:
-  v1:
-    name: tortilla
-    description: "Tortillas everyday"
-    mainCss: main.css
-    clayCss: clay.css
-themeJs:
-  v1:
-    name: marmitako
-    description: "What is a marmitako?"
-    js:
-    - main.js
-    - foobar.js
+jamon:
+  type: favicon
+  description: "Jamon for Life"
+  sourceCodeUrl: &scu https://liferay.com
+  url: favicon.ico
+
+jamonhd:
+  type: favicon
+  description: "Jamon HD for Life"
+  sourceCodeUrl: *scu
+  url: favicon.ico
+  hdUrl: https://raw.githubusercontent.com/gamerson/jamon/favicon2x.ico
+
+tortilla:
+  type: themeCss
+  description: "Tortillas everyday"
+  sourceCodeUrl: *scu
+  mainCss: main.css
+  clayCss: clay.css
+
+marmitako:
+  type: themeJs
+  description: "What is a marmitako?"
+  sourceCodeUrl: *scu
+  js:
+  - main.js
+  - foobar.js
      

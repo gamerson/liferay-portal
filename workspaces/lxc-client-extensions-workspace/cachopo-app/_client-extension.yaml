@@ -17,6 +17,7 @@ customElement:
     properties:
     - "foo=bar"
     - "fizz=buzz"
+
 iframe:
   v1:
     name: sepia

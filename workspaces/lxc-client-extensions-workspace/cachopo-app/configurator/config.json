@@ -1,4 +1,18 @@
 {
+  "com.liferay.client.extensions.factory.configuration.ClientExtensionConfiguration~cachopoapp": {
+    "name": "cachopoapp",
+    "type": "custom-element",
+    "description": "Cachopo App",
+    "sourceCodeUrl": "https://github.com/liferay/cachopo-app",
+    "typeSettings": [
+      "useEsModules=true",
+      "portletCategoryName=sample",
+      "friendlyUrlMapping=/abc",
+      "urls=$[conf:host.service.address]/main.js\n$[conf:host.service.address]/foobar.js",
+      "cssUrls=$[conf:host.service.address]/main.css\n$[conf:host.service.address]/foobar.css"
+    ],
+    "__timestamp": "${tstamp}" 
+  },
   "com.liferay.client.extensions.factory.configuration.v1.CustomElementConfiguration~cachopoapp": {
       "name": "cachopoapp",
       "customElementName": "cachopoapp-element",
@@ -30,10 +44,7 @@
     "instanceable": true,
     "portletCategoryName": "sample",
     "friendlyUrlMapping": "/abc",
-    "properties": [
-        "foo=bar",
-        "fizz=buzz"
-    ],
+    "properties": "foo=bar\nfizz=buzz",
     "timestamp": "${tstamp}"
   }
 }
