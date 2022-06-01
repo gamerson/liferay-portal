@@ -1,3 +1,17 @@
+/**
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License as published by the Free
+ * Software Foundation; either version 2.1 of the License, or (at your option)
+ * any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+ * details.
+ */
+
 package com.liferay.gradle.plugins.workspace.configurators;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -12,6 +26,7 @@ import com.liferay.gradle.plugins.workspace.internal.client.extension.ClientExte
 import com.liferay.gradle.plugins.workspace.internal.client.extension.ClientExtensionConfigurer;
 import com.liferay.gradle.plugins.workspace.internal.client.extension.ThemeFaviconConfigurer;
 import com.liferay.gradle.plugins.workspace.internal.util.GradleUtil;
+import com.liferay.petra.string.StringBundler;
 
 import java.io.File;
 import java.io.FileReader;
@@ -41,6 +56,9 @@ import org.gradle.api.tasks.Delete;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.jvm.tasks.Jar;
 
+/**
+ * @author Gregory Amerson
+ */
 public class ClientExtensionProjectConfigurator
 	extends BaseProjectConfigurator {
 
@@ -59,15 +77,7 @@ public class ClientExtensionProjectConfigurator
 
 	@Override
 	public void apply(Project project) {
-		if (isDefaultRepositoryEnabled()) {
-			GradleUtil.addDefaultRepositories(project);
-		}
-
-		GradleUtil.applyPlugin(project, LiferayOSGiPlugin.class);
-
-		_configureConfigurationDefault(project);
-		_configureVersion(project);
-		_configureTaskClean(project);
+		_baseConfigureClientExtensionProject(project);
 
 		File clientExtensionFile = project.file(_CLIENT_EXTENSION_YAML);
 
@@ -76,10 +86,10 @@ public class ClientExtensionProjectConfigurator
 
 			JsonNode rootJsonNode = objectMapper.readTree(clientExtensionFile);
 
-			Iterator<Map.Entry<String, JsonNode>> clientExtensionNodes =
+			Iterator<Map.Entry<String, JsonNode>> nodeIterator =
 				rootJsonNode.fields();
 
-			clientExtensionNodes.forEachRemaining(
+			nodeIterator.forEachRemaining(
 				node -> {
 					String id = node.getKey();
 					JsonNode clientExtensionNode = node.getValue();
@@ -88,8 +98,9 @@ public class ClientExtensionProjectConfigurator
 						ClientExtension clientExtension =
 							objectMapper.treeToValue(
 								clientExtensionNode, ClientExtension.class);
-						
+
 						clientExtension.id = id;
+						clientExtension.projectName = project.getName();
 
 						ClientExtensionConfigurer clientExtensionConfigurer =
 							_clientExtensionConfigurers.get(
@@ -100,24 +111,19 @@ public class ClientExtensionProjectConfigurator
 								project, clientExtension);
 						}
 					}
-					catch (JsonProcessingException jpe) {
+					catch (JsonProcessingException jsonProcessingException) {
 						throw new GradleException(
-							"Failed to parse client-extension " + id);
+							"Failed to parse client-extension " + id,
+							jsonProcessingException);
 					}
 				});
 		}
-		catch (IOException e) {
+		catch (IOException ioException) {
 			throw new GradleException(
-				"Failed parsing client-extension.yaml file.", e);
+				StringBundler.concat(
+					"Failed parsing ", _CLIENT_EXTENSION_YAML, " file."),
+				ioException);
 		}
-
-		WorkspaceExtension workspaceExtension = GradleUtil.getExtension(
-			(ExtensionAware)project.getGradle(), WorkspaceExtension.class);
-
-		TaskProvider<Jar> jarTaskProvider = GradleUtil.getTaskProvider(
-			project, JavaPlugin.JAR_TASK_NAME, Jar.class);
-
-		addTaskDockerDeploy(project, jarTaskProvider, workspaceExtension);
 	}
 
 	@Override
@@ -166,6 +172,26 @@ public class ClientExtensionProjectConfigurator
 	}
 
 	protected static final String NAME = "client.extension";
+
+	private void _baseConfigureClientExtensionProject(Project project) {
+		if (isDefaultRepositoryEnabled()) {
+			GradleUtil.addDefaultRepositories(project);
+		}
+
+		GradleUtil.applyPlugin(project, LiferayOSGiPlugin.class);
+
+		_configureConfigurationDefault(project);
+		_configureVersion(project);
+		_configureTaskClean(project);
+
+		WorkspaceExtension workspaceExtension = GradleUtil.getExtension(
+			(ExtensionAware)project.getGradle(), WorkspaceExtension.class);
+
+		TaskProvider<Jar> jarTaskProvider = GradleUtil.getTaskProvider(
+			project, JavaPlugin.JAR_TASK_NAME, Jar.class);
+
+		addTaskDockerDeploy(project, jarTaskProvider, workspaceExtension);
+	}
 
 	private void _configureConfigurationDefault(Project project) {
 		Configuration defaultConfiguration = GradleUtil.getConfiguration(

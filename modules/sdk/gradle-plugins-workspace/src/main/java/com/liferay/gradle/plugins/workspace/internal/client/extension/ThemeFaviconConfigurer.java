@@ -1,3 +1,17 @@
+/**
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License as published by the Free
+ * Software Foundation; either version 2.1 of the License, or (at your option)
+ * any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+ * details.
+ */
+
 package com.liferay.gradle.plugins.workspace.internal.client.extension;
 
 import com.liferay.gradle.plugins.LiferayBasePlugin;
@@ -12,6 +26,7 @@ import com.liferay.petra.string.StringBundler;
 import groovy.lang.Closure;
 
 import java.io.File;
+
 import java.util.concurrent.Callable;
 
 import org.gradle.api.Action;
@@ -32,6 +47,9 @@ import org.gradle.api.tasks.Copy;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.jvm.tasks.Jar;
 
+/**
+ * @author Gregory Amerson
+ */
 public class ThemeFaviconConfigurer implements ClientExtensionConfigurer {
 
 	public static final String BUILD_FAVICON_TASK_NAME = "buildFavicon";
@@ -79,54 +97,13 @@ public class ThemeFaviconConfigurer implements ClientExtensionConfigurer {
 					_defaultClientExtensionBundleInstructions(bundleExtension);
 
 					try {
-						String key = StringBundler.concat(clientExtension.id, "OsgiConfigJsonValue");
-						bundleExtension.instruction(
-							key, clientExtension.toJSON());
-
-						key = StringBundler.concat("-includeresource.", clientExtension.id, ".osgi.config.json");
-						String value = StringBundler.concat("OSGI-INF/configurator/", clientExtension.id, ".osgi.config.json;literal='${", clientExtension.id, "OsgiConfigJsonValue}'");
-						bundleExtension.instruction(key, value);
-
-						key = StringBundler.concat("-includeresource.", clientExtension.id);
-						bundleExtension.instruction(key, "META-INF/resources/=build/;filter:=*.ico;recursive:=false");
-
-						File lcpJsonFile = project.file("LCP.json");
-
-						if (lcpJsonFile.exists()) {
-							bundleExtension.instruction(
-								"-includeresource.lcp.json", "LCP.json");
-						}
-						else {
-							String lcpJsonValue = StringUtil.read(
-								ClientExtensionProjectConfigurator.class.
-									getResourceAsStream("LcpJson_template"));
-							bundleExtension.instruction(
-								"lcpJsonValue", lcpJsonValue);
-							bundleExtension.instruction(
-								"-includeresource.lcp.json",
-								"LCP.json;literal='${lcpJsonValue}'");
-						}
-
-						File dockerfile = project.file("Dockerfile");
-
-						if (dockerfile.exists()) {
-							bundleExtension.instruction(
-								"-includeresource.dockerfile", "Dockerfile");
-						}
-						else {
-							String dockerfileValue = StringUtil.read(
-								ClientExtensionProjectConfigurator.class.
-									getResourceAsStream("Dockerfile_template"));
-							bundleExtension.instruction(
-								"dockerfileValue", dockerfileValue);
-							bundleExtension.instruction(
-								"-includeresource.dockerfile",
-								"Dockerfile;literal='${dockerfileValue}'");
-						}
+						_themeFaviconBundleInstructions(
+							project, bundleExtension, clientExtension);
 					}
-					catch (Exception e) {
+					catch (Exception exception) {
 						throw new GradleException(
-							"Failed to configure bundle instructions", e);
+							"Failed to configure bundle instructions",
+							exception);
 					}
 				}
 
@@ -138,8 +115,7 @@ public class ThemeFaviconConfigurer implements ClientExtensionConfigurer {
 		Project project, ClientExtension clientExtension) {
 
 		Copy copy = GradleUtil.addTask(
-			project,
-			BUILD_FAVICON_TASK_NAME + clientExtension.id.toUpperCase(),
+			project, BUILD_FAVICON_TASK_NAME + clientExtension.id.toUpperCase(),
 			Copy.class);
 
 		copy.setDescription("Assembles favicon.");
@@ -245,9 +221,73 @@ public class ThemeFaviconConfigurer implements ClientExtensionConfigurer {
 		bundleExtension.instruction("Bundle-SymbolicName", "${project.name}");
 		bundleExtension.instruction("Bundle-Version", "${project.version}");
 		bundleExtension.instruction(
-			"Require-Capability",
-			"osgi.extender;filter:=\"(&(osgi.extender=osgi.configurator)(version>=1.0)(!(version>=2.0)))\"");
+			"Require-Capability", _OSGI_EXTENDER_CAPABILITY);
 		bundleExtension.instruction("Web-ContextPath", "/${project.name}");
 	}
+
+	private void _themeFaviconBundleInstructions(
+			Project project, BundleExtension bundleExtension,
+			ClientExtension clientExtension)
+		throws Exception {
+
+		bundleExtension.instruction(
+			clientExtension.id + "OsgiConfigJsonValue",
+			clientExtension.toJSON());
+
+		String key = StringBundler.concat(
+			"-includeresource.", clientExtension.id, ".osgi.config.json");
+		String value = StringBundler.concat(
+			"OSGI-INF/configurator/", clientExtension.id,
+			".osgi.config.json;literal='${", clientExtension.id,
+			"OsgiConfigJsonValue}'");
+
+		bundleExtension.instruction(key, value);
+
+		bundleExtension.instruction(
+			"-includeresource." + clientExtension.id,
+			"META-INF/resources/=build/;filter:=*.ico;recursive:=false");
+
+		File lcpJsonFile = project.file("LCP.json");
+
+		if (lcpJsonFile.exists()) {
+			bundleExtension.instruction(
+				"-includeresource.lcp.json", "LCP.json");
+		}
+		else {
+			String lcpJsonValue = StringUtil.read(
+				ClientExtensionProjectConfigurator.class.getResourceAsStream(
+					"LcpJson_template"));
+
+			bundleExtension.instruction(
+				"-includeresource.lcp.json",
+				"LCP.json;literal='${lcpJsonValue}'");
+			bundleExtension.instruction("lcpJsonValue", lcpJsonValue);
+		}
+
+		File dockerfile = project.file("Dockerfile");
+
+		if (dockerfile.exists()) {
+			bundleExtension.instruction(
+				"-includeresource.dockerfile", "Dockerfile");
+		}
+		else {
+			String dockerfileValue = StringUtil.read(
+				ClientExtensionProjectConfigurator.class.getResourceAsStream(
+					"Dockerfile_template"));
+
+			bundleExtension.instruction(
+				"-includeresource.dockerfile",
+				"Dockerfile;literal='${dockerfileValue}'");
+			bundleExtension.instruction("dockerfileValue", dockerfileValue);
+		}
+
+		bundleExtension.instruction(
+			"-fixupmessages" + clientExtension.id,
+			"No translation found for macro");
+	}
+
+	private static final String _OSGI_EXTENDER_CAPABILITY =
+		"osgi.extender;filter:=\"(&(osgi.extender=osgi.configurator)" +
+			"(version>=1.0)(!(version>=2.0)))\"";
 
 }
