@@ -14,17 +14,17 @@ cachopoapp:
   portletCategoryName: sample
   friendlyUrlMapping: /abc
   properties:
-  - "foo=bar"
-  - "fizz=buzz"
+    foo: bar
+    fizz: buzz
 
 sepia:
   type: iframeElement
   description: "Black ink"
   sourceCodeUrl: *scu
-    url: "https://raw.githubusercontent.com/liferay/seipia-app/app.html"
-    instanceable: true
-    portletCategoryName: sample
-    friendlyUrlMapping: /sepia
-    properties:
-    - "foo=bar"
-    - "fizz=buzz"
+  url: "https://raw.githubusercontent.com/liferay/seipia-app/app.html"
+  instanceable: true
+  portletCategoryName: sample
+  friendlyUrlMapping: /sepia
+  properties:
+    foo: bar
+    fizz: buzz

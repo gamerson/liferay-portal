@@ -1,28 +1,48 @@
 {
-  "com.liferay.client.extensions.factory.configuration.v1.FaviconConfiguration~jamon": {
+  "com.liferay.client.extensions.factory.configuration.ClientExtensionConfiguration~jamon": {
+      "name": "jamon",
+      "type": "favicon",
       "description": "Jamon Icon",
-      "url": "favicon.ico",
+      "sourceCodeUrl": "https://liferay.com",
+      "typeSettings": [
+        "url=favicon.ico"
+      ],
       "__timestamp": "${tstamp}",
       "__hostAddressPrefix": "${portalURL}${pathContext}/o/${project.name}"
   },
-  "com.liferay.client.extensions.factory.configuration.v2.FaviconConfiguration~jamon": {
-      "description": "Jamon Icon",
-      "url": "$[conf:host.service.address]/favicon.ico",
-      "hdUrl": "$[conf:host.service.address]/favicon2x.ico",
-      "timestamp": "${tstamp}"
+  "com.liferay.client.extensions.factory.configuration.ClientExtensionConfiguration~jamonhd": {
+      "name": "jamonhd",
+      "type": "favicon",
+      "description": "Jamon HD Icon",
+      "sourceCodeUrl": "https://liferay.com",
+      "typeSettings": [
+        "url=favicon.ico",
+        "hdUrl=https://raw.githubusercontent.com/gamerson/jamon/favicon2x.ico"
+      ],
+      "__timestamp": "${tstamp}",
+      "__hostAddressPrefix": "${portalURL}${pathContext}/o/${project.name}"
   },
-  "com.liferay.client.extensions.factory.configuration.v1.ThemeCssConfiguration~tortilla": {
-    "description": "Tortilla Theme CSS",
-    "mainCss": "$[conf:host.service.address]/main.css",
-    "clayCss": "$[conf:host.service.address]/clay.css",
-    "timestamp": "${tstamp}"
+  "com.liferay.client.extensions.factory.configuration.ClientExtensionConfiguration~tortilla": {
+      "name": "tortilla",
+      "type": "themeCss",
+      "description": "Tortillas everyday",
+      "sourceCodeUrl": "https://liferay.com",
+      "typeSettings": [
+        "mainCss=main.css",
+        "clayCss=clay.css"
+      ],
+      "__timestamp": "${tstamp}",
+      "__hostAddressPrefix": "${portalURL}${pathContext}/o/${project.name}"
   },
-  "com.liferay.client.extensions.factory.configuration.v1.ThemeJsConfiguration~marmitako": {
-    "description": "Marmitako Theme JS",
-    "js": [
-      "$[conf:host.service.address]/main.js",
-      "$[conf:host.service.address]/foobar.js"
-    ],
-    "timestamp": "${tstamp}"
+  "com.liferay.client.extensions.factory.configuration.ClientExtensionConfiguration~marmitako": {
+      "name": "marmitako",
+      "type": "themeJs",
+      "description": "What is a marmitako?",
+      "sourceCodeUrl": "https://liferay.com",
+      "typeSettings": [
+        "jsUrls=main.js\nfoobar.jar"
+      ],
+      "__timestamp": "${tstamp}",
+      "__hostAddressPrefix": "${portalURL}${pathContext}/o/${project.name}"
   }
 }
