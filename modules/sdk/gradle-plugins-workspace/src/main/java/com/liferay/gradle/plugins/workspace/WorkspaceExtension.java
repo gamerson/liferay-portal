@@ -19,9 +19,9 @@ import com.google.gson.annotations.SerializedName;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 
+import com.liferay.gradle.plugins.workspace.configurators.ClientExtensionProjectConfigurator;
 import com.liferay.gradle.plugins.workspace.configurators.DesignPacksProjectConfigurator;
 import com.liferay.gradle.plugins.workspace.configurators.ExtProjectConfigurator;
-import com.liferay.gradle.plugins.workspace.configurators.ClientExtensionProjectConfigurator;
 import com.liferay.gradle.plugins.workspace.configurators.ModulesProjectConfigurator;
 import com.liferay.gradle.plugins.workspace.configurators.PluginsProjectConfigurator;
 import com.liferay.gradle.plugins.workspace.configurators.RootProjectConfigurator;

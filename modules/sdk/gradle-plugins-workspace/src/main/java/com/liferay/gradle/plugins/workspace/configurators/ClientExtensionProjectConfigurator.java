@@ -1,13 +1,34 @@
 package com.liferay.gradle.plugins.workspace.configurators;
 
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+
+import com.liferay.gradle.plugins.LiferayBasePlugin;
+import com.liferay.gradle.plugins.LiferayOSGiPlugin;
+import com.liferay.gradle.plugins.extensions.BundleExtension;
+import com.liferay.gradle.plugins.util.BndUtil;
+import com.liferay.gradle.plugins.workspace.WorkspaceExtension;
+import com.liferay.gradle.plugins.workspace.WorkspacePlugin;
+import com.liferay.gradle.plugins.workspace.internal.util.GradleUtil;
+import com.liferay.gradle.plugins.workspace.internal.util.StringUtil;
+
+import groovy.lang.Closure;
+
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.StringWriter;
+
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -35,24 +56,8 @@ import org.gradle.api.tasks.Delete;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.jvm.tasks.Jar;
 
-import com.fasterxml.jackson.annotation.JsonAnySetter;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.liferay.gradle.plugins.LiferayBasePlugin;
-import com.liferay.gradle.plugins.LiferayOSGiPlugin;
-import com.liferay.gradle.plugins.extensions.BundleExtension;
-import com.liferay.gradle.plugins.util.BndUtil;
-import com.liferay.gradle.plugins.workspace.WorkspaceExtension;
-import com.liferay.gradle.plugins.workspace.WorkspacePlugin;
-import com.liferay.gradle.plugins.workspace.internal.util.GradleUtil;
-import com.liferay.gradle.plugins.workspace.internal.util.StringUtil;
-
-import groovy.lang.Closure;
-
-public class ClientExtensionProjectConfigurator extends BaseProjectConfigurator {
+public class ClientExtensionProjectConfigurator
+	extends BaseProjectConfigurator {
 
 	public static final String BUILD_FAVICON_TASK_NAME = "buildFavicon";
 
@@ -60,7 +65,7 @@ public class ClientExtensionProjectConfigurator extends BaseProjectConfigurator 
 		super(settings);
 
 		_clientExtensionConfigurers.put("favicon", new FaviconConfigurer());
-		_clientExtensionConfigurers.put("themeCss", new ThemeCssConfigurer());
+		//_clientExtensionConfigurers.put("themeCss", new ThemeCssConfigurer());
 
 		_defaultRepositoryEnabled = GradleUtil.getProperty(
 			settings,
@@ -78,22 +83,33 @@ public class ClientExtensionProjectConfigurator extends BaseProjectConfigurator 
 
 			JsonNode rootNode = objectMapper.readTree(clientExtensionFile);
 
-			rootNode.fields().forEachRemaining(
+			rootNode.fields(
+			).forEachRemaining(
 				nameNode -> {
 					String name = nameNode.getKey();
 					JsonNode clientExtensionNode = nameNode.getValue();
-					
+
 					try {
-						ClientExtension clientExtension = objectMapper.treeToValue(clientExtensionNode, ClientExtension.class);
+						ClientExtension clientExtension =
+							objectMapper.treeToValue(
+								clientExtensionNode, ClientExtension.class);
+
 						clientExtension.name = name;
-						
-						ClientExtensionConfigurer clientExtensionConfigurer = _clientExtensionConfigurers.get(clientExtension.type);
+
+						ClientExtensionConfigurer clientExtensionConfigurer =
+							_clientExtensionConfigurers.get(
+								clientExtension.type);
+
 						if (clientExtensionConfigurer != null) {
-							clientExtensionConfigurer.apply(project, clientExtension);
+							clientExtensionConfigurer.apply(
+								project, clientExtension);
 						}
-					} 
-					catch (JsonProcessingException | IllegalArgumentException e) {
+					}
+					catch (IllegalArgumentException | JsonProcessingException
+								e) {
+
 						// TODO Auto-generated catch block
+
 						e.printStackTrace();
 					}
 				}
@@ -115,23 +131,58 @@ public class ClientExtensionProjectConfigurator extends BaseProjectConfigurator 
 
 	@JsonIgnoreProperties(ignoreUnknown = true)
 	public static class ClientExtension {
-		public String name;
-		public String type;
-		public String description;
-		public String sourceCodeUrl;
-		public Map<String, Object> typeSettings = new HashMap<>();
 
 		@JsonAnySetter
 		public void ignored(String name, Object value) {
-		    typeSettings.put(name, value);
+			typeSettings.put(name, value);
 		}
 
-		public Object toJSON() {
-			// TODO Auto-generated method stub
-			return null;
+		public String toJSON() {
+			Map<String, Object> config = new HashMap<>();
+
+			config.put(
+				"__hostAddressPrefix",
+				"${portalURL}${pathContext}/o/" + projectName);
+			config.put("__timestamp", "${tstamp}");
+			config.put("description", description);
+			config.put("name", name);
+			config.put("sourceCodeUrl", sourceCodeUrl);
+			config.put("type", type);
+			config.put("typeSettings", typeSettings);
+
+			Map<String, Object> json = new HashMap<>();
+
+			json.put(
+				"com.liferay.client.extensions.factory.configuration.ClientExtensionConfiguration~" +
+					name,
+				config);
+
+			ObjectMapper objectMapper = new ObjectMapper();
+
+			StringWriter sw = new StringWriter();
+
+			try {
+				objectMapper.writeValue(sw, json);
+			}
+			catch (IOException e) {
+
+				// TODO Auto-generated catch block
+
+				e.printStackTrace();
+			}
+
+			return sw.toString();
 		}
+
+		public String description;
+		public String name;
+		public String projectName;
+		public String sourceCodeUrl;
+		public String type;
+		public Map<String, Object> typeSettings = new HashMap<>();
+
 	}
-	
+
 	@Override
 	protected Iterable<File> doGetProjectDirs(File rootDir) throws Exception {
 		final Set<File> projectDirs = new HashSet<>();
@@ -171,9 +222,13 @@ public class ClientExtensionProjectConfigurator extends BaseProjectConfigurator 
 	protected static final String NAME = "client.extension";
 
 	@SuppressWarnings("serial")
-	private Copy _addTaskBuildFavicon(Project project) {
+	private Copy _addTaskBuildFavicon(
+		Project project, ClientExtension clientExtension) {
+
 		Copy copy = GradleUtil.addTask(
-			project, BUILD_FAVICON_TASK_NAME, Copy.class);
+			project,
+			BUILD_FAVICON_TASK_NAME + clientExtension.name.toUpperCase(),
+			Copy.class);
 
 		copy.setDescription("Assembles favicon.");
 		copy.setGroup(BasePlugin.BUILD_GROUP);
@@ -298,7 +353,8 @@ public class ClientExtensionProjectConfigurator extends BaseProjectConfigurator 
 
 	private static final boolean _DEFAULT_REPOSITORY_ENABLED = true;
 
-	private final Map<String, ClientExtensionConfigurer> _clientExtensionConfigurers = new HashMap<>();
+	private final Map<String, ClientExtensionConfigurer>
+		_clientExtensionConfigurers = new HashMap<>();
 	private final boolean _defaultRepositoryEnabled;
 
 	private interface ClientExtensionConfigurer {
@@ -307,15 +363,10 @@ public class ClientExtensionProjectConfigurator extends BaseProjectConfigurator 
 
 	}
 
-	private class ThemeCssConfigurer extends FaviconConfigurer {
-	}
-
 	private class FaviconConfigurer implements ClientExtensionConfigurer {
 
 		@Override
-		public void apply(
-			Project project, ClientExtension clientExtension) {
-
+		public void apply(Project project, ClientExtension clientExtension) {
 			WorkspaceExtension workspaceExtension = GradleUtil.getExtension(
 				(ExtensionAware)project.getGradle(), WorkspaceExtension.class);
 
@@ -328,7 +379,7 @@ public class ClientExtensionProjectConfigurator extends BaseProjectConfigurator 
 			_configureConfigurationDefault(project);
 			_configureVersion(project);
 
-			Copy faviconTask = _addTaskBuildFavicon(project);
+			Copy faviconTask = _addTaskBuildFavicon(project, clientExtension);
 
 			TaskProvider<Jar> jarTaskProvider = GradleUtil.getTaskProvider(
 				project, JavaPlugin.JAR_TASK_NAME, Jar.class);
@@ -378,8 +429,19 @@ public class ClientExtensionProjectConfigurator extends BaseProjectConfigurator 
 						bundleExtension.instruction(
 							"Web-ContextPath", "/${project.name}");
 
-						bundleExtension.instruction("-includeresource.favicon.osgi.config.json", "OSGI-INF/configurator/osgi.config.json;literal='${osgiConfigJsonValue}'");
-						bundleExtension.instruction("-includeresource.favicon", "META-INF/resources/=build/;filter:=*.ico;recursive:=false");
+						bundleExtension.instruction(
+							clientExtension.name + "OsgiConfigJsonValue",
+							clientExtension.toJSON());
+						bundleExtension.instruction(
+							"-includeresource." + clientExtension.name +
+								".osgi.config.json",
+							"OSGI-INF/configurator/" + clientExtension.name +
+								".osgi.config.json;literal='${" +
+									clientExtension.name +
+										"OsgiConfigJsonValue}'");
+						bundleExtension.instruction(
+							"-includeresource." + clientExtension.name,
+							"META-INF/resources/=build/;filter:=*.ico;recursive:=false");
 
 						try {
 							File lcpJsonFile = project.file("LCP.json");
@@ -421,14 +483,13 @@ public class ClientExtensionProjectConfigurator extends BaseProjectConfigurator 
 						}
 						catch (IOException e) {
 						}
-
-						bundleExtension.instruction("osgiConfigJsonValue", clientExtension.toJSON());
 					}
 
 				});
 
 			addTaskDockerDeploy(project, jarTaskProvider, workspaceExtension);
 		}
+
 	}
 
 }
