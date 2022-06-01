@@ -7,11 +7,11 @@ import com.liferay.gradle.plugins.workspace.configurators.ClientExtensionProject
 import com.liferay.gradle.plugins.workspace.configurators.RootProjectConfigurator;
 import com.liferay.gradle.plugins.workspace.internal.util.GradleUtil;
 import com.liferay.gradle.plugins.workspace.internal.util.StringUtil;
+import com.liferay.petra.string.StringBundler;
 
 import groovy.lang.Closure;
 
 import java.io.File;
-import java.text.MessageFormat;
 import java.util.concurrent.Callable;
 
 import org.gradle.api.Action;
@@ -79,25 +79,16 @@ public class ThemeFaviconConfigurer implements ClientExtensionConfigurer {
 					_defaultClientExtensionBundleInstructions(bundleExtension);
 
 					try {
-						String key = MessageFormat.format("{0}OsgiConfigJsonValue", clientExtension.id);
-
+						String key = StringBundler.concat(clientExtension.id, "OsgiConfigJsonValue");
 						bundleExtension.instruction(
 							key, clientExtension.toJSON());
 
-						key = MessageFormat.format(
-							"-includeresource.{0}.osgi.config.json",
-							clientExtension.name);
-						String value = MessageFormat.format(
-							"OSGI-INF/configurator/{0}.osgi.config.json;literal='${{0}OsgiConfigJsonValue}'",
-							clientExtension.name);
-
+						key = StringBundler.concat("-includeresource.", clientExtension.id, ".osgi.config.json");
+						String value = StringBundler.concat("OSGI-INF/configurator/", clientExtension.id, ".osgi.config.json;literal='${", clientExtension.id, "OsgiConfigJsonValue}'");
 						bundleExtension.instruction(key, value);
 
-						key = MessageFormat.format(
-							"-includeresource.{0}", clientExtension.name);
-						bundleExtension.instruction(
-							key,
-							"META-INF/resources/=build/;filter:=*.ico;recursive:=false");
+						key = StringBundler.concat("-includeresource.", clientExtension.id);
+						bundleExtension.instruction(key, "META-INF/resources/=build/;filter:=*.ico;recursive:=false");
 
 						File lcpJsonFile = project.file("LCP.json");
 
@@ -148,7 +139,7 @@ public class ThemeFaviconConfigurer implements ClientExtensionConfigurer {
 
 		Copy copy = GradleUtil.addTask(
 			project,
-			BUILD_FAVICON_TASK_NAME + clientExtension.name.toUpperCase(),
+			BUILD_FAVICON_TASK_NAME + clientExtension.id.toUpperCase(),
 			Copy.class);
 
 		copy.setDescription("Assembles favicon.");
