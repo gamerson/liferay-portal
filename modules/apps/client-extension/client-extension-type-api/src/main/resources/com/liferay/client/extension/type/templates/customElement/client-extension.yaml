@@ -1,0 +1,14 @@
+sample:
+  type: "customElement"
+  name: "Vanilla Counter"
+  description: "This is a vanilla counter customElement remote app"
+  sourceCodeURL: "https://www.liferay.com"
+  cssURLs:
+    - "vanilla.css"
+  friendlyURLMapping: "counter"
+  htmlElementName: "vanilla-counter"
+  portletCategoryName: "category.remote-apps"
+  urls:
+    - "index.js"
+  instanceable: false
+  useESM: false

@@ -5,7 +5,7 @@
 			{
 				"name": "name",
 				"type": "string",
-				"default": "Sample Custom Element"
+				"default": "Sample customElement"
 			},
 			{
 				"name": "type",
@@ -13,14 +13,9 @@
 				"default": "customElement"
 			},
 			{
-				"name": "version",
-				"type": "string",
-				"default": "1"
-			},
-			{
 				"name": "description",
 				"type": "string",
-				"default": "This is a sample custom element"
+				"default": "This is a sample customElement"
 			},
 			{
 				"name": "sourceCodeURL",
@@ -31,13 +26,13 @@
 				"name": "cssURLs",
 				"type": "list",
 				"default": [
-					"custom-element.css"
+					"customElement.css"
 				]
 			},
 			{
 				"name": "friendlyURLMapping",
 				"type": "string",
-				"default": "/abc/friendly"
+				"default": "sample"
 			},
 			{
 				"name": "htmlElementName",
@@ -47,13 +42,13 @@
 			{
 				"name": "portletCategoryName",
 				"type": "string",
-				"default": "sample"
+				"default": "category.remote-apps"
 			},
 			{
 				"name": "urls",
 				"type": "list",
 				"default": [
-					"custom-element.js"					
+					"index.js"
 				]
 			},
 			{
@@ -74,7 +69,7 @@
 			{
 				"name": "name",
 				"type": "string",
-				"default": "Sample IFrame"
+				"default": "Sample iframe"
 			},
 			{
 				"name": "type",
@@ -82,14 +77,9 @@
 				"default": "iframe"
 			},
 			{
-				"name": "version",
-				"type": "string",
-				"default": "1"
-			},
-			{
 				"name": "description",
 				"type": "string",
-				"default": "This is a sample IFrame"
+				"default": "This is a sample iframe"
 			},
 			{
 				"name": "sourceCodeURL",
@@ -99,12 +89,12 @@
 			{
 				"name": "friendlyURLMapping",
 				"type": "string",
-				"default": "/abc/friendly"
+				"default": "sample"
 			},
 			{
 				"name": "portletCategoryName",
 				"type": "string",
-				"default": "sample"
+				"default": "category.remote-apps"
 			},
 			{
 				"name": "url",
@@ -124,7 +114,7 @@
 			{
 				"name": "name",
 				"type": "string",
-				"default": "Sample ThemeCSS"
+				"default": "Sample themeCSS"
 			},
 			{
 				"name": "type",
@@ -132,14 +122,9 @@
 				"default": "themeCSS"
 			},
 			{
-				"name": "version",
-				"type": "string",
-				"default": "1"
-			},
-			{
 				"name": "description",
 				"type": "string",
-				"default": "This is a sample ThemeCSS"
+				"default": "This is a sample themeCSS"
 			},
 			{
 				"name": "sourceCodeURL",
@@ -147,12 +132,12 @@
 				"default": "https://www.liferay.com"
 			},
 			{
-				"name": "clayUrl",
+				"name": "clayURL",
 				"type": "string",
 				"default": "clay.css"
 			},
 			{
-				"name": "mainUrl",
+				"name": "mainURL",
 				"type": "string",
 				"default": "main.css"
 			}
@@ -164,7 +149,7 @@
 			{
 				"name": "name",
 				"type": "string",
-				"default": "Sample ThemeFavicon"
+				"default": "Sample themeFavicon"
 			},
 			{
 				"name": "type",
@@ -172,14 +157,9 @@
 				"default": "themeFavicon"
 			},
 			{
-				"name": "version",
-				"type": "string",
-				"default": "1"
-			},
-			{
 				"name": "description",
 				"type": "string",
-				"default": "This is a sample ThemeFavicon"
+				"default": "This is a sample themeFavicon"
 			},
 			{
 				"name": "sourceCodeURL",
@@ -199,7 +179,7 @@
 			{
 				"name": "name",
 				"type": "string",
-				"default": "Sample ThemeJS"
+				"default": "Sample themeJS"
 			},
 			{
 				"name": "type",
@@ -207,14 +187,9 @@
 				"default": "themeJS"
 			},
 			{
-				"name": "version",
-				"type": "string",
-				"default": "1"
-			},
-			{
 				"name": "description",
 				"type": "string",
-				"default": "This is a sample ThemeJS"
+				"default": "This is a sample themeJS"
 			},
 			{
 				"name": "sourceCodeURL",

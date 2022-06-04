@@ -1,0 +1,9 @@
+example:
+  name: "Example iframe"
+  type: "iframe"
+  description: "This is an example iframe remote app that shows https://www.example.com"
+  sourceCodeURL: "https://www.liferay.com"
+  friendlyURLMapping: "example"
+  portletCategoryName: "category.remote-apps"
+  url: "https://example.com"
+  instanceable: false

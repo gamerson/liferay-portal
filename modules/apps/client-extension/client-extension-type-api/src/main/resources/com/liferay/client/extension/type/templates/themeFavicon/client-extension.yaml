@@ -1,0 +1,6 @@
+jamon:
+  type: "themeFavicon"
+  name: "Jamon themeFavicon"
+  description: "This is a sample jamon themeFavicon"
+  sourceCodeURL: "https://www.liferay.com"
+  url: "favicon.ico"

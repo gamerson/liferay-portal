@@ -1,0 +1,7 @@
+sampleThemeJS:
+  type: "themeJS"
+  name: "Sample themeJS"
+  description: "This is a sample themeJS"
+  sourceCodeURL: "https://www.liferay.com"
+  urls:
+    - "theme.js"

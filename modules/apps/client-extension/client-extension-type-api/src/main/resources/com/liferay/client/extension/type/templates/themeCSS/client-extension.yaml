@@ -1,0 +1,7 @@
+cursive:
+  type: "themeCSS"
+  name: "Cursive Theme"
+  description: "This is a sample cursive themeCSS"
+  sourceCodeURL: "https://www.liferay.com"
+  clayURL: "clay.css"
+  mainURL: "main.css"
