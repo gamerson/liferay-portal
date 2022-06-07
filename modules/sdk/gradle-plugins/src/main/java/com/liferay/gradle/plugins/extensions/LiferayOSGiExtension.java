@@ -31,6 +31,7 @@ import com.liferay.ant.bnd.spring.SpringDependencyAnalyzerPlugin;
 import com.liferay.gradle.plugins.internal.util.GradleUtil;
 import com.liferay.gradle.util.StringUtil;
 import com.liferay.gradle.util.Validator;
+import com.liferay.ant.bnd.client.extension.ClientExtensionAnalyzerPlugin;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -200,7 +201,8 @@ public class LiferayOSGiExtension {
 		ServiceAnalyzerPlugin.class.getName(),
 		SocialAnalyzerPlugin.class.getName(), SpringComponent.class.getName(),
 		SpringDependencyAnalyzerPlugin.class.getName(),
-		EnterpriseAnalyzerPlugin.class.getName()
+		EnterpriseAnalyzerPlugin.class.getName(),
+		ClientExtensionAnalyzerPlugin.class.getName()
 	};
 
 	private boolean _autoUpdateXml = true;

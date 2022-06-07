@@ -16,24 +16,35 @@ package com.liferay.client.extension.type;
 
 import org.osgi.annotation.versioning.ProviderType;
 
+import com.liferay.client.extension.type.annotation.CETProperty;
+import com.liferay.client.extension.type.annotation.CETType;
+
 /**
  * @author Brian Wing Shun Chan
  */
+@CETType(name="customElement", description="This is some description")
 @ProviderType
 public interface CETCustomElement {
 
+	@CETProperty(name="cssURLs", type="list", defaultValue="custom-element.css")
 	public String getCSSURLs();
 
+	@CETProperty(defaultValue="friendly", description="This is some description")
 	public String getFriendlyURLMapping();
 
+	@CETProperty(name="htmlElementName", defaultValue="custom-element", description="This is some description of custom-element property")
 	public String getHTMLElementName();
 
+	@CETProperty(defaultValue="category.remote-apps", description="This is some description of custom-element property")
 	public String getPortletCategoryName();
 
+	@CETProperty(type="list", defaultValue="index.js", description="This is some description of custom-element property")
 	public String getURLs();
 
+	@CETProperty(name="instanceable", description="Set true if extension is instanceable")
 	public boolean isInstanceable();
 
+	@CETProperty(name="useESM", description="Set true is using ES modules")
 	public boolean isUseESM();
 
 }

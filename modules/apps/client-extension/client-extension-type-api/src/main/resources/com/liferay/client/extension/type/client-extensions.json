@@ -5,7 +5,8 @@
 			{
 				"name": "name",
 				"type": "string",
-				"default": "Sample customElement"
+				"default": "Sample customElement",
+				"documentation": "this is some documentation"
 			},
 			{
 				"name": "type",

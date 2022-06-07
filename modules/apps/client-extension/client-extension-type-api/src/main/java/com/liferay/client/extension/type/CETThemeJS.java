@@ -16,12 +16,17 @@ package com.liferay.client.extension.type;
 
 import org.osgi.annotation.versioning.ProviderType;
 
+import com.liferay.client.extension.type.annotation.CETProperty;
+import com.liferay.client.extension.type.annotation.CETType;
+
 /**
  * @author Iván Zaera Avellón
  */
+@CETType(name="themeJS", description="This is some description of themeJS type")
 @ProviderType
 public interface CETThemeJS {
 
+	@CETProperty(type="list", defaultValue="theme.js", description="List of JS urls to load in theme")
 	public String getURLs();
 
 }

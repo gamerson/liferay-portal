@@ -4,3 +4,16 @@ dependencies {
 	compileOnly group: "org.osgi", name: "org.osgi.annotation.versioning", version: "1.1.0"
 	compileOnly project(":apps:client-extension:client-extension-api")
 }
+
+jar {
+	exclude(['com/liferay/client/extension/type/templates/**'])
+}
+
+task templatesJar(type: Zip, dependsOn: jar) {
+	classifier = 'templates'
+	from jar.destinationDir
+}
+
+artifacts {
+	archives templatesJar
+}

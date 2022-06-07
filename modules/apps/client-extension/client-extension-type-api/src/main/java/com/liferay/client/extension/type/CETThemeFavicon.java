@@ -16,12 +16,17 @@ package com.liferay.client.extension.type;
 
 import org.osgi.annotation.versioning.ProviderType;
 
+import com.liferay.client.extension.type.annotation.CETProperty;
+import com.liferay.client.extension.type.annotation.CETType;
+
 /**
  * @author Iván Zaera Avellón
  */
+@CETType(name="themeFavicon", description="This is some description of themeFavicon type")
 @ProviderType
 public interface CETThemeFavicon {
 
+	@CETProperty(name="url", defaultValue="favicon.ico", description="URL of favicon.ico")
 	public String getURL();
 
 }
