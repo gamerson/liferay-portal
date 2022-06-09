@@ -1,0 +1,7 @@
+samplecss:
+  name: "Sample ThemeCSS"
+  type: "themeCss"
+  description: "This is a sample ThemeCSS"
+  sourceCodeURL: "https://www.liferay.com"
+  clayURL: "clay.css"
+  mainURL: "main.css"
