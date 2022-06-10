@@ -101,6 +101,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 /**
  * @author Raymond Augé
@@ -116,7 +118,14 @@ public class WabProcessor {
 	}
 
 	public File getProcessedFile() throws IOException {
-		_pluginDir = _autoDeploy();
+		String fileExtension = MapUtil.getString(_parameters, "fileExtension");
+
+		if (Objects.equals(fileExtension, "zip")) {
+			_pluginDir = _convertToClientExtensionBundleDir();
+		}
+		else {
+			_pluginDir = _autoDeploy();
+		}
 
 		if ((_pluginDir == null) || !_pluginDir.exists() ||
 			!_pluginDir.isDirectory()) {
@@ -254,6 +263,55 @@ public class WabProcessor {
 		autoDeploymentContext.setDestDir(file.getAbsolutePath());
 
 		return autoDeploymentContext;
+	}
+
+	private File _convertToClientExtensionBundleDir() {
+		Path clientExtensionBundlePath = null;
+
+		try (ZipFile zipFile = new ZipFile(_file)) {
+			clientExtensionBundlePath = Files.createTempDirectory(
+				"clientextension");
+
+			Path metatInfResourcesPath = _takePath(
+				clientExtensionBundlePath, "META-INF/resources");
+			Path osgiInfConfiguratorPath = _takePath(
+				clientExtensionBundlePath, "OSGI-INF/configurator");
+
+			Enumeration<? extends ZipEntry> enumeration = zipFile.entries();
+
+			while (enumeration.hasMoreElements()) {
+				ZipEntry zipEntry = enumeration.nextElement();
+
+				String name = zipEntry.getName();
+
+				if (zipEntry.isDirectory()) {
+					if (name.startsWith("static/")) {
+						Path destPath = metatInfResourcesPath.resolve(
+							name.replaceAll("^static/", ""));
+
+						Files.createDirectories(destPath);
+					}
+				}
+				else {
+					if (!name.contains("/") && name.endsWith(".config.json")) {
+						Files.copy(
+							zipFile.getInputStream(zipEntry),
+							osgiInfConfiguratorPath.resolve(name));
+					}
+					else if (name.startsWith("static/")) {
+						Path destPath = metatInfResourcesPath.resolve(
+							name.replaceAll("^static/", ""));
+
+						Files.copy(zipFile.getInputStream(zipEntry), destPath);
+					}
+				}
+			}
+		}
+		catch (IOException ioException) {
+			_log.error(ioException);
+		}
+
+		return clientExtensionBundlePath.toFile();
 	}
 
 	private Discover _findDiscoveryMode(Document document) {
@@ -1272,6 +1330,14 @@ public class WabProcessor {
 
 			return SAXReaderUtil.createDocument();
 		}
+	}
+
+	private Path _takePath(Path parentPath, String take) throws IOException {
+		Path path = parentPath.resolve(take);
+
+		Files.createDirectories(path);
+
+		return path;
 	}
 
 	private File _transformToOSGiBundle(Jar jar) throws IOException {
