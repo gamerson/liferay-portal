@@ -1,0 +1,6 @@
+sampleThemeFavicon:
+  name: "Sample Theme Favicon"
+  type: "themeFavicon"
+  description: ""
+  sourceCodeURL: "https://www.liferay.com"
+  url: "favicon.ico"
