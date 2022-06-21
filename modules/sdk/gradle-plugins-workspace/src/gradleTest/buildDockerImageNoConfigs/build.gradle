@@ -16,6 +16,7 @@ runGradleTest {
 
 		assert inputDirFileNames.contains("100_liferay_image_setup.sh")
 		assert inputDirFileNames.contains("Dockerfile")
+		assert inputDirFileNames.contains("client-extensions")
 		assert inputDirFileNames.contains("configs")
 		assert inputDirFileNames.contains("deploy")
 		assert inputDirFileNames.contains("patching")
