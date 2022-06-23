@@ -8,3 +8,9 @@ dependencies {
 	compileOnly project(":apps:portal-vulcan:portal-vulcan-api")
 	compileOnly project(":apps:static:portal-configuration:portal-configuration-metatype-api")
 }
+
+task localjar(type: Copy) {
+	dependsOn jar
+	from jar.archivePath
+	into project.projectDir
+}
