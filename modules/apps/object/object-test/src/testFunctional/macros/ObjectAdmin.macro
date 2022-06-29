@@ -427,10 +427,6 @@ definition {
 			locator1 = "ObjectAdmin#FIELDS_RADIO_OPTION");
 	}
 
-	macro assertLabelFieldRequired {
-		AssertElementPresent(locator1 = "ObjectField#LABEL_ERROR_REQUIRED");
-	}
-
 	macro assertNoItemsWereFound {
 		AssertTextEquals(
 			locator1 = "Message#EMPTY_INFO",
@@ -441,18 +437,6 @@ definition {
 		AssertTextEquals(
 			locator1 = "Message#EMPTY_STATE_INFO",
 			value1 = "No Results Found");
-	}
-
-	macro assertNotPossibleAddFieldOnBlockWithoutChooseOptionField {
-		Click(locator1 = "ObjectAdmin#ADD_FIELD_ON_BLOCK");
-
-		Click(
-			key_tab = "Save",
-			locator1 = "Button#TAB_SUBMIT_BTN");
-
-		AssertElementPresent(locator1 = "ObjectAdmin#OBJECT_LAYOUTS_FIELD_INPUT_HAS_REQUIRED_ERROR");
-
-		AssertElementPresent(locator1 = "ObjectAdmin#REQUIRED_ERROR_MESSAGE");
 	}
 
 	macro assertObjectActions {
@@ -523,10 +507,6 @@ definition {
 		AssertElementNotPresent(locator1 = "ObjectAdmin#VIEW_OBJECT_FIELD_LABEL");
 	}
 
-	macro assertObjectLabelFieldRequired {
-		AssertElementPresent(locator1 = "ObjectAdmin#OBJECT_LABEL_FIELD_REQUIRED");
-	}
-
 	macro assertObjectLayout {
 		var key_layoutLabel = "${layoutLabel}";
 
@@ -537,16 +517,6 @@ definition {
 		var key_layoutLabel = "${layoutLabel}";
 
 		AssertElementNotPresent(locator1 = "ObjectAdmin#VIEW_OBJECT_LAYOUT_LABEL");
-	}
-
-	macro assertObjectLayoutRelationshipFieldRequiredError {
-		AssertElementPresent(locator1 = "ObjectAdmin#OBJECT_LAYOUTS_RELATIONSHIP_FIELD_HAD_REQUIRED_ERROR");
-
-		AssertElementPresent(locator1 = "ObjectAdmin#REQUIRED_ERROR_MESSAGE");
-	}
-
-	macro assertObjectNameFieldRequired {
-		AssertElementPresent(locator1 = "ObjectAdmin#OBJECT_NAME_FIELD_REQUIRED");
 	}
 
 	macro assertObjectStatus {
@@ -579,10 +549,6 @@ definition {
 		AssertTextEquals.assertPartialText(
 			locator1 = "TextInput#REQUIRED_ALERT",
 			value1 = "Required");
-	}
-
-	macro assertTypeFieldRequired {
-		AssertElementPresent(locator1 = "ObjectField#TYPE_ERROR_REQUIRED");
 	}
 
 	macro assertUpdateEntryModalIsNotPresent {

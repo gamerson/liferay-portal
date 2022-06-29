@@ -201,11 +201,6 @@
 		<td></td>
 	</tr>
 	<tr>
-		<td>NAME_OBJECT_RELATIONSHIP_REQUIRED</td>
-		<td>//input[@id ='objectRelationshipName']/following-sibling::div[contains(.,'Required')]</td>
-		<td></td>
-	</tr>
-	<tr>
 		<td>PLURAL_LABEL_CUSTOM_OBJECT</td>
 		<td>//input[@id='objectDefinitionPluralLabel']</td>
 		<td></td>
@@ -241,23 +236,8 @@
 		<td></td>
 	</tr>
 	<tr>
-		<td>REQUIRED_ERROR_MESSAGE</td>
-		<td>//div[contains(@class,'form-group has-error')]//div[@class='form-feedback-item' and contains (.,'Required')]</td>
-		<td></td>
-	</tr>
-	<tr>
 		<td>OBJECT_FIELDS_TAB</td>
 		<td>//*[contains(@class,'nav-link')]//span[contains(text(),'Fields')]</td>
-		<td></td>
-	</tr>
-	<tr>
-		<td>OBJECT_LAYOUTS_FIELD_INPUT_HAS_REQUIRED_ERROR</td>
-		<td>//div[contains(@class,'form-group has-error')]//label[contains(text(),'Field')]</td>
-		<td></td>
-	</tr>
-	<tr>
-		<td>OBJECT_LAYOUTS_RELATIONSHIP_FIELD_HAD_REQUIRED_ERROR</td>
-		<td>//div[contains(@class,'form-group has-error')]//label[contains(text(),'Relationship')]</td>
 		<td></td>
 	</tr>
 	<tr>
@@ -278,11 +258,6 @@
 	<tr>
 		<td>RELATIONSHIPS_TYPE_FORM</td>
 		<td>//label[contains(text(),'Type')]/..//input</td>
-		<td></td>
-	</tr>
-	<tr>
-		<td>RELATIONSHIPS_TYPE_FORM_REQUIRED</td>
-		<td>//label[contains(.,'Type')]/..//div[contains(.,'Required')]</td>
 		<td></td>
 	</tr>
 	<tr>
@@ -353,11 +328,6 @@
 	<tr>
 		<td>SELECT_OBJECT_RELATIONSHIP</td>
 		<td>//select[@class = 'form-control']</td>
-		<td></td>
-	</tr>
-	<tr>
-		<td>SELECT_OBJECT_RELATIONSHIP_REQUIRED</td>
-		<td>//select[@class = 'form-control']/following-sibling::div[contains(.,'Required')]</td>
 		<td></td>
 	</tr>
 	<tr>
@@ -433,16 +403,6 @@
 	<tr>
 		<td>KEBAB_MENU_OPTION</td>
 		<td>//*[@class = 'dropdown-item' and contains(text(), '${key_kebabOption}')]</td>
-		<td></td>
-	</tr>
-	<tr>
-		<td>OBJECT_LABEL_FIELD_REQUIRED</td>
-		<td>//input[@id='objectDefinitionLabel']/following-sibling::div[contains(.,'Required')]</td>
-		<td></td>
-	</tr>
-	<tr>
-		<td>OBJECT_NAME_FIELD_REQUIRED</td>
-		<td>//input[@id='objectDefinitionName']/following-sibling::div[contains(.,'Required')]</td>
 		<td></td>
 	</tr>
 	<tr>
@@ -523,11 +483,6 @@
 	<tr>
 		<td>VIEW_OPTION_TITLE_FIELD</td>
 		<td>//*[contains(@id,'titleObjectFieldId')]//option[contains(text(),'${key_optionName}')]</td>
-		<td></td>
-	</tr>
-	<tr>
-		<td>LABEL_OBJECT_RELATIONSHIP_REQUIRED</td>
-		<td>//input[@id ='objectRelationshipLabel']/following-sibling::div[contains(.,'Required')]</td>
 		<td></td>
 	</tr>
 	<tr>

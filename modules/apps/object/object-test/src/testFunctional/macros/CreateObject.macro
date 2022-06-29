@@ -219,10 +219,6 @@ definition {
 			locator1 = "CreateObject#VIEW_RELATED_OBJECT_ON_RELATIONSHIP_FIELD");
 	}
 
-	macro assertRequiredPicklistOnField {
-		AssertElementPresent(locator1 = "ObjectAdmin#SELECT_OBJECT_RELATIONSHIP_REQUIRED");
-	}
-
 	macro assertScopeFieldSelected {
 		AssertSelectedLabel(
 			locator1 = "ObjectAdmin#SELECT_OBJECT_SCOPE",

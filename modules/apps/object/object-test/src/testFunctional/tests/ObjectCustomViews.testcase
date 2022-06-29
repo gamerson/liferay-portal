@@ -595,7 +595,7 @@ definition {
 
 		Button.clickSave();
 
-		AssertElementPresent(locator1 = "ObjectAdmin#REQUIRED_ERROR_MESSAGE");
+		FieldBase.assertRequiredFieldErrorPresent(fieldLabel = "Name");
 	}
 
 	@description = "LPS-135394 - Verify that it is not possible to save another View as default"

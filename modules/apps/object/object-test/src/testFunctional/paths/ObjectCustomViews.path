@@ -121,11 +121,6 @@
 		<td></td>
 	</tr>
 	 <tr>
-		<td>CUSTOM_VIEW_FIELD_REQUIRED</td>
-		<td>//input[@id='listObjectCustomViewName']/..//div[contains(@class, 'form-feedback-group') and contains(.,'Required')]</td>
-		<td></td>
-	</tr>
-	 <tr>
 		<td>SELECT_ANY_PERMISSIONS</td>
 		<td>//input[@id='${key_roleName}_ACTION_${key_permissionName}']</td>
 		<td></td>
