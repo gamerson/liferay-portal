@@ -1,0 +1,19 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: foobar
+  labels:
+    lxc.liferay.com/metadataType: ext-provision
+data:
+  foobar.client-extension-config.json: |-
+    {
+      "com.liferay.client.extension.type.configuration.CETConfiguration~foobar" : {
+        "baseURL" : "${portalURL}/o/foobar",
+        "description" : "This CSS file can be loads as a stylesheet for a configured page",
+        "dxp.lxc.liferay.com.virtualInstanceId" : "default",
+        "name" : "Foo Bar",
+        "sourceCodeURL" : "",
+        "type" : "globalCSS",
+        "typeSettings" : [ "url=global.css" ]
+      }
+    }
