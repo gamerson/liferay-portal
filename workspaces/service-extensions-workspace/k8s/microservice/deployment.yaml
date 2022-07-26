@@ -18,7 +18,7 @@ spec:
       containers:
       - name: #@ data.values.serviceId
         image: #@ data.values.image
-        imagePullPolicy: Never
+        #!imagePullPolicy: Never
         resources:
           limits:
             memory: "512Mi"
@@ -26,17 +26,17 @@ spec:
         ports:
         - containerPort: 8081
         - containerPort: 8000
-        volumeMounts:
-        - mountPath: /etc/liferay/lxc/dxp-metadata
-          name: lxc-dxp-metadata
-          readOnly: true
-        - mountPath: /etc/liferay/lxc/ext-init-metadata
-          name: lxc-ext-init-metadata
-          readOnly: true
-      volumes:
-        - name: lxc-dxp-metadata
-          configMap:
-            name: lxc-dxp-metadata
-        - name: lxc-ext-init-metadata
-          configMap:
-            name: #@ "{}-lxc-ext-init-metadata".format(data.values.serviceId)
+        #!volumeMounts:
+        #!- mountPath: /etc/liferay/lxc/dxp-metadata
+        #!  name: lxc-dxp-metadata
+        #!  readOnly: true
+        #!- mountPath: /etc/liferay/lxc/ext-init-metadata
+        #!  name: lxc-ext-init-metadata
+        #!  readOnly: true
+      #!volumes:
+      #!  - name: lxc-dxp-metadata
+      #!    configMap:
+      #!      name: lxc-dxp-metadata
+      #!  - name: lxc-ext-init-metadata
+      #!    configMap:
+      #!      name: #@ "{}-lxc-ext-init-metadata".format(data.values.serviceId)

@@ -4,9 +4,10 @@ kind: Service
 metadata:
   name: #@ data.values.serviceId
 spec:
+  type: LoadBalancer
   selector:
     app: #@ data.values.serviceId 
   ports:
-  - port: 80
+  - port: 8081
     protocol: TCP
     targetPort: 8081

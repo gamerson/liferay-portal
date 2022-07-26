@@ -22,3 +22,6 @@ containerdConfigPatches:
   - |-
     [plugins."io.containerd.grpc.v1.cri".containerd]
     disable_snapshot_annotations = true
+  - |-
+    [plugins."io.containerd.grpc.v1.cri".registry.mirrors."localhost:5001"]
+    endpoint = ["http://kind-registry:5000"]

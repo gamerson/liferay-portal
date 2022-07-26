@@ -1,5 +1,14 @@
 #!/usr/bin/env bash
 
+# create registry container unless it already exists
+reg_name='kind-registry'
+reg_port='5001'
+if [ "$(docker inspect -f '{{.State.Running}}' "${reg_name}" 2>/dev/null || true)" != 'true' ]; then
+  docker run \
+    -d --restart=always -p "127.0.0.1:${reg_port}:5000" --name "${reg_name}" \
+    registry:2
+fi
+
 kind create cluster --config=./kind/cluster.yaml --image kindest/node:v1.20.15
 
 kubectl config use-context kind-kind
@@ -7,7 +16,21 @@ kubectl config set-context --current --namespace=default
 
 kubectl create -f ./kind/rbac.yaml
 
-DEFAULT_TOKEN=$(kubectl get secret --namespace default | grep 'default-token' | awk '{print $1}')
+# connect the registry to the cluster network if not already connected
+if [ "$(docker inspect -f='{{json .NetworkSettings.Networks.kind}}' "${reg_name}")" = 'null' ]; then
+  docker network connect "kind" "${reg_name}"
+fi
 
-echo "KUBERNETES_CERTIFICATE=$(kubectl get secret $DEFAULT_TOKEN -o jsonpath={.data.'ca\.crt'} | base64 -d)" > .certificate
-echo "KUBERNETES_TOKEN=$(kubectl get secret $DEFAULT_TOKEN -o jsonpath={.data.'token'} | base64 -d)" > .token
+# Document the local registry
+# https://github.com/kubernetes/enhancements/tree/master/keps/sig-cluster-lifecycle/generic/1755-communicating-a-local-registry
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: local-registry-hosting
+  namespace: kube-public
+data:
+  localRegistryHosting.v1: |
+    host: "localhost:${reg_port}"
+    help: "https://kind.sigs.k8s.io/docs/user/local-registry/"
+EOF
