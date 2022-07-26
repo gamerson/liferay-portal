@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 
-#mvn clean package
-
 #lcp deploy -r liferayperf.sh -p cosettepoc-dev
+
+mvn clean package
+
+docker build -t couponpdf .
 
 # install kapp
 # install ytt
