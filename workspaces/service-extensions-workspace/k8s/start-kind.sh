@@ -34,3 +34,6 @@ data:
     host: "localhost:${reg_port}"
     help: "https://kind.sigs.k8s.io/docs/user/local-registry/"
 EOF
+
+istioctl install --set profile=demo -y
+kubectl label namespace default istio-injection=enabled

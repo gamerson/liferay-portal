@@ -4,14 +4,13 @@
 
 mvn clean package
 
-docker build -t localhost:5001/couponpdf:latest .
-
-docker push localhost:5001/couponpdf:latest
+docker build -t lxc-registry.localdev.me:5000/couponpdf:latest .
+docker push lxc-registry.localdev.me:5000/couponpdf:latest
 
 # install kapp
 # install ytt
 
-kubectl config use-context kind-kind
+kubectl config use-context k3d-lxc-extensions
 kubectl config set-context --current --namespace=default
 
 kapp \
@@ -22,4 +21,4 @@ kapp \
         -f ../../k8s/microservice \
         -f configurator/couponpdf.client-extension-config.json \
         --data-value serviceId=couponpdf \
-        --data-value image=localhost:5001/couponpdf:latest)
+        --data-value image=lxc-registry.localdev.me:5000/couponpdf:latest)

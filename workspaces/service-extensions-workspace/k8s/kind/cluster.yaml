@@ -11,6 +11,12 @@ nodes:
     nodeRegistration:
       kubeletExtraArgs:
         node-labels: "ingress-ready=true"
+  - |
+    kind: ClusterConfiguration
+    apiServer:
+      extraArgs:
+        "service-account-issuer": "kubernetes.default.svc"
+        "service-account-signing-key-file": "/etc/kubernetes/pki/sa.key"
   extraPortMappings:
   - protocol: TCP
     containerPort: 80
@@ -18,6 +24,8 @@ nodes:
   - protocol: TCP
     containerPort: 443
     hostPort: 443
+  - containerPort: 32607
+    hostPort: 8080
 containerdConfigPatches:
   - |-
     [plugins."io.containerd.grpc.v1.cri".containerd]

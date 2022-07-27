@@ -24,8 +24,7 @@ spec:
             memory: "512Mi"
             cpu: "500m"
         ports:
-        - containerPort: 8081
-        - containerPort: 8000
+        - containerPort: 80
         #!volumeMounts:
         #!- mountPath: /etc/liferay/lxc/dxp-metadata
         #!  name: lxc-dxp-metadata

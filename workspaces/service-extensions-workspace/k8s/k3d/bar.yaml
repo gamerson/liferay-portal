@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: bar-nginx
+  labels:
+    run: bar-nginx
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: bar-nginx
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bar-nginxdemo
+spec:
+  selector:
+    matchLabels:
+      app: bar-nginx
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: bar-nginx
+    spec:
+      containers:
+      - name: bar-nginx
+        image: nginxdemos/hello
+        ports:
+        - containerPort: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: bar-ingress
+spec:
+  rules:
+    - host: bar.127.0.0.1.nip.io
+      http:
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: bar-nginx
+                port:
+                  number: 80
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: bar-ingress-route
+spec:
+  entryPoints:
+    - websecure
+  routes:
+  - kind: Rule
+    match: Host(`bar.127.0.0.1.nip.io`)
+    services:
+    - name: bar-nginx
+      port: 80

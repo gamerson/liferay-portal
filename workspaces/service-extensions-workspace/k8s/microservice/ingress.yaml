@@ -5,13 +5,13 @@ metadata:
   name: #@ "{}-ingress".format(data.values.serviceId)
 spec:
   rules:
-  - host: #@ "{}.localdev.me".format(data.values.serviceId)
+  - host: #@ "{}.127.0.0.1.nip.io".format(data.values.serviceId)
     http:
       paths:
-      - pathType: Prefix
-        path: "/"
-        backend:
+      - backend:
           service:
             name: #@ data.values.serviceId
             port:
-              number: 8081
+              number: 80
+        path: /
+        pathType: ImplementationSpecific

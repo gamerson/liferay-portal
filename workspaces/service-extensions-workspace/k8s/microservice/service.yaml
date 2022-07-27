@@ -3,11 +3,12 @@ apiVersion: v1
 kind: Service
 metadata:
   name: #@ data.values.serviceId
+  labels:
+    run: #@ data.values.serviceId 
 spec:
-  type: LoadBalancer
   selector:
     app: #@ data.values.serviceId 
   ports:
-  - port: 8081
+  - port: 80
     protocol: TCP
-    targetPort: 8081
+    targetPort: 80

@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: foo-nginx
+  labels:
+    run: foo-nginx
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: foo-nginx
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: foo-nginxdemo
+spec:
+  selector:
+    matchLabels:
+      app: foo-nginx
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: foo-nginx
+    spec:
+      containers:
+      - name: foo-nginx
+        image: nginxdemos/hello
+        ports:
+        - containerPort: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: foo-ingress
+spec:
+  rules:
+    - host: foo.127.0.0.1.nip.io
+      http:
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: foo-nginx
+                port:
+                  number: 80
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: foo-ingress-route
+spec:
+  entryPoints:
+    - websecure
+  routes:
+  - kind: Rule
+    match: Host(`foo.127.0.0.1.nip.io`)
+    services:
+    - name: foo-nginx
+      port: 80

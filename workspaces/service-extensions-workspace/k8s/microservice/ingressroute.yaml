@@ -1,0 +1,14 @@
+#@ load("@ytt:data", "data")
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: #@ "{}-ingress-route".format(data.values.serviceId)
+spec:
+  entryPoints:
+    - websecure
+  routes:
+  - kind: Rule
+    match: #@ "Host(`{}.127.0.0.1.nip.io`)".format(data.values.serviceId)
+    services:
+    - name: #@ data.values.serviceId
+      port: 80
