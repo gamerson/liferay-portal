@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-kubectl config use-context k3d-lxc-extensions
+kubectl config use-context k3d-lxc-localdev
 kubectl config set-context --current --namespace=default
 
 kapp \
