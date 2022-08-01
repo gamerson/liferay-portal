@@ -16,7 +16,7 @@ metadata:
     lxc.liferay.com/metadataType: "ext-provision"
     dxp.lxc.liferay.com/virtualInstanceId: #@ data.values.virtualInstanceId
   annotations:
-    cloud.liferay.com/context-data: '{"domains":["customrestservice.localdev.me"]}'
+    cloud.liferay.com/context-data: #@ "'{\"domains\":[\"customrestservice.localdev.me\"]}'".format(data.values.serviceID)
 data:
 #@ for/end jsonfile in [ f for f in files if f.endswith(".json") ]:
   _: #@ template.replace(parse(jsonfile))

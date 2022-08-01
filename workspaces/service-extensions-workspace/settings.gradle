@@ -18,3 +18,7 @@ buildscript {
 }
 
 apply plugin: "com.liferay.workspace"
+
+gradle.liferayWorkspace {
+	dockerImageId = startParameter.projectProperties.get("docker.image.id") ?: "service-extensions-dxp"
+}
