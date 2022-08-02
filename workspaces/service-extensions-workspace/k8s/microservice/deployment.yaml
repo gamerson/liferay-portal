@@ -38,4 +38,4 @@ spec:
             name: lxc-dxp-metadata
         - name: lxc-ext-init-metadata
           configMap:
-            name: #@ "{}-lxc-ext-init-metadata".format(data.values.serviceId)
+            name: #@ "{}-{}-lxc-init-metadata".format(data.values.serviceId, data.values.virtualInstanceId)

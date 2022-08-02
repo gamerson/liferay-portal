@@ -20,24 +20,24 @@ spec:
     spec:
       securityContext:
         runAsUser: 0
-      initContainers:
-        - name: init-dxp-pv
-          image: #@ data.values.image
-          command:
-          - bash
-          - -c
-          - if [ -z "$(ls -A /opt/liferay/data-pv)" ]; then chown -R 1000:1000 /opt/liferay/data-pv; ls -l /opt/liferay; cp -r /opt/liferay/data/* /opt/liferay/data-pv/; fi
-          volumeMounts:
-          - name: dxp-persistent-storage
-            mountPath: "/opt/liferay/data-pv"
       containers:
         - name: dxp
           image: #@ data.values.image
-          imagePullPolicy: Never
+          #!imagePullPolicy: Never
           resources:
             limits:
               cpu: "4000m"
               memory: "8096Mi"
+            initialDelaySeconds: 300
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 30
+          livenessProbe:
+            failureThreshold: 360
+            httpGet:
+              path: /health
+              port: 8080
+              scheme: HTTP
             initialDelaySeconds: 300
             periodSeconds: 10
             successThreshold: 1
@@ -51,24 +51,7 @@ spec:
               value: https
             - name: LIFERAY_MODULE_PERIOD_FRAMEWORK_PERIOD_PROPERTIES_PERIOD_ORG_PERIOD_APACHE_PERIOD_FELIX_PERIOD_CONFIGADMIN_PERIOD_PLUGIN_PERIOD_INTERPOLATION_PERIOD_SECRETSDIR
               value: /opt/liferay/osgi/configs,/var/run/secrets/kubernetes.io/serviceaccount
-            - name: LCP_SERVICE_DOMAIN
-              value: localdev.me
-            - name: LCP_PROJECT_ID
-              value: dxp
-            - name: WEBSERVER_SERVICE_HOST
-              value: ""
-            - name: KUBERNETES_SERVICE_HOST
-              value: "k3d-lxc-localdev-server-0"
-            - name: KUBERNETES_SERVICE_PORT
-              value: "6443"
           ports:
           - containerPort: 8080
           - containerPort: 8000
           - containerPort: 11311
-          volumeMounts:
-          - name: dxp-persistent-storage
-            mountPath: "/opt/liferay/data"
-      volumes:
-        - name: dxp-persistent-storage
-          persistentVolumeClaim:
-            claimName: dxp-persistent-volume-claim

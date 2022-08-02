@@ -1,8 +1,0 @@
-spec:
-  type: NodePort
-  ports:
-  - name: http2
-    nodePort: 32000
-    port: 80
-    protocol: TCP
-    targetPort: 80
