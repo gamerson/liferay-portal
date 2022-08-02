@@ -4,6 +4,8 @@
 
 mvn clean package
 
+cp ../../k8s/tls/ca.crt .
+
 docker build -t registry.localdev.me:5000/couponpdf:latest .
 docker push registry.localdev.me:5000/couponpdf:latest
 
