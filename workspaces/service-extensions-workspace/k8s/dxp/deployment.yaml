@@ -23,7 +23,6 @@ spec:
       containers:
         - name: dxp
           image: #@ data.values.image
-          #!imagePullPolicy: Never
           resources:
             limits:
               cpu: "4000m"

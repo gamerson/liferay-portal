@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 IMAGE="registry.localdev.me:5000/service-extensions-dxp:latest"
 
 (cd ..; ./gradlew clean buildDockerImage -Pdocker.image.id=${IMAGE})
