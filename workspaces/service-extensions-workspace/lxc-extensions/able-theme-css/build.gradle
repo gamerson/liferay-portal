@@ -1,0 +1,5 @@
+buildClientExtension {
+	from('src/css/img') {
+    into('static/css/img')
+  }
+}

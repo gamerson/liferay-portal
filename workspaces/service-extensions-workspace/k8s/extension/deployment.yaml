@@ -20,21 +20,25 @@ spec:
         image: #@ data.values.image
         resources:
           limits:
-            memory: "512Mi"
-            cpu: "500m"
+            memory: #@ data.values.memory
+            cpu: #@ data.values.cpu
         ports:
         - containerPort: 80
         volumeMounts:
-        - mountPath: /etc/liferay/lxc/dxp-metadata
-          name: lxc-dxp-metadata
-          readOnly: true
-        - mountPath: /etc/liferay/lxc/ext-init-metadata
-          name: lxc-ext-init-metadata
-          readOnly: true
+          - mountPath: /etc/liferay/lxc/dxp-metadata
+            name: lxc-dxp-metadata
+            readOnly: true
+          #@ if data.values.initMetadata:
+          - mountPath: /etc/liferay/lxc/ext-init-metadata
+            name: lxc-ext-init-metadata
+            readOnly: true
+          #@ end
       volumes:
         - name: lxc-dxp-metadata
           configMap:
             name: lxc-dxp-metadata
+        #@ if data.values.initMetadata:
         - name: lxc-ext-init-metadata
           configMap:
             name: #@ "{}-{}-lxc-init-metadata".format(data.values.serviceId, data.values.virtualInstanceId)
+        #@ end

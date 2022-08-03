@@ -2,14 +2,13 @@
 
 set -e
 
-mvn clean package
+../../gradlew clean build
 
-cp ../../k8s/tls/ca.crt .
-
-SERVICE="couponpdf"
+SERVICE="able-theme-css"
 IMAGE="registry.localdev.me:5000/${SERVICE}:latest"
 
-docker build -t $IMAGE .
+(cd dist; unzip ${SERVICE}.zip; docker build -t $IMAGE .)
+
 docker push $IMAGE
 
 kubectl config use-context k3d-lxc-localdev
@@ -21,9 +20,6 @@ kapp \
   -y \
   -f <(ytt \
         -f ../../k8s/extension \
-        -f configurator/${SERVICE}.client-extension-config.json \
-        --data-value cpu=500m \
-        --data-value image=$IMAGE \
-        --data-value initMetadata=true \
-        --data-value memory=512Mi \
+        -f dist/${SERVICE}.client-extension-config.json \
+        --data-value image=${IMAGE} \
         --data-value serviceId=${SERVICE})
