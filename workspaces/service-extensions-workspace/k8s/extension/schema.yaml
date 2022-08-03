@@ -2,7 +2,7 @@
 ---
 cpu: "50m"
 image: ""
-initMetadata: false
+initMetadata: #@ False
 memory: "50Mi"
 serviceId: ""
 virtualInstanceId: default

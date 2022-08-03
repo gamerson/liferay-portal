@@ -24,6 +24,6 @@ kapp \
         -f configurator/${SERVICE}.client-extension-config.json \
         --data-value cpu=500m \
         --data-value image=$IMAGE \
-        --data-value initMetadata=true \
         --data-value memory=512Mi \
-        --data-value serviceId=${SERVICE})
+        --data-value serviceId=${SERVICE} \
+        --data-value-yaml initMetadata=true)
