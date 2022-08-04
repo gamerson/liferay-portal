@@ -1,0 +1,50 @@
+# DXP
+custom_build(
+  'dxp', 
+  "./gradlew clean buildDockerImage -Pdocker.image.id=$EXPECTED_REF", 
+  deps=[
+    'build.gradle',
+    'configs/',
+    'gradle.properties',
+    'k8s/dxp',
+    'settings.gradle'
+  ],
+  ignore=[]
+)
+
+k8s_yaml(
+  local(
+    "ytt -f k8s/dxp --data-value image=dxp"
+  )
+)
+
+# Extensions
+
+# able-theme-css
+custom_build(
+  'able-theme-css', 
+  "extensions/able-theme-css/tilt_build.sh",
+  deps=[
+    'extensions/able-theme-css/build.gradle',
+    'extensions/able-theme-css/client-extension.yaml',
+    'extensions/able-theme-css/package.json',
+    'extensions/able-theme-css/src'
+  ], 
+  ignore=[]
+)
+
+k8s_yaml(local("extensions/able-theme-css/tilt_yaml.sh"))
+
+# couponpdf
+custom_build(
+  'couponpdf', 
+  "extensions/couponpdf/tilt_build.sh",
+  deps=[
+    'extensions/couponpdf/configurator',
+    'extensions/couponpdf/src',
+    'extensions/couponpdf/pom.xml'
+  ], 
+  ignore=[]
+)
+
+k8s_yaml(local("extensions/couponpdf/tilt_yaml.sh"))
