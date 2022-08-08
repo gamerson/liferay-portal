@@ -1,5 +1,6 @@
 FROM adoptopenjdk/openjdk11:jre-11.0.14.1_1
 
+ENV DEBUG_PORT 8001
 ENV TINI_VERSION v0.19.0
 
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
@@ -14,4 +15,4 @@ RUN \
 	&& keytool -keystore cacerts -storepass changeit \
 		-noprompt -trustcacerts -importcert -alias project-cert -file ca.crt
 
-ENTRYPOINT ["/tini", "--", "java", "-jar", "/app.jar"]
+ENTRYPOINT ["/tini", "--", "java", "-agentlib:jdwp=transport=dt_socket,address=*:$DEBUG_PORT,server=y,suspend=n", "-jar", "/app.jar"]

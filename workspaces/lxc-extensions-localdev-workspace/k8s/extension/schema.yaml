@@ -1,6 +1,7 @@
 #@data/values-schema
 ---
 cpu: "50m"
+debugPort: 8001
 image: ""
 initMetadata: #@ False
 memory: "50Mi"

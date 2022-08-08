@@ -9,4 +9,5 @@ ytt \
   --data-value image=couponpdf \
   --data-value memory=512Mi \
   --data-value serviceId=couponpdf \
+  --data-value-yaml debugPort=8001 \
   --data-value-yaml initMetadata=true

@@ -18,22 +18,35 @@ k8s_yaml(
   )
 )
 
+#k8s_resource(
+#   workload='dxp-deployment',
+#   port_forwards=['8000', '11311']
+#)
+
 # Extensions
 
 # able-theme-css
-custom_build(
-  'able-theme-css', 
-  "extensions/able-theme-css/tilt_build.sh",
-  deps=[
-    'extensions/able-theme-css/build.gradle',
-    'extensions/able-theme-css/client-extension.yaml',
-    'extensions/able-theme-css/package.json',
-    'extensions/able-theme-css/src'
-  ], 
-  ignore=[]
-)
+#custom_build(
+#  'able-theme-css',
+#  "extensions/able-theme-css/tilt_build.sh",
+#  deps=[
+#    'extensions/able-theme-css/build.gradle',
+#    'extensions/able-theme-css/client-extension.yaml',
+#    'extensions/able-theme-css/package.json',
+#    'extensions/able-theme-css/src'
+#  ],
+#  ignore=[]
+#)
 
-k8s_yaml(local("extensions/able-theme-css/tilt_yaml.sh"))
+#k8s_yaml(local("extensions/able-theme-css/tilt_yaml.sh"))
+
+#k8s_custom_deploy(
+#  'able-theme-css-deployment',
+#  apply_cmd='kapp deploy -a able-theme-css -y -f <(ytt -f k8s/extension -f extensions/able-theme-css/build/able-theme-css.client-extension-config.json --data-value image=able-theme-css --data-value serviceId=able-theme-css)', 
+#  delete_cmd='kapp delete -a able-theme-css',
+#  deps=['k8s/extension'],
+#  image_deps=['able-theme-css']
+#)
 
 # couponpdf
 custom_build(
@@ -48,3 +61,15 @@ custom_build(
 )
 
 k8s_yaml(local("extensions/couponpdf/tilt_yaml.sh"))
+
+#k8s_resource(
+#   workload='couponpdf',
+#   port_forwards=['8001']
+#)
+
+#k8s_custom_deploy(
+#  'couponpdf-deployment',
+#  apply_cmd="kapp deploy -a couponpdf -y -f <(ytt -f k8s/extension -f extensions/couponpdf/configurator/couponpdf.client-extension-config.json --data-value cpu=500m --data-value image=couponpdf --data-value memory=512Mi --data-value serviceId=couponpdf --data-value-yaml initMetadata=true)", 
+#  delete_cmd='kapp delete -a couponpdf',
+#  deps=['k8s/extension']
+#)

@@ -13,7 +13,7 @@ kind: ConfigMap
 metadata:
   name: #@ "{}-{}-lxc-ext-provision-metadata".format(data.values.serviceId, data.values.virtualInstanceId)
   labels:
-    lxc.liferay.com/metadataType: "ext-provision"
+    lxc.liferay.com/metadataType: "dxp"
     dxp.lxc.liferay.com/virtualInstanceId: #@ data.values.virtualInstanceId
     ext.lxc.liferay.com/serviceId: #@ data.values.serviceId
   annotations:
