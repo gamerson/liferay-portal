@@ -1,0 +1,14 @@
+apiVersion: k3d.io/v1alpha4
+kind: Simple
+metadata:
+  name: lxc-localdev
+kubeAPI:
+  hostIP: "0.0.0.0"
+  hostPort: "6443"
+ports:
+  - port: 443:443
+    nodeFilters:
+      - loadbalancer
+options:
+  k3d:
+    wait: true

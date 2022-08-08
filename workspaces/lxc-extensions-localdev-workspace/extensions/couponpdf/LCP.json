@@ -1,0 +1,31 @@
+{
+	"kind": "Deployment",
+	"id": "couponpdf",
+	"image": "couponpdf",
+	"cpu": 0.2,
+	"scale": 1,
+	"memory": 300,
+	"loadBalancer": {
+		"cdn": true,
+		"targetPort": 8081
+	},
+	"env": {
+		"LCP_PROJECT_ID": "@lcp-project-id",
+		"LCP_SERVICE_DOMAIN": "@lcp-service-domain",
+		"LIFERAY_OAUTH2_HEADLESS_CLIENT_ID": "@liferay-oauth2-headless-client-id",
+		"LIFERAY_OAUTH2_HEADLESS_CLIENT_SECRET": "@liferay-oauth2-headless-client-secret",
+		"LIFERAY_OAUTH2_HEADLESS_SCOPE": "@liferay-oauth2-headless-scope",
+		"LIFERAY_OAUTH2_TOKEN_URI": "@liferay-oauth2-token-uri"
+	},
+	"environments": {
+		"dev": {
+			"loadBalancer": {
+				"cdn": false,
+				"targetPort": 8081
+			}
+		},
+		"infra": {
+			"deploy": false
+		}
+	}
+}

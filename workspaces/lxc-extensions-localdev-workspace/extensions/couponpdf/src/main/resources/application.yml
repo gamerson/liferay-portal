@@ -1,0 +1,7 @@
+logging:
+    level:
+        com.liferay.couponpdf.service: DEBUG
+        org.springframework.security: DEBUG
+        org.springframework.web: DEBUG
+server:
+    port: 80
