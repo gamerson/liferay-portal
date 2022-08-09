@@ -18,10 +18,16 @@ k8s_yaml(
   )
 )
 
-#k8s_resource(
-#   workload='dxp-deployment',
-#   port_forwards=['8000', '11311']
-#)
+k8s_resource(
+  objects=['lxc-dxp-metadata:configmap', 'dxp-ingress:ingress', 'dxp-ingress-route:ingressroute'],
+  new_name='dxp-resources', labels=['dxp']
+)
+
+k8s_resource(
+   workload='dxp-deployment',
+   port_forwards=['8000'], 
+   labels=['dxp']
+)
 
 # Extensions
 
@@ -62,10 +68,21 @@ custom_build(
 
 k8s_yaml(local("extensions/couponpdf/tilt_yaml.sh"))
 
-#k8s_resource(
-#   workload='couponpdf',
-#   port_forwards=['8001']
-#)
+k8s_resource(
+   workload='couponpdf',
+   port_forwards=['8001'],
+   labels=['extensions']
+)
+
+k8s_resource(
+  objects=[
+    'couponpdf-lxc-ext-provision-metadata:configmap', 
+    'couponpdf-ingress:ingress',
+    'couponpdf-ingress-route:ingressroute'
+  ], 
+  new_name='couponpdf-resources', 
+  labels=['extensions']
+)
 
 #k8s_custom_deploy(
 #  'couponpdf-deployment',

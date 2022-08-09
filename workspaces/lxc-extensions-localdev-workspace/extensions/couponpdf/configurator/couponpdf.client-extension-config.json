@@ -1,5 +1,5 @@
 {
-  "com.liferay.oauth2.provider.configuration.v1.OAuth2ProviderApplicationUserAgentConfiguration~couponpdf": {
+  "com.liferay.oauth2.provider.configuration.OAuth2ProviderApplicationUserAgentConfiguration~couponpdf": {
       ":configurator:policy": "force",
       "description": "This a custom REST service DEMO",
       "homePageURL": "https://$[conf:ext.lxc.liferay.com.mainDomain]",

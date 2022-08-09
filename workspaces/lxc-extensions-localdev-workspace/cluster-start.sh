@@ -15,4 +15,7 @@ kubectl create secret generic localdev-tls-secret \
   --from-file=tls.key=./k8s/tls/localdev.me.key  \
   --namespace default
 
+kubectl create \
+  -f ./k8s/k3d/rbac.yaml
+
 echo "Cluster is ready.  Run 'tilt up' to deploy DXP and extensions"

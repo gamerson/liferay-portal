@@ -1,7 +1,6 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  namespace: default
   name: config-reader-role
   labels:
     app: dxp
@@ -16,7 +15,6 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: config-reader-role-binding
-  namespace: default
   labels:
     app: dxp
 subjects:
