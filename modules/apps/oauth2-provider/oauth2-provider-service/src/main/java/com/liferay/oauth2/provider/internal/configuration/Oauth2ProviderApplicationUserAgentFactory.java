@@ -20,6 +20,7 @@ import com.liferay.oauth2.provider.constants.GrantType;
 import com.liferay.oauth2.provider.model.OAuth2Application;
 import com.liferay.oauth2.provider.service.OAuth2ApplicationLocalService;
 import com.liferay.oauth2.provider.util.OAuth2SecureRandomGenerator;
+import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 import com.liferay.petra.string.StringUtil;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
@@ -84,7 +85,9 @@ public class Oauth2ProviderApplicationUserAgentFactory {
 
 		Company company = _companyLocalService.getCompanyById(companyId);
 
-		String serviceAddress = "https://" + company.getVirtualHostname();
+		String virtualInstanceId = company.getVirtualHostname();
+
+		String serviceAddress = "https://".concat(virtualInstanceId);
 
 		List<String> redirectURIsList = Collections.singletonList(
 			serviceAddress.concat("/o/oauth2/redirect"));
@@ -102,6 +105,8 @@ public class Oauth2ProviderApplicationUserAgentFactory {
 
 		if ((_portalK8sConfigMapModifier != null) &&
 			Validator.isNotNull(_serviceId)) {
+
+			_configMapName = _configMapName(_serviceId, virtualInstanceId);
 
 			_extensionProperties = HashMapBuilder.put(
 				externalReferenceCode + ".oauth2.authorization.uri",
@@ -124,8 +129,19 @@ public class Oauth2ProviderApplicationUserAgentFactory {
 			).build();
 
 			_portalK8sConfigMapModifier.modifyConfigMap(
-				model -> _extensionProperties.forEach(model.data()::put),
-				_configMapName(_serviceId));
+				model -> {
+					Map<String, String> data = model.data();
+
+					_extensionProperties.forEach(data::put);
+
+					Map<String, String> labels = model.labels();
+
+					labels.put("lxc.liferay.com/metadataType", "ext-init");
+					labels.put(
+						"dxp.lxc.liferay.com/virtualInstanceId",
+						virtualInstanceId);
+				},
+				_configMapName);
 		}
 
 		_oAuth2Application = oAuth2Application;
@@ -153,7 +169,7 @@ public class Oauth2ProviderApplicationUserAgentFactory {
 
 				_portalK8sConfigMapModifier.modifyConfigMap(
 					model -> _extensionProperties.forEach(model.data()::remove),
-					_configMapName(_serviceId));
+					_configMapName);
 			}
 
 			_oAuth2ApplicationLocalService.deleteOAuth2Application(
@@ -199,8 +215,9 @@ public class Oauth2ProviderApplicationUserAgentFactory {
 			oAuth2Application.getOAuth2ApplicationId(), inputStream);
 	}
 
-	private String _configMapName(String serviceId) {
-		return serviceId.concat("-lxc-ext-init-metadata");
+	private String _configMapName(String serviceId, String virtualInstanceId) {
+		return StringBundler.concat(
+			serviceId, virtualInstanceId, "-lxc-ext-init-metadata");
 	}
 
 	private String _getExternalReferenceCode(Map<String, Object> properties) {
@@ -221,6 +238,8 @@ public class Oauth2ProviderApplicationUserAgentFactory {
 
 	@Reference
 	private CompanyLocalService _companyLocalService;
+
+	private String _configMapName;
 
 	private HashMap<String, String> _extensionProperties;
 	private OAuth2Application _oAuth2Application;

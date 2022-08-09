@@ -183,7 +183,7 @@ public class PortalK8sAgentImpl implements PortalK8sConfigMapModifier {
 						binaryData, originalConfigMap.getBinaryData()) ||
 					 !Objects.equals(data, originalConfigMap.getData())) {
 
-				_validateLabels(configMapName, _getLabels(configMap));
+				_validateLabels(configMapName, labels);
 
 				configMap = _kubernetesClient.configMaps(
 				).withName(
@@ -721,14 +721,14 @@ public class PortalK8sAgentImpl implements PortalK8sConfigMapModifier {
 		String metadataType = labels.get("lxc.liferay.com/metadataType");
 
 		if ((metadataType == null) ||
-			(!Objects.equals(metadataType, "dxp") &&
-			 !Objects.equals(metadataType, "ext-init"))) {
+			(!Objects.equals(metadataType, "ext-init") &&
+			 !Objects.equals(metadataType, "ext-provision"))) {
 
 			throw new IllegalArgumentException(
 				StringBundler.concat(
 					"Config map labels must contain the key ",
-					"\"lxc.liferay.com/metadataType\" with a value of \"dxp\" ",
-					"or \"ext-init\""));
+					"\"lxc.liferay.com/metadataType\" with a value of ",
+					"\"ext-init\" or \"ext-provision\""));
 		}
 
 		String virtualInstanceId = labels.get(
