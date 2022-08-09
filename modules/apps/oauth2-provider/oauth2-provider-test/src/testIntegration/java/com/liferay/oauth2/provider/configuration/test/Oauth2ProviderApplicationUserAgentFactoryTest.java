@@ -19,9 +19,7 @@ import com.liferay.oauth2.provider.configuration.OAuth2ProviderApplicationUserAg
 import com.liferay.oauth2.provider.model.OAuth2Application;
 import com.liferay.oauth2.provider.service.OAuth2ApplicationLocalService;
 import com.liferay.petra.function.UnsafeSupplier;
-import com.liferay.portal.kernel.dao.orm.DynamicQuery;
-import com.liferay.portal.kernel.dao.orm.Property;
-import com.liferay.portal.kernel.dao.orm.PropertyFactoryUtil;
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.util.HashMapDictionaryBuilder;
@@ -29,7 +27,6 @@ import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 
 import java.util.Dictionary;
-import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -136,42 +133,25 @@ public class Oauth2ProviderApplicationUserAgentFactoryTest {
 
 		CountDownLatch latch = new CountDownLatch(50);
 
-		DynamicQuery dynamicQuery = _queryOAuthApplication(
-			externalReferenceCode);
+		OAuth2Application oAuth2Application = null;
 
-		List<OAuth2Application> oAuth2Applications =
-			_oAuth2ApplicationLocalService.dynamicQuery(dynamicQuery);
-
-		while (latch.getCount() > 0) {
-			if (!oAuth2Applications.isEmpty()) {
-				return oAuth2Applications.get(0);
+		while (oAuth2Application == null) {
+			try {
+				oAuth2Application = _oAuth2ApplicationLocalService.
+					getOAuth2ApplicationByExternalReferenceCode(
+						TestPropsValues.getCompanyId(), externalReferenceCode);
 			}
+			catch (PortalException portalException) {
 
-			oAuth2Applications = _oAuth2ApplicationLocalService.dynamicQuery(
-				dynamicQuery);
+				// Ignore this scenario
+
+			}
 
 			latch.countDown();
 			latch.await(10, TimeUnit.MILLISECONDS);
 		}
 
-		return null;
-	}
-
-	private DynamicQuery _queryOAuthApplication(String externalReferenceCode)
-		throws Exception {
-
-		DynamicQuery dynamicQuery =
-			_oAuth2ApplicationLocalService.dynamicQuery();
-
-		Property companyIdProperty = PropertyFactoryUtil.forName("companyId");
-
-		dynamicQuery.add(companyIdProperty.eq(TestPropsValues.getCompanyId()));
-
-		Property nameProperty = PropertyFactoryUtil.forName("name");
-
-		dynamicQuery.add(nameProperty.eq(externalReferenceCode));
-
-		return dynamicQuery;
+		return oAuth2Application;
 	}
 
 	@Inject
