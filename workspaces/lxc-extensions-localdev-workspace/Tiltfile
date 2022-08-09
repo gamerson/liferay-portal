@@ -76,7 +76,7 @@ k8s_resource(
 
 k8s_resource(
   objects=[
-    'couponpdf-lxc-ext-provision-metadata:configmap', 
+    'couponpdf-default-lxc-ext-provision-metadata:configmap', 
     'couponpdf-ingress:ingress',
     'couponpdf-ingress-route:ingressroute'
   ], 
