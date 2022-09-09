@@ -31,5 +31,6 @@
 			"dxp/apps/*/*/*",
 			"dxp/apps/osb/*/*/*"
 		]
-	}
+	},
+	"version": "0.0.0"
 }
