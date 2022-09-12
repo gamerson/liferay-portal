@@ -14,9 +14,6 @@
 
 package com.liferay.gradle.plugins.workspace.internal.client.extension;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.liferay.gradle.plugins.node.NodeExtension;
 import com.liferay.gradle.plugins.node.NodePlugin;
 import com.liferay.gradle.plugins.workspace.configurator.ClientExtensionProjectConfigurator;
@@ -28,32 +25,34 @@ import groovy.json.JsonSlurper;
 import groovy.lang.Closure;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
+
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.stream.Stream;
 
 import org.gradle.api.Action;
 import org.gradle.api.GradleException;
 import org.gradle.api.Project;
 import org.gradle.api.file.CopySpec;
+import org.gradle.api.file.FileCollection;
+import org.gradle.api.tasks.TaskOutputs;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.bundling.Zip;
 
 import org.osgi.framework.Version;
-import org.yaml.snakeyaml.Yaml;
 
 /**
  * @author Gregory Amerson
  */
 public class CustomElementTypeConfigurer
 	implements ClientExtensionTypeConfigurer {
-	private static final String _CLIENT_EXTENSION_YAML =
-			"client-extension.yaml";
+
 	@Override
 	public void apply(
 		Project project, ClientExtension clientExtension,
@@ -86,6 +85,11 @@ public class CustomElementTypeConfigurer
 				@Override
 				@SuppressWarnings("serial")
 				public void execute(Zip zip) {
+					zip.doFirst(
+						task -> _updateClientExtensionConfigURLs(
+							project,
+							createClientExtensionConfigTaskProvider.get()));
+
 					zip.into(
 						new Callable<String>() {
 
@@ -186,6 +190,71 @@ public class CustomElementTypeConfigurer
 		}
 
 		return false;
+	}
+
+	@SuppressWarnings("unchecked")
+	private void _updateClientExtensionConfigURLs(
+		Project project,
+		CreateClientExtensionConfigTask createClientExtensionConfigTask) {
+
+		File assertManifestJsonFile = new File(
+			project.getBuildDir(), "asset-manifest.json");
+
+		if (!assertManifestJsonFile.exists()) {
+			return;
+		}
+
+		JsonSlurper jsonSlurper = new JsonSlurper();
+
+		Map<String, Object> assetManifestMap =
+			(Map<String, Object>)jsonSlurper.parse(assertManifestJsonFile);
+
+		Map<String, Object> filesMap =
+			(Map<String, Object>)assetManifestMap.get("files");
+
+		if ((filesMap == null) || filesMap.isEmpty()) {
+			return;
+		}
+
+		TaskOutputs taskOutputs = createClientExtensionConfigTask.getOutputs();
+
+		FileCollection outputFiles = taskOutputs.getFiles();
+
+		outputFiles.forEach(
+			outputFile -> {
+				String name = outputFile.getName();
+
+				if (!name.endsWith(".client-extension-config.json")) {
+					return;
+				}
+
+				try {
+					String originalContent = Files.readString(
+						outputFile.toPath());
+
+					Set<Map.Entry<String, Object>> entries =
+						filesMap.entrySet();
+
+					Stream<Map.Entry<String, Object>> stream = entries.stream();
+
+					String updatedContent = stream.reduce(
+						originalContent,
+						(content, entry) -> content.replace(
+							entry.getKey(), String.valueOf(entry.getValue())),
+						(x, y) -> {
+							throw new RuntimeException();
+						});
+
+					if (!originalContent.equals(updatedContent)) {
+						Files.write(
+							outputFile.toPath(), updatedContent.getBytes());
+					}
+				}
+				catch (IOException ioException) {
+					throw new GradleException(
+						ioException.getMessage(), ioException);
+				}
+			});
 	}
 
 	private static final Version _MINIMUM_NODE_VERSION = Version.parseVersion(
