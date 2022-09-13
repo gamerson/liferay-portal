@@ -17,6 +17,7 @@ package com.liferay.gradle.plugins.workspace.internal.client.extension;
 import com.liferay.gradle.plugins.node.NodeExtension;
 import com.liferay.gradle.plugins.node.NodePlugin;
 import com.liferay.gradle.plugins.workspace.configurator.ClientExtensionProjectConfigurator;
+import com.liferay.gradle.plugins.workspace.internal.util.FileUtil;
 import com.liferay.gradle.plugins.workspace.internal.util.GradleUtil;
 import com.liferay.gradle.plugins.workspace.task.CreateClientExtensionConfigTask;
 
@@ -229,8 +230,7 @@ public class CustomElementTypeConfigurer
 				}
 
 				try {
-					String originalContent = Files.readString(
-						outputFile.toPath());
+					String originalContent = FileUtil.read(outputFile);
 
 					Set<Map.Entry<String, Object>> entries =
 						filesMap.entrySet();
