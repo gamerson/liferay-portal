@@ -1,0 +1,13 @@
+${id}-user-agent:
+  type: oauthApplicationUserAgent
+  scopes:
+    - C_${Object}.everything
+
+${id}:
+  type: objectAction
+  resourcePath: /${object}s/issued
+  oauth2Application: ${id}-user-agent
+
+runtime:
+  type: springboot
+  workload: deployment

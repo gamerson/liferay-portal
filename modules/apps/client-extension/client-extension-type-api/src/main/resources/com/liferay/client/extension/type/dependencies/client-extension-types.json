@@ -4,6 +4,7 @@
 		"name": "customElement",
 		"properties": [
 			{
+				"default": "",
 				"name": "description",
 				"type": "string"
 			},
@@ -17,6 +18,7 @@
 				"type": "string"
 			},
 			{
+				"default": "customElement",
 				"name": "type",
 				"type": "string"
 			},
@@ -62,6 +64,7 @@
 		"name": "globalCSS",
 		"properties": [
 			{
+				"default": "",
 				"name": "description",
 				"type": "string"
 			},
@@ -75,6 +78,7 @@
 				"type": "string"
 			},
 			{
+				"default": "globalCSS",
 				"name": "type",
 				"type": "string"
 			},
@@ -90,6 +94,7 @@
 		"name": "globalJS",
 		"properties": [
 			{
+				"default": "",
 				"name": "description",
 				"type": "string"
 			},
@@ -103,6 +108,7 @@
 				"type": "string"
 			},
 			{
+				"default": "globalJS",
 				"name": "type",
 				"type": "string"
 			},
@@ -118,6 +124,7 @@
 		"name": "iframe",
 		"properties": [
 			{
+				"default": "",
 				"name": "description",
 				"type": "string"
 			},
@@ -131,6 +138,7 @@
 				"type": "string"
 			},
 			{
+				"default": "iframe",
 				"name": "type",
 				"type": "string"
 			},
@@ -161,6 +169,7 @@
 		"name": "themeCSS",
 		"properties": [
 			{
+				"default": "",
 				"name": "description",
 				"type": "string"
 			},
@@ -174,6 +183,7 @@
 				"type": "string"
 			},
 			{
+				"default": "themeCSS",
 				"name": "type",
 				"type": "string"
 			},
@@ -194,6 +204,7 @@
 		"name": "themeFavicon",
 		"properties": [
 			{
+				"default": "",
 				"name": "description",
 				"type": "string"
 			},
@@ -207,6 +218,7 @@
 				"type": "string"
 			},
 			{
+				"default": "themeFavicon",
 				"name": "type",
 				"type": "string"
 			},
@@ -222,6 +234,7 @@
 		"name": "themeJS",
 		"properties": [
 			{
+				"default": "",
 				"name": "description",
 				"type": "string"
 			},
@@ -235,6 +248,7 @@
 				"type": "string"
 			},
 			{
+				"default": "themeJS",
 				"name": "type",
 				"type": "string"
 			},
@@ -244,5 +258,75 @@
 				"type": "string"
 			}
 		]
+	},
+	{
+		"description": "This is a description.",
+		"name": "objectActionNodeJS", 
+		"properties": [
+			{
+				"default": "",
+				"name": "description",
+				"type": "string"
+			},
+			{
+				"name": "id",
+				"type": "string",
+				"description": "The id to use for registering the client extensions with DXP"
+			},
+			{
+				"name": "name",
+				"type": "string"
+			}
+		]	
+	},
+	{
+		"description": "This is a description.",
+		"name": "objectActionSpringBoot",
+		"properties": [
+			{
+				"default": "",
+				"name": "description",
+				"type": "string"
+			},
+			{
+				"name": "id",
+				"type": "string",
+				"description": "The id to use for registering the client extensions with DXP"
+			},
+			{
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"name": "Object",
+				"type": "string",
+				"description": "Name of Object this action is registred with. (Use uppercase first letter)"
+			},
+			{
+				"name": "object",
+				"type": "string",
+				"description": "Name of Object this action is registred with. (Use lowercase first letter)"
+			}
+		]
+	},
+	{
+		"description": "This is a description.",
+		"name": "objectDefinition",
+		"properties": [
+			{
+				"default": "",
+				"name": "description",
+				"type": "string"
+			},
+			{
+				"name": "id",
+				"type": "string",
+				"description": "The id to use for registering the client extensions with DXP"
+			},
+			{
+				"name": "name",
+				"type": "string"
+			}
+		]	
 	}
 ]
