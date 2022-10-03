@@ -63,7 +63,7 @@ public class CustomElementTypeConfigurer
 	@Override
 	public void apply(
 		Project project, Optional<ClientExtension> clientExtensionOptional,
-		TaskProvider<Copy> copyTaskProvider) {
+		TaskProvider<Copy> assembleClientExtensionTaskProvider) {
 
 		if (!_hasFrontendBuildScript(project)) {
 			return;
@@ -89,7 +89,7 @@ public class CustomElementTypeConfigurer
 				createClientExtensionConfigTask.dependsOn(
 					NodePlugin.PACKAGE_RUN_BUILD_TASK_NAME));
 
-		copyTaskProvider.configure(
+		assembleClientExtensionTaskProvider.configure(
 			new Action<Copy>() {
 
 				@Override

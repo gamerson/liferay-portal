@@ -53,7 +53,7 @@ public class ThemeCSSTypeConfigurer implements ClientExtensionTypeConfigurer {
 	@Override
 	public void apply(
 		Project project, Optional<ClientExtension> clientExtensionOptional,
-		TaskProvider<Copy> copyTaskProvider) {
+		TaskProvider<Copy> assembleClientExtensionTaskProvider) {
 
 		GradleUtil.applyPlugin(project, NodePlugin.class);
 		GradleUtil.applyPlugin(project, ThemeBuilderPlugin.class);
@@ -69,7 +69,7 @@ public class ThemeCSSTypeConfigurer implements ClientExtensionTypeConfigurer {
 
 		war.setEnabled(false);
 
-		copyTaskProvider.configure(
+		assembleClientExtensionTaskProvider.configure(
 			new Action<Copy>() {
 
 				@Override
