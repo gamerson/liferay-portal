@@ -1,0 +1,14 @@
+{
+  "com.liferay.oauth2.provider.configuration.OAuth2ProviderApplicationHeadlessServerConfiguration~id-test" : {
+    "baseURL" : "${portalURL}/o/project-test",
+    "description" : "description-test",
+    "dxp.lxc.liferay.com.virtualInstanceId" : "default",
+    "homePageURL" : "https://$[conf:ext.lxc.liferay.com.mainDomain]",
+    "name" : "name-test",
+    "scopes" : [ "C_Coupon.read", "C_Coupon.write" ],
+    "sourceCodeURL" : "https://liferay.com",
+    "type" : "oauthApplicationHeadlessServer",
+    "typeSettings" : [ "userAccountEmailAddress=test@$[conf:dxp.lxc.liferay.com.virtualInstanceId]", "scopes=C_Coupon.read\nC_Coupon.write", "homePageURL=https://$[conf:ext.lxc.liferay.com.mainDomain]" ],
+    "userAccountEmailAddress" : "test@$[conf:dxp.lxc.liferay.com.virtualInstanceId]"
+  }
+}

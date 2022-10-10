@@ -1,0 +1,13 @@
+{
+  "com.liferay.object.configuration.ObjectActionExecutorFactoryConfiguration~id-test" : {
+    "baseURL" : "${portalURL}/o/project-test",
+    "description" : "description-test",
+    "dxp.lxc.liferay.com.virtualInstanceId" : "default",
+    "name" : "name-test",
+    "oauthApplication" : "coupon-action-user-agent",
+    "resourcePath" : "/coupons/issued",
+    "sourceCodeURL" : "https://liferay.com",
+    "type" : "objectAction",
+    "typeSettings" : [ "resourcePath=/coupons/issued", "oauthApplication=coupon-action-user-agent" ]
+  }
+}

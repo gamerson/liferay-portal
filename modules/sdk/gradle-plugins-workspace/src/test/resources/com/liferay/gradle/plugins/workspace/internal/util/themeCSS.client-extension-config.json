@@ -1,0 +1,11 @@
+{
+  "com.liferay.client.extension.type.configuration.CETConfiguration~id-test" : {
+    "baseURL" : "${portalURL}/o/project-test",
+    "description" : "description-test",
+    "dxp.lxc.liferay.com.virtualInstanceId" : "default",
+    "name" : "name-test",
+    "sourceCodeURL" : "https://liferay.com",
+    "type" : "themeCSS",
+    "typeSettings" : [ "clayURL=css/clay.css", "mainURL=css/main.css" ]
+  }
+}

@@ -14,6 +14,9 @@
 
 package com.liferay.gradle.plugins.workspace.configurator;
 
+import com.bmuschko.gradle.docker.DockerRemoteApiPlugin;
+import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,6 +28,8 @@ import com.liferay.gradle.plugins.workspace.WorkspaceExtension;
 import com.liferay.gradle.plugins.workspace.WorkspacePlugin;
 import com.liferay.gradle.plugins.workspace.internal.client.extension.ClientExtension;
 import com.liferay.gradle.plugins.workspace.internal.client.extension.ClientExtensionTypeConfigurer;
+import com.liferay.gradle.plugins.workspace.internal.client.extension.CustomElementTypeConfigurer;
+import com.liferay.gradle.plugins.workspace.internal.client.extension.ObjectDefinitionTypeConfigurer;
 import com.liferay.gradle.plugins.workspace.internal.client.extension.ThemeCSSTypeConfigurer;
 import com.liferay.gradle.plugins.workspace.internal.util.GradleUtil;
 import com.liferay.gradle.plugins.workspace.task.CreateClientExtensionConfigTask;
@@ -42,11 +47,14 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
@@ -63,6 +71,7 @@ import org.gradle.api.initialization.Settings;
 import org.gradle.api.plugins.BasePlugin;
 import org.gradle.api.plugins.ExtensionAware;
 import org.gradle.api.provider.Property;
+import org.gradle.api.provider.SetProperty;
 import org.gradle.api.tasks.Copy;
 import org.gradle.api.tasks.Delete;
 import org.gradle.api.tasks.TaskInputs;
@@ -75,8 +84,8 @@ import org.gradle.api.tasks.bundling.Zip;
 public class ClientExtensionProjectConfigurator
 	extends BaseProjectConfigurator {
 
-	public static final String BUILD_CLIENT_EXTENSION_TASK_NAME =
-		"buildClientExtension";
+	public static final String BUILD_CLIENT_EXTENSION_DOCKER_IMAGE_TASK_NAME =
+		"buildClientExtensionDockerImage";
 
 	public static final String CREATE_CLIENT_EXTENSION_CONFIG_TASK_NAME =
 		"createClientExtensionConfig";
@@ -85,7 +94,15 @@ public class ClientExtensionProjectConfigurator
 		super(settings);
 
 		_clientExtensionConfigurers.put(
-			"themeCSS", new ThemeCSSTypeConfigurer());
+			"customElement",
+			Collections.singletonList(new CustomElementTypeConfigurer()));
+		_clientExtensionConfigurers.put(
+			"themeCSS",
+			Collections.singletonList(new ThemeCSSTypeConfigurer()));
+
+		_clientExtensionConfigurers.put(
+			"objectDefinition",
+			Collections.singletonList(new ObjectDefinitionTypeConfigurer()));
 
 		_defaultRepositoryEnabled = GradleUtil.getProperty(
 			settings,
@@ -102,11 +119,24 @@ public class ClientExtensionProjectConfigurator
 					project, CREATE_CLIENT_EXTENSION_CONFIG_TASK_NAME,
 					CreateClientExtensionConfigTask.class);
 
-		TaskProvider<Zip> zipTaskProvider = GradleUtil.addTaskProvider(
-			project, BUILD_CLIENT_EXTENSION_TASK_NAME, Zip.class);
+		TaskProvider<Copy> assembleClientExtensionTaskProvider =
+			GradleUtil.addTaskProvider(
+				project, "assembleClientExtension", Copy.class);
+
+		TaskProvider<Zip> buildClientExtensionZipTaskProvider =
+			GradleUtil.addTaskProvider(
+				project, "buildClientExtensionZip", Zip.class);
+
+		TaskProvider<DockerBuildImage> buildClientExtensionDockerImageProvider =
+			GradleUtil.addTaskProvider(
+				project, BUILD_CLIENT_EXTENSION_DOCKER_IMAGE_TASK_NAME,
+				DockerBuildImage.class);
 
 		_baseConfigureClientExtensionProject(
-			project, createClientExtensionConfigTaskProvider, zipTaskProvider);
+			project, createClientExtensionConfigTaskProvider,
+			assembleClientExtensionTaskProvider,
+			buildClientExtensionZipTaskProvider,
+			buildClientExtensionDockerImageProvider);
 
 		File clientExtensionFile = project.file(_CLIENT_EXTENSION_YAML);
 
@@ -121,35 +151,64 @@ public class ClientExtensionProjectConfigurator
 			nodeIterator.forEachRemaining(
 				node -> {
 					String id = node.getKey();
-					JsonNode clientExtensionNode = node.getValue();
 
-					try {
-						ClientExtension clientExtension =
-							objectMapper.treeToValue(
-								clientExtensionNode, ClientExtension.class);
+					if (Objects.equals("runtime", id)) {
+						JsonNode runtimeNode = node.getValue();
 
-						clientExtension.id = id;
-						clientExtension.projectName = project.getName();
+						JsonNode runtimeType = runtimeNode.get("type");
 
 						createClientExtensionConfigTaskProvider.configure(
 							createClientExtensionConfigTask ->
-								createClientExtensionConfigTask.
-									addClientExtension(clientExtension));
+								createClientExtensionConfigTask.setType(
+									runtimeType.asText()));
 
-						ClientExtensionTypeConfigurer
-							clientExtensionTypeConfigurer =
-								_clientExtensionConfigurers.get(
-									clientExtension.type);
+						List<ClientExtensionTypeConfigurer>
+							clientExtensionTypeConfigurers =
+								_clientExtensionConfigurers.getOrDefault(
+									runtimeType.asText(),
+									Collections.emptyList());
 
-						if (clientExtensionTypeConfigurer != null) {
-							clientExtensionTypeConfigurer.apply(
-								project, clientExtension, zipTaskProvider);
-						}
+						clientExtensionTypeConfigurers.forEach(
+							clientExtensionTypeConfigurer ->
+								clientExtensionTypeConfigurer.apply(
+									project, Optional.empty(),
+									assembleClientExtensionTaskProvider));
 					}
-					catch (JsonProcessingException jsonProcessingException) {
-						throw new GradleException(
-							"Failed to parse client-extension " + id,
-							jsonProcessingException);
+					else {
+						JsonNode clientExtensionNode = node.getValue();
+
+						try {
+							ClientExtension clientExtension =
+								objectMapper.treeToValue(
+									clientExtensionNode, ClientExtension.class);
+
+							clientExtension.id = id;
+							clientExtension.projectName = project.getName();
+
+							createClientExtensionConfigTaskProvider.configure(
+								createClientExtensionConfigTask ->
+									createClientExtensionConfigTask.
+										addClientExtension(clientExtension));
+
+							List<ClientExtensionTypeConfigurer>
+								clientExtensionTypeConfigurers =
+									_clientExtensionConfigurers.getOrDefault(
+										clientExtension.type,
+										Collections.emptyList());
+
+							clientExtensionTypeConfigurers.forEach(
+								clientExtensionTypeConfigurer ->
+									clientExtensionTypeConfigurer.apply(
+										project, Optional.of(clientExtension),
+										assembleClientExtensionTaskProvider));
+						}
+						catch (JsonProcessingException
+									jsonProcessingException) {
+
+							throw new GradleException(
+								"Failed to parse client-extension " + id,
+								jsonProcessingException);
+						}
 					}
 				});
 		}
@@ -214,7 +273,10 @@ public class ClientExtensionProjectConfigurator
 		Project project,
 		TaskProvider<CreateClientExtensionConfigTask>
 			createClientExtensionConfigTaskProvider,
-		TaskProvider<Zip> zipTaskProvider) {
+		TaskProvider<Copy> assembleClientExtensionTaskProvider,
+		TaskProvider<Zip> buildClientExtensionZipTaskProvider,
+		TaskProvider<DockerBuildImage>
+			buildClientExtensionDockerImageProvider) {
 
 		if (isDefaultRepositoryEnabled()) {
 			GradleUtil.addDefaultRepositories(project);
@@ -222,6 +284,7 @@ public class ClientExtensionProjectConfigurator
 
 		GradleUtil.applyPlugin(project, BasePlugin.class);
 		GradleUtil.applyPlugin(project, LiferayBasePlugin.class);
+		GradleUtil.applyPlugin(project, DockerRemoteApiPlugin.class);
 
 		LiferayExtension liferayExtension = GradleUtil.getExtension(
 			project, LiferayExtension.class);
@@ -237,25 +300,130 @@ public class ClientExtensionProjectConfigurator
 		_configureTaskClean(project);
 		_configureTaskDeploy(project);
 
-		_configureTaskBuildClientExtension(
-			project, createClientExtensionConfigTaskProvider, zipTaskProvider);
+		_configureClientExtensionTasks(
+			project, createClientExtensionConfigTaskProvider,
+			assembleClientExtensionTaskProvider,
+			buildClientExtensionZipTaskProvider,
+			buildClientExtensionDockerImageProvider);
 
 		addTaskDockerDeploy(
-			project, zipTaskProvider,
+			project, buildClientExtensionZipTaskProvider,
 			new File(workspaceExtension.getDockerDir(), "client-extensions"));
 
-		_configureArtifacts(project, zipTaskProvider);
-		_configureRootTaskDistBundle(project, zipTaskProvider);
+		_configureArtifacts(project, buildClientExtensionZipTaskProvider);
+		_configureRootTaskDistBundle(
+			project, buildClientExtensionZipTaskProvider);
 
-		return zipTaskProvider;
+		return buildClientExtensionZipTaskProvider;
 	}
 
 	private void _configureArtifacts(
-		Project project, TaskProvider<Zip> zipTaskProvider) {
+		Project project, TaskProvider<Zip> buildClientExtensionTaskProvider) {
 
 		ArtifactHandler artifacts = project.getArtifacts();
 
-		artifacts.add(Dependency.ARCHIVES_CONFIGURATION, zipTaskProvider);
+		artifacts.add(
+			Dependency.ARCHIVES_CONFIGURATION,
+			buildClientExtensionTaskProvider);
+	}
+
+	@SuppressWarnings("serial")
+	private void _configureClientExtensionTasks(
+		Project project,
+		TaskProvider<CreateClientExtensionConfigTask>
+			createClientExtensionConfigTaskProvider,
+		TaskProvider<Copy> assembleClientExtensionTaskProvider,
+		TaskProvider<Zip> buildClientExtensionZipTaskProvider,
+		TaskProvider<DockerBuildImage> buildClientExtensionDockerImage) {
+
+		createClientExtensionConfigTaskProvider.configure(
+			createClientExtensionConfigTask -> {
+				TaskInputs taskInputs =
+					createClientExtensionConfigTask.getInputs();
+
+				taskInputs.file(project.file(_CLIENT_EXTENSION_YAML));
+			});
+
+		assembleClientExtensionTaskProvider.configure(
+			copy -> {
+				copy.setDestinationDir(
+					new File(project.getBuildDir(), "clientExtension"));
+
+				copy.from(createClientExtensionConfigTaskProvider);
+
+				copy.into(
+					new Callable<String>() {
+
+						@Override
+						public String call() throws Exception {
+							return "static";
+						}
+
+					},
+					new Closure<Void>(copy) {
+
+						@SuppressWarnings("unused")
+						public void doCall(CopySpec copySpec) {
+							copySpec.from(project.file("assets"));
+							copySpec.include("**/*");
+							copySpec.setIncludeEmptyDirs(false);
+						}
+
+					});
+
+				String lxcLocaldevRepo = System.getenv("LOCALDEV_REPO");
+
+				if (lxcLocaldevRepo != null) {
+					copy.from(lxcLocaldevRepo + "/k8s/tls/ca.crt");
+				}
+			});
+
+		buildClientExtensionZipTaskProvider.configure(
+			zip -> {
+				DirectoryProperty destinationDirectoryProperty =
+					zip.getDestinationDirectory();
+
+				destinationDirectoryProperty.set(
+					new File(project.getProjectDir(), "dist"));
+
+				Property<String> archiveBaseNameProperty =
+					zip.getArchiveBaseName();
+
+				archiveBaseNameProperty.set(
+					project.provider(
+						new Callable<String>() {
+
+							@Override
+							public String call() throws Exception {
+								return project.getName();
+							}
+
+						}));
+
+				zip.from(assembleClientExtensionTaskProvider);
+				zip.include("**/*");
+			});
+
+		buildClientExtensionDockerImage.configure(
+			dockerBuildImage -> {
+				dockerBuildImage.dependsOn(assembleClientExtensionTaskProvider);
+
+				dockerBuildImage.getInputDir(
+				).set(
+					new File(project.getBuildDir(), "clientExtension")
+				);
+
+				SetProperty<String> images = dockerBuildImage.getImages();
+
+				if (project.hasProperty("imageId")) {
+					Map<String, ?> properties = project.getProperties();
+
+					images.add((String)properties.get("imageId"));
+				}
+				else {
+					images.add(project.getName());
+				}
+			});
 	}
 
 	private void _configureConfigurationDefault(Project project) {
@@ -291,7 +459,7 @@ public class ClientExtensionProjectConfigurator
 
 	@SuppressWarnings("serial")
 	private void _configureRootTaskDistBundle(
-		Project project, TaskProvider<Zip> zipTaskProvider) {
+		Project project, TaskProvider<Zip> buildClientExtensionTaskProvider) {
 
 		Task assembleTask = GradleUtil.getTask(
 			project, BasePlugin.ASSEMBLE_TASK_NAME);
@@ -311,75 +479,14 @@ public class ClientExtensionProjectConfigurator
 					Project project = assembleTask.getProject();
 
 					ConfigurableFileCollection configurableFileCollection =
-						project.files(zipTaskProvider);
+						project.files(buildClientExtensionTaskProvider);
 
 					configurableFileCollection.builtBy(assembleTask);
 
-					copySpec.from(zipTaskProvider);
+					copySpec.from(buildClientExtensionTaskProvider);
 				}
 
 			});
-	}
-
-	private void _configureTaskBuildClientExtension(
-		Project project,
-		TaskProvider<CreateClientExtensionConfigTask>
-			createClientExtensionConfigTaskProvider,
-		TaskProvider<Zip> zipTaskProvider) {
-
-		createClientExtensionConfigTaskProvider.configure(
-			createClientExtensionConfigTask -> {
-				TaskInputs taskInputs =
-					createClientExtensionConfigTask.getInputs();
-
-				taskInputs.file(project.file(_CLIENT_EXTENSION_YAML));
-			});
-
-		zipTaskProvider.configure(
-			zip -> {
-				DirectoryProperty destinationDirectoryProperty =
-					zip.getDestinationDirectory();
-
-				destinationDirectoryProperty.set(
-					new File(project.getProjectDir(), "dist"));
-
-				Property<String> archiveBaseNameProperty =
-					zip.getArchiveBaseName();
-
-				archiveBaseNameProperty.set(
-					project.provider(
-						new Callable<String>() {
-
-							@Override
-							public String call() throws Exception {
-								return project.getName();
-							}
-
-						}));
-
-				zip.from(createClientExtensionConfigTaskProvider);
-			});
-
-		zipTaskProvider.configure(
-			zip -> zip.into(
-				new Callable<String>() {
-
-					@Override
-					public String call() throws Exception {
-						return "static";
-					}
-
-				},
-				new Closure<Void>(zip) {
-
-					@SuppressWarnings("unused")
-					public void doCall(CopySpec copySpec) {
-						copySpec.from(project.file("src"));
-						copySpec.include("**/*");
-						copySpec.setIncludeEmptyDirs(false);
-					}
-
-				}));
 	}
 
 	private void _configureTaskClean(Project project) {
@@ -408,7 +515,7 @@ public class ClientExtensionProjectConfigurator
 
 	private static final boolean _DEFAULT_REPOSITORY_ENABLED = true;
 
-	private final Map<String, ClientExtensionTypeConfigurer>
+	private final Map<String, List<ClientExtensionTypeConfigurer>>
 		_clientExtensionConfigurers = new HashMap<>();
 	private final boolean _defaultRepositoryEnabled;
 
