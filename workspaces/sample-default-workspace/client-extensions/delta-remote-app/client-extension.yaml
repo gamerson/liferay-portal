@@ -12,6 +12,6 @@ delta-remote-app:
   useESM: false
 
 assemble:
-  - from: build/
-    include: "static/**/*"
+  - from: build
+    include: static/
     into: static/

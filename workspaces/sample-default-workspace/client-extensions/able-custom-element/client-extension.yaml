@@ -10,3 +10,10 @@ able-custom-element:
     urls:
         - index.js
     useESM: false
+
+assemble:
+  - from: src/
+    include:
+    - "*.js"
+    - "*.css"
+    into: static/
