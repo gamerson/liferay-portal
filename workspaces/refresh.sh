@@ -41,7 +41,7 @@ function init_workspace {
 
 	mkdir -p ${1}/configs/local
 
-	cp sample-default-workspace/configs/local/portal-ext.properties ${1}/configs/local
+	cp sample-default-workspace/configs/local/portal-env.properties ${1}/configs/local
 }
 
 function refresh_liferay_learn_workspace {
@@ -61,9 +61,10 @@ function refresh_sample_default_workspace {
 
 	echo -e "\n**/dist\n**/node_modules_cache\n.DS_Store" >> .gitignore
 
-	echo -e "\n\nfeature.flag.LPS-153457=true" >> configs/local/portal-ext.properties
+	echo -e "\n\nfeature.flag.LPS-153457=true" >> configs/local/portal-env.properties
 
 	echo -e "\nliferay.workspace.docker.image.liferay=liferay/dxp:7.4.13-u50-d5.0.2-20221110093908" >> gradle.properties
+	echo -e "\nliferay.workspace.node.package.manager=yarn" >> gradle.properties
 
 	sort -o gradle.properties gradle.properties
 
