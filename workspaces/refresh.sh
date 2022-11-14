@@ -55,13 +55,15 @@ function refresh_sample_default_workspace {
 
 	cd sample-default-workspace
 
-	${BLADE_PATH} init --liferay-version dxp-7.4-u40
+	${BLADE_PATH} init --liferay-version dxp-7.4-u50
+
+	sed -i'.bak' "s/\"com.liferay.gradle.plugins.workspace\", version: \"4.0.5\"/\"com.liferay.gradle.plugins.workspace\", version: \"4.0.23\"/" settings.gradle
 
 	echo -e "\n**/dist\n**/node_modules_cache\n.DS_Store" >> .gitignore
 
 	echo -e "\n\nfeature.flag.LPS-153457=true" >> configs/local/portal-ext.properties
 
-	echo -e "\nliferay.workspace.docker.image.liferay=liferay/7.4.13.nightly-d4.1.4-20220707214146" >> gradle.properties
+	echo -e "\nliferay.workspace.docker.image.liferay=liferay/dxp:7.4.13-u50-d5.0.2-20221110093908" >> gradle.properties
 
 	sort -o gradle.properties gradle.properties
 
