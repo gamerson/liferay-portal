@@ -9,6 +9,7 @@ delta-remote-app:
   type: customElement
   urls:
     - static/js/main.*.js
+    #- http://localhost:3000/static/js/bundle.js
   useESM: false
 
 assemble:
