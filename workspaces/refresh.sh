@@ -110,6 +110,8 @@ EOF
 
 	sed -i'.bak' '/^.*react-scripts test.*$/d' delta-remote-app/package.json
 
+	rm -fr sample-minimal-workspace/client-extensions/delta-remote-app
+
 	mv delta-remote-app sample-minimal-workspace/client-extensions
 
 	rm -fr sample-default-workspace/client-extensions
