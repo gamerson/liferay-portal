@@ -86,6 +86,30 @@ function refresh_sample_minimal_workspace {
 	copy_template theme-css sample-minimal-workspace/client-extensions/able-theme-css "Able Theme CSS"
 	copy_template theme-favicon sample-minimal-workspace/client-extensions/able-theme-favicon "Able Theme Favicon"
 
+	../tools/create_remote_app.sh delta-remote-app react
+
+	cat <<EOF > delta-remote-app/client-extension.yaml
+delta-remote-app:
+  cssURLs:
+    - static/css/main.*.css
+  friendlyURLMapping: delta-remote-app
+  htmlElementName: delta-remote-app
+  instanceable: false
+  name: Delta Remote App
+  portletCategoryName: category.remote-apps
+  type: customElement
+  urls:
+    - static/js/main.*.js
+  useESM: false
+
+assemble:
+  - from: build
+    include: static/
+    into: static/
+EOF
+
+	mv delta-remote-app sample-minimal-workspace/client-extensions
+
 	rm -fr sample-default-workspace/client-extensions
 
 	cp -R sample-minimal-workspace/client-extensions sample-default-workspace
