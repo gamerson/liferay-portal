@@ -91,6 +91,10 @@ function refresh_sample_minimal_workspace {
 	cp -R sample-minimal-workspace/client-extensions sample-default-workspace
 }
 
+function remove_bak_files {
+	find . -name '*.bak' -exec rm {} +
+}
+
 function main {
 	check_blade
 
@@ -99,6 +103,8 @@ function main {
 	refresh_sample_minimal_workspace
 
 	refresh_liferay_learn_workspace
+
+	remove_bak_files
 }
 
 main "${@}"
