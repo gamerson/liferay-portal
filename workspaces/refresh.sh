@@ -41,6 +41,20 @@ function copy_template {
 	find "${2}" -not -path '*/*\.ico' -type f -exec sed -i "s/\${name}/${3}/g" {} +
 }
 
+function format_workspaces {
+	cd liferay-learn-workspace
+
+	./gradlew :formatSource
+
+	cd ../sample-default-workspace
+
+	./gradlew :formatSource
+
+	cd ../sample-minimal-workspace
+
+	./gradlew :formatSource
+}
+
 function init_workspace {
 	cp sample-default-workspace/.gitignore ${1}
 	cp sample-default-workspace/gradle.properties ${1}
@@ -179,6 +193,8 @@ function main {
 	refresh_sample_minimal_workspace
 
 	refresh_liferay_learn_workspace
+
+	format_workspaces
 }
 
 main "${@}"

@@ -116,17 +116,16 @@ public class EasyRestController {
 		try {
 			WebClient.Builder builder = WebClient.builder();
 
-			WebClient webClient = builder.baseUrl(
+			JSONObject jsonObject = new JSONObject(json);
+
+			builder.baseUrl(
 				_liferayPortalURL
 			).defaultHeader(
 				HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE
 			).defaultHeader(
 				HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE
-			).build();
-
-			JSONObject jsonObject = new JSONObject(json);
-
-			webClient.post(
+			).build(
+			).post(
 			).uri(
 				jsonObject.getString("transitionURL")
 			).bodyValue(
