@@ -19,3 +19,8 @@ easy-workflow-action-1:
     oAuth2ApplicationExternalReferenceCode: easy-oauth-application-user-agent
     resourcePath: /easy-workflow/action/1
     type: workflowAction
+runtime:
+  type: service
+  template: service-springboot
+  cpu: 500m
+  memory: 256Mi
