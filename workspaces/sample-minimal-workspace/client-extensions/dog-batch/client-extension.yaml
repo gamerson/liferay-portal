@@ -1,2 +1,17 @@
 assemble:
     - include: "batch/*"
+dog-batch-oauth-application-headless-server:
+  name: Dog Batch Application
+  scopes:
+    - Liferay.Headless.Batch.Engine.everything
+    - Liferay.Object.Admin.REST.everything
+  type: oAuthApplicationHeadlessServer
+  userAccountEmailAddress: test@$[conf:dxp.lxc.liferay.com.virtualInstanceId]
+runtime:
+    type: configuration
+    workload: job
+    env:
+    - name: OAUTH2_JOB_PROFILE
+      value: dog-batch-oauth-application-headless-server
+    - name: CURL_FLAGS
+      value: "-v"
