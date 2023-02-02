@@ -10,3 +10,6 @@ baker-iframe-3:
     name: Hockey
     type: iframe
     url: https://en.wikipedia.org/wiki/Hockey
+runtime:
+    type: configuration
+    workload: job

@@ -10,3 +10,6 @@ charlie-iframe-3:
     name: Pomegranate
     type: iframe
     url: https://en.wikipedia.org/wiki/Pomegranate
+runtime:
+    type: configuration
+    workload: job
