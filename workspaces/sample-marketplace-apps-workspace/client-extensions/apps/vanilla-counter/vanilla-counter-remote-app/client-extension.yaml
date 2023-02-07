@@ -1,0 +1,12 @@
+vanilla-counter:
+    cssURLs:
+        - style.css
+    friendlyURLMapping: vanilla-counter
+    htmlElementName: vanilla-counter
+    instanceable: true
+    name: Vanilla Counter
+    portletCategoryName: category.client-extensions
+    type: customElement
+    urls:
+        - index.js
+    useESM: false

@@ -1,0 +1,17 @@
+coupon-oauth-application-headless-server:
+  name: Coupon OAuth Application Headless Server
+  scopes:
+    - Liferay.Headless.Batch.Engine.everything
+    - Liferay.Object.Admin.REST.everything
+  type: oAuthApplicationHeadlessServer
+  userAccountEmailAddress: test@$[conf:dxp.lxc.liferay.com.virtualInstanceId]
+
+runtime:
+  template: configuration
+  type: configuration
+  workload: job
+  env:
+  - name: OAUTH2_APPLICATION_NAME
+    value: coupon-oauth-application-headless-server
+  - name: CURL_FLAGS
+    value: "-v"

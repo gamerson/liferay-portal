@@ -1,0 +1,9 @@
+joke-oauth-application-user-agent:
+    homePageURL: https://$[conf:ext.lxc.liferay.com.mainDomain]
+    name: Joke OAuth Application User Agent
+    type: oAuthApplicationUserAgent
+runtime:
+    type: service
+    template: service-springboot
+    cpu: 500m
+    memory: 256Mi

@@ -1,0 +1,16 @@
+coupon-oauth-application-user-agent:
+  name: Coupon OAuth Application User Agent
+  scopes:
+    - C_Coupon.everything
+  type: oAuthApplicationUserAgent
+
+coupon-updated-object-action:
+  oAuth2ApplicationExternalReferenceCode: coupon-oauth-application-user-agent
+  resourcePath: /coupon/updated
+  type: objectAction
+
+runtime:
+  type: service
+  template: service-springboot
+  cpu: 500m
+  memory: 256Mi
