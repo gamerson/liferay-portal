@@ -16,7 +16,8 @@ RUN \
 ENV TRUST_STORES=java
 ENV CAROOT=/var/lib/caroot
 
-COPY rootCA.pem /var/lib/caroot
+# optionally copy rootCA.pem
+COPY Dockerfile rootCA.pem* /var/lib/caroot/
 
 RUN mkcert -install
 
