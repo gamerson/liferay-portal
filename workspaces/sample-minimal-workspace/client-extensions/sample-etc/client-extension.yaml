@@ -19,3 +19,6 @@ sample-workflow-action-1:
     oAuth2ApplicationExternalReferenceCode: sample-oauth-application-user-agent
     resourcePath: /sample-workflow/action/1
     type: workflowAction
+runtime:
+  cpu: 500m
+  memory: 256Mi
