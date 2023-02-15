@@ -1,0 +1,9 @@
+{
+    "private": true,
+    "workspaces": {
+        "packages": [
+            "client-extensions/sample-custom-element-2",
+            "client-extensions/sample-theme-css"
+        ]
+    }
+}
