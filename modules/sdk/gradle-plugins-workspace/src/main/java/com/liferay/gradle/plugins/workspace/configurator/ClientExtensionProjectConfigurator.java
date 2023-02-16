@@ -54,6 +54,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
@@ -199,6 +200,16 @@ public class ClientExtensionProjectConfigurator
 									ClientExtension.class);
 
 							clientExtension.id = id;
+
+							if ((clientExtension.type == null) ||
+								clientExtension.type.isEmpty()) {
+
+								clientExtension.type = id;
+							}
+
+							clientExtension.classification = _getClassification(
+								clientExtension.id, clientExtension.type);
+
 							clientExtension.projectName = project.getName();
 
 							createClientExtensionConfigTaskProvider.configure(
@@ -388,6 +399,9 @@ public class ClientExtensionProjectConfigurator
 					createClientExtensionConfigTask.getInputs();
 
 				taskInputs.file(project.file(_CLIENT_EXTENSION_YAML));
+
+				createClientExtensionConfigTask.addClientExtensionProperties(
+					_getClientExtensionProperties());
 			});
 
 		assembleClientExtensionTaskProvider.configure(
@@ -503,6 +517,43 @@ public class ClientExtensionProjectConfigurator
 		copy.from(_getZipFile(project));
 	}
 
+	private String _getClassification(String id, String type) {
+		Properties clientExtensionProperties = _getClientExtensionProperties();
+
+		String classification = clientExtensionProperties.getProperty(
+			type + ".classification");
+
+		if (classification != null) {
+			return classification;
+		}
+
+		throw new GradleException(
+			StringBundler.concat(
+				"Client extension ", id, " with type ", type,
+				" is of unkown classification"));
+	}
+
+	private Properties _getClientExtensionProperties() {
+		if (_clientExtensionProperties == null) {
+			try {
+				Properties properties = new Properties();
+
+				properties.load(
+					ClientExtension.class.getResourceAsStream(
+						"client-extension.properties"));
+
+				return _clientExtensionProperties = properties;
+			}
+			catch (Exception exception) {
+				throw new GradleException(
+					"Failed parsing client-extension.properties file",
+					exception);
+			}
+		}
+
+		return _clientExtensionProperties;
+	}
+
 	private File _getZipFile(Project project) {
 		return project.file(
 			"dist/" + GradleUtil.getArchivesBaseName(project) + ".zip");
@@ -515,6 +566,7 @@ public class ClientExtensionProjectConfigurator
 
 	private final Map<String, List<ClientExtensionConfigurer>>
 		_clientExtensionConfigurers = new HashMap<>();
+	private Properties _clientExtensionProperties;
 	private final boolean _defaultRepositoryEnabled;
 
 }

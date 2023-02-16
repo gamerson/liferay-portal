@@ -15,6 +15,7 @@
 package com.liferay.gradle.plugins.workspace.internal.client.extension;
 
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import com.liferay.petra.string.StringBundler;
@@ -25,7 +26,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -38,18 +39,10 @@ public class ClientExtension {
 
 	@JsonAnySetter
 	public void ignored(String name, Object value) {
-		_typeSettings.put(name, value);
+		typeSettings.put(name, value);
 	}
 
-	public Map<String, Object> toJSONMap() throws Exception {
-		Properties clientExtensionProperties = _getClientExtensionProperties();
-
-		String pid = clientExtensionProperties.getProperty(type);
-
-		if (pid == null) {
-			throw new Exception("Unable to find PID for type: " + type);
-		}
-
+	public Map<String, Object> toJSONMap(String pid) {
 		Map<String, Object> jsonMap = new HashMap<>();
 
 		Map<String, Object> configMap = new HashMap<>();
@@ -62,7 +55,7 @@ public class ClientExtension {
 		configMap.put("sourceCodeURL", sourceCodeURL);
 		configMap.put("type", type);
 
-		Set<Map.Entry<String, Object>> set = _typeSettings.entrySet();
+		Set<Map.Entry<String, Object>> set = typeSettings.entrySet();
 
 		set.forEach(
 			entry -> {
@@ -76,18 +69,21 @@ public class ClientExtension {
 
 			configMap.put(
 				"homePageURL",
-				_typeSettings.getOrDefault(
+				typeSettings.getOrDefault(
 					"homePageURL",
 					"https://$[conf:ext.lxc.liferay.com.mainDomain]"));
 		}
 
-		configMap.put("typeSettings", _encode(_typeSettings));
+		if (Objects.equals(classification, "static")) {
+			configMap.put("typeSettings", _encode(typeSettings));
+		}
 
 		jsonMap.put(pid + "~" + id, configMap);
 
 		return jsonMap;
 	}
 
+	public String classification = "static";
 	public String description = "";
 	public String id;
 	public String name = "";
@@ -95,6 +91,9 @@ public class ClientExtension {
 	public Map<String, Object> properties = Collections.emptyMap();
 	public String sourceCodeURL = "";
 	public String type;
+
+	@JsonIgnore
+	public Map<String, Object> typeSettings = new HashMap<>();
 
 	private List<String> _encode(Map<String, Object> map) {
 		Set<Map.Entry<String, Object>> set = map.entrySet();
@@ -116,17 +115,5 @@ public class ClientExtension {
 			Collectors.toList()
 		);
 	}
-
-	private Properties _getClientExtensionProperties() throws Exception {
-		Properties properties = new Properties();
-
-		properties.load(
-			ClientExtension.class.getResourceAsStream(
-				"client-extension.properties"));
-
-		return properties;
-	}
-
-	private final Map<String, Object> _typeSettings = new HashMap<>();
 
 }
