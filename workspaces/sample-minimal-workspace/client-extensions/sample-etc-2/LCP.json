@@ -1,0 +1,12 @@
+{
+	"cpu": 1,
+	"environments": {
+		"infra": {
+			"deploy": false
+		}
+	},
+	"id": "sampleetc2",
+	"kind": "Job",
+	"memory": 500,
+	"scale": 1
+}
