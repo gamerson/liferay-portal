@@ -1,3 +1,17 @@
+/**
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License as published by the Free
+ * Software Foundation; either version 2.1 of the License, or (at your option)
+ * any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+ * details.
+ */
+
 package com.sample;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -20,36 +34,33 @@ import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.web.reactive.function.client.WebClient;
 
+/**
+ * @author Gregory Amerson
+ */
 @Configuration
 public class OAuth2ClientConfiguration {
 
 	@Bean
-	public OAuth2AuthorizedClientService auth2AuthorizedClientService(
-		ClientRegistrationRepository clientRegistrationRepository) {
-
-		return new InMemoryOAuth2AuthorizedClientService(
-			clientRegistrationRepository);
-	}
-
-	@Bean
 	public AuthorizedClientServiceOAuth2AuthorizedClientManager
-		authorizedClientServiceAndManager(
-			ClientRegistrationRepository crr,
-			OAuth2AuthorizedClientService oacs) {
+		authorizedClientServiceOAuth2AuthorizedClientManager(
+			ClientRegistrationRepository clientRegistrationRepository,
+			OAuth2AuthorizedClientService oAuth2AuthorizedClientService) {
 
-		OAuth2AuthorizedClientProvider authorizedClientProvider =
+		OAuth2AuthorizedClientProvider oAuth2AuthorizedClientProvider =
 			OAuth2AuthorizedClientProviderBuilder.builder(
 			).clientCredentials(
 			).build();
 
 		AuthorizedClientServiceOAuth2AuthorizedClientManager
-			authorizedClientManager =
+			authorizedClientServiceOAuth2AuthorizedClientManager =
 				new AuthorizedClientServiceOAuth2AuthorizedClientManager(
-					crr, oacs);
-		authorizedClientManager.setAuthorizedClientProvider(
-			authorizedClientProvider);
+					clientRegistrationRepository,
+					oAuth2AuthorizedClientService);
 
-		return authorizedClientManager;
+		authorizedClientServiceOAuth2AuthorizedClientManager.
+			setAuthorizedClientProvider(oAuth2AuthorizedClientProvider);
+
+		return authorizedClientServiceOAuth2AuthorizedClientManager;
 	}
 
 	@Bean
@@ -76,23 +87,24 @@ public class OAuth2ClientConfiguration {
 		)
 		String scope) {
 
-		ClientRegistration registration = ClientRegistration.withRegistrationId(
-			"dxp"
-		).tokenUri(
-			_protocol + "://" + _mainDomain + tokenUri
-		).clientId(
-			clientId
-		).clientSecret(
-			clientSecret
-		).scope(
-			scope
-		).authorizationGrantType(
-			AuthorizationGrantType.CLIENT_CREDENTIALS
-		).clientAuthenticationMethod(
-			ClientAuthenticationMethod.CLIENT_SECRET_POST
-		).build();
+		ClientRegistration clientRegistration =
+			ClientRegistration.withRegistrationId(
+				"dxp"
+			).tokenUri(
+				_protocol + "://" + _mainDomain + tokenUri
+			).clientId(
+				clientId
+			).clientSecret(
+				clientSecret
+			).scope(
+				scope.split("\\s+")
+			).authorizationGrantType(
+				AuthorizationGrantType.CLIENT_CREDENTIALS
+			).clientAuthenticationMethod(
+				ClientAuthenticationMethod.CLIENT_SECRET_POST
+			).build();
 
-		return new InMemoryClientRegistrationRepository(registration);
+		return new InMemoryClientRegistrationRepository(clientRegistration);
 	}
 
 	@Bean
@@ -110,7 +122,7 @@ public class OAuth2ClientConfiguration {
 		@Value(
 			"${sample-oauth-application-headless-server.oauth2.headless.server.scopes}"
 		)
-		String scope) {
+		String serverScopes) {
 
 		ClientRegistration registration = ClientRegistration.withRegistrationId(
 			"dxp"
@@ -121,7 +133,7 @@ public class OAuth2ClientConfiguration {
 		).clientSecret(
 			clientSecret
 		).scope(
-			scope
+			serverScopes.split("\\s+")
 		).authorizationGrantType(
 			AuthorizationGrantType.CLIENT_CREDENTIALS
 		).clientAuthenticationMethod(
@@ -132,21 +144,32 @@ public class OAuth2ClientConfiguration {
 	}
 
 	@Bean
+	public OAuth2AuthorizedClientService oAuth2AuthorizedClientService(
+		ClientRegistrationRepository clientRegistrationRepository) {
+
+		return new InMemoryOAuth2AuthorizedClientService(
+			clientRegistrationRepository);
+	}
+
+	@Bean
 	public WebClient webClient(
-		ReactiveClientRegistrationRepository clientRegistrations) {
+		ReactiveClientRegistrationRepository
+			reactiveClientRegistrationRepository) {
 
-		ServerOAuth2AuthorizedClientExchangeFilterFunction oauth =
-			new ServerOAuth2AuthorizedClientExchangeFilterFunction(
-				new AuthorizedClientServiceReactiveOAuth2AuthorizedClientManager(
-					clientRegistrations,
-					new InMemoryReactiveOAuth2AuthorizedClientService(
-						clientRegistrations)));
+		ServerOAuth2AuthorizedClientExchangeFilterFunction
+			serverOAuth2AuthorizedClientExchangeFilterFunction =
+				new ServerOAuth2AuthorizedClientExchangeFilterFunction(
+					new AuthorizedClientServiceReactiveOAuth2AuthorizedClientManager(
+						reactiveClientRegistrationRepository,
+						new InMemoryReactiveOAuth2AuthorizedClientService(
+							reactiveClientRegistrationRepository)));
 
-		oauth.setDefaultClientRegistrationId("dxp");
+		serverOAuth2AuthorizedClientExchangeFilterFunction.
+			setDefaultClientRegistrationId("dxp");
 
 		return WebClient.builder(
 		).filter(
-			oauth
+			serverOAuth2AuthorizedClientExchangeFilterFunction
 		).build();
 	}
 
