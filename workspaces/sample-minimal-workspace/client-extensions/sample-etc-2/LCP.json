@@ -6,7 +6,8 @@
 		}
 	},
 	"id": "sampleetc2",
-	"kind": "Job",
-	"memory": 500,
-	"scale": 1
+	"kind": "CronJob",
+	"memory": 1024,
+	"scale": 1,
+	"schedule": "* * * * *"
 }

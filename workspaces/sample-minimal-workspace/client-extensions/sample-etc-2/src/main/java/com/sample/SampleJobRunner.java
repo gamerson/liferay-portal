@@ -16,17 +16,12 @@ package com.sample;
 
 import com.liferay.headless.admin.user.client.dto.v1_0.Site;
 import com.liferay.headless.admin.user.client.resource.v1_0.SiteResource;
-import com.liferay.headless.delivery.client.dto.v1_0.MessageBoardMessage;
 import com.liferay.headless.delivery.client.dto.v1_0.MessageBoardThread;
 import com.liferay.headless.delivery.client.pagination.Page;
 import com.liferay.headless.delivery.client.pagination.Pagination;
-import com.liferay.headless.delivery.client.resource.v1_0.MessageBoardMessageResource;
 import com.liferay.headless.delivery.client.resource.v1_0.MessageBoardThreadResource;
 
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -94,62 +89,56 @@ public class SampleJobRunner implements CommandLineRunner {
 
 		threads.forEach(
 			thread -> {
-				if (thread.getShowAsQuestion() && !thread.getHasValidAnswer()) {
+				if (thread.getShowAsQuestion()) {
 					Long threadId = thread.getId();
+					String currentHeadline = thread.getHeadline();
 
-					_log.info(
-						"Found unanswered question: " + threadId + " - " +
-							thread.getHeadline());
-
-					MessageBoardMessageResource messageBoardMessageResource =
-						MessageBoardMessageResource.builder(
-						).header(
-							"Authorization",
-							"Bearer " + oAuth2AccessToken.getTokenValue()
-						).endpoint(
-							_mainDomain, 443, "https"
-						).build();
-
-					try {
-						Page<MessageBoardMessage> messagePage =
-							messageBoardMessageResource.
-								getMessageBoardThreadMessageBoardMessagesPage(
-									threadId, null, null, null,
-									Pagination.of(1, 2), null);
-
-						Collection<MessageBoardMessage> messages =
-							messagePage.getItems();
-
-						MessageBoardMessage messageBoardMessage =
-							messages.iterator(
-							).next();
-
-						_log.info(messageBoardMessage);
-
-						Set<String> keywords = new HashSet<>(
-							Arrays.asList(messageBoardMessage.getKeywords()));
-
-						String[] words = messageBoardMessage.getKeywords();
-
-						for (String word : words) {
-							_log.info("Keyword: " + word);
-						}
-
-						keywords.add("unanswered");
-
-						messageBoardMessage.setKeywords(
-							keywords.toArray(new String[0]));
-
-						messageBoardMessageResource.putMessageBoardMessage(
-							messageBoardMessage.getId(), messageBoardMessage);
-
+					if (thread.getHasValidAnswer()) {
 						_log.info(
-							"Marked message as unanswered: " +
-								messageBoardMessage.getId());
+							"Found answered question: " + threadId + " - " +
+								currentHeadline);
+
+						if (currentHeadline.startsWith("[Unanswered] ")) {
+							thread.setHeadline(
+								currentHeadline.substring(
+									"[Unanswered] ".length()));
+
+							try {
+								messageBoardThreadResource.
+									putMessageBoardThread(threadId, thread);
+
+								_log.info(
+									"Marked thread as answered: " + threadId);
+							}
+							catch (Exception exception) {
+								_log.error(
+									"Unable to update message board thread",
+									exception);
+							}
+						}
 					}
-					catch (Exception exception) {
-						_log.error(
-							"Error getting message board threads", exception);
+					else {
+						_log.info(
+							"Found unanswered question: " + threadId + " - " +
+								currentHeadline);
+
+						if (!currentHeadline.startsWith("[Unanswered] ")) {
+							thread.setHeadline(
+								"[Unanswered] " + currentHeadline);
+
+							try {
+								messageBoardThreadResource.
+									putMessageBoardThread(threadId, thread);
+
+								_log.info(
+									"Marked thread as unanswered: " + threadId);
+							}
+							catch (Exception exception) {
+								_log.error(
+									"Unable to update message board thread",
+									exception);
+							}
+						}
 					}
 				}
 			});
