@@ -1,2 +1,10 @@
 assemble:
     - include: "batch/*"
+    - include: "src/*"
+sample-batch-oauth-application-headless-server:
+    name: Sample Batch Application
+    scopes:
+        - Liferay.Headless.Batch.Engine.everything
+        - Liferay.Object.Admin.REST.everything
+    type: oAuthApplicationHeadlessServer
+    userAccountScreenName: test
