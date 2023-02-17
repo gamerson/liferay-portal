@@ -1,0 +1,12 @@
+{
+	"cpu": 0.1,
+	"environments": {
+		"infra": {
+			"deploy": false
+		}
+	},
+	"id": "sampleiframe2",
+	"kind": "Job",
+	"memory": 50,
+	"scale": 1
+}
