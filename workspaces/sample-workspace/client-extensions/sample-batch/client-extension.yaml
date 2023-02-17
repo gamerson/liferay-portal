@@ -2,6 +2,8 @@ assemble:
     - include: "batch/*"
     - include: "src/*"
 sample-batch-oauth-application-headless-server:
+    homePageURL: http://localhost:8080
+    #homePageURL: "https://$[conf:ext.lxc.liferay.com.mainDomain]"
     name: Sample Batch Application
     scopes:
         - Liferay.Headless.Batch.Engine.everything
