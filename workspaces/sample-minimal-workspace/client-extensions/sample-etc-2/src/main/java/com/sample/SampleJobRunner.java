@@ -16,10 +16,20 @@ package com.sample;
 
 import com.liferay.headless.admin.user.client.dto.v1_0.Site;
 import com.liferay.headless.admin.user.client.resource.v1_0.SiteResource;
+import com.liferay.headless.delivery.client.dto.v1_0.MessageBoardMessage;
 import com.liferay.headless.delivery.client.dto.v1_0.MessageBoardThread;
 import com.liferay.headless.delivery.client.pagination.Page;
 import com.liferay.headless.delivery.client.pagination.Pagination;
+import com.liferay.headless.delivery.client.resource.v1_0.MessageBoardMessageResource;
 import com.liferay.headless.delivery.client.resource.v1_0.MessageBoardThreadResource;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -38,18 +48,13 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class SampleJobRunner implements CommandLineRunner {
 
 	public void run(String... args) throws Exception {
-		System.out.println("_webClient" + _webClient);
-
-		OAuth2AuthorizeRequest oAuth2AuthorizeRequest =
-			OAuth2AuthorizeRequest.withClientRegistrationId(
-				"dxp"
-			).principal(
-				"Sample"
-			).build();
-
 		OAuth2AuthorizedClient oAuth2AuthorizedClient =
 			_authorizedClientServiceOAuth2AuthorizedClientManager.authorize(
-				oAuth2AuthorizeRequest);
+				OAuth2AuthorizeRequest.withClientRegistrationId(
+					"dxp"
+				).principal(
+					"Sample"
+				).build());
 
 		// Get the token from the authorized client object
 
@@ -62,9 +67,8 @@ public class SampleJobRunner implements CommandLineRunner {
 		System.out.println("Scopes: " + oAuth2AccessToken.getScopes());
 		System.out.println("Token: " + oAuth2AccessToken.getTokenValue());
 
-		SiteResource.Builder siteResourceBuilder = SiteResource.builder();
-
-		SiteResource siteResource = siteResourceBuilder.header(
+		SiteResource siteResource = SiteResource.builder(
+		).header(
 			"Authorization", "Bearer " + oAuth2AccessToken.getTokenValue()
 		).endpoint(
 			_mainDomain, 443, "https"
@@ -74,21 +78,84 @@ public class SampleJobRunner implements CommandLineRunner {
 
 		Long siteId = site.getId();
 
-		MessageBoardThreadResource.Builder builder =
-			MessageBoardThreadResource.builder();
+		MessageBoardThreadResource messageBoardThreadResource =
+			MessageBoardThreadResource.builder(
+			).header(
+				"Authorization", "Bearer " + oAuth2AccessToken.getTokenValue()
+			).endpoint(
+				_mainDomain, 443, "https"
+			).build();
 
-		MessageBoardThreadResource messageBoardThreadResource = builder.header(
-			"Authorization", "Bearer " + oAuth2AccessToken.getTokenValue()
-		).endpoint(
-			_mainDomain, 443, "https"
-		).build();
-
-		Page<MessageBoardThread> page =
+		Page<MessageBoardThread> threadPage =
 			messageBoardThreadResource.getSiteMessageBoardThreadsPage(
 				siteId, null, null, null, null, Pagination.of(1, 2), null);
 
-		System.out.println("page: " + page);
+		Collection<MessageBoardThread> threads = threadPage.getItems();
+
+		threads.forEach(
+			thread -> {
+				if (thread.getShowAsQuestion() && !thread.getHasValidAnswer()) {
+					Long threadId = thread.getId();
+
+					_log.info(
+						"Found unanswered question: " + threadId + " - " +
+							thread.getHeadline());
+
+					MessageBoardMessageResource messageBoardMessageResource =
+						MessageBoardMessageResource.builder(
+						).header(
+							"Authorization",
+							"Bearer " + oAuth2AccessToken.getTokenValue()
+						).endpoint(
+							_mainDomain, 443, "https"
+						).build();
+
+					try {
+						Page<MessageBoardMessage> messagePage =
+							messageBoardMessageResource.
+								getMessageBoardThreadMessageBoardMessagesPage(
+									threadId, null, null, null,
+									Pagination.of(1, 2), null);
+
+						Collection<MessageBoardMessage> messages =
+							messagePage.getItems();
+
+						MessageBoardMessage messageBoardMessage =
+							messages.iterator(
+							).next();
+
+						_log.info(messageBoardMessage);
+
+						Set<String> keywords = new HashSet<>(
+							Arrays.asList(messageBoardMessage.getKeywords()));
+
+						String[] words = messageBoardMessage.getKeywords();
+
+						for (String word : words) {
+							_log.info("Keyword: " + word);
+						}
+
+						keywords.add("unanswered");
+
+						messageBoardMessage.setKeywords(
+							keywords.toArray(new String[0]));
+
+						messageBoardMessageResource.putMessageBoardMessage(
+							messageBoardMessage.getId(), messageBoardMessage);
+
+						_log.info(
+							"Marked message as unanswered: " +
+								messageBoardMessage.getId());
+					}
+					catch (Exception exception) {
+						_log.error(
+							"Error getting message board threads", exception);
+					}
+				}
+			});
 	}
+
+	private static final Log _log = LogFactory.getLog(SampleJobRunner.class);
 
 	@Autowired
 	private AuthorizedClientServiceOAuth2AuthorizedClientManager

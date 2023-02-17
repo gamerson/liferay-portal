@@ -97,7 +97,7 @@ public class OAuth2ClientConfiguration {
 			).clientSecret(
 				clientSecret
 			).scope(
-				scope.split("\\s+")
+				scope.split("\\s*\n\\s*")
 			).authorizationGrantType(
 				AuthorizationGrantType.CLIENT_CREDENTIALS
 			).clientAuthenticationMethod(
@@ -133,7 +133,7 @@ public class OAuth2ClientConfiguration {
 		).clientSecret(
 			clientSecret
 		).scope(
-			serverScopes.split("\\s+")
+			serverScopes.split("\\s*\n\\s*")
 		).authorizationGrantType(
 			AuthorizationGrantType.CLIENT_CREDENTIALS
 		).clientAuthenticationMethod(
