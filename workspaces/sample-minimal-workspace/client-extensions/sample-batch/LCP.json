@@ -1,5 +1,9 @@
 {
 	"cpu": 0.2,
+	"env": {
+		"OAUTH2_JOB_PROFILE": "sample-batch-oauth-application-headless-server",
+		"CURL_FLAGS": "-v"
+	},
 	"environments": {
 		"infra": {
 			"deploy": false

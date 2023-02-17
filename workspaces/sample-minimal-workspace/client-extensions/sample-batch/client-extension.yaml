@@ -8,9 +8,3 @@ sample-batch-oauth-application-headless-server:
     - Liferay.Object.Admin.REST.everything
   type: oAuthApplicationHeadlessServer
   userAccountScreenName: test
-runtime:
-    env:
-    - name: OAUTH2_JOB_PROFILE
-      value: sample-batch-oauth-application-headless-server
-    - name: CURL_FLAGS
-      value: "-v"
