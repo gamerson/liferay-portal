@@ -1,2 +1,10 @@
 assemble:
     - include: "batch/*"
+batch:
+    oAuth2ApplicationExternalReferenceCode: sample-oauth-application-headless-server
+sample-oauth-application-headless-server:
+    ext.lxc.liferay.com.mainDomain: localhost
+    name: Sample OAuth Application Headless Server
+    scopes:
+        - Liferay.Headless.Admin.Workflow.everything
+    type: oAuthApplicationHeadlessServer
