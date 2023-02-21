@@ -27,6 +27,7 @@ import java.net.URI;
 import java.net.URL;
 
 import java.util.Enumeration;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.ZipEntry;
@@ -116,6 +117,12 @@ public class WarArtifactUrlTransformer implements FileInstaller {
 				ZipEntry zipEntry = enumeration.nextElement();
 
 				String name = zipEntry.getName();
+
+				if (Objects.equals(
+						name, "WEB-INF/liferay-plugin-package.properties")) {
+
+					return true;
+				}
 
 				if (name.endsWith(".client-extension-config.json") &&
 					(name.indexOf("/") == -1)) {
