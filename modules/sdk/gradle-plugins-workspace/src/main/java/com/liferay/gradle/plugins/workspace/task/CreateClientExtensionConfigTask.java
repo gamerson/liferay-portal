@@ -97,7 +97,7 @@ public class CreateClientExtensionConfigTask extends DefaultTask {
 		_clientExtensions.forEach(
 			clientExtension -> {
 				String pid = _clientExtensionProperties.getProperty(
-					clientExtension.type);
+					clientExtension.type + ".pid");
 
 				if (pid != null) {
 					jsonMap.putAll(clientExtension.toJSONMap(pid));

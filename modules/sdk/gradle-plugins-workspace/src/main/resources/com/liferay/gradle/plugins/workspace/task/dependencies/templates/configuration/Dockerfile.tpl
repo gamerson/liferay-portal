@@ -1,3 +1,3 @@
-FROM bash:latest
+# TODO Replace this with official version, LPS-176095
 
-ENTRYPOINT ["bash", "-c", "echo COMPLETED"]
+FROM gamerson/noop

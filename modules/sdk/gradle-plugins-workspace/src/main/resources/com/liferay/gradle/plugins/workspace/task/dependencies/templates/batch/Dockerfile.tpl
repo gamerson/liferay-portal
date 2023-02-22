@@ -2,7 +2,6 @@ FROM bash:latest
 
 COPY /batch /batch
 COPY job.sh /batch/job.sh
-COPY rootCA.pem .
 
 RUN \
 	apk add --no-cache curl jq tree && \
