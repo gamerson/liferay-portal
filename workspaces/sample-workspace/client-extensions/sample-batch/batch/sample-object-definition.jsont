@@ -23,6 +23,24 @@
 	],
 	"items": [
 		{
+			"actions": {
+        "permissions": {
+          "method": "PATCH",
+          "href": "https://dxp.lfr.dev/o/object-admin/v1.0/object-definitions/48480"
+        },
+        "get": {
+          "method": "GET",
+          "href": "https://dxp.lfr.dev/o/object-admin/v1.0/object-definitions/48480"
+        },
+        "update": {
+          "method": "PUT",
+          "href": "https://dxp.lfr.dev/o/object-admin/v1.0/object-definitions/48480"
+        },
+        "delete": {
+          "method": "DELETE",
+          "href": "https://dxp.lfr.dev/o/object-admin/v1.0/object-definitions/48480"
+        }
+      },
 			"accountEntryRestricted": false,
 			"accountEntryRestrictedObjectFieldName": "",
 			"active": true,

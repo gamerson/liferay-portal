@@ -6,7 +6,7 @@ set -e
 # OAUTH2_JOB_PROFILE sets the oauth profile to use
 
 LOCALDEV_CA_CERT="/etc/liferay/localdev/rootCA.pem"
-CURL_FLAGS="-v"
+
 if [ -f "$LOCALDEV_CA_CERT" ]; then
 	CA_CERT="--cacert $LOCALDEV_CA_CERT"
 else
