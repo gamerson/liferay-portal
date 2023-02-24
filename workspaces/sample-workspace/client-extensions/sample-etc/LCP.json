@@ -8,5 +8,10 @@
 	"id": "sampleetc",
 	"kind": "Deployment",
 	"memory": 512,
-	"scale": 1
+	"scale": 1,
+	"ports": [
+		{
+			"targetPort": 58081
+		}
+	]
 }
