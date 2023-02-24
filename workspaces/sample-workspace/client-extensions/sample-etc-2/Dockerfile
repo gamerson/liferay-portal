@@ -15,7 +15,7 @@ RUN \
 ENV TRUST_STORES=java
 ENV CAROOT=/var/lib/caroot
 
-#COPY *.pem /var/lib/caroot/
+# COPY *.pem /var/lib/caroot/
 
 RUN mkcert -install
 
