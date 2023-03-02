@@ -11,18 +11,20 @@ client extension that is registered by the `joke-service`.
 ### Deploy Joke App to local
 
 1. Go to `sample-markplace-apps-workspace`
-2. Run `./gradlew clean startDockerContainer logsDockerContainer
-3. Once portal starts up, go to the `joke-service` directory
-4. Run `./gradlew bootRun`
+1. Run `./gradlew clean startDockerContainer logsDockerContainer
+1. Once portal starts up, go to the `joke-service` directory
+1. Run `./gradlew bootRun`
 
 ### Deploy Joke to LXC
 
 1. Go to `sample-markplace-apps-workspace`
-2. Run `./gradlew clean build`
-3. Run `lcp login` to your LXC extension environment
-4. Run `lcp deploy --extension client-extensions/apps/joke-remote-app/dist/joke-remote-app.zip`
-5. Run `lcp deploy --extension client-extensions/apps/joke-service/dist/joke-service.zip`
+1. Run `./gradlew clean build`
+1. Run `lcp login` to your LXC extension environment
+1. Run `lcp deploy --extension client-extensions/apps/joke/joke-remote-app/dist/joke-remote-app.zip`
+1. Run `lcp deploy --extension client-extensions/apps/joke/joke-service/dist/joke-service.zip`
 
 ### Test Joke App in DXP
 
-
+1. Login to DXP after Joke App has been deployed
+1. On any page, add the `Joke Remote App widget`
+1. If user is logged in, it should show `Hello <User>` and then display a joke that was fetched from `joke-service`
