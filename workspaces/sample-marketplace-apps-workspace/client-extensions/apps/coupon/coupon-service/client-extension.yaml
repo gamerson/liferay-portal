@@ -8,9 +8,3 @@ coupon-updated-object-action:
   oAuth2ApplicationExternalReferenceCode: coupon-oauth-application-user-agent
   resourcePath: /coupon/updated
   type: objectAction
-
-runtime:
-  type: service
-  template: service-springboot
-  cpu: 500m
-  memory: 256Mi

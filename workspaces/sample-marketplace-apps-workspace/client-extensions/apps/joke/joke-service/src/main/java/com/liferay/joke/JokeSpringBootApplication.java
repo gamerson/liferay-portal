@@ -12,7 +12,7 @@
  * details.
  */
 
-package com.liferay.sample.minimal.workspace.joke;
+package com.liferay.joke;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
