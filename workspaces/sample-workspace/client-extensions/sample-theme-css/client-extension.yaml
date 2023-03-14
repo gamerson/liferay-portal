@@ -1,6 +1,8 @@
 assemble:
     - from: build/buildTheme
-      include: "css/*.css"
+      include:
+        - "css/*.css"
+        - "img/*"
       into: static
 sample-theme-css:
     clayURL: css/clay.css
