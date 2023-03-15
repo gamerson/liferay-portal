@@ -1,0 +1,34 @@
+load("ext://uibutton", "cmd_button", "text_input", "location")
+
+config.clear_enabled_resources()
+config.set_enabled_resources(['samplebatch', 'sampleetc', 'sampleetc2'])
+
+# this map will add additional build args to the dxp-server base image build
+# To see all buildargs seeSee
+# https://github.com/liferay/liferay-localdev/blob/main/docker/images/dxp-server/Dockerfile
+dxp_buildargs = {
+    "DXP_BASE_IMAGE": "gamerson/dxp:7.4.13.LOCALDEV-SNAPSHOT-20230224131526"
+}
+
+# This map will add additional ENV VARs to the dxp-server docker container
+# To see full list of ENV VARs supported see portal.properties for possible ENVs
+# https://github.com/liferay/liferay-portal/blob/master/portal-impl/src/portal.properties
+dxp_envs = {
+    #  "LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_DRIVER_UPPERCASEC_LASS_UPPERCASEN_AME": "org.hsqldb.jdbc.JDBCDriver",
+    #  "LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_URL": "${liferay.home}/data/hypersonic/lportal;hsqldb.lock_file=false,hsqldb.write_delay=false",
+    #  "LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_USERNAME": "sa",
+    #  "LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_PASSWORD:" "",
+}
+
+cmd_button(
+    "Debug DXP",
+    argv=[
+        "sh",
+        "-c",
+        "/repo/scripts/tilt/debugDxp.py $projectName",
+    ],
+    resource="dxp.lfr.dev",
+    icon_name="adb",
+    text="Debug DXP",
+    inputs=[text_input("projectName", "Debug project name", default="debugDxp")],
+)
