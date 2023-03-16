@@ -1,9 +1,17 @@
 assemble:
     - fromTask: bootJar
-sample-oauth-application-headless-server:
-    homePageURL: https://$[conf:ext.lxc.liferay.com.mainDomain]
-    name: Sample OAuth Application Headless Server
+    #- fromExec: './mvnw', 'clean', 'package', 'spring-boot:repackage'
+    #  include: target/sample-etc-2-*.jar
+sample-oauth-application-user-agent-2:
+    homePageURL: http://localhost:58082
+    #LXC version of homePageURL
+    #homePageURL: https://$[conf:ext.lxc.liferay.com.mainDomain]
+    name: Sample OAuth Application User Agent 2
     scopes:
-        - Liferay.Headless.Admin.User.everything.read
-        - Liferay.Headless.Delivery.everything
-    type: oAuthApplicationHeadlessServer
+        - Liferay.Headless.Admin.Workflow.everything
+    type: oAuthApplicationUserAgent
+sample-object-action-3:
+    name: Sample Object Action 3
+    oAuth2ApplicationExternalReferenceCode: sample-oauth-application-user-agent-2
+    resourcePath: /sample/object/action/3
+    type: objectAction

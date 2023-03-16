@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Title of the document</title>
+  <script>
+    var text = "I told you so!";
+  </script>
+  <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body>
+
+  <math xmlns="http://www.w3.org/1998/Math/MathML">
+    <mrow>
+      <msup>
+        <mi>a</mi>
+        <mn>2</mn>
+      </msup>
+      <mo>+</mo>
+      <msup>
+        <mi>b</mi>
+        <mn>2</mn>
+      </msup>
+      <mo>=</mo>
+      <msup>
+        <mi>c</mi>
+        <mn>2</mn>
+      </msup>
+    </mrow>
+  </math>
+
+  <!-- embed svg elements directly in HTML5 -->
+  <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="190">
+    <polygon points="100,10 40,180 190,60 10,60 160,180"
+      style="fill:lime;stroke:purple;stroke-width:5;fill-rule:evenodd;">
+  </svg>
+
+  <script>
+    document.write("<p>" + text + "</p>");
+    document.write("<p>" + text + "</p>");
+    document.write("<p>" + text + "</p>");
+  </script>
+</body>
+
+</html>

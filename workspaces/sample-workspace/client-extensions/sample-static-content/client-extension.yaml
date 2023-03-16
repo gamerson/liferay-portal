@@ -1,0 +1,8 @@
+assemble:
+    - from: assets
+      include: "**/*"
+      into: static
+sample-static-content:
+    name: Sample Static Content
+    type: staticContent
+    url: index.html

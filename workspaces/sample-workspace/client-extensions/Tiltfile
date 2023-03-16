@@ -1,7 +1,7 @@
 load("ext://uibutton", "cmd_button", "text_input", "location")
 
 config.clear_enabled_resources()
-config.set_enabled_resources(['samplebatch', 'sampleetc', 'sampleetc2'])
+config.set_enabled_resources(['sampleetc1', 'sampleetc2', 'sampleoauthapplicationheadlessserver', 'samplestaticcontent'])
 
 # this map will add additional build args to the dxp-server base image build
 # To see all buildargs seeSee

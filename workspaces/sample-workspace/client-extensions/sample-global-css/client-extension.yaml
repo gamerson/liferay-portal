@@ -1,6 +1,5 @@
 assemble:
     - from: assets
-      include: "**/*"
       into: static
 sample-global-css:
     name: Sample Global CSS

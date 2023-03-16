@@ -14,19 +14,24 @@
 
 package com.sample;
 
-import org.springframework.boot.SpringApplication;
+import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 
 /**
- * @author Raymond Augé
  * @author Gregory Amerson
- * @author Brian Wing Shun Chan
  */
 @SpringBootApplication
 public class SampleSpringBootApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(SampleSpringBootApplication.class, args);
+		new SpringApplicationBuilder(
+			SampleSpringBootApplication.class
+		).web(
+			WebApplicationType.NONE
+		).run(
+			args
+		);
 	}
 
 }

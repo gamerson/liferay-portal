@@ -12,21 +12,20 @@
  * details.
  */
 
-package com.sample;
-
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+package com.sample.util;
 
 /**
- * @author Raymond Augé
- * @author Gregory Amerson
- * @author Brian Wing Shun Chan
+ * @author Michael Hashimoto
  */
-@SpringBootApplication
-public class SampleSpringBootApplication {
+public class ThreadUtil {
 
-	public static void main(String[] args) {
-		SpringApplication.run(SampleSpringBootApplication.class, args);
+	public static void sleep(long millis) {
+		try {
+			Thread.sleep(millis);
+		}
+		catch (InterruptedException interruptedException) {
+			throw new RuntimeException(interruptedException);
+		}
 	}
 
 }

@@ -2,29 +2,29 @@ assemble:
     - fromTask: bootJar
 sample-notification-type-1:
     name: Sample Notification Type 1
-    oAuth2ApplicationExternalReferenceCode: sample-oauth-application-user-agent
+    oAuth2ApplicationExternalReferenceCode: sample-oauth-application-user-agent-1
     resourcePath: /sample/notification/type/1
     type: notificationType
-sample-oauth-application-user-agent:
+sample-oauth-application-user-agent-1:
     homePageURL: http://localhost:58081
     #LXC version of homePageURL
     #homePageURL: https://$[conf:ext.lxc.liferay.com.mainDomain]
-    name: Sample OAuth Application User Agent
+    name: Sample OAuth Application User Agent 1
     scopes:
         - Liferay.Headless.Admin.Workflow.everything
     type: oAuthApplicationUserAgent
 sample-object-action-1:
     name: Sample Object Action 1
-    oAuth2ApplicationExternalReferenceCode: sample-oauth-application-user-agent
+    oAuth2ApplicationExternalReferenceCode: sample-oauth-application-user-agent-1
     resourcePath: /sample/object/action/1
     type: objectAction
 sample-object-action-2:
     name: Sample Object Action 2
-    oAuth2ApplicationExternalReferenceCode: sample-oauth-application-user-agent
+    oAuth2ApplicationExternalReferenceCode: sample-oauth-application-user-agent-1
     resourcePath: /sample/object/action/2
     type: objectAction
 sample-workflow-action-1:
     name: Sample Workflow Action 1
-    oAuth2ApplicationExternalReferenceCode: sample-oauth-application-user-agent
+    oAuth2ApplicationExternalReferenceCode: sample-oauth-application-user-agent-1
     resourcePath: /sample/workflow/action/1
     type: workflowAction

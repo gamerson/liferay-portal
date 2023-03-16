@@ -1,0 +1,9 @@
+assemble:
+    - fromTask: bootJar
+sample-oauth-application-headless-server:
+    homePageURL: https://$[conf:ext.lxc.liferay.com.mainDomain]
+    name: Sample OAuth Application Headless Server
+    scopes:
+        - Liferay.Headless.Admin.User.everything.read
+        - Liferay.Headless.Delivery.everything
+    type: oAuthApplicationHeadlessServer

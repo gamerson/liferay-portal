@@ -84,9 +84,14 @@ public class SampleEnableWebSecurity {
 		DefaultJWTProcessor<SecurityContext> defaultJWTProcessor =
 			new DefaultJWTProcessor<>();
 
+			System.out.println(_dxpDomains);
+			System.out.println(_liferayOAuthApplicationExternalReferenceCode);
+			System.out.println(_mainDomain);
+			System.out.println(_serverProtocol);
+			System.out.println(new URL(_serverProtocol + "://" + _mainDomain + "/o/oauth2/jwks"));
 		defaultJWTProcessor.setJWSKeySelector(
 			JWSAlgorithmFamilyJWSKeySelector.fromJWKSetURL(
-				new URL(_protocol + "://" + _mainDomain + "/o/oauth2/jwks")));
+				new URL(_serverProtocol + "://" + _mainDomain + "/o/oauth2/jwks")));
 		defaultJWTProcessor.setJWSTypeVerifier(
 			new DefaultJOSEObjectTypeVerifier<>(new JOSEObjectType("at+jwt")));
 
@@ -144,7 +149,7 @@ public class SampleEnableWebSecurity {
 		while (true) {
 			try {
 				return WebClient.create(
-					_protocol + "://" + _mainDomain + "/o/oauth2/application"
+					_serverProtocol + "://" + _mainDomain + "/o/oauth2/application"
 				).get(
 				).uri(
 					uriBuilder -> uriBuilder.queryParam(
@@ -181,7 +186,7 @@ public class SampleEnableWebSecurity {
 	private String _mainDomain;
 
 	@Value("${com.liferay.lxc.dxp.server.protocol}")
-	private String _protocol;
+	private String _serverProtocol;
 
 	private static class ApplicationInfo {
 

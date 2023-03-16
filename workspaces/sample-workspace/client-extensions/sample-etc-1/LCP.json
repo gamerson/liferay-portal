@@ -5,7 +5,7 @@
 			"deploy": false
 		}
 	},
-	"id": "sampleetc",
+	"id": "sampleetc1",
 	"kind": "Deployment",
 	"memory": 512,
 	"ports": [

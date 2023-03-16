@@ -6,8 +6,12 @@
 		}
 	},
 	"id": "sampleetc2",
-	"kind": "CronJob",
-	"memory": 1024,
-	"scale": 1,
-	"schedule": "* * * * *"
+	"kind": "Deployment",
+	"memory": 512,
+	"ports": [
+		{
+			"targetPort": 58082
+		}
+	],
+	"scale": 1
 }
