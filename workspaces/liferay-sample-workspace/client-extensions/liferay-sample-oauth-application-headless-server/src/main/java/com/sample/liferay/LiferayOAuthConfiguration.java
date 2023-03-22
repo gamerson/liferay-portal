@@ -77,8 +77,6 @@ public class LiferayOAuthConfiguration {
 				_getClientId()
 			).clientSecret(
 				_clientSecret
-			).scope(
-				_serverScopes.split("\\s*\n\\s*")
 			).authorizationGrantType(
 				AuthorizationGrantType.CLIENT_CREDENTIALS
 			).clientAuthenticationMethod(
@@ -103,8 +101,6 @@ public class LiferayOAuthConfiguration {
 			_getClientId()
 		).clientSecret(
 			_clientSecret
-		).scope(
-			_serverScopes.split("\\s*\n\\s*")
 		).authorizationGrantType(
 			AuthorizationGrantType.CLIENT_CREDENTIALS
 		).clientAuthenticationMethod(
@@ -201,11 +197,6 @@ public class LiferayOAuthConfiguration {
 
 	@Value("${com.liferay.lxc.dxp.server.protocol}")
 	private String _serverProtocol;
-
-	@Value(
-		"${${liferay.oauth.application.external.reference.code}.oauth2.headless.server.scopes}"
-	)
-	private String _serverScopes;
 
 	@Value(
 		"${${liferay.oauth.application.external.reference.code}.oauth2.token.uri}"
