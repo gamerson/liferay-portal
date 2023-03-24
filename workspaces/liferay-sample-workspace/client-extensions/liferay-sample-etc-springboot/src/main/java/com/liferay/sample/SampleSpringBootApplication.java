@@ -14,14 +14,18 @@
 
 package com.liferay.sample;
 
+import com.liferay.client.extension.util.spring.ClientExtensionUtilSpringComponentScan;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Import;
 
 /**
  * @author Raymond Augé
  * @author Gregory Amerson
  * @author Brian Wing Shun Chan
  */
+@Import(ClientExtensionUtilSpringComponentScan.class)
 @SpringBootApplication
 public class SampleSpringBootApplication {
 

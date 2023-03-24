@@ -29,6 +29,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.security.oauth2.client.AuthorizedClientServiceOAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.OAuth2AuthorizeRequest;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
@@ -39,22 +40,17 @@ import org.springframework.stereotype.Component;
  * @author Gregory Amerson
  */
 @Component
+@ComponentScan("com.liferay.client.extension.util.spring")
 public class SampleJobRunner implements CommandLineRunner {
-
-	@Value("${liferay.oauth.application.external.reference.code}")
-	private String _liferayOAuthApplicationExternalReferenceCode;
-
-	@Value("${com.liferay.lxc.dxp.server.protocol}")
-	private String _dxpServerProtocol;
 
 	public void run(String... args) throws Exception {
 		OAuth2AuthorizedClient oAuth2AuthorizedClient =
 			_authorizedClientServiceOAuth2AuthorizedClientManager.authorize(
 				OAuth2AuthorizeRequest.withClientRegistrationId(
-			_liferayOAuthApplicationExternalReferenceCode
-		).principal(
-			"SampleJobRunner"
-		).build());
+					_liferayOAuthApplicationExternalReferenceCode
+				).principal(
+					"SampleJobRunner"
+				).build());
 
 		if (oAuth2AuthorizedClient == null) {
 			_log.error("Unable to get authorized client");
@@ -64,7 +60,7 @@ public class SampleJobRunner implements CommandLineRunner {
 
 		OAuth2AccessToken oAuth2AccessToken =
 			oAuth2AuthorizedClient.getAccessToken();
-		
+
 		System.out.println(
 			"Issued: " + oAuth2AccessToken.getIssuedAt() + ", Expires:" +
 				oAuth2AccessToken.getExpiresAt());
@@ -78,7 +74,16 @@ public class SampleJobRunner implements CommandLineRunner {
 		int port = 443;
 
 		if (mainDomainParts.length > 1) {
-			port = Integer.parseInt(mainDomainParts[1]);
+			String portString = mainDomainParts[1];
+
+			try {
+				port = Integer.parseInt(portString);
+			}
+			catch (NumberFormatException numberFormatException) {
+				_log.error(
+					"Unable to parse port from " + portString,
+					numberFormatException);
+			}
 		}
 
 		SiteResource siteResource = SiteResource.builder(
@@ -178,5 +183,11 @@ public class SampleJobRunner implements CommandLineRunner {
 
 	@Value("${com.liferay.lxc.dxp.mainDomain}")
 	private String _dxpMainDomain;
+
+	@Value("${com.liferay.lxc.dxp.server.protocol}")
+	private String _dxpServerProtocol;
+
+	@Value("${liferay.oauth.application.external.reference.code}")
+	private String _liferayOAuthApplicationExternalReferenceCode;
 
 }
