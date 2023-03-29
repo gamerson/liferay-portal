@@ -1,0 +1,15 @@
+{
+	"cpu": 1,
+	"environments": {
+		"infra": {
+			"deploy": false
+		}
+	},
+	"id": "liferaymarketplaceetc",
+	"kind": "Deployment",
+	"loadBalancer": {
+		"targetPort": 58081
+	},
+	"memory": 512,
+	"scale": 1
+}
