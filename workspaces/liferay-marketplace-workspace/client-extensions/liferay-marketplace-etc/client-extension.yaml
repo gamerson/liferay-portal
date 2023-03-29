@@ -1,0 +1,14 @@
+assemble:
+    - fromTask: bootJar
+liferay-marketplace-oauth-application-user-agent:
+    .serviceAddress: localhost:58081
+    .serviceScheme: http
+    name: Liferay Marketplace OAuth Application User Agent
+    scopes:
+        - Liferay.Headless.Admin.Workflow.everything
+    type: oAuthApplicationUserAgent
+liferay-marketplace-object-action-trial-add:
+    name: Liferay Marketplace Object Action Trial Add
+    oAuth2ApplicationExternalReferenceCode: liferay-marketplace-object-action-trial-add
+    resourcePath: /marketplace/trial
+    type: objectAction
