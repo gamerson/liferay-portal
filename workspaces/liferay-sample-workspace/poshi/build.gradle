@@ -1,10 +1,10 @@
 apply plugin: "com.liferay.poshi.runner"
 
-task liferayIsReady
+task waitForPortal
 
 afterEvaluate {
 	runPoshi {
-		dependsOn ":startDockerContainer", liferayIsReady
+		dependsOn ":startDockerContainer", waitForPortal
 		finalizedBy ":stopDockerContainer"
 	}
 }
@@ -13,30 +13,25 @@ dependencies {
 	poshiRunnerResources group: "com.liferay", name: "com.liferay.poshi.runner.resources", version: "latest.release"
 }
 
-liferayIsReady {
+waitForPortal {
 	doLast {
 		def portalUrl = "http://localhost:8080"
-		def max = 50
 		def sleep = 5000
 		def responseCode = -1
 
-		def attempts = 0
-		while (attempts < max) {
+		while (true) {
 			try {
-				responseCode = portalUrl.toURL().openConnection().responseCode
-				if (responseCode == 200) {
+				if (portalUrl.toURL().openConnection().responseCode == 200) {
 					println("Portal is up!")
 					break
 				}
 			}
-			catch (Throwable t) {
+			catch (Throwable throwable) {
 			}
-			attempts++
-			println("Try #$attempts failed. Response code is $responseCode. Sleeping...")
 			try {
 				Thread.sleep(sleep)
 			}
-			catch (InterruptedException ie) {
+			catch (Trowable throwable) {
 			}
 		}
 	}

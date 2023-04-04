@@ -1,6 +1,7 @@
 .DS_Store
 /bundles
 /poshi/poshi-ext.properties
+.angular
 bin
 build
 dist
