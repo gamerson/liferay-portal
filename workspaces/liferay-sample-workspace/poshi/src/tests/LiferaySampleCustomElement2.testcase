@@ -1,8 +1,8 @@
 definition {
 
 	@priority = 5
-	test Smoke {
-		property testray.main.component.name = "Liferay Sample Workspace";
+	test LiferaySampleCustomElement2 {
+		property testray.main.component.name = "Liferay Sample Custom Element 2";
 
 		var portalURL = PropsUtil.get("portal.url");
 

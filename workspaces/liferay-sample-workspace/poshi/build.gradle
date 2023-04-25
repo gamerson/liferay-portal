@@ -1,6 +1,34 @@
 apply plugin: "com.liferay.poshi.runner"
 
 task waitForPortal
+task runAllPoshiTests
+task runPoshiTestOne(type: PoshiTest)
+task runPoshiTestTwo(type: PoshiTest)
+task startClientExtensionOne(type: Exec)
+task startClientExtensionTwo(type: Exec)
+
+startClientExtensionOne {
+	commandLine "sh", "-c", "cd client-extension-one && npm install && npm start"
+}
+
+startClientExtensionOne {
+	commandLine "sh", "-c", "cd client-extension-two && gradle bootRun"
+}
+
+runPoshiTestOne {
+	dependsOn startClientExtensionOne
+	testName "SmokeTest#One"
+}
+
+runPoshiTestTwo {
+	dependsOn startClientExtensionTwo
+	testName "SmokeTest#Two"
+}
+
+runPoshiTestThree {
+	dependsOn startClientExtensioOne, startClientExtensionTwo
+	testName "SmokeTest#Two"
+}
 
 dependencies {
 	poshiRunnerResources group: "com.liferay", name: "com.liferay.poshi.runner.resources", version: "latest.release"
@@ -43,9 +71,10 @@ waitForPortal {
 	}
 }
 
+
 afterEvaluate {
-	runPoshi {
-		dependsOn waitForPortal
+	runAllPoshiTests {
+		dependsOn waitForPortal, runPoshiTestOne, runPoshiTestTwo
 		finalizedBy ":stopDockerContainer"
 	}
 }

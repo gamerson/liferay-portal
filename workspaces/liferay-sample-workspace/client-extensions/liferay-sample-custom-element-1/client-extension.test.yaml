@@ -1,0 +1,4 @@
+liferay-sample-custom-element-1:
+    properties:
+        foo: bar
+        fizz: buzz

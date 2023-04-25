@@ -1,0 +1,12 @@
+definition {
+
+	@priority = 5
+	test LiferaySampleCustomElement1 {
+		property testray.main.component.name = "Liferay Sample Custom Element 1";
+
+		var portalURL = PropsUtil.get("portal.url");
+
+		Default.Open(locator1 = ${portalURL});
+	}
+
+}
