@@ -42,29 +42,29 @@ app.get('/comic', async (req, res) => {
 
 const serverPort = config['server.port'];
 
-app.get('/sample/object/action/1', async (req, res) => {
+app.post('/sample/object/action/1', async (req, res) => {
 	log.info('User %s is authorized', req.jwt.username);
 	log.info('User scopes: ' + req.jwt.scope);
 
-	const json = requesty.body;
+	const json = req.body;
 	log.info(`json: ${JSON.stringify(json, null, '\t')}`);
 	res.status(200).send(json);
 });
 
-app.get('/sample/object/action/2', async (req, res) => {
+app.post('/sample/object/action/2', async (req, res) => {
 	log.info('User %s is authorized', req.jwt.username);
 	log.info('User scopes: ' + req.jwt.scope);
 
-	const json = requesty.body;
+	const json = req.body;
 	log.info(`json: ${JSON.stringify(json, null, '\t')}`);
 	res.status(200).send(json);
 });
 
-app.get('/sample/workflow/action/1', async (req, res) => {
+app.post('/sample/workflow/action/1', async (req, res) => {
 	log.info('User %s is authorized', req.jwt.username);
 	log.info('User scopes: ' + req.jwt.scope);
 
-	const json = requesty.body;
+	const json = req.body;
 	log.info(`json: ${JSON.stringify(json, null, '\t')}`);
 	res.status(200).send('OK');
 });
