@@ -1,5 +1,6 @@
 'use strict';
 
+import bodyParser from 'body-parser';
 import config from './util/configMap.js';
 import express from 'express';
 import fetch from 'node-fetch';
@@ -13,6 +14,7 @@ log.info(`config: ${JSON.stringify(config, null, '\t')}`);
 
 const app = express();
 
+app.use(bodyParser.json());
 app.use(corsWithReady);
 app.use(liferayJWT);
 
@@ -41,14 +43,29 @@ app.get('/comic', async (req, res) => {
 const serverPort = config['server.port'];
 
 app.get('/sample/object/action/1', async (req, res) => {
-	res.status(200).send('OK');
+	log.info('User %s is authorized', req.jwt.username);
+	log.info('User scopes: ' + req.jwt.scope);
+
+	const json = requesty.body;
+	log.info(`json: ${JSON.stringify(json, null, '\t')}`);
+	res.status(200).send(json);
 });
 
 app.get('/sample/object/action/2', async (req, res) => {
-	res.status(200).send('OK');
+	log.info('User %s is authorized', req.jwt.username);
+	log.info('User scopes: ' + req.jwt.scope);
+
+	const json = requesty.body;
+	log.info(`json: ${JSON.stringify(json, null, '\t')}`);
+	res.status(200).send(json);
 });
 
 app.get('/sample/workflow/action/1', async (req, res) => {
+	log.info('User %s is authorized', req.jwt.username);
+	log.info('User scopes: ' + req.jwt.scope);
+
+	const json = requesty.body;
+	log.info(`json: ${JSON.stringify(json, null, '\t')}`);
 	res.status(200).send('OK');
 });
 
