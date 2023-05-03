@@ -19,6 +19,7 @@ export default {
 	// Other
 	//
 
+	'configTreePath': '/etc/liferay/lxc',
 	'readyPath': '/ready',
 	'server.port': 3001,
 };

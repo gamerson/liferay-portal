@@ -1,7 +1,7 @@
 'use strict';
 
 import bodyParser from 'body-parser';
-import config from './util/configMap.js';
+import config from './util/configTreePath.js';
 import express from 'express';
 import fetch from 'node-fetch';
 import {

@@ -1,6 +1,6 @@
 'use strict';
 
-import config from './configMap.js';
+import config from './configTreePath.js';
 import cors from 'cors';
 import fetch from 'node-fetch';
 import {verify} from 'jsonwebtoken';

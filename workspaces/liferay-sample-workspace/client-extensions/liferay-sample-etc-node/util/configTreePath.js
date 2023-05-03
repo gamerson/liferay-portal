@@ -2,11 +2,11 @@ import config from '../config.js';
 import fs from 'fs';
 import path from 'path';
 
-const configTreePath = '/etc/liferay/lxc';
-
 async function* walk(dir) {
 	if (fs.existsSync(dir) === false) return;
-	for await (const dirent of await fs.promises.opendir(dir, { withFileTypes: true })) {
+	for await (const dirent of await fs.promises.opendir(dir, {
+		withFileTypes: true,
+	})) {
 		if (dirent.name.startsWith('..')) {
 			continue;
 		}
@@ -20,8 +20,8 @@ async function* walk(dir) {
 	}
 }
 
-const configMap = async () => {
-	for await (const configFile of walk(configTreePath)) {
+const configTreeMap = async () => {
+	for await (const configFile of walk(config.configTreePath)) {
 		const configFileName = configFile.substring(
 			configFile.lastIndexOf('/') + 1
 		);
@@ -30,4 +30,4 @@ const configMap = async () => {
 	return config;
 };
 
-export default await configMap();
+export default await configTreeMap();
