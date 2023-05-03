@@ -11,7 +11,7 @@ import HelloWorld from './routes/hello-world/pages/HelloWorld';
 
 import './common/styles/index.scss';
 
-const App = ({oAuth2Client1, oAuth2Client2, route}) => {
+const App = ({oAuth2ClientSpringBoot, oAuth2ClientNode, route}) => {
 	if (route === 'hello-bar') {
 		return <HelloBar />;
 	}
@@ -26,9 +26,9 @@ const App = ({oAuth2Client1, oAuth2Client2, route}) => {
 
 			{Liferay.ThemeDisplay.isSignedIn() && (
 				<div>
-					<DadJoke oAuth2Client={oAuth2Client1} />
+					<DadJoke oAuth2Client={oAuth2ClientSpringBoot} />
 					<hr />
-					<Comic oAuth2Client={oAuth2Client2} />
+					<Comic oAuth2Client={oAuth2ClientNode} />
 				</div>
 			)}
 		</div>
@@ -40,18 +40,20 @@ class WebComponent extends HTMLElement {
 		super();
 
 		try {
-			this.oAuth2Client1 = Liferay.OAuth2Client.FromUserAgentApplication(
-				'liferay-sample-spring-boot-oauth-application-user-agent'
-			);
+			this.oAuth2ClientSpringBoot =
+				Liferay.OAuth2Client.FromUserAgentApplication(
+					'liferay-sample-spring-boot-oauth-application-user-agent'
+				);
 		}
 		catch (error) {
 			console.log('Unable to get user agent application');
 		}
 
 		try {
-			this.oAuth2Client2 = Liferay.OAuth2Client.FromUserAgentApplication(
-				'liferay-sample-node-oauth-application-user-agent'
-			);
+			this.oAuth2ClientNode =
+				Liferay.OAuth2Client.FromUserAgentApplication(
+					'liferay-sample-node-oauth-application-user-agent'
+				);
 		}
 		catch (error) {
 			console.log('Unable to get node user agent application');
@@ -61,8 +63,8 @@ class WebComponent extends HTMLElement {
 	connectedCallback() {
 		createRoot(this).render(
 			<App
-				oAuth2Client1={this.oAuth2Client1}
-				oAuth2Client2={this.oAuth2Client2}
+				oAuth2ClientSpringBoot={this.oAuth2ClientSpringBoot}
+				oAuth2ClientNode={this.oAuth2ClientNode}
 				route={this.getAttribute('route')}
 			/>,
 			this
