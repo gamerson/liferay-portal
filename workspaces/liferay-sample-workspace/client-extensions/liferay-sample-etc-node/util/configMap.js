@@ -6,10 +6,17 @@ const configTreePath = '/etc/liferay/lxc';
 
 async function* walk(dir) {
 	if (fs.existsSync(dir) === false) return;
-	for await (const dirent of await fs.promises.opendir(dir)) {
+	for await (const dirent of await fs.promises.opendir(dir, { withFileTypes: true })) {
+		if (dirent.name.startsWith('..')) {
+			continue;
+		}
 		const entryPath = path.join(dir, dirent.name);
-		if (dirent.isDirectory()) yield* walk(entryPath);
-		else if (dirent.isFile()) yield entryPath;
+		if (dirent.isDirectory()) {
+			yield* walk(entryPath);
+		}
+		else {
+			yield entryPath;
+		}
 	}
 }
 
