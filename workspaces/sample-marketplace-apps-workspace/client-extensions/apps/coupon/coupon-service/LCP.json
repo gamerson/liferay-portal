@@ -1,0 +1,17 @@
+{
+	"cpu": 1,
+	"environments": {
+		"infra": {
+			"deploy": false
+		}
+	},
+	"id": "couponservice",
+	"kind": "Deployment",
+	"memory": 512,
+	"ports": [
+		{
+			"targetPort": 58082
+		}
+	],
+	"scale": 1
+}

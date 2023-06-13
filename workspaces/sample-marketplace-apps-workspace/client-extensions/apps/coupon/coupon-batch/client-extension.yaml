@@ -1,0 +1,12 @@
+assemble:
+    - include: "batch/*"
+batch:
+    oAuth2ApplicationExternalReferenceCode: coupon-oauth-application-headless-server
+coupon-oauth-application-headless-server:
+    ext.lxc.liferay.com.mainDomain: localhost
+    name: Coupon OAuth Application Headless Server
+    scopes:
+        - Liferay.Headless.Admin.Workflow.everything
+        - Liferay.Headless.Batch.Engine.everything
+        - Liferay.Object.Admin.REST.everything
+    type: oAuthApplicationHeadlessServer

@@ -1,0 +1,10 @@
+coupon-oauth-application-user-agent:
+  name: Coupon OAuth Application User Agent
+  scopes:
+    - C_Coupon.everything
+  type: oAuthApplicationUserAgent
+
+coupon-updated-object-action:
+  oAuth2ApplicationExternalReferenceCode: coupon-oauth-application-user-agent
+  resourcePath: /coupon/updated
+  type: objectAction
