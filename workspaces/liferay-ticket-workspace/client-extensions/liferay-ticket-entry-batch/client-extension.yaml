@@ -1,0 +1,15 @@
+assemble:
+    - from: batch
+      into: batch
+liferay-ticket-entry-batch:
+    name: Liferay Ticket Entry Batch
+    oAuthApplicationHeadlessServer: liferay-ticket-entry-batch-importer
+    type: batch
+liferay-ticket-entry-batch-importer:
+    .serviceAddress: localhost:8080
+    .serviceScheme: http
+    name: Liferay Ticket Entry Batch Importer Application
+    scopes:
+        - C_Ticket
+        - Liferay.Headless.Batch.Engine.everything
+    type: oAuthApplicationHeadlessServer
