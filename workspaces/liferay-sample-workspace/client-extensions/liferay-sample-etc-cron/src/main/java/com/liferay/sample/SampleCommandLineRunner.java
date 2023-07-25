@@ -12,6 +12,11 @@ import com.liferay.headless.delivery.client.pagination.Page;
 import com.liferay.headless.delivery.client.pagination.Pagination;
 import com.liferay.headless.delivery.client.resource.v1_0.MessageBoardThreadResource;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Collection;
 
 import org.apache.commons.logging.Log;
@@ -39,7 +44,42 @@ public class SampleCommandLineRunner implements CommandLineRunner {
 			_lxcDXPMainDomain, _lxcDXPServerProtocol
 		).build();
 
-		Site site = siteResource.getSiteByFriendlyUrlPath("guest");
+		String urlString = _lxcDXPServerProtocol + "://" + _lxcDXPMainDomain + "/o/headless-admin-user/v1.0/sites/by-friendly-url-path/guest";
+
+    try {
+ 						_log.info("urlString: " + urlString);
+            URL url = new URL(urlString);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+						conn.setRequestProperty("Authorization", "Bearer " + oAuth2AccessToken.getTokenValue());
+
+            int responseCode = conn.getResponseCode();
+						_log.info("Response Code: " + responseCode);
+
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                String inputLine;
+                StringBuilder response = new StringBuilder();
+
+                while ((inputLine = in.readLine()) != null) {
+                    response.append(inputLine);
+                }
+                in.close();
+
+								_log.info("Response Body: " + response.toString());
+            } else {
+								_log.error("GET request failed.");
+								_log.error("responseCode: " + responseCode);
+            }
+
+            conn.disconnect();
+        } catch (IOException e) {
+						_log.error(e);
+        }
+
+		java.util.logging.LogManager.getLogManager().getLogger("sun.net.www.protocol.http.HttpURLConnection").setLevel(java.util.logging.Level.ALL);
+
+		Site site = siteResource.getSiteByFriendlyUrlPath("/guest");
 
 		MessageBoardThreadResource messageBoardThreadResource =
 			MessageBoardThreadResource.builder(
