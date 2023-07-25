@@ -112,10 +112,6 @@ public class SampleCommandLineRunner implements CommandLineRunner {
 	private static final Log _log = LogFactory.getLog(
 		SampleCommandLineRunner.class);
 
-	@Autowired
-	private AuthorizedClientServiceOAuth2AuthorizedClientManager
-		_authorizedClientServiceOAuth2AuthorizedClientManager;
-
 	@Value("${com.liferay.lxc.dxp.mainDomain}")
 	private String _lxcDXPMainDomain;
 
