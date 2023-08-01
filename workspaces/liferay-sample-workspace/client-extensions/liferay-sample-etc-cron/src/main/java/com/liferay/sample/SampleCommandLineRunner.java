@@ -29,9 +29,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.security.oauth2.client.AuthorizedClientServiceOAuth2AuthorizedClientManager;
-import org.springframework.security.oauth2.client.OAuth2AuthorizeRequest;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.stereotype.Component;
 
@@ -43,33 +40,9 @@ public class SampleCommandLineRunner implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) throws Exception {
-		OAuth2AuthorizedClient oAuth2AuthorizedClient =
-			_authorizedClientServiceOAuth2AuthorizedClientManager.authorize(
-				OAuth2AuthorizeRequest.withClientRegistrationId(
-					"liferay-sample-etc-cron-oauth-application-headless-server"
-				).principal(
-					"SampleCommandLineRunner"
-				).build());
-
-		if (oAuth2AuthorizedClient == null) {
-			_log.error("Unable to get OAuth 2 authorized client");
-
-			return;
-		}
-
-		OAuth2AccessToken oAuth2AccessToken =
-			oAuth2AuthorizedClient.getAccessToken();
-
-		if (_log.isInfoEnabled()) {
-			_log.info("Issued: " + oAuth2AccessToken.getIssuedAt());
-			_log.info("Expires At: " + oAuth2AccessToken.getExpiresAt());
-			_log.info("Scopes: " + oAuth2AccessToken.getScopes());
-			_log.info("Token: " + oAuth2AccessToken.getTokenValue());
-		}
-
 		SiteResource siteResource = SiteResource.builder(
 		).bearerToken(
-			oAuth2AccessToken.getTokenValue()
+			_oAuth2AccessToken.getTokenValue()
 		).endpoint(
 			_lxcDXPMainDomain, _lxcDXPServerProtocol
 		).build();
@@ -79,7 +52,7 @@ public class SampleCommandLineRunner implements CommandLineRunner {
 		MessageBoardThreadResource messageBoardThreadResource =
 			MessageBoardThreadResource.builder(
 			).bearerToken(
-				oAuth2AccessToken.getTokenValue()
+				_oAuth2AccessToken.getTokenValue()
 			).endpoint(
 				_lxcDXPMainDomain, _lxcDXPServerProtocol
 			).build();
@@ -117,5 +90,8 @@ public class SampleCommandLineRunner implements CommandLineRunner {
 
 	@Value("${com.liferay.lxc.dxp.server.protocol}")
 	private String _lxcDXPServerProtocol;
+
+	@Autowired
+	private OAuth2AccessToken _oAuth2AccessToken;
 
 }
