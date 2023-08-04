@@ -93,7 +93,7 @@ public class LiferayRoutesEmmitterTest {
 	}
 
 	@Test
-	public void testDefaultDxpMetadata() throws Exception {
+	public void testDefaultDxpRoutes() throws Exception {
 		Path dxpMetadataPath = _liferayHomePath.resolve(
 			PropsUtil.get(PropsKeys.LIFERAY_ROUTES) + "/default/dxp");
 
@@ -172,7 +172,7 @@ public class LiferayRoutesEmmitterTest {
 	}
 
 	@Test
-	public void testProjectMetadata() throws Exception {
+	public void testProjectRoutes() throws Exception {
 		String projectName = RandomTestUtil.randomString();
 		String serviceId = RandomTestUtil.randomString();
 
@@ -229,7 +229,7 @@ public class LiferayRoutesEmmitterTest {
 	}
 
 	@Test
-	public void testVirtualInstanceDxpMetadata() throws Exception {
+	public void testVirtualInstanceDxpRoutes() throws Exception {
 		String webId = "foo.lxc.com";
 
 		_companyLocalService.addCompany(
