@@ -7,7 +7,6 @@ package com.liferay.portal.k8s.agent.internal;
 
 import com.liferay.osgi.util.service.Snapshot;
 import com.liferay.petra.string.CharPool;
-import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 import com.liferay.petra.string.StringUtil;
 import com.liferay.portal.k8s.agent.PortalK8sConfigMapModifier;
@@ -106,31 +105,28 @@ public class LiferayRoutesEmitter
 
 		if (binaryData.isEmpty() && data.isEmpty()) {
 			if (_log.isInfoEnabled()) {
-				_log.info(
-					StringBundler.concat(
-						"Config map does not exist and no data was supplied ",
-						"for ", configMapName, " resulting in no change"));
+				_log.info("Deleting routes data for " + configMapName);
 			}
 
 			try {
-				_deleteCXMetadata(configMapName, labels);
+				_deleteLiferayRoutes(configMapName, labels);
 			}
 			catch (Exception exception) {
 				_log.error(
-					"Could not delete configMap metadata " + configMapName,
+					"Could not delete routes data for " + configMapName,
 					exception);
 			}
 
-			return Result.UNCHANGED;
+			return Result.DELETED;
 		}
 
 		_updateForPortalLocalPort(data, _getPortalLocalPort());
 
 		try {
-			_writeCXMetadata(data, labels);
+			_writeLiferayRoutesData(data, labels);
 		}
 		catch (Exception exception) {
-			_log.error("Unable to write CX metadata", exception);
+			_log.error("Unable to write routes data", exception);
 		}
 
 		return Result.CREATED;
@@ -140,14 +136,14 @@ public class LiferayRoutesEmitter
 	public void portalLocalInetSocketAddressConfigured(
 		InetSocketAddress localInetSocketAddress, boolean secure) {
 
-		_updateDxpMetadata(secure);
+		_updateDxpRoutes(secure);
 	}
 
 	@Override
 	public void portalServerInetSocketAddressConfigured(
 		InetSocketAddress serverInetSocketAddress, boolean secure) {
 
-		_updateDxpMetadata(secure);
+		_updateDxpRoutes(secure);
 	}
 
 	@Activate
@@ -167,49 +163,6 @@ public class LiferayRoutesEmitter
 				_serviceRegistrations) {
 
 			serviceRegistration.unregister();
-		}
-	}
-
-	private void _deleteCXMetadata(
-			String configMapName, Map<String, String> labels)
-		throws Exception {
-
-		Path cxMetadataPath = _getCXMetadataPath();
-
-		String virtualInstanceId = labels.get(
-			"dxp.lxc.liferay.com/virtualInstanceId");
-
-		if ((cxMetadataPath == null) || (virtualInstanceId == null)) {
-			return;
-		}
-
-		if (Objects.equals(
-				virtualInstanceId, PropsValues.COMPANY_DEFAULT_WEB_ID)) {
-
-			virtualInstanceId = "default";
-		}
-
-		Path virtualInstanceIdPath = cxMetadataPath.resolve(virtualInstanceId);
-
-		Matcher matcher = _lxcDxpMetadataPattern.matcher(configMapName);
-
-		if (matcher.matches()) {
-			if (Files.exists(virtualInstanceIdPath)) {
-				_deleteFolder(virtualInstanceIdPath);
-			}
-		}
-		else {
-			matcher = _lxcExtInitMetadataPattern.matcher(configMapName);
-
-			String projectName = labels.get("ext.lxc.liferay.com/projectName");
-
-			if (matcher.matches() && (projectName != null)) {
-				Path projectPath = virtualInstanceIdPath.resolve(projectName);
-
-				if (Files.exists(projectPath)) {
-					_deleteFolder(projectPath);
-				}
-			}
 		}
 	}
 
@@ -249,24 +202,68 @@ public class LiferayRoutesEmitter
 			});
 	}
 
-	private Path _getCXMetadataPath() {
+	private void _deleteLiferayRoutes(
+			String configMapName, Map<String, String> labels)
+		throws Exception {
+
+		Path liferayRoutesPath = _getLiferayRoutesPath();
+
+		String virtualInstanceId = labels.get(
+			"dxp.lxc.liferay.com/virtualInstanceId");
+
+		if ((liferayRoutesPath == null) || (virtualInstanceId == null)) {
+			return;
+		}
+
+		if (Objects.equals(
+				virtualInstanceId, PropsValues.COMPANY_DEFAULT_WEB_ID)) {
+
+			virtualInstanceId = "default";
+		}
+
+		Path virtualInstanceIdPath = liferayRoutesPath.resolve(
+			virtualInstanceId);
+
+		Matcher matcher = _lxcDxpMetadataPattern.matcher(configMapName);
+
+		if (matcher.matches()) {
+			if (Files.exists(virtualInstanceIdPath)) {
+				_deleteFolder(virtualInstanceIdPath);
+			}
+		}
+		else {
+			matcher = _lxcExtInitMetadataPattern.matcher(configMapName);
+
+			String projectName = labels.get("ext.lxc.liferay.com/projectName");
+
+			if (matcher.matches() && (projectName != null)) {
+				Path projectPath = virtualInstanceIdPath.resolve(projectName);
+
+				if (Files.exists(projectPath)) {
+					_deleteFolder(projectPath);
+				}
+			}
+		}
+	}
+
+	private Path _getLiferayRoutesPath() {
 		String liferayHome = PropsValues.LIFERAY_HOME;
 
 		if (!FileUtil.exists(liferayHome)) {
 			return null;
 		}
 
-		Path cxMetadataPath = Paths.get(
+		Path liferayRoutesPath = Paths.get(
 			liferayHome, PropsValues.LIFERAY_ROUTES);
 
 		try {
-			cxMetadataPath = Files.createDirectories(cxMetadataPath);
+			liferayRoutesPath = Files.createDirectories(liferayRoutesPath);
 		}
 		catch (IOException ioException) {
-			_log.error("Could not create CX Metadata path", ioException);
+			_log.error("Could not create Liferay routes path", ioException);
 		}
 
-		return cxMetadataPath;
+		return liferayRoutesPath;
 	}
 
 	private int _getPortalLocalPort() {
@@ -284,10 +281,10 @@ public class LiferayRoutesEmitter
 		return webServerProtocol;
 	}
 
-	private void _updateDxpMetadata(boolean secure) {
+	private void _updateDxpRoutes(boolean secure) {
 		try {
 			Files.walkFileTree(
-				_getCXMetadataPath(),
+				_getLiferayRoutesPath(),
 				new SimpleFileVisitor<Path>() {
 
 					@Override
@@ -388,28 +385,13 @@ public class LiferayRoutesEmitter
 		}
 	}
 
-	private void _writeCXData(Path dataPath, Map<String, String> data) {
-		data.forEach(
-			(key, value) -> {
-				Path keyPath = dataPath.resolve(key);
-
-				try {
-					Files.write(
-						keyPath, value.getBytes(), StandardOpenOption.CREATE);
-				}
-				catch (IOException ioException) {
-					_log.error("Unable to write CX data", ioException);
-				}
-			});
-	}
-
-	private void _writeCXMetadata(
+	private void _writeLiferayRoutesData(
 			Map<String, String> data, Map<String, String> labels)
 		throws Exception {
 
-		Path cxMetadataPath = _getCXMetadataPath();
+		Path liferayRoutesPath = _getLiferayRoutesPath();
 
-		if (cxMetadataPath == null) {
+		if (liferayRoutesPath == null) {
 			return;
 		}
 
@@ -428,7 +410,8 @@ public class LiferayRoutesEmitter
 			virtualInstanceId = "default";
 		}
 
-		Path virtualInstanceIdPath = cxMetadataPath.resolve(virtualInstanceId);
+		Path virtualInstanceIdPath = liferayRoutesPath.resolve(
+			virtualInstanceId);
 
 		Files.createDirectories(virtualInstanceIdPath);
 
@@ -437,7 +420,7 @@ public class LiferayRoutesEmitter
 		if (Objects.equals(metadataType, "dxp")) {
 			Files.createDirectories(dxpMetadataPath);
 
-			_writeCXData(dxpMetadataPath, data);
+			_writeRoutesData(dxpMetadataPath, data);
 		}
 		else if (Objects.equals(metadataType, "ext-init")) {
 			String projectName = labels.get("ext.lxc.liferay.com/projectName");
@@ -446,8 +429,23 @@ public class LiferayRoutesEmitter
 
 			Files.createDirectories(projectPath);
 
-			_writeCXData(projectPath, data);
+			_writeRoutesData(projectPath, data);
 		}
+	}
+
+	private void _writeRoutesData(Path dataPath, Map<String, String> data) {
+		data.forEach(
+			(key, value) -> {
+				Path keyPath = dataPath.resolve(key);
+
+				try {
+					Files.write(
+						keyPath, value.getBytes(), StandardOpenOption.CREATE);
+				}
+				catch (IOException ioException) {
+					_log.error("Unable to write routes data", ioException);
+				}
+			});
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(
