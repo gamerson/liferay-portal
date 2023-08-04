@@ -109,7 +109,7 @@ public class LiferayRoutesEmitter
 			}
 
 			try {
-				_deleteLiferayRoutes(configMapName, labels);
+				_deleteLiferayRoutesData(configMapName, labels);
 			}
 			catch (Exception exception) {
 				_log.error(
@@ -202,7 +202,7 @@ public class LiferayRoutesEmitter
 			});
 	}
 
-	private void _deleteLiferayRoutes(
+	private void _deleteLiferayRoutesData(
 			String configMapName, Map<String, String> labels)
 		throws Exception {
 
@@ -293,8 +293,7 @@ public class LiferayRoutesEmitter
 						throws IOException {
 
 						if (Objects.equals(
-								String.valueOf(path.getFileName()),
-								"dxp-metadata")) {
+								String.valueOf(path.getFileName()), "dxp")) {
 
 							File dir = path.toFile();
 
@@ -334,7 +333,7 @@ public class LiferayRoutesEmitter
 				});
 		}
 		catch (IOException ioException) {
-			_log.error("Unable to update DXP Metadata", ioException);
+			_log.error("Unable to update DXP routes", ioException);
 		}
 	}
 
@@ -415,12 +414,12 @@ public class LiferayRoutesEmitter
 
 		Files.createDirectories(virtualInstanceIdPath);
 
-		Path dxpMetadataPath = virtualInstanceIdPath.resolve("dxp-metadata");
+		Path dxpRoutesPath = virtualInstanceIdPath.resolve("dxp");
 
 		if (Objects.equals(metadataType, "dxp")) {
-			Files.createDirectories(dxpMetadataPath);
+			Files.createDirectories(dxpRoutesPath);
 
-			_writeRoutesData(dxpMetadataPath, data);
+			_writeRoutesData(dxpRoutesPath, data);
 		}
 		else if (Objects.equals(metadataType, "ext-init")) {
 			String projectName = labels.get("ext.lxc.liferay.com/projectName");
