@@ -66,11 +66,6 @@ public class LiferayRoutesEmmitterTest {
 
 		_bundleContext = _bundle.getBundleContext();
 
-		_liferayHomePath = Paths.get(System.getProperty("liferay.home"));
-
-		Assert.assertTrue(
-			"liferay.home does not exist", Files.exists(_liferayHomePath));
-
 		_serviceTracker = new ServiceTracker<>(
 			_bundleContext, PortalK8sConfigMapModifier.class, null);
 
@@ -94,7 +89,7 @@ public class LiferayRoutesEmmitterTest {
 
 	@Test
 	public void testDefaultDxpRoutes() throws Exception {
-		Path dxpMetadataPath = _liferayHomePath.resolve(
+		Path dxpMetadataPath = Paths.get(
 			PropsUtil.get(PropsKeys.LIFERAY_ROUTES) + "/default/dxp");
 
 		Assert.assertTrue(
@@ -134,7 +129,7 @@ public class LiferayRoutesEmmitterTest {
 
 		_virtualHostLocalService.addVirtualHost(_virtualHost);
 
-		Path dxpMetadataPath = _liferayHomePath.resolve(
+		Path dxpMetadataPath = Paths.get(
 			StringBundler.concat(
 				PropsUtil.get(PropsKeys.LIFERAY_ROUTES), "/", webId, "/dxp"));
 
@@ -198,10 +193,8 @@ public class LiferayRoutesEmmitterTest {
 			},
 			configMapName);
 
-		Path projectMetadataPath = _liferayHomePath.resolve(
-			Paths.get(
-				PropsUtil.get(PropsKeys.LIFERAY_ROUTES) + "/default",
-				projectName));
+		Path projectMetadataPath = Paths.get(
+			PropsUtil.get(PropsKeys.LIFERAY_ROUTES) + "/default", projectName);
 
 		Assert.assertTrue(
 			projectMetadataPath.toString() + " should exist",
@@ -236,7 +229,7 @@ public class LiferayRoutesEmmitterTest {
 			null, webId, webId, webId, 0, true, null, null, null, null, null,
 			null);
 
-		Path dxpMetadataPath = _liferayHomePath.resolve(
+		Path dxpMetadataPath = Paths.get(
 			StringBundler.concat(
 				PropsUtil.get(PropsKeys.LIFERAY_ROUTES), "/", webId, "/dxp"));
 
@@ -266,8 +259,6 @@ public class LiferayRoutesEmmitterTest {
 
 	@Inject
 	private static CompanyLocalService _companyLocalService;
-
-	private static Path _liferayHomePath;
 
 	@Inject
 	private static PortalK8sConfigMapModifier _portalK8sConfigMapModifier;

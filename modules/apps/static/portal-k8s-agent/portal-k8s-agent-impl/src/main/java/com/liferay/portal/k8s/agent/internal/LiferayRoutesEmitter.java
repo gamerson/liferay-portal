@@ -253,8 +253,7 @@ public class LiferayRoutesEmitter
 			return null;
 		}
 
-		Path liferayRoutesPath = Paths.get(
-			liferayHome, PropsValues.LIFERAY_ROUTES);
+		Path liferayRoutesPath = Paths.get(PropsValues.LIFERAY_ROUTES);
 
 		try {
 			liferayRoutesPath = Files.createDirectories(liferayRoutesPath);
