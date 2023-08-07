@@ -413,9 +413,9 @@ public class LiferayRoutesEmitter
 
 		Files.createDirectories(virtualInstanceIdPath);
 
-		Path dxpRoutesPath = virtualInstanceIdPath.resolve("dxp");
-
 		if (Objects.equals(metadataType, "dxp")) {
+			Path dxpRoutesPath = virtualInstanceIdPath.resolve("dxp");
+
 			Files.createDirectories(dxpRoutesPath);
 
 			_writeRoutesData(dxpRoutesPath, data);

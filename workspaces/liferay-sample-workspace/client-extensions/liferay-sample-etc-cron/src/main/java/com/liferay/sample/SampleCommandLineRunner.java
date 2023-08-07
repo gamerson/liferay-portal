@@ -76,7 +76,7 @@ public class SampleCommandLineRunner implements CommandLineRunner {
 	private static final Log _log = LogFactory.getLog(
 		SampleCommandLineRunner.class);
 
-	@Value("${com.liferay.lxc.dxp.main.domain}")
+	@Value("${com.liferay.lxc.dxp.mainDomain}")
 	private String _lxcDXPMainDomain;
 
 	@Value("${com.liferay.lxc.dxp.server.protocol}")

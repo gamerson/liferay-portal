@@ -17,17 +17,6 @@ apply plugin: "com.liferay.source.formatter"
 apply plugin: "java"
 apply plugin: "org.springframework.boot"
 
-new File("${gradle.liferayWorkspace.homeDir}/routes/${virtualInstanceId}/${project.name}/").listFiles().each { file ->
-		println file.absolutePath
-		println file.name
-		println file.text
-	}
-	new File("${gradle.liferayWorkspace.homeDir}/routes/${virtualInstanceId}/dxp/").listFiles().each { file ->
-		println file.absolutePath
-		println file.name
-		println file.text
-	}
-
 bootRun {
 	String virtualInstanceId = project.hasProperty("virtualInstanceId") ? project.getProperty("virtualInstanceId") : "default"
 	environment "LIFERAY_ROUTES_CLIENT_EXTENSION", "${gradle.liferayWorkspace.homeDir}/routes/${virtualInstanceId}/${project.name}/"
