@@ -8,7 +8,6 @@
 		<attribute name="workspace.client.extension.name" />
 
 		<sequential>
-			<var name="workspace.name" unset="true" />
 			<var name="client.extension.deployed.id" unset="true" />
 
 			<propertyregex
@@ -17,6 +16,8 @@
 				regexp="[^a-zA-Z0-9\\s]"
 				replace=""
 			/>
+
+			<var name="workspace.name" unset="true" />
 
 			<propertyregex
 				input="@{workspace.client.extension.name}"
