@@ -183,7 +183,7 @@ let oAuth2Client;
 
 try {
 	oAuth2Client = Liferay.OAuth2Client.FromUserAgentApplication(
-		'liferay-sample-etc-spring-boot-oauth-application-user-agent'
+		'liferaySampleEtcSpringBootOauthApplicationUserAgent'
 	);
 }
 catch (error) {
