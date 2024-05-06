@@ -20,27 +20,15 @@ import com.liferay.portal.kernel.util.HashMapBuilder;
 
 import java.net.URL;
 
-import java.nio.charset.Charset;
-
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
-import org.apache.http.HttpStatus;
-import org.apache.http.StatusLine;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -219,56 +207,6 @@ public class TrialRestController extends BaseRestController {
 		).toString();
 	}
 
-	private String _getOAuthAuthorization() throws Exception {
-		if ((_oauthAccessToken != null) &&
-			(System.currentTimeMillis() < (_oauthExpirationMillis - 15000))) {
-
-			return _oauthAccessToken;
-		}
-
-		HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
-
-		HttpPost httpPost = new HttpPost(
-			new URL(_trialAuthURL) + "/o/oauth2/token");
-
-		httpPost.setEntity(
-			new UrlEncodedFormEntity(
-				Arrays.asList(
-					new BasicNameValuePair("client_id", _trialAuthClientId),
-					new BasicNameValuePair(
-						"client_secret", _trialAuthClientSecret),
-					new BasicNameValuePair(
-						"grant_type", "client_credentials"))));
-		httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
-
-		try (CloseableHttpClient closeableHttpClient =
-				httpClientBuilder.build();
-			CloseableHttpResponse closeableHttpResponse =
-				closeableHttpClient.execute(httpPost)) {
-
-			StatusLine statusLine = closeableHttpResponse.getStatusLine();
-
-			if (statusLine.getStatusCode() != HttpStatus.SC_OK) {
-				throw new Exception("Unable to get OAuth authorization");
-			}
-
-			JSONObject jsonObject = new JSONObject(
-				EntityUtils.toString(
-					closeableHttpResponse.getEntity(),
-					Charset.defaultCharset()));
-
-			_oauthExpirationMillis =
-				(jsonObject.getLong("expires_in") * 1000) +
-					System.currentTimeMillis();
-
-			_oauthAccessToken =
-				jsonObject.getString("token_type") + " " +
-					jsonObject.getString("access_token");
-
-			return _oauthAccessToken;
-		}
-	}
-
 	private PortalInstanceResource _getPortalInstanceResource()
 		throws Exception {
 
@@ -276,7 +214,9 @@ public class TrialRestController extends BaseRestController {
 		).endpoint(
 			new URL(_trialAuthURL)
 		).header(
-			HttpHeaders.AUTHORIZATION, _getOAuthAuthorization()
+			HttpHeaders.AUTHORIZATION,
+			_liferayOAuth2AccessTokenManager.getAuthorization(
+				"liferay-marketplace-trial-oauth-application-headless-server")
 		).build();
 	}
 
@@ -299,8 +239,7 @@ public class TrialRestController extends BaseRestController {
 		).header(
 			HttpHeaders.AUTHORIZATION,
 			_liferayOAuth2AccessTokenManager.getAuthorization(
-				"liferay-marketplace-etc-spring-boot-oauth-application-" +
-					"headless-server")
+				"liferay-marketplace-trial-oauth-application-headless-server")
 		).build();
 	}
 
@@ -467,8 +406,6 @@ public class TrialRestController extends BaseRestController {
 	@Autowired
 	private LiferayOAuth2AccessTokenManager _liferayOAuth2AccessTokenManager;
 
-	private String _oauthAccessToken;
-	private long _oauthExpirationMillis;
 	private OrderResource _orderResource;
 
 	@Value("${liferay.marketplace.trial.auth.client.id}")
