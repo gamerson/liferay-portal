@@ -250,7 +250,7 @@ public class LiferayOAuth2ResourceServerEnableWebSecurity {
 
 				try {
 					String issuer = new URL(
-						_lxcDXPMainDomain
+						_lxcDXPServerProtocol + "://" + _lxcDXPMainDomain
 					).getHost();
 
 					String jwksUri = _environment.getProperty(
