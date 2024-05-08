@@ -254,7 +254,11 @@ public class LiferayOAuth2ResourceServerEnableWebSecurity {
 					).getHost();
 
 					String jwksUri = _environment.getProperty(
-						externalReferenceCode + ".oauth2.jwks.uri", "");
+						externalReferenceCode + ".oauth2.jwks.uri");
+
+					if (jwksUri == null) {
+						continue;
+					}
 
 					if (jwksUri.contains("://")) {
 						issuer = new URL(
