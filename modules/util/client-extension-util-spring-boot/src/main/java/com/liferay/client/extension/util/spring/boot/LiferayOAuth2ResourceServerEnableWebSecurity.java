@@ -11,13 +11,16 @@ import com.nimbusds.jose.proc.JWSAlgorithmFamilyJWSKeySelector;
 import com.nimbusds.jose.proc.SecurityContext;
 import com.nimbusds.jwt.proc.DefaultJWTProcessor;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
@@ -28,17 +31,19 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationManagerResolver;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2TokenValidatorResult;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationProvider;
+import org.springframework.security.oauth2.server.resource.authentication.JwtIssuerAuthenticationManagerResolver;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -75,77 +80,6 @@ public class LiferayOAuth2ResourceServerEnableWebSecurity {
 	}
 
 	@Bean
-	public JwtDecoder jwtDecoder() throws Exception {
-		String liferayOauthApplicationExternalReferenceCodes =
-			_environment.getProperty(
-				"liferay.oauth.application.external.reference.codes");
-
-		if (liferayOauthApplicationExternalReferenceCodes == null) {
-			throw new IllegalArgumentException(
-				"Property " +
-					"\"liferay.oauth.application.external.reference.codes\" " +
-						"is not defined");
-		}
-
-		DefaultJWTProcessor<SecurityContext> defaultJWTProcessor =
-			new DefaultJWTProcessor<>();
-
-		URL jwkSetURL = new URL(
-			_lxcDXPServerProtocol + "://" + _lxcDXPMainDomain +
-				"/o/oauth2/jwks");
-
-		if (_log.isDebugEnabled()) {
-			_log.debug("Using " + jwkSetURL);
-		}
-
-		defaultJWTProcessor.setJWSKeySelector(
-			JWSAlgorithmFamilyJWSKeySelector.fromJWKSetURL(jwkSetURL));
-
-		defaultJWTProcessor.setJWSTypeVerifier(
-			new DefaultJOSEObjectTypeVerifier<>(new JOSEObjectType("at+jwt")));
-
-		NimbusJwtDecoder nimbusJwtDecoder = new NimbusJwtDecoder(
-			defaultJWTProcessor);
-
-		Set<String> clientIds = new HashSet<>();
-
-		for (String externalReferenceCode :
-				liferayOauthApplicationExternalReferenceCodes.split(",")) {
-
-			String clientId = _environment.getProperty(
-				externalReferenceCode + ".oauth2.user.agent.client.id");
-
-			long timeout = TimeUnit.MINUTES.toMillis(5);
-
-			while ((clientId == null) && (timeout > 0)) {
-				clientId = LiferayOAuth2Util.getClientId(
-					externalReferenceCode, _lxcDXPMainDomain,
-					_lxcDXPServerProtocol);
-
-				if (clientId == null) {
-					long sleep = TimeUnit.SECONDS.toMillis(1);
-
-					Thread.sleep(sleep);
-
-					timeout -= sleep;
-				}
-			}
-
-			clientIds.add(clientId);
-
-			if (_log.isInfoEnabled()) {
-				_log.info("Using client ID " + clientId);
-			}
-		}
-
-		nimbusJwtDecoder.setJwtValidator(
-			new DelegatingOAuth2TokenValidator<>(
-				new ClientIdOAuth2TokenValidator(clientIds)));
-
-		return nimbusJwtDecoder;
-	}
-
-	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity)
 		throws Exception {
 
@@ -164,7 +98,9 @@ public class LiferayOAuth2ResourceServerEnableWebSecurity {
 			).anyRequest(
 			).authenticated()
 		).oauth2ResourceServer(
-			OAuth2ResourceServerConfigurer::jwt
+			oauth2 -> oauth2.authenticationManagerResolver(
+				new JwtIssuerAuthenticationManagerResolver(
+					new LiferayAuthenticationManagerResolver()))
 		).build();
 	}
 
@@ -197,7 +133,7 @@ public class LiferayOAuth2ResourceServerEnableWebSecurity {
 	@Value("${com.liferay.lxc.dxp.server.protocol}")
 	private String _lxcDXPServerProtocol;
 
-	private class ClientIdOAuth2TokenValidator
+	private static class ClientIdOAuth2TokenValidator
 		implements OAuth2TokenValidator<Jwt> {
 
 		@Override
@@ -218,6 +154,141 @@ public class LiferayOAuth2ResourceServerEnableWebSecurity {
 		private final OAuth2Error _oAuth2Error = new OAuth2Error(
 			"invalid_token", "The client_id does not match", null);
 		private final Set<String> _validClientIds;
+
+	}
+
+	private class LiferayAuthenticationManagerResolver
+		implements AuthenticationManagerResolver<String> {
+
+		public LiferayAuthenticationManagerResolver() {
+			String liferayOauthApplicationExternalReferenceCodes =
+				_environment.getProperty(
+					"liferay.oauth.application.external.reference.codes");
+
+			if (liferayOauthApplicationExternalReferenceCodes == null) {
+				throw new IllegalArgumentException(
+					"\"liferay.oauth.application.external.reference.codes\" " +
+						"property is not defined");
+			}
+
+			for (String externalReferenceCode :
+					liferayOauthApplicationExternalReferenceCodes.split(",")) {
+
+				String jwksUri = _environment.getProperty(
+					externalReferenceCode + ".oauth2.jwks.uri");
+
+				if (jwksUri == null) {
+					continue;
+				}
+
+				try {
+					URL lxcDXPURL = new URL(
+						_lxcDXPServerProtocol + "://" + _lxcDXPMainDomain);
+
+					String issuer = lxcDXPURL.getHost();
+
+					if (jwksUri.contains("://")) {
+						URL jwksURL = new URL(jwksUri);
+
+						issuer = jwksURL.getHost();
+					}
+
+					addIssuer(externalReferenceCode, issuer);
+				}
+				catch (MalformedURLException malformedURLException) {
+					throw new RuntimeException(malformedURLException);
+				}
+			}
+		}
+
+		public void addIssuer(String externalReferenceCode, String issuer) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(
+					"Adding issuer " + issuer + " for " +
+						externalReferenceCode);
+			}
+
+			AuthenticationManager authenticationManager = authentication -> {
+				try {
+					String clientId = _environment.getProperty(
+						externalReferenceCode + ".oauth2.user.agent.client.id");
+
+					long timeout = TimeUnit.MINUTES.toMillis(5);
+
+					while ((clientId == null) && (timeout > 0)) {
+						clientId = LiferayOAuth2Util.getClientId(
+							externalReferenceCode, _lxcDXPMainDomain,
+							_lxcDXPServerProtocol);
+
+						if (clientId == null) {
+							long sleep = TimeUnit.SECONDS.toMillis(1);
+
+							try {
+								Thread.sleep(sleep);
+							}
+							catch (Exception exception) {
+								throw new RuntimeException(exception);
+							}
+
+							timeout -= sleep;
+						}
+					}
+
+					if (_log.isInfoEnabled()) {
+						_log.info("Using client ID " + clientId);
+					}
+
+					String jwksUri = _environment.getProperty(
+						externalReferenceCode + ".oauth2.jwks.uri",
+						"/o/oauth2/jwks");
+
+					if (!jwksUri.contains("://")) {
+						jwksUri =
+							_lxcDXPServerProtocol + "://" + _lxcDXPMainDomain +
+								jwksUri;
+					}
+
+					URL jwkURL = new URL(jwksUri);
+
+					DefaultJWTProcessor<SecurityContext> defaultJWTProcessor =
+						new DefaultJWTProcessor<>();
+
+					defaultJWTProcessor.setJWSKeySelector(
+						JWSAlgorithmFamilyJWSKeySelector.fromJWKSetURL(jwkURL));
+
+					defaultJWTProcessor.setJWSTypeVerifier(
+						new DefaultJOSEObjectTypeVerifier<>(
+							new JOSEObjectType("at+jwt")));
+
+					NimbusJwtDecoder nimbusJwtDecoder = new NimbusJwtDecoder(
+						defaultJWTProcessor);
+
+					nimbusJwtDecoder.setJwtValidator(
+						new DelegatingOAuth2TokenValidator<>(
+							new ClientIdOAuth2TokenValidator(
+								Collections.singleton(clientId))));
+
+					JwtAuthenticationProvider jwtAuthenticationProvider =
+						new JwtAuthenticationProvider(nimbusJwtDecoder);
+
+					return jwtAuthenticationProvider.authenticate(
+						authentication);
+				}
+				catch (Exception exception) {
+					throw new RuntimeException(exception);
+				}
+			};
+
+			_authenticationManagers.put(issuer, authenticationManager);
+		}
+
+		@Override
+		public AuthenticationManager resolve(String issuer) {
+			return _authenticationManagers.get(issuer);
+		}
+
+		private final Map<String, AuthenticationManager>
+			_authenticationManagers = new ConcurrentHashMap<>();
 
 	}
 
