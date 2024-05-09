@@ -1,0 +1,61 @@
+buildscript {
+	dependencies {
+		classpath group: "com.liferay", name: "com.liferay.gradle.plugins.defaults", version: "10.1.88"
+		classpath group: "org.springframework.boot", name: "spring-boot-gradle-plugin", version: "2.7.18"
+	}
+
+	repositories {
+		maven {
+			url new File(rootProject.projectDir, "../../.m2-tmp")
+		}
+
+		maven {
+			url "https://repository-cdn.liferay.com/nexus/content/groups/public"
+		}
+	}
+}
+
+apply plugin: "com.liferay.source.formatter"
+apply plugin: "java-library"
+apply plugin: "org.springframework.boot"
+
+bootRun {
+	environment "EXTERNAL_LIFERAY_OAUTH_USER_AGENT_OAUTH2_AUTHORIZATION_URI", "https://external.liferay.com/o/oauth2/authorize"
+	environment "EXTERNAL_LIFERAY_OAUTH_USER_AGENT_OAUTH2_INTROSPECTION_URI", "https://external.liferay.com/o/oauth2/introspect"
+	environment "EXTERNAL_LIFERAY_OAUTH_USER_AGENT_OAUTH2_JWKS_URI", "https://external.liferay.com/o/oauth2/jwks"
+	environment "EXTERNAL_LIFERAY_OAUTH_USER_AGENT_OAUTH2_REDIRECT_URI", "https://external.liferay.com/o/oauth2/redirect"
+	environment "EXTERNAL_LIFERAY_OAUTH_USER_AGENT_OAUTH2_TOKEN_URI", "https://external.liferay.com/o/oauth2/token"
+	environment "EXTERNAL_LIFERAY_OAUTH_USER_AGENT_OAUTH2_USER_AGENT_AUDIENCE", "http://localhost:58081"
+	environment "EXTERNAL_LIFERAY_OAUTH_USER_AGENT_OAUTH2_USER_AGENT_CLIENT_ID", "<user-agent-client-id>"
+	environment "EXTERNAL_LIFERAY_OAUTH_USER_AGENT_OAUTH2_USER_AGENT_HOME_PAGE_URI", "http://localhost:58081"
+	environment "EXTERNAL_LIFERAY_OAUTH_USER_AGENT_OAUTH2_USER_AGENT_SCOPES", "Liferay.Headless.Delivery.everything.read"
+
+	environment "EXTERNAL_LIFERAY_OAUTH_HEADLESS_SERVER_OAUTH2_HEADLESS_SERVER_CLIENT_ID", "<headless-server-client-id>"
+	environment "EXTERNAL_LIFERAY_OAUTH_HEADLESS_SERVER_OAUTH2_HEADLESS_SERVER_CLIENT_SECRET", "<headless-server-client-secret>"
+	environment "EXTERNAL_LIFERAY_OAUTH_HEADLESS_SERVER_OAUTH2_HEADLESS_SERVER_HOME_PAGE_URI", "https://external.liferay.com"
+	environment "EXTERNAL_LIFERAY_OAUTH_HEADLESS_SERVER_OAUTH2_TOKEN_URI", "https://external.liferay.com/o/oauth2/token"
+}
+
+dependencies {
+	implementation group: "com.liferay", name: "com.liferay.client.extension.util.spring.boot", version: "latest.release"
+	implementation group: "com.liferay", name: "com.liferay.headless.admin.user.client", version: "latest.release"
+	implementation group: "com.liferay", name: "com.liferay.headless.delivery.client", version: "latest.release"
+	implementation group: "com.liferay", name: "org.apache.commons.logging", version: "1.2.LIFERAY-PATCHED-2"
+	implementation group: "net.datafaker", name: "datafaker", version: "1.9.0"
+	implementation group: "org.json", name: "json", version: "20231013"
+	implementation group: "org.springframework.boot", name: "spring-boot-starter-oauth2-resource-server", version: "2.7.18"
+	implementation group: "org.springframework.boot", name: "spring-boot-starter-web", version: "2.7.18"
+	implementation group: "org.springframework.boot", name: "spring-boot-starter-webflux", version: "2.7.18"
+}
+
+repositories {
+	maven {
+		url new File(rootProject.projectDir, "../../.m2-tmp")
+	}
+
+	maven {
+		url "https://repository-cdn.liferay.com/nexus/content/groups/public"
+	}
+
+	mavenLocal()
+}
