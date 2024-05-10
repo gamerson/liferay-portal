@@ -15,7 +15,7 @@ const SAMPLES = [
 		bareSpecifier: 'jquery',
 		erc: 'LXC:liferay-sample-js-import-maps-entry',
 		name: 'Liferay Sample JS Import Maps Entry',
-		url: '/o/liferay-sample-js-import-maps-entry/jquery.db7c7063a8b5d1298dbc.js',
+		url: '/o/liferay-sample-js-import-maps-entry/jquery.62d686ddc1e428e249ff.js',
 	},
 	{
 		bareSpecifier: 'my-utils',
