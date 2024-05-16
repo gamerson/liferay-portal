@@ -16,6 +16,7 @@ import org.apache.cxf.rs.security.jose.jws.JwsHeaders;
 import org.apache.cxf.rs.security.jose.jws.JwsJwtCompactConsumer;
 import org.apache.cxf.rs.security.jose.jws.JwsSignatureVerifier;
 import org.apache.cxf.rs.security.jose.jws.JwsUtils;
+import org.apache.cxf.rs.security.jose.jwt.JwtClaims;
 import org.apache.cxf.rs.security.jose.jwt.JwtToken;
 
 import org.junit.Assert;
@@ -41,6 +42,23 @@ public class IssueJWTAccessTokenTest extends BaseTokenEndpointTestCase {
 	@Override
 	protected BundleActivator getBundleActivator() {
 		return new IssueJWTAccessTokenTestPreparatorBundleActivator();
+	}
+
+	@Test
+	public void testJWTClaimsDefaultIssuer() throws Exception {
+		String accessToken = getAccessToken(
+			new PasswordAuthorizationGrant("test@liferay.com", "test"),
+			clientAuthentications.get(TEST_CLIENT_ID_1));
+
+		JwsJwtCompactConsumer jwsJwtCompactConsumer = new JwsJwtCompactConsumer(
+			accessToken);
+
+		JwtToken jwtToken = jwsJwtCompactConsumer.getJwtToken();
+
+		JwtClaims jwtClaims =
+			jwtToken.getClaims();
+
+		Assert.assertEquals("localhost", jwtClaims.getIssuer());
 	}
 
 	private void _verifyJWTAccessToken(String jwtAccessToken) {

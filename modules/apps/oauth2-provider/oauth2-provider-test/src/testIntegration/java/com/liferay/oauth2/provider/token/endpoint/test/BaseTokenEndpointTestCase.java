@@ -41,6 +41,14 @@ import org.junit.runner.RunWith;
 @RunWith(Arquillian.class)
 public abstract class BaseTokenEndpointTestCase extends BaseClientTestCase {
 
+	public BaseTokenEndpointTestCase() {
+		this(_getInvocationBuilder());
+	}
+
+	public BaseTokenEndpointTestCase( Invocation.Builder invocationBuilder) {
+		_invocationBuilder = invocationBuilder;
+	}
+
 	@ClassRule
 	@Rule
 	public static final AggregateTestRule aggregateTestRule =
@@ -151,7 +159,6 @@ public abstract class BaseTokenEndpointTestCase extends BaseClientTestCase {
 			null, getTokenWebTarget(), Function.identity());
 	}
 
-	private static final Invocation.Builder _invocationBuilder =
-		_getInvocationBuilder();
+	private final Invocation.Builder _invocationBuilder;
 
 }

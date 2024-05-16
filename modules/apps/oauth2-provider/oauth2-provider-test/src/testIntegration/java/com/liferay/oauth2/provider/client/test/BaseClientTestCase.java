@@ -122,7 +122,13 @@ public abstract class BaseClientTestCase {
 		return webTarget.path("token");
 	}
 
+	private static final URI _baseURI = URI.create("http://localhost:8080");
+
 	protected static WebTarget getWebTarget() {
+		return getWebTarget(_baseURI);
+	}
+
+	protected static WebTarget getWebTarget(URI uri) {
 		ClientBuilder clientBuilder = new ClientBuilderImpl();
 
 		Client client = clientBuilder.build();
@@ -131,7 +137,7 @@ public abstract class BaseClientTestCase {
 
 		UriBuilder uriBuilder = runtimeDelegate.createUriBuilder();
 
-		return client.target(uriBuilder.uri("http://localhost:8080"));
+		return client.target(uriBuilder.uri(uri));
 	}
 
 	protected Invocation.Builder authorize(

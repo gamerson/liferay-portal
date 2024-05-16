@@ -168,9 +168,12 @@ public abstract class BaseTestPreparatorBundleActivator
 		return user;
 	}
 
-	protected Company createCompany(String hostName) throws PortalException {
-		String virtualHostname = hostName + ".xyz";
 
+	protected Company createCompany(String hostName) throws PortalException {
+		return createCompany(hostName, hostName + ".xyz");
+	}
+
+	protected Company createCompany(String hostName, String virtualHostname) throws PortalException {
 		Company company = CompanyLocalServiceUtil.addCompany(
 			null, hostName, virtualHostname, virtualHostname, 0, true, null,
 			null, null, null, null, null);
