@@ -39,7 +39,6 @@ import org.osgi.service.cm.ManagedServiceFactory;
  */
 public class ConfigurationTestUtil {
 
-
 	public static String createFactoryConfiguration(
 			String factoryPid, Dictionary<String, Object> properties)
 		throws Exception {
@@ -69,6 +68,22 @@ public class ConfigurationTestUtil {
 		if (configuration != null) {
 			_updateProperties(configuration, null);
 		}
+	}
+
+	public static String getFactoryConfiguration(
+			String factoryPid, String instanceName,
+			Dictionary<String, Object> properties)
+		throws Exception {
+
+		Configuration configuration = OSGiServiceUtil.callService(
+			_bundleContext, ConfigurationAdmin.class,
+			(ConfigurationAdmin configurationAdmin) ->
+				configurationAdmin.getFactoryConfiguration(
+					factoryPid, instanceName, StringPool.QUESTION));
+
+		_updateProperties(configuration, properties);
+
+		return configuration.getPid();
 	}
 
 	public static void saveConfiguration(
@@ -239,19 +254,6 @@ public class ConfigurationTestUtil {
 
 				return null;
 			});
-	}
-
-	public static String getFactoryConfiguration(String factoryPid, Dictionary<String, Object> properties) throws Exception {
-		Configuration configuration =
-			OSGiServiceUtil.callService(
-				_bundleContext, ConfigurationAdmin.class,
-				(ConfigurationAdmin configurationAdmin) ->
-					configurationAdmin.getFactoryConfiguration(
-						factoryPid, StringPool.QUESTION));
-
-		_updateProperties(configuration, properties);
-
-		return configuration.getPid();
 	}
 
 	private static void _updateProperties(
