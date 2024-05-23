@@ -375,21 +375,19 @@ public class LiferayOAuthDataProvider
 
 	public String getIssuer() {
 		try {
+			Company company = _companyLocalService.fetchCompany(
+				CompanyThreadLocal.getCompanyId());
+
+			if (company != null) {
+				return company.getVirtualHostname();
+			}
+
 			MessageContext messageContext = getMessageContext();
 
 			return _portal.getHost(messageContext.getHttpServletRequest());
 		}
 		catch (Exception exception) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(exception);
-			}
-
-			Company company = _companyLocalService.fetchCompany(
-				CompanyThreadLocal.getCompanyId());
-
-			if (company != null) {
-				return company.getWebId();
-			}
+			_log.error("Unable to get issuer", exception);
 		}
 
 		return null;
