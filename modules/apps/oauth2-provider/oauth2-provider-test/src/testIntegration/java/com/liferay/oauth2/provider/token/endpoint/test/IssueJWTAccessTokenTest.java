@@ -16,6 +16,7 @@ import org.apache.cxf.rs.security.jose.jws.JwsHeaders;
 import org.apache.cxf.rs.security.jose.jws.JwsJwtCompactConsumer;
 import org.apache.cxf.rs.security.jose.jws.JwsSignatureVerifier;
 import org.apache.cxf.rs.security.jose.jws.JwsUtils;
+import org.apache.cxf.rs.security.jose.jwt.JwtClaims;
 import org.apache.cxf.rs.security.jose.jwt.JwtToken;
 
 import org.junit.Assert;
@@ -59,6 +60,10 @@ public class IssueJWTAccessTokenTest extends BaseTokenEndpointTestCase {
 			jwsSignatureVerifier.verify(
 				jwsHeaders, jwsJwtCompactConsumer.getUnsignedEncodedSequence(),
 				jwsJwtCompactConsumer.getDecodedSignature()));
+
+		JwtClaims jwtClaims = jwtToken.getClaims();
+
+		Assert.assertEquals("localhost:8080", jwtClaims.getIssuer());
 	}
 
 	private static class IssueJWTAccessTokenTestPreparatorBundleActivator
