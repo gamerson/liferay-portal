@@ -1,4 +1,17 @@
+buildscript {
+        dependencies {
+                classpath group: "org.sonarsource.scanner.gradle", name: "sonarqube-gradle-plugin", version: "5.0.0.4638"
+        }
+
+        repositories {
+                maven {
+                        url "https://plugins.gradle.org/m2/"
+                }
+        }
+}
+
 apply plugin: "com.liferay.node"
+apply plugin: "org.sonarqube"
 
 createDockerContainer {
 	hostConfig.network = "host"
