@@ -6,11 +6,13 @@
 import ClayAlert from '@clayui/alert';
 import ClayButton from '@clayui/button';
 import {ClayInput} from '@clayui/form';
+import {useAtom} from 'jotai';
 import {useEffect, useState} from 'react';
 import {useForm} from 'react-hook-form';
 import {useNavigate, useOutletContext, useParams} from 'react-router-dom';
 import {KeyedMutator} from 'swr';
 import {withPagePermission} from '~/hoc/withPagePermission';
+import {taskSidebarRefresh} from '~/hooks/useSidebarTask';
 
 import Form from '../../components/Form';
 import Container from '../../components/Layout/Container';
@@ -54,9 +56,8 @@ const TestflowForm = () => {
 		form: {onClose, onError, onSubmit, onSuccess},
 	} = useFormActions();
 
-	const [modalType, setModalType] = useState<TestflowAssigUserType>(
-		'select-users'
-	);
+	const [modalType, setModalType] =
+		useState<TestflowAssigUserType>('select-users');
 	const [userIds, setUserIds] = useState<number[]>([]);
 	const {modal} = useFormModal({
 		onSave: setUserIds,
@@ -64,6 +65,7 @@ const TestflowForm = () => {
 	const {buildId, taskId} = useParams();
 	const {actions} = useTestFlowAssign({setUserIds});
 	const navigate = useNavigate();
+	const [, setTaskSidebarRefresh] = useAtom(taskSidebarRefresh);
 
 	const outletContext = useOutletContext<OutletContext>();
 
@@ -130,6 +132,8 @@ const TestflowForm = () => {
 
 				revalidateTaskUser();
 			}
+
+			setTaskSidebarRefresh(new Date().getTime());
 
 			onSuccess();
 

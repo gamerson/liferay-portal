@@ -17,7 +17,10 @@ import {
 } from 'frontend-js-components-web';
 import React, {useEffect, useState} from 'react';
 
-import {getCheckedChildren} from './rolesUtils';
+import {
+	getCheckedChildren,
+	handleMultiSelectRoleItemsChange,
+} from './rolesUtil';
 
 interface SecondaryRecipientsProps {
 	emailNotificationRoles: MultiSelectItem[];
@@ -37,22 +40,6 @@ export function SecondaryRecipient({
 	const [bccRolesList, setBCCRolesList] = useState<MultiSelectItem[]>([]);
 	const [ccRolesList, setCCRolesList] = useState<MultiSelectItem[]>([]);
 	const [recipient] = values.recipients as EmailRecipients[];
-
-	const handleMultiSelectItemsChange = (itemsGroup: MultiSelectItem[]) => {
-		const newRecipients: EmailNotificationRecipients[] = [];
-
-		if (itemsGroup.length) {
-			itemsGroup.forEach((itemGroup) => {
-				itemGroup.children.forEach((child) => {
-					if (child.checked) {
-						newRecipients.push({['roleName']: child.value});
-					}
-				});
-			});
-		}
-
-		return newRecipients;
-	};
 
 	useEffect(() => {
 		if (emailNotificationRoles.length && !ccRolesList.length) {
@@ -175,9 +162,10 @@ export function SecondaryRecipient({
 										'type-email-address'
 									)}
 									value={
-										(values
-											.recipients[0] as EmailRecipients)
-											.cc as string
+										(
+											values
+												.recipients[0] as EmailRecipients
+										).cc as string
 									}
 								/>
 							)}
@@ -198,9 +186,11 @@ export function SecondaryRecipient({
 										)}
 										selectAllOption
 										setOptions={(items) => {
-											const newRecipients = handleMultiSelectItemsChange(
-												items
-											);
+											const newRecipients =
+												handleMultiSelectRoleItemsChange(
+													items
+												);
+
 											setValues({
 												...values,
 												recipients: [
@@ -210,6 +200,7 @@ export function SecondaryRecipient({
 													},
 												],
 											});
+
 											setCCRolesList(items);
 										}}
 									/>
@@ -291,9 +282,10 @@ export function SecondaryRecipient({
 										'type-email-address'
 									)}
 									value={
-										(values
-											.recipients[0] as EmailRecipients)
-											.bcc as string
+										(
+											values
+												.recipients[0] as EmailRecipients
+										).bcc as string
 									}
 								/>
 							)}
@@ -314,9 +306,11 @@ export function SecondaryRecipient({
 										)}
 										selectAllOption
 										setOptions={(items) => {
-											const newRecipients = handleMultiSelectItemsChange(
-												items
-											);
+											const newRecipients =
+												handleMultiSelectRoleItemsChange(
+													items
+												);
+
 											setValues({
 												...values,
 												recipients: [
@@ -326,6 +320,7 @@ export function SecondaryRecipient({
 													},
 												],
 											});
+
 											setBCCRolesList(items);
 										}}
 									/>

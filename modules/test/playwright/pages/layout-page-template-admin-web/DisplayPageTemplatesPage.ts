@@ -27,26 +27,45 @@ export class DisplayPageTemplatesPage {
 		);
 	}
 
-	async publishNewTemplate(name: string) {
+	async publishNewTemplate({
+		contentSubtype,
+		contentType,
+		name,
+	}: {
+		contentSubtype?: string;
+		contentType: string;
+		name: string;
+	}) {
 		await this.newButton.click();
 		await this.page.getByRole('button', {name: 'Blank'}).click();
-		await this.page.getByLabel('Name').fill(name);
+		await this.page.getByLabel('Name', {exact: true}).fill(name);
 		await this.page
 			.getByLabel('Content Type')
-			.selectOption({label: 'Web Content Article'});
-		await this.page
-			.getByLabel('Subtype')
-			.selectOption({label: 'Basic Web Content'});
+			.selectOption({label: contentType});
+
+		if (contentSubtype) {
+			await this.page
+				.getByLabel('Subtype')
+				.selectOption({label: contentSubtype});
+		}
+
 		await this.page.getByRole('button', {name: 'Save'}).click();
+
+		await waitForSuccessAlert(
+			this.page,
+			'Success:The display page template was created successfully.'
+		);
+
 		await this.publishButton.waitFor();
 		await this.publishButton.click();
+
 		await waitForSuccessAlert(
 			this.page,
 			'Success:The display page template was published successfully.'
 		);
 	}
 
-	async clickMoreActions(name: string) {
+	private async clickMoreActions(name: string) {
 		await this.page
 			.locator(
 				'#_com_liferay_layout_page_template_admin_web_portlet_LayoutPageTemplatesPortlet_displayPagesSearchContainer .card-page-item'
@@ -56,10 +75,38 @@ export class DisplayPageTemplatesPage {
 			.click();
 	}
 
+	async deleteAllDisplayPageTemplates() {
+		await this.page
+			.getByLabel('Select All Items on the Page')
+			.setChecked(true);
+
+		await this.page.getByRole('button', {name: 'Delete'}).click();
+
+		await this.page
+			.getByLabel('Delete Entries- Loading')
+			.getByRole('button', {name: 'Delete'})
+			.click();
+	}
+
+	async editTemplate(name: string) {
+		await this.clickMoreActions(name);
+
+		await this.page
+			.getByRole('menuitem', {
+				exact: true,
+				name: 'Edit',
+			})
+			.click();
+
+		await this.page
+			.getByText('Select a Page Element', {exact: true})
+			.waitFor();
+	}
+
 	async markAsDefault(name: string) {
 		await this.clickMoreActions(name);
 
-		await this.page.once('dialog', (dialog) => {
+		this.page.once('dialog', (dialog) => {
 			dialog.accept().catch(() => {});
 		});
 

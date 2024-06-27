@@ -10,9 +10,11 @@ import React, {useState} from 'react';
 import {FUZZY_OPTIONS} from '../../utils/constants';
 
 export default function RESTEndpointDropdownMenu({
+	className,
 	onItemClick,
 	restEndpoints: initialRESTEndpoints,
 }: {
+	className?: string;
 	onItemClick: Function;
 	restEndpoints: Array<string>;
 }) {
@@ -30,7 +32,7 @@ export default function RESTEndpointDropdownMenu({
 			query
 				? initialRESTEndpoints.filter((restEndpoint) => {
 						return restEndpoint.match(regexp);
-				  }) || []
+					}) || []
 				: initialRESTEndpoints
 		);
 	};
@@ -39,6 +41,7 @@ export default function RESTEndpointDropdownMenu({
 		<>
 			<ClayDropDown.Search
 				aria-label={Liferay.Language.get('search')}
+				className={className}
 				onChange={onSearch}
 				value={query}
 			/>

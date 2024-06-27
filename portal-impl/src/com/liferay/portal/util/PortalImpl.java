@@ -48,6 +48,7 @@ import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.language.constants.LanguageConstants;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.login.AuthLoginGroupSettingsUtil;
 import com.liferay.portal.kernel.model.AuditedModel;
 import com.liferay.portal.kernel.model.BaseModel;
 import com.liferay.portal.kernel.model.ClassName;
@@ -116,6 +117,7 @@ import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.PermissionCheckerFactoryUtil;
+import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
 import com.liferay.portal.kernel.security.permission.ResourceActionsUtil;
 import com.liferay.portal.kernel.service.ClassNameLocalServiceUtil;
 import com.liferay.portal.kernel.service.CompanyLocalServiceUtil;
@@ -1054,8 +1056,24 @@ public class PortalImpl implements Portal {
 		Layout layout = null;
 
 		if (Validator.isNull(friendlyURL)) {
-			layout = LayoutServiceUtil.fetchFirstLayout(
-				groupId, privateLayout, true);
+			if (AuthLoginGroupSettingsUtil.isPromptEnabled(groupId) &&
+				!_isSignedIn(
+					(HttpServletRequest)requestContext.get("request"))) {
+
+				// Ensure that virtual layouts are merged. See LPS-42222.
+
+				List<Layout> layouts = LayoutLocalServiceUtil.getLayouts(
+					groupId, privateLayout,
+					LayoutConstants.DEFAULT_PARENT_LAYOUT_ID, true, 0, 1);
+
+				if (!layouts.isEmpty()) {
+					layout = layouts.get(0);
+				}
+			}
+			else {
+				layout = LayoutServiceUtil.fetchFirstLayout(
+					groupId, privateLayout, true);
+			}
 
 			if (layout == null) {
 				throw new NoSuchLayoutException(
@@ -2372,7 +2390,11 @@ public class PortalImpl implements Portal {
 	public String getHost(HttpServletRequest httpServletRequest) {
 		httpServletRequest = getOriginalServletRequest(httpServletRequest);
 
-		String host = httpServletRequest.getServerName();
+		String host = httpServletRequest.getHeader("Host");
+
+		if (Validator.isNull(host)) {
+			host = httpServletRequest.getServerName();
+		}
 
 		if (host != null) {
 			host = StringUtil.toLowerCase(host.trim());
@@ -5441,64 +5463,6 @@ public class PortalImpl implements Portal {
 	}
 
 	@Override
-	public void initCustomSQL() {
-		_customSqlKeys = new String[] {
-			"[$CLASS_NAME_ID_COM.LIFERAY.PORTAL.MODEL.GROUP$]",
-			"[$CLASS_NAME_ID_COM.LIFERAY.PORTAL.MODEL.LAYOUT$]",
-			"[$CLASS_NAME_ID_COM.LIFERAY.PORTAL.MODEL.ORGANIZATION$]",
-			"[$CLASS_NAME_ID_COM.LIFERAY.PORTAL.MODEL.ROLE$]",
-			"[$CLASS_NAME_ID_COM.LIFERAY.PORTAL.MODEL.TEAM$]",
-			"[$CLASS_NAME_ID_COM.LIFERAY.PORTAL.MODEL.USER$]",
-			"[$CLASS_NAME_ID_COM.LIFERAY.PORTAL.MODEL.USERGROUP$]",
-			"[$CLASS_NAME_ID_COM.LIFERAY.PORTLET.DOCUMENTLIBRARY.MODEL." +
-				"DLFILEENTRY$]",
-			"[$CLASS_NAME_ID_COM.LIFERAY.PORTLET.DOCUMENTLIBRARY.MODEL." +
-				"DLFOLDER$]",
-			"[$RESOURCE_SCOPE_COMPANY$]", "[$RESOURCE_SCOPE_GROUP$]",
-			"[$RESOURCE_SCOPE_GROUP_TEMPLATE$]",
-			"[$RESOURCE_SCOPE_INDIVIDUAL$]",
-			"[$SOCIAL_RELATION_TYPE_BI_COWORKER$]",
-			"[$SOCIAL_RELATION_TYPE_BI_FRIEND$]",
-			"[$SOCIAL_RELATION_TYPE_BI_ROMANTIC_PARTNER$]",
-			"[$SOCIAL_RELATION_TYPE_BI_SIBLING$]",
-			"[$SOCIAL_RELATION_TYPE_BI_SPOUSE$]",
-			"[$SOCIAL_RELATION_TYPE_UNI_CHILD$]",
-			"[$SOCIAL_RELATION_TYPE_UNI_ENEMY$]",
-			"[$SOCIAL_RELATION_TYPE_UNI_FOLLOWER$]",
-			"[$SOCIAL_RELATION_TYPE_UNI_PARENT$]",
-			"[$SOCIAL_RELATION_TYPE_UNI_SUBORDINATE$]",
-			"[$SOCIAL_RELATION_TYPE_UNI_SUPERVISOR$]", "[$FALSE$]", "[$TRUE$]"
-		};
-
-		DB db = DBManagerUtil.getDB();
-
-		_customSqlValues = ArrayUtil.toStringArray(
-			new Object[] {
-				getClassNameId(Group.class), getClassNameId(Layout.class),
-				getClassNameId(Organization.class), getClassNameId(Role.class),
-				getClassNameId(Team.class), getClassNameId(User.class),
-				getClassNameId(UserGroup.class),
-				getClassNameId(DLFileEntry.class),
-				getClassNameId(DLFolder.class), ResourceConstants.SCOPE_COMPANY,
-				ResourceConstants.SCOPE_GROUP,
-				ResourceConstants.SCOPE_GROUP_TEMPLATE,
-				ResourceConstants.SCOPE_INDIVIDUAL,
-				SocialRelationConstants.TYPE_BI_COWORKER,
-				SocialRelationConstants.TYPE_BI_FRIEND,
-				SocialRelationConstants.TYPE_BI_ROMANTIC_PARTNER,
-				SocialRelationConstants.TYPE_BI_SIBLING,
-				SocialRelationConstants.TYPE_BI_SPOUSE,
-				SocialRelationConstants.TYPE_UNI_CHILD,
-				SocialRelationConstants.TYPE_UNI_ENEMY,
-				SocialRelationConstants.TYPE_UNI_FOLLOWER,
-				SocialRelationConstants.TYPE_UNI_PARENT,
-				SocialRelationConstants.TYPE_UNI_SUBORDINATE,
-				SocialRelationConstants.TYPE_UNI_SUPERVISOR,
-				db.getTemplateFalse(), db.getTemplateTrue()
-			});
-	}
-
-	@Override
 	public User initUser(HttpServletRequest httpServletRequest)
 		throws Exception {
 
@@ -6265,11 +6229,33 @@ public class PortalImpl implements Portal {
 
 	@Override
 	public String transformCustomSQL(String sql) {
-		if ((_customSqlKeys == null) || (_customSqlValues == null)) {
-			initCustomSQL();
-		}
+		DB db = DBManagerUtil.getDB();
 
-		return StringUtil.replace(sql, _customSqlKeys, _customSqlValues);
+		return StringUtil.replace(
+			sql, _CUSTOM_SQL_KEYS,
+			new Object[] {
+				getClassNameId(Group.class), getClassNameId(Layout.class),
+				getClassNameId(Organization.class), getClassNameId(Role.class),
+				getClassNameId(Team.class), getClassNameId(User.class),
+				getClassNameId(UserGroup.class),
+				getClassNameId(DLFileEntry.class),
+				getClassNameId(DLFolder.class), ResourceConstants.SCOPE_COMPANY,
+				ResourceConstants.SCOPE_GROUP,
+				ResourceConstants.SCOPE_GROUP_TEMPLATE,
+				ResourceConstants.SCOPE_INDIVIDUAL,
+				SocialRelationConstants.TYPE_BI_COWORKER,
+				SocialRelationConstants.TYPE_BI_FRIEND,
+				SocialRelationConstants.TYPE_BI_ROMANTIC_PARTNER,
+				SocialRelationConstants.TYPE_BI_SIBLING,
+				SocialRelationConstants.TYPE_BI_SPOUSE,
+				SocialRelationConstants.TYPE_UNI_CHILD,
+				SocialRelationConstants.TYPE_UNI_ENEMY,
+				SocialRelationConstants.TYPE_UNI_FOLLOWER,
+				SocialRelationConstants.TYPE_UNI_PARENT,
+				SocialRelationConstants.TYPE_UNI_SUBORDINATE,
+				SocialRelationConstants.TYPE_UNI_SUPERVISOR,
+				db.getTemplateFalse(), db.getTemplateTrue()
+			});
 	}
 
 	@Override
@@ -8000,6 +7986,32 @@ public class PortalImpl implements Portal {
 		return virtualHostnames.firstKey();
 	}
 
+	private boolean _isSignedIn(HttpServletRequest httpServletRequest) {
+		PermissionChecker permissionChecker =
+			PermissionThreadLocal.getPermissionChecker();
+
+		if (permissionChecker != null) {
+			return permissionChecker.isSignedIn();
+		}
+
+		User user = null;
+
+		try {
+			user = getUser(httpServletRequest);
+		}
+		catch (PortalException portalException) {
+			if (_log.isWarnEnabled()) {
+				_log.warn(portalException);
+			}
+		}
+
+		if ((user == null) || user.isGuestUser()) {
+			return false;
+		}
+
+		return true;
+	}
+
 	private boolean _layoutContainsPortletId(Layout layout, String portletId) {
 		LayoutTypePortlet layoutTypePortlet =
 			(LayoutTypePortlet)layout.getLayoutType();
@@ -8038,6 +8050,32 @@ public class PortalImpl implements Portal {
 
 		return false;
 	}
+
+	private static final String[] _CUSTOM_SQL_KEYS = {
+		"[$CLASS_NAME_ID_COM.LIFERAY.PORTAL.MODEL.GROUP$]",
+		"[$CLASS_NAME_ID_COM.LIFERAY.PORTAL.MODEL.LAYOUT$]",
+		"[$CLASS_NAME_ID_COM.LIFERAY.PORTAL.MODEL.ORGANIZATION$]",
+		"[$CLASS_NAME_ID_COM.LIFERAY.PORTAL.MODEL.ROLE$]",
+		"[$CLASS_NAME_ID_COM.LIFERAY.PORTAL.MODEL.TEAM$]",
+		"[$CLASS_NAME_ID_COM.LIFERAY.PORTAL.MODEL.USER$]",
+		"[$CLASS_NAME_ID_COM.LIFERAY.PORTAL.MODEL.USERGROUP$]",
+		"[$CLASS_NAME_ID_COM.LIFERAY.PORTLET.DOCUMENTLIBRARY.MODEL." +
+			"DLFILEENTRY$]",
+		"[$CLASS_NAME_ID_COM.LIFERAY.PORTLET.DOCUMENTLIBRARY.MODEL.DLFOLDER$]",
+		"[$RESOURCE_SCOPE_COMPANY$]", "[$RESOURCE_SCOPE_GROUP$]",
+		"[$RESOURCE_SCOPE_GROUP_TEMPLATE$]", "[$RESOURCE_SCOPE_INDIVIDUAL$]",
+		"[$SOCIAL_RELATION_TYPE_BI_COWORKER$]",
+		"[$SOCIAL_RELATION_TYPE_BI_FRIEND$]",
+		"[$SOCIAL_RELATION_TYPE_BI_ROMANTIC_PARTNER$]",
+		"[$SOCIAL_RELATION_TYPE_BI_SIBLING$]",
+		"[$SOCIAL_RELATION_TYPE_BI_SPOUSE$]",
+		"[$SOCIAL_RELATION_TYPE_UNI_CHILD$]",
+		"[$SOCIAL_RELATION_TYPE_UNI_ENEMY$]",
+		"[$SOCIAL_RELATION_TYPE_UNI_FOLLOWER$]",
+		"[$SOCIAL_RELATION_TYPE_UNI_PARENT$]",
+		"[$SOCIAL_RELATION_TYPE_UNI_SUBORDINATE$]",
+		"[$SOCIAL_RELATION_TYPE_UNI_SUPERVISOR$]", "[$FALSE$]", "[$TRUE$]"
+	};
 
 	private static final String _J_SECURITY_CHECK = "j_security_check";
 
@@ -8082,8 +8120,6 @@ public class PortalImpl implements Portal {
 		SystemBundleUtil.getBundleContext();
 	private final Set<String> _computerAddresses = new HashSet<>();
 	private final String _computerName;
-	private String[] _customSqlKeys;
-	private String[] _customSqlValues;
 	private final String _pathContext;
 	private final String _pathFriendlyURLPrivateGroup;
 	private final String _pathFriendlyURLPrivateUser;

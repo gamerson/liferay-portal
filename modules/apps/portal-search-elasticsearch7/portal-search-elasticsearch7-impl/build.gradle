@@ -4,8 +4,8 @@ import com.liferay.gradle.util.StringUtil
 task cleanSidecar
 task deploySidecar(type: Copy)
 
-String elasticsearchClientVersion = "7.17.18"
-String luceneVersion = "8.11.1"
+String elasticsearchClientVersion = "7.17.21"
+String luceneVersion = "8.11.3"
 String sidecarElasticsearchServerVersion = file('src/main/resources/META-INF/sidecar/sidecar.version').text
 
 String elasticsearchDownloadURL = "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-${sidecarElasticsearchServerVersion}-no-jdk-linux-x86_64.tar.gz"
@@ -29,9 +29,9 @@ cleanSidecar {
 
 dependencies {
 	compileInclude group: "com.carrotsearch", name: "hppc", version: "0.8.1"
-	compileInclude group: "com.fasterxml.jackson.dataformat", name: "jackson-dataformat-cbor", version: "2.16.1"
-	compileInclude group: "com.fasterxml.jackson.dataformat", name: "jackson-dataformat-smile", version: "2.16.1"
-	compileInclude group: "com.fasterxml.jackson.dataformat", name: "jackson-dataformat-yaml", version: "2.16.1"
+	compileInclude group: "com.fasterxml.jackson.dataformat", name: "jackson-dataformat-cbor", version: "2.17.1"
+	compileInclude group: "com.fasterxml.jackson.dataformat", name: "jackson-dataformat-smile", version: "2.17.1"
+	compileInclude group: "com.fasterxml.jackson.dataformat", name: "jackson-dataformat-yaml", version: "2.17.1"
 	compileInclude group: "com.liferay", name: "org.apache.commons.logging", version: "1.2.LIFERAY-PATCHED-2"
 	compileInclude group: "com.liferay", name: "org.apache.logging.log4j", version: "2.17.1.LIFERAY-PATCHED-1"
 	compileInclude group: "com.liferay", name: "org.apache.logging.log4j.core", version: "2.17.1.LIFERAY-PATCHED-1"

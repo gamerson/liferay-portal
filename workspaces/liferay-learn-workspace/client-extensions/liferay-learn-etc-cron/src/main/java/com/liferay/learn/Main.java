@@ -55,6 +55,7 @@ import com.vladsch.flexmark.util.ast.TextCollectingVisitor;
 import com.vladsch.flexmark.util.data.MutableDataSet;
 
 import java.io.File;
+import java.io.FileInputStream;
 
 import java.net.URL;
 
@@ -368,10 +369,8 @@ public class Main {
 						continue;
 					}
 
-					File file = new File(fileName);
-
 					if (StringUtil.equals(
-							DigestUtils.md5Hex(file.toString()),
+							DigestUtils.md5Hex(new FileInputStream(fileName)),
 							_getMD5Hex(siteStructuredContent)) &&
 						!_skipDiffCheck) {
 
@@ -772,10 +771,10 @@ public class Main {
 		Path docsPath = Paths.get(_docsDirName);
 		Path filePath = Paths.get(file.toURI());
 
+		Path relativePath = docsPath.relativize(filePath);
+
 		String urlString =
-			"/w/" +
-				FilenameUtils.removeExtension(
-					String.valueOf(docsPath.relativize(filePath)));
+			"/w/" + FilenameUtils.removeExtension(String.valueOf(relativePath));
 
 		urlString =
 			urlString.substring(0, urlString.indexOf("/latest/")) +
@@ -1282,17 +1281,17 @@ public class Main {
 
 		Map<String, Object> data = snakeYamlFrontMatterVisitor.getData();
 
-		if ((data == null) || !data.containsKey("show-children-cards") ||
+		if ((data == null) || !data.containsKey("showChildrenCards") ||
 			!StringUtil.equals(
 				data.get(
-					"show-children-cards"
+					"showChildrenCards"
 				).toString(),
 				"false")) {
 
 			return true;
 		}
 
-		return GetterUtil.getBoolean(data.get("show-children-cards"));
+		return GetterUtil.getBoolean(data.get("showChildrenCards"));
 	}
 
 	private void _loadTaxonomyCategories(
@@ -1471,7 +1470,9 @@ public class Main {
 		ContentFieldValue englishMD5HexContentFieldValue =
 			new ContentFieldValue() {
 				{
-					setData(() -> DigestUtils.md5Hex(englishFile.toString()));
+					setData(
+						() -> DigestUtils.md5Hex(
+							new FileInputStream(englishFile)));
 				}
 			};
 		ContentFieldValue englishNavigationContentFieldValue =
@@ -1533,7 +1534,8 @@ public class Main {
 										{
 											setData(
 												() -> DigestUtils.md5Hex(
-													japaneseFile.toString()));
+													new FileInputStream(
+														japaneseFile)));
 										}
 									}
 								).build());

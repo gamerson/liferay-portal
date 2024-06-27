@@ -6,9 +6,9 @@
 	"name": "frontend-js-spa-web",
 	"scripts": {
 		"build": "node-scripts build",
-		"checkFormat": "liferay-npm-scripts check",
-		"format": "liferay-npm-scripts fix",
-		"test": "liferay-npm-scripts test"
+		"checkFormat": "node-scripts format --check",
+		"format": "node-scripts format",
+		"test": "node-scripts test"
 	},
-	"version": "5.0.51"
+	"version": "5.0.52"
 }

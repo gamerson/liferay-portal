@@ -13,13 +13,13 @@ import com.liferay.portal.catapult.PortalCatapult;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.json.JSONObject;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.Http;
+import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.kernel.workflow.WorkflowHandler;
 import com.liferay.portal.kernel.workflow.WorkflowHandlerRegistryUtil;
@@ -138,58 +138,34 @@ public class FunctionActionExecutorImpl
 		KaleoTaskInstanceToken kaleoTaskInstanceToken =
 			executionContext.getKaleoTaskInstanceToken();
 
-		long workflowTaskId =
-			kaleoTaskInstanceToken.getKaleoTaskInstanceTokenId();
+		if (kaleoTaskInstanceToken != null) {
+			long workflowTaskId =
+				kaleoTaskInstanceToken.getKaleoTaskInstanceTokenId();
 
-		payloadJSONObject.put(
-			"nextTransitionNames",
-			_workflowTaskManager.getNextTransitionNames(
-				kaleoAction.getUserId(), workflowTaskId)
-		).put(
-			"transitionURL",
-			"/o/headless-admin-workflow/v1.0/workflow-tasks/" + workflowTaskId +
-				"/change-transition"
-		).put(
-			"workflowTaskId", workflowTaskId
-		);
+			payloadJSONObject.put(
+				"nextTransitionNames",
+				_workflowTaskManager.getNextTransitionNames(
+					kaleoAction.getUserId(), workflowTaskId)
+			).put(
+				"transitionURL",
+				"/o/headless-admin-workflow/v1.0/workflow-tasks/" +
+					workflowTaskId + "/change-transition"
+			).put(
+				"workflowTaskId", workflowTaskId
+			);
+
+			JSONObject kaleoTaskInstanceTokenJSONObject =
+				payloadJSONObject.getJSONObject("kaleoTaskInstanceToken");
+
+			kaleoTaskInstanceTokenJSONObject.remove("workflowContext");
+		}
 
 		payloadJSONObject.remove("serviceContext");
 		payloadJSONObject.remove("workflowContext");
 
-		JSONObject kaleoTaskInstanceTokenJSONObject =
-			payloadJSONObject.getJSONObject("kaleoTaskInstanceToken");
-
-		kaleoTaskInstanceTokenJSONObject.remove("workflowContext");
-
 		List<WorkflowTaskAssignee> workflowTaskAssignees =
 			(List<WorkflowTaskAssignee>)inputObjects.get(
 				"workflowTaskAssignees");
-
-		if (workflowTaskAssignees.isEmpty()) {
-			if (_log.isWarnEnabled()) {
-				_log.warn(
-					"There are no workflow task assignees for Kaleo action " +
-						kaleoAction);
-			}
-
-			return;
-		}
-
-		WorkflowTaskAssignee workflowTaskAssignee = workflowTaskAssignees.get(
-			0);
-
-		if (!Objects.equals(
-				workflowTaskAssignee.getAssigneeClassName(),
-				User.class.getName())) {
-
-			if (_log.isWarnEnabled()) {
-				_log.warn(
-					"The first workflow task assignee must be a user for " +
-						"Kaleo action " + kaleoAction);
-			}
-
-			return;
-		}
 
 		payloadJSONObject.put(
 			"entryDTO",
@@ -200,13 +176,35 @@ public class FunctionActionExecutorImpl
 					inputObjects.get(WorkflowConstants.CONTEXT_ENTRY_CLASS_PK)),
 				executionContext));
 
+		launch(payloadJSONObject, workflowTaskAssignees);
+	}
+
+	protected void launch(
+			JSONObject payloadJSONObject,
+			List<WorkflowTaskAssignee> workflowTaskAssignees)
+		throws Exception {
+
+		long userId = _userLocalService.getUserIdByScreenName(
+			_companyId, "default-service-account");
+
+		if (ListUtil.isNotEmpty(workflowTaskAssignees)) {
+			WorkflowTaskAssignee workflowTaskAssignee =
+				workflowTaskAssignees.get(0);
+
+			if (Objects.equals(
+					workflowTaskAssignee.getAssigneeClassName(),
+					User.class.getName())) {
+
+				userId = workflowTaskAssignee.getAssigneeClassPK();
+			}
+		}
+
 		_portalCatapult.launch(
 			_companyId, Http.Method.POST,
 			_functionActionExecutorImplConfiguration.
 				oAuth2ApplicationExternalReferenceCode(),
 			payloadJSONObject,
-			_functionActionExecutorImplConfiguration.resourcePath(),
-			workflowTaskAssignee.getAssigneeClassPK());
+			_functionActionExecutorImplConfiguration.resourcePath(), userId);
 	}
 
 	private JSONObject _getEntryDTOJSONObject(
@@ -281,9 +279,6 @@ public class FunctionActionExecutorImpl
 		return entryDTOJSONObject;
 	}
 
-	private static final Log _log = LogFactoryUtil.getLog(
-		FunctionActionExecutorImpl.class);
-
 	private String _actionExecutorKey;
 	private long _companyId;
 
@@ -304,6 +299,9 @@ public class FunctionActionExecutorImpl
 
 	@Reference
 	private ScriptingContextBuilder _scriptingContextBuilder;
+
+	@Reference
+	private UserLocalService _userLocalService;
 
 	@Reference
 	private WorkflowTaskManager _workflowTaskManager;

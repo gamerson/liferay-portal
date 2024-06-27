@@ -99,6 +99,10 @@ public abstract class BaseBuildUpdater implements BuildUpdater {
 	}
 
 	protected void runQueued() {
+		if (isBuildQueued()) {
+			return;
+		}
+
 		if (isBuildRunning()) {
 			_build.setStatus("running");
 
@@ -113,9 +117,7 @@ public abstract class BaseBuildUpdater implements BuildUpdater {
 			return;
 		}
 
-		if (!isBuildQueued()) {
-			_build.setStatus("missing");
-		}
+		_build.setStatus("missing");
 	}
 
 	protected void runReporting() {
@@ -286,48 +288,7 @@ public abstract class BaseBuildUpdater implements BuildUpdater {
 			return;
 		}
 
-		String pinnedMessage = "";
-
-		if (!slaveOfflineRule.shutdown) {
-			pinnedMessage = "PINNED\n";
-		}
-
-		JenkinsSlave jenkinsSlave = build.getJenkinsSlave();
-
-		JenkinsMaster jenkinsMaster = jenkinsSlave.getJenkinsMaster();
-
-		String slaveOfflineRuleString = slaveOfflineRule.toString();
-
-		slaveOfflineRuleString = slaveOfflineRuleString.replace("\\", "\\\\");
-
-		String message = JenkinsResultsParserUtil.combine(
-			pinnedMessage, slaveOfflineRule.getName(), " failure detected at ",
-			build.getBuildURL(), ". ", jenkinsSlave.getName(),
-			" will be taken offline.\n\n", slaveOfflineRuleString,
-			"\n\n\nOffline Slave URL: https://", jenkinsMaster.getName(),
-			".liferay.com/computer/", jenkinsSlave.getName(), "\n");
-
-		System.out.println(message);
-
-		TopLevelBuild topLevelBuild = build.getTopLevelBuild();
-
-		if (topLevelBuild != null) {
-			message = JenkinsResultsParserUtil.combine(
-				message, "Top Level Build URL: ", topLevelBuild.getBuildURL());
-		}
-
-		jenkinsSlave.takeSlavesOffline(message);
-
-		String notificationRecipients =
-			slaveOfflineRule.getNotificationRecipients();
-
-		if ((notificationRecipients != null) &&
-			!notificationRecipients.isEmpty()) {
-
-			NotificationUtil.sendEmail(
-				message, "jenkins", "Slave Offline",
-				slaveOfflineRule.notificationRecipients);
-		}
+		slaveOfflineRule.takeSlaveOffline(build);
 	}
 
 	private final Build _build;

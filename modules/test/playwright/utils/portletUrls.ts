@@ -23,6 +23,8 @@ export const PORTLET_URLS = {
 		'/~/control_panel/manage?p_p_id=com_liferay_locked_items_web_internal_portlet_LockedItemsPortlet',
 	masterPages:
 		'/~/control_panel/manage?p_p_id=com_liferay_layout_page_template_admin_web_portlet_LayoutPageTemplatesPortlet&_com_liferay_layout_page_template_admin_web_portlet_LayoutPageTemplatesPortlet_tabs1=master-layouts',
+	messageBoardsAdmin:
+		'/~/control_panel/manage?p_p_id=com_liferay_message_boards_web_portlet_MBAdminPortlet',
 	modelBuilder:
 		'/~/control_panel/manage?p_p_id=com_liferay_object_web_internal_object_definitions_portlet_ObjectDefinitionsPortlet&_com_liferay_object_web_internal_object_definitions_portlet_ObjectDefinitionsPortlet_mvcRenderCommandName=/object_definitions/view_model_builder',
 	myWorkflowTasks:
@@ -38,8 +40,10 @@ export const PORTLET_URLS = {
 		'/~/control_panel/manage?p_p_id=com_liferay_change_tracking_web_portlet_PublicationsPortlet',
 	scriptManagement:
 		'/~/control_panel/manage?p_p_id=com_liferay_configuration_admin_web_portlet_SystemSettingsPortlet&p_p_lifecycle=0&p_p_state=maximized&p_p_mode=view&_com_liferay_configuration_admin_web_portlet_SystemSettingsPortlet_mvcRenderCommandName=%2Fconfiguration_admin%2Fview_configuration_screen&_com_liferay_configuration_admin_web_portlet_SystemSettingsPortlet_configurationScreenKey=script-management',
+	selectSites: '/~/control_panel/manage/-/sites/sites/select_site',
 	siteSettings: '/~/control_panel/manage/-/site/settings',
 	styleBooks: '/~/control_panel/manage/-/style_books/style_books',
+	tagsAdmin: '/~/control_panel/manage/-/tags_admin/tags',
 	utilityPages:
 		'/~/control_panel/manage?p_p_id=com_liferay_layout_admin_web_portlet_GroupPagesPortlet&_com_liferay_layout_admin_web_portlet_GroupPagesPortlet_tabs1=utility-pages',
 	wikiAdmin:

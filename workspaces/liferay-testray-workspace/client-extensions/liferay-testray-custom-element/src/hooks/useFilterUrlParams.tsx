@@ -44,9 +44,10 @@ const useFilterUrlParams = (customFilterFields?: CustomFilterFieldsProps) => {
 		filterSchemaKey as string
 	] as FilterSchemaType;
 
-	const filterKeys = useMemo(() => Object.keys(serializedFilter), [
-		serializedFilter,
-	]);
+	const filterKeys = useMemo(
+		() => Object.keys(serializedFilter),
+		[serializedFilter]
+	);
 	const filterFields = useMemo(
 		() =>
 			filterSchema?.fields?.filter((field) =>
@@ -56,42 +57,44 @@ const useFilterUrlParams = (customFilterFields?: CustomFilterFieldsProps) => {
 	);
 
 	const getFilterResponse = useCallback(async () => {
-		const parameters = safeJSONParse(JSON.stringify(params));
-		const resourceFields =
-			filterFields?.filter(({resource}) => resource) || {};
-		const _resourceFieldOptions: any = {};
+		if (filterSchema) {
+			const parameters = safeJSONParse(JSON.stringify(params));
+			const resourceFields =
+				filterFields?.filter(({resource}) => resource) || {};
+			const _resourceFieldOptions: any = {};
 
-		if (resourceFields.length) {
-			await Promise.all(
-				resourceFields.map(async (field) => {
-					const cacheKey =
-						typeof field.resource === 'function'
-							? (field.resource({
-									...parameters,
-									...customFilterFields,
-							  }) as string)
-							: (field.resource as string);
+			if (resourceFields.length) {
+				await Promise.all(
+					resourceFields.map(async (field) => {
+						const cacheKey =
+							typeof field.resource === 'function'
+								? (field.resource({
+										...parameters,
+										...customFilterFields,
+									}) as string)
+								: (field.resource as string);
 
-					if (cache[cacheKey]) {
-						_resourceFieldOptions[field.name] = cache[cacheKey];
-					}
-					else {
-						const result = await fetcher(cacheKey);
-						const parsedValue = field.transformData
-							? field.transformData(result)
-							: result;
-						_resourceFieldOptions[field.name] = parsedValue;
-						setCache((prevCache) => ({
-							...prevCache,
-							[cacheKey]: parsedValue,
-						}));
-					}
-				})
-			);
+						if (cache[cacheKey]) {
+							_resourceFieldOptions[field.name] = cache[cacheKey];
+						}
+						else {
+							const result = await fetcher(cacheKey);
+							const parsedValue = field.transformData
+								? field.transformData(result)
+								: result;
+							_resourceFieldOptions[field.name] = parsedValue;
+							setCache((prevCache) => ({
+								...prevCache,
+								[cacheKey]: parsedValue,
+							}));
+						}
+					})
+				);
+			}
+
+			setFilterResponse(_resourceFieldOptions);
 		}
-
-		setFilterResponse(_resourceFieldOptions);
-	}, [customFilterFields, filterFields, params, cache]);
+	}, [filterSchema, params, filterFields, customFilterFields, cache]);
 
 	useEffect(() => {
 		getFilterResponse();
@@ -123,10 +126,9 @@ const useFilterUrlParams = (customFilterFields?: CustomFilterFieldsProps) => {
 
 			Object.keys(filterResponse).forEach((key) => {
 				if (Array.isArray(serializedFilter[key])) {
-					const filteredOptions = filterResponse[
-						key
-					]?.filter((option: Options) =>
-						serializedFilter[key].includes(option.value)
+					const filteredOptions = filterResponse[key]?.filter(
+						(option: Options) =>
+							serializedFilter[key].includes(option.value)
 					);
 
 					if (filteredOptions.length) {

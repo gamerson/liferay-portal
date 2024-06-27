@@ -21,7 +21,10 @@ const TestflowAssignUsers: React.FC<TestflowAssignUsersProps> = ({
 			initialContext: {
 				selectedRows: modalState,
 			},
-			managementToolbarProps: {title: ''},
+			managementToolbarProps: {
+				hasSearch: true,
+				title: '',
+			},
 			onContextChange: ({selectedRows}) => setState(selectedRows),
 		}}
 		tableProps={{rowSelectable: true}}

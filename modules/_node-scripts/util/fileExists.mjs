@@ -10,8 +10,9 @@ export default async function fileExists(filePath) {
 		await fs.stat(filePath);
 
 		return true;
-	} catch (error) {
-		if (error.code !== 'ENOENT') {
+	}
+	catch (error) {
+		if (error.code !== 'ENOENT' && error.code !== 'ENOTDIR') {
 			throw error;
 		}
 

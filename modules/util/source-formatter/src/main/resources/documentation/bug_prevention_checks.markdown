@@ -150,6 +150,7 @@ JavaTransactionBoundaryCheck | .java | Finds direct `add*` or `get*` calls in `*
 JavaUpgradeConnectionCheck | .java | Finds cases where `DataAccess.getConnection` is used (instead of using the available global variable `connection`). |
 [JavaUpgradeDropTableCheck](check/java_upgrade_drop_table_check.markdown#javaupgradedroptablecheck) | .java | Finds cases where `DROP_TABLE_IF_EXISTS` should be used (instead of `drop table if exists`). |
 [JavaUpgradeIndexCheck](check/java_upgrade_index_check.markdown#javaupgradeindexcheck) | .java | Finds cases where the service builder indexes are updated manually in Upgrade classes. This is not needed because Liferay takes care of it. |
+JavaUpgradeMissingCTCollectionIdDuringUpdateCheck | .java | Finds missing `ctCollectionId` in where clause during update. |
 JavaUpgradeMissingTestCheck | .java | Finds missing integration tests for upgrade classes. |
 JavaUpgradeVersionCheck | .java | Verifies that the correct upgrade versions are used in classes that implement `UpgradeStepRegistrator`. |
 JavaVariableTypeCheck | .java | Performs several checks on the modifiers on variables. |
@@ -171,6 +172,7 @@ PackageinfoBNDExportPackageCheck | packageinfo | Finds legacy `packageinfo` file
 PersistenceCallCheck | .java, .jsp, .jspf, .jspx, .tag, .tpl or .vm | Finds illegal persistence calls across component boundaries. |
 [PersistenceUpdateCheck](check/persistence_update_check.markdown#persistenceupdatecheck) | .java | Checks that there are no stale references in service code from persistence updates. |
 PoshiDependenciesFileLocationCheck | .function, .jar, .lar, .macro, .path, .testcase, .war or .zip | Checks that dependencies files are located in the correct directory. |
+PoshiPropsUtilCheck | .function, .jar, .lar, .macro, .path, .testcase, .war or .zip | Finds cases where `PropsUtil.get` should be inlined. |
 PoshiSmokeTestCheck | .function, .jar, .lar, .macro, .path, .testcase, .war or .zip | Checks for missing and unnecessary `property ci.retries.disabled = true` in smoke test. |
 PrimitiveWrapperInstantiationCheck | .java, .jsp, .jspf, .jspx, .tag, .tpl or .vm | Finds cases where `new Type` is used for primitive types (use `Type.valueOf` instead). |
 PrincipalExceptionCheck | .java, .jsp, .jspf, .jspx, .tag, .tpl or .vm | Finds calls to `PrincipalException.class.getName()` (use `PrincipalException.getNestedClasses()` instead). |

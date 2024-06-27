@@ -261,7 +261,7 @@ export default function _JournalPortlet({
 	const handlePublishButtonClick = (event) => {
 		lockHolder.lock?.lock();
 
-		if (Liferay.FeatureFlags['LPS-141392']) {
+		if (Liferay.FeatureFlags['LPD-11228']) {
 			return;
 		}
 
@@ -394,9 +394,8 @@ export default function _JournalPortlet({
 							);
 
 							if (!friendlyUrlInputComponent.getValue()) {
-								const friendlyURL = url.searchParams.get(
-									friendlyURLKey
-								);
+								const friendlyURL =
+									url.searchParams.get(friendlyURLKey);
 								friendlyUrlInputComponent.updateInputLanguage(
 									friendlyURL,
 									defaultLanguageId

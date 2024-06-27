@@ -17,6 +17,7 @@ import {useMemo} from 'react';
 import AppToolbar from '../../../../../components/AppToolBar/AppToolBar';
 import Modal from '../../../../../components/Modal';
 import {useSolutionContext} from '../../../../../context/SolutionContext';
+import {PRODUCT_WORKFLOW_STATUS_CODE} from '../../../../../enums/Product';
 import i18n from '../../../../../i18n';
 import usePublishSolutionHeader from '../../../hooks/usePublishSolutionHeader';
 import usePublishSolutionNavigation from '../../../hooks/usePublishSolutionNavigation';
@@ -45,6 +46,7 @@ const PublishSolutionOutlet = () => {
 	);
 
 	const {observer, onOpenChange, open} = useModal();
+	const onExitModal = useModal();
 
 	const parsedSchema = useMemo(() => {
 		const parseSchema = activeRoute?.parseSchema;
@@ -58,6 +60,12 @@ const PublishSolutionOutlet = () => {
 
 	const isDisabled = parsedSchema ? !parsedSchema.success : false;
 
+	const isDraft = (status?: number) =>
+		status === PRODUCT_WORKFLOW_STATUS_CODE.DRAFT;
+
+	const isSaveAsDraft =
+		!context._product || isDraft(context._product.productStatus);
+
 	return (
 		<>
 			<AppToolbar
@@ -65,12 +73,19 @@ const PublishSolutionOutlet = () => {
 				accountName={account?.name as string}
 				appImage={context.profile.file?.preview}
 				appName={context.profile.name}
-				display={{preview: true, saveAsDraft: true}}
+				display={{
+					preview: true,
+					saveAsDraft: isSaveAsDraft,
+					submit:
+						!!context._product &&
+						!isDraft(context._product.productStatus),
+				}}
 				exitProps={{
 					onClick: () => {
-						onOpenChange(true);
+						isSaveAsDraft
+							? onOpenChange(true)
+							: onExitModal.onOpenChange(true);
 					},
-					to: undefined as any,
 				}}
 				previewProps={{
 					disabled: false,
@@ -79,6 +94,9 @@ const PublishSolutionOutlet = () => {
 				saveAsDraftProps={{
 					disabled: isDisabled,
 					onClick: onSaveAsDraft,
+				}}
+				submitProps={{
+					onClick: onSave,
 				}}
 			/>
 
@@ -154,6 +172,32 @@ const PublishSolutionOutlet = () => {
 					)}
 				</p>
 			</Modal>
+
+			{onExitModal.open && (
+				<Modal
+					last={
+						<>
+							<ClayButton
+								className="btn btn-primary ml-2"
+								displayType="primary"
+								onClick={onExit}
+							>
+								{i18n.translate('exit')}
+							</ClayButton>
+						</>
+					}
+					observer={onExitModal.observer}
+					size={'md' as any}
+					title="Exit from creating a solution"
+					visible={onExitModal.open}
+				>
+					<p>
+						{i18n.translate(
+							'all-progress-and-information-related-to-the-creation-of-the-solution-will-be-lost-do-you-still-want-to-exit'
+						)}
+					</p>
+				</Modal>
+			)}
 		</>
 	);
 };

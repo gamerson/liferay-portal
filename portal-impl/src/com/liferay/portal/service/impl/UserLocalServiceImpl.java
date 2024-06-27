@@ -24,6 +24,7 @@ import com.liferay.portal.kernel.cache.PortalCacheManagerNames;
 import com.liferay.portal.kernel.cache.PortalCacheMapSynchronizeUtil;
 import com.liferay.portal.kernel.change.tracking.CTAware;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
+import com.liferay.portal.kernel.dao.orm.EntityCacheUtil;
 import com.liferay.portal.kernel.dao.orm.QueryPos;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.SQLQuery;
@@ -1821,7 +1822,9 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 	public void checkLoginFailureById(long userId) throws PortalException {
 		User user = userPersistence.findByPrimaryKey(userId);
 
-		checkLoginFailure(user);
+		PasswordPolicy passwordPolicy = user.getPasswordPolicy();
+
+		checkLoginFailure(_unlockOutUser(user, passwordPolicy));
 	}
 
 	/**
@@ -1837,7 +1840,9 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 
 		User user = getUserByScreenName(companyId, screenName);
 
-		checkLoginFailure(user);
+		PasswordPolicy passwordPolicy = user.getPasswordPolicy();
+
+		checkLoginFailure(_unlockOutUser(user, passwordPolicy));
 	}
 
 	/**
@@ -4046,7 +4051,7 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 
 		PasswordPolicy passwordPolicy = user.getPasswordPolicy();
 
-		if (passwordPolicy.isChangeable()) {
+		if ((passwordPolicy != null) && passwordPolicy.isChangeable()) {
 			Date expirationDate = null;
 
 			if ((passwordPolicy != null) &&
@@ -4510,6 +4515,10 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 		throws PortalException {
 
 		User user = userPersistence.findByPrimaryKey(userId);
+
+		if (user.isAgreedToTermsOfUse() == agreedToTermsOfUse) {
+			return user;
+		}
 
 		user.setAgreedToTermsOfUse(agreedToTermsOfUse);
 
@@ -5008,7 +5017,7 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			return userPersistence.findByPrimaryKey(userId);
 		}
 
-		userPersistence.cacheResult(user);
+		EntityCacheUtil.putResult(UserImpl.class, user, false, false);
 
 		return user;
 	}
@@ -5394,6 +5403,12 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 		User user = userPersistence.findByPrimaryKey(userId);
 
 		validateReminderQuery(user.getCompanyId(), question, answer);
+
+		if (Objects.equals(user.getReminderQueryQuestion(), question) &&
+			Objects.equals(user.getReminderQueryAnswer(), answer)) {
+
+			return user;
+		}
 
 		user.setReminderQueryQuestion(question);
 		user.setReminderQueryAnswer(answer);
@@ -7519,6 +7534,8 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			int count = sqlQuery.executeUpdate();
 
 			if (count != 1) {
+				userPersistence.clearCache(user);
+
 				return null;
 			}
 
@@ -7529,11 +7546,11 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			user.setLastLoginIP(lastLoginIP);
 			user.setFailedLoginAttempts(failedLoginAttempts);
 
-			session.evict(UserImpl.class, user.getUserId());
-
 			return user;
 		}
 		finally {
+			session.evict(UserImpl.class, user.getUserId());
+
 			userPersistence.closeSession(session);
 		}
 	}

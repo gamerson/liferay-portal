@@ -16,7 +16,6 @@ import com.liferay.petra.string.CharPool;
 import com.liferay.petra.string.StringPool;
 import com.liferay.petra.string.StringUtil;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.feature.flag.FeatureFlagManagerUtil;
 import com.liferay.portal.kernel.util.CamelCaseUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.odata.sort.InvalidSortException;
@@ -84,11 +83,6 @@ public class SortDSLQueryVisitor extends BaseSortDSLQueryVisitor {
 			ObjectDefinition relatedObjectDefinition, Sort sort)
 		throws PortalException {
 
-		if (!FeatureFlagManagerUtil.isEnabled("LPD-18730")) {
-			throw new InvalidSortException(
-				"Unable to sort by a related object field");
-		}
-
 		if (!Objects.equals(
 				objectRelationship.getType(),
 				ObjectRelationshipConstants.TYPE_ONE_TO_MANY)) {
@@ -101,19 +95,22 @@ public class SortDSLQueryVisitor extends BaseSortDSLQueryVisitor {
 					" related object field");
 		}
 
+		BaseSortDSLQueryVisitor baseSortDSLQueryVisitor = null;
+
 		if (objectDefinition.getObjectDefinitionId() !=
 				objectRelationship.getObjectDefinitionId1()) {
 
-			throw new InvalidSortException(
-				"Unable to sort by a many to one related object field");
+			baseSortDSLQueryVisitor =
+				new ObjectEntryMTo1RelationshipSortDSLQueryVisitor(
+					objectFieldLocalService, objectRelationshipLocalService);
 		}
-
-		ObjectEntry1ToMRelationshipSortDSLQueryVisitor
-			objectEntry1ToMRelationshipSortDSLQueryVisitor =
+		else {
+			baseSortDSLQueryVisitor =
 				new ObjectEntry1ToMRelationshipSortDSLQueryVisitor(
 					objectFieldLocalService, objectRelationshipLocalService);
+		}
 
-		return objectEntry1ToMRelationshipSortDSLQueryVisitor.visit(
+		return baseSortDSLQueryVisitor.visit(
 			dslQuery,
 			new RelationshipSort(
 				objectDefinition, objectRelationship, path,

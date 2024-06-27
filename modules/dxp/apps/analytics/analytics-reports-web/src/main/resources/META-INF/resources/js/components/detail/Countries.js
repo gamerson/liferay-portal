@@ -38,9 +38,9 @@ export default function Countries({currentPage}) {
 
 	return (
 		<>
-			<h5 className="mt-3 sheet-subtitle">
+			<div className="mt-3 sheet-subtitle">
 				{Liferay.Language.get('views-by-location')}
-			</h5>
+			</div>
 
 			<ClayList className="list-group-countries-list">
 				<ClayList.Item flex>
@@ -120,14 +120,14 @@ export default function Countries({currentPage}) {
 												? numberFormat(
 														languageTag,
 														views
-												  )
+													)
 												: countryValueType.name ===
-												  'views-percentage'
-												? `${numberFormat(
-														languageTag,
-														viewsP
-												  )}%`
-												: views}
+													  'views-percentage'
+													? `${numberFormat(
+															languageTag,
+															viewsP
+														)}%`
+													: views}
 										</span>
 									</ClayList.ItemField>
 								</ClayList.Item>

@@ -95,13 +95,13 @@ export default class MarketplaceSpringBootOAuth2 extends OAuth2Client {
 	}
 
 	async createLicenseKey(payload: LicenseTypePayload): Promise<LicenseKey> {
-		return (this.oAuth2Client.fetch('/provisioning/license-keys', {
+		return this.oAuth2Client.fetch('/provisioning/license-keys', {
 			body: JSON.stringify(payload),
 			method: 'POST',
 
 			// Necessary due the response comes resolved already, not necessary to parse to .json()
 
-		}) as unknown) as Promise<LicenseKey>;
+		}) as unknown as Promise<LicenseKey>;
 	}
 
 	async deactivateLicenseKey(licenseKey: number) {
@@ -111,6 +111,10 @@ export default class MarketplaceSpringBootOAuth2 extends OAuth2Client {
 				method: 'POST',
 			}
 		);
+	}
+
+	async deleteTrial(orderId: string) {
+		await this.oAuth2Client.fetch(`/trial/${orderId}`, {method: 'DELETE'});
 	}
 
 	async downloadLicenseKey(id: number) {

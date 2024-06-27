@@ -50,12 +50,12 @@ const SelectReassignment = ({
 		if (!currentAssignmentType) {
 			setSection('assetCreator');
 		}
+
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	const getReassignmentTypeOptions = () => {
 		if (
-			Liferay.FeatureFlags['LPD-11179'] &&
 			!allowScriptContentToBeExecutedOrIncluded &&
 			!hadGroovyOrJavaScriptBefore
 		) {

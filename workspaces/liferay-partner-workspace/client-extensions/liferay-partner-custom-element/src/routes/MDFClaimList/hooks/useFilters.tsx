@@ -7,19 +7,18 @@ import {useEffect, useState} from 'react';
 
 import {Filters} from '../../../common/utils/constants/filters';
 import {getCamelCase} from '../../../common/utils/getCamelCase';
-import getSearchFilterTerm from '../../../common/utils/getSearchFilterTerm';
 import {INITIAL_FILTER} from '../utils/constants/initialFilter';
 import getDateCreatedFilterTerm from '../utils/getDateCreatedFilterTerm';
 
 export default function useFilters(
 	openClaimsFilter: boolean,
+	sort: string,
 	urlParams: URLSearchParams,
 	isChannel?: boolean
 ) {
 	const [filters, setFilters] = useState(() => {
-		const initialFilter: typeof INITIAL_FILTER = structuredClone(
-			INITIAL_FILTER
-		);
+		const initialFilter: typeof INITIAL_FILTER =
+			structuredClone(INITIAL_FILTER);
 
 		if (urlParams.getAll('partner').length) {
 			initialFilter.partner.value = urlParams.getAll('partner')!;
@@ -38,9 +37,8 @@ export default function useFilters(
 		}
 
 		if (urlParams.get('startdate')) {
-			initialFilter.submitDate.dates.startDate = urlParams.get(
-				'startdate'
-			)!;
+			initialFilter.submitDate.dates.startDate =
+				urlParams.get('startdate')!;
 		}
 
 		if (urlParams.getAll('type').length) {
@@ -50,15 +48,13 @@ export default function useFilters(
 		return initialFilter;
 	});
 
-	const [filtersTerm, setFilterTerm] = useState('');
-
 	const mdfClaimRoleFilter = isChannel
 		? openClaimsFilter
 			? Filters.MDF_CLAIM_LISTING.channelsOpen
 			: Filters.MDF_CLAIM_LISTING.channelsCompleted
 		: openClaimsFilter
-		? Filters.MDF_CLAIM_LISTING.partnersOpen
-		: Filters.MDF_CLAIM_LISTING.partnersCompleted;
+			? Filters.MDF_CLAIM_LISTING.partnersOpen
+			: Filters.MDF_CLAIM_LISTING.partnersCompleted;
 
 	const onFilter = (newFilters: Partial<typeof INITIAL_FILTER>) => {
 		setFilters((previousFilters) => {
@@ -174,28 +170,24 @@ export default function useFilters(
 			urlParams.delete('type');
 		}
 
-		if (filters.searchTerm) {
-			initialFilter = initialFilter.concat(
-				getSearchFilterTerm(filters.searchTerm)
-			);
-		}
-
 		onFilter({
 			hasValue: hasFilter,
 		});
 
-		setFilterTerm(initialFilter);
+		urlParams.set('filter', initialFilter);
+		urlParams.set('sort', sort);
 	}, [
 		filters.submitDate,
 		filters.partner,
 		filters.searchTerm,
 		filters.status,
 		filters.type,
-		setFilters,
-		openClaimsFilter,
 		mdfClaimRoleFilter,
+		openClaimsFilter,
+		setFilters,
+		sort,
 		urlParams,
 	]);
 
-	return {filters, filtersTerm, onFilter, setFilters};
+	return {filters, onFilter, setFilters};
 }

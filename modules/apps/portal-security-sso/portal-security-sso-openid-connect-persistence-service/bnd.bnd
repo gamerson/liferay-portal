@@ -1,6 +1,6 @@
 Bundle-Name: Liferay Portal Security SSO OpenID Connect Persistence Service
 Bundle-SymbolicName: com.liferay.portal.security.sso.openid.connect.persistence.service
-Bundle-Version: 6.0.27
+Bundle-Version: 6.0.28
 Import-Package:\
 	!com.google.crypto.tink.*,\
 	\
@@ -15,6 +15,6 @@ Import-Package:\
 	!org.opensaml.*,\
 	\
 	*
-Liferay-Require-SchemaVersion: 2.1.0
+Liferay-Require-SchemaVersion: 2.1.1
 Liferay-Service: true
 -dsannotations-options: inherit

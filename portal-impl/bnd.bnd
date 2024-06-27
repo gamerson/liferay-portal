@@ -1,6 +1,6 @@
 Bundle-Name: ${manifest.bundle.name}
 Bundle-SymbolicName: ${manifest.bundle.symbolic.name}
-Bundle-Version: 102.2.1
+Bundle-Version: 104.0.0
 Export-Package:\
 	com.liferay.portal.bean,\
 	com.liferay.portal.dao.orm.hibernate,\
@@ -46,3 +46,8 @@ Liferay-Service: true
 Private-Package: com.liferay.*.dependencies
 -donotcopy: (log4j\.properties|logging\.properties|portal-.*\.properties|system-.*\.properties|\.touch)
 -include ../common.bnd
+-removeheaders:\
+	Bnd-LastModified,\
+	DSTAMP,\
+	TODAY,\
+	TSTAMP

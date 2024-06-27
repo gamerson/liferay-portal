@@ -32,9 +32,8 @@ export default function getMDFListColumns(
 	isChannel?: boolean
 ): TableColumn<MDFRequestListItem>[] | undefined {
 	const getDropdownOptions = (row: MDFRequestListItem, index: number) => {
-		const isUserAssociated = hasUserAccountSameAccountEntryCurrentMDFRequest(
-			index
-		);
+		const isUserAssociated =
+			hasUserAccountSameAccountEntryCurrentMDFRequest(index);
 
 		const options = actions?.reduce<DropdownOption[]>(
 			(previousValue, currentValue) => {
@@ -101,10 +100,11 @@ export default function getMDFListColumns(
 									'Are you sure you want to complete the MDF request?',
 								onConfirm: async (isConfirmed: boolean) => {
 									if (isConfirmed) {
-										const newRequestStatus = await patchRequestStatus(
-											Status.COMPLETED,
-											String(row[MDFColumnKey.ID])
-										);
+										const newRequestStatus =
+											await patchRequestStatus(
+												Status.COMPLETED,
+												String(row[MDFColumnKey.ID])
+											);
 
 										if (newRequestStatus) {
 											Liferay.Util.openToast({
@@ -137,10 +137,11 @@ export default function getMDFListColumns(
 									'Are you sure you want to cancel the MDF request?',
 								onConfirm: async (isConfirmed: boolean) => {
 									if (isConfirmed) {
-										const newRequestStatus = await patchRequestStatus(
-											Status.CANCELED,
-											String(row[MDFColumnKey.ID])
-										);
+										const newRequestStatus =
+											await patchRequestStatus(
+												Status.CANCELED,
+												String(row[MDFColumnKey.ID])
+											);
 
 										if (newRequestStatus) {
 											Liferay.Util.openToast({
@@ -247,8 +248,13 @@ export default function getMDFListColumns(
 			size: 'sm',
 		},
 		{
-			columnKey: MDFColumnKey.ACTIVITY_PERIOD,
-			label: 'Activity Period',
+			columnKey: MDFColumnKey.START_ACT_PERIOD,
+			label: 'Start Act. Period',
+			wrap: true,
+		},
+		{
+			columnKey: MDFColumnKey.END_ACT_PERIOD,
+			label: 'End Act. Period',
 			wrap: true,
 		},
 		{
@@ -259,9 +265,9 @@ export default function getMDFListColumns(
 			columnKey: MDFColumnKey.AMOUNT_CLAIMED,
 			label: (
 				<div>
-					<p className="mb-0 mt-4 text-neutral-10">Amount Claimed</p>
+					<p className="mb-0 mt-4 text-neutral-10">Claimed</p>
 					<p className="mt-0 text-neutral-5 text-paragraph-sm">
-						Amount Paid
+						Paid
 					</p>
 				</div>
 			),
@@ -275,19 +281,13 @@ export default function getMDFListColumns(
 					</p>
 				</div>
 			),
-		},
-		{
-			columnKey: MDFColumnKey.BALANCE,
-			label: 'Balance',
+			size: 'md',
 		},
 		{
 			columnKey: MDFColumnKey.DATE_SUBMITTTED,
 			label: (
 				<div>
 					<p className="mb-0 mt-4 text-neutral-10">Submit Date</p>
-					<p className="mt-0 text-neutral-5 text-paragraph-sm">
-						Last Modified Date
-					</p>
 				</div>
 			),
 			render: (_, row) => (

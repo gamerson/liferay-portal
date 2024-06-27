@@ -182,6 +182,45 @@ public class BaseNotificationTypeTest {
 			TestPropsValues.getCompanyId());
 
 		parentObjectEntryValues = LinkedHashMapBuilder.<String, Object>put(
+			"dateObjectField",
+			() -> {
+				SimpleDateFormat simpleDateFormat = new SimpleDateFormat(
+					"yyyy-MM-dd");
+
+				return simpleDateFormat.format(RandomTestUtil.nextDate());
+			}
+		).put(
+			"dateTimeObjectField",
+			() -> {
+				SimpleDateFormat simpleDateFormat = new SimpleDateFormat(
+					"yyyy-MM-dd 00:00:00.0");
+
+				return simpleDateFormat.format(RandomTestUtil.nextDate());
+			}
+		).put(
+			"multiselectPicklistObjectField",
+			Arrays.asList(
+				new ListEntry() {
+					{
+						key = listTypeEntry1.getKey();
+						name = listTypeEntry1.getName(LocaleUtil.US);
+					}
+				},
+				new ListEntry() {
+					{
+						key = listTypeEntry2.getKey();
+						name = listTypeEntry2.getName(LocaleUtil.US);
+					}
+				})
+		).put(
+			"picklistObjectField",
+			new ListEntry() {
+				{
+					key = listTypeEntry1.getKey();
+					name = listTypeEntry1.getName(LocaleUtil.US);
+				}
+			}
+		).put(
 			"systemObjectField", RandomTestUtil.randomString()
 		).put(
 			"textObjectField", RandomTestUtil.randomString()
@@ -346,6 +385,47 @@ public class BaseNotificationTypeTest {
 				false, ObjectDefinitionConstants.SCOPE_COMPANY,
 				ObjectDefinitionConstants.STORAGE_TYPE_DEFAULT,
 				Arrays.asList(
+					new DateObjectFieldBuilder(
+					).labelMap(
+						LocalizedMapUtil.getLocalizedMap(
+							RandomTestUtil.randomString())
+					).name(
+						"dateObjectField"
+					).build(),
+					new DateTimeObjectFieldBuilder(
+					).labelMap(
+						LocalizedMapUtil.getLocalizedMap(
+							RandomTestUtil.randomString())
+					).name(
+						"dateTimeObjectField"
+					).objectFieldSettings(
+						Collections.singletonList(
+							new ObjectFieldSettingBuilder(
+							).name(
+								ObjectFieldSettingConstants.NAME_TIME_STORAGE
+							).value(
+								ObjectFieldSettingConstants.
+									VALUE_USE_INPUT_AS_ENTERED
+							).build())
+					).build(),
+					new MultiselectPicklistObjectFieldBuilder(
+					).labelMap(
+						LocalizedMapUtil.getLocalizedMap(
+							RandomTestUtil.randomString())
+					).name(
+						"multiselectPicklistObjectField"
+					).listTypeDefinitionId(
+						_listTypeDefinition.getListTypeDefinitionId()
+					).build(),
+					new PicklistObjectFieldBuilder(
+					).labelMap(
+						LocalizedMapUtil.getLocalizedMap(
+							RandomTestUtil.randomString())
+					).name(
+						"picklistObjectField"
+					).listTypeDefinitionId(
+						_listTypeDefinition.getListTypeDefinitionId()
+					).build(),
 					new TextObjectFieldBuilder(
 					).labelMap(
 						LocalizedMapUtil.getLocalizedMap(
@@ -506,7 +586,8 @@ public class BaseNotificationTypeTest {
 	}
 
 	protected void executeNotificationObjectAction(
-			long fileEntryId, NotificationTemplate notificationTemplate)
+			DTOConverterContext dtoConverterContext, long fileEntryId,
+			NotificationTemplate notificationTemplate)
 		throws Exception {
 
 		ObjectAction objectAction = objectActionLocalService.addObjectAction(
@@ -528,7 +609,7 @@ public class BaseNotificationTypeTest {
 			dtoConverterContext, parentObjectDefinition,
 			new ObjectEntry() {
 				{
-					properties = parentObjectEntryValues;
+					properties = new LinkedHashMap<>(parentObjectEntryValues);
 				}
 			},
 			ObjectDefinitionConstants.SCOPE_COMPANY);
@@ -551,6 +632,14 @@ public class BaseNotificationTypeTest {
 
 		objectActionLocalService.deleteObjectAction(
 			objectAction.getObjectActionId());
+	}
+
+	protected void executeNotificationObjectAction(
+			long fileEntryId, NotificationTemplate notificationTemplate)
+		throws Exception {
+
+		executeNotificationObjectAction(
+			dtoConverterContext, fileEntryId, notificationTemplate);
 	}
 
 	protected String getObjectRelationshipObjectField2Name()
@@ -594,6 +683,10 @@ public class BaseNotificationTypeTest {
 				getTermName("multiselectPicklistObjectField"),
 				getTermName("picklistObjectField"),
 				getTermName("textObjectField"),
+				getTermName(true, "dateObjectField"),
+				getTermName(true, "dateTimeObjectField"),
+				getTermName(true, "multiselectPicklistObjectField"),
+				getTermName(true, "picklistObjectField"),
 				getTermName(true, "systemObjectField"),
 				getTermName(true, "textObjectField")));
 	}

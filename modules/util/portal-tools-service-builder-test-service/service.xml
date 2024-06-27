@@ -170,6 +170,20 @@
 
 		<column name="companyId" type="long" />
 	</entity>
+	<entity external-reference-code="group" local-service="true" name="ERCVersionedEntry" remote-service="false" uuid="true" versioned="true">
+
+		<!-- PK fields -->
+
+		<column name="ercVersionedEntryId" primary="true" type="long" />
+
+		<!-- Group instance -->
+
+		<column name="groupId" type="long" />
+
+		<!-- Audit fields -->
+
+		<column name="companyId" type="long" />
+	</entity>
 	<entity local-service="true" name="FinderWhereClauseEntry" remote-service="false">
 
 		<!-- PK fields -->
@@ -362,6 +376,35 @@
 
 		<finder name="Name" return-type="NullConvertibleEntry" unique="true">
 			<finder-column name="name" />
+		</finder>
+	</entity>
+	<entity local-service="true" name="PermissionCheckFinderEntry" remote-service="false">
+
+		<!-- PK fields -->
+
+		<column name="permissionCheckFinderEntryId" primary="true" type="long" />
+
+		<!-- Group instance -->
+
+		<column name="groupId" type="long" />
+
+		<!-- Other fields -->
+
+		<column name="integer" type="int" />
+		<column name="name" type="String" />
+		<column name="type" type="String" />
+
+		<!-- Order -->
+
+		<order by="asc">
+			<order-column name="integer" />
+			<order-column name="type" />
+		</order>
+
+		<!-- Finder methods -->
+
+		<finder name="GroupId" return-type="Collection">
+			<finder-column name="groupId" />
 		</finder>
 	</entity>
 	<entity local-service="true" name="RedundantIndexEntry" remote-service="false">

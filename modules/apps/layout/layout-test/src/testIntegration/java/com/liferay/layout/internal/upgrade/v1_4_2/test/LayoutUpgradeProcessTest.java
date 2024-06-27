@@ -69,7 +69,7 @@ public class LayoutUpgradeProcessTest {
 	}
 
 	@Test
-	public void testUpgradeProcess() throws Exception {
+	public void testUpgrade() throws Exception {
 		LayoutPageTemplateEntry layoutPageTemplateEntry =
 			_layoutPageTemplateEntryLocalService.addLayoutPageTemplateEntry(
 				null, TestPropsValues.getUserId(), _group.getGroupId(), 0,
@@ -127,6 +127,75 @@ public class LayoutUpgradeProcessTest {
 				updatedDraftLayout.getDefaultLanguageId());
 
 		Assert.assertTrue(updatedDraftLayoutFriendlyURL.isPrivateLayout());
+
+		LayoutFriendlyURL updatedLayoutFriendlyURL =
+			_layoutFriendlyURLLocalService.fetchLayoutFriendlyURL(
+				updatedLayout.getPlid(), updatedLayout.getDefaultLanguageId());
+
+		Assert.assertTrue(updatedLayoutFriendlyURL.isPrivateLayout());
+	}
+
+	@Test
+	public void testUpgradeWhenPrivateLayoutAlreadyExists()
+		throws Exception {
+
+		LayoutPageTemplateEntry layoutPageTemplateEntry =
+			_layoutPageTemplateEntryLocalService.addLayoutPageTemplateEntry(
+				null, TestPropsValues.getUserId(), _group.getGroupId(), 0,
+				RandomTestUtil.randomString(),
+				LayoutPageTemplateEntryTypeConstants.MASTER_LAYOUT, 0,
+				WorkflowConstants.STATUS_DRAFT, _serviceContext);
+
+		Layout draftLayout = _layoutLocalService.fetchLayout(
+			_classNameLocalService.getClassNameId(Layout.class),
+			layoutPageTemplateEntry.getPlid());
+
+		Layout layout = _layoutLocalService.getLayout(draftLayout.getClassPK());
+
+		Assert.assertTrue(layout.isPrivateLayout());
+
+		LayoutPageTemplateEntry duplicateLayoutPageTemplateEntry =
+			_layoutPageTemplateEntryLocalService.addLayoutPageTemplateEntry(
+				null, TestPropsValues.getUserId(), _group.getGroupId(), 0,
+				RandomTestUtil.randomString(),
+				LayoutPageTemplateEntryTypeConstants.MASTER_LAYOUT, 0,
+				WorkflowConstants.STATUS_DRAFT, _serviceContext);
+
+		Layout duplicateDraftLayout = _layoutLocalService.fetchLayout(
+			_classNameLocalService.getClassNameId(Layout.class),
+			duplicateLayoutPageTemplateEntry.getPlid());
+
+		Layout duplicateLayout = _layoutLocalService.getLayout(
+			duplicateDraftLayout.getClassPK());
+
+		duplicateLayout.setUuid(layout.getUuid());
+		duplicateLayout.setPrivateLayout(false);
+		duplicateLayout.setFriendlyURL(layout.getFriendlyURL());
+
+		duplicateLayout = _layoutLocalService.updateLayout(duplicateLayout);
+
+		LayoutFriendlyURL layoutFriendlyURL =
+			_layoutFriendlyURLLocalService.fetchLayoutFriendlyURL(
+				layout.getPlid(), layout.getDefaultLanguageId());
+
+		LayoutFriendlyURL duplicateLayoutFriendlyURL =
+			_layoutFriendlyURLLocalService.fetchLayoutFriendlyURL(
+				duplicateLayout.getPlid(),
+				duplicateDraftLayout.getDefaultLanguageId());
+
+		duplicateLayoutFriendlyURL.setPrivateLayout(false);
+		duplicateLayoutFriendlyURL.setFriendlyURL(
+			layoutFriendlyURL.getFriendlyURL());
+
+		_layoutFriendlyURLLocalService.updateLayoutFriendlyURL(
+			duplicateLayoutFriendlyURL);
+
+		_runUpgrade();
+
+		Layout updatedLayout = _layoutLocalService.getLayout(
+			duplicateLayout.getPlid());
+
+		Assert.assertTrue(updatedLayout.isPrivateLayout());
 
 		LayoutFriendlyURL updatedLayoutFriendlyURL =
 			_layoutFriendlyURLLocalService.fetchLayoutFriendlyURL(

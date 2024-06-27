@@ -11,12 +11,12 @@ import {ActionReassignmentPage} from '../pages/portal-workflow-kaleo-designer-we
 import {ConditionNode} from '../pages/portal-workflow-kaleo-designer-web/ConditionNodePage';
 import {DiagramViewPage} from '../pages/portal-workflow-kaleo-designer-web/DiagramViewPage';
 import {NodePropertiesSidebarPage} from '../pages/portal-workflow-kaleo-designer-web/NodePropertiesSidebarPage';
-import {NotificationPage} from '../pages/portal-workflow-kaleo-designer-web/NotificationPage';
 import {NotificationSectionPage} from '../pages/portal-workflow-kaleo-designer-web/NotificationSectionPage';
 import {ProcessBuilderPage} from '../pages/portal-workflow-kaleo-designer-web/ProcessBuilderPage';
+import {SourceViewPage} from '../pages/portal-workflow-kaleo-designer-web/SourceViewPage';
 import {TimerPage} from '../pages/portal-workflow-kaleo-designer-web/TimerPage';
-import {WorkflowTasksPage} from '../tests/portal-workflow-task-web/pages/WorkflowTasksPage';
-import {WorkflowPage} from '../tests/portal-workflow-web/pages/WorkflowPage';
+import {WorkflowTasksPage} from '../pages/portal-workflow-task-web/WorkflowTasksPage';
+import {WorkflowPage} from '../pages/portal-workflow-web/WorkflowPage';
 
 const workflowPagesTest = test.extend<{
 	actionPage: ActionPage;
@@ -24,10 +24,10 @@ const workflowPagesTest = test.extend<{
 	conditionNode: ConditionNode;
 	diagramViewPage: DiagramViewPage;
 	nodePropertiesSidebarPage: NodePropertiesSidebarPage;
-	notificationPage: NotificationPage;
 	notificationSectionPage: NotificationSectionPage;
 	processBuilderPage: ProcessBuilderPage;
 	scriptManagementPage: ScriptManagementPage;
+	sourceViewPage: SourceViewPage;
 	timerPage: TimerPage;
 	workflowPage: WorkflowPage;
 	workflowTasksPage: WorkflowTasksPage;
@@ -47,17 +47,17 @@ const workflowPagesTest = test.extend<{
 	nodePropertiesSidebarPage: async ({page}, use) => {
 		await use(new NodePropertiesSidebarPage(page));
 	},
-	notificationPage: async ({page}, use) => {
-		await use(new NotificationPage(page));
-	},
 	notificationSectionPage: async ({page}, use) => {
-		await use(new NotificationSectionPage(page, 0));
+		await use(new NotificationSectionPage(page));
 	},
 	processBuilderPage: async ({page}, use) => {
 		await use(new ProcessBuilderPage(page));
 	},
 	scriptManagementPage: async ({page}, use) => {
 		await use(new ScriptManagementPage(page));
+	},
+	sourceViewPage: async ({page}, use) => {
+		await use(new SourceViewPage(page));
 	},
 	timerPage: async ({page}, use) => {
 		await use(new TimerPage(page));

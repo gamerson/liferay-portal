@@ -189,10 +189,10 @@ function TreeItem({
 	const warningMessage = isSiteTemplate
 		? Liferay.Language.get(
 				'there-is-a-page-with-the-same-friendly-url-in-a-site-using-this-site-template'
-		  )
+			)
 		: Liferay.Language.get(
 				'there-is-a-page-with-the-same-friendly-url-in-the-site-template'
-		  );
+			);
 
 	return (
 		<ClayTreeView.Item
@@ -229,10 +229,7 @@ function TreeItem({
 					{item.regularURL ? (
 						<a
 							aria-label={(() => {
-								if (
-									Liferay.FeatureFlags['LPS-196847'] &&
-									!item.hasGuestViewPermission
-								) {
+								if (!item.hasGuestViewPermission) {
 									return `${
 										item.name
 									}. ${Liferay.Language.get(
@@ -262,8 +259,7 @@ function TreeItem({
 								{item.name}
 							</span>
 
-							{Liferay.FeatureFlags['LPS-196847'] &&
-							!item.hasGuestViewPermission ? (
+							{!item.hasGuestViewPermission ? (
 								<ClayIcon
 									className="c-ml-2 c-mt-0 flex-shrink-0 icon-tooltip text-4"
 									data-title={Liferay.Language.get(
@@ -328,12 +324,7 @@ function TreeItem({
 							{item.regularURL ? (
 								<a
 									aria-label={(() => {
-										if (
-											Liferay.FeatureFlags[
-												'LPS-196847'
-											] &&
-											!item.hasGuestViewPermission
-										) {
+										if (!item.hasGuestViewPermission) {
 											return `${
 												item.name
 											}. ${Liferay.Language.get(
@@ -364,8 +355,7 @@ function TreeItem({
 										{item.name}
 									</span>
 
-									{Liferay.FeatureFlags['LPS-196847'] &&
-									!item.hasGuestViewPermission ? (
+									{!item.hasGuestViewPermission ? (
 										<ClayIcon
 											className="c-ml-2 c-mt-0 flex-shrink-0 icon-tooltip text-4"
 											data-title={Liferay.Language.get(
@@ -469,9 +459,10 @@ function normalizeActions(actions, namespace) {
 													}
 													else {
 														openToast({
-															message: Liferay.Language.get(
-																'your-request-processed-successfully'
-															),
+															message:
+																Liferay.Language.get(
+																	'your-request-processed-successfully'
+																),
 															toastProps: {
 																autoClose: 5000,
 															},

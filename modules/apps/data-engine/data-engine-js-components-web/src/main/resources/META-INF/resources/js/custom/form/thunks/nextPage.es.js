@@ -77,10 +77,10 @@ export default function nextPage({
 					? evaluatedPages.findIndex(
 							({enabled}, index) =>
 								enabled && index === currentPage
-					  )
+						)
 					: evaluatedPages.findIndex(
 							({enabled}, index) => enabled && index > activePage
-					  );
+						);
 
 				const activePageUpdated = Math.min(
 					nextActivePageIndex,
@@ -103,12 +103,6 @@ export default function nextPage({
 					page: activePageUpdated,
 					title,
 				});
-
-				const formPagination = document.getElementsByClassName(
-					'ddm-form-pagination'
-				)[0];
-
-				formPagination.scrollIntoView();
 			}
 			else {
 				const pageIndex = selectedPage ? currentPage : activePage;

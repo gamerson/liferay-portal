@@ -74,6 +74,13 @@ public class UpgradeCatchAllCheck implements ConfigurationBeanDeclaration {
 		assetCategory.getLeftCategoryId;
 	}
 
+	public void method(boolean showHiddenPages) {
+		LayoutItemSelectorCriterion layoutItemSelectorCriterion = new LayoutItemSelectorCriterion();
+
+		layoutItemSelectorCriterion.setShowHiddenPages(null);
+		layoutItemSelectorCriterion.setShowHiddenPages(showHiddenPages);
+	}
+
 	public void method(CommerceAddress commerceAddress) {
 		CommerceAddressLocalServiceUtil.updateCommerceAddress(commerceAddress);
 		CommerceAddressLocalServiceUtil.updateCommerceAddress(null);
@@ -130,6 +137,10 @@ public class UpgradeCatchAllCheck implements ConfigurationBeanDeclaration {
 
 	public void method(Indexer<?> indexer) {
 		indexer.getClassNames();
+	}
+
+	public void method(Layout layout, String friendlyURL) {
+		LayoutFriendlyURLComposite(layout, friendlyURL);
 	}
 
 	public void method(long commerceOrderId) {
@@ -415,6 +426,10 @@ public class UpgradeCatchAllCheck implements ConfigurationBeanDeclaration {
 		AssetVocabularyLocalServiceUtil.fetchAssetVocabularyByExternalReferenceCode(companyId, externalReferenceCode);
 		_assetVocabularyLocalService.fetchAssetVocabularyByExternalReferenceCode(companyId, externalReferenceCode);
 
+		CommerceCatalogLocalServiceUtil.fetchCommerceCatalogByExternalReferenceCode(companyId, externalReferenceCode);
+		_commerceCatalogLocalService.fetchCommerceCatalogByExternalReferenceCode(123, "test123");
+		_commerceCatalogLocalService.fetchCommerceCatalogByExternalReferenceCode(companyId, externalReferenceCode);
+
 		CommercePriceListLocalServiceUtil.fetchByExternalReferenceCode(companyId, externalReferenceCode);
 		_commercePriceListLocalService.fetchByExternalReferenceCode(123, "test123");
 		_commercePriceListLocalService.fetchByExternalReferenceCode(companyId, externalReferenceCode);
@@ -498,10 +513,30 @@ public class UpgradeCatchAllCheck implements ConfigurationBeanDeclaration {
 		portletDisplay.getPortletInstanceConfiguration(null);
 	}
 
+	public void method(Product product) {
+		product.getConfiguration();
+	}
+
 	public void method(
 		ResourceRequest resourceRequest, ResourceResponse resourceResponse) {
 
 		CaptchaUtil.serveImage(resourceRequest, resourceResponse);
+	}
+
+	public void method(String searchEngineId) {
+		IndexableActionableDynamicQuery indexableActionableDynamicQuery =
+			new IndexableActionableDynamicQuery();
+
+		indexableActionableDynamicQuery.setSearchEngineId("test123");
+		indexableActionableDynamicQuery.setSearchEngineId(searchEngineId);
+	}
+
+	public void method(
+		String searchEngineId, long companyId, Collection<Document> documents,
+		boolean commitImmediately) {
+
+		IndexWriterHelperUtil.updateDocument(searchEngineId, companyId, documents, commitImmediately);
+		IndexWriterHelperUtil.updateDocument("test123", 123, null, null);
 	}
 
 	public void method(
@@ -588,6 +623,9 @@ public class UpgradeCatchAllCheck implements ConfigurationBeanDeclaration {
 
 	@Reference
 	private CommerceAddressLocalService _commerceAddressLocalService;
+
+	@Reference
+	private CommerceCatalogLocalService _commerceCatalogLocalService;
 
 	@Reference
 	private CommerceOrderItemLocalService _commerceOrderItemLocalService;

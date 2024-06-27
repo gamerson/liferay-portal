@@ -3,18 +3,20 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-import {useCallback, useEffect, useMemo, useState} from 'react';
-import {useForm} from 'react-hook-form';
+import {useMemo, useState} from 'react';
 import {Outlet, useLocation, useNavigate} from 'react-router-dom';
+import useSWR from 'swr';
 import {z} from 'zod';
 
 import {useMarketplaceContext} from '../../context/MarketplaceContext';
+import {Analytics} from '../../core/Analytics';
 import {ORDER_TYPES} from '../../enums/Order';
 import useMarketplaceSpringBootOAuth2 from '../../hooks/useMarketplaceSpringBootOAuth2';
-import zodSchema, {zodResolver} from '../../schema/zod';
+import zodSchema from '../../schema/zod';
 import fetcher from '../../services/fetcher';
 import CommerceSelectAccountImpl from '../../services/rest/CommerceSelectAccount';
-import {postOrder} from '../../utils/api';
+import headlessCommerceDeliveryCart from '../../services/rest/HeadlessCommerceDeliveryCart';
+import {scrollToTop} from '../../utils/browser';
 import AccountEmailInfo from '../CustomerDashboard/pages/Apps/App/Licenses/CreateLicense/AccountInfo';
 import {ProductCardRevamp} from '../GetApp/components/ProductCard/ProductCard';
 import {StepWizardRevamp} from '../GetApp/components/StepWizard/StepWizard';
@@ -25,26 +27,6 @@ type GetSolutionOutletProps = {
 
 export type UserForm = z.infer<typeof zodSchema.accountCreator> & {
 	accountSelected: Account | undefined;
-};
-
-const productCustomFields = [
-	'Github Username',
-	'Project Name',
-	'Site Initializer',
-];
-
-const getProductCustomFields = (customFields: CustomField[]) => {
-	let data = {};
-
-	productCustomFields.forEach((fieldName) => {
-		customFields.forEach((field) => {
-			if (field.name === fieldName) {
-				data = {...data, [fieldName]: field.customValue.data};
-			}
-		});
-	});
-
-	return data;
 };
 
 const steps = [
@@ -69,8 +51,7 @@ const getIcon = (image = '') => {
 };
 
 const GetSolutionOutlet: React.FC<GetSolutionOutletProps> = ({product}) => {
-	const [account, setSelectedAccount] = useState<any>(null);
-	const [accounts, setAccounts] = useState<any[]>([]);
+	const [selectedAccount, setSelectedAccount] = useState<any>(null);
 	const location = useLocation();
 	const marketplaceContext = useMarketplaceContext();
 	const marketplaceSpringBootOAuth2 = useMarketplaceSpringBootOAuth2();
@@ -78,102 +59,69 @@ const GetSolutionOutlet: React.FC<GetSolutionOutletProps> = ({product}) => {
 
 	const {channel, myUserAccount} = marketplaceContext;
 
-	const accountBriefs = useMemo(() => myUserAccount?.accountBriefs || [], [
-		myUserAccount?.accountBriefs,
-	]);
+	const accountBriefs = useMemo(
+		() => myUserAccount?.accountBriefs || [],
+		[myUserAccount?.accountBriefs]
+	);
 
 	const sku = product?.skus?.[0]?.id;
 
-	const accountForm = useForm<UserForm>({
-		defaultValues: {
-			companyName: '',
-			country: '',
-			emailAddress: myUserAccount.emailAddress,
-			extension: '',
-			familyName: myUserAccount.familyName,
-			givenName: myUserAccount.givenName,
-			phone: {code: '+1', flag: 'en-us'},
-			phoneNumber: undefined,
-		},
-		mode: 'all',
-		resolver: zodResolver(zodSchema.accountCreator),
-	});
-
-	const {setValue} = accountForm;
-
-	const fetchAccount = useCallback(async () => {
-		const fetchedAccounts = [];
-
-		for (const accountBrief of accountBriefs) {
-			const accountInfo = await fetcher(
-				`o/headless-admin-user/v1.0/accounts/${Number(
-					accountBrief.id
-				)}?nestedFields=accountUserAccounts`
+	const {data: accounts = []} = useSWR(
+		{accountBriefs, key: '/accounts-briefs/'},
+		() => {
+			return Promise.all(
+				accountBriefs.map((accountBrief) =>
+					fetcher(
+						`o/headless-admin-user/v1.0/accounts/${Number(
+							accountBrief.id
+						)}?nestedFields=accountUserAccounts`
+					)
+				)
 			);
-
-			fetchedAccounts.push(accountInfo);
 		}
+	);
 
-		return fetchedAccounts;
-	}, [accountBriefs]);
+	const currentAccount = selectedAccount || accounts[0];
 
-	useEffect(() => {
-		(async () => {
-			const userAccounts = await fetchAccount();
+	const onSubmit = async () => {
+		const accountId = Number(currentAccount?.id);
 
-			if (userAccounts.length === 1) {
-				setSelectedAccount(userAccounts[0]);
-			}
-
-			setAccounts(userAccounts);
-		})();
-	}, [fetchAccount, myUserAccount, setValue]);
-
-	const customFields =
-		product?.customFields?.filter((item) =>
-			productCustomFields.find((field) => item.name === field)
-		) || [];
-
-	const onSubmit = async (responeAccount?: Account) => {
-		const accountId = Number(account?.id || responeAccount?.id);
-
-		await postOrder({
-			account: {
-				id: accountId,
-				type:
-					(account?.type as string) ||
-					(responeAccount?.type as string),
-			},
-			accountExternalReferenceCode: account?.externalReferenceCode,
+		const cart = await headlessCommerceDeliveryCart.createCart(channel.id, {
 			accountId,
-			channel: {
-				currencyCode: channel?.currencyCode,
-				id: channel?.id,
-				type: channel?.type,
-			},
-			channelId: channel?.id,
-			currencyCode: 'USD',
-			customFields: getProductCustomFields(customFields),
-			orderItems: [
+			cartItems: [
 				{
-					id: 0,
+					price: {
+						currency: channel.currencyCode,
+						discount: 0,
+					},
+					productId: product?.productId,
 					quantity: 1,
-					skuId: Number(sku),
+					settings: {
+						maxQuantity: 1,
+					},
+					skuId: sku,
 				},
 			],
-			orderStatus: 1,
+			currencyCode: channel.currencyCode,
 			orderTypeExternalReferenceCode: ORDER_TYPES.SOLUTIONS7,
-			shippingAmount: 0,
-			shippingWithTaxAmount: 0,
 		});
 
-		await CommerceSelectAccountImpl.selectAccount(accountId);
-
-		const trialAvailability = await marketplaceSpringBootOAuth2.getTrialAvailability();
+		const [trialAvailability] = await Promise.all([
+			marketplaceSpringBootOAuth2.getTrialAvailability(),
+			headlessCommerceDeliveryCart.checkoutCart(cart.id),
+			CommerceSelectAccountImpl.selectAccount(accountId),
+		]);
 
 		const maxTrialsReached = trialAvailability.fallback
 			? false
 			: trialAvailability.available === 0;
+
+		Analytics.track('TRIAL_CREATION', {
+			accountId,
+			productName: product.name,
+		});
+
+		scrollToTop();
 
 		navigate(`/finish${maxTrialsReached ? '?state=hold' : ''}`, {
 			replace: true,
@@ -191,7 +139,7 @@ const GetSolutionOutlet: React.FC<GetSolutionOutletProps> = ({product}) => {
 				subtitle="7 Days Trial"
 				title={product.name}
 			>
-				{account && (
+				{selectedAccount && (
 					<>
 						<hr />
 
@@ -203,8 +151,8 @@ const GetSolutionOutlet: React.FC<GetSolutionOutletProps> = ({product}) => {
 							<AccountEmailInfo
 								userAccount={{
 									...myUserAccount,
-									...account,
-									image: account.logoURL,
+									...selectedAccount,
+									image: selectedAccount.logoURL,
 								}}
 							/>
 						</div>
@@ -213,33 +161,29 @@ const GetSolutionOutlet: React.FC<GetSolutionOutletProps> = ({product}) => {
 			</ProductCardRevamp>
 
 			<div className="border d-flex flex-column mt-7 p-5 rounded">
-				<main>
-					<div className="d-flex flex-column">
-						{accounts.length > 1 && (
-							<div className="d-flex justify-content-center mb-6">
-								<StepWizardRevamp
-									className="col-8"
-									currentStep={steps[stepIndex]}
-									stepIndex={stepIndex}
-									steps={steps}
-								/>
-							</div>
-						)}
+				<div className="d-flex flex-column">
+					{accounts.length > 1 && (
+						<div className="d-flex justify-content-center mb-6">
+							<StepWizardRevamp
+								className="col-8"
+								currentStep={steps[stepIndex]}
+								stepIndex={stepIndex}
+								steps={steps}
+							/>
+						</div>
+					)}
 
-						<Outlet
-							context={{
-								accountForm,
-								accountSelected: account,
-								accounts,
-								navigate,
-								onSubmit,
-								product,
-								setAccounts,
-								setSelectedAccount,
-							}}
-						/>
-					</div>
-				</main>
+					<Outlet
+						context={{
+							accounts,
+							navigate,
+							onSubmit,
+							product,
+							selectedAccount: currentAccount,
+							setSelectedAccount,
+						}}
+					/>
+				</div>
 			</div>
 		</div>
 	);

@@ -6,19 +6,12 @@
 import {expect, mergeTests} from '@playwright/test';
 
 import {documentLibraryPagesTest} from '../../fixtures/documentLibraryPages.fixtures';
-import {featureFlagsTest} from '../../fixtures/featureFlagsTest';
 import {loginTest} from '../../fixtures/loginTest';
 
 const MOCKED_IMAGE_PATH =
 	'USER_IMAGES_URL_https://images.freeimages.com/images/large-previews/83f/paris-1213603.jpg';
 
-export const test = mergeTests(
-	loginTest(),
-	featureFlagsTest({
-		'LPD-10793': true,
-	}),
-	documentLibraryPagesTest
-);
+export const test = mergeTests(loginTest(), documentLibraryPagesTest);
 
 test('LPD-6717 Create AI Image option in Management Toolbar without API Key opens an alert', async ({
 	documentLibraryPage,
@@ -49,7 +42,7 @@ test('LPD-6717 and LPD-6691 Create AI Image option is hidden when disabled from 
 	await aiCreatorInstanceSettingsPage.enableDalleCreateImages();
 });
 
-test.skip('LPD-6677 Can add images to DM when API Key is provided', async ({
+test('LPD-6677 Can add images to DM when API Key is provided', async ({
 	aiCreatorInstanceSettingsPage,
 	documentLibraryPage,
 	gogoShellPage,
@@ -60,6 +53,10 @@ test.skip('LPD-6677 Can add images to DM when API Key is provided', async ({
 	);
 
 	await aiCreatorInstanceSettingsPage.addApiKey();
+
+	await expect(
+		page.getByText('Success:Your request completed successfully.')
+	).toBeVisible();
 
 	await documentLibraryPage.goto();
 

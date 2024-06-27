@@ -39,10 +39,19 @@ export class ObjectAdminApiHelper {
 		);
 	}
 
-	async postObjectDefinition(data: DataObject) {
-		return this.apiHelpers.post(
-			`${this.apiHelpers.baseUrl}${this.basePath}/object-definitions`,
-			{data}
+	async getObjectActionsByExternalReferenceCode(
+		objectDefinitionExternalReferenceCode: string
+	) {
+		return this.apiHelpers.get(
+			`${this.apiHelpers.baseUrl}${this.basePath}/object-definitions/by-external-reference-code/${objectDefinitionExternalReferenceCode}/object-actions`
+		);
+	}
+
+	async getObjectDefinitionByExternalReferenceCode(
+		externalReferenceCode: string
+	) {
+		return this.apiHelpers.get(
+			`${this.apiHelpers.baseUrl}${this.basePath}/object-definitions/by-external-reference-code/${externalReferenceCode}`
 		);
 	}
 
@@ -53,6 +62,20 @@ export class ObjectAdminApiHelper {
 		return this.apiHelpers.post<Partial<ObjectAction>>(
 			`${this.apiHelpers.baseUrl}${this.basePath}/object-definitions/by-external-reference-code/${externalReferenceCode}/object-actions`,
 			{data: objectAction}
+		);
+	}
+
+	async postObjectDefinition(data: DataObject): Promise<ObjectDefinition> {
+		return this.apiHelpers.post(
+			`${this.apiHelpers.baseUrl}${this.basePath}/object-definitions`,
+			{data}
+		);
+	}
+
+	async postObjectDefinitionPublish(objectDefinitionId: number) {
+		return this.apiHelpers.post(
+			`${this.apiHelpers.baseUrl}${this.basePath}/object-definitions/${objectDefinitionId}/publish`,
+			{}
 		);
 	}
 
@@ -157,6 +180,16 @@ export class ObjectAdminApiHelper {
 					name: objectFolderExternalReferenceCode,
 				},
 			}
+		);
+	}
+
+	async putObjectRelationship(
+		objectRelationshipId: number,
+		objectRelationship: Partial<ObjectRelationship>
+	) {
+		return this.apiHelpers.put(
+			`${this.apiHelpers.baseUrl}${this.basePath}/object-relationships/${objectRelationshipId}`,
+			{data: objectRelationship}
 		);
 	}
 }

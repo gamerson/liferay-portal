@@ -7,6 +7,7 @@ import {Locator, Page, expect} from '@playwright/test';
 
 import {liferayConfig} from '../../liferay.config';
 import getPageDefinition from '../../tests/layout-content-page-editor-web/utils/getPageDefinition';
+import {clickAndExpectToBeHidden} from '../../utils/clickAndExpectToBeHidden';
 import fillAndClickOutside from '../../utils/fillAndClickOutside';
 import getRandomString from '../../utils/getRandomString';
 import {waitForSuccessAlert} from '../../utils/waitForSuccessAlert';
@@ -16,10 +17,13 @@ export class PageEditorPage {
 	readonly page: Page;
 
 	readonly experienceSelector: Locator;
+	readonly languageSelector: Locator;
 	readonly publishButton: Locator;
+	readonly publishMasterButton: Locator;
 	readonly redoButton: Locator;
 	readonly undoButton: Locator;
 	readonly undoHistory: Locator;
+	readonly selectItemMappingButton: Locator;
 
 	readonly segmentEditorPage: SegmentEditorPage;
 
@@ -29,10 +33,15 @@ export class PageEditorPage {
 		this.experienceSelector = page.locator(
 			'.page-editor__experience-selector'
 		);
+		this.languageSelector = page.getByLabel('Select a language');
 		this.publishButton = page.getByLabel('Publish', {exact: true});
+		this.publishMasterButton = page.getByLabel('Publish Master', {
+			exact: true,
+		});
 		this.redoButton = page.getByTitle('Redo');
 		this.undoButton = page.getByTitle('Undo');
 		this.undoHistory = page.locator('.page-editor__undo-history');
+		this.selectItemMappingButton = page.getByLabel('Select Item');
 
 		this.segmentEditorPage = new SegmentEditorPage(page);
 	}
@@ -43,7 +52,7 @@ export class PageEditorPage {
 		);
 	}
 
-	async addFragment(setName: string, name: string) {
+	async addFragment(setName: string, name: string, dropTarget?: Locator) {
 		await this.goToSidebarTab('Fragments and Widgets');
 
 		const header = this.page.getByRole('menuitem', {
@@ -59,12 +68,58 @@ export class PageEditorPage {
 			await header.click();
 		}
 
-		await this.page.getByLabel(`Add ${name}`).focus();
+		if (dropTarget) {
+			await this.page.getByRole('menuitem', {name}).first().hover();
 
-		await this.page.keyboard.press('Enter');
-		await this.page.keyboard.press('Enter');
+			await this.page.mouse.down();
+			await dropTarget.hover();
+
+			const boundingClientRect = await dropTarget.evaluate((element) =>
+				element.getBoundingClientRect()
+			);
+
+			await dropTarget.hover({
+				position: {
+					x: boundingClientRect.width / 2,
+					y: boundingClientRect.height / 2,
+				},
+			});
+			await this.page.mouse.up();
+		}
+		else {
+			await this.page.getByLabel(`Add ${name}`).focus();
+
+			await this.page.keyboard.press('Enter');
+			await this.page.keyboard.press('Enter');
+		}
 
 		await this.waitForChangesSaved();
+	}
+
+	async addRuleAction() {
+		await this.page.getByLabel('Select Action').press('Enter');
+		await this.page.keyboard.press('Tab');
+		await this.page.keyboard.press('Enter');
+		await this.page.keyboard.press('Tab');
+		await this.page.keyboard.press('Enter');
+		await this.page.keyboard.press('Tab');
+		await this.page
+			.getByRole('button', {name: 'Add Action'})
+			.press('Enter');
+	}
+
+	async addRuleCondition() {
+		await this.page
+			.getByLabel('Select Item for the Condition')
+			.press('Enter');
+		await this.page.keyboard.press('Tab');
+		await this.page.keyboard.press('Enter');
+		await this.page.keyboard.press('Tab');
+		await this.page.keyboard.press('Enter');
+		await this.page.keyboard.press('Tab');
+		await this.page
+			.getByRole('button', {name: 'Add Condition'})
+			.press('Enter');
 	}
 
 	async addWidget(category: string, name: string) {
@@ -95,26 +150,68 @@ export class PageEditorPage {
 		await this.waitForChangesSaved();
 	}
 
-	async changeFragmentConfiguration(
-		fragmentId: string,
-		tab: ConfigurationTab,
-		fieldLabel: string,
-		value: string,
-		isDesktop = true
-	) {
+	async changeFragmentConfiguration({
+		fieldLabel,
+		fragmentId,
+		isDesktop = true,
+		tab,
+		value,
+		valueFromStylebook,
+	}: {
+		fieldLabel: string;
+		fragmentId: string;
+		isDesktop?: boolean;
+		tab: ConfigurationTab;
+		value?: string | boolean;
+		valueFromStylebook?: boolean;
+	}) {
 		await this.selectFragment(fragmentId, isDesktop);
 		await this.goToConfigurationTab(tab);
 
 		// Change value in different way depending on field type
 
-		const field = await this.page.getByLabel(fieldLabel, {exact: true});
-		const type = await field.evaluate((element) => element.tagName);
+		const field = await this.page.getByLabel(fieldLabel, {
+			exact: true,
+		});
 
-		if (type === 'INPUT' || type === 'TEXTAREA') {
-			await field.fill(value);
+		if (valueFromStylebook) {
+			await field
+				.getByLabel('Value from Stylebook', {exact: true})
+				.click();
+
+			const valueButton = await this.page.getByTitle(value as string, {
+				exact: true,
+			});
+
+			await valueButton.click();
 		}
-		else if (type === 'SELECT') {
-			await field.selectOption(value);
+		else {
+			const type = await field.evaluate((element) => element.tagName);
+
+			if (type === 'INPUT' || type === 'TEXTAREA') {
+				const inputType = await field.evaluate(
+					(element: HTMLInputElement) => element.type
+				);
+
+				if (inputType === 'checkbox') {
+					if (value as boolean) {
+						field.check();
+					}
+					else {
+						field.uncheck();
+					}
+
+					return;
+				}
+
+				await field.fill(value as string);
+			}
+			else if (type === 'SELECT') {
+				await field.selectOption(value as string);
+			}
+			else if (type === 'BUTTON') {
+				await field.click();
+			}
 		}
 
 		// The change is applied on blur
@@ -170,10 +267,13 @@ export class PageEditorPage {
 			.frameLocator('iframe[title="Select"]')
 			.getByRole('link', {name: collectionType})
 			.click();
-		await this.page
-			.frameLocator('iframe[title="Select"]')
-			.getByRole('button', {name: 'Select ' + collectionTitle})
-			.click();
+
+		await clickAndExpectToBeHidden({
+			target: this.page.locator('.modal-dialog'),
+			trigger: this.page
+				.frameLocator('iframe[title="Select"]')
+				.getByRole('button', {name: 'Select ' + collectionTitle}),
+		});
 	}
 
 	async chooseCollectionFilterOption(fieldName: string, option: string) {
@@ -242,7 +342,7 @@ export class PageEditorPage {
 	async deleteExperience(name: string) {
 		await this.openExperienceSelector();
 
-		await this.page.on('dialog', async (dialog) => await dialog.accept());
+		this.page.on('dialog', async (dialog) => await dialog.accept());
 
 		await this.page
 			.locator('.dropdown-menu__experience', {
@@ -290,7 +390,37 @@ export class PageEditorPage {
 		await this.waitForChangesSaved();
 	}
 
-	async editEditableText(
+	async editHTMLEditable(
+		fragmentId: string,
+		editableId: string,
+		value: string
+	) {
+
+		// Select fragment and editable
+
+		await this.selectEditable(fragmentId, editableId);
+
+		const editable = this.getEditable(fragmentId, editableId);
+
+		// Enable editor
+
+		await editable.dblclick();
+
+		// Set the content using codemirror API and save
+
+		await this.page
+			.locator('.CodeMirror')
+			.evaluate(
+				(element: any, value) => element.CodeMirror.setValue(value),
+				value
+			);
+
+		await this.page.getByRole('button', {name: 'Save'}).click();
+
+		await this.waitForChangesSaved();
+	}
+
+	async editTextEditable(
 		fragmentId: string,
 		editableId: string,
 		value: string
@@ -321,7 +451,10 @@ export class PageEditorPage {
 
 		await this.page.keyboard.type(value);
 
-		await this.page.locator('header.page-editor__disabled-area').click();
+		await this.page
+			.getByLabel('Configuration Panel')
+			.getByRole('heading', {name: editableId})
+			.click();
 
 		await this.waitForChangesSaved();
 	}
@@ -402,14 +535,50 @@ export class PageEditorPage {
 		);
 	}
 
-	async getFragmentStyle(
-		fragmentId: string,
-		style: string,
-		isDesktop = true
-	) {
-		const topper = this.getTopper(fragmentId, isDesktop);
+	/**
+	 * Get id of a fragment that was manually added to the page.
+	 *
+	 * This is for cases in which we are not able to use a page definition to
+	 * create the page, for example when editing display page templates.
+	 *
+	 * It's recommended to change fragment's name before using this method
+	 * so we make sure we get the id for the desired fragment
+	 *
+	 * @param fragmentName Name of the fragment
+	 */
 
-		const styles = await topper.evaluate((element) =>
+	async getFragmentId(fragmentName: string) {
+		const topper = this.page.locator(
+			`.page-editor__topper[data-name="${fragmentName}"]`
+		);
+
+		const fragmentId = await topper.evaluate((element) =>
+			Array.from(element.classList)
+				.find((cssClass) =>
+					cssClass.includes('lfr-layout-structure-item')
+				)
+				.replace('lfr-layout-structure-item-topper-', '')
+		);
+
+		return fragmentId;
+	}
+
+	async getFragmentStyle({
+		fragmentId,
+		isDesktop = true,
+		isTopperStyle = false,
+		style,
+	}: {
+		fragmentId: string;
+		isDesktop?: boolean;
+		isTopperStyle?: boolean;
+		style: string;
+	}) {
+		const element = isTopperStyle
+			? this.getTopper(fragmentId, isDesktop)
+			: this.getFragment(fragmentId, isDesktop);
+
+		const styles = await element.evaluate((element) =>
 			window.getComputedStyle(element)
 		);
 
@@ -435,16 +604,42 @@ export class PageEditorPage {
 	}
 
 	async isActive(fragmentId: string, isDesktop = true) {
-		const topper = isDesktop
-			? this.page.locator(
-					`.lfr-layout-structure-item-topper-${fragmentId}`
-			  )
-			: this.page
-					.frameLocator('.page-editor__global-context-iframe')
-					.locator(`.lfr-layout-structure-item-topper-${fragmentId}`);
+		const topper = this.getTopper(fragmentId, isDesktop);
 
 		return await topper.evaluate((element) =>
 			element.classList.contains('active')
+		);
+	}
+
+	async isMaster() {
+		const toolbar = this.page.locator('.page-editor__toolbar');
+
+		return await toolbar.evaluate((element) =>
+			element.classList.contains('page-editor__toolbar--master-layout')
+		);
+	}
+
+	async mapFormFragment(fragmentId: string, type: string, fields: string[]) {
+		const fragment = this.getFragment(fragmentId);
+
+		await fragment.getByLabel('Content Type').selectOption(type);
+
+		const fieldsModal = this.page.frameLocator(
+			'iframe[title="Manage Form Fields"]'
+		);
+
+		for (const field of fields) {
+			await fieldsModal
+				.getByRole('row', {name: field})
+				.getByRole('checkbox')
+				.check();
+		}
+
+		await this.page.locator('.modal-footer').getByText('Save').click();
+
+		await waitForSuccessAlert(
+			this.page,
+			'Success:Your form has been successfully loaded.'
 		);
 	}
 
@@ -468,12 +663,17 @@ export class PageEditorPage {
 	}
 
 	async publishPage() {
-		await this.publishButton.click();
+		const isMaster = await this.isMaster();
 
-		await waitForSuccessAlert(
-			this.page,
-			'Success:The page was published successfully.'
-		);
+		const button = isMaster ? this.publishMasterButton : this.publishButton;
+		const successMessage = isMaster
+			? 'Success:The master page was published successfully.'
+			: 'Success:The page was published successfully.';
+
+		await button.waitFor();
+		await button.click();
+
+		await waitForSuccessAlert(this.page, successMessage);
 	}
 
 	async removeFragment(fragmentId: string) {
@@ -501,6 +701,22 @@ export class PageEditorPage {
 		await this.waitForChangesSaved();
 	}
 
+	async hideFragment(fragmentId: string, isDesktop = true) {
+		await this.selectFragment(fragmentId, isDesktop);
+
+		await this.page
+			.locator('.page-editor__topper__item')
+			.getByRole('button', {name: 'Options'})
+			.click();
+
+		await this.page
+			.locator('.dropdown-menu.show')
+			.getByText('Hide Fragment')
+			.click();
+
+		await this.waitForChangesSaved();
+	}
+
 	async selectFragment(fragmentId: string, isDesktop = true) {
 		if (await this.isActive(fragmentId, isDesktop)) {
 			return;
@@ -512,7 +728,7 @@ export class PageEditorPage {
 
 		const isActive = await this.isActive(fragmentId, isDesktop);
 
-		await expect(isActive).toBe(true);
+		expect(isActive).toBe(true);
 	}
 
 	async selectEditable(
@@ -533,6 +749,69 @@ export class PageEditorPage {
 		await expect(editable).toBeFocused();
 	}
 
+	async setMappingConfiguration({
+		entity,
+		entry,
+		field,
+		recentSelectedItem,
+		relationship,
+		source,
+	}: {
+		entity?: string;
+		entry?: string;
+		field: string;
+		recentSelectedItem?: string;
+		relationship?: string;
+		source?: 'content' | 'relationship' | 'structure';
+	}) {
+
+		// Select source and relationship is needed
+
+		if (source) {
+			await this.page.getByLabel('Source').selectOption(source);
+		}
+
+		if (source === 'relationship') {
+			await this.page
+				.getByLabel('Relationship')
+				.selectOption(relationship);
+		}
+
+		// If source is not content, just select the field
+
+		if (source !== 'content') {
+			await this.page.getByLabel('Field').selectOption(field);
+
+			return;
+		}
+
+		// If source is content, select the item and the field
+
+		await this.selectItemMappingButton.click();
+
+		if (recentSelectedItem) {
+			await this.page
+				.getByRole('menuitem', {name: recentSelectedItem})
+				.click();
+		}
+		else {
+			await this.page
+				.frameLocator('iframe[title="Select"]')
+				.getByRole('menuitem', {name: entity})
+				.click();
+
+			await this.page.waitForTimeout(1500);
+
+			await this.page
+				.frameLocator('iframe[title="Select"]')
+				.getByRole('paragraph')
+				.filter({hasText: entry})
+				.click();
+		}
+
+		await this.page.getByLabel('Field').selectOption(field);
+	}
+
 	async switchExperience(experience: string) {
 		await this.openExperienceSelector();
 
@@ -547,6 +826,16 @@ export class PageEditorPage {
 		await expect(this.experienceSelector).toContainText(experience);
 
 		await this.closeExperienceSelector();
+	}
+
+	async switchLanguage(language: string) {
+		await this.languageSelector.click();
+
+		await this.page
+			.getByRole('option', {
+				name: `${language} Language`,
+			})
+			.click();
 	}
 
 	async switchViewport(viewport: Viewport) {
@@ -572,32 +861,32 @@ export class PageEditorPage {
 
 	getFragment(fragmentId: string, isDesktop = true) {
 		if (isDesktop) {
-			return this.page.locator(
-				`.lfr-layout-structure-item-${fragmentId}`
-			);
+			return this.page
+				.locator(`.lfr-layout-structure-item-${fragmentId}`)
+				.first();
 		}
 		else {
 			return this.page
 				.frameLocator('.page-editor__global-context-iframe')
-				.locator(`.lfr-layout-structure-item-${fragmentId}`);
+				.locator(`.lfr-layout-structure-item-${fragmentId}`)
+				.first();
 		}
 	}
 
 	getEditable(fragmentId: string, editableId: string, isDesktop = true) {
-		return this.getFragment(fragmentId, isDesktop).locator(
-			`[data-lfr-editable-id="${editableId}"]`
-		);
+		return this.getFragment(fragmentId, isDesktop)
+			.locator(`[data-lfr-editable-id="${editableId}"]`)
+			.first();
 	}
 
 	getTopper(fragmentId: string, isDesktop = true) {
-		const topper = isDesktop
-			? this.page.locator(
-					`.lfr-layout-structure-item-topper-${fragmentId}`
-			  )
+		return isDesktop
+			? this.page
+					.locator(`.lfr-layout-structure-item-topper-${fragmentId}`)
+					.first()
 			: this.page
 					.frameLocator('.page-editor__global-context-iframe')
-					.locator(`.lfr-layout-structure-item-topper-${fragmentId}`);
-
-		return topper;
+					.locator(`.lfr-layout-structure-item-topper-${fragmentId}`)
+					.first();
 	}
 }

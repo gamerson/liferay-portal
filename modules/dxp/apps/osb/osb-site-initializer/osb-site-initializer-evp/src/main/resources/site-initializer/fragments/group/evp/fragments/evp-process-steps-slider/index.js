@@ -1,4 +1,5 @@
 /* eslint-disable no-undef */
+
 /**
  * SPDX-FileCopyrightText: (c) 2000 Liferay, Inc. https://liferay.com
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
@@ -16,7 +17,7 @@ const indicators = [].slice.call(
 const items = [].slice.call(fragmentElement.querySelectorAll('.carousel-item'));
 const nextItemIndexKey = `${fragmentEntryLinkNamespace}-next-item-index`;
 const stepsNumber = fragmentElement.querySelectorAll('h1');
-const stepsTitle = fragmentElement.querySelectorAll('h5');
+const stepsTitle = fragmentElement.querySelectorAll('.h5');
 
 let moving = false;
 
@@ -126,9 +127,8 @@ function setNextItemIndex(index) {
 
 	indicators.forEach((indicator, index) => {
 		indicator.addEventListener('click', () => {
-			const indexActiveIndicator = indicators.indexOf(
-				getActiveIndicator()
-			);
+			const indexActiveIndicator =
+				indicators.indexOf(getActiveIndicator());
 
 			if (index !== indexActiveIndicator) {
 				if (index < indexActiveIndicator) {

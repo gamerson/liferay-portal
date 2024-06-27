@@ -115,23 +115,31 @@ const Table = <T extends BasicRow>({
 }: TableProps<T>) => {
 	const [sort, setSort] = useState<Sorting | null>(null);
 
-	const getColumnkeyFromObjectString = (columnKey: string) => {
+	const getSortString = (
+		columnKey: string,
+		prevSort: string,
+		sortOrder: string
+	) => {
 		const columnMap: {[key: string]: string} = {
 			ACCOUNT_NAME: 'prospectAccountName',
 			CLAIM_STATUS: 'mdfClaimStatus',
 			CLOSE_DATE: 'closeDate',
 			DATE_SUBMITTED: 'submitDate',
 			DEAL_DATE_SUBMITTED: 'dateCreated',
+			END_ACT_PERIOD: 'maxDateActivity',
 			OPPORTUNITY_ACCOUNT_NAME: 'accountName',
 			PARTNER: 'companyName',
 			PARTNER_ACCOUNT_NAME: 'partnerAccountName',
 			PARTNER_NAME: 'partnerFirstName',
 			REQUEST_STATUS: 'mdfRequestStatus',
 			STAGE: 'stage',
+			START_ACT_PERIOD: 'minDateActivity',
 			TYPE: 'partial',
 		};
 
-		return columnMap[columnKey];
+		return columnMap[columnKey]
+			? `${columnMap[columnKey]}:${sortOrder}`
+			: prevSort;
 	};
 
 	const onSortChange = useCallback((sort: Sorting | null) => {
@@ -164,9 +172,11 @@ const Table = <T extends BasicRow>({
 											? 'desc'
 											: 'asc';
 
-										return `${getColumnkeyFromObjectString(
-											column.columnKey
-										)}:${sortOrder}`;
+										return getSortString(
+											column.columnKey,
+											prevSort,
+											sortOrder
+										);
 									});
 								}}
 								sortable={

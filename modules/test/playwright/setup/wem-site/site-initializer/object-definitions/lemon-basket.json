@@ -1,0 +1,39 @@
+{
+	"externalReferenceCode": "lemon-basket-object-erc",
+	"label": {
+		"en_US": "Lemon Basket"
+	},
+	"name": "LemonBasket",
+	"objectFields": [
+		{
+			"DBType": "String",
+			"indexed": true,
+			"indexedAsKeyword": true,
+			"label": {
+				"en_US": "Lemon Basket Color"
+			},
+			"name": "lemonBasketColor",
+			"required": false,
+			"type": "String"
+		},
+		{
+			"DBType": "String",
+			"businessType": "Picklist",
+			"indexed": true,
+			"indexedAsKeyword": false,
+			"label": {
+				"en_US": "Material"
+			},
+			"listTypeDefinitionId": "[$LIST_TYPE_DEFINITION_ID:Material$]",
+			"name": "material",
+			"required": false,
+			"type": "String"
+		}
+	],
+	"panelCategoryKey": "site_administration.content",
+	"pluralLabel": {
+		"en_US": "Lemon Baskets"
+	},
+	"scope": "site",
+	"titleObjectFieldName": "material"
+}

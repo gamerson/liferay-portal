@@ -50,6 +50,7 @@ import com.liferay.petra.function.UnsafeConsumer;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.events.ServicePreAction;
 import com.liferay.portal.events.ThemeServicePreAction;
+import com.liferay.portal.kernel.feature.flag.FeatureFlagManagerUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.repository.model.FileEntry;
@@ -69,6 +70,7 @@ import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.Constants;
+import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.Portal;
@@ -94,8 +96,10 @@ import com.liferay.portlet.documentlibrary.constants.DLConstants;
 import com.liferay.ratings.kernel.service.RatingsEntryLocalService;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 import javax.servlet.http.HttpServletRequest;
@@ -371,11 +375,21 @@ public class DocumentResourceImpl extends BaseDocumentResourceImpl {
 		String fileName = null;
 		String title = null;
 		String description = null;
+		Date displayDate = null;
+		Date expirationDate = null;
 
 		if (document != null) {
 			fileName = document.getFileName();
 			title = document.getTitle();
 			description = document.getDescription();
+
+			if (FeatureFlagManagerUtil.isEnabled(
+					contextCompany.getCompanyId(), "LPD-10701")) {
+
+				displayDate = document.getDatePublished();
+			}
+
+			expirationDate = document.getDateExpired();
 		}
 
 		if (fileName == null) {
@@ -390,14 +404,20 @@ public class DocumentResourceImpl extends BaseDocumentResourceImpl {
 			existingFileEntry.getDescription();
 		}
 
+		if (displayDate == null) {
+			existingFileEntry.getDisplayDate();
+		}
+
+		if (expirationDate == null) {
+			existingFileEntry.getExpirationDate();
+		}
+
 		return _toDocument(
 			_dlAppService.updateFileEntry(
 				documentId, fileName, binaryFile.getContentType(), title, null,
 				description, null, DLVersionNumberIncrease.AUTOMATIC,
-				binaryFile.getInputStream(), binaryFile.getSize(),
-				existingFileEntry.getDisplayDate(),
-				existingFileEntry.getExpirationDate(),
-				existingFileEntry.getReviewDate(),
+				binaryFile.getInputStream(), binaryFile.getSize(), displayDate,
+				expirationDate, existingFileEntry.getReviewDate(),
 				_createServiceContext(
 					Constants.UPDATE,
 					() -> ArrayUtil.toArray(
@@ -405,8 +425,10 @@ public class DocumentResourceImpl extends BaseDocumentResourceImpl {
 							DLFileEntry.class.getName(), documentId)),
 					() -> _assetTagLocalService.getTagNames(
 						DLFileEntry.class.getName(), documentId),
-					existingFileEntry.getFolderId(), document,
-					existingFileEntry.getGroupId())));
+					_getDLFileEntryType(
+						existingFileEntry.getFolderId(), document,
+						existingFileEntry.getGroupId()),
+					document, existingFileEntry.getGroupId())));
 	}
 
 	@Override
@@ -543,17 +565,27 @@ public class DocumentResourceImpl extends BaseDocumentResourceImpl {
 		BinaryFile binaryFile = multipartBody.getBinaryFile("file");
 
 		if (binaryFile == null) {
-			throw new BadRequestException("No file found in body");
+			binaryFile = new BinaryFile(null, null, null, 0);
 		}
 
 		String fileName = null;
 		String title = null;
 		String description = null;
+		Date displayDate = null;
+		Date expirationDate = null;
 
 		if (document != null) {
 			fileName = document.getFileName();
 			title = document.getTitle();
 			description = document.getDescription();
+
+			if (FeatureFlagManagerUtil.isEnabled(
+					contextCompany.getCompanyId(), "LPD-10701")) {
+
+				displayDate = document.getDatePublished();
+			}
+
+			expirationDate = document.getDateExpired();
 		}
 
 		if (fileName == null) {
@@ -564,15 +596,30 @@ public class DocumentResourceImpl extends BaseDocumentResourceImpl {
 			title = fileName;
 		}
 
+		String contentType = binaryFile.getContentType();
+
+		DLFileEntryType dlFileEntryType = _getDLFileEntryType(
+			documentFolderId, document, groupId);
+
+		if ((dlFileEntryType != null) &&
+			Objects.equals(
+				dlFileEntryType.getFileEntryTypeKey(),
+				"DL_VIDEO_EXTERNAL_SHORTCUT")) {
+
+			contentType =
+				ContentTypes.
+					APPLICATION_VND_LIFERAY_VIDEO_EXTERNAL_SHORTCUT_HTML;
+		}
+
 		return _toDocument(
 			_dlAppService.addFileEntry(
 				externalReferenceCode, repositoryId, documentFolderId, fileName,
-				binaryFile.getContentType(), title, null, description, null,
-				binaryFile.getInputStream(), binaryFile.getSize(), null, null,
-				null,
+				contentType, title, null, description, null,
+				binaryFile.getInputStream(), binaryFile.getSize(), displayDate,
+				expirationDate, null,
 				_createServiceContext(
 					Constants.ADD, () -> new Long[0], () -> new String[0],
-					documentFolderId, document, groupId)));
+					dlFileEntryType, document, groupId)));
 	}
 
 	private UnsafeConsumer<BooleanQuery, Exception>
@@ -601,8 +648,8 @@ public class DocumentResourceImpl extends BaseDocumentResourceImpl {
 
 	private ServiceContext _createServiceContext(
 			String command, Supplier<Long[]> defaultCategoriesSupplier,
-			Supplier<String[]> defaultKeywordsSupplier, Long documentFolderId,
-			Document document, Long groupId)
+			Supplier<String[]> defaultKeywordsSupplier,
+			DLFileEntryType dlFileEntryType, Document document, Long groupId)
 		throws Exception {
 
 		Long[] assetCategoryIds = null;
@@ -652,9 +699,6 @@ public class DocumentResourceImpl extends BaseDocumentResourceImpl {
 			_initThemeDisplay(
 				groupId, contextHttpServletRequest, contextHttpServletResponse);
 		}
-
-		DLFileEntryType dlFileEntryType = _getDLFileEntryType(
-			documentFolderId, document, groupId);
 
 		if (dlFileEntryType != null) {
 			serviceContext.setAttribute(
@@ -946,15 +990,14 @@ public class DocumentResourceImpl extends BaseDocumentResourceImpl {
 			FileEntry fileEntry, MultipartBody multipartBody)
 		throws Exception {
 
-		BinaryFile binaryFile = multipartBody.getBinaryFile("file");
-
 		Document document = multipartBody.getValueAsNullableInstance(
 			"document", Document.class);
 
-		if ((binaryFile == null) && (document == null)) {
-			throw new BadRequestException(
-				"Document and file are not found in body");
+		if (document == null) {
+			throw new BadRequestException("Document not found in body");
 		}
+
+		BinaryFile binaryFile = multipartBody.getBinaryFile("file");
 
 		if (binaryFile == null) {
 			binaryFile = new BinaryFile(
@@ -968,11 +1011,21 @@ public class DocumentResourceImpl extends BaseDocumentResourceImpl {
 		String fileName = null;
 		String title = null;
 		String description = null;
+		Date displayDate = null;
+		Date expirationDate = null;
 
 		if (document != null) {
 			fileName = document.getFileName();
 			title = document.getTitle();
 			description = document.getDescription();
+
+			if (FeatureFlagManagerUtil.isEnabled(
+					contextCompany.getCompanyId(), "LPD-10701")) {
+
+				displayDate = document.getDatePublished();
+			}
+
+			expirationDate = document.getDateExpired();
 		}
 
 		if (fileName == null) {
@@ -988,12 +1041,14 @@ public class DocumentResourceImpl extends BaseDocumentResourceImpl {
 				fileEntry.getFileEntryId(), fileName,
 				binaryFile.getContentType(), title, null, description, null,
 				DLVersionNumberIncrease.AUTOMATIC, binaryFile.getInputStream(),
-				binaryFile.getSize(), fileEntry.getDisplayDate(),
-				fileEntry.getExpirationDate(), fileEntry.getReviewDate(),
+				binaryFile.getSize(), displayDate, expirationDate,
+				fileEntry.getReviewDate(),
 				_createServiceContext(
 					Constants.UPDATE, () -> new Long[0], () -> new String[0],
-					fileEntry.getFolderId(), document,
-					fileEntry.getGroupId())));
+					_getDLFileEntryType(
+						fileEntry.getFolderId(), document,
+						fileEntry.getGroupId()),
+					document, fileEntry.getGroupId())));
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(

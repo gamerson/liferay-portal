@@ -8,6 +8,7 @@ import {render, screen} from '@testing-library/react';
 import React from 'react';
 
 import '@testing-library/jest-dom/extend-expect';
+import {checkAccessibility} from '@liferay/layout-js-components-web';
 
 import {EDITABLE_FRAGMENT_ENTRY_PROCESSOR} from '../../../../../../src/main/resources/META-INF/resources/page_editor/app/config/constants/editableFragmentEntryProcessor';
 import {StoreContextProvider} from '../../../../../../src/main/resources/META-INF/resources/page_editor/app/contexts/StoreContext';
@@ -156,6 +157,12 @@ describe('ContentsSidebar', () => {
 		expect(screen.getByText('WC2')).toBeInTheDocument();
 	});
 
+	it('checks panel accessibility', async () => {
+		const {container} = renderPageContent();
+
+		await checkAccessibility({context: container});
+	});
+
 	it('shows inline text within the content list when the editable type is text', () => {
 		renderPageContent();
 
@@ -244,8 +251,7 @@ describe('ContentsSidebar', () => {
 						[EDITABLE_FRAGMENT_ENTRY_PROCESSOR]: {
 							'element-text': {
 								defaultValue: '\n\tParagraph example\n',
-								en_US:
-									'<span style="background: black;">This is a paragraph&nbsp&nbsp&nbsp<span>',
+								en_US: '<span style="background: black;">This is a paragraph&nbsp&nbsp&nbsp<span>',
 							},
 						},
 					},
@@ -269,8 +275,7 @@ describe('ContentsSidebar', () => {
 						[EDITABLE_FRAGMENT_ENTRY_PROCESSOR]: {
 							'element-text': {
 								defaultValue: '\n\tParagraph example\n',
-								en_US:
-									'<img src="first-image"><img src="second-image">',
+								en_US: '<img src="first-image"><img src="second-image">',
 							},
 						},
 					},

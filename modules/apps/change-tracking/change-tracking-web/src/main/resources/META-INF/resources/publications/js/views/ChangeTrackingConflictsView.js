@@ -24,6 +24,7 @@ class ChangeTrackingConflictsView extends ChangeTrackingBaseScheduleView {
 
 		const {
 			hasUnapprovedChanges,
+			isEmpty,
 			learnLink,
 			publishURL,
 			redirect,
@@ -39,6 +40,7 @@ class ChangeTrackingConflictsView extends ChangeTrackingBaseScheduleView {
 		} = props;
 
 		this.hasUnapprovedChanges = hasUnapprovedChanges;
+		this.isEmpty = isEmpty;
 		this.learnLink = learnLink;
 		this.publishURL = publishURL;
 		this.redirect = redirect;
@@ -58,6 +60,7 @@ class ChangeTrackingConflictsView extends ChangeTrackingBaseScheduleView {
 			formError: null,
 			scheduleButtonDisabled:
 				!!this.unresolvedConflicts.length ||
+				isEmpty ||
 				(this.hasUnapprovedChanges && !this.unapprovedChangesAllowed)
 					? true
 					: false,
@@ -93,10 +96,10 @@ class ChangeTrackingConflictsView extends ChangeTrackingBaseScheduleView {
 								this.unapprovedChangesAllowed
 									? Liferay.Language.get(
 											'this-publication-contains-unapproved-changes'
-									  )
+										)
 									: Liferay.Language.get(
 											'this-publication-contains-unapproved-changes-that-must-be-approved-before-publishing'
-									  )
+										)
 							}
 						/>
 					)}
@@ -110,10 +113,10 @@ class ChangeTrackingConflictsView extends ChangeTrackingBaseScheduleView {
 								{this.unscheduleURL
 									? Liferay.Language.get(
 											'this-scheduled-publication-contains-conflicting-changes-that-must-be-manually-resolved-before-publishing'
-									  )
+										)
 									: Liferay.Language.get(
 											'this-publication-contains-conflicting-changes-that-must-be-manually-resolved-before-publishing'
-									  )}
+										)}
 							</span>
 
 							<a href={this.learnLink.url}>

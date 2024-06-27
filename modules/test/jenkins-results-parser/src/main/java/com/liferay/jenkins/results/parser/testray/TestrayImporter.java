@@ -652,6 +652,13 @@ public class TestrayImporter {
 					_replaceEnvVars(testrayProjectName, true));
 			}
 
+			if ((testrayProject == null) &&
+				!JenkinsResultsParserUtil.isNullOrEmpty(testrayProjectName)) {
+
+				testrayProject = testrayServer.createTestrayProject(
+					_replaceEnvVars(testrayProjectName, true));
+			}
+
 			testrayProjectID = _getBuildParameter("TESTRAY_PROJECT_ID");
 
 			if ((testrayProject == null) && (testrayProjectID != null) &&
@@ -1227,6 +1234,38 @@ public class TestrayImporter {
 				continue;
 			}
 
+			String testray1ImportEnabled = "false";
+
+			try {
+				testray1ImportEnabled =
+					JenkinsResultsParserUtil.getBuildProperty(
+						"testray.import.enabled[testray-1]");
+			}
+			catch (IOException ioException) {
+			}
+
+			if (!(testrayBuild instanceof Testray1TestrayBuild) &&
+				(testray1ImportEnabled != null)) {
+
+				TestrayProject testrayProject =
+					testrayBuild.getTestrayProject();
+
+				TestrayRoutine testrayRoutine =
+					testrayBuild.getTestrayRoutine();
+
+				TestrayProductVersion testrayProductVersion =
+					testrayBuild.getTestrayProductVersion();
+
+				Testray1TestrayBuild testray1TestrayBuild =
+					_createTestray1TestrayBuild(
+						testrayBuild.getName(), testrayBuild.getDescription(),
+						testrayBuild.getDueDate(), testrayBuild.getPortalSHA(),
+						testrayProductVersion.getName(),
+						testrayProject.getName(), testrayRoutine.getName());
+
+				System.out.println(testray1TestrayBuild.getURL());
+			}
+
 			testrayBuildIDs.add(testrayBuild.getID());
 
 			TestrayServer testrayServer = testrayBuild.getTestrayServer();
@@ -1501,6 +1540,46 @@ public class TestrayImporter {
 			qaWebsitesBranchInformationBuild.getQAWebsitesBranchInformation());
 
 		qaWebsitesGitWorkingDirectory.displayLog();
+	}
+
+	private Testray1TestrayBuild _createTestray1TestrayBuild(
+		String testrayBuildName, String testrayBuildDescription,
+		Date testrayBuildDueDate, String testrayBuildSHA,
+		String testrayProductVersionName, String testrayProjectName,
+		String testrayRoutineName) {
+
+		String testrayServerURL;
+
+		try {
+			testrayServerURL = JenkinsResultsParserUtil.getBuildProperty(
+				"testray.server.url[testray-1]");
+		}
+		catch (IOException ioException) {
+			throw new RuntimeException(ioException);
+		}
+
+		TestrayServer testrayServer = TestrayFactory.newTestrayServer(
+			testrayServerURL);
+
+		TestrayProject testrayProject = testrayServer.getTestrayProjectByName(
+			testrayProjectName);
+
+		TestrayRoutine testrayRoutine = testrayProject.getTestrayRoutineByName(
+			testrayRoutineName);
+
+		TestrayProductVersion testrayProductVersion =
+			testrayProject.getTestrayProductVersionByName(
+				testrayProductVersionName);
+
+		TestrayBuild testrayBuild = testrayRoutine.createTestrayBuild(
+			testrayProductVersion, testrayBuildName, testrayBuildDueDate,
+			testrayBuildDescription, testrayBuildSHA);
+
+		if (!(testrayBuild instanceof Testray1TestrayBuild)) {
+			throw new RuntimeException("Invalid Testray build " + testrayBuild);
+		}
+
+		return (Testray1TestrayBuild)testrayBuild;
 	}
 
 	private String _fixSlackString(String string) {

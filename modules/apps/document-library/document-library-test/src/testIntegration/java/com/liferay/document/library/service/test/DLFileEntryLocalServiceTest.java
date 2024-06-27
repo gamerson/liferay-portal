@@ -19,6 +19,7 @@ import com.liferay.document.library.kernel.exception.NoSuchFolderException;
 import com.liferay.document.library.kernel.model.DLFileEntry;
 import com.liferay.document.library.kernel.model.DLFileEntryConstants;
 import com.liferay.document.library.kernel.model.DLFileEntryMetadata;
+import com.liferay.document.library.kernel.model.DLFileEntryTable;
 import com.liferay.document.library.kernel.model.DLFileEntryType;
 import com.liferay.document.library.kernel.model.DLFileEntryTypeConstants;
 import com.liferay.document.library.kernel.model.DLFileVersion;
@@ -27,6 +28,7 @@ import com.liferay.document.library.kernel.model.DLFolderConstants;
 import com.liferay.document.library.kernel.model.DLVersionNumberIncrease;
 import com.liferay.document.library.kernel.service.DLAppLocalServiceUtil;
 import com.liferay.document.library.kernel.service.DLAppServiceUtil;
+import com.liferay.document.library.kernel.service.DLFileEntryLocalService;
 import com.liferay.document.library.kernel.service.DLFileEntryLocalServiceUtil;
 import com.liferay.document.library.kernel.service.DLFileEntryMetadataLocalServiceUtil;
 import com.liferay.document.library.kernel.service.DLFileEntryTypeLocalServiceUtil;
@@ -55,8 +57,10 @@ import com.liferay.expando.kernel.model.ExpandoTable;
 import com.liferay.expando.kernel.service.ExpandoColumnLocalServiceUtil;
 import com.liferay.expando.kernel.service.ExpandoTableLocalServiceUtil;
 import com.liferay.petra.io.unsync.UnsyncByteArrayInputStream;
+import com.liferay.petra.sql.dsl.DSLQueryFactoryUtil;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.configuration.test.util.ConfigurationTemporarySwapper;
+import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.interval.IntervalActionProcessor;
 import com.liferay.portal.kernel.lock.Lock;
 import com.liferay.portal.kernel.lock.LockManagerUtil;
@@ -98,6 +102,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -843,6 +848,54 @@ public class DLFileEntryLocalServiceTest {
 				_group.getGroupId(), folder.getFolderId()));
 	}
 
+	@Test
+	public void testDeleteFileVersionThatIsExpired() throws Exception {
+		ServiceContext serviceContext =
+			ServiceContextTestUtil.getServiceContext(
+				_group.getGroupId(), TestPropsValues.getUserId());
+
+		DLFileEntry dlFileEntry = addDLFileEntryWithStatus(
+			serviceContext, WorkflowConstants.STATUS_APPROVED);
+
+		dlFileEntry = updateDLFileEntryWithStatus(
+			dlFileEntry, new ByteArrayInputStream(new byte[0]), new HashMap<>(),
+			serviceContext, WorkflowConstants.STATUS_EXPIRED);
+
+		DLFileVersion lastDLFileVersion = dlFileEntry.getLatestFileVersion(
+			true);
+
+		DLFileEntryLocalServiceUtil.deleteFileVersion(
+			TestPropsValues.getUserId(), dlFileEntry.getFileEntryId(),
+			lastDLFileVersion.getVersion());
+
+		Assert.assertEquals(
+			1, dlFileEntry.getFileVersionsCount(WorkflowConstants.STATUS_ANY));
+	}
+
+	@Test
+	public void testDeleteFileVersionThatIsScheduled() throws Exception {
+		ServiceContext serviceContext =
+			ServiceContextTestUtil.getServiceContext(
+				_group.getGroupId(), TestPropsValues.getUserId());
+
+		DLFileEntry dlFileEntry = addDLFileEntryWithStatus(
+			serviceContext, WorkflowConstants.STATUS_SCHEDULED);
+
+		dlFileEntry = updateDLFileEntryWithStatus(
+			dlFileEntry, new ByteArrayInputStream(new byte[0]), new HashMap<>(),
+			serviceContext, WorkflowConstants.STATUS_SCHEDULED);
+
+		DLFileVersion lastDLFileVersion = dlFileEntry.getLatestFileVersion(
+			true);
+
+		DLFileEntryLocalServiceUtil.deleteFileVersion(
+			TestPropsValues.getUserId(), dlFileEntry.getFileEntryId(),
+			lastDLFileVersion.getVersion());
+
+		Assert.assertEquals(
+			1, dlFileEntry.getFileVersionsCount(WorkflowConstants.STATUS_ANY));
+	}
+
 	@Test(expected = InvalidFileVersionException.class)
 	public void testDoesNotDeleteUnapprovedVersion() throws Exception {
 		DLFileEntry dlFileEntry = DLFileEntryLocalServiceUtil.addFileEntry(
@@ -1196,6 +1249,32 @@ public class DLFileEntryLocalServiceTest {
 	}
 
 	@Test
+	public void testRevertScheduledVersion() throws Exception {
+		ServiceContext serviceContext =
+			ServiceContextTestUtil.getServiceContext(
+				_group.getGroupId(), TestPropsValues.getUserId());
+
+		DLFileEntry dlFileEntry = addDLFileEntryWithStatus(
+			serviceContext, WorkflowConstants.STATUS_SCHEDULED);
+
+		DLFileVersion originalVersion = dlFileEntry.getFileVersion();
+
+		dlFileEntry = updateDLFileEntryWithStatus(
+			dlFileEntry, new ByteArrayInputStream(new byte[0]), new HashMap<>(),
+			serviceContext, WorkflowConstants.STATUS_SCHEDULED);
+
+		DLFileEntryLocalServiceUtil.revertFileEntry(
+			TestPropsValues.getUserId(), dlFileEntry.getFileEntryId(),
+			originalVersion.getVersion(), serviceContext);
+
+		DLFileVersion latestFileVersion = dlFileEntry.getLatestFileVersion(
+			true);
+
+		Assert.assertEquals(
+			originalVersion.getTitle(), latestFileVersion.getTitle());
+	}
+
+	@Test
 	public void testUpdateDisplayDateExpirationDateReviewDate()
 		throws Exception {
 
@@ -1251,6 +1330,53 @@ public class DLFileEntryLocalServiceTest {
 		Assert.assertEquals(displayDate, dlFileEntry.getDisplayDate());
 		Assert.assertEquals(expirationDate, dlFileEntry.getExpirationDate());
 		Assert.assertEquals(reviewDate, dlFileEntry.getReviewDate());
+	}
+
+	@Test
+	public void testUpdateFileEntryActionableDynamicQuery() throws Exception {
+		for (int i = 0; i < 20; i++) {
+			_dlFileEntryLocalService.addFileEntry(
+				null, TestPropsValues.getUserId(), _group.getGroupId(),
+				_group.getGroupId(), DLFolderConstants.DEFAULT_PARENT_FOLDER_ID,
+				StringUtil.randomString(), ContentTypes.TEXT_PLAIN,
+				StringUtil.randomString(), StringUtil.randomString(),
+				StringPool.BLANK, StringPool.BLANK, -1, new HashMap<>(), null,
+				new ByteArrayInputStream(new byte[0]), 0, null, null, null,
+				ServiceContextTestUtil.getServiceContext(
+					_group.getGroupId(), TestPropsValues.getUserId()));
+		}
+
+		AtomicInteger atomicInteger = new AtomicInteger(0);
+		String description = RandomTestUtil.randomString();
+		RuntimeException runtimeException = new RuntimeException();
+
+		try {
+			_dlFileEntryLocalService.forEachFileEntry(
+				TestPropsValues.getCompanyId(),
+				dlFileEntry -> {
+					if (atomicInteger.incrementAndGet() == 20) {
+						throw runtimeException;
+					}
+
+					dlFileEntry.setDescription(description);
+				},
+				0L, new String[] {ContentTypes.TEXT_PLAIN});
+
+			Assert.fail();
+		}
+		catch (SystemException systemException) {
+			Assert.assertEquals(systemException.getCause(), runtimeException);
+		}
+
+		Assert.assertEquals(
+			10,
+			_dlFileEntryLocalService.dslQueryCount(
+				DSLQueryFactoryUtil.count(
+				).from(
+					DLFileEntryTable.INSTANCE
+				).where(
+					DLFileEntryTable.INSTANCE.description.eq(description)
+				)));
 	}
 
 	@Test
@@ -1508,6 +1634,29 @@ public class DLFileEntryLocalServiceTest {
 			WorkflowConstants.STATUS_APPROVED, serviceContext, new HashMap<>());
 	}
 
+	protected DLFileEntry addDLFileEntryWithStatus(
+			ServiceContext serviceContext, int status)
+		throws Exception {
+
+		Date displayDate = new Date(System.currentTimeMillis() + Time.MONTH);
+		Date expirationDate = new Date(System.currentTimeMillis() + Time.YEAR);
+
+		DLFileEntry dlFileEntry = DLFileEntryLocalServiceUtil.addFileEntry(
+			null, TestPropsValues.getUserId(), _group.getGroupId(),
+			_group.getGroupId(), DLFolderConstants.DEFAULT_PARENT_FOLDER_ID,
+			StringUtil.randomString(), ContentTypes.TEXT_PLAIN,
+			StringUtil.randomString(), StringUtil.randomString(),
+			StringPool.BLANK, StringPool.BLANK, -1, new HashMap<>(), null,
+			new ByteArrayInputStream(new byte[0]), 0, displayDate,
+			expirationDate, new Date(), serviceContext);
+
+		DLFileVersion dlFileVersion = dlFileEntry.getFileVersion();
+
+		return DLFileEntryLocalServiceUtil.updateStatus(
+			TestPropsValues.getUserId(), dlFileVersion.getFileVersionId(),
+			status, serviceContext, new HashMap<>());
+	}
+
 	protected DDMForm createDDMForm() {
 		DDMForm ddmForm = new DDMForm();
 
@@ -1609,8 +1758,37 @@ public class DLFileEntryLocalServiceTest {
 			WorkflowConstants.STATUS_APPROVED, serviceContext, new HashMap<>());
 	}
 
+	protected DLFileEntry updateDLFileEntryWithStatus(
+			DLFileEntry dlFileEntry, InputStream inputStream,
+			Map<String, com.liferay.dynamic.data.mapping.kernel.DDMFormValues>
+				ddmFormValuesMap,
+			ServiceContext serviceContext, int status)
+		throws Exception {
+
+		dlFileEntry = DLFileEntryLocalServiceUtil.updateFileEntry(
+			TestPropsValues.getUserId(), dlFileEntry.getFileEntryId(),
+			StringUtil.randomString(), ContentTypes.TEXT_PLAIN,
+			StringUtil.randomString(), StringUtil.randomString(),
+			StringPool.BLANK, StringPool.BLANK, DLVersionNumberIncrease.MAJOR,
+			DLFileEntryTypeConstants.FILE_ENTRY_TYPE_ID_BASIC_DOCUMENT,
+			ddmFormValuesMap, null, inputStream, 0,
+			dlFileEntry.getDisplayDate(), dlFileEntry.getExpirationDate(),
+			dlFileEntry.getReviewDate(), serviceContext);
+
+		DLFileVersion dlFileVersion = dlFileEntry.getLatestFileVersion(true);
+
+		dlFileVersion.setStatus(status);
+
+		DLFileVersionLocalServiceUtil.updateDLFileVersion(dlFileVersion);
+
+		return dlFileEntry;
+	}
+
 	@Inject
 	private DDMStorageEngineManager _ddmStorageEngineManager;
+
+	@Inject
+	private DLFileEntryLocalService _dlFileEntryLocalService;
 
 	@DeleteAfterTestRun
 	private Group _group;

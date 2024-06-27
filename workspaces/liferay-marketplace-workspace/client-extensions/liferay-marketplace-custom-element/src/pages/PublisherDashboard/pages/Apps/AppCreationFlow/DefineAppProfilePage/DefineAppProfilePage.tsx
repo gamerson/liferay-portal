@@ -30,6 +30,7 @@ import './DefineAppProfilePage.scss';
 import UploadLogo from '../../../../../../components/UploadLogo/UploadLogo';
 import {useMarketplaceContext} from '../../../../../../context/MarketplaceContext';
 import HeadlessCommerceAdminCatalogImpl from '../../../../../../services/rest/HeadlessCommerceAdminCatalog';
+import {getRandomID} from '../../../../../../utils/string';
 
 type DefineAppProfilePageProps = {
 	onClickBack: () => void;
@@ -70,7 +71,7 @@ export function DefineAppProfilePage({
 			error: false,
 			file,
 			fileName: file.name,
-			id: crypto.randomUUID(),
+			id: getRandomID(),
 			preview: URL.createObjectURL(file),
 			progress: 0,
 			readableSize: filesize(file.size),
@@ -100,9 +101,8 @@ export function DefineAppProfilePage({
 
 		setLoading(true);
 
-		const catalog = await HeadlessCommerceAdminCatalogImpl.getCatalog(
-			catalogId
-		);
+		const catalog =
+			await HeadlessCommerceAdminCatalogImpl.getCatalog(catalogId);
 
 		if (appERC) {
 			response = await updateApp({
@@ -125,7 +125,8 @@ export function DefineAppProfilePage({
 					{
 						channelId: channel?.id as number,
 						currencyCode: channel?.currencyCode as string,
-						externalReferenceCode: channel?.externalReferenceCode as string,
+						externalReferenceCode:
+							channel?.externalReferenceCode as string,
 						id: channel?.id as number,
 						name: channel?.name as string,
 						type: channel?.type as string,

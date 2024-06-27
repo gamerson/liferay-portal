@@ -5,6 +5,15 @@
 
 /// <reference types="react" />
 
+export declare function InlineEditInputRenderer({
+	itemId,
+	options,
+	rootPropertyName,
+	type,
+	value,
+	valuePath,
+	...otherProps
+}: any): JSX.Element;
 declare function TableCell({
 	actions,
 	field,

@@ -1,4 +1,4 @@
-@component-name = "portal-user-management"
+@component-name = "portal-commerce"
 definition {
 
 	property portal.release = "true";
@@ -121,8 +121,9 @@ definition {
 		var key_appName = "Independent Modules";
 
 		AssertClick(
-			locator1 = "AppManager#APP_NAME",
-			value1 = "Independent Modules");
+			key_text = ${key_appName},
+			locator1 = "Link#ANY",
+			value1 = ${key_appName});
 
 		AssertElementNotPresent(locator1 = "AppManager#APP_NAME");
 	}
@@ -194,7 +195,7 @@ definition {
 	@priority = 3
 	test CanDeactivateAndActivateBlogs {
 		property app.server.types = "jboss,tcserver,tomcat,weblogic,websphere,wildfly";
-		property database.types = "db2,hypersonic,mariadb,mysql,oracle,postgresql,sqlserver,sybase";
+		property database.types = "db2,hypersonic,mariadb,mysql,oracle,postgresql,sqlserver";
 		property portal.acceptance = "true";
 		property test.liferay.virtual.instance = "false";
 		property test.run.type = "single";

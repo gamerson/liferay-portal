@@ -3,13 +3,14 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-import {expect} from '@playwright/test';
+import {Page, expect} from '@playwright/test';
 
+import {ApiHelpers} from '../../../helpers/ApiHelpers';
 import {liferayConfig} from '../../../liferay.config';
 import {createChannel} from '../../osb-faro-web/utils/channel';
 import {createDataSource} from '../../osb-faro-web/utils/dataSource';
 
-export async function acceptsCookiesBanner(page) {
+export async function acceptsCookiesBanner(page: Page) {
 	const cookiesBannerButton = page.getByRole('button', {name: 'Accept All'});
 
 	if (await cookiesBannerButton.isVisible()) {
@@ -17,15 +18,15 @@ export async function acceptsCookiesBanner(page) {
 	}
 }
 
-export async function connectToAnalyticsCloud(page) {
-	await page.getByTestId('input-token', {name: 'input-token'}).click();
+export async function connectToAnalyticsCloud(page: Page) {
+	await page.getByPlaceholder('Paste token here.').click();
 
 	await page.keyboard.press('Control+V');
 
 	await page.getByRole('button', {name: 'Connect'}).click();
 }
 
-export async function disconnectFromAnalyticsCloud(page) {
+export async function disconnectFromAnalyticsCloud(page: Page) {
 	const disconnectButton = page.getByRole('button', {name: 'Disconnect'});
 
 	if (await disconnectButton.isVisible()) {
@@ -41,7 +42,7 @@ export async function disconnectFromAnalyticsCloud(page) {
 	}
 }
 
-export async function goToAnalyticsCloudInstanceSettings(page) {
+export async function goToAnalyticsCloudInstanceSettings(page: Page) {
 	await page.goto(liferayConfig.environment.baseUrl);
 
 	await page.getByLabel('Open Applications MenuCtrl+Alt+A').click();
@@ -57,7 +58,15 @@ export async function goToAnalyticsCloudInstanceSettings(page) {
 	});
 }
 
-export async function navigateToSitePage(page, siteName, pageName) {
+export async function navigateToSitePage({
+	page,
+	pageName,
+	siteName,
+}: {
+	page: Page;
+	pageName: string;
+	siteName?: string;
+}) {
 	const pageNameURL = pageName.replace(/ /g, '-').toLowerCase();
 
 	if (siteName) {
@@ -75,15 +84,15 @@ export async function navigateToSitePage(page, siteName, pageName) {
 	}
 }
 
-export async function syncAllContacts(page) {
-	const wizard = page.getByTestId('VIEW_WIZARD_MODE');
+export async function syncAllContacts(page: Page) {
+	const wizard = page.locator('[data-testid="VIEW_WIZARD_MODE"]');
 
 	await expect(wizard.getByText('Sync People')).toBeVisible({
 		timeout: 100 * 1000,
 	});
 
-	const syncContactsButton = page.getByTestId(
-		'sync-all-contacts-and-accounts__false'
+	const syncContactsButton = page.locator(
+		'[data-testid="sync-all-contacts-and-accounts__false"]'
 	);
 
 	if (await syncContactsButton.isVisible()) {
@@ -93,8 +102,19 @@ export async function syncAllContacts(page) {
 	await page.getByRole('button', {exact: true, name: 'Next'}).click();
 }
 
-export async function syncAnalyticsCloud(page, propertyName) {
-	await createChannel(page, propertyName);
+export async function syncAnalyticsCloud({
+	apiHelpers,
+	channelName,
+	page,
+}: {
+	apiHelpers: ApiHelpers;
+	channelName: string;
+	page: Page;
+}) {
+	await createChannel({
+		apiHelpers,
+		channelName,
+	});
 
 	await createDataSource(page);
 
@@ -106,31 +126,40 @@ export async function syncAnalyticsCloud(page, propertyName) {
 
 	await connectToAnalyticsCloud(page);
 
-	await syncSite(page, propertyName);
+	await syncSite({
+		channelName,
+		page,
+	});
 
 	await syncAllContacts(page);
 
 	await page.getByRole('button', {name: 'Finish'}).click();
 }
 
-export async function syncSite(page, propertyName) {
+export async function syncSite({
+	channelName,
+	page,
+}: {
+	channelName: string;
+	page: Page;
+}) {
 	await expect(
 		page.getByRole('heading', {name: 'Property Assignment'})
 	).toBeVisible({
 		timeout: 100 * 1000,
 	});
 
-	const wizard = page.getByTestId('VIEW_WIZARD_MODE');
+	const wizard = page.locator('[data-testid="VIEW_WIZARD_MODE"]');
 
 	await expect(wizard.getByText('Available Properties')).toBeVisible({
 		timeout: 100 * 1000,
 	});
 
-	await page.getByPlaceholder('Search').fill(propertyName);
+	await page.getByPlaceholder('Search').fill(channelName);
 
 	await page.getByRole('button', {name: 'Search'}).click();
 
-	await expect(page.getByRole('cell', {name: propertyName})).toBeVisible({
+	await expect(page.getByRole('cell', {name: channelName})).toBeVisible({
 		timeout: 100 * 1000,
 	});
 
@@ -142,7 +171,7 @@ export async function syncSite(page, propertyName) {
 
 	await page.getByRole('tab', {name: 'Sites'}).click();
 
-	await page.waitForTimeout(3000);
+	await page.waitForSelector('div[aria-modal="true"] tbody');
 
 	const checkbox = await page.$(
 		'.modal table.table tbody tr:first-child input[type="checkbox"]'

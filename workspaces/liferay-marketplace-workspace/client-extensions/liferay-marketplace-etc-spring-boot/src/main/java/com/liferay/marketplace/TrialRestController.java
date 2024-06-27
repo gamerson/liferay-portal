@@ -6,6 +6,8 @@
 package com.liferay.marketplace;
 
 import com.liferay.client.extension.util.spring.boot.LiferayOAuth2AccessTokenManager;
+import com.liferay.headless.admin.user.client.dto.v1_0.UserAccount;
+import com.liferay.headless.admin.user.client.resource.v1_0.UserAccountResource;
 import com.liferay.headless.commerce.admin.order.client.dto.v1_0.Order;
 import com.liferay.headless.commerce.admin.order.client.pagination.Page;
 import com.liferay.headless.commerce.admin.order.client.pagination.Pagination;
@@ -18,8 +20,11 @@ import com.liferay.notification.rest.client.dto.v1_0.NotificationQueueEntry;
 import com.liferay.notification.rest.client.dto.v1_0.NotificationTemplate;
 import com.liferay.notification.rest.client.resource.v1_0.NotificationQueueEntryResource;
 import com.liferay.notification.rest.client.resource.v1_0.NotificationTemplateResource;
+import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HashMapBuilder;
+import com.liferay.portal.kernel.util.LocaleUtil;
+import com.liferay.portal.kernel.util.StringUtil;
 
 import java.net.URL;
 
@@ -42,10 +47,10 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -56,8 +61,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class TrialRestController extends BaseRestController {
 
 	@DeleteMapping("{orderId}")
-	public void delete(@RequestParam String orderId) throws Exception {
-		_consoleService.deleteProject(orderId);
+	public void delete(@PathVariable long orderId) throws Exception {
+		_consoleService.deleteProject(String.valueOf(orderId));
 
 		_deletePortalInstance(orderId);
 	}
@@ -77,6 +82,60 @@ public class TrialRestController extends BaseRestController {
 		).toString();
 	}
 
+	@PostMapping("expire/{orderId}")
+	public void postExpire(@PathVariable long orderId) throws Exception {
+		_updateOrder(null, orderId, _ORDER_STATUS_PENDING);
+
+		_updateOrder(null, orderId, _ORDER_STATUS_PROCESSING);
+
+		_updateOrder(null, orderId, _ORDER_STATUS_COMPLETED);
+
+		delete(orderId);
+
+		if (_log.isInfoEnabled()) {
+			_log.info("Expired trial " + orderId);
+		}
+	}
+
+	@PostMapping("notify-end/{orderId}")
+	public void postNotifyEnd(@PathVariable long orderId) throws Exception {
+		OrderResource orderResource = _getOrderResource();
+
+		Order order = orderResource.getOrder(orderId);
+
+		UserAccountResource userAccountResource = _getUserAccountResource();
+
+		UserAccount userAccount =
+			userAccountResource.getUserAccountByEmailAddress(
+				order.getCreatorEmailAddress());
+
+		Map<String, String> customFields =
+			(Map<String, String>)order.getCustomFields();
+
+		_postNotificationQueueEntry(
+			order.getCreatorEmailAddress(), "TRY-IT-NOW-EXPIRING-ORDER",
+			new HashMapBuilder<String, Object>().put(
+				"%TRIAL_CREATOR_FIRST_NAME%", userAccount.getGivenName()
+			).put(
+				"%TRIAL_END_DATE%",
+				ZonedDateTime.parse(
+					customFields.get("trial-end-date")
+				).format(
+					DateTimeFormatter.ofPattern(
+						"MMMM d, yyyy", LocaleUtil.ENGLISH)
+				)
+			).build());
+
+		customFields.put(
+			"trial-notify-end-date",
+			ZonedDateTime.now(
+			).format(
+				DateTimeFormatter.ISO_INSTANT
+			));
+
+		_updateOrder(customFields, orderId, order.getOrderStatus());
+	}
+
 	@PostMapping("provisioning")
 	public void postProvisioning(
 			@AuthenticationPrincipal Jwt jwt, @RequestBody String json)
@@ -93,23 +152,26 @@ public class TrialRestController extends BaseRestController {
 		JSONObject modelDTOOrderJSONObject = jsonObject.getJSONObject(
 			"modelDTOOrder");
 
-		OrderResource orderResource = _getOrderResource();
+		if (_TRIAL_ACCOUNT_CHECK) {
+			OrderResource orderResource = _getOrderResource();
 
-		Page<Order> ordersPage = orderResource.getOrdersPage(
-			"",
-			"accountId/any(x:(x eq " +
-				modelDTOOrderJSONObject.getString("accountId") +
-					")) and orderTypeExternalReferenceCode eq 'SOLUTIONS7'",
-			Pagination.of(1, 1), "");
+			Page<Order> ordersPage = orderResource.getOrdersPage(
+				"",
+				"accountId/any(x:(x eq " +
+					modelDTOOrderJSONObject.getString("accountId") +
+						")) and orderTypeExternalReferenceCode eq 'SOLUTIONS7'",
+				Pagination.of(1, 1), "");
 
-		if (ordersPage.getTotalCount() > 1) {
-			_log.error(
-				"Account " + modelDTOOrderJSONObject.getString("accountId") +
-					" already has a provisioned order");
+			if (ordersPage.getTotalCount() > 1) {
+				_log.error(
+					"Account " +
+						modelDTOOrderJSONObject.getString("accountId") +
+							" already has a provisioned order");
 
-			_updateOrder(null, orderId, _ORDER_STATUS_CANCELLED);
+				_updateOrder(null, orderId, _ORDER_STATUS_CANCELLED);
 
-			return;
+				return;
+			}
 		}
 
 		com.liferay.headless.portal.instances.client.pagination.Page
@@ -121,6 +183,12 @@ public class TrialRestController extends BaseRestController {
 			_updateOrder(null, orderId, _ORDER_STATUS_ON_HOLD);
 
 			return;
+		}
+
+		if (modelDTOOrderJSONObject.getInt("orderStatus") ==
+				_ORDER_STATUS_OPEN) {
+
+			_updateOrder(null, orderId, _ORDER_STATUS_PENDING);
 		}
 
 		_updateOrder(null, orderId, _ORDER_STATUS_PROCESSING);
@@ -138,7 +206,7 @@ public class TrialRestController extends BaseRestController {
 				"Unable to set up project for order " + orderId + ":",
 				exception);
 
-			_deletePortalInstance(String.valueOf(orderId));
+			_deletePortalInstance(orderId);
 
 			_updateOrder(
 				HashMapBuilder.put(
@@ -175,17 +243,25 @@ public class TrialRestController extends BaseRestController {
 			).put(
 				"trial-virtualhost", portalInstance.getVirtualHost()
 			).build(),
-			orderId, _ORDER_STATUS_COMPLETED);
+			orderId, _ORDER_STATUS_IN_PROGRESS);
 
 		_postNotificationQueueEntry(
 			modelDTOOrderJSONObject.getString("creatorEmailAddress"),
-			portalInstance.getVirtualHost(),
-			jwt.getClaim(
-				"username"
-			).toString());
+			"TRY-IT-NOW-COMPLETED-ORDER",
+			new HashMapBuilder<String, Object>().put(
+				"%EMAIL%",
+				modelDTOOrderJSONObject.getString("creatorEmailAddress")
+			).put(
+				"%NAME%",
+				jwt.getClaim(
+					"username"
+				).toString()
+			).put(
+				"%URL%", portalInstance.getVirtualHost()
+			).build());
 	}
 
-	private void _deletePortalInstance(String orderId) throws Exception {
+	private void _deletePortalInstance(long orderId) throws Exception {
 		PortalInstanceResource portalInstanceResource =
 			_getPortalInstanceResource();
 
@@ -230,7 +306,7 @@ public class TrialRestController extends BaseRestController {
 
 		return PortalInstanceResource.builder(
 		).endpoint(
-			_externalLiferayTrialURI
+			_externalTrialHomePageURL
 		).header(
 			HttpHeaders.AUTHORIZATION,
 			_liferayOAuth2AccessTokenManager.getAuthorization("external-trial")
@@ -246,8 +322,24 @@ public class TrialRestController extends BaseRestController {
 		return portalInstanceResource.getPortalInstancesPage(true);
 	}
 
+	private UserAccountResource _getUserAccountResource() throws Exception {
+		URL liferayDXPURL = new URL(
+			lxcDXPServerProtocol + "://" + lxcDXPMainDomain);
+
+		return UserAccountResource.builder(
+		).endpoint(
+			liferayDXPURL
+		).header(
+			HttpHeaders.AUTHORIZATION,
+			_liferayOAuth2AccessTokenManager.getAuthorization(
+				"liferay-marketplace-etc-spring-boot-oauth-application-" +
+					"headless-server")
+		).build();
+	}
+
 	private void _postNotificationQueueEntry(
-			String emailAddress, String hostname, String name)
+			String emailAddress, String externalReferenceCode,
+			Map<String, String> map)
 		throws Exception {
 
 		String authorization =
@@ -265,12 +357,19 @@ public class TrialRestController extends BaseRestController {
 				HttpHeaders.AUTHORIZATION, authorization
 			).build();
 
-		NotificationTemplate notificationTemplate =
-			notificationTemplateResource.
-				getNotificationTemplateByExternalReferenceCode(
-					"TRY-IT-NOW-COMPLETED-ORDER");
+		NotificationTemplate notificationTemplate;
 
-		if (notificationTemplate == null) {
+		try {
+			notificationTemplate =
+				notificationTemplateResource.
+					getNotificationTemplateByExternalReferenceCode(
+						externalReferenceCode);
+		}
+		catch (Exception exception) {
+			_log.error(
+				"Unable to get notification template " + externalReferenceCode,
+				exception);
+
 			return;
 		}
 
@@ -286,16 +385,12 @@ public class TrialRestController extends BaseRestController {
 			new NotificationQueueEntry();
 
 		notificationQueueEntry.setBody(
-			() -> notificationTemplate.getBody(
-			).get(
-				"en_US"
-			).replaceAll(
-				"%EMAIL%", emailAddress
-			).replaceAll(
-				"%NAME%", name
-			).replaceAll(
-				"%URL%", hostname
-			));
+			() -> _replace(
+				notificationTemplate.getBody(
+				).get(
+					"en_US"
+				),
+				map));
 
 		JSONArray jsonArray = new JSONObject(
 			String.valueOf(notificationTemplate)
@@ -322,17 +417,22 @@ public class TrialRestController extends BaseRestController {
 			});
 
 		notificationQueueEntry.setSubject(
-			() -> notificationTemplate.getSubject(
-			).get(
-				"en_US"
-			));
+			() -> _replace(
+				notificationTemplate.getSubject(
+				).get(
+					"en_US"
+				),
+				map));
 		notificationQueueEntry.setType(notificationTemplate::getType);
 
 		notificationQueueEntryResource.postNotificationQueueEntry(
 			notificationQueueEntry);
 
 		if (_log.isInfoEnabled()) {
-			_log.info("Sent notification to " + emailAddress);
+			_log.info(
+				StringBundler.concat(
+					"Sent ", externalReferenceCode, " notification to ",
+					emailAddress));
 		}
 	}
 
@@ -376,6 +476,15 @@ public class TrialRestController extends BaseRestController {
 		return portalInstance;
 	}
 
+	private String _replace(String string, Map<String, String> map) {
+		for (Map.Entry<String, String> entry : map.entrySet()) {
+			string = StringUtil.replace(
+				string, entry.getKey(), entry.getValue());
+		}
+
+		return string;
+	}
+
 	private void _updateOrder(
 			Map<String, ?> customFields, long orderId, int orderStatus)
 		throws Exception {
@@ -394,9 +503,19 @@ public class TrialRestController extends BaseRestController {
 
 	private static final int _ORDER_STATUS_COMPLETED = 0;
 
+	private static final int _ORDER_STATUS_IN_PROGRESS = 6;
+
 	private static final int _ORDER_STATUS_ON_HOLD = 20;
 
+	private static final int _ORDER_STATUS_OPEN = 2;
+
+	private static final int _ORDER_STATUS_PENDING = 1;
+
 	private static final int _ORDER_STATUS_PROCESSING = 10;
+
+	private static final boolean _TRIAL_ACCOUNT_CHECK = GetterUtil.getBoolean(
+		System.getenv(
+			"LIFERAY_MARKETPLACE_ETC_SPRING_BOOT_TRIAL_ACCOUNT_CHECK"));
 
 	private static final int _TRIAL_MAX_INSTANCES = GetterUtil.getInteger(
 		System.getenv(
@@ -409,8 +528,8 @@ public class TrialRestController extends BaseRestController {
 	@Autowired
 	private ConsoleService _consoleService;
 
-	@Value("${external.trial.oauth2.headless.server.home.page.uri}")
-	private URL _externalLiferayTrialURI;
+	@Value("${external.trial.oauth2.headless.server.home.page.url}")
+	private URL _externalTrialHomePageURL;
 
 	@Autowired
 	private LiferayOAuth2AccessTokenManager _liferayOAuth2AccessTokenManager;

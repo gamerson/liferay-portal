@@ -69,7 +69,6 @@ import com.liferay.portal.kernel.util.HashMapDictionaryBuilder;
 import com.liferay.portal.kernel.util.Time;
 import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.portal.model.impl.ThemeSettingImpl;
-import com.liferay.portal.servlet.filters.cache.CacheUtil;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.sites.kernel.util.Sites;
@@ -206,8 +205,6 @@ public class LayoutSetPrototypePropagationTest
 		prototypeLayout = updateModifiedDate(
 			prototypeLayout,
 			new Date(System.currentTimeMillis() + Time.MINUTE));
-
-		CacheUtil.clearCache(prototypeLayout.getCompanyId());
 
 		propagateChanges(group);
 
@@ -1167,7 +1164,7 @@ public class LayoutSetPrototypePropagationTest
 
 	private Layout _addLayout(long groupId) throws Exception {
 		Layout layout = _layoutLocalService.addLayout(
-			TestPropsValues.getUserId(), groupId, true,
+			null, TestPropsValues.getUserId(), groupId, true,
 			LayoutConstants.DEFAULT_PARENT_LAYOUT_ID,
 			RandomTestUtil.randomString(), null, null,
 			LayoutConstants.TYPE_CONTENT, false, StringPool.BLANK,

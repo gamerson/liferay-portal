@@ -46,12 +46,17 @@ import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.test.util.UserTestUtil;
+import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.FileUtil;
+import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HashMapBuilder;
+import com.liferay.portal.kernel.util.HttpComponentsUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.kernel.util.Time;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.test.rule.FeatureFlags;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
@@ -61,6 +66,7 @@ import com.liferay.ratings.kernel.service.RatingsEntryLocalService;
 import java.io.File;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -107,6 +113,7 @@ public class DocumentResourceTest extends BaseDocumentResourceTestCase {
 				irrelevantDocument.getId()));
 	}
 
+	@FeatureFlags("LPD-10701")
 	@Override
 	@Test
 	public void testGetDocument() throws Exception {
@@ -116,6 +123,8 @@ public class DocumentResourceTest extends BaseDocumentResourceTestCase {
 			testGroup.getGroupId(), randomDocument(), getMultipartFiles());
 
 		Assert.assertTrue(Validator.isNotNull(document1.getContentUrl()));
+		Assert.assertTrue(Validator.isNotNull(document1.getDateExpired()));
+		Assert.assertTrue(Validator.isNotNull(document1.getDatePublished()));
 		Assert.assertTrue(Validator.isNotNull(document1.getFriendlyUrlPath()));
 
 		Document document2 = documentResource.postSiteDocument(
@@ -125,6 +134,8 @@ public class DocumentResourceTest extends BaseDocumentResourceTestCase {
 			).build());
 
 		Assert.assertTrue(Validator.isNull(document2.getContentUrl()));
+		Assert.assertTrue(Validator.isNotNull(document2.getDateExpired()));
+		Assert.assertTrue(Validator.isNotNull(document2.getDatePublished()));
 		Assert.assertTrue(Validator.isNotNull(document2.getFriendlyUrlPath()));
 
 		Role guestRole = _roleLocalService.getRole(
@@ -154,6 +165,8 @@ public class DocumentResourceTest extends BaseDocumentResourceTestCase {
 		document1 = regularUserDocumentResource.getDocument(document1.getId());
 
 		Assert.assertTrue(Validator.isNull(document1.getContentUrl()));
+		Assert.assertTrue(Validator.isNotNull(document1.getDateExpired()));
+		Assert.assertTrue(Validator.isNotNull(document1.getDatePublished()));
 		Assert.assertTrue(Validator.isNotNull(document1.getFriendlyUrlPath()));
 	}
 
@@ -200,6 +213,23 @@ public class DocumentResourceTest extends BaseDocumentResourceTestCase {
 		super.testPostDocumentFolderDocument();
 
 		_testPostDocumentFolderDocumentWithDLFileEntryType();
+		_testPostDocumentFolderDocumentWithExternalVideoShortcutDLFileEntryType();
+	}
+
+	@Override
+	@Test
+	public void testPostSiteDocument() throws Exception {
+		super.testPostSiteDocument();
+
+		_testPostSiteDocumentWithNoMultipartFiles();
+	}
+
+	@Override
+	@Test
+	public void testPutDocument() throws Exception {
+		super.testPutDocument();
+
+		_testPutSiteDocumentWithNoMultipartFiles();
 	}
 
 	@Override
@@ -260,6 +290,8 @@ public class DocumentResourceTest extends BaseDocumentResourceTestCase {
 	protected Document randomDocument() throws Exception {
 		Document document = super.randomDocument();
 
+		document.setDateExpired(
+			new Date(System.currentTimeMillis() + Time.YEAR));
 		document.setDocumentFolderId(0L);
 		document.setViewableBy(Document.ViewableBy.ANYONE);
 
@@ -418,8 +450,20 @@ public class DocumentResourceTest extends BaseDocumentResourceTestCase {
 			ServiceContextTestUtil.getServiceContext(group.getGroupId()));
 	}
 
-	private void _assertDLFileEntryType(
-			DLFileEntryType dlFileEntryType, Group group)
+	private void _assertDocumentType(
+		DLFileEntryType dlFileEntryType, Document postDocument) {
+
+		DocumentType documentType = postDocument.getDocumentType();
+
+		Assert.assertNotNull(documentType);
+		Assert.assertEquals(
+			dlFileEntryType.getName(LocaleUtil.getDefault()),
+			documentType.getName());
+	}
+
+	private Document _getDLFileEntryTypePostDocument(
+			DLFileEntryType dlFileEntryType, Group group,
+			Map<String, File> multipartFiles)
 		throws Exception {
 
 		DLFolder dlFolder = _dlFolderLocalService.addFolder(
@@ -439,15 +483,8 @@ public class DocumentResourceTest extends BaseDocumentResourceTestCase {
 			});
 		randomDocument.setSiteId(group.getGroupId());
 
-		Document postDocument = documentResource.postDocumentFolderDocument(
-			dlFolder.getFolderId(), randomDocument, getMultipartFiles());
-
-		DocumentType documentType = postDocument.getDocumentType();
-
-		Assert.assertNotNull(documentType);
-		Assert.assertEquals(
-			dlFileEntryType.getName(LocaleUtil.getDefault()),
-			documentType.getName());
+		return documentResource.postDocumentFolderDocument(
+			dlFolder.getFolderId(), randomDocument, multipartFiles);
 	}
 
 	private String _read(String url) throws Exception {
@@ -468,13 +505,72 @@ public class DocumentResourceTest extends BaseDocumentResourceTestCase {
 
 		DLFileEntryType dlFileEntryType = _addFileEntryType(testGroup);
 
-		_assertDLFileEntryType(dlFileEntryType, testGroup);
+		Map<String, File> multipartFiles = getMultipartFiles();
+
+		Document postDocument = _getDLFileEntryTypePostDocument(
+			dlFileEntryType, testGroup, multipartFiles);
+
+		_assertDocumentType(dlFileEntryType, postDocument);
 
 		Group childGroup = GroupTestUtil.addGroup(testGroup.getGroupId());
 
-		_assertDLFileEntryType(dlFileEntryType, childGroup);
+		postDocument = _getDLFileEntryTypePostDocument(
+			dlFileEntryType, childGroup, multipartFiles);
+
+		_assertDocumentType(dlFileEntryType, postDocument);
 
 		GroupTestUtil.deleteGroup(childGroup);
+	}
+
+	private void _testPostDocumentFolderDocumentWithExternalVideoShortcutDLFileEntryType()
+		throws Exception {
+
+		DLFileEntryType dlFileEntryType =
+			_dlFileEntryTypeLocalService.getFileEntryType(
+				testCompany.getGroupId(), "DL_VIDEO_EXTERNAL_SHORTCUT");
+
+		Document postDocument = _getDLFileEntryTypePostDocument(
+			dlFileEntryType, testGroup, new HashMap<>());
+
+		Assert.assertEquals(
+			ContentTypes.APPLICATION_VND_LIFERAY_VIDEO_EXTERNAL_SHORTCUT_HTML,
+			postDocument.getEncodingFormat());
+
+		_assertDocumentType(dlFileEntryType, postDocument);
+	}
+
+	private void _testPostSiteDocumentWithNoMultipartFiles() throws Exception {
+		Document randomDocument = randomDocument();
+
+		Document postDocument = testPostSiteDocument_addDocument(
+			randomDocument, new HashMap<>());
+
+		assertEquals(randomDocument, postDocument);
+		assertValid(postDocument);
+
+		Assert.assertEquals(StringPool.BLANK, postDocument.getContentUrl());
+		Assert.assertEquals(
+			0, GetterUtil.getLong(postDocument.getSizeInBytes()));
+	}
+
+	private void _testPutSiteDocumentWithNoMultipartFiles() throws Exception {
+		Document postDocument = testPutDocument_addDocument();
+
+		Document randomDocument = randomDocument();
+
+		Document putDocument = documentResource.putDocument(
+			postDocument.getId(), randomDocument, new HashMap<>());
+
+		assertEquals(randomDocument, putDocument);
+		assertValid(putDocument);
+
+		Assert.assertEquals(
+			"1.1",
+			HttpComponentsUtil.getParameter(
+				putDocument.getContentUrl(), "version", false));
+
+		Assert.assertEquals(
+			postDocument.getSizeInBytes(), putDocument.getSizeInBytes());
 	}
 
 	@Inject

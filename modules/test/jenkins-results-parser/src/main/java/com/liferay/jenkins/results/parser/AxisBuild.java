@@ -472,6 +472,14 @@ public class AxisBuild extends BaseBuild {
 		return warningMessages;
 	}
 
+	@Override
+	public void saveBuildURLInBuildDatabase() {
+		BuildDatabase buildDatabase = getBuildDatabase();
+
+		buildDatabase.putProperty(
+			BUILD_URLS_PROPERTIES_KEY, getAxisName(), getBuildURL());
+	}
+
 	protected AxisBuild(String url) {
 		this(url, null);
 	}
@@ -549,7 +557,7 @@ public class AxisBuild extends BaseBuild {
 			"(?<axisVariable>" + AxisBuild._AXIS_VARIABLE_REGEX + ")/",
 			"(?<buildNumber>\\d+)/?"));
 	protected static final String defaultLogBaseURL =
-		"https://testray.liferay.com/reports/production/logs";
+		"https://storage.cloud.google.com/testray-results";
 
 	private static final String _AXIS_VARIABLE_REGEX =
 		"AXIS_VARIABLE=(?<axisNumber>[^,/]+)(,[^/]+)?";

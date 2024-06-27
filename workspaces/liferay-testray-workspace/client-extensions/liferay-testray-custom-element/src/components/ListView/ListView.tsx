@@ -128,6 +128,7 @@ const ListView: React.FC<ListViewProps> = ({
 	const {
 		columns: columnsContext,
 		filters,
+		search,
 		selectedRows,
 		sort,
 	} = listViewContext;
@@ -218,6 +219,7 @@ const ListView: React.FC<ListViewProps> = ({
 				managementToolbarProps.applyFilters && currentPageSize
 					? Number(currentPageSize)
 					: listViewContext.pageSize,
+			search,
 			sort: buildSort(sort),
 		}),
 		[
@@ -228,17 +230,21 @@ const ListView: React.FC<ListViewProps> = ({
 			listViewContext.page,
 			listViewContext.pageSize,
 			managementToolbarProps.applyFilters,
+			search,
 			sort,
 		]
 	);
 
-	const {data: response, error, isValidating, loading, mutate} = useFetch(
-		resource,
-		{
-			params: getURLSearchParams(),
-			transformData,
-		}
-	);
+	const {
+		data: response,
+		error,
+		isValidating,
+		loading,
+		mutate,
+	} = useFetch(resource, {
+		params: getURLSearchParams(),
+		transformData,
+	});
 
 	const {
 		actions = {},
@@ -255,11 +261,10 @@ const ListView: React.FC<ListViewProps> = ({
 		[results, title]
 	);
 
-	const itemsMemoized = useMemo(() => (results ? matrixData : items), [
-		items,
-		matrixData,
-		results,
-	]);
+	const itemsMemoized = useMemo(
+		() => (results ? matrixData : items),
+		[items, matrixData, results]
+	);
 
 	const isCompareRunsMatrix = title === 'Runs';
 

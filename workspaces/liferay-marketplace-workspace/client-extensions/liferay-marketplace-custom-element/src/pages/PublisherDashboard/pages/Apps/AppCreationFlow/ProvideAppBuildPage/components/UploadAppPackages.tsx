@@ -10,6 +10,7 @@ import {FileList} from '../../../../../../../components/FileList/FileList';
 import {useMarketplaceContext} from '../../../../../../../context/MarketplaceContext';
 import {ProductType} from '../../../../../../../enums/ProductType';
 import i18n from '../../../../../../../i18n';
+import {getRandomID} from '../../../../../../../utils/string';
 import {useAppContext} from '../../AppContext/AppManageState';
 import {TYPES} from '../../AppContext/actionTypes';
 
@@ -47,7 +48,7 @@ export function UploadAppPackagesComponent({
 			error: false,
 			file,
 			fileName: file.name,
-			id: crypto.randomUUID(),
+			id: getRandomID(),
 			preview: URL.createObjectURL(file),
 			progress: 0,
 			readableSize: filesize(file.size),
@@ -64,7 +65,7 @@ export function UploadAppPackagesComponent({
 					? [
 							...buildAppPackages[versionName as string],
 							...newUploadedPackage,
-					  ]
+						]
 					: newUploadedPackage,
 				versionName,
 			},
@@ -107,10 +108,10 @@ export function UploadAppPackagesComponent({
 						appType.value === ProductType.CLOUD
 							? i18n.translate(
 									'only-zip-files-are-allowed-max-file-size-is-500-mb'
-							  )
+								)
 							: i18n.translate(
 									'only-jar-war-files-are-allowed-max-file-size-is-500mb'
-							  )
+								)
 					}
 					maxFiles={
 						properties.featureFlags?.includes('LPD-21582') ? 1 : 10

@@ -3,24 +3,39 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-import {faroConfig} from '../faro.config';
+import {Page} from '@playwright/test';
 
-export async function createChannel(page, name) {
-	await page.goto(faroConfig.environment.baseUrl);
+import {ApiHelpers} from '../../../helpers/ApiHelpers';
 
-	await page
-		.getByRole('link', {
-			name: 'FARO-DEV-liferay Liferay Demo Enterprise Plan',
-		})
-		.click();
+export async function createChannel({
+	apiHelpers,
+	channelName,
+}: {
+	apiHelpers: ApiHelpers;
+	channelName: string;
+}) {
+	const projects = await apiHelpers.jsonWebServicesOSBFaro.getProjects();
 
-	await page.getByRole('link', {name: 'Settings'}).click();
+	const project = projects.find(({name}) => name === 'FARO-DEV-liferay');
 
-	await page.getByRole('link', {name: 'Properties'}).click();
+	const channel = await apiHelpers.jsonWebServicesOSBFaro.createChannel(
+		channelName,
+		project.groupId
+	);
 
-	await page.getByTestId('addproperty-button').click();
+	return {
+		channel,
+		project,
+	};
+}
 
-	await page.getByLabel('Property Name').fill(name);
-
-	await page.getByRole('button', {name: 'Save'}).click();
+export async function switchChannel({
+	channelName,
+	page,
+}: {
+	channelName: string;
+	page: Page;
+}) {
+	await page.locator('.channels-menu.button-root').click();
+	await page.getByRole('link', {name: channelName}).click();
 }

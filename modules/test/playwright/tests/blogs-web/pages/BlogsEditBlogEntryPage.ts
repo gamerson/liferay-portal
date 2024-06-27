@@ -5,25 +5,31 @@
 
 import {Locator, Page} from '@playwright/test';
 
+import {waitForSuccessAlert} from '../../../utils/waitForSuccessAlert';
 import {BlogsPage} from './BlogsPage';
+
+import type {postTaxonomyVocabularyTaxonomyCategoryProps} from '../../../helpers/HeadlessAdminTaxonomyApiHelper';
+
+type editBlogEntryAddfriendlyUrlType = {
+	categories: Pick<postTaxonomyVocabularyTaxonomyCategoryProps, 'name'>[];
+	vocabularyName: string;
+};
 
 export class BlogsEditBlogEntryPage {
 	readonly page: Page;
 
 	readonly blogsPage: BlogsPage;
-	readonly propertiesTab: Locator;
 	readonly publishButton: Locator;
-	readonly titlePlaceholder: Locator;
+	readonly contentEditor: Locator;
 
 	constructor(page: Page) {
 		this.page = page;
 
 		this.blogsPage = new BlogsPage(page);
-		this.propertiesTab = page.getByRole('tab', {name: 'Properties'});
-		this.publishButton = page.getByRole('button', {name: 'Publish'});
-		this.titlePlaceholder = page.getByPlaceholder(
-			'Untitled Basic Web Content'
+		this.contentEditor = page.locator(
+			'#_com_liferay_blogs_web_portlet_BlogsAdminPortlet_contentEditor.cke_editable'
 		);
+		this.publishButton = page.getByRole('button', {name: 'Publish'});
 	}
 
 	async goto(siteUrl?: Site['friendlyUrlPath']) {
@@ -31,17 +37,68 @@ export class BlogsEditBlogEntryPage {
 		await this.blogsPage.goToCreateBlogEntry();
 	}
 
-	async editBlogEntry(content: string, title: string) {
-		await this.page.getByPlaceholder('Title *').waitFor();
+	private async editBlogEntryAddfriendlyUrl({
+		categories,
+		vocabularyName,
+	}: editBlogEntryAddfriendlyUrlType) {
+		const fieldset = await this.page.locator(
+			'#_com_liferay_blogs_web_portlet_BlogsAdminPortlet_friendly-url'
+		);
 
-		await this.page.getByPlaceholder('Title *').fill(title);
+		if (await fieldset.locator('.panel-body').isHidden()) {
+			await fieldset.getByRole('button', {name: 'Friendly URL'}).click();
+		}
 
-		await this.page.getByRole('paragraph').click();
+		await fieldset.getByText('Use a Customized URL').click();
+		await fieldset.getByRole('button', {name: 'Select'}).click();
+
+		const categoriesSelectorIframe = await this.page.frameLocator(
+			'iframe[title="Filter by Categories"]'
+		);
+
+		await categoriesSelectorIframe.getByText(vocabularyName).click();
+
+		for (const {name} of categories) {
+			await categoriesSelectorIframe.getByText(name).click();
+		}
 
 		await this.page
-			.locator(
-				'[id="_com_liferay_blogs_web_portlet_BlogsAdminPortlet_contentEditor"]'
-			)
-			.fill(content);
+			.getByLabel('Filter by Categories')
+			.getByRole('button', {name: 'Select'})
+			.click();
+	}
+
+	async editBlogEntry({
+		content,
+		friendlyUrl,
+		publish = true,
+		title,
+	}: {
+		content: string;
+		friendlyUrl?: editBlogEntryAddfriendlyUrlType;
+		publish?: boolean;
+		title: string;
+	}) {
+		await this.page.getByPlaceholder('Title *').fill(title);
+
+		await this.contentEditor.fill(content);
+
+		if (friendlyUrl) {
+			const {categories, vocabularyName} = friendlyUrl;
+
+			await this.editBlogEntryAddfriendlyUrl({
+				categories,
+				vocabularyName,
+			});
+		}
+
+		if (publish) {
+			await this.publishBlogEntry();
+		}
+	}
+
+	async publishBlogEntry() {
+		await this.publishButton.click();
+		await waitForSuccessAlert(this.page);
 	}
 }

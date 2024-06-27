@@ -109,7 +109,7 @@ else {
 			<div class="sidebar sidebar-light sidenav-menu">
 				<div class="sidebar-header">
 					<clay:button
-						aria-label="<%= LanguageUtil.get(request, "close") %>"
+						aria-label='<%= LanguageUtil.get(request, "close") %>'
 						cssClass="d-sm-none icon-monospaced lfr-portal-tooltip sidenav-close"
 						displayType="unstyled"
 						icon="times"
@@ -293,10 +293,12 @@ else {
 <aui:script>
 	function <portlet:namespace />setWorkflowAction(draft) {
 		if (draft) {
-			document.<portlet:namespace />fm.<portlet:namespace />workflowAction.value = <%= WorkflowConstants.ACTION_SAVE_DRAFT %>;
+			document.<portlet:namespace />fm.<portlet:namespace />workflowAction.value =
+				<%= WorkflowConstants.ACTION_SAVE_DRAFT %>;
 		}
 		else {
-			document.<portlet:namespace />fm.<portlet:namespace />workflowAction.value = <%= WorkflowConstants.ACTION_PUBLISH %>;
+			document.<portlet:namespace />fm.<portlet:namespace />workflowAction.value =
+				<%= WorkflowConstants.ACTION_PUBLISH %>;
 		}
 	}
 </aui:script>

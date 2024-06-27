@@ -249,7 +249,7 @@ public class UpdateArticleMVCActionCommand extends BaseMVCActionCommand {
 			uploadPortletRequest, "expirationDateAmPm");
 
 		boolean neverExpire = ParamUtil.getBoolean(
-			uploadPortletRequest, "neverExpire", displayDateYear == 0);
+			uploadPortletRequest, "neverExpire", expirationDateYear == 0);
 
 		if (!PropsValues.SCHEDULER_ENABLED) {
 			neverExpire = true;
@@ -273,7 +273,7 @@ public class UpdateArticleMVCActionCommand extends BaseMVCActionCommand {
 			uploadPortletRequest, "reviewDateAmPm");
 
 		boolean neverReview = ParamUtil.getBoolean(
-			uploadPortletRequest, "neverReview", displayDateYear == 0);
+			uploadPortletRequest, "neverReview", reviewDateYear == 0);
 
 		if (!PropsValues.SCHEDULER_ENABLED) {
 			neverReview = true;
@@ -735,7 +735,7 @@ public class UpdateArticleMVCActionCommand extends BaseMVCActionCommand {
 		).setParameter(
 			"friendlyURL",
 			() -> {
-				if (!FeatureFlagManagerUtil.isEnabled("LPS-141392") ||
+				if (!FeatureFlagManagerUtil.isEnabled("LPD-11228") ||
 					!Objects.equals(actionName, "/journal/add_article")) {
 
 					return null;

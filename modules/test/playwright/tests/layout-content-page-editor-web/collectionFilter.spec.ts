@@ -12,6 +12,8 @@ import {isolatedSiteTest} from '../../fixtures/isolatedSiteTest';
 import {loginTest} from '../../fixtures/loginTest';
 import {pageEditorPagesTest} from '../../fixtures/pageEditorPagesTest';
 import {wemSiteTest} from '../../fixtures/wemSiteTest';
+import {ANIMALS_COLLECTION_NAME} from '../../setup/wem-site/constants';
+import {clickAndExpectToBeHidden} from '../../utils/clickAndExpectToBeHidden';
 import getRandomString from '../../utils/getRandomString';
 import addApprovedStructuredContent from '../../utils/structured-content/addApprovedStructuredContent';
 import getBasicWebContentStructureId from '../../utils/structured-content/getBasicWebContentStructureId';
@@ -44,24 +46,47 @@ const test = mergeTests(
 	featureFlagsTest({
 		'LPS-178052': true,
 	}),
-	isolatedSiteTest,
 	journalPagesTest,
 	loginTest(),
 	pageEditorPagesTest,
 	wemSiteTest
 );
 
-const testWithIsolatedSite = mergeTests(
-	apiHelpersTest,
-	collectionsPagesTest,
-	featureFlagsTest({
-		'LPS-178052': true,
-	}),
-	isolatedSiteTest,
-	journalPagesTest,
-	loginTest(),
-	pageEditorPagesTest
-);
+const testWithIsolatedSite = mergeTests(test, isolatedSiteTest);
+
+const configureFilter = async (page, option: 'category' | 'keywords') => {
+	await page.getByLabel('Select', {exact: true}).click();
+
+	await page.getByLabel(ANIMALS_COLLECTION_NAME).check();
+
+	await page.getByLabel('Filter', {exact: true}).selectOption(option);
+
+	if (option === 'category') {
+		await page.getByLabel('Select Source').click();
+
+		await page
+			.frameLocator('iframe[title="Select"]')
+			.getByRole('link', {name: ANIMALS_COLLECTION_NAME})
+			.click();
+
+		await expect(
+			page
+				.frameLocator('iframe[title="Select"]')
+				.getByRole('button', {name: 'Select This Level'})
+		).toBeEnabled();
+
+		await clickAndExpectToBeHidden({
+			target: page.locator('.modal-dialog'),
+			trigger: page
+				.frameLocator('iframe[title="Select"]')
+				.getByRole('button', {name: 'Select This Level'}),
+		});
+
+		await expect(page.getByLabel('Source', {exact: true})).toHaveValue(
+			ANIMALS_COLLECTION_NAME
+		);
+	}
+};
 
 const selectFilter = async (page, categories) => {
 	await page.getByRole('button', {name: 'Select'}).click();
@@ -95,10 +120,8 @@ test('filters a web content collection by single and multiple categories', async
 
 	// Create definition for a collection mapped to Animals collection
 
-	const collectionName = 'Animals';
-
 	const animalsClassPK = await collectionsPage.getCollectionClassPK(
-		collectionName,
+		ANIMALS_COLLECTION_NAME,
 		wemSite.friendlyUrlPath
 	);
 
@@ -135,23 +158,7 @@ test('filters a web content collection by single and multiple categories', async
 
 	// Set Filter configuration for categories
 
-	await page.getByLabel('Select', {exact: true}).click();
-
-	await page.getByLabel(collectionName).check();
-
-	await page.getByLabel('Filter', {exact: true}).selectOption('category');
-
-	await page.getByLabel('Select Source').click();
-
-	await page
-		.frameLocator('iframe[title="Select"]')
-		.getByRole('link', {name: 'Animals'})
-		.click();
-
-	await page
-		.frameLocator('iframe[title="Select"]')
-		.getByRole('button', {name: 'Select This Level'})
-		.click();
+	await configureFilter(page, 'category');
 
 	// Check the option to show the label with the selected vocabulary
 
@@ -170,7 +177,9 @@ test('filters a web content collection by single and multiple categories', async
 	).toBeVisible();
 	await expect(page.getByText('Animal 02 - Dogs category')).toBeVisible();
 
-	await expect(page.getByText('Animals', {exact: true})).toBeVisible();
+	await expect(
+		page.getByText(ANIMALS_COLLECTION_NAME, {exact: true})
+	).toBeVisible();
 
 	// Select category filter: Cats
 
@@ -207,7 +216,7 @@ testWithIsolatedSite(
 
 		for (const tagName of ['Dogs', 'Cats']) {
 			tags.push(
-				await apiHelpers.headlessAdminTaxonomy.createTag({
+				await apiHelpers.headlessAdminTaxonomy.postSiteKeyword({
 					name: tagName,
 					siteId: site.id,
 				})
@@ -216,9 +225,8 @@ testWithIsolatedSite(
 
 		// Create two Web Contents with tags
 
-		const contentStructureId = await getBasicWebContentStructureId(
-			apiHelpers
-		);
+		const contentStructureId =
+			await getBasicWebContentStructureId(apiHelpers);
 		const webContents = [
 			{
 				name: 'Web content with the tag Dogs',
@@ -331,10 +339,8 @@ test('enables search field in dropdown list of Collection Filter', async ({
 
 	// Create definition for a collection mapped to Animals collection
 
-	const collectionName = 'Animals';
-
 	const animalsClassPK = await collectionsPage.getCollectionClassPK(
-		collectionName,
+		ANIMALS_COLLECTION_NAME,
 		wemSite.friendlyUrlPath
 	);
 
@@ -371,23 +377,7 @@ test('enables search field in dropdown list of Collection Filter', async ({
 
 	// Set Filter configuration for categories
 
-	await page.getByLabel('Select', {exact: true}).click();
-
-	await page.getByLabel(collectionName).check();
-
-	await page.getByLabel('Filter', {exact: true}).selectOption('category');
-
-	await page.getByLabel('Select Source').click();
-
-	await page
-		.frameLocator('iframe[title="Select"]')
-		.getByRole('link', {name: 'Animals'})
-		.click();
-
-	await page
-		.frameLocator('iframe[title="Select"]')
-		.getByRole('button', {name: 'Select This Level'})
-		.click();
+	await configureFilter(page, 'category');
 
 	await page.getByLabel('Include Search Field').check();
 
@@ -435,10 +425,8 @@ test('filters the collection content by keywords using two filters', async ({
 
 	// Create definition for a collection mapped to Animals collection
 
-	const collectionName = 'Animals';
-
 	const animalsClassPK = await collectionsPage.getCollectionClassPK(
-		collectionName,
+		ANIMALS_COLLECTION_NAME,
 		wemSite.friendlyUrlPath
 	);
 
@@ -476,21 +464,13 @@ test('filters the collection content by keywords using two filters', async ({
 
 	await pageEditorPage.selectFragment(firstCollectionFilterId);
 
-	await page.getByLabel('Select', {exact: true}).click();
-
-	await page.getByLabel(collectionName).check();
-
-	await page.getByLabel('Filter', {exact: true}).selectOption('keywords');
+	await configureFilter(page, 'keywords');
 
 	// Configure the second filter by keywords
 
 	await pageEditorPage.selectFragment(secondCollectionFilterId);
 
-	await page.getByLabel('Select', {exact: true}).click();
-
-	await page.getByLabel(collectionName).check();
-
-	await page.getByLabel('Filter', {exact: true}).selectOption('keywords');
+	await configureFilter(page, 'keywords');
 
 	// Publish the page
 

@@ -66,6 +66,7 @@ import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.bean.BeanReference;
 import com.liferay.portal.kernel.comment.CommentManagerUtil;
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
+import com.liferay.portal.kernel.dao.orm.DefaultActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.IndexableActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.ProjectionFactoryUtil;
@@ -885,17 +886,30 @@ public class DLFileEntryLocalServiceImpl
 			DLFileVersion dlFileVersion = _dlFileVersionPersistence.findByF_V(
 				fileEntryId, version);
 
-			if (!dlFileVersion.isApproved()) {
+			if (!dlFileVersion.isApproved() && !dlFileVersion.isExpired() &&
+				!dlFileVersion.isScheduled()) {
+
 				throw new InvalidFileVersionException(
 					StringBundler.concat(
 						"Unable to delete the unapproved file version ",
 						version, " for file entry ", fileEntryId));
 			}
 
-			int count = _dlFileVersionPersistence.countByF_S(
+			int fileVersionsCount = _dlFileVersionPersistence.countByF_S(
 				fileEntryId, WorkflowConstants.STATUS_APPROVED);
 
-			if (count <= 1) {
+			fileVersionsCount += _dlFileVersionPersistence.countByF_S(
+				fileEntryId, WorkflowConstants.STATUS_SCHEDULED);
+
+			int fileVersionsExpiredCount = _dlFileVersionPersistence.countByF_S(
+				fileEntryId, WorkflowConstants.STATUS_EXPIRED);
+
+			if ((fileVersionsCount <= 1) &&
+				!((dlFileVersion.getStatus() ==
+					WorkflowConstants.STATUS_EXPIRED) &&
+				  ((fileVersionsCount == 1) ||
+				   (fileVersionsExpiredCount > 1)))) {
+
 				throw new InvalidFileVersionException(
 					StringBundler.concat(
 						"Unable to delete the only approved file version ",
@@ -1773,7 +1787,7 @@ public class DLFileEntryLocalServiceImpl
 		DLFileVersion dlFileVersion = _dlFileVersionLocalService.getFileVersion(
 			fileEntryId, version);
 
-		if (!dlFileVersion.isApproved()) {
+		if (!dlFileVersion.isApproved() && !dlFileVersion.isScheduled()) {
 			throw new InvalidFileVersionException(
 				"Unable to revert from an unapproved file version");
 		}
@@ -3205,7 +3219,6 @@ public class DLFileEntryLocalServiceImpl
 
 		subscriptionSender.setClassName(DLFileEntryConstants.getClassName());
 		subscriptionSender.setClassPK(fileVersion.getFileEntryId());
-		subscriptionSender.setCompanyId(fileVersion.getCompanyId());
 
 		if (folder != null) {
 			subscriptionSender.setContextAttribute(
@@ -3393,7 +3406,6 @@ public class DLFileEntryLocalServiceImpl
 
 		subscriptionSender.setClassName(DLFileEntryConstants.getClassName());
 		subscriptionSender.setClassPK(fileVersion.getFileEntryId());
-		subscriptionSender.setCompanyId(fileVersion.getCompanyId());
 
 		if (folder != null) {
 			subscriptionSender.setContextAttribute(
@@ -3589,9 +3601,12 @@ public class DLFileEntryLocalServiceImpl
 
 		actionableDynamicQuery.setAddCriteriaMethod(
 			addCriteriaMethodConsumer::accept);
+		actionableDynamicQuery.setInterval(10);
 		actionableDynamicQuery.setPerformActionMethod(
 			(DLFileEntry dlFileEntry) -> performActionMethodConsumer.accept(
 				dlFileEntry));
+		actionableDynamicQuery.setTransactionConfig(
+			DefaultActionableDynamicQuery.REQUIRES_NEW_TRANSACTION_CONFIG);
 
 		actionableDynamicQuery.performActions();
 	}

@@ -24,12 +24,10 @@ const QuotedSummary = ({externalReferenceCode}: externalReferenceCodeType) => {
 	const [bodilyInjury, setBodilyInjury] = useState<string>('');
 	const [medicalPayments, setMedicalPayments] = useState<string>('');
 	const [propertyDamage, setPropertyDamage] = useState<string>('');
-	const [motoristBodilyInjury, setMotoristBodilyInjury] = useState<string>(
-		''
-	);
-	const [motoristPropertyDamage, setMotoristPropertyDamage] = useState<
-		string
-	>('');
+	const [motoristBodilyInjury, setMotoristBodilyInjury] =
+		useState<string>('');
+	const [motoristPropertyDamage, setMotoristPropertyDamage] =
+		useState<string>('');
 
 	const PARAMETERS_APPLICATIONS = {
 		filter: `contains(externalReferenceCode,'${externalReferenceCode}')`,
@@ -102,6 +100,7 @@ const QuotedSummary = ({externalReferenceCode}: externalReferenceCodeType) => {
 
 	useEffect(() => {
 		getPoliciesThroughApplicationERC();
+
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
@@ -116,7 +115,7 @@ const QuotedSummary = ({externalReferenceCode}: externalReferenceCodeType) => {
 	return (
 		<div className="bg-neutral-0 quoted-summary-container rounded">
 			<div className="pt-3 px-5 quoted-summary-title">
-				<h5 className="m-0">Quote Summary</h5>
+				<div className="h5 m-0">Quote Summary</div>
 			</div>
 
 			<hr />

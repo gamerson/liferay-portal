@@ -23,9 +23,11 @@ const Download = () => {
 
 	const channel = marketplaceContext.channel;
 	const virtualProducts = outletContext?.placedOrder.placedOrderItems;
-	const hasVersionSpecification = outletContext?.product.productSpecifications.find(
-		(specification) => specification.specificationKey === 'latest-version'
-	);
+	const hasVersionSpecification =
+		outletContext?.product.productSpecifications.find(
+			(specification) =>
+				specification.specificationKey === 'latest-version'
+		);
 
 	const {data: skus = [], isLoading} = useSWR(
 		hasVersionSpecification
@@ -61,8 +63,8 @@ const Download = () => {
 			})
 		);
 
-		return virtualItemsWithVersion.filter((item: VirtualItem) =>
-			item.version.toLowerCase().includes(search)
+		return virtualItemsWithVersion?.filter((item: VirtualItem) =>
+			item.version?.toLowerCase()?.includes(search)
 		);
 	}, [hasVersionSpecification, search, skus, virtualProducts]);
 

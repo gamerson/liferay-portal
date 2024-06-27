@@ -19,21 +19,36 @@ type TTerms = {
 };
 
 type TOrder = {
-	accountId: number;
+	accountId?: number;
 	billingAddressId?: string;
 	channelId?: number;
 	currencyCode?: string;
-	orderItems: TOrderItem[];
+	id?: number;
+	orderItems?: TOrderItem[];
 	orderStatus?: string;
+	orderStatusInfo?: number;
+	orderTypeExternalReferenceCode?: string;
 	paymentMethod?: string;
 	paymentStatus?: string;
+	paymentStatusInfo?: number;
 	shippingAddressId?: string;
 };
 
 type TOrderItem = {
-	decimalQuantity: number;
+	decimalQuantity?: number;
+	productId?: number;
 	quantity: number;
-	skuId: string;
+	skuId?: string;
+	unitPrice?: number;
+};
+
+type TOrderRule = {
+	active?: boolean;
+	id?: number;
+	name?: string;
+	priority?: number;
+	type: string;
+	typeSettings?: string;
 };
 
 export class HeadlessCommerceAdminOrderApiHelper {
@@ -70,6 +85,23 @@ export class HeadlessCommerceAdminOrderApiHelper {
 				data: {currencyCode: 'USD', ...order},
 			}
 		);
+
+		if (this.apiHelpers instanceof DataApiHelpers) {
+			this.apiHelpers.data.push({
+				id: postOrder.id,
+				type: 'order',
+			});
+		}
+
+		return postOrder;
+	}
+
+	async patchOrder(id: number, order: TOrder) {
+		const postOrder = await this.apiHelpers.patch(
+			`${this.apiHelpers.baseUrl}${this.basePath}orders/${id}?nestedFields=orderItems`,
+			order
+		);
+
 		if (this.apiHelpers instanceof DataApiHelpers) {
 			this.apiHelpers.data.push({
 				id: postOrder.id,
@@ -105,5 +137,30 @@ export class HeadlessCommerceAdminOrderApiHelper {
 		}
 
 		return terms;
+	}
+
+	async postOrderRule(orderRule: TOrderRule) {
+		orderRule = {
+			active: true,
+			name: getRandomString(),
+			priority: getRandomInt(),
+			type: '',
+			typeSettings: '',
+			...(orderRule || {}),
+		};
+
+		orderRule = await this.apiHelpers.post(
+			`${this.apiHelpers.baseUrl}${this.basePath}/order-rules`,
+			{
+				data: orderRule,
+				failOnStatusCode: true,
+			}
+		);
+
+		if (this.apiHelpers instanceof DataApiHelpers) {
+			this.apiHelpers.data.push({id: orderRule.id, type: 'orderRule'});
+		}
+
+		return orderRule;
 	}
 }

@@ -95,7 +95,7 @@ const DriverInfo = ({
 							)}
 
 							<div className="align-self-start pr-9">
-								<h5>
+								<div className="h5">
 									{`${
 										currentDriver?.firstName ?? 'No data'
 									}, ${
@@ -104,10 +104,10 @@ const DriverInfo = ({
 											? calculatedAge(
 													applicationData?.contactInfo
 														?.dateOfBirth
-											  )
+												)
 											: 'No data'
 									}`}
-								</h5>
+								</div>
 							</div>
 
 							<div className="list-driver-info">

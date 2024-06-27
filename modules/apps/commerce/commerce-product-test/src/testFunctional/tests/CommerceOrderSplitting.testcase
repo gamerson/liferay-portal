@@ -13,18 +13,18 @@ definition {
 	tearDown {
 		CommerceConfiguration.commerceTearDown();
 
+		User.logoutAndLoginPG();
+
 		ObjectAdmin.openObjectAdmin();
 
-		ObjectPortlet.selectCustomObject(label = "Commerce Order");
+		ObjectPortlet.selectObject(label = "Commerce Order");
 
 		ObjectAdmin.goToActionsTab();
 
-		while (IsElementNotPresent(locator1 = "CommerceNavigation#EMPTY_SEARCH_CONTAINER")) {
-			Click(
-				key_value = "",
-				locator1 = "CommerceEntry#BODY_VERTICAL_ELLIPSIS");
+		while (IsElementPresent(locator1 = "xpath=(//div[@class='table-list-title'])[1]")) {
+			var actionLabel = selenium.getText("xpath=(//div[@class='table-list-title'])[1]/a");
 
-			MenuItem.click(menuItem = "Delete");
+			ObjectAdmin.deleteActionViaUI(actionLabel = ${actionLabel});
 		}
 	}
 
@@ -1550,9 +1550,9 @@ definition {
 
 			CommerceSKUs.generateAllSkuCombinations();
 
-			WaitForElementPresent(locator1 = "//div[(@class='dnd-tr')][2]/div[1]");
+			WaitForElementPresent(locator1 = "//div[@class='dnd-tbody']//div[(@class='dnd-tr')]//span[text()='Approved']/../../..//div[@class='table-list-title']/a");
 
-			var skuCombinationName = selenium.getText("//div[(@class='dnd-tr')][2]/div[1]");
+			var skuCombinationName = selenium.getText("//div[@class='dnd-tbody']//div[(@class='dnd-tr')]//span[text()='Approved']/../../..//div[@class='table-list-title']/a");
 
 			CommerceNavigator.gotoEntry(entryName = ${skuCombinationName});
 
@@ -1726,7 +1726,7 @@ definition {
 		task ("Then a new Commerce Order action rule with default settings is created") {
 			ObjectAdmin.openObjectAdmin();
 
-			ObjectPortlet.selectCustomObject(label = "Commerce Order");
+			ObjectPortlet.selectObject(label = "Commerce Order");
 
 			ObjectAdmin.goToActionsTab();
 
@@ -2638,11 +2638,9 @@ definition {
 
 			Click(
 				key_optionName = "Update an Object Entry",
-				locator1 = "CommerceEntry#COMBOBOX_DROPDOWN_OPTION_NAME");
+				locator1 = "ObjectAdmin#CLAY_GENERIC_DROPDOWN_ITEM");
 
-			PortletEntry.save();
-
-			Refresh();
+			Button.clickSave();
 		}
 
 		task ("Then the health check is clickable again") {

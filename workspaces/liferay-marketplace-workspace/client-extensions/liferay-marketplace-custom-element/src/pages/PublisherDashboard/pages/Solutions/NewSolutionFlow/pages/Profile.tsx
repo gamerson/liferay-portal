@@ -17,6 +17,7 @@ import {
 import {ProductVocabulary} from '../../../../../../enums/ProductVocabulary';
 import i18n from '../../../../../../i18n';
 import {getIconSpriteMap} from '../../../../../../liferay/constants';
+import {getRandomID} from '../../../../../../utils/string';
 
 const tooltipInfo = {
 	categories: i18n.translate(
@@ -71,19 +72,26 @@ const Profile = () => {
 	};
 
 	const handleLogoUpload = (files: FileList) => {
-		const file = files[0];
+		const _file = files[0];
 
 		const newUploadedFile: UploadedFile = {
 			changed: true,
 			error: false,
-			file,
-			fileName: file.name,
-			id: crypto.randomUUID(),
-			preview: URL.createObjectURL(file),
+			file: _file,
+			fileName: _file.name,
+			id: getRandomID(),
+			preview: URL.createObjectURL(_file),
 			progress: 0,
-			readableSize: filesize(file.size),
+			readableSize: filesize(_file.size),
 			uploaded: true,
 		};
+
+		if (file?.id) {
+			dispatch({
+				payload: file.id,
+				type: SolutionTypes.SET_DELETE_IMAGE,
+			});
+		}
 
 		dispatch({
 			payload: {

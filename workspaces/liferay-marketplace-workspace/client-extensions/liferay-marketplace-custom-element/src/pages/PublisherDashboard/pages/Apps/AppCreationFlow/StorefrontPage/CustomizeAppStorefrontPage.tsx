@@ -31,6 +31,7 @@ import i18n from '../../../../../../i18n';
 import {Liferay} from '../../../../../../liferay/liferay';
 import fetcher from '../../../../../../services/fetcher';
 import HeadlessCommerceAdminCatalogImpl from '../../../../../../services/rest/HeadlessCommerceAdminCatalog';
+import {getRandomID} from '../../../../../../utils/string';
 import {submitBase64EncodedFile} from '../../../../../../utils/util';
 import {swapImageElements} from '../../../../constants';
 
@@ -66,7 +67,7 @@ export function CustomizeAppStorefrontPage({
 			error: false,
 			file,
 			fileName: file.name,
-			id: crypto.randomUUID(),
+			id: getRandomID(),
 			index: 0,
 			preview: URL.createObjectURL(file),
 			progress: 0,
@@ -164,8 +165,7 @@ export function CustomizeAppStorefrontPage({
 										payload: {
 											files: [],
 										},
-										type:
-											TYPES.UPLOAD_APP_STOREFRONT_IMAGES,
+										type: TYPES.UPLOAD_APP_STOREFRONT_IMAGES,
 									});
 								}
 								catch (error) {
@@ -233,17 +233,18 @@ export function CustomizeAppStorefrontPage({
 						image,
 					] of appStorefrontImages.entries()) {
 						if (image.uploaded && image.changed) {
-							const {uploadedImage} = (appStorefrontImages[
+							const {uploadedImage} = appStorefrontImages[
 								index
-							] as unknown) as UploadedImage;
+							] as unknown as UploadedImage;
 
 							uploadedImage.priority = index + 1;
 
-							uploadedImage.title.en_US = image.imageDescription as string;
+							uploadedImage.title.en_US =
+								image.imageDescription as string;
 
 							await HeadlessCommerceAdminCatalogImpl.addOrUpdateProductImageByExternalReferenceCode(
 								appERC,
-								(uploadedImage as unknown) as UploadedImage
+								uploadedImage as unknown as UploadedImage
 							);
 
 							appStorefrontImages[index].changed = false;
@@ -260,9 +261,8 @@ export function CustomizeAppStorefrontPage({
 							const uploadedFile = await submitBase64EncodedFile({
 								appERC,
 								callback: (progress) => {
-									appStorefrontImages[
-										index
-									].progress = progress;
+									appStorefrontImages[index].progress =
+										progress;
 									appStorefrontImages[index].uploaded =
 										progress === 100;
 
@@ -270,8 +270,7 @@ export function CustomizeAppStorefrontPage({
 										payload: {
 											files: appStorefrontImages,
 										},
-										type:
-											TYPES.UPLOAD_APP_STOREFRONT_IMAGES,
+										type: TYPES.UPLOAD_APP_STOREFRONT_IMAGES,
 									});
 									appStorefrontImages;
 								},
@@ -282,9 +281,8 @@ export function CustomizeAppStorefrontPage({
 								title: image.imageDescription ?? image.fileName,
 							});
 
-							appStorefrontImages[
-								index
-							].uploadedImage = uploadedFile as UploadedImage;
+							appStorefrontImages[index].uploadedImage =
+								uploadedFile as UploadedImage;
 							appStorefrontImages[index].changed = false;
 
 							dispatch({

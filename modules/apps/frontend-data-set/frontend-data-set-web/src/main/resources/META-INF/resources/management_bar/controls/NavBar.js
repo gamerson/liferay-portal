@@ -18,9 +18,8 @@ import SortDropdown from './SortDropdown';
 import FiltersDropdown from './filters/FiltersDropdown';
 
 function NavBar({creationMenu, showSearch}) {
-	const [{customViewsEnabled, filters, sorts, views}] = useContext(
-		ViewsContext
-	);
+	const [{customViewsEnabled, filters, sorts, views}] =
+		useContext(ViewsContext);
 
 	const [showMobile, setShowMobile] = useState(false);
 
@@ -36,11 +35,13 @@ function NavBar({creationMenu, showSearch}) {
 					</ManagementToolbar.Item>
 				)}
 
-				{!!sorts.length && Liferay.FeatureFlags['LPD-19465'] && (
-					<ManagementToolbar.Item>
-						<SortDropdown />
-					</ManagementToolbar.Item>
-				)}
+				{!!sorts.length &&
+					sorts.some((sort) => !!sort.label) &&
+					Liferay.FeatureFlags['LPD-19465'] && (
+						<ManagementToolbar.Item>
+							<SortDropdown />
+						</ManagementToolbar.Item>
+					)}
 			</ManagementToolbar.ItemList>
 
 			{showSearch && (

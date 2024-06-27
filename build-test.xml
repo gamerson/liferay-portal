@@ -185,43 +185,6 @@ module.framework.properties.osgi.console=11312</echo>
 		</sequential>
 	</macrodef>
 
-	<macrodef name="create-custom-element-client-extension">
-		<sequential>
-			<echo file="${liferay.home}/osgi/configs/com.liferay.client.extension.type.configuration.CETConfiguration~customElement.config">
-baseURL=&quot;&quot;
-description=&quot;Custom Element Description&quot;
-name=&quot;Vanilla Counter&quot;
-properties=&#91;&quot;test-data-user=QAuser&quot;&#93;
-type=&quot;customElement&quot;
-typeSettings=&#91;&quot;friendlyURLMapping=vanilla&quot;,&quot;instanceable=true&quot;,&quot;portletCategoryName=category.client-extensions&quot;,&quot;urls=https:&#47;&#47;liferay.github.io&#47;liferay-frontend-projects&#47;vanilla-counter&#47;index.js&quot;,&quot;htmlElementName=vanilla-counter&quot;,&quot;cssURLs=https:&#47;&#47;liferay.github.io&#47;liferay-frontend-projects&#47;index.css&quot;,&quot;useESM=true&quot;&#93;</echo>
-		</sequential>
-	</macrodef>
-
-	<macrodef name="create-fds-cell-renderer-client-extension">
-		<sequential>
-			<echo file="${liferay.home}/osgi/configs/com.liferay.client.extension.type.configuration.CETConfiguration~fdsCellRenderer.config">
-baseURL=&quot;&quot;
-description=&quot;Liferay Sample Frontend Data Set Cell Renderer Description&quot;
-name=&quot;Liferay Sample Frontend Data Set Cell Renderer&quot;
-sourceCodeURL=&quot;&quot;
-type=&quot;fdsCellRenderer&quot;
-typeSettings=&#91;&quot;url=https:&#47;&#47;liferay.github.io&#47;liferay-frontend-projects&#47;index.html&quot;&#93;</echo>
-		</sequential>
-	</macrodef>
-
-	<macrodef name="create-iframe-client-extension">
-		<sequential>
-			<echo file="${liferay.home}/osgi/configs/com.liferay.client.extension.type.configuration.CETConfiguration~iframe.config">
-baseURL=&quot;&quot;
-description=&quot;IFrame Description&quot;
-name=&quot;My Pretty IFrame&quot;
-properties=&#91;&quot;a=1&quot;,&quot;b=2&quot;&#93;
-sourceCodeURL=&quot;&quot;
-type=&quot;iframe&quot;
-typeSettings=&#91;&quot;friendlyURLMapping=perico&quot;,&quot;instanceable=false&quot;,&quot;portletCategoryName=category.client-extensions&quot;,&quot;url=https:&#47;&#47;liferay.github.io&#47;liferay-frontend-projects&#47;index.html&quot;&#93;</echo>
-		</sequential>
-	</macrodef>
-
 	<macrodef name="decompress">
 		<attribute name="dest" />
 		<attribute name="src" />
@@ -4170,6 +4133,64 @@ tell application "Safari" to quit
 		</sequential>
 	</macrodef>
 
+	<macrodef name="prepare-selenium-object-storage-sugarcrm-properties">
+		<sequential>
+			<if>
+				<isset property="object.storage.sugarcrm.access.token.url" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+						object.storage.sugarcrm.access.token.url=${object.storage.sugarcrm.access.token.url}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="object.storage.sugarcrm.base.url" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+						object.storage.sugarcrm.base.url=${object.storage.sugarcrm.base.url}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="object.storage.sugarcrm.client.id" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+						object.storage.sugarcrm.client.id=${object.storage.sugarcrm.client.id}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="object.storage.sugarcrm.grant.type" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+						object.storage.sugarcrm.grant.type=${object.storage.sugarcrm.grant.type}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="object.storage.sugarcrm.password" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+						object.storage.sugarcrm.password=${object.storage.sugarcrm.password}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="object.storage.sugarcrm.username" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+						object.storage.sugarcrm.username=${object.storage.sugarcrm.username}
+					</echo>
+				</then>
+			</if>
+		</sequential>
+	</macrodef>
+
 	<macrodef name="prepare-selenium-onedrive-properties">
 		<sequential>
 			<if>
@@ -7849,13 +7870,26 @@ ${docker.start.error}</fail>
 				<isset property="env.HOSTNAME" />
 			</condition>
 
+			<local name="env.testray.cloud.storage.base.url" />
+
+			<condition else="" property="env.testray.cloud.storage.base.url" value="--env=TESTRAY_CLOUD_STORAGE_BASE_URL='${testray.run.shared.url}/playwright-report/data/'">
+				<isset property="testray.run.shared.url" />
+			</condition>
+
 			<get-playwright-docker-image />
 
 			<start-docker-container image="${playwright.docker.image}" name="${playwright.docker.host}">\
 				${docker.add.host.hostname.arg} \
 				${docker.add.host.node.name.arg} \
+				--add-host www.able.com:${ip.address} \
+				--add-host www.baker.com:${ip.address} \
+				--add-host www.charlie.com:${ip.address} \
+				--add-host www.dog.com:${ip.address} \
+				--add-host www.easy.com:${ip.address} \
+				--add-host www.fox.com:${ip.address} \
 				${env.ci.arg} \
 				${env.portal.url.arg} \
+				${env.testray.cloud.storage.base.url} \
 				--mount type=bind,source=${host.git.dir}/${portal.dir.name},target=${portal.dir} \
 			</start-docker-container>
 		</sequential>
@@ -10826,14 +10860,14 @@ send_user $expect_out(buffer)]]></echo>
 		<if>
 			<equals arg1="${database.type}" arg2="mysql" />
 			<then>
-				<sql classpath="${test.app.server.lib.portal.dir}/${jdbc.mysql.driver}" driver="${database.mysql.driver}" onerror="continue" output="${sql.output.file}" password="${database.mysql.password}" print="true" showheaders="false" showtrailers="false" src="${sql.input.file}" url="${database.mysql.url}" userid="${database.mysql.username}" />
+				<sql autocommit="${sql.autocommit}" classpath="${test.app.server.lib.portal.dir}/${jdbc.mysql.driver}" driver="${database.mysql.driver}" onerror="continue" output="${sql.output.file}" password="${database.mysql.password}" print="true" showheaders="false" showtrailers="false" src="${sql.input.file}" url="${database.mysql.url}" userid="${database.mysql.username}" />
 			</then>
 		</if>
 
 		<if>
 			<equals arg1="${database.type}" arg2="postgresql" />
 			<then>
-				<sql classpath="${test.app.server.lib.portal.dir}/${jdbc.postgresql.driver}" driver="${database.postgresql.driver}" onerror="continue" output="${sql.output.file}" password="${database.postgresql.password}" print="true" showheaders="false" showtrailers="false" src="${sql.input.file}" url="${database.postgresql.url}" userid="${database.postgresql.username}" />
+				<sql autocommit="${sql.autocommit}" classpath="${test.app.server.lib.portal.dir}/${jdbc.postgresql.driver}" driver="${database.postgresql.driver}" onerror="continue" output="${sql.output.file}" password="${database.postgresql.password}" print="true" showheaders="false" showtrailers="false" src="${sql.input.file}" url="${database.postgresql.url}" userid="${database.postgresql.username}" />
 			</then>
 		</if>
 	</target>
@@ -11781,32 +11815,6 @@ ${update.properties}</echo>
 	</target>
 
 	<target name="prepare-osgi-module-configurations">
-		<get-testcase-property property.name="custom.element.client.extension.created" />
-
-		<if>
-			<equals arg1="${custom.element.client.extension.created}" arg2="true" />
-			<then>
-				<create-custom-element-client-extension />
-			</then>
-		</if>
-
-		<get-testcase-property property.name="fds.cell.renderer.client.extension.created" />
-
-		<if>
-			<equals arg1="${fds.cell.renderer.client.extension.created}" arg2="true" />
-			<then>
-				<create-fds-cell-renderer-client-extension />
-			</then>
-		</if>
-
-		<get-testcase-property property.name="iframe.client.extension.created" />
-
-		<if>
-			<equals arg1="${iframe.client.extension.created}" arg2="true" />
-			<then>
-				<create-iframe-client-extension />
-			</then>
-		</if>
 		<get-testcase-property property.name="osgi.module.configurations" />
 
 		<if>
@@ -12729,6 +12737,62 @@ captcha.enforce.disabled=true</echo>
 		</if>
 	</target>
 
+	<target name="prepare-portal-test-object-storage-sugarcrm-properties">
+		<if>
+			<isset property="object.storage.sugarcrm.access.token.url" />
+			<then>
+				<echo append="true" file="${project.dir}/portal-test/src/test-portal-impl.properties">
+					object.storage.sugarcrm.access.token.url=${object.storage.sugarcrm.access.token.url}
+				</echo>
+			</then>
+		</if>
+
+		<if>
+			<isset property="object.storage.sugarcrm.base.url" />
+			<then>
+				<echo append="true" file="${project.dir}/portal-test/src/test-portal-impl.properties">
+					object.storage.sugarcrm.base.url=${object.storage.sugarcrm.base.url}
+				</echo>
+			</then>
+		</if>
+
+		<if>
+			<isset property="object.storage.sugarcrm.client.id" />
+			<then>
+				<echo append="true" file="${project.dir}/portal-test/src/test-portal-impl.properties">
+					object.storage.sugarcrm.client.id=${object.storage.sugarcrm.client.id}
+				</echo>
+			</then>
+		</if>
+
+		<if>
+			<isset property="object.storage.sugarcrm.grant.type" />
+			<then>
+				<echo append="true" file="${project.dir}/portal-test/src/test-portal-impl.properties">
+					object.storage.sugarcrm.grant.type=${object.storage.sugarcrm.grant.type}
+				</echo>
+			</then>
+		</if>
+
+		<if>
+			<isset property="object.storage.sugarcrm.password" />
+			<then>
+				<echo append="true" file="${project.dir}/portal-test/src/test-portal-impl.properties">
+					object.storage.sugarcrm.password=${object.storage.sugarcrm.password}
+				</echo>
+			</then>
+		</if>
+
+		<if>
+			<isset property="object.storage.sugarcrm.username" />
+			<then>
+				<echo append="true" file="${project.dir}/portal-test/src/test-portal-impl.properties">
+					object.storage.sugarcrm.username=${object.storage.sugarcrm.username}
+				</echo>
+			</then>
+		</if>
+	</target>
+
 	<target name="prepare-portlet-ext-properties">
 		<for list="${test.case.available.property.names}" param="test.case.available.property.name">
 			<sequential>
@@ -13074,6 +13138,60 @@ captcha.enforce.disabled=true</echo>
 			<then>
 				<echo append="true" file="${test.ext.properties.file}">
 					object.storage.salesforce.username=${object.storage.salesforce.username}
+				</echo>
+			</then>
+		</if>
+
+		<if>
+			<isset property="object.storage.sugarcrm.access.token.url" />
+			<then>
+				<echo append="true" file="${test.ext.properties.file}">
+					object.storage.sugarcrm.access.token.url=${object.storage.sugarcrm.access.token.url}
+				</echo>
+			</then>
+		</if>
+
+		<if>
+			<isset property="object.storage.sugarcrm.base.url" />
+			<then>
+				<echo append="true" file="${test.ext.properties.file}">
+					object.storage.sugarcrm.base.url=${object.storage.sugarcrm.base.url}
+				</echo>
+			</then>
+		</if>
+
+		<if>
+			<isset property="object.storage.sugarcrm.client.id" />
+			<then>
+				<echo append="true" file="${test.ext.properties.file}">
+					object.storage.sugarcrm.client.id=${object.storage.sugarcrm.client.id}
+				</echo>
+			</then>
+		</if>
+
+		<if>
+			<isset property="object.storage.sugarcrm.grant.type" />
+			<then>
+				<echo append="true" file="${test.ext.properties.file}">
+					object.storage.sugarcrm.grant.type=${object.storage.sugarcrm.grant.type}
+				</echo>
+			</then>
+		</if>
+
+		<if>
+			<isset property="object.storage.sugarcrm.password" />
+			<then>
+				<echo append="true" file="${test.ext.properties.file}">
+					object.storage.sugarcrm.password=${object.storage.sugarcrm.password}
+				</echo>
+			</then>
+		</if>
+
+		<if>
+			<isset property="object.storage.sugarcrm.username" />
+			<then>
+				<echo append="true" file="${test.ext.properties.file}">
+					object.storage.sugarcrm.username=${object.storage.sugarcrm.username}
 				</echo>
 			</then>
 		</if>
@@ -13431,6 +13549,7 @@ captcha.enforce.disabled=true</echo>
 		<prepare-selenium-google-cloud-translation-properties />
 		<prepare-selenium-google-properties />
 		<prepare-selenium-object-storage-salesforce-properties />
+		<prepare-selenium-object-storage-sugarcrm-properties />
 		<prepare-selenium-onedrive-properties />
 		<prepare-selenium-openid-properties />
 		<prepare-selenium-recaptcha-properties />

@@ -429,7 +429,7 @@ public class CPFileImporterImpl implements CPFileImporter {
 		friendlyURL = CharPool.SLASH + friendlyURL;
 
 		Layout layout = _layoutLocalService.addLayout(
-			serviceContext.getUserId(), serviceContext.getScopeGroupId(),
+			null, serviceContext.getUserId(), serviceContext.getScopeGroupId(),
 			privateLayout, parentLayoutId, name, name, StringPool.BLANK,
 			layoutType, hidden, friendlyURL, serviceContext);
 
@@ -569,10 +569,11 @@ public class CPFileImporterImpl implements CPFileImporter {
 
 		if (ddmTemplate == null) {
 			ddmTemplate = _ddmTemplateLocalService.addTemplate(
-				serviceContext.getUserId(), serviceContext.getScopeGroupId(),
-				classNameId, classPK, resourceClassNameId, _getKey(name),
-				nameMap, null, type, mode, language, script, cacheable, false,
-				StringPool.BLANK, null, serviceContext);
+				null, serviceContext.getUserId(),
+				serviceContext.getScopeGroupId(), classNameId, classPK,
+				resourceClassNameId, _getKey(name), nameMap, null, type, mode,
+				language, script, cacheable, false, StringPool.BLANK, null,
+				serviceContext);
 		}
 		else {
 			ddmTemplate = _ddmTemplateLocalService.updateTemplate(

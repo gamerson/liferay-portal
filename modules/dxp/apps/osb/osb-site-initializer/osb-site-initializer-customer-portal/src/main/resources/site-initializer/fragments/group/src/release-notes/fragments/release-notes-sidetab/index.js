@@ -2,7 +2,9 @@
  * SPDX-FileCopyrightText: (c) 2000 Liferay, Inc. https://liferay.com
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
+
 /* eslint-disable @liferay/portal/no-global-fetch */
+
 /* eslint-disable no-undef */
 
 const fetchRequest = async (input) => {
@@ -59,8 +61,10 @@ function updateArticleContent(contentFields) {
 	articleContent.innerHTML = '';
 
 	contentFields.forEach((field) => {
-		if (field.contentFieldValue && field.contentFieldValue.data) {
-			const contentDiv = createContentDiv(field.contentFieldValue.data);
+		const trimmedContent = field.contentFieldValue?.data?.trim();
+
+		if (trimmedContent && trimmedContent !== 'null') {
+			const contentDiv = createContentDiv(trimmedContent);
 
 			articleContent.appendChild(contentDiv);
 		}

@@ -30,8 +30,8 @@ const useBuildTestActions = () => {
 						<UserListView
 							listViewProps={{
 								managementToolbarProps: {
-									applyFilters: false,
 									display: {columns: false},
+									hasSearch: true,
 								},
 							}}
 							tableProps={{

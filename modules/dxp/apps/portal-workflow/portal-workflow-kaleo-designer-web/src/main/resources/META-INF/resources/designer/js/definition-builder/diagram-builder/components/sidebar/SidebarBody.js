@@ -34,7 +34,6 @@ export default function SidebarBody({children, displayDefaultContent = true}) {
 	);
 
 	if (
-		Liferay.FeatureFlags['LPD-11179'] &&
 		!allowScriptContentToBeExecutedOrIncluded &&
 		!hadGroovyOrJavaScriptBefore
 	) {
@@ -56,7 +55,7 @@ export default function SidebarBody({children, displayDefaultContent = true}) {
 								onDragStart(event, key, setElementRectangle)
 							}
 						/>
-				  ))
+					))
 				: children}
 		</div>
 	);

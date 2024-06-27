@@ -119,6 +119,7 @@ export default function EditRolePermissionsNavigation({
 
 	useEffect(
 		() => setExpandedKeys(processedExpandedKeys),
+
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[debouncedFilterQuery]
 	);
@@ -147,6 +148,7 @@ export default function EditRolePermissionsNavigation({
 						<ClayVerticalNav.Item
 							active={item.active}
 							className={item.className}
+							data-qa-id={item.id}
 							items={item.items}
 							key={item.id}
 							onClick={

@@ -108,9 +108,7 @@ const UploadDocuments = () => {
 				}
 
 				try {
-					const {
-						data,
-					} = await createDocumentInFolder(
+					const {data} = await createDocumentInFolder(
 						sectionFolder.id,
 						fileEntry,
 						(progress) =>
@@ -157,7 +155,7 @@ const UploadDocuments = () => {
 					key={index}
 				>
 					<header className="c-mb-3 header">
-						<h5 className="c-mb-1 font-weight-bolder h5 upload-title">
+						<div className="c-mb-1 font-weight-bolder h5 upload-title">
 							{section.title}
 
 							{section.required ? (
@@ -172,7 +170,7 @@ const UploadDocuments = () => {
 									{` (optional)`}
 								</span>
 							)}
-						</h5>
+						</div>
 
 						<span className="font-weight-normal text-neutral-8 text-paragraph">
 							{section.subtitle}

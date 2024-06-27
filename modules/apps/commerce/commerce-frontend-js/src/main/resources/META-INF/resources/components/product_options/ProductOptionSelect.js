@@ -52,14 +52,13 @@ const ProductOptionSelect = ({
 	const [selectedSkuId, setSelectedSkuId] = useState(sku?.id);
 	const skuOptionsKey = isFromMiniCart ? 'miniCartSkuOptions' : 'skuOptions';
 
-	const [skuOptionsAtomState, setSkuOptionsAtomState] = useLiferayState(
-		skuOptionsAtom
-	);
+	const [skuOptionsAtomState, setSkuOptionsAtomState] =
+		useLiferayState(skuOptionsAtom);
 
 	const currentJSONObject = json
 		? JSON.parse(json).filter(
 				(jsonObject) => jsonObject.key === productOption.key
-		  )[0]
+			)[0]
 		: null;
 
 	const initialProductOptionValue = isAdmin
@@ -68,27 +67,22 @@ const ProductOptionSelect = ({
 				currentJSONObject,
 				isFromMiniCart,
 				productOption,
-		  });
+			});
 
-	const [
-		selectedProductOptionValue,
-		setSelectedProductOptionValue,
-	] = useState({
-		productOptionValueId: initialProductOptionValue?.id,
-		skuId: selectedSkuId,
-	});
-	const [
-		selectedProductOptionValueKey,
-		setSelectedProductOptionValueKey,
-	] = useState(initialProductOptionValue?.key);
+	const [selectedProductOptionValue, setSelectedProductOptionValue] =
+		useState({
+			productOptionValueId: initialProductOptionValue?.id,
+			skuId: selectedSkuId,
+		});
+	const [selectedProductOptionValueKey, setSelectedProductOptionValueKey] =
+		useState(initialProductOptionValue?.key);
 
 	const [productOptionValues, setProductOptionValues] = useState(
 		productOption.productOptionValues
 	);
 
-	const DeliveryCatalogAPIServiceProvider = ServiceProvider.DeliveryCatalogAPI(
-		'v1'
-	);
+	const DeliveryCatalogAPIServiceProvider =
+		ServiceProvider.DeliveryCatalogAPI('v1');
 
 	useEffect(
 		() =>
@@ -101,6 +95,7 @@ const ProductOptionSelect = ({
 					skuOptionsAtomState
 				),
 			}),
+
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[hasErrors]
 	);
@@ -143,7 +138,7 @@ const ProductOptionSelect = ({
 							],
 							value: initialProductOptionValue?.key || '',
 						},
-				  ],
+					],
 		});
 
 		return () =>
@@ -152,8 +147,9 @@ const ProductOptionSelect = ({
 						...skuOptionsAtomState,
 						miniCartErrors: [],
 						miniCartSkuOptions: [],
-				  })
+					})
 				: setSkuOptionsAtomState(initialSkuOptionsAtomState);
+
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
@@ -225,25 +221,45 @@ const ProductOptionSelect = ({
 					skuOptions: currentSkuOptions,
 				})
 			);
-
-			return;
 		}
+		else {
+			setSelectedProductOptionValue({
+				...selectedProductOptionValue,
+				productOptionValueId: valueArray[0],
+				skuId: selectedSkuId,
+			});
+			setSelectedProductOptionValueKey(valueArray[1]);
 
-		setSelectedProductOptionValue({
-			...selectedProductOptionValue,
-			productOptionValueId: valueArray[0],
-			skuId: selectedSkuId,
-		});
-		setSelectedProductOptionValueKey(valueArray[1]);
+			const currentSkuOption = currentSkuOptions.filter(
+				(skuOption) => skuOption.skuOptionKey === productOption.key
+			)[0];
 
-		const currentSkuOption = currentSkuOptions.filter(
-			(skuOption) => skuOption.skuOptionKey === productOption.key
-		)[0];
+			if (currentSkuOption) {
+				currentSkuOptions = currentSkuOptions.map((skuOption) => {
+					if (skuOption.skuOptionKey === productOption.key) {
+						return {
+							key: productOption.key,
+							price: currentProductOptionValue.price,
+							priceType: currentProductOptionValue.priceType,
+							quantity: currentProductOptionValue.quantity,
+							skuId: currentProductOptionValue.skuId,
+							skuOptionKey: productOption.key,
+							skuOptionName: productOption.name,
+							skuOptionValueKey: valueArray[1],
+							skuOptionValueNames: [
+								currentProductOptionValue.name,
+							],
+							value: valueArray[1],
+						};
+					}
 
-		if (currentSkuOption) {
-			currentSkuOptions = currentSkuOptions.map((skuOption) => {
-				if (skuOption.skuOptionKey === productOption.key) {
-					return {
+					return skuOption;
+				});
+			}
+			else {
+				currentSkuOptions = [
+					...currentSkuOptions,
+					{
 						key: productOption.key,
 						price: currentProductOptionValue.price,
 						priceType: currentProductOptionValue.priceType,
@@ -254,55 +270,9 @@ const ProductOptionSelect = ({
 						skuOptionValueKey: valueArray[1],
 						skuOptionValueNames: [currentProductOptionValue.name],
 						value: valueArray[1],
-					};
-				}
-
-				return skuOption;
-			});
-		}
-		else {
-			currentSkuOptions = [
-				...currentSkuOptions,
-				{
-					key: productOption.key,
-					price: currentProductOptionValue.price,
-					priceType: currentProductOptionValue.priceType,
-					quantity: currentProductOptionValue.quantity,
-					skuId: currentProductOptionValue.skuId,
-					skuOptionKey: productOption.key,
-					skuOptionName: productOption.name,
-					skuOptionValueKey: valueArray[1],
-					skuOptionValueNames: [currentProductOptionValue.name],
-					value: valueArray[1],
-				},
-			];
-		}
-
-		if (!productOption.skuContributor) {
-			setHasErrors(false);
-
-			setSkuOptionsAtomState({
-				...skuOptionsAtomState,
-				[errorsKey]: getSkuOptionsErrors(
-					false,
-					isFromMiniCart,
-					productOption,
-					skuOptionsAtomState
-				),
-				[skuOptionsKey]: currentSkuOptions,
-				updating: false,
-			});
-
-			setTimeout(() =>
-				Liferay.fire(`${namespace}${CP_OPTION_CHANGED}`, {
-					productOptionId: productOption.id,
-					productOptionValueId: valueArray[0],
-					skuId: selectedSkuId,
-					skuOptions: currentSkuOptions,
-				})
-			);
-
-			return;
+					},
+				];
+			}
 		}
 
 		let currentSkuId = selectedSkuId;
@@ -410,12 +380,13 @@ const ProductOptionSelect = ({
 				setProductOptionValues(responseProductOptionValues.items);
 
 				if (!Liferay.CommerceContext.showUnselectableOptions) {
-					const currentProductOptionValues = responseProductOptionValues.items.filter(
-						(productOptionValue) =>
-							productOptionValue.productOptionId.toString() ===
-								productOption.id.toString() &&
-							productOptionValue.selectable
-					);
+					const currentProductOptionValues =
+						responseProductOptionValues.items.filter(
+							(productOptionValue) =>
+								productOptionValue.productOptionId.toString() ===
+									productOption.id.toString() &&
+								productOptionValue.selectable
+						);
 
 					if (
 						!currentProductOptionValues.length &&
@@ -433,10 +404,12 @@ const ProductOptionSelect = ({
 					return;
 				}
 
-				const currentProductOptionValue = responseProductOptionValues.items.find(
-					(productOptionValue) =>
-						productOptionValue.key === selectedProductOptionValueKey
-				);
+				const currentProductOptionValue =
+					responseProductOptionValues.items.find(
+						(productOptionValue) =>
+							productOptionValue.key ===
+							selectedProductOptionValueKey
+					);
 
 				if (productOptionId === productOption.id) {
 					setResetErrorMessage(false);
@@ -476,6 +449,7 @@ const ProductOptionSelect = ({
 				}
 			});
 		},
+
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[resetErrorMessage, selectedProductOptionValueKey]
 	);

@@ -23,7 +23,7 @@ export const test = mergeTests(
 	loginTest()
 );
 
-test('LPD-23780 Commerce Classic Header taglib fragments are correctly displayed', async ({
+test('LPD-23780 Commerce Classic Header main fragment is correctly displayed', async ({
 	apiHelpers,
 	page,
 }) => {
@@ -35,6 +35,13 @@ test('LPD-23780 Commerce Classic Header taglib fragments are correctly displayed
 
 	apiHelpers.data.push({id: site.id, type: 'site'});
 
+	const channels =
+		await apiHelpers.headlessCommerceAdminChannel.getChannelsPage(
+			'Liferay Commerce Channel'
+		);
+
+	apiHelpers.data.push({id: channels.items[0].id, type: 'channel'});
+
 	await page.goto(`/web${site.friendlyUrlPath}`);
 
 	const editPageLink = await page
@@ -45,7 +52,7 @@ test('LPD-23780 Commerce Classic Header taglib fragments are correctly displayed
 
 	await page.locator('button[title="Page Design Options"]').click();
 	await page.locator('div[aria-label="Liferay Commerce Master"]').click();
-	await page.getByText('Publish').click();
+	await page.getByText('Publish', {exact: true}).click();
 
 	const commerceHeaderTagFragments = page.locator(
 		'#commerce-header-components'
@@ -59,4 +66,10 @@ test('LPD-23780 Commerce Classic Header taglib fragments are correctly displayed
 	await expect(commerceHeaderTagFragments.locator('.cart-root')).toHaveClass(
 		/sticky-top/
 	);
+
+	const commerceHeaderSearchPortlet = page.locator(
+		'#commerce-header-search .portlet-search-bar'
+	);
+
+	await expect(commerceHeaderSearchPortlet).toBeVisible();
 });

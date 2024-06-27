@@ -173,6 +173,19 @@ export class HeadlessAdminUserApiHelper {
 		);
 	}
 
+	async postAccountAccountRoles(
+		accountId: number,
+		accountRole?: TRole
+	): Promise<TRole> {
+		return this.apiHelpers.post(
+			`${this.apiHelpers.baseUrl}${this.basePath}/accounts/${accountId}/account-roles`,
+			{
+				data: {name: 'Role' + getRandomInt(), ...(accountRole || {})},
+				failOnStatusCode: true,
+			}
+		);
+	}
+
 	async postAccountGroup(
 		accountGroup?: TAccountGroup
 	): Promise<TAccountGroup> {
@@ -184,6 +197,26 @@ export class HeadlessAdminUserApiHelper {
 					...(accountGroup || {}),
 				},
 			}
+		);
+	}
+
+	async postAccountOrganization(accountId: number, organizationId: string) {
+		return this.apiHelpers.postResponse(
+			`${this.apiHelpers.baseUrl}${this.basePath}/accounts/${accountId}/organizations/${organizationId}`
+		);
+	}
+
+	async postAccountUserAccountByEmailAddress(
+		accountId: number,
+		accountRoleIds: number[],
+		emailAddresses: string[]
+	) {
+		return this.apiHelpers.post(
+			`${this.apiHelpers.baseUrl}${this.basePath}/accounts/${accountId}
+			/user-accounts/by-email-address${
+				accountRoleIds ? `?accountRoleIds=${accountRoleIds}` : ''
+			}`,
+			{data: {emailAddresses}}
 		);
 	}
 
@@ -219,6 +252,16 @@ export class HeadlessAdminUserApiHelper {
 		}
 
 		return organization;
+	}
+
+	async postOrganizationAccounts(
+		organizationId: number,
+		accountIds: number[]
+	) {
+		return this.apiHelpers.post(
+			`${this.apiHelpers.baseUrl}${this.basePath}/organizations/${organizationId}/accounts`,
+			{data: accountIds}
+		);
 	}
 
 	async postRole(role: TRole) {
@@ -269,7 +312,7 @@ export class HeadlessAdminUserApiHelper {
 		);
 	}
 
-	async assingUserToRole(
+	async assignUserToRole(
 		roleExternalReferenceCode: string,
 		userId: number | string
 	) {
@@ -279,7 +322,7 @@ export class HeadlessAdminUserApiHelper {
 		);
 	}
 
-	async assingUserToAccountRole(
+	async assignUserToAccountRole(
 		accountId: number | string,
 		accountRoleId: number | string,
 		userId: number | string

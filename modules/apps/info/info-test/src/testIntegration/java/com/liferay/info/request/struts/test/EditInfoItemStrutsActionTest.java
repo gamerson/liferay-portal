@@ -318,6 +318,8 @@ public class EditInfoItemStrutsActionTest {
 		_editInfoItemStrutsAction.execute(
 			uploadPortletRequest, pipingServletResponse);
 
+		Assert.assertNull(SessionErrors.get(uploadPortletRequest, _formItemId));
+
 		List<ObjectEntry> objectEntries =
 			_objectEntryLocalService.getObjectEntries(
 				0, _objectDefinition.getObjectDefinitionId(), QueryUtil.ALL_POS,
@@ -583,6 +585,8 @@ public class EditInfoItemStrutsActionTest {
 		_editInfoItemStrutsAction.execute(
 			uploadPortletRequest, pipingServletResponse);
 
+		Assert.assertNull(SessionErrors.get(uploadPortletRequest, _formItemId));
+
 		objectEntry = _objectEntryLocalService.fetchObjectEntry(
 			objectEntry.getObjectEntryId());
 
@@ -591,7 +595,7 @@ public class EditInfoItemStrutsActionTest {
 
 	private Layout _addLayout() throws Exception {
 		Layout layout = _layoutLocalService.addLayout(
-			_user.getUserId(), _group.getGroupId(), false,
+			null, _user.getUserId(), _group.getGroupId(), false,
 			LayoutConstants.DEFAULT_PARENT_LAYOUT_ID, 0, 0,
 			RandomTestUtil.randomLocaleStringMap(),
 			RandomTestUtil.randomLocaleStringMap(), Collections.emptyMap(),

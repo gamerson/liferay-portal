@@ -8,7 +8,6 @@ import {FrameLocator, Locator, Page, expect} from '@playwright/test';
 import {PORTLET_URLS} from '../../../utils/portletUrls';
 
 export class ViewObjectEntriesPage {
-	readonly addObjectEntryButton: Locator;
 	readonly backButton: Locator;
 	readonly duplicateEntryErrorMessage: Locator;
 	readonly editObjectEntryForm: Locator;
@@ -21,9 +20,6 @@ export class ViewObjectEntriesPage {
 	readonly successMessage: Locator;
 
 	constructor(page: Page) {
-		this.addObjectEntryButton = page
-			.getByTestId('fdsCreationActionButton')
-			.first();
 		this.backButton = page.getByTitle('Back');
 		this.duplicateEntryErrorMessage = page.getByText(
 			'Error:The field values are already in use. Please choose unique values.'
@@ -51,18 +47,18 @@ export class ViewObjectEntriesPage {
 		await expect(this.duplicateEntryErrorMessage).toBeVisible();
 	}
 
-	async clickAddObjectEntry() {
-		await this.addObjectEntryButton.click();
+	async clickAddObjectEntry(objectDefinitionLabel: string) {
+		await this.page.getByLabel(objectDefinitionLabel).click();
 		await this.editObjectEntryForm.waitFor({state: 'visible'});
 	}
 
 	async fillObjectEntry({
 		objectFieldBusinessType,
-		objectFieldName,
+		objectFieldLabel,
 		objectFieldValue,
 	}: {
 		objectFieldBusinessType?: ObjectFieldBusinessTypeName;
-		objectFieldName?: string;
+		objectFieldLabel?: string;
 		objectFieldValue: string;
 	}) {
 		if (objectFieldBusinessType === 'RichText') {
@@ -78,7 +74,7 @@ export class ViewObjectEntriesPage {
 		}
 
 		await this.page
-			.getByLabel(objectFieldName, {exact: true})
+			.getByLabel(objectFieldLabel, {exact: true})
 			.fill(objectFieldValue);
 	}
 
@@ -87,7 +83,7 @@ export class ViewObjectEntriesPage {
 		await this.page.getByRole('option', {name: optionName}).click();
 	}
 
-	async selectFileFromDocumentsAndMedia() {
+	async selectFileFromDocumentsAndMedia(fileName: string) {
 		await this.selectFileButton.click();
 
 		await this.selectFileIframe
@@ -104,8 +100,9 @@ export class ViewObjectEntriesPage {
 
 		await this.selectFileIframe
 			.locator(
-				'[id="_com_liferay_item_selector_web_portlet_ItemSelectorPortlet_repositoryEntriesSearchContainer"] img'
+				'[id="_com_liferay_item_selector_web_portlet_ItemSelectorPortlet_repositoryEntriesSearchContainer_1"] div'
 			)
+			.filter({hasText: fileName})
 			.first()
 			.click();
 	}

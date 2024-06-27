@@ -56,6 +56,8 @@ public class DefaultBuildUpdater extends BaseBuildUpdater {
 		build.addInvocation(_invoke(jenkinsMaster));
 
 		build.reset();
+
+		build.setStatus("queued");
 	}
 
 	@Override
@@ -177,6 +179,8 @@ public class DefaultBuildUpdater extends BaseBuildUpdater {
 
 			build.setBuildURL(buildJSONObject.getString("url"));
 
+			build.saveBuildURLInBuildDatabase();
+
 			Build.Invocation buildInvocation = build.getCurrentInvocation();
 
 			buildInvocation.setQueueId(buildJSONObject.getLong("queueId"));
@@ -220,6 +224,17 @@ public class DefaultBuildUpdater extends BaseBuildUpdater {
 			}
 
 			if (_matchesBuildParameters(_getBuildParameters(buildJSONObject))) {
+				Build.Invocation previousInvocation =
+					build.getPreviousInvocation();
+
+				if ((previousInvocation != null) &&
+					Objects.equals(
+						previousInvocation.getBuildURL(),
+						buildJSONObject.optString("url"))) {
+
+					continue;
+				}
+
 				return buildJSONObject;
 			}
 		}

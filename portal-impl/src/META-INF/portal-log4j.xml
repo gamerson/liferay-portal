@@ -39,7 +39,6 @@
 		<Logger level="ERROR" name="com.ecyrd.jspwiki" />
 		<Logger level="ERROR" name="com.liferay" />
 		<Logger level="INFO" name="com.liferay.bean.portlet" />
-		<Logger level="WARN" name="com.liferay.mail.messaging" />
 		<Logger level="ERROR" name="com.liferay.mail.service.impl.MailServiceImpl" />
 		<Logger level="INFO" name="com.liferay.portal.action.JSONServiceAction" />
 		<Logger level="WARN" name="com.liferay.portal.action.LayoutAction" />
@@ -75,7 +74,7 @@
 		<Logger level="ERROR" name="com.liferay.portal.events.LogoutPreAction" />
 		<Logger level="ERROR" name="com.liferay.portal.events.ServicePreAction" />
 		<Logger level="INFO" name="com.liferay.portal.events.StartupAction" />
-		<Logger level="INFO" name="com.liferay.portal.events.StartupHelperUtil" />
+		<Logger level="WARN" name="com.liferay.portal.events.StartupHelperUtil" />
 		<Logger level="ERROR" name="com.liferay.portal.image.ImageToolImpl" />
 		<Logger level="INFO" name="com.liferay.portal.internal.servlet.MainServlet" />
 		<Logger level="WARN" name="com.liferay.portal.json.jabsorb.serializer.LiferayJSONDeserializationWhitelist" />
@@ -136,7 +135,6 @@
 		<Logger level="WARN" name="com.liferay.portal.servlet.LanguageServlet" />
 		<Logger level="ERROR" name="com.liferay.portal.servlet.filters" />
 		<Logger level="ERROR" name="com.liferay.portal.servlet.filters.autologin.AutoLoginFilter" />
-		<Logger level="ERROR" name="com.liferay.portal.servlet.filters.cache" />
 		<Logger level="ERROR" name="com.liferay.portal.servlet.filters.dynamiccss" />
 		<Logger level="ERROR" name="com.liferay.portal.servlet.filters.dynamiccss.DynamicCSSFilter" />
 		<Logger level="ERROR" name="com.liferay.portal.servlet.filters.dynamiccss.DynamicCSSUtil" />

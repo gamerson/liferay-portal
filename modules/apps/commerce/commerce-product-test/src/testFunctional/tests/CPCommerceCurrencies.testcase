@@ -84,7 +84,7 @@ definition {
 		}
 
 		task ("Then the user goes and clear the results") {
-			Search.clearSearchResult();
+			Click(locator1 = "//button[text()='Clear']");
 		}
 
 		task ("And all of the currencies are displayed") {
@@ -194,6 +194,8 @@ definition {
 			Click(locator1 = "CommerceAccelerators#ADD_TO_CART_BUTTON_PRODUCT_DETAILS_PAGE");
 
 			CommerceNavigator.gotoMiniCart();
+
+			WaitForElementPresent(locator1 = "//p[@class='item-sku' and contains(.,'Simple Product')]/../../../..//span[@class='price-value']");
 
 			var productPrice = selenium.getText("//p[@class='item-sku' and contains(.,'Simple Product')]/../../../..//span[@class='price-value']");
 

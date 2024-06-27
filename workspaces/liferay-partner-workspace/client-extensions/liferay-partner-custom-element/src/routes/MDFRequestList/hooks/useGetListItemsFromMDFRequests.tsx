@@ -32,12 +32,6 @@ export default function useGetListItemsFromMDFRequests(
 	const listItems = useMemo(() => {
 		return swrResponse.data?.items?.map((item) => {
 			const baseItem: MDFRequestListItem = {
-				[MDFColumnKey.BALANCE]: Number(item.totalPaidAmount)
-					? getIntlNumberFormat(item.currency).format(
-							Number(item.totalClaimedRequest) -
-								Number(item.totalPaidAmount)
-					  )
-					: '-',
 				[MDFColumnKey.ID]: String(item.id),
 				[MDFColumnKey.CAMPAIGN_NAME]: item.overallCampaignName,
 				...getMDFActivityPeriod(
@@ -50,12 +44,12 @@ export default function useGetListItemsFromMDFRequests(
 					? '-'
 					: getIntlNumberFormat(item.currency).format(
 							Number(item.totalPaidAmount)
-					  ),
+						),
 				[MDFColumnKey.AMOUNT_CLAIMED]: !Number(item.totalClaimedRequest)
 					? '-'
 					: getIntlNumberFormat(item.currency).format(
 							Number(item.totalClaimedRequest)
-					  ),
+						),
 				...getMDFDates(item.submitDate, item.dateModified),
 				...getMDFBudgetInfos(item.totalMDFRequestAmount, item.currency),
 			};

@@ -79,8 +79,8 @@ String orderByType = ParamUtil.getString(request, "orderByType", "asc");
 												<div class="input-group-inset-item input-group-inset-item-after">
 													<clay:button
 														data-qa-id="searchButton"
-														icon="search"
 														displayType="unstyled"
+														icon="search"
 														monospaced="<%= false %>"
 														type="submit"
 													/>
@@ -269,7 +269,8 @@ String orderByType = ParamUtil.getString(request, "orderByType", "asc");
 		recordSetId,
 		recordSetName
 	) {
-		document.<portlet:namespace />fm.<portlet:namespace />recordSetId.value = recordSetId;
+		document.<portlet:namespace />fm.<portlet:namespace />recordSetId.value =
+			recordSetId;
 
 		var displayingRecordSetIdHolder = document.querySelector(
 			'.displaying-record-set-id-holder'

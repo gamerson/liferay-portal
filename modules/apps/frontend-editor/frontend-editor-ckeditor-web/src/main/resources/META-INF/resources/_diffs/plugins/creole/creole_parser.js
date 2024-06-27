@@ -278,16 +278,19 @@
 			},
 
 			hr: {regex: /(^|\n)\s*----\s*(\n|$)/, tag: 'hr'},
+
 			// eslint-disable-next-line @liferay/no-abbreviations
 			img: {
 				build(node, r, options) {
 					let imagePath = r[1];
 					const imagePathPrefix = options ? options.imagePrefix : '';
 
-					if (imagePathPrefix) {
-						if (!/^https?:\/\//gi.test(imagePath)) {
-							imagePath = imagePathPrefix + imagePath;
-						}
+					if (
+						imagePathPrefix &&
+						!imagePath.startsWith('data:image/') &&
+						!/^https?:\/\//gi.test(imagePath)
+					) {
+						imagePath = imagePathPrefix + imagePath;
 					}
 
 					const image = document.createElement('img');
@@ -320,7 +323,7 @@
 							? formatLink(
 									r[1].replace(/~(.)/g, '$1'),
 									options.linkFormat
-							  )
+								)
 							: r[1].replace(/~(.)/g, '$1');
 					link.setAttribute('data-cke-saved-href', link.href);
 
@@ -486,10 +489,14 @@
 				options
 			);
 		};
-		g.namedUri.children = g.unnamedUri.children = g.rawUri.children = g.namedLink.children = g.unnamedLink.children = g.namedInterwikiLink.children = g.unnamedInterwikiLink.children = [
-			g.escapedSymbol,
-			g.img,
-		];
+		g.namedUri.children =
+			g.unnamedUri.children =
+			g.rawUri.children =
+			g.namedLink.children =
+			g.unnamedLink.children =
+			g.namedInterwikiLink.children =
+			g.unnamedInterwikiLink.children =
+				[g.escapedSymbol, g.img];
 
 		for (let i = 1; i <= 6; i++) {
 			g['h' + i] = {
@@ -512,35 +519,46 @@
 		g.td.children = [g.singleLine];
 		g.th.children = [g.singleLine];
 
-		g.h1.children = g.h2.children = g.h3.children = g.h4.children = g.h5.children = g.h6.children = [
-			g.escapedSequence,
-			g.br,
-			g.rawUri,
-			g.namedUri,
-			g.namedInterwikiLink,
-			g.namedLink,
-			g.unnamedUri,
-			g.unnamedInterwikiLink,
-			g.unnamedLink,
-			g.tt,
-			g.img,
-		];
+		g.h1.children =
+			g.h2.children =
+			g.h3.children =
+			g.h4.children =
+			g.h5.children =
+			g.h6.children =
+				[
+					g.escapedSequence,
+					g.br,
+					g.rawUri,
+					g.namedUri,
+					g.namedInterwikiLink,
+					g.namedLink,
+					g.unnamedUri,
+					g.unnamedInterwikiLink,
+					g.unnamedLink,
+					g.tt,
+					g.img,
+				];
 
-		g.singleLine.children = g.paragraph.children = g.text.children = g.strong.children = g.em.children = [
-			g.escapedSequence,
-			g.strong,
-			g.em,
-			g.br,
-			g.rawUri,
-			g.namedUri,
-			g.namedInterwikiLink,
-			g.namedLink,
-			g.unnamedUri,
-			g.unnamedInterwikiLink,
-			g.unnamedLink,
-			g.tt,
-			g.img,
-		];
+		g.singleLine.children =
+			g.paragraph.children =
+			g.text.children =
+			g.strong.children =
+			g.em.children =
+				[
+					g.escapedSequence,
+					g.strong,
+					g.em,
+					g.br,
+					g.rawUri,
+					g.namedUri,
+					g.namedInterwikiLink,
+					g.namedLink,
+					g.unnamedUri,
+					g.unnamedInterwikiLink,
+					g.unnamedLink,
+					g.tt,
+					g.img,
+				];
 
 		g.root = {
 			children: [

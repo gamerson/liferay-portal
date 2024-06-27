@@ -1,4 +1,5 @@
 /* eslint-disable @liferay/empty-line-between-elements */
+
 /**
  * SPDX-FileCopyrightText: (c) 2000 Liferay, Inc. https://liferay.com
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
@@ -49,13 +50,14 @@ const PolicyDetail = ({
 
 	useEffect(() => {
 		setShowPanel(policyHistory.map(() => false));
+
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	return (
 		<div className="bg-neutral-0 h-100 rounded w-100">
 			<div className="bg-neutral-0 policy-detail-title pt-3 px-5 rounded-top">
-				<h5 className="m-0">Policy Detail</h5>
+				<div className="h5 m-0">Policy Detail</div>
 			</div>
 
 			<div className="d-flex flex-row">

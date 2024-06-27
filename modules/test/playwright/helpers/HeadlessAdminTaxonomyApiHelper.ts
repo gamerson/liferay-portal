@@ -5,18 +5,24 @@
 
 import {ApiHelpers} from './ApiHelpers';
 
-interface createVocabularyProps {
-	assetTypes: AssetType[];
+interface postSiteTaxonomyVocabularyProps {
+	assetTypes?: AssetType[];
 	name: string;
 	siteId: string;
 }
 
-interface createCategoryProps {
+export interface postTaxonomyVocabularyTaxonomyCategoryProps {
 	name: string;
+	name_i18n?: {['ES-es']: string};
 	vocabularyId: number;
 }
 
-interface createTagProps {
+interface patchTaxonomyCategoryProps {
+	id: number;
+	name: string;
+}
+
+interface postSiteKeywordProps {
 	name: string;
 	siteId: string;
 }
@@ -35,14 +41,14 @@ export class HeadlessAdminTaxonomyApiHelper {
 	 *
 	 * @param siteId the id of the site in which the vocabulary will be created
 	 * @param name the name of the vocabulary
-	 * @param assetTypes the asset types to which the vocabulary can be used
+	 * @param [assetTypes] the asset types to which the vocabulary can be used
 	 */
 
-	async createVocabulary({
+	async postSiteTaxonomyVocabulary({
 		assetTypes,
 		name,
 		siteId,
-	}: createVocabularyProps): Promise<{id: number}> {
+	}: postSiteTaxonomyVocabularyProps): Promise<{id: number}> {
 		return this.apiHelpers.post(
 			`${this.apiHelpers.baseUrl}${this.basePath}/sites/${siteId}/taxonomy-vocabularies`,
 			{data: {assetTypes, name}}
@@ -56,13 +62,31 @@ export class HeadlessAdminTaxonomyApiHelper {
 	 * @param vocabularyId the parent vocabulary id
 	 */
 
-	async createCategory({
+	async postTaxonomyVocabularyTaxonomyCategory({
 		name,
+		name_i18n,
 		vocabularyId,
-	}: createCategoryProps): Promise<{id: number}> {
+	}: postTaxonomyVocabularyTaxonomyCategoryProps): Promise<{id: number}> {
 		return this.apiHelpers.post(
 			`${this.apiHelpers.baseUrl}${this.basePath}/taxonomy-vocabularies/${vocabularyId}/taxonomy-categories`,
-			{data: {name}}
+			{data: {name, name_i18n}}
+		);
+	}
+
+	/**
+	 * It allows partially update a category name
+	 *
+	 * @param name the new name of the category
+	 * @param id the category id
+	 */
+
+	async patchTaxonomyCategory({
+		id,
+		name,
+	}: patchTaxonomyCategoryProps): Promise<{id: number}> {
+		return this.apiHelpers.patch(
+			`${this.apiHelpers.baseUrl}${this.basePath}/taxonomy-categories/${id}`,
+			{name}
 		);
 	}
 
@@ -73,7 +97,10 @@ export class HeadlessAdminTaxonomyApiHelper {
 	 * @param siteId the id of the site in which the tag will be created
 	 */
 
-	async createTag({name, siteId}: createTagProps): Promise<{id: number}> {
+	async postSiteKeyword({
+		name,
+		siteId,
+	}: postSiteKeywordProps): Promise<{id: number}> {
 		return this.apiHelpers.post(
 			`${this.apiHelpers.baseUrl}${this.basePath}/sites/${siteId}/keywords`,
 			{data: {name}}
@@ -86,7 +113,7 @@ export class HeadlessAdminTaxonomyApiHelper {
 	 * @param id the id of the tag
 	 */
 
-	async deleteTag({id}: {id: number}) {
+	async deleteKeyword({id}: {id: number}) {
 		return this.apiHelpers.delete(
 			`${this.apiHelpers.baseUrl}${this.basePath}/keywords/${id}`
 		);

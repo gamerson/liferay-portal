@@ -66,7 +66,7 @@ function ListTypeEntriesModal() {
 		}
 		setState((previousValues) => ({
 			...previousValues,
-			itemKey: toCamelCase(value),
+			itemKey: toCamelCase(value, false, true),
 		}));
 	};
 
@@ -76,6 +76,7 @@ function ListTypeEntriesModal() {
 		if (modalType !== 'edit' && keyChanged === false) {
 			newItemKey = toCamelCase(
 				newName_i18n[defaultLanguageId] as string,
+				true,
 				true
 			);
 		}
@@ -126,6 +127,7 @@ function ListTypeEntriesModal() {
 
 		return () =>
 			Liferay.detach('openListTypeEntriesModal', openModal as () => void);
+
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
@@ -240,6 +242,7 @@ function ListTypeEntriesModal() {
 				<Input
 					disabled={modalType === 'edit'}
 					error={errors.name}
+					id="listTypeEntriesModalKeyInputField"
 					label={Liferay.Language.get('key')}
 					name="name"
 					onChange={({target}) => handleKeyChange(target.value)}

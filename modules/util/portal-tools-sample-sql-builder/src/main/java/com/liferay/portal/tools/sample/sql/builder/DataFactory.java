@@ -249,6 +249,7 @@ import com.liferay.portal.kernel.model.VirtualHostModel;
 import com.liferay.portal.kernel.model.role.RoleConstants;
 import com.liferay.portal.kernel.portlet.PortletIdCodec;
 import com.liferay.portal.kernel.portlet.PortletPreferencesFactory;
+import com.liferay.portal.kernel.security.SecureRandomUtil;
 import com.liferay.portal.kernel.security.auth.FullNameGenerator;
 import com.liferay.portal.kernel.security.auth.FullNameGeneratorFactory;
 import com.liferay.portal.kernel.service.permission.PortletPermissionUtil;
@@ -323,9 +324,9 @@ import com.liferay.segments.criteria.Criteria;
 import com.liferay.segments.criteria.CriteriaSerializer;
 import com.liferay.segments.model.SegmentsEntry;
 import com.liferay.segments.model.SegmentsEntryModel;
-import com.liferay.segments.model.SegmentsExperience;
-import com.liferay.segments.model.impl.SegmentsEntryImpl;
-import com.liferay.segments.model.impl.SegmentsExperienceImpl;
+import com.liferay.segments.model.SegmentsExperienceModel;
+import com.liferay.segments.model.impl.SegmentsEntryModelImpl;
+import com.liferay.segments.model.impl.SegmentsExperienceModelImpl;
 import com.liferay.social.kernel.model.SocialActivity;
 import com.liferay.social.kernel.model.SocialActivityConstants;
 import com.liferay.social.kernel.model.SocialActivityModel;
@@ -370,6 +371,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.UUID;
 
 import javax.portlet.PortletPreferences;
 
@@ -2389,13 +2391,17 @@ public class DataFactory {
 		List<LayoutModel> layoutModels = new ArrayList<>();
 
 		LayoutModel publicLayoutModel = _newContentPageLayoutModel(
-			groupId, name, 0, 0);
+			groupId, 0, 0, name, name);
 
 		layoutModels.add(publicLayoutModel);
 		layoutModels.add(
 			_newContentPageLayoutModel(
-				groupId, name + "1", getClassNameId(Layout.class),
-				publicLayoutModel.getPlid()));
+				groupId, getClassNameId(Layout.class),
+				publicLayoutModel.getPlid(), name + "1",
+				String.valueOf(
+					new UUID(
+						SecureRandomUtil.nextLong(),
+						SecureRandomUtil.nextLong()))));
 
 		return layoutModels;
 	}
@@ -3984,50 +3990,55 @@ public class DataFactory {
 	}
 
 	public List<FragmentEntryLinkModel> newFragmentEntryLinkModels(
-			List<LayoutModel> layoutModels)
+			List<LayoutModel> layoutModels, long segmentsExperienceId)
 		throws Exception {
 
-		List<FragmentEntryLinkModel> fragmentEntryLinkModels =
+		List<FragmentEntryLinkModel> originalFragmentEntryLinkModels =
 			new ArrayList<>();
 
-		String headingRenderNamespace = StringUtil.randomId();
+		LayoutModel nonhiddenLayout = null;
+
 		String imageRenderNamespace = StringUtil.randomId();
 		String paragraphRenderNamespace = StringUtil.randomId();
 
 		for (LayoutModel layoutModel : layoutModels) {
-			fragmentEntryLinkModels.add(
+			if (!layoutModel.isHidden()) {
+				nonhiddenLayout = layoutModel;
+
+				continue;
+			}
+
+			originalFragmentEntryLinkModels.add(
 				newFragmentEntryLinkModel(
-					layoutModel, _FRAGMENT_COMPONENT_RENDER_KEY_HEADING,
-					_readFile(
-						_getFragmentComponentInputStream("heading", "css")),
-					_readFile(
-						_getFragmentComponentInputStream("heading", "html")),
-					_readFile(
-						"fragment_component" +
-							"/fragment_component_heading_configuration.json"),
-					_readFile(
-						"fragment_component" +
-							"/fragment_component_heading_editValue.json"),
-					0, headingRenderNamespace));
-			fragmentEntryLinkModels.add(
-				newFragmentEntryLinkModel(
-					layoutModel, _FRAGMENT_COMPONENT_RENDER_KEY_PARAGRAPH,
+					layoutModel, 0, segmentsExperienceId,
 					_readFile(
 						_getFragmentComponentInputStream("paragraph", "css")),
 					_readFile(
 						_getFragmentComponentInputStream("paragraph", "html")),
+					StringPool.BLANK,
 					_readFile(
 						"fragment_component" +
-							"/fragment_component_paragraph_configuration.json"),
-					_replaceReleaseInfo(
-						_readFile(
-							"fragment_component" +
-								"/fragment_component_paragraph_editValue." +
-									"json")),
-					0, paragraphRenderNamespace));
-			fragmentEntryLinkModels.add(
+							"/fragment_component_paragraph_title_editValue." +
+								"json"),
+					paragraphRenderNamespace, 0,
+					_FRAGMENT_COMPONENT_RENDER_KEY_PARAGRAPH));
+			originalFragmentEntryLinkModels.add(
 				newFragmentEntryLinkModel(
-					layoutModel, _FRAGMENT_COMPONENT_RENDER_KEY_IMAGE, "",
+					layoutModel, 0, segmentsExperienceId,
+					_readFile(
+						_getFragmentComponentInputStream("paragraph", "css")),
+					_readFile(
+						_getFragmentComponentInputStream("paragraph", "html")),
+					StringPool.BLANK,
+					_readFile(
+						"fragment_component" +
+							"/fragment_component_paragraph_content_editValue." +
+								"json"),
+					paragraphRenderNamespace, 1,
+					_FRAGMENT_COMPONENT_RENDER_KEY_PARAGRAPH));
+			originalFragmentEntryLinkModels.add(
+				newFragmentEntryLinkModel(
+					layoutModel, 0, segmentsExperienceId, "",
 					_readFile(
 						_getFragmentComponentInputStream("image", "html")),
 					_readFile(
@@ -4036,7 +4047,28 @@ public class DataFactory {
 					_readFile(
 						"fragment_component" +
 							"/fragment_component_image_editValue.json"),
-					0, imageRenderNamespace));
+					imageRenderNamespace, 0,
+					_FRAGMENT_COMPONENT_RENDER_KEY_IMAGE));
+		}
+
+		List<FragmentEntryLinkModel> fragmentEntryLinkModels = new ArrayList<>(
+			originalFragmentEntryLinkModels);
+
+		for (FragmentEntryLinkModel originalFragmentEntryLinkModel :
+				originalFragmentEntryLinkModels) {
+
+			fragmentEntryLinkModels.add(
+				newFragmentEntryLinkModel(
+					nonhiddenLayout,
+					originalFragmentEntryLinkModel.getFragmentEntryLinkId(),
+					originalFragmentEntryLinkModel.getSegmentsExperienceId(),
+					originalFragmentEntryLinkModel.getCss(),
+					originalFragmentEntryLinkModel.getHtml(),
+					originalFragmentEntryLinkModel.getConfiguration(),
+					originalFragmentEntryLinkModel.getEditableValues(),
+					originalFragmentEntryLinkModel.getNamespace(),
+					originalFragmentEntryLinkModel.getPosition(),
+					originalFragmentEntryLinkModel.getRendererKey()));
 		}
 
 		return fragmentEntryLinkModels;
@@ -4661,9 +4693,19 @@ public class DataFactory {
 		layoutPageTemplateStructureRelModel.setLayoutPageTemplateStructureId(
 			layoutPageTemplateStructureModel.
 				getLayoutPageTemplateStructureId());
-		layoutPageTemplateStructureRelModel.setSegmentsExperienceId(0L);
+
+		FragmentEntryLinkModel fragmentEntryLinkModel =
+			targetFragmentEntryLinkModels.get(0);
+
+		layoutPageTemplateStructureRelModel.setSegmentsExperienceId(
+			fragmentEntryLinkModel.getSegmentsExperienceId());
+
 		layoutPageTemplateStructureRelModel.setData(
 			_generateJsonData(targetFragmentEntryLinkModels, templateFileName));
+		layoutPageTemplateStructureRelModel.setStatusByUserId(_sampleUserId);
+		layoutPageTemplateStructureRelModel.setStatusByUserName(
+			_SAMPLE_USER_NAME);
+		layoutPageTemplateStructureRelModel.setStatusDate(new Date());
 
 		// Autogenerated fields
 
@@ -5565,47 +5607,34 @@ public class DataFactory {
 			StringPool.BLANK, userId);
 	}
 
-	public List<SegmentsEntry> newSegmentsEntries(long groupId) {
-		List<SegmentsEntry> segmentsEntries = new ArrayList<>(
-			BenchmarksPropsValues.MAX_SEGMENTS_ENTRY_COUNT);
-
-		for (int i = 0; i < BenchmarksPropsValues.MAX_SEGMENTS_ENTRY_COUNT;
-			 i++) {
-
-			segmentsEntries.add(newSegmentsEntry(groupId, i));
-		}
-
-		return segmentsEntries;
-	}
-
-	public SegmentsEntry newSegmentsEntry(long groupId, int index) {
-		SegmentsEntry segmentsEntry = new SegmentsEntryImpl();
+	public SegmentsEntryModel newSegmentsEntryModel(long groupId, int index) {
+		SegmentsEntryModel segmentsEntryModel = new SegmentsEntryModelImpl();
 
 		// PK fields
 
-		segmentsEntry.setSegmentsEntryId(_counter.get());
+		segmentsEntryModel.setSegmentsEntryId(_counter.get());
 
 		// Group instance
 
-		segmentsEntry.setGroupId(groupId);
+		segmentsEntryModel.setGroupId(groupId);
 
 		// Audit fields
 
-		segmentsEntry.setCompanyId(_companyId);
-		segmentsEntry.setUserId(_sampleUserId);
-		segmentsEntry.setUserName(_SAMPLE_USER_NAME);
-		segmentsEntry.setCreateDate(new Date());
-		segmentsEntry.setModifiedDate(new Date());
+		segmentsEntryModel.setCompanyId(_companyId);
+		segmentsEntryModel.setUserId(_sampleUserId);
+		segmentsEntryModel.setUserName(_SAMPLE_USER_NAME);
+		segmentsEntryModel.setCreateDate(new Date());
+		segmentsEntryModel.setModifiedDate(new Date());
 
 		// Other fields
 
-		segmentsEntry.setSegmentsEntryKey(_counter.getString());
-		segmentsEntry.setName(
+		segmentsEntryModel.setSegmentsEntryKey(_counter.getString());
+		segmentsEntryModel.setName(
 			StringBundler.concat(
 				"<?xml version=\"1.0\"?><root available-locales=\"en_US\" ",
 				"default-locale=\"en_US\"><Name language-id=\"en_US\">",
 				"SampleSegment", index, "</Name></root>"));
-		segmentsEntry.setActive(true);
+		segmentsEntryModel.setActive(true);
 
 		Criteria criteria = new Criteria();
 
@@ -5619,60 +5648,59 @@ public class DataFactory {
 		criteria.addFilter(
 			Criteria.Type.MODEL, filterString, Criteria.Conjunction.AND);
 
-		segmentsEntry.setCriteria(CriteriaSerializer.serialize(criteria));
+		segmentsEntryModel.setCriteria(CriteriaSerializer.serialize(criteria));
 
-		segmentsEntry.setSource(SegmentsEntryConstants.SOURCE_DEFAULT);
+		segmentsEntryModel.setSource(SegmentsEntryConstants.SOURCE_DEFAULT);
 
 		// Autogenerated fields
 
-		segmentsEntry.setUuid(SequentialUUID.generate());
+		segmentsEntryModel.setUuid(SequentialUUID.generate());
 
-		return segmentsEntry;
+		return segmentsEntryModel;
 	}
 
-	public SegmentsExperience newSegmentsExperience(
-		long groupId, long plid, long segmentsEntryId) {
+	public List<SegmentsEntryModel> newSegmentsEntryModels(long groupId) {
+		List<SegmentsEntryModel> segmentsEntryModels = new ArrayList<>(
+			BenchmarksPropsValues.MAX_SEGMENTS_ENTRY_COUNT);
 
-		SegmentsExperience segmentsExperience = new SegmentsExperienceImpl();
+		for (int i = 0; i < BenchmarksPropsValues.MAX_SEGMENTS_ENTRY_COUNT;
+			 i++) {
 
-		// PK fields
+			segmentsEntryModels.add(newSegmentsEntryModel(groupId, i));
+		}
 
-		segmentsExperience.setSegmentsExperienceId(_counter.get());
+		return segmentsEntryModels;
+	}
 
-		// Group instance
+	public SegmentsExperienceModel newSegmentsExperienceModel(
+		List<LayoutModel> layoutModels) {
 
-		segmentsExperience.setGroupId(groupId);
+		long groupId = 0;
+		long plid = 0;
 
-		// Audit fields
+		for (LayoutModel layoutModel : layoutModels) {
+			long classNameId = layoutModel.getClassNameId();
 
-		segmentsExperience.setCompanyId(_companyId);
-		segmentsExperience.setUserId(_sampleUserId);
-		segmentsExperience.setUserName(_SAMPLE_USER_NAME);
-		segmentsExperience.setCreateDate(new Date());
-		segmentsExperience.setModifiedDate(new Date());
+			if (classNameId == 0) {
+				groupId = layoutModel.getGroupId();
+				plid = layoutModel.getPlid();
 
-		// Other fields
+				break;
+			}
+		}
 
-		segmentsExperience.setSegmentsEntryId(segmentsEntryId);
-		segmentsExperience.setSegmentsExperienceKey(_counter.getString());
-		segmentsExperience.setPlid(plid);
+		return newSegmentsExperienceModel(
+			groupId, 0, "DEFAULT", plid, "Default", 0);
+	}
+
+	public SegmentsExperienceModel newSegmentsExperienceModel(
+		long groupId, long segmentsEntryId, long plid) {
 
 		Long index = _segmentsExperienceCounter.get();
 
-		segmentsExperience.setName(
-			StringBundler.concat(
-				"<?xml version=\"1.0\"?><root available-locales=\"en_US\" ",
-				"default-locale=\"en_US\"><Name language-id=\"en_US\">",
-				"SampleExperience", index, "</Name></root>"));
-		segmentsExperience.setPriority(index.intValue());
-
-		segmentsExperience.setActive(true);
-
-		// Autogenerated fields
-
-		segmentsExperience.setUuid(SequentialUUID.generate());
-
-		return segmentsExperience;
+		return newSegmentsExperienceModel(
+			groupId, segmentsEntryId, _counter.getString(), plid,
+			"SampleExperience" + index, index.intValue());
 	}
 
 	public SocialActivityModel newSocialActivityModel(
@@ -6530,7 +6558,10 @@ public class DataFactory {
 
 		// Autogenerated fields
 
-		ddmTemplateModel.setUuid(SequentialUUID.generate());
+		String uuid = SequentialUUID.generate();
+
+		ddmTemplateModel.setUuid(uuid);
+		ddmTemplateModel.setExternalReferenceCode(uuid);
 
 		return ddmTemplateModel;
 	}
@@ -6579,9 +6610,10 @@ public class DataFactory {
 	}
 
 	protected FragmentEntryLinkModel newFragmentEntryLinkModel(
-		LayoutModel layoutModel, String renderKey, String css, String html,
-		String configuration, String editValue, int position,
-		String nameSpace) {
+		LayoutModel layoutModel, long originalFragmentEntryLinkId,
+		long segmentsExperienceId, String css, String html,
+		String configuration, String editValue, String nameSpace, int position,
+		String renderKey) {
 
 		FragmentEntryLinkModel fragmentEntryLinkModel =
 			new FragmentEntryLinkModelImpl();
@@ -6604,18 +6636,20 @@ public class DataFactory {
 
 		// Other fields
 
+		fragmentEntryLinkModel.setOriginalFragmentEntryLinkId(
+			originalFragmentEntryLinkId);
 		fragmentEntryLinkModel.setFragmentEntryId(0);
+		fragmentEntryLinkModel.setSegmentsExperienceId(segmentsExperienceId);
 		fragmentEntryLinkModel.setClassNameId(getClassNameId(Layout.class));
 		fragmentEntryLinkModel.setClassPK(layoutModel.getPlid());
 		fragmentEntryLinkModel.setPlid(layoutModel.getPlid());
-		fragmentEntryLinkModel.setRendererKey(renderKey);
-		fragmentEntryLinkModel.setConfiguration(configuration);
 		fragmentEntryLinkModel.setCss(css);
 		fragmentEntryLinkModel.setHtml(html);
 		fragmentEntryLinkModel.setConfiguration(configuration);
 		fragmentEntryLinkModel.setEditableValues(editValue);
 		fragmentEntryLinkModel.setNamespace(nameSpace);
 		fragmentEntryLinkModel.setPosition(position);
+		fragmentEntryLinkModel.setRendererKey(renderKey);
 
 		// Autogenerated fields
 
@@ -6769,7 +6803,10 @@ public class DataFactory {
 
 		// Autogenerated fields
 
-		layoutModel.setUuid(SequentialUUID.generate());
+		String uuid = SequentialUUID.generate();
+
+		layoutModel.setUuid(uuid);
+		layoutModel.setExternalReferenceCode(uuid);
 
 		return layoutModel;
 	}
@@ -7095,6 +7132,52 @@ public class DataFactory {
 		roleModel.setUuid(SequentialUUID.generate());
 
 		return roleModel;
+	}
+
+	protected SegmentsExperienceModel newSegmentsExperienceModel(
+		long groupId, long segmentsEntryId, String segmentsExperienceKey,
+		long plid, String name, int priority) {
+
+		SegmentsExperienceModel segmentsExperienceModel =
+			new SegmentsExperienceModelImpl();
+
+		// PK fields
+
+		segmentsExperienceModel.setSegmentsExperienceId(_counter.get());
+
+		// Group instance
+
+		segmentsExperienceModel.setGroupId(groupId);
+
+		// Audit fields
+
+		segmentsExperienceModel.setCompanyId(_companyId);
+		segmentsExperienceModel.setUserId(_sampleUserId);
+		segmentsExperienceModel.setUserName(_SAMPLE_USER_NAME);
+		segmentsExperienceModel.setCreateDate(new Date());
+		segmentsExperienceModel.setModifiedDate(new Date());
+
+		// Other fields
+
+		segmentsExperienceModel.setSegmentsEntryId(segmentsEntryId);
+		segmentsExperienceModel.setSegmentsExperienceKey(segmentsExperienceKey);
+		segmentsExperienceModel.setPlid(plid);
+		segmentsExperienceModel.setName(
+			StringBundler.concat(
+				"<?xml version=\"1.0\"?><root available-locales=\"en_US\" ",
+				"default-locale=\"en_US\"><Name language-id=\"en_US\">", name,
+				"</Name></root>"));
+		segmentsExperienceModel.setPriority(priority);
+		segmentsExperienceModel.setActive(true);
+
+		// Autogenerated fields
+
+		String uuid = SequentialUUID.generate();
+
+		segmentsExperienceModel.setUuid(uuid);
+		segmentsExperienceModel.setExternalReferenceCode(uuid);
+
+		return segmentsExperienceModel;
 	}
 
 	protected SocialActivityModel newSocialActivityModel(
@@ -7493,29 +7576,25 @@ public class DataFactory {
 
 			String rendererKey = fragmentEntryLinkModel.getRendererKey();
 
-			if (rendererKey.equals(_FRAGMENT_COMPONENT_RENDER_KEY_HEADING)) {
-				data = StringUtil.replace(
-					data, "${headingFragmentEntryLinkId}",
-					String.valueOf(
-						fragmentEntryLinkModel.getFragmentEntryLinkId()));
-			}
-			else if (rendererKey.equals(
-						_FRAGMENT_COMPONENT_RENDER_KEY_PARAGRAPH)) {
+			if (rendererKey.equals(_FRAGMENT_COMPONENT_RENDER_KEY_PARAGRAPH)) {
+				int position = fragmentEntryLinkModel.getPosition();
 
-				data = StringUtil.replace(
-					data, "${paragraphFragmentEntryLinkId}",
-					String.valueOf(
-						fragmentEntryLinkModel.getFragmentEntryLinkId()));
-			}
-			else if (rendererKey.equals(_FRAGMENT_COMPONENT_RENDER_KEY_IMAGE)) {
-				data = StringUtil.replace(
-					data, "${imageFragmentEntryLinkId}",
-					String.valueOf(
-						fragmentEntryLinkModel.getFragmentEntryLinkId()));
+				if (position == 0) {
+					data = StringUtil.replace(
+						data, "${paragraphTitleFragmentEntryLinkId}",
+						String.valueOf(
+							fragmentEntryLinkModel.getFragmentEntryLinkId()));
+				}
+				else {
+					data = StringUtil.replace(
+						data, "${paragraphContentFragmentEntryLinkId}",
+						String.valueOf(
+							fragmentEntryLinkModel.getFragmentEntryLinkId()));
+				}
 			}
 			else {
 				data = StringUtil.replace(
-					data, "${loginPortletFragmentEntryLinkId}",
+					data, "${imageFragmentEntryLinkId}",
 					String.valueOf(
 						fragmentEntryLinkModel.getFragmentEntryLinkId()));
 			}
@@ -7577,7 +7656,8 @@ public class DataFactory {
 	}
 
 	private LayoutModel _newContentPageLayoutModel(
-		long groupId, String name, long classNameId, long classPK) {
+		long groupId, long classNameId, long classPK, String name,
+		String friendlyURL) {
 
 		SimpleCounter simpleCounter = _layoutIdCounters.computeIfAbsent(
 			LayoutLocalServiceImpl.getCounterName(groupId, false),
@@ -7604,31 +7684,43 @@ public class DataFactory {
 		// Other fields
 
 		layoutModel.setLayoutId(simpleCounter.get());
+		layoutModel.setClassNameId(classNameId);
+		layoutModel.setClassPK(classPK);
 		layoutModel.setName(
 			"<?xml version=\"1.0\"?><root><name>" + name + "</name></root>");
 		layoutModel.setType(LayoutConstants.TYPE_CONTENT);
-		layoutModel.setFriendlyURL(StringPool.FORWARD_SLASH + name);
-		layoutModel.setClassNameId(classNameId);
-		layoutModel.setClassPK(classPK);
+
+		int priority = 0;
 
 		if (classNameId != 0) {
+			layoutModel.setTypeSettings(
+				StringUtil.replace(
+					UnicodePropertiesBuilder.create(
+						true
+					).put(
+						"published", "true"
+					).buildString(),
+					'\n', "\\n"));
+
 			layoutModel.setHidden(true);
 			layoutModel.setSystem(true);
+
+			priority = Integer.MAX_VALUE;
 		}
 
-		layoutModel.setTypeSettings(
-			StringUtil.replace(
-				UnicodePropertiesBuilder.create(
-					true
-				).put(
-					"published", "true"
-				).buildString(),
-				'\n', "\\n"));
-		layoutModel.setLastPublishDate(new Date());
+		layoutModel.setFriendlyURL(StringPool.FORWARD_SLASH + friendlyURL);
+		layoutModel.setPriority(priority);
+		layoutModel.setPublishDate(new Date());
+		layoutModel.setStatusByUserId(_sampleUserId);
+		layoutModel.setStatusByUserName(_SAMPLE_USER_NAME);
+		layoutModel.setStatusDate(new Date());
 
 		// Autogenerated fields
 
-		layoutModel.setUuid(SequentialUUID.generate());
+		String uuid = SequentialUUID.generate();
+
+		layoutModel.setUuid(uuid);
+		layoutModel.setExternalReferenceCode(uuid);
 
 		return layoutModel;
 	}
@@ -7674,16 +7766,6 @@ public class DataFactory {
 		return _readLines(getResourceInputStream(resourceName));
 	}
 
-	private String _replaceReleaseInfo(String resource) throws Exception {
-		StringBundler sb = new StringBundler(3);
-
-		sb.append("Welcome to");
-		sb.append(ReleaseInfo.getReleaseInfo());
-		sb.append(StringPool.PERIOD);
-
-		return StringUtil.replace(resource, "${paragraphValue}", sb.toString());
-	}
-
 	private static final long _CURRENT_TIME = System.currentTimeMillis();
 
 	private static final long _DEFAULT_DL_FILE_ENTRY_TYPE_ID =
@@ -7691,9 +7773,6 @@ public class DataFactory {
 
 	private static final String _DEPENDENCIES_DIR =
 		"/com/liferay/portal/tools/sample/sql/builder/dependencies/data/";
-
-	private static final String _FRAGMENT_COMPONENT_RENDER_KEY_HEADING =
-		"BASIC_COMPONENT-heading";
 
 	private static final String _FRAGMENT_COMPONENT_RENDER_KEY_IMAGE =
 		"BASIC_COMPONENT-image";

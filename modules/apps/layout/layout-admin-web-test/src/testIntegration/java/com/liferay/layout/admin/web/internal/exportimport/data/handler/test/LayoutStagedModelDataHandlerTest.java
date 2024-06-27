@@ -21,6 +21,9 @@ import com.liferay.exportimport.kernel.lifecycle.constants.ExportImportLifecycle
 import com.liferay.exportimport.test.util.lar.BaseStagedModelDataHandlerTestCase;
 import com.liferay.friendly.url.model.FriendlyURLEntry;
 import com.liferay.friendly.url.service.FriendlyURLEntryLocalServiceUtil;
+import com.liferay.layout.page.template.constants.LayoutPageTemplateEntryTypeConstants;
+import com.liferay.layout.page.template.model.LayoutPageTemplateEntry;
+import com.liferay.layout.page.template.service.LayoutPageTemplateEntryLocalService;
 import com.liferay.layout.test.util.ContentLayoutTestUtil;
 import com.liferay.layout.test.util.LayoutTestUtil;
 import com.liferay.petra.string.StringPool;
@@ -59,11 +62,14 @@ import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.portal.kernel.util.UnicodePropertiesBuilder;
+import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.kernel.xml.Document;
 import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.kernel.xml.SAXReaderUtil;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
+import com.liferay.style.book.model.StyleBookEntry;
+import com.liferay.style.book.service.StyleBookEntryLocalService;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -99,119 +105,12 @@ public class LayoutStagedModelDataHandlerTest
 
 	@Test
 	public void testClientExtensionEntries() throws Exception {
-		initExport();
-
-		ClientExtensionEntry clientExtensionEntry =
-			_clientExtensionEntryLocalService.addClientExtensionEntry(
-				RandomTestUtil.randomString(), TestPropsValues.getUserId(),
-				StringPool.BLANK,
-				Collections.singletonMap(
-					LocaleUtil.getDefault(), RandomTestUtil.randomString()),
-				StringPool.BLANK, StringPool.BLANK,
-				ClientExtensionEntryConstants.TYPE_GLOBAL_CSS,
-				UnicodePropertiesBuilder.create(
-					true
-				).put(
-					"url", "http://css.css"
-				).buildString());
-
-		Layout layout = LayoutTestUtil.addTypePortletLayout(stagingGroup);
-
-		_clientExtensionEntryRelLocalService.addClientExtensionEntryRel(
-			TestPropsValues.getUserId(), stagingGroup.getGroupId(),
-			_portal.getClassNameId(Layout.class), layout.getPlid(),
-			clientExtensionEntry.getExternalReferenceCode(),
-			ClientExtensionEntryConstants.TYPE_GLOBAL_CSS, StringPool.BLANK,
-			ServiceContextTestUtil.getServiceContext(
-				stagingGroup.getGroupId()));
-
-		StagedModelDataHandlerUtil.exportStagedModel(
-			portletDataContext, layout);
-
-		initImport();
-
-		ExportImportLifecycleManagerUtil.fireExportImportLifecycleEvent(
-			ExportImportLifecycleConstants.EVENT_LAYOUT_IMPORT_STARTED,
-			ExportImportLifecycleConstants.
-				PROCESS_FLAG_LAYOUT_IMPORT_IN_PROCESS,
-			portletDataContext.getExportImportProcessId(),
-			PortletDataContextFactoryUtil.clonePortletDataContext(
-				portletDataContext));
-
-		Layout exportedLayout = (Layout)readExportedStagedModel(layout);
-
-		StagedModelDataHandlerUtil.importStagedModel(
-			portletDataContext, exportedLayout);
-
-		ExportImportLifecycleManagerUtil.fireExportImportLifecycleEvent(
-			ExportImportLifecycleConstants.EVENT_LAYOUT_IMPORT_SUCCEEDED,
-			ExportImportLifecycleConstants.
-				PROCESS_FLAG_LAYOUT_IMPORT_IN_PROCESS,
-			portletDataContext.getExportImportProcessId(),
-			PortletDataContextFactoryUtil.clonePortletDataContext(
-				portletDataContext));
-
-		Layout importedLayout = _layoutLocalService.getLayoutByUuidAndGroupId(
-			layout.getUuid(), liveGroup.getGroupId(), layout.isPrivateLayout());
-
-		Assert.assertEquals(
-			1,
-			_clientExtensionEntryRelLocalService.
-				getClientExtensionEntryRelsCount(
-					_portal.getClassNameId(Layout.class),
-					importedLayout.getPlid(),
-					ClientExtensionEntryConstants.TYPE_GLOBAL_CSS));
-
-		_clientExtensionEntryRelLocalService.deleteClientExtensionEntryRels(
-			_portal.getClassNameId(Layout.class), layout.getPlid(),
-			ClientExtensionEntryConstants.TYPE_GLOBAL_CSS);
-
-		_clientExtensionEntryRelLocalService.addClientExtensionEntryRel(
-			TestPropsValues.getUserId(), stagingGroup.getGroupId(),
-			_portal.getClassNameId(Layout.class), layout.getPlid(),
-			clientExtensionEntry.getExternalReferenceCode(),
-			ClientExtensionEntryConstants.TYPE_GLOBAL_CSS, StringPool.BLANK,
-			ServiceContextTestUtil.getServiceContext(
-				stagingGroup.getGroupId()));
-
-		initExport();
-
-		StagedModelDataHandlerUtil.exportStagedModel(
-			portletDataContext, layout);
-
-		initImport();
-
-		ExportImportLifecycleManagerUtil.fireExportImportLifecycleEvent(
-			ExportImportLifecycleConstants.EVENT_LAYOUT_IMPORT_STARTED,
-			ExportImportLifecycleConstants.
-				PROCESS_FLAG_LAYOUT_IMPORT_IN_PROCESS,
-			portletDataContext.getExportImportProcessId(),
-			PortletDataContextFactoryUtil.clonePortletDataContext(
-				portletDataContext));
-
-		exportedLayout = (Layout)readExportedStagedModel(layout);
-
-		StagedModelDataHandlerUtil.importStagedModel(
-			portletDataContext, exportedLayout);
-
-		ExportImportLifecycleManagerUtil.fireExportImportLifecycleEvent(
-			ExportImportLifecycleConstants.EVENT_LAYOUT_IMPORT_SUCCEEDED,
-			ExportImportLifecycleConstants.
-				PROCESS_FLAG_LAYOUT_IMPORT_IN_PROCESS,
-			portletDataContext.getExportImportProcessId(),
-			PortletDataContextFactoryUtil.clonePortletDataContext(
-				portletDataContext));
-
-		importedLayout = _layoutLocalService.getLayoutByUuidAndGroupId(
-			layout.getUuid(), liveGroup.getGroupId(), layout.isPrivateLayout());
-
-		Assert.assertEquals(
-			1,
-			_clientExtensionEntryRelLocalService.
-				getClientExtensionEntryRelsCount(
-					_portal.getClassNameId(Layout.class),
-					importedLayout.getPlid(),
-					ClientExtensionEntryConstants.TYPE_GLOBAL_CSS));
+		_testClientExtensionEntries(
+			ClientExtensionEntryConstants.TYPE_GLOBAL_CSS, "http://css.css");
+		_testClientExtensionEntries(
+			ClientExtensionEntryConstants.TYPE_GLOBAL_JS, "http://js.js");
+		_testClientExtensionEntries(
+			ClientExtensionEntryConstants.TYPE_THEME_CSS, "http://css.css");
 	}
 
 	@Test
@@ -298,6 +197,126 @@ public class LayoutStagedModelDataHandlerTest
 		finally {
 			serviceRegistration.unregister();
 		}
+	}
+
+	@Test
+	public void testLayoutPageTemplateEntry() throws Exception {
+		initExport();
+
+		LayoutPageTemplateEntry masterLayoutPageTemplateEntry =
+			_layoutPageTemplateEntryLocalService.addLayoutPageTemplateEntry(
+				null, TestPropsValues.getUserId(), stagingGroup.getGroupId(), 0,
+				"Test Master Page",
+				LayoutPageTemplateEntryTypeConstants.MASTER_LAYOUT, 0,
+				WorkflowConstants.STATUS_APPROVED,
+				ServiceContextTestUtil.getServiceContext(
+					stagingGroup.getGroupId()));
+
+		Layout layout = LayoutTestUtil.addTypeContentLayout(stagingGroup);
+
+		layout = _layoutLocalService.updateMasterLayoutPlid(
+			layout.getGroupId(), layout.isPrivateLayout(), layout.getLayoutId(),
+			masterLayoutPageTemplateEntry.getPlid());
+
+		StagedModelDataHandlerUtil.exportStagedModel(
+			portletDataContext, layout);
+
+		initImport();
+
+		ExportImportLifecycleManagerUtil.fireExportImportLifecycleEvent(
+			ExportImportLifecycleConstants.EVENT_LAYOUT_IMPORT_STARTED,
+			ExportImportLifecycleConstants.
+				PROCESS_FLAG_LAYOUT_IMPORT_IN_PROCESS,
+			portletDataContext.getExportImportProcessId(),
+			PortletDataContextFactoryUtil.clonePortletDataContext(
+				portletDataContext));
+
+		Layout exportedLayout = (Layout)readExportedStagedModel(layout);
+
+		StagedModelDataHandlerUtil.importStagedModel(
+			portletDataContext, exportedLayout);
+
+		ExportImportLifecycleManagerUtil.fireExportImportLifecycleEvent(
+			ExportImportLifecycleConstants.EVENT_LAYOUT_IMPORT_SUCCEEDED,
+			ExportImportLifecycleConstants.
+				PROCESS_FLAG_LAYOUT_IMPORT_IN_PROCESS,
+			portletDataContext.getExportImportProcessId(),
+			PortletDataContextFactoryUtil.clonePortletDataContext(
+				portletDataContext));
+
+		LayoutPageTemplateEntry importedMasterLayoutPageTemplateEntry =
+			_layoutPageTemplateEntryLocalService.
+				getLayoutPageTemplateEntryByUuidAndGroupId(
+					masterLayoutPageTemplateEntry.getUuid(),
+					liveGroup.getGroupId());
+
+		Assert.assertNotEquals(
+			masterLayoutPageTemplateEntry.getLayoutPageTemplateEntryId(),
+			importedMasterLayoutPageTemplateEntry.
+				getLayoutPageTemplateEntryId());
+		Assert.assertNotEquals(
+			masterLayoutPageTemplateEntry.getPlid(),
+			importedMasterLayoutPageTemplateEntry.getPlid());
+
+		Layout importedLayout = _layoutLocalService.getLayoutByUuidAndGroupId(
+			layout.getUuid(), liveGroup.getGroupId(), layout.isPrivateLayout());
+
+		Assert.assertNotEquals(
+			layout.getMasterLayoutPlid(), importedLayout.getMasterLayoutPlid());
+	}
+
+	@Test
+	public void testStyleBookEntry() throws Exception {
+		initExport();
+
+		StyleBookEntry styleBookEntry =
+			_styleBookEntryLocalService.addStyleBookEntry(
+				null, TestPropsValues.getUserId(), stagingGroup.getGroupId(),
+				false, StringPool.BLANK, RandomTestUtil.randomString(),
+				StringPool.BLANK,
+				ServiceContextTestUtil.getServiceContext(
+					stagingGroup.getGroupId()));
+
+		Layout layout = LayoutTestUtil.addTypeContentLayout(stagingGroup);
+
+		layout = _layoutLocalService.updateStyleBookEntryId(
+			layout.getGroupId(), layout.isPrivateLayout(), layout.getLayoutId(),
+			styleBookEntry.getStyleBookEntryId());
+
+		StagedModelDataHandlerUtil.exportStagedModel(
+			portletDataContext, layout);
+
+		initImport();
+
+		ExportImportLifecycleManagerUtil.fireExportImportLifecycleEvent(
+			ExportImportLifecycleConstants.EVENT_LAYOUT_IMPORT_STARTED,
+			ExportImportLifecycleConstants.
+				PROCESS_FLAG_LAYOUT_IMPORT_IN_PROCESS,
+			portletDataContext.getExportImportProcessId(),
+			PortletDataContextFactoryUtil.clonePortletDataContext(
+				portletDataContext));
+
+		Layout exportedLayout = (Layout)readExportedStagedModel(layout);
+
+		StagedModelDataHandlerUtil.importStagedModel(
+			portletDataContext, exportedLayout);
+
+		ExportImportLifecycleManagerUtil.fireExportImportLifecycleEvent(
+			ExportImportLifecycleConstants.EVENT_LAYOUT_IMPORT_SUCCEEDED,
+			ExportImportLifecycleConstants.
+				PROCESS_FLAG_LAYOUT_IMPORT_IN_PROCESS,
+			portletDataContext.getExportImportProcessId(),
+			PortletDataContextFactoryUtil.clonePortletDataContext(
+				portletDataContext));
+
+		Layout importedLayout = _layoutLocalService.getLayoutByUuidAndGroupId(
+			layout.getUuid(), liveGroup.getGroupId(), layout.isPrivateLayout());
+
+		Assert.assertNotEquals(
+			layout.getStyleBookEntryId(), importedLayout.getStyleBookEntryId());
+		Assert.assertNotNull(
+			_styleBookEntryLocalService.fetchStyleBookEntry(
+				importedLayout.getStyleBookEntryId()));
 	}
 
 	@Test
@@ -760,6 +779,120 @@ public class LayoutStagedModelDataHandlerTest
 			).build());
 	}
 
+	private void _testClientExtensionEntries(String type, String url)
+		throws Exception {
+
+		initExport();
+
+		ClientExtensionEntry clientExtensionEntry =
+			_clientExtensionEntryLocalService.addClientExtensionEntry(
+				RandomTestUtil.randomString(), TestPropsValues.getUserId(),
+				StringPool.BLANK,
+				Collections.singletonMap(
+					LocaleUtil.getDefault(), RandomTestUtil.randomString()),
+				StringPool.BLANK, StringPool.BLANK, type,
+				UnicodePropertiesBuilder.create(
+					true
+				).put(
+					"url", url
+				).buildString());
+
+		Layout layout = LayoutTestUtil.addTypePortletLayout(stagingGroup);
+
+		_clientExtensionEntryRelLocalService.addClientExtensionEntryRel(
+			TestPropsValues.getUserId(), stagingGroup.getGroupId(),
+			_portal.getClassNameId(Layout.class), layout.getPlid(),
+			clientExtensionEntry.getExternalReferenceCode(), type,
+			StringPool.BLANK,
+			ServiceContextTestUtil.getServiceContext(
+				stagingGroup.getGroupId()));
+
+		StagedModelDataHandlerUtil.exportStagedModel(
+			portletDataContext, layout);
+
+		initImport();
+
+		ExportImportLifecycleManagerUtil.fireExportImportLifecycleEvent(
+			ExportImportLifecycleConstants.EVENT_LAYOUT_IMPORT_STARTED,
+			ExportImportLifecycleConstants.
+				PROCESS_FLAG_LAYOUT_IMPORT_IN_PROCESS,
+			portletDataContext.getExportImportProcessId(),
+			PortletDataContextFactoryUtil.clonePortletDataContext(
+				portletDataContext));
+
+		Layout exportedLayout = (Layout)readExportedStagedModel(layout);
+
+		StagedModelDataHandlerUtil.importStagedModel(
+			portletDataContext, exportedLayout);
+
+		ExportImportLifecycleManagerUtil.fireExportImportLifecycleEvent(
+			ExportImportLifecycleConstants.EVENT_LAYOUT_IMPORT_SUCCEEDED,
+			ExportImportLifecycleConstants.
+				PROCESS_FLAG_LAYOUT_IMPORT_IN_PROCESS,
+			portletDataContext.getExportImportProcessId(),
+			PortletDataContextFactoryUtil.clonePortletDataContext(
+				portletDataContext));
+
+		Layout importedLayout = _layoutLocalService.getLayoutByUuidAndGroupId(
+			layout.getUuid(), liveGroup.getGroupId(), layout.isPrivateLayout());
+
+		Assert.assertEquals(
+			1,
+			_clientExtensionEntryRelLocalService.
+				getClientExtensionEntryRelsCount(
+					_portal.getClassNameId(Layout.class),
+					importedLayout.getPlid(), type));
+
+		_clientExtensionEntryRelLocalService.deleteClientExtensionEntryRels(
+			_portal.getClassNameId(Layout.class), layout.getPlid(), type);
+
+		_clientExtensionEntryRelLocalService.addClientExtensionEntryRel(
+			TestPropsValues.getUserId(), stagingGroup.getGroupId(),
+			_portal.getClassNameId(Layout.class), layout.getPlid(),
+			clientExtensionEntry.getExternalReferenceCode(), type,
+			StringPool.BLANK,
+			ServiceContextTestUtil.getServiceContext(
+				stagingGroup.getGroupId()));
+
+		initExport();
+
+		StagedModelDataHandlerUtil.exportStagedModel(
+			portletDataContext, layout);
+
+		initImport();
+
+		ExportImportLifecycleManagerUtil.fireExportImportLifecycleEvent(
+			ExportImportLifecycleConstants.EVENT_LAYOUT_IMPORT_STARTED,
+			ExportImportLifecycleConstants.
+				PROCESS_FLAG_LAYOUT_IMPORT_IN_PROCESS,
+			portletDataContext.getExportImportProcessId(),
+			PortletDataContextFactoryUtil.clonePortletDataContext(
+				portletDataContext));
+
+		exportedLayout = (Layout)readExportedStagedModel(layout);
+
+		StagedModelDataHandlerUtil.importStagedModel(
+			portletDataContext, exportedLayout);
+
+		ExportImportLifecycleManagerUtil.fireExportImportLifecycleEvent(
+			ExportImportLifecycleConstants.EVENT_LAYOUT_IMPORT_SUCCEEDED,
+			ExportImportLifecycleConstants.
+				PROCESS_FLAG_LAYOUT_IMPORT_IN_PROCESS,
+			portletDataContext.getExportImportProcessId(),
+			PortletDataContextFactoryUtil.clonePortletDataContext(
+				portletDataContext));
+
+		importedLayout = _layoutLocalService.getLayoutByUuidAndGroupId(
+			layout.getUuid(), liveGroup.getGroupId(), layout.isPrivateLayout());
+
+		Assert.assertEquals(
+			1,
+			_clientExtensionEntryRelLocalService.
+				getClientExtensionEntryRelsCount(
+					_portal.getClassNameId(Layout.class),
+					importedLayout.getPlid(), type));
+	}
+
 	private static final String _TEST_PORTLET_NAME =
 		"com_liferay_test_portlet_TestPortlet";
 
@@ -786,6 +919,10 @@ public class LayoutStagedModelDataHandlerTest
 	private LayoutLocalService _layoutLocalService;
 
 	@Inject
+	private LayoutPageTemplateEntryLocalService
+		_layoutPageTemplateEntryLocalService;
+
+	@Inject
 	private Portal _portal;
 
 	@Inject
@@ -793,5 +930,8 @@ public class LayoutStagedModelDataHandlerTest
 
 	@Inject
 	private PortletPreferencesLocalService _portletPreferencesLocalService;
+
+	@Inject
+	private StyleBookEntryLocalService _styleBookEntryLocalService;
 
 }

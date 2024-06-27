@@ -1,7 +1,7 @@
 {
 	"dependencies": {
-		"@clayui/button": "3.115.0",
-		"@clayui/drop-down": "3.115.1",
+		"@clayui/button": "3.116.0",
+		"@clayui/drop-down": "3.116.0",
 		"@liferay/fragment-renderer-collection-filter-impl": "*",
 		"frontend-js-web": "*",
 		"prop-types": "15.7.2",
@@ -11,8 +11,8 @@
 	"name": "@liferay/fragment-collection-filter-category",
 	"scripts": {
 		"build": "node-scripts build",
-		"checkFormat": "liferay-npm-scripts check",
-		"format": "liferay-npm-scripts fix"
+		"checkFormat": "node-scripts format --check",
+		"format": "node-scripts format"
 	},
-	"version": "1.0.44"
+	"version": "1.0.45"
 }

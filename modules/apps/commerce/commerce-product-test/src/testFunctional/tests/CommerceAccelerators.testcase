@@ -845,7 +845,6 @@ definition {
 	test DeactivateCommerceAccount {
 		property portal.acceptance = "false";
 		property portal.release = "quarantine";
-		property portal.upstream = "quarantine";
 
 		// Quarantined because of COMMERCE-9825
 
@@ -906,16 +905,6 @@ definition {
 		Click(locator1 = "CommerceAccelerators#ACCOUNT_SELECTOR_DROPDOWN");
 
 		AssertElementPresent(locator1 = "CommerceAccelerators#ACCOUNT_SELECTOR_NO_ACCOUNTS_WERE_FOUND");
-
-		CommerceAcceleratorsInitializer.changeProductsSorting(sortingType = "Name Ascending");
-
-		CommerceAcceleratorsInitializer.viewDisabledAddToCartButton(productName = "ABS Sensor");
-
-		CommerceAcceleratorsInitializer.viewAllAccountsFromAccountSelector();
-
-		AssertTextEquals.assertPartialText(
-			locator1 = "Message#EMPTY_INFO",
-			value1 = "No accounts were found.");
 	}
 
 	@description = "This is a workaround for an issue with Minium's sidebar on CI"
@@ -1151,7 +1140,6 @@ definition {
 	test MiniumSiteFullFlow {
 		property portal.acceptance = "false";
 		property portal.release = "quarantine";
-		property portal.upstream = "quarantine";
 
 		// Quarantined because of COMMERCE-9825
 

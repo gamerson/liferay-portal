@@ -29,14 +29,32 @@ const SolutionsDetailsHeader = ({product}: {product?: Product}) => {
 
 	return (
 		<>
-			<ClayButton
-				className="align-items-center d-flex"
-				displayType="unstyled"
-				onClick={() => navigate('..')}
-			>
-				<ClayIcon className="mr-2" symbol="order-arrow-left" />
-				<h5 className="mt-1">{i18n.translate('back-to-solutions')}</h5>
-			</ClayButton>
+			<div className="d-flex justify-content-between">
+				<ClayButton
+					className="align-items-center d-flex"
+					displayType="unstyled"
+					onClick={() => navigate('..')}
+				>
+					<ClayIcon className="mr-2" symbol="order-arrow-left" />
+					<h5 className="mt-1">
+						{i18n.translate('back-to-solutions')}
+					</h5>
+				</ClayButton>
+
+				<ClayButton
+					disabled={
+						product.productStatus ===
+						PRODUCT_WORKFLOW_STATUS_CODE.PENDING
+					}
+					displayType="secondary"
+					onClick={() =>
+						navigate(`../${product.productId}/publisher/profile`)
+					}
+					size="sm"
+				>
+					{i18n.translate('edit')}
+				</ClayButton>
+			</div>
 
 			{product.workflowStatusInfo.code ===
 				PRODUCT_WORKFLOW_STATUS_CODE.PENDING && (

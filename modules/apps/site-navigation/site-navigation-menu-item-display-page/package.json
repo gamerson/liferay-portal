@@ -1,8 +1,8 @@
 {
 	"dependencies": {
 		"@clayui/alert": "3.111.0",
-		"@clayui/button": "3.115.0",
-		"@clayui/form": "3.115.0",
+		"@clayui/button": "3.116.0",
+		"@clayui/form": "3.116.0",
 		"@clayui/icon": "3.111.0",
 		"@clayui/label": "3.111.0",
 		"classnames": "2.3.1",
@@ -15,9 +15,9 @@
 	"name": "@liferay/site-navigation-menu-item-display-page",
 	"scripts": {
 		"build": "node-scripts build",
-		"checkFormat": "liferay-npm-scripts check",
-		"format": "liferay-npm-scripts fix",
-		"test": "liferay-npm-scripts test"
+		"checkFormat": "node-scripts format --check",
+		"format": "node-scripts format",
+		"test": "node-scripts test"
 	},
-	"version": "1.0.66"
+	"version": "1.0.67"
 }

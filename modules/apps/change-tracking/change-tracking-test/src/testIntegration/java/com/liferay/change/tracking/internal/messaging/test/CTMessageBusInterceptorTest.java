@@ -10,13 +10,15 @@ import com.liferay.change.tracking.model.CTCollection;
 import com.liferay.change.tracking.service.CTCollectionLocalService;
 import com.liferay.change.tracking.service.CTMessageLocalService;
 import com.liferay.change.tracking.service.CTProcessLocalService;
+import com.liferay.dynamic.data.mapping.test.util.DDMStructureTestUtil;
+import com.liferay.journal.model.JournalArticle;
 import com.liferay.petra.lang.SafeCloseable;
 import com.liferay.portal.kernel.change.tracking.CTCollectionThreadLocal;
 import com.liferay.portal.kernel.messaging.Destination;
 import com.liferay.portal.kernel.messaging.DestinationConfiguration;
 import com.liferay.portal.kernel.messaging.DestinationFactory;
 import com.liferay.portal.kernel.messaging.DestinationNames;
-import com.liferay.portal.kernel.messaging.DestinationWrapper;
+import com.liferay.portal.kernel.messaging.DestinationStatistics;
 import com.liferay.portal.kernel.messaging.Message;
 import com.liferay.portal.kernel.module.util.SystemBundleUtil;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
@@ -83,11 +85,8 @@ public class CTMessageBusInterceptorTest {
 
 	@Test
 	public void testInterceptSubscriptionSenderMessage() throws Exception {
-		long companyId = TestPropsValues.getCompanyId();
-
 		SubscriptionSender subscriptionSender = new SubscriptionSender();
 
-		subscriptionSender.setCompanyId(companyId);
 		subscriptionSender.setMailId(
 			CTMessageBusInterceptorTest.class.getName(), "test");
 
@@ -110,25 +109,16 @@ public class CTMessageBusInterceptorTest {
 		Assert.assertEquals(
 			DestinationNames.SUBSCRIPTION_SENDER,
 			deserializedMessage.getDestinationName());
-
-		SubscriptionSender deserializedSubscriptionSender =
-			(SubscriptionSender)deserializedMessage.getPayload();
-
-		Assert.assertEquals(
-			companyId, deserializedSubscriptionSender.getCompanyId());
 	}
 
 	@Test
 	public void testPublishSubscriptionSenderMessage() throws Exception {
-		long companyId = TestPropsValues.getCompanyId();
-
 		Message message = new Message();
 
 		message.setDestinationName(DestinationNames.SUBSCRIPTION_SENDER);
 
 		SubscriptionSender subscriptionSender = new SubscriptionSender();
 
-		subscriptionSender.setCompanyId(companyId);
 		subscriptionSender.setMailId(
 			CTMessageBusInterceptorTest.class.getName(), "test");
 
@@ -143,17 +133,12 @@ public class CTMessageBusInterceptorTest {
 				CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
 					_ctCollection.getCtCollectionId())) {
 
+			DDMStructureTestUtil.addStructure(
+				TestPropsValues.getGroupId(), JournalArticle.class.getName());
+
 			_ctProcessLocalService.addCTProcess(
 				_ctCollection.getUserId(), _ctCollection.getCtCollectionId());
 		}
-
-		Message receivedMessage = _testDestination.getReceivedMessage();
-
-		SubscriptionSender deserializedSubscriptionSender =
-			(SubscriptionSender)receivedMessage.getPayload();
-
-		Assert.assertEquals(
-			companyId, deserializedSubscriptionSender.getCompanyId());
 
 		List<Message> messages = _ctMessageLocalService.getMessages(
 			_ctCollection.getCtCollectionId());
@@ -165,12 +150,6 @@ public class CTMessageBusInterceptorTest {
 		Assert.assertEquals(
 			DestinationNames.SUBSCRIPTION_SENDER,
 			deserializedMessage.getDestinationName());
-
-		deserializedSubscriptionSender =
-			(SubscriptionSender)receivedMessage.getPayload();
-
-		Assert.assertEquals(
-			companyId, deserializedSubscriptionSender.getCompanyId());
 
 		_ctCollectionLocalService.deleteCTCollection(_ctCollection);
 
@@ -203,10 +182,40 @@ public class CTMessageBusInterceptorTest {
 	private ServiceRegistration<Destination> _serviceRegistration;
 	private TestDestination _testDestination;
 
-	private static class TestDestination extends DestinationWrapper {
+	private static class TestDestination implements Destination {
 
 		public TestDestination(Destination destination) {
-			super(destination);
+			_destination = destination;
+		}
+
+		@Override
+		public void close() {
+			_destination.close();
+		}
+
+		@Override
+		public void close(boolean force) {
+			_destination.close(force);
+		}
+
+		@Override
+		public void destroy() {
+			_destination.destroy();
+		}
+
+		@Override
+		public DestinationStatistics getDestinationStatistics() {
+			return _destination.getDestinationStatistics();
+		}
+
+		@Override
+		public String getDestinationType() {
+			return _destination.getDestinationType();
+		}
+
+		@Override
+		public String getName() {
+			return _destination.getName();
 		}
 
 		public Message getReceivedMessage() {
@@ -214,10 +223,16 @@ public class CTMessageBusInterceptorTest {
 		}
 
 		@Override
+		public void open() {
+			_destination.open();
+		}
+
+		@Override
 		public void send(Message message) {
 			_message = message;
 		}
 
+		private final Destination _destination;
 		private Message _message;
 
 	}

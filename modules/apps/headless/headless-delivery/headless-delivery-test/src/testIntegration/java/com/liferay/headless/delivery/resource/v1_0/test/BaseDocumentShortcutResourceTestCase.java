@@ -25,6 +25,8 @@ import com.liferay.headless.delivery.client.serdes.v1_0.DocumentShortcutSerDes;
 import com.liferay.petra.function.transform.TransformUtil;
 import com.liferay.petra.reflect.ReflectionUtil;
 import com.liferay.petra.string.StringBundler;
+import com.liferay.portal.kernel.json.JSONArray;
+import com.liferay.portal.kernel.json.JSONDeserializer;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.json.JSONUtil;
@@ -257,6 +259,12 @@ public abstract class BaseDocumentShortcutResourceTestCase {
 			page,
 			testGetAssetLibraryDocumentShortcutsPage_getExpectedActions(
 				assetLibraryId));
+
+		documentShortcutResource.deleteDocumentShortcut(
+			documentShortcut1.getId());
+
+		documentShortcutResource.deleteDocumentShortcut(
+			documentShortcut2.getId());
 	}
 
 	protected Map<String, Map<String, String>>
@@ -265,6 +273,15 @@ public abstract class BaseDocumentShortcutResourceTestCase {
 		throws Exception {
 
 		Map<String, Map<String, String>> expectedActions = new HashMap<>();
+
+		Map createBatchAction = new HashMap<>();
+		createBatchAction.put("method", "POST");
+		createBatchAction.put(
+			"href",
+			"http://localhost:8080/o/headless-delivery/v1.0/asset-libraries/{assetLibraryId}/document-shortcuts/batch".
+				replace("{assetLibraryId}", String.valueOf(assetLibraryId)));
+
+		expectedActions.put("createBatch", createBatchAction);
 
 		return expectedActions;
 	}
@@ -374,8 +391,8 @@ public abstract class BaseDocumentShortcutResourceTestCase {
 				Long assetLibraryId, DocumentShortcut documentShortcut)
 		throws Exception {
 
-		throw new UnsupportedOperationException(
-			"This method needs to be implemented");
+		return documentShortcutResource.postAssetLibraryDocumentShortcut(
+			assetLibraryId, documentShortcut);
 	}
 
 	protected Long testGetAssetLibraryDocumentShortcutsPage_getAssetLibraryId()
@@ -389,6 +406,141 @@ public abstract class BaseDocumentShortcutResourceTestCase {
 		throws Exception {
 
 		return null;
+	}
+
+	@Test
+	public void testPostAssetLibraryDocumentShortcut() throws Exception {
+		DocumentShortcut randomDocumentShortcut = randomDocumentShortcut();
+
+		DocumentShortcut postDocumentShortcut =
+			testPostAssetLibraryDocumentShortcut_addDocumentShortcut(
+				randomDocumentShortcut);
+
+		assertEquals(randomDocumentShortcut, postDocumentShortcut);
+		assertValid(postDocumentShortcut);
+	}
+
+	protected DocumentShortcut
+			testPostAssetLibraryDocumentShortcut_addDocumentShortcut(
+				DocumentShortcut documentShortcut)
+		throws Exception {
+
+		return documentShortcutResource.postAssetLibraryDocumentShortcut(
+			testGetAssetLibraryDocumentShortcutsPage_getAssetLibraryId(),
+			documentShortcut);
+	}
+
+	@Test
+	public void testDeleteDocumentShortcut() throws Exception {
+		@SuppressWarnings("PMD.UnusedLocalVariable")
+		DocumentShortcut documentShortcut =
+			testDeleteDocumentShortcut_addDocumentShortcut();
+
+		assertHttpResponseStatusCode(
+			204,
+			documentShortcutResource.deleteDocumentShortcutHttpResponse(
+				documentShortcut.getId()));
+
+		assertHttpResponseStatusCode(
+			404,
+			documentShortcutResource.getDocumentShortcutHttpResponse(
+				documentShortcut.getId()));
+
+		assertHttpResponseStatusCode(
+			404, documentShortcutResource.getDocumentShortcutHttpResponse(0L));
+	}
+
+	protected DocumentShortcut testDeleteDocumentShortcut_addDocumentShortcut()
+		throws Exception {
+
+		return documentShortcutResource.postSiteDocumentShortcut(
+			testGroup.getGroupId(), randomDocumentShortcut());
+	}
+
+	@Test
+	public void testGraphQLDeleteDocumentShortcut() throws Exception {
+
+		// No namespace
+
+		DocumentShortcut documentShortcut1 =
+			testGraphQLDeleteDocumentShortcut_addDocumentShortcut();
+
+		Assert.assertTrue(
+			JSONUtil.getValueAsBoolean(
+				invokeGraphQLMutation(
+					new GraphQLField(
+						"deleteDocumentShortcut",
+						new HashMap<String, Object>() {
+							{
+								put(
+									"documentShortcutId",
+									documentShortcut1.getId());
+							}
+						})),
+				"JSONObject/data", "Object/deleteDocumentShortcut"));
+
+		JSONArray errorsJSONArray1 = JSONUtil.getValueAsJSONArray(
+			invokeGraphQLQuery(
+				new GraphQLField(
+					"documentShortcut",
+					new HashMap<String, Object>() {
+						{
+							put(
+								"documentShortcutId",
+								documentShortcut1.getId());
+						}
+					},
+					new GraphQLField("id"))),
+			"JSONArray/errors");
+
+		Assert.assertTrue(errorsJSONArray1.length() > 0);
+
+		// Using the namespace headlessDelivery_v1_0
+
+		DocumentShortcut documentShortcut2 =
+			testGraphQLDeleteDocumentShortcut_addDocumentShortcut();
+
+		Assert.assertTrue(
+			JSONUtil.getValueAsBoolean(
+				invokeGraphQLMutation(
+					new GraphQLField(
+						"headlessDelivery_v1_0",
+						new GraphQLField(
+							"deleteDocumentShortcut",
+							new HashMap<String, Object>() {
+								{
+									put(
+										"documentShortcutId",
+										documentShortcut2.getId());
+								}
+							}))),
+				"JSONObject/data", "JSONObject/headlessDelivery_v1_0",
+				"Object/deleteDocumentShortcut"));
+
+		JSONArray errorsJSONArray2 = JSONUtil.getValueAsJSONArray(
+			invokeGraphQLQuery(
+				new GraphQLField(
+					"headlessDelivery_v1_0",
+					new GraphQLField(
+						"documentShortcut",
+						new HashMap<String, Object>() {
+							{
+								put(
+									"documentShortcutId",
+									documentShortcut2.getId());
+							}
+						},
+						new GraphQLField("id")))),
+			"JSONArray/errors");
+
+		Assert.assertTrue(errorsJSONArray2.length() > 0);
+	}
+
+	protected DocumentShortcut
+			testGraphQLDeleteDocumentShortcut_addDocumentShortcut()
+		throws Exception {
+
+		return testGraphQLDocumentShortcut_addDocumentShortcut();
 	}
 
 	@Test
@@ -407,8 +559,8 @@ public abstract class BaseDocumentShortcutResourceTestCase {
 	protected DocumentShortcut testGetDocumentShortcut_addDocumentShortcut()
 		throws Exception {
 
-		throw new UnsupportedOperationException(
-			"This method needs to be implemented");
+		return documentShortcutResource.postSiteDocumentShortcut(
+			testGroup.getGroupId(), randomDocumentShortcut());
 	}
 
 	@Test
@@ -513,6 +665,69 @@ public abstract class BaseDocumentShortcutResourceTestCase {
 	}
 
 	@Test
+	public void testPatchDocumentShortcut() throws Exception {
+		DocumentShortcut postDocumentShortcut =
+			testPatchDocumentShortcut_addDocumentShortcut();
+
+		DocumentShortcut randomPatchDocumentShortcut =
+			randomPatchDocumentShortcut();
+
+		@SuppressWarnings("PMD.UnusedLocalVariable")
+		DocumentShortcut patchDocumentShortcut =
+			documentShortcutResource.patchDocumentShortcut(
+				postDocumentShortcut.getId(), randomPatchDocumentShortcut);
+
+		DocumentShortcut expectedPatchDocumentShortcut =
+			postDocumentShortcut.clone();
+
+		BeanTestUtil.copyProperties(
+			randomPatchDocumentShortcut, expectedPatchDocumentShortcut);
+
+		DocumentShortcut getDocumentShortcut =
+			documentShortcutResource.getDocumentShortcut(
+				patchDocumentShortcut.getId());
+
+		assertEquals(expectedPatchDocumentShortcut, getDocumentShortcut);
+		assertValid(getDocumentShortcut);
+	}
+
+	protected DocumentShortcut testPatchDocumentShortcut_addDocumentShortcut()
+		throws Exception {
+
+		return documentShortcutResource.postSiteDocumentShortcut(
+			testGroup.getGroupId(), randomDocumentShortcut());
+	}
+
+	@Test
+	public void testPutDocumentShortcut() throws Exception {
+		DocumentShortcut postDocumentShortcut =
+			testPutDocumentShortcut_addDocumentShortcut();
+
+		DocumentShortcut randomDocumentShortcut = randomDocumentShortcut();
+
+		DocumentShortcut putDocumentShortcut =
+			documentShortcutResource.putDocumentShortcut(
+				postDocumentShortcut.getId(), randomDocumentShortcut);
+
+		assertEquals(randomDocumentShortcut, putDocumentShortcut);
+		assertValid(putDocumentShortcut);
+
+		DocumentShortcut getDocumentShortcut =
+			documentShortcutResource.getDocumentShortcut(
+				putDocumentShortcut.getId());
+
+		assertEquals(randomDocumentShortcut, getDocumentShortcut);
+		assertValid(getDocumentShortcut);
+	}
+
+	protected DocumentShortcut testPutDocumentShortcut_addDocumentShortcut()
+		throws Exception {
+
+		return documentShortcutResource.postSiteDocumentShortcut(
+			testGroup.getGroupId(), randomDocumentShortcut());
+	}
+
+	@Test
 	public void testGetSiteDocumentShortcutsPage() throws Exception {
 		Long siteId = testGetSiteDocumentShortcutsPage_getSiteId();
 		Long irrelevantSiteId =
@@ -562,6 +777,12 @@ public abstract class BaseDocumentShortcutResourceTestCase {
 			documentShortcut2, (List<DocumentShortcut>)page.getItems());
 		assertValid(
 			page, testGetSiteDocumentShortcutsPage_getExpectedActions(siteId));
+
+		documentShortcutResource.deleteDocumentShortcut(
+			documentShortcut1.getId());
+
+		documentShortcutResource.deleteDocumentShortcut(
+			documentShortcut2.getId());
 	}
 
 	protected Map<String, Map<String, String>>
@@ -569,6 +790,15 @@ public abstract class BaseDocumentShortcutResourceTestCase {
 		throws Exception {
 
 		Map<String, Map<String, String>> expectedActions = new HashMap<>();
+
+		Map createBatchAction = new HashMap<>();
+		createBatchAction.put("method", "POST");
+		createBatchAction.put(
+			"href",
+			"http://localhost:8080/o/headless-delivery/v1.0/sites/{siteId}/document-shortcuts/batch".
+				replace("{siteId}", String.valueOf(siteId)));
+
+		expectedActions.put("createBatch", createBatchAction);
 
 		return expectedActions;
 	}
@@ -676,8 +906,8 @@ public abstract class BaseDocumentShortcutResourceTestCase {
 				Long siteId, DocumentShortcut documentShortcut)
 		throws Exception {
 
-		throw new UnsupportedOperationException(
-			"This method needs to be implemented");
+		return documentShortcutResource.postSiteDocumentShortcut(
+			siteId, documentShortcut);
 	}
 
 	protected Long testGetSiteDocumentShortcutsPage_getSiteId()
@@ -770,11 +1000,139 @@ public abstract class BaseDocumentShortcutResourceTestCase {
 		return testGraphQLDocumentShortcut_addDocumentShortcut();
 	}
 
+	@Test
+	public void testPostSiteDocumentShortcut() throws Exception {
+		DocumentShortcut randomDocumentShortcut = randomDocumentShortcut();
+
+		DocumentShortcut postDocumentShortcut =
+			testPostSiteDocumentShortcut_addDocumentShortcut(
+				randomDocumentShortcut);
+
+		assertEquals(randomDocumentShortcut, postDocumentShortcut);
+		assertValid(postDocumentShortcut);
+	}
+
+	protected DocumentShortcut testPostSiteDocumentShortcut_addDocumentShortcut(
+			DocumentShortcut documentShortcut)
+		throws Exception {
+
+		return documentShortcutResource.postSiteDocumentShortcut(
+			testGetSiteDocumentShortcutsPage_getSiteId(), documentShortcut);
+	}
+
+	@Test
+	public void testGraphQLPostSiteDocumentShortcut() throws Exception {
+		DocumentShortcut randomDocumentShortcut = randomDocumentShortcut();
+
+		DocumentShortcut documentShortcut =
+			testGraphQLDocumentShortcut_addDocumentShortcut(
+				randomDocumentShortcut);
+
+		Assert.assertTrue(equals(randomDocumentShortcut, documentShortcut));
+	}
+
+	protected void appendGraphQLFieldValue(StringBuilder sb, Object value)
+		throws Exception {
+
+		if (value instanceof Object[]) {
+			StringBuilder arraySB = new StringBuilder("[");
+
+			for (Object object : (Object[])value) {
+				if (arraySB.length() > 1) {
+					arraySB.append(", ");
+				}
+
+				arraySB.append("{");
+
+				Class<?> clazz = object.getClass();
+
+				for (java.lang.reflect.Field field :
+						getDeclaredFields(clazz.getSuperclass())) {
+
+					arraySB.append(field.getName());
+					arraySB.append(": ");
+
+					appendGraphQLFieldValue(arraySB, field.get(object));
+
+					arraySB.append(", ");
+				}
+
+				arraySB.setLength(arraySB.length() - 2);
+
+				arraySB.append("}");
+			}
+
+			arraySB.append("]");
+
+			sb.append(arraySB.toString());
+		}
+		else if (value instanceof String) {
+			sb.append("\"");
+			sb.append(value);
+			sb.append("\"");
+		}
+		else {
+			sb.append(value);
+		}
+	}
+
 	protected DocumentShortcut testGraphQLDocumentShortcut_addDocumentShortcut()
 		throws Exception {
 
-		throw new UnsupportedOperationException(
-			"This method needs to be implemented");
+		return testGraphQLDocumentShortcut_addDocumentShortcut(
+			randomDocumentShortcut());
+	}
+
+	protected DocumentShortcut testGraphQLDocumentShortcut_addDocumentShortcut(
+			DocumentShortcut documentShortcut)
+		throws Exception {
+
+		JSONDeserializer<DocumentShortcut> jsonDeserializer =
+			JSONFactoryUtil.createJSONDeserializer();
+
+		StringBuilder sb = new StringBuilder("{");
+
+		for (java.lang.reflect.Field field :
+				getDeclaredFields(DocumentShortcut.class)) {
+
+			if (!ArrayUtil.contains(
+					getAdditionalAssertFieldNames(), field.getName())) {
+
+				continue;
+			}
+
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append(field.getName());
+			sb.append(": ");
+
+			appendGraphQLFieldValue(sb, field.get(documentShortcut));
+		}
+
+		sb.append("}");
+
+		List<GraphQLField> graphQLFields = getGraphQLFields();
+
+		graphQLFields.add(new GraphQLField("id"));
+
+		return jsonDeserializer.deserialize(
+			JSONUtil.getValueAsString(
+				invokeGraphQLMutation(
+					new GraphQLField(
+						"createSiteDocumentShortcut",
+						new HashMap<String, Object>() {
+							{
+								put(
+									"siteKey",
+									"\"" + testGroup.getGroupId() + "\"");
+								put("documentShortcut", sb.toString());
+							}
+						},
+						graphQLFields)),
+				"JSONObject/data", "JSONObject/createSiteDocumentShortcut"),
+			DocumentShortcut.class);
 	}
 
 	protected void assertContains(
@@ -916,6 +1274,14 @@ public abstract class BaseDocumentShortcutResourceTestCase {
 
 			if (Objects.equals("title", additionalAssertFieldName)) {
 				if (documentShortcut.getTitle() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("viewableBy", additionalAssertFieldName)) {
+				if (documentShortcut.getViewableBy() == null) {
 					valid = false;
 				}
 
@@ -1114,6 +1480,17 @@ public abstract class BaseDocumentShortcutResourceTestCase {
 				if (!Objects.deepEquals(
 						documentShortcut1.getTitle(),
 						documentShortcut2.getTitle())) {
+
+					return false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("viewableBy", additionalAssertFieldName)) {
+				if (!Objects.deepEquals(
+						documentShortcut1.getViewableBy(),
+						documentShortcut2.getViewableBy())) {
 
 					return false;
 				}
@@ -1408,6 +1785,11 @@ public abstract class BaseDocumentShortcutResourceTestCase {
 			}
 
 			return sb.toString();
+		}
+
+		if (entityFieldName.equals("viewableBy")) {
+			throw new IllegalArgumentException(
+				"Invalid entity field " + entityFieldName);
 		}
 
 		throw new IllegalArgumentException(

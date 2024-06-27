@@ -127,11 +127,11 @@ type ActionMap<M extends {[index: string]: any}> = {
 	[Key in keyof M]: M[Key] extends undefined
 		? {
 				type: Key;
-		  }
+			}
 		: {
 				payload: M[Key];
 				type: Key;
-		  };
+			};
 };
 
 type AccountBrief = {
@@ -300,6 +300,7 @@ type DefaultProperties = {
 	featureFlags: string[];
 	featurePreviews: ['use-product-id-for-specification'];
 	marketoFormId: string;
+	trialAccountCheck: 'false' | 'true';
 	trialEulaURL: string;
 	trialProductId: string;
 };
@@ -349,7 +350,7 @@ type Order = {
 			quantity?: number;
 			skuId: number;
 			unitPriceWithTaxAmount?: number;
-		}
+		},
 	];
 	orderStatus: number;
 	orderStatusInfo?: {
@@ -527,6 +528,7 @@ interface DeliveryProduct {
 	attachments: DeliveryProductAttachment[];
 	catalogName?: string;
 	categories: ProductCategories[];
+	createDate: string;
 	customFields?: CustomField[];
 	description: string;
 	externalReferenceCode: string;
@@ -537,6 +539,7 @@ interface DeliveryProduct {
 	productId: number;
 	productSpecifications: DeliveryProductSpecification[];
 	productType: string;
+	shortDescription: string;
 	skus: DeliverySKU[];
 	urlImage: string;
 }

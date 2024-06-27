@@ -442,12 +442,12 @@
 </tr>
 <tr>
 	<td>EXPORT_MODAL</td>
-	<td>//div[contains(@class,'btn-group-item')]/button[contains(@class,'btn') and contains(.,'Export')]</td>
+	<td>//div[contains(@class,'btn-group-spaced')]/button[contains(@class,'btn') and contains(.,'Export')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>EXPORT_MODAL_DISABLED</td>
-	<td>//div[contains(@class,'btn-group-item')]/button[@disabled and contains(.,'Export')]</td>
+	<td>//div[contains(@class,'btn-group-spaced')]/button[@disabled and contains(.,'Export')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -862,7 +862,7 @@
 </tr>
 <tr>
 	<td>TRANSLATIONS_LOCALIZATION</td>
-	<td>//div[contains(@class,'dropdown')]//button[contains(@class,'dropdown-toggle')]//*[name()='svg'][contains(@class,'lexicon-icon-${key_currentLocale}')] | //button[contains(@aria-haspopup,'listbox')]//*[name()='svg'][contains(@class,'lexicon-icon-${key_currentLocale}')]</td>
+	<td>//div[contains(@class,'dropdown')]//button[contains(@class,'dropdown-toggle')]//*[name()='svg'][contains(@class,'lexicon-icon-${key_currentLocale}')] | //button[contains(@aria-haspopup,'true')]//*[name()='svg'][contains(@class,'lexicon-icon-${key_currentLocale}')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -962,7 +962,7 @@
 </tr>
 <tr>
 	<td>SUBMIT_FOR_WORKFLOW_DISABLED</td>
-	<td>//div[contains(@class,'btn-group-item')]//button[@disabled and contains(.,'Submit for Workflow')]</td>
+	<td>//div[contains(@class,'btn-group-spaced')]//button[@disabled and contains(.,'Submit for Workflow')]</td>
 	<td></td>
 </tr>
 <tr>

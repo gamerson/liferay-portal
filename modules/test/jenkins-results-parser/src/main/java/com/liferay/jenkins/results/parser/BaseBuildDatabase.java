@@ -10,6 +10,7 @@ import java.io.IOException;
 
 import java.net.URL;
 
+import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -22,11 +23,6 @@ import org.json.JSONObject;
  * @author Michael Hashimoto
  */
 public abstract class BaseBuildDatabase implements BuildDatabase {
-
-	@Override
-	public File getBuildDatabaseFile() {
-		return _buildDatabaseFile;
-	}
 
 	@Override
 	public JSONObject getBuildDataJSONObject(String key) {
@@ -75,20 +71,25 @@ public abstract class BaseBuildDatabase implements BuildDatabase {
 	}
 
 	@Override
+	public JSONObject getJSONObject() {
+		return new JSONObject(_jsonObject);
+	}
+
+	@Override
 	public Properties getProperties(String key) {
 		return getProperties(key, null);
 	}
 
 	@Override
 	public Properties getProperties(String key, Pattern pattern) {
+		Properties properties = new Properties();
+
 		if (!hasProperties(key)) {
-			throw new RuntimeException("Unable to find properties for " + key);
+			return properties;
 		}
 
 		JSONObject propertiesJSONObject = _jsonObject.getJSONObject(
 			"properties");
-
-		Properties properties = new Properties();
 
 		JSONArray propertyJSONArray = propertiesJSONObject.getJSONArray(key);
 
@@ -256,6 +257,19 @@ public abstract class BaseBuildDatabase implements BuildDatabase {
 	}
 
 	@Override
+	public void putProperty(
+		String key, String propertyName, String propertyValue) {
+
+		synchronized (_buildDatabaseFile) {
+			Properties properties = getProperties(key);
+
+			properties.setProperty(propertyName, propertyValue);
+
+			putProperties(key, properties);
+		}
+	}
+
+	@Override
 	public void putPullRequest(String key, PullRequest pullRequest) {
 		if (!JenkinsResultsParserUtil.isCINode()) {
 			return;
@@ -299,46 +313,49 @@ public abstract class BaseBuildDatabase implements BuildDatabase {
 	}
 
 	@Override
-	public void readBuildDatabaseFile() {
+	public FilePropagator rsyncBuildDatabaseFile(
+		List<String> distNodes, String distPath, String preDistCommand,
+		String postDistCommand, int threadCount) {
+
+		if (!JenkinsResultsParserUtil.isCINode()) {
+			return null;
+		}
+
 		synchronized (_buildDatabaseFile) {
-			if (_buildDatabaseFile.exists()) {
-				try {
-					_jsonObject = new JSONObject(
-						JenkinsResultsParserUtil.read(_buildDatabaseFile));
+			File tempBuildDatabaseFile = new File(
+				JenkinsResultsParserUtil.combine(
+					System.getProperty("java.io.tmpdir"), "/",
+					String.valueOf(_buildDatabaseFile.hashCode()), "/",
+					_buildDatabaseFile.getName()));
+
+			try {
+				JenkinsResultsParserUtil.copy(
+					_buildDatabaseFile, tempBuildDatabaseFile);
+
+				String srcPath = JenkinsResultsParserUtil.combine(
+					JenkinsResultsParserUtil.getHostName(
+						System.getenv("HOSTNAME")),
+					":", tempBuildDatabaseFile.getParent());
+
+				FilePropagator filePropagator = new FilePropagator(
+					new String[] {tempBuildDatabaseFile.getName()}, srcPath,
+					distPath, distNodes);
+
+				filePropagator.setPreDistCommand(preDistCommand);
+				filePropagator.setPostDistCommand(postDistCommand);
+
+				filePropagator.start(threadCount);
+
+				return filePropagator;
+			}
+			catch (IOException ioException) {
+				throw new RuntimeException(ioException);
+			}
+			finally {
+				if (tempBuildDatabaseFile.exists()) {
+					JenkinsResultsParserUtil.delete(tempBuildDatabaseFile);
 				}
-				catch (IOException ioException) {
-					throw new RuntimeException(ioException);
-				}
 			}
-			else {
-				_jsonObject = new JSONObject();
-			}
-
-			if (!_jsonObject.has("builds")) {
-				_jsonObject.put("builds", new JSONObject());
-			}
-
-			if (!_jsonObject.has("jobs")) {
-				_jsonObject.put("jobs", new JSONObject());
-			}
-
-			if (!_jsonObject.has("properties")) {
-				_jsonObject.put("properties", new JSONObject());
-			}
-
-			if (!_jsonObject.has("pull_requests")) {
-				_jsonObject.put("pull_requests", new JSONObject());
-			}
-
-			if (!_jsonObject.has("workspace_git_repositories")) {
-				_jsonObject.put("workspace_git_repositories", new JSONObject());
-			}
-
-			if (!_jsonObject.has("workspaces")) {
-				_jsonObject.put("workspaces", new JSONObject());
-			}
-
-			_writeJSONObjectFile();
 		}
 	}
 
@@ -434,7 +451,50 @@ public abstract class BaseBuildDatabase implements BuildDatabase {
 		_buildDatabaseFile = new File(
 			baseDir, BuildDatabase.FILE_NAME_BUILD_DATABASE);
 
-		readBuildDatabaseFile();
+		_readBuildDatabaseFile();
+	}
+
+	private void _readBuildDatabaseFile() {
+		synchronized (_buildDatabaseFile) {
+			if (_buildDatabaseFile.exists()) {
+				try {
+					_jsonObject = new JSONObject(
+						JenkinsResultsParserUtil.read(_buildDatabaseFile));
+				}
+				catch (IOException ioException) {
+					throw new RuntimeException(ioException);
+				}
+			}
+			else {
+				_jsonObject = new JSONObject();
+			}
+
+			if (!_jsonObject.has("builds")) {
+				_jsonObject.put("builds", new JSONObject());
+			}
+
+			if (!_jsonObject.has("jobs")) {
+				_jsonObject.put("jobs", new JSONObject());
+			}
+
+			if (!_jsonObject.has("properties")) {
+				_jsonObject.put("properties", new JSONObject());
+			}
+
+			if (!_jsonObject.has("pull_requests")) {
+				_jsonObject.put("pull_requests", new JSONObject());
+			}
+
+			if (!_jsonObject.has("workspace_git_repositories")) {
+				_jsonObject.put("workspace_git_repositories", new JSONObject());
+			}
+
+			if (!_jsonObject.has("workspaces")) {
+				_jsonObject.put("workspaces", new JSONObject());
+			}
+
+			_writeJSONObjectFile();
+		}
 	}
 
 	private JSONArray _toJSONArray(Properties properties) {

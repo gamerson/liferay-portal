@@ -20,6 +20,7 @@ import {
 	useSolutionContext,
 } from '../../../../../../context/SolutionContext';
 import i18n from '../../../../../../i18n';
+import {getRandomID} from '../../../../../../utils/string';
 import {swapImageElements} from '../../../../constants';
 import {ACCEPT_FILE_TYPES} from '../../../Apps/AppCreationFlow/StorefrontPage/CustomizeAppStorefrontPage';
 import {MAX_IMAGE_QUANTITY, MAX_SIZE_5MBS} from '../../constants';
@@ -62,7 +63,7 @@ const Header = () => {
 				error: false,
 				file,
 				fileName: file.name,
-				id: crypto.randomUUID(),
+				id: getRandomID(),
 				index: 0,
 				preview: URL.createObjectURL(file),
 				progress: 0,
@@ -78,7 +79,7 @@ const Header = () => {
 								? [
 										...contentType.content.headerImages,
 										...newUploadedFiles,
-								  ]
+									]
 								: newUploadedFiles,
 						},
 						type: ContentMediaType.UPLOAD_IMAGES,
@@ -90,9 +91,9 @@ const Header = () => {
 	};
 
 	const handleDelete = async (id: string) => {
-		const files = (contentType as HeaderContentTypeImages).content.headerImages.filter(
-			(uploadedFile) => uploadedFile.id !== id
-		);
+		const files = (
+			contentType as HeaderContentTypeImages
+		).content.headerImages.filter((uploadedFile) => uploadedFile.id !== id);
 
 		dispatch({
 			payload: id,
@@ -245,8 +246,7 @@ const Header = () => {
 												headerVideoUrl:
 													event.target.value,
 											},
-											type:
-												ContentMediaType.EMBED_VIDEO_URL,
+											type: ContentMediaType.EMBED_VIDEO_URL,
 										},
 									},
 									type: SolutionTypes.SET_HEADER,
@@ -282,8 +282,7 @@ const Header = () => {
 													headerVideoDescription:
 														event.target.value,
 												},
-												type:
-													ContentMediaType.EMBED_VIDEO_URL,
+												type: ContentMediaType.EMBED_VIDEO_URL,
 											},
 										},
 										type: SolutionTypes.SET_HEADER,
@@ -322,8 +321,7 @@ const Header = () => {
 											content: {
 												headerImages: newImagesInputs,
 											},
-											type:
-												ContentMediaType.UPLOAD_IMAGES,
+											type: ContentMediaType.UPLOAD_IMAGES,
 										},
 									},
 									type: SolutionTypes.SET_HEADER,

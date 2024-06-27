@@ -37,9 +37,8 @@ test('LPD-15256 Approved and scheduled web contents should be displayed in the "
 	const scheduledWebContentTitle = 'Scheduled Web Content';
 
 	async function _addBasicWebContents(site: Site) {
-		const contentStructureId = await getBasicWebContentStructureId(
-			apiHelpers
-		);
+		const contentStructureId =
+			await getBasicWebContentStructureId(apiHelpers);
 
 		await addApprovedStructuredContent({
 			apiHelpers,
@@ -84,10 +83,10 @@ test('LPD-15256 Approved and scheduled web contents should be displayed in the "
 
 	await _addBasicWebContents(site);
 
-	const layout = await apiHelpers.jsonWebServicesLayout.addLayout(
-		site.id,
-		getRandomString()
-	);
+	const layout = await apiHelpers.jsonWebServicesLayout.addLayout({
+		groupId: site.id,
+		title: getRandomString(),
+	});
 
 	await widgetPage.goToSitePage(site, layout.friendlyURL);
 	await widgetPage.clickControlMenuAddButton();

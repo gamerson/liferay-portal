@@ -245,7 +245,9 @@ definition {
 		property test.liferay.virtual.instance = "false";
 		property test.run.type = "single";
 
-		AssertConsoleTextPresent(value1 = "Sidecar Elasticsearch liferay started at [\d\.]+:9201");
+		var clientVersion = Elasticsearch.getClientVersion();
+
+		AssertConsoleTextPresent(value1 = "Sidecar Elasticsearch ${clientVersion} liferay_sidecar started at [\d\.]+:9201");
 
 		JSONWebcontent.addWebContent(
 			content = "WC Content",
@@ -684,9 +686,9 @@ definition {
 				http://${portalHostname}:${port}/liferay-${companyId}/_doc \
 					-H 'Content-Type: application/json' \
 					-d '{
-						"companyId" : "${companyId}",
-						"userName" : "alpha bravo",
-						"entryClassName" : "com.liferay.portal.kernel.model.User"
+						"companyId": "${companyId}",
+						"entryClassName": "com.liferay.portal.kernel.model.User",
+						"userName": "alpha bravo"
 					}'
 			''';
 
@@ -698,21 +700,16 @@ definition {
 				http://${portalHostname}:${port}/liferay-${companyId}/_search?pretty \
 					-H 'Content-Type: application/json' \
 					-d '{
-						"query":
-						{
-							"bool":
-							{
-								"must":
-								[
+						"query": {
+							"bool": {
+								"must": [
 									{
-										"match":
-										{
+										"match": {
 											"userName": "test test"
 										}
 									},
 									{
-										"match":
-										{
+										"match": {
 											"entryClassName": "com.liferay.portal.kernel.model.User"
 										}
 									}
@@ -761,15 +758,11 @@ definition {
 				http://${portalHostname}:${port}/liferay-${companyId}/_search?pretty \
 					-H 'Content-Type: application/json' \
 					-d '{
-						"query":
-						{
-							"bool":
-							{
-								"must":
-								[
+						"query": {
+							"bool": {
+								"must": [
 									{
-										"match":
-										{
+										"match": {
 											"userName": "alpha bravo"
 										}
 									}

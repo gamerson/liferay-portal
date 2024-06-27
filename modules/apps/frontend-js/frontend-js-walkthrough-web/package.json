@@ -1,10 +1,10 @@
 {
 	"dependencies": {
-		"@clayui/button": "3.115.0",
-		"@clayui/core": "3.115.1",
-		"@clayui/form": "3.115.0",
+		"@clayui/button": "3.116.0",
+		"@clayui/core": "3.116.0",
+		"@clayui/form": "3.116.0",
 		"@clayui/layout": "3.111.0",
-		"@clayui/popover": "3.115.0",
+		"@clayui/popover": "3.116.0",
 		"@liferay/frontend-js-react-web": "*",
 		"dom-align": "1.12.2",
 		"frontend-js-web": "*",
@@ -20,9 +20,9 @@
 	"name": "@liferay/frontend-js-walkthrough-web",
 	"scripts": {
 		"build": "node-scripts build",
-		"checkFormat": "liferay-npm-scripts check",
-		"format": "liferay-npm-scripts fix",
-		"test": "liferay-npm-scripts test"
+		"checkFormat": "node-scripts format --check",
+		"format": "node-scripts format",
+		"test": "node-scripts test"
 	},
-	"version": "1.0.31"
+	"version": "1.0.32"
 }

@@ -49,12 +49,7 @@ const baseTest = mergeTests(
 	workflowPagesTest
 );
 
-const bulkTest = mergeTests(
-	baseTest,
-	featureFlagsTest({
-		'LPD-16469': true,
-	})
-);
+const bulkTest = mergeTests(baseTest);
 
 const expect = baseExpect.extend({
 	toBeSuccessful: (response: APIResponse) => ({
@@ -71,7 +66,6 @@ const autoSaveAsDraftTest = mergeTests(
 	featureFlagsTest({
 		'LPD-11228': true,
 		'LPD-15596': true,
-		'LPS-141392': true,
 	})
 );
 
@@ -96,13 +90,6 @@ const translationTest = mergeTests(
 	featureFlagsTest({
 		'LPD-11253': true,
 		'LPS-114700': true,
-	})
-);
-
-const aiCreateImageTest = mergeTests(
-	baseTest,
-	featureFlagsTest({
-		'LPD-10793': true,
 	})
 );
 
@@ -203,12 +190,199 @@ autoSaveAsDraftTest(
 	}
 );
 
+autoSaveAsDraftTest(
+	'LPD-26863: Undo/Redo buttons work with metadata fields',
+	async ({journalEditArticlePage, page, site}) => {
+		const changesSavedIndicator = await page.locator(
+			'#_com_liferay_journal_web_portlet_JournalPortlet_changesSavedIndicator'
+		);
+		const redoButton = page.getByTitle('Redo', {exact: true});
+		const title = getRandomString();
+		const undobutton = page.getByTitle('Undo', {exact: true});
+
+		await journalEditArticlePage.goto({siteUrl: site.friendlyUrlPath});
+
+		await journalEditArticlePage.titlePlaceholder.click();
+
+		await page.waitForTimeout(200);
+
+		await journalEditArticlePage.titlePlaceholder.fill(title);
+
+		await expect(changesSavedIndicator).toBeVisible();
+
+		await page.locator('body').click();
+
+		await undobutton.click();
+
+		await expect(undobutton).toBeDisabled();
+
+		await expect(journalEditArticlePage.titlePlaceholder).toHaveValue('');
+
+		await redoButton.click();
+
+		await expect(redoButton).toBeDisabled();
+
+		await expect(journalEditArticlePage.titlePlaceholder).toHaveValue(
+			title
+		);
+	}
+);
+
+autoSaveAsDraftTest(
+	'LPD-26863: Undo/Redo buttons work with content field',
+	async ({apiHelpers, journalEditArticlePage, page, site}) => {
+		const localizableFieldName = 'Text56789';
+		const structureName = 'Structure undo/redo';
+
+		const dataDefinition = getDataStructureDefinition({
+			defaultLanguageId: 'en_US',
+			fields: [{name: localizableFieldName, repeatable: false}],
+			name: structureName,
+		});
+
+		await apiHelpers.dataEngine.createStructure(site.id, dataDefinition);
+
+		await journalEditArticlePage.goto({
+			siteUrl: site.friendlyUrlPath,
+			structureName,
+		});
+
+		const changesSavedIndicator = await page.locator(
+			'#_com_liferay_journal_web_portlet_JournalPortlet_changesSavedIndicator'
+		);
+		const redoButton = await page.getByTitle('Redo', {exact: true});
+		const title = getRandomString();
+		const undoButton = await page.getByTitle('Undo', {exact: true});
+
+		const localizableField = await page.getByRole('textbox', {
+			name: localizableFieldName,
+		});
+		const titlePlaceholder = await page.getByPlaceholder(
+			'Untitled ' + structureName
+		);
+
+		await titlePlaceholder.click();
+
+		await page.waitForTimeout(200);
+
+		await titlePlaceholder.fill(title);
+
+		await expect(changesSavedIndicator).toBeVisible();
+
+		await page.locator('body').click();
+
+		await fillAndClickOutside(page, localizableField, title);
+
+		await expect(changesSavedIndicator).toBeVisible();
+
+		await undoButton.click();
+
+		await expect(localizableField).toHaveValue('');
+
+		await redoButton.click();
+
+		await expect(redoButton).toBeDisabled();
+
+		await expect(localizableField).toHaveValue(title);
+	}
+);
+
+baseTest(
+	'LPD-15248 Move folder to another folder via management toolbar',
+	async ({apiHelpers, journalPage, page, site}) => {
+		const childFolder = await apiHelpers.jsonWebServicesJournal.addFolder({
+			groupId: site.id,
+		});
+
+		const parentFolder = await apiHelpers.jsonWebServicesJournal.addFolder({
+			groupId: site.id,
+		});
+
+		await journalPage.goto(site.friendlyUrlPath);
+
+		await page.getByLabel(`${childFolder.name}`).check();
+
+		await page.getByRole('button', {name: 'Move'}).click();
+
+		await page.getByRole('button', {name: 'Select'}).click();
+
+		await page
+			.frameLocator('iframe[title="Select Folder"]')
+			.getByRole('button')
+			.click();
+
+		await page
+			.frameLocator('iframe[title="Select Folder"]')
+			.getByText(`${parentFolder.name}`)
+			.click();
+
+		await page.getByRole('button', {name: 'Move'}).click();
+
+		await expect(
+			page.getByText('Success:Your request completed successfully.')
+		).toBeVisible();
+
+		await expect(page.getByText(`${childFolder.name}`)).toBeHidden();
+
+		await page.getByRole('link', {name: `${parentFolder.name}`}).click();
+
+		await expect(page.getByText(`${childFolder.name}`)).toBeVisible();
+	}
+);
+
+baseTest(
+	'LPD-19384: Select articles to move across multiple pages',
+	async ({apiHelpers, journalPage, page, site}) => {
+		const contentStructureId =
+			await getBasicWebContentStructureId(apiHelpers);
+
+		for (let i = 0; i < 10; i++) {
+			await apiHelpers.jsonWebServicesJournal.addWebContent({
+				ddmStructureId: contentStructureId,
+				groupId: site.id,
+			});
+		}
+
+		await journalPage.goto(site.friendlyUrlPath);
+
+		await page.getByLabel('Items per Page').click();
+
+		await page.getByRole('link', {name: '4 Entries per Page'}).click();
+
+		await page.getByTestId('row').nth(0).getByRole('checkbox').check();
+		await page.getByTestId('row').nth(1).getByRole('checkbox').check();
+
+		await page.getByRole('link', {name: 'Page 2'}).click();
+
+		await expect(
+			page.getByText('Showing 5 to 8 of 10 entries.')
+		).toBeVisible();
+
+		await page.getByTestId('row').nth(0).getByRole('checkbox').check();
+		await page.getByTestId('row').nth(1).getByRole('checkbox').check();
+
+		await page.getByRole('link', {name: 'Page 3'}).click();
+
+		await expect(
+			page.getByText('Showing 9 to 10 of 10 entries.')
+		).toBeVisible();
+
+		await page.getByTestId('row').nth(0).getByRole('checkbox').check();
+		await page.getByTestId('row').nth(1).getByRole('checkbox').check();
+
+		await page.getByRole('button', {name: 'Move'}).click();
+
+		await expect(
+			page.getByText('6 web content instances are ready to be moved.')
+		).toBeVisible();
+	}
+);
+
 keepTitlesUntranslated(
 	'LPD-20723: Clay link is translating asset titles/names by default in vertical card',
 	async ({apiHelpers, journalPage, page, site}) => {
-		const contentStructureId = await getBasicWebContentStructureId(
-			apiHelpers
-		);
+		const contentStructureId =
+			await getBasicWebContentStructureId(apiHelpers);
 
 		const title = 'add-web-content';
 
@@ -244,9 +418,8 @@ keepTitlesUntranslated(
 privateContentIconTest(
 	'LPD-15807: Identify at a glance if a Web Content is visible for guests in content management',
 	async ({apiHelpers, journalEditArticlePage, journalPage, site}) => {
-		const contentStructureId = await getBasicWebContentStructureId(
-			apiHelpers
-		);
+		const contentStructureId =
+			await getBasicWebContentStructureId(apiHelpers);
 
 		const title = getRandomString();
 
@@ -276,9 +449,8 @@ privateContentIconTest(
 privateContentIconTest(
 	'LPD-15807: Identify at a glance if a Web Content is visible for guests in the item selector',
 	async ({apiHelpers, journalEditArticlePage, journalPage, site}) => {
-		const contentStructureId = await getBasicWebContentStructureId(
-			apiHelpers
-		);
+		const contentStructureId =
+			await getBasicWebContentStructureId(apiHelpers);
 
 		await addApprovedStructuredContent({
 			apiHelpers,
@@ -328,9 +500,8 @@ prefixUrlTest(
 	}) => {
 		const articleTitle = getRandomString();
 
-		const contentStructureId = await getBasicWebContentStructureId(
-			apiHelpers
-		);
+		const contentStructureId =
+			await getBasicWebContentStructureId(apiHelpers);
 
 		await addApprovedStructuredContent({
 			apiHelpers,
@@ -343,9 +514,11 @@ prefixUrlTest(
 
 		const displayPageTemplateName = getRandomString();
 
-		await displayPageTemplatesPage.publishNewTemplate(
-			displayPageTemplateName
-		);
+		await displayPageTemplatesPage.publishNewTemplate({
+			contentSubtype: 'Basic Web Content',
+			contentType: 'Web Content Article',
+			name: displayPageTemplateName,
+		});
 
 		await displayPageTemplatesPage.markAsDefault(displayPageTemplateName);
 
@@ -607,9 +780,8 @@ translationTest(
 		journalPage,
 		site,
 	}) => {
-		const contentStructureId = await getBasicWebContentStructureId(
-			apiHelpers
-		);
+		const contentStructureId =
+			await getBasicWebContentStructureId(apiHelpers);
 
 		const title = getRandomString();
 
@@ -644,9 +816,8 @@ bulkTest(
 			{enabled: true, locator: '#guest_ACTION_PERMISSIONS'},
 		];
 
-		const contentStructureId = await getBasicWebContentStructureId(
-			apiHelpers
-		);
+		const contentStructureId =
+			await getBasicWebContentStructureId(apiHelpers);
 
 		const title1 = getRandomString();
 		const title2 = getRandomString();
@@ -752,7 +923,7 @@ translationTest(
 			name: 'Select a language',
 		});
 
-		await clickAndExpectToBeVisible({
+		clickAndExpectToBeVisible({
 			autoClick: true,
 			target: page.getByRole('option', {
 				name: 'Catalan Language: Not Translated',
@@ -768,7 +939,7 @@ translationTest(
 
 		await fillAndClickOutside(page, localizableField);
 
-		await clickAndExpectToBeVisible({
+		clickAndExpectToBeVisible({
 			target: page.getByRole('option', {
 				name: 'Catalan Language: Translated',
 			}),
@@ -778,7 +949,7 @@ translationTest(
 
 		await page.getByLabel('Add Duplicate Field Text').click();
 
-		await clickAndExpectToBeVisible({
+		clickAndExpectToBeVisible({
 			target: page.getByRole('option', {
 				name: 'Catalan Language: Translating 2/3',
 			}),
@@ -791,7 +962,7 @@ translationTest(
 			page.locator('input.ddm-field-text').nth(1)
 		);
 
-		await clickAndExpectToBeVisible({
+		clickAndExpectToBeVisible({
 			target: page.getByRole('option', {
 				name: 'Catalan Language: Translated',
 			}),
@@ -946,7 +1117,7 @@ scheduleTest(
 	}
 );
 
-aiCreateImageTest(
+baseTest(
 	'LPD-6800 Create AI Image option visible from Item Selector',
 	async ({journalEditArticlePage, page, site}) => {
 		await journalEditArticlePage.goto({siteUrl: site.friendlyUrlPath});
@@ -970,16 +1141,24 @@ scheduleTest(
 		await journalEditArticlePage.goto({siteUrl: site.friendlyUrlPath});
 
 		const articleTitle = getRandomString();
-		const scheduleDate = '9987-11-26 13:00';
+		const expirationDate = '01/01/9999';
+		const publishDate = '9987-11-26 13:00';
+		const reviewDate = '01/01/9999';
 
 		await journalEditArticlePage.scheduleArticle(
 			articleTitle,
-			scheduleDate
+			publishDate,
+			undefined,
+			expirationDate,
+			reviewDate
 		);
 
-		await journalEditArticlePage.assertScheduleDate(
+		await journalEditArticlePage.assertScheduledArticleDates(
 			articleTitle,
-			scheduleDate
+			publishDate,
+			undefined,
+			expirationDate,
+			reviewDate
 		);
 	}
 );
@@ -1019,7 +1198,7 @@ scheduleTest(
 
 		await journalPage.goto(site.friendlyUrlPath);
 
-		await journalEditArticlePage.assertScheduleDate(
+		await journalEditArticlePage.assertScheduledArticleDates(
 			articleTitle,
 			articleDate,
 			{workflow: true}

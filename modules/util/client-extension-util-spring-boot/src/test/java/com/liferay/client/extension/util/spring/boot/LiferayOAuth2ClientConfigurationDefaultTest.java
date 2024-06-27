@@ -14,6 +14,9 @@ import com.nimbusds.jose.proc.JWSAlgorithmFamilyJWSKeySelector;
 
 import java.net.URL;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
@@ -40,6 +43,11 @@ import org.springframework.security.oauth2.client.AuthorizedClientServiceOAuth2A
 import org.springframework.security.oauth2.client.ClientCredentialsOAuth2AuthorizedClientProvider;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
 import org.springframework.security.oauth2.client.endpoint.OAuth2ClientCredentialsGrantRequest;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
+import org.springframework.security.oauth2.client.registration.InMemoryReactiveClientRegistrationRepository;
+import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AccessTokenResponse;
 import org.springframework.test.annotation.DirtiesContext;
@@ -69,9 +77,10 @@ public class LiferayOAuth2ClientConfigurationDefaultTest {
 			new JSONFactoryImpl()
 		);
 
-		Mockito.mockStatic(
-			JWSAlgorithmFamilyJWSKeySelector.class
-		).when(
+		_mockedStatic = Mockito.mockStatic(
+			JWSAlgorithmFamilyJWSKeySelector.class);
+
+		_mockedStatic.when(
 			(MockedStatic.Verification)
 				JWSAlgorithmFamilyJWSKeySelector.fromJWKSetURL(Mockito.any())
 		).thenReturn(
@@ -108,6 +117,8 @@ public class LiferayOAuth2ClientConfigurationDefaultTest {
 	@AfterClass
 	public static void tearDownClass() {
 		_clientAndServer.stop();
+
+		_mockedStatic.close();
 	}
 
 	@Before
@@ -167,19 +178,63 @@ public class LiferayOAuth2ClientConfigurationDefaultTest {
 				"foo-baker-headless-server"));
 	}
 
+	@Test
+	public void testNoExtraClientRegistrationsExist() {
+		InMemoryClientRegistrationRepository
+			inMemoryClientRegistrationRepository =
+				(InMemoryClientRegistrationRepository)
+					_clientRegistrationRepository;
+
+		List<ClientRegistration> clientRegistrations = new ArrayList<>();
+
+		inMemoryClientRegistrationRepository.forEach(clientRegistrations::add);
+
+		Assert.assertEquals(
+			clientRegistrations.toString(), 2, clientRegistrations.size());
+
+		InMemoryReactiveClientRegistrationRepository
+			inMemoryReactiveClientRegistrationRepository =
+				(InMemoryReactiveClientRegistrationRepository)
+					_reactiveClientRegistrationRepository;
+
+		clientRegistrations = new ArrayList<>();
+
+		inMemoryReactiveClientRegistrationRepository.forEach(
+			clientRegistrations::add);
+
+		Assert.assertEquals(
+			clientRegistrations.toString(), 2, clientRegistrations.size());
+
+		Assert.assertNull(
+			inMemoryClientRegistrationRepository.findByRegistrationId("extra"));
+
+		Assert.assertNull(
+			inMemoryReactiveClientRegistrationRepository.findByRegistrationId(
+				"extra"
+			).block());
+	}
+
 	@Rule
 	public ExpectedException expectedException = ExpectedException.none();
 
 	private static ClientAndServer _clientAndServer;
+	private static MockedStatic<JWSAlgorithmFamilyJWSKeySelector> _mockedStatic;
 
 	@Autowired
 	private AuthorizedClientServiceOAuth2AuthorizedClientManager
 		_authorizedClientServiceOAuth2AuthorizedClientManager;
 
 	@Autowired
+	private ClientRegistrationRepository _clientRegistrationRepository;
+
+	@Autowired
 	private LiferayOAuth2AccessTokenManager _liferayOAuth2AccessTokenManager;
 
 	private OAuth2AccessTokenResponseClient<OAuth2ClientCredentialsGrantRequest>
 		_oAuth2AccessTokenResponseClient;
+
+	@Autowired
+	private ReactiveClientRegistrationRepository
+		_reactiveClientRegistrationRepository;
 
 }

@@ -33,7 +33,6 @@ import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 import com.liferay.petra.string.StringUtil;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.feature.flag.FeatureFlagManagerUtil;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONUtil;
@@ -129,7 +128,13 @@ public class ContentDashboardAdminManagementToolbarDisplayContext
 			).setParameter(
 				"contentDashboardItemSubtypePayload", (String)null
 			).setParameter(
+				"dateType", (String)null
+			).setParameter(
+				"endDate", (String)null
+			).setParameter(
 				"scopeId", (String)null
+			).setParameter(
+				"startDate", (String)null
 			).setParameter(
 				"status", WorkflowConstants.STATUS_ANY
 			);
@@ -197,16 +202,8 @@ public class ContentDashboardAdminManagementToolbarDisplayContext
 			dropdownGroupItem -> {
 				dropdownGroupItem.setDropdownItems(
 					_getFilterByDateDropdownItems());
-
-				if (FeatureFlagManagerUtil.isEnabled("LPD-25680")) {
-					dropdownGroupItem.setLabel(
-						_language.get(httpServletRequest, "filter-by-date"));
-				}
-				else {
-					dropdownGroupItem.setLabel(
-						_language.get(
-							httpServletRequest, "filter-by-review-date"));
-				}
+				dropdownGroupItem.setLabel(
+					_language.get(httpServletRequest, "filter-by-date"));
 			}
 		).build();
 	}
@@ -356,9 +353,7 @@ public class ContentDashboardAdminManagementToolbarDisplayContext
 			});
 
 		labelItemListWrapper.add(
-			() ->
-				FeatureFlagManagerUtil.isEnabled("LPD-25680") &&
-				_isCustomDateActive(),
+			() -> _isCustomDateActive(),
 			labelItem -> {
 				labelItem.putData(
 					"removeLabelURL",
@@ -777,7 +772,6 @@ public class ContentDashboardAdminManagementToolbarDisplayContext
 					_language.get(httpServletRequest, "to-be-reviewed"));
 			}
 		).add(
-			() -> FeatureFlagManagerUtil.isEnabled("LPD-25680"),
 			dropdownItem -> {
 				dropdownItem.putData("action", "customDate");
 				dropdownItem.putData(

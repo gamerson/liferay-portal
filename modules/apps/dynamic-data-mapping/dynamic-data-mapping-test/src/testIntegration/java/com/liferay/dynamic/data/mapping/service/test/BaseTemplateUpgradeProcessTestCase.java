@@ -55,8 +55,9 @@ public abstract class BaseTemplateUpgradeProcessTestCase {
 		long classPK = ParamUtil.getLong(_serviceContext, "classPK");
 
 		_ddmTemplate = _ddmTemplateService.addTemplate(
-			_group.getGroupId(), _portal.getClassNameId(DDMTemplate.class),
-			classPK, _portal.getClassNameId(JournalArticle.class),
+			null, _group.getGroupId(),
+			_portal.getClassNameId(DDMTemplate.class), classPK,
+			_portal.getClassNameId(JournalArticle.class),
 			HashMapBuilder.put(
 				LocaleUtil.US, "DDMTemplate Name"
 			).build(),
@@ -74,9 +75,10 @@ public abstract class BaseTemplateUpgradeProcessTestCase {
 				StringPool.BLANK, _serviceContext);
 
 		_fragmentEntry = _fragmentEntryService.addFragmentEntry(
-			_group.getGroupId(), fragmentCollection.getFragmentCollectionId(),
-			null, "FragmentEntry Name", null, read(filePath), null, false, null,
-			null, 0, false, FragmentConstants.TYPE_COMPONENT, null,
+			null, _group.getGroupId(),
+			fragmentCollection.getFragmentCollectionId(), null,
+			"FragmentEntry Name", null, read(filePath), null, false, null, null,
+			0, false, FragmentConstants.TYPE_COMPONENT, null,
 			WorkflowConstants.STATUS_APPROVED, _serviceContext);
 	}
 

@@ -21,7 +21,10 @@ import {
 import React, {useEffect, useState} from 'react';
 
 import {NotificationTemplateError} from '../EditNotificationTemplate';
-import {getCheckedChildren} from './rolesUtils';
+import {
+	getCheckedChildren,
+	handleMultiSelectRoleItemsChange,
+} from './rolesUtil';
 
 interface PrimaryRecipientProps {
 	emailNotificationRoles: MultiSelectItem[];
@@ -44,30 +47,6 @@ export function PrimaryRecipient({
 }: PrimaryRecipientProps) {
 	const [recipient] = values.recipients as EmailRecipients[];
 	const [toRolesList, setToRolesList] = useState<MultiSelectItem[]>([]);
-
-	const handleMultiSelectItemsChange = (itemsGroup: MultiSelectItem[]) => {
-		const newRecipients: EmailNotificationRecipients[] = [];
-
-		if (itemsGroup.length) {
-			itemsGroup.forEach((itemGroup) => {
-				itemGroup.children.forEach((child) => {
-					if (child.checked) {
-						newRecipients.push({['roleName']: child.value});
-					}
-				});
-			});
-		}
-
-		setValues({
-			...values,
-			recipients: [
-				{
-					...recipient,
-					to: newRecipients,
-				},
-			],
-		});
-	};
 
 	useEffect(() => {
 		if (emailNotificationRoles.length && !toRolesList.length) {
@@ -98,6 +77,7 @@ export function PrimaryRecipient({
 
 			return;
 		}
+
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [emailNotificationRoles, recipient.to]);
 
@@ -170,7 +150,19 @@ export function PrimaryRecipient({
 						)}
 						selectAllOption
 						setOptions={(items) => {
-							handleMultiSelectItemsChange(items);
+							const newRecipients =
+								handleMultiSelectRoleItemsChange(items);
+
+							setValues({
+								...values,
+								recipients: [
+									{
+										...recipient,
+										to: newRecipients,
+									},
+								],
+							});
+
 							setToRolesList(items);
 						}}
 					/>

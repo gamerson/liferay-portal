@@ -6,11 +6,12 @@
 import {useCallback, useEffect, useState} from 'react';
 
 import {Filters} from '../../../common/utils/constants/filters';
-import getSearchFilterTerm from '../../../common/utils/getSearchFilterTerm';
 import getCloseDateFilterTerm from '../utils/constants/getCloseDateFilterTerm';
 import {INITIAL_FILTER} from '../utils/constants/initialFilter';
 
 export default function useFilters(
+	sort: string,
+	urlParams: URLSearchParams,
 	openOpportunitiesFilter?: boolean,
 	isRenewalListing?: boolean
 ) {
@@ -20,15 +21,13 @@ export default function useFilters(
 		) as typeof INITIAL_FILTER) || INITIAL_FILTER
 	);
 
-	const [filtersTerm, setFilterTerm] = useState('');
-
 	const opportunitiesInitialFilter = isRenewalListing
 		? openOpportunitiesFilter
 			? Filters.RENEWAL_LISTING.open
 			: Filters.RENEWAL_LISTING.closed
 		: openOpportunitiesFilter
-		? Filters.OPPORTUNITY_LISTING.open
-		: Filters.OPPORTUNITY_LISTING.closed;
+			? Filters.OPPORTUNITY_LISTING.open
+			: Filters.OPPORTUNITY_LISTING.closed;
 
 	const onFilter = useCallback(
 		(newFilters: Partial<typeof INITIAL_FILTER>) =>
@@ -53,12 +52,6 @@ export default function useFilters(
 			initialFilter = initialFilter
 				? initialFilter.concat(opportunitiesInitialFilter)
 				: `${opportunitiesInitialFilter}`;
-		}
-
-		if (filters.searchTerm) {
-			initialFilter = initialFilter
-				? initialFilter.concat(getSearchFilterTerm(filters.searchTerm))
-				: getSearchFilterTerm(filters.searchTerm);
 		}
 
 		if (
@@ -90,7 +83,8 @@ export default function useFilters(
 			hasValue: hasFilter,
 		});
 
-		setFilterTerm(initialFilter);
+		urlParams.set('filter', initialFilter);
+		urlParams.set('sort', sort);
 	}, [
 		filters.closeDate,
 		filters.searchTerm,
@@ -98,7 +92,9 @@ export default function useFilters(
 		onFilter,
 		opportunitiesInitialFilter,
 		setFilters,
+		sort,
+		urlParams,
 	]);
 
-	return {filters, filtersTerm, onFilter, setFilters};
+	return {filters, onFilter, setFilters};
 }

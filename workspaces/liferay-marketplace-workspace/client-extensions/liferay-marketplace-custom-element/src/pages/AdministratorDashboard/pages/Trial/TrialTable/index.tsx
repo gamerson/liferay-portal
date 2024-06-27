@@ -7,16 +7,23 @@ import ClayButton from '@clayui/button';
 import DropDown from '@clayui/drop-down';
 import ClayIcon from '@clayui/icon';
 import ClayLabel from '@clayui/label';
+import {useModal} from '@clayui/modal';
 import {Status} from '@clayui/modal/lib/types';
 import {formatDistance} from 'date-fns';
+import {useState} from 'react';
 
 import {DashboardEmptyTable} from '../../../../../components/DashboardTable/DashboardEmptyTable';
+import Loading from '../../../../../components/Loading';
+import Modal from '../../../../../components/Modal';
 import Table from '../../../../../components/Table/Table';
 import {ORDER_WORKFLOW_STATUS_CODE} from '../../../../../enums/Order';
+import useMarketplaceSpringBootOAuth2 from '../../../../../hooks/useMarketplaceSpringBootOAuth2';
 import i18n from '../../../../../i18n';
+import HeadlessCommerceAdminOrderImpl from '../../../../../services/rest/HeadlessCommerceAdminOrder';
 
 type TrialTableProps = {
 	items: Order[];
+	revalidate: () => void;
 };
 
 type DropDownItems = {
@@ -33,25 +40,35 @@ const ORDER_STATUS_LABEL = {
 
 const CONSOLE_CLOUD_URL = 'https://console.liferay.cloud';
 
-const itemsDropdown = [
-	{
-		id: 1,
-		name: i18n.translate('go-to-trial'),
-		onClick: (order: Order) =>
-			window.open(
-				`https://${
-					order?.customFields?.['trial-virtualhost'] as string
-				}`
-			),
-	},
-	{
-		id: 2,
-		name: i18n.translate('go-to-console'),
-		onClick: () => window.open(CONSOLE_CLOUD_URL),
-	},
-];
+const safeRunner = async (promise: any) => {
+	try {
+		await promise;
+	}
+	catch (error) {}
+};
 
-const TrialTable: React.FC<TrialTableProps> = ({items}) => {
+const TrialTable: React.FC<TrialTableProps> = ({items, revalidate}) => {
+	const [processing, setProcessing] = useState(false);
+	const [selectedTrial, setSelectedTrial] = useState<Order>();
+	const modal = useModal();
+
+	const marketplaceSpringBootOAuth2 = useMarketplaceSpringBootOAuth2();
+
+	const onDeleteTrial = async (order: Order) => {
+		setProcessing(true);
+
+		const orderId = String(order.id);
+
+		await safeRunner(HeadlessCommerceAdminOrderImpl.deleteOrder(orderId));
+		await safeRunner(marketplaceSpringBootOAuth2.deleteTrial(orderId));
+
+		await revalidate();
+
+		setProcessing(false);
+
+		modal.onClose();
+	};
+
 	if (!items.length) {
 		return (
 			<DashboardEmptyTable
@@ -64,6 +81,33 @@ const TrialTable: React.FC<TrialTableProps> = ({items}) => {
 			/>
 		);
 	}
+
+	const itemsDropdown = [
+		{
+			id: 1,
+			name: i18n.translate('go-to-trial'),
+			onClick: (order: Order) =>
+				window.open(
+					`https://${
+						order?.customFields?.['trial-virtualhost'] as string
+					}`
+				),
+		},
+		{
+			id: 2,
+			name: i18n.translate('go-to-console'),
+			onClick: () => window.open(CONSOLE_CLOUD_URL),
+		},
+		{
+			id: 3,
+			name: i18n.translate('delete'),
+			onClick: async (order: Order) => {
+				modal.onOpenChange(true);
+
+				setSelectedTrial(order);
+			},
+		},
+	];
 
 	return (
 		<>
@@ -87,16 +131,29 @@ const TrialTable: React.FC<TrialTableProps> = ({items}) => {
 					{
 						key: 'orderStatusInfo',
 						render: (orderStatusInfo) => (
-							<ClayLabel
-								className="text-nowrap"
-								displayType={
-									ORDER_STATUS_LABEL[
-										orderStatusInfo?.label as keyof typeof ORDER_STATUS_LABEL
-									] as Status
-								}
-							>
-								{orderStatusInfo?.label_i18n}
-							</ClayLabel>
+							<div className="align-items-center d-flex">
+								<ClayLabel
+									className="text-nowrap"
+									displayType={
+										ORDER_STATUS_LABEL[
+											orderStatusInfo?.label as keyof typeof ORDER_STATUS_LABEL
+										] as Status
+									}
+								>
+									{orderStatusInfo?.label_i18n}
+								</ClayLabel>
+
+								{[
+									ORDER_WORKFLOW_STATUS_CODE.ON_HOLD,
+									ORDER_WORKFLOW_STATUS_CODE.PROCESSING,
+								].includes(orderStatusInfo.code) && (
+									<Loading
+										displayType="primary"
+										shape="circle"
+										size="sm"
+									/>
+								)}
+							</div>
 						),
 						title: i18n.translate('trial-status'),
 					},
@@ -151,8 +208,8 @@ const TrialTable: React.FC<TrialTableProps> = ({items}) => {
 						key: 'accountId',
 						render: (_, order) => {
 							if (
-								order.orderStatusInfo?.code !==
-								ORDER_WORKFLOW_STATUS_CODE.COMPLETED
+								order.orderStatusInfo?.code ===
+								ORDER_WORKFLOW_STATUS_CODE.PROCESSING
 							) {
 								return null;
 							}
@@ -174,7 +231,8 @@ const TrialTable: React.FC<TrialTableProps> = ({items}) => {
 								>
 									<DropDown.ItemList items={itemsDropdown}>
 										{(dropDownItem: unknown) => {
-											const item = dropDownItem as DropDownItems;
+											const item =
+												dropDownItem as DropDownItems;
 
 											return (
 												<DropDown.Item
@@ -196,6 +254,42 @@ const TrialTable: React.FC<TrialTableProps> = ({items}) => {
 				]}
 				rows={items}
 			/>
+
+			<Modal
+				last={
+					<>
+						<ClayButton
+							displayType="secondary"
+							onClick={modal.onClose}
+							size="sm"
+						>
+							{i18n.translate('cancel')}
+						</ClayButton>
+
+						<ClayButton
+							className="ml-2"
+							disabled={processing}
+							displayType="danger"
+							onClick={() =>
+								onDeleteTrial(selectedTrial as Order)
+							}
+							size="sm"
+						>
+							{i18n.translate('delete')}
+						</ClayButton>
+					</>
+				}
+				observer={modal.observer}
+				size={'md' as any}
+				status="danger"
+				title={`Are you sure you want to delete trial ${selectedTrial?.id}`}
+				visible={modal.open}
+			>
+				{i18n.sub(
+					'x-will-be-deleted-and-this-action-cant-be-undone-are-you-sure-you-want-to-delete-it',
+					'Order'
+				)}
+			</Modal>
 		</>
 	);
 };

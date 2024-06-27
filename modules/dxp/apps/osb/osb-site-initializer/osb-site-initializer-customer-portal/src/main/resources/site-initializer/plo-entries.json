@@ -15,9 +15,27 @@
 		}
 	},
 	{
+		"key": "for-more-information-please-click-x",
+		"value": {
+			"en-US": "For more information, please click {0}.",
+			"es-ES": "Para más información, haz clic {0}.",
+			"ja-JP": "詳細については、{0} をクリックしてください。",
+			"pt-BR": "Para mais informações, por favor clique {0}."
+		}
+	},
+	{
 		"key": "help-center",
 		"value": {
 			"en-US": "Help Center"
+		}
+	},
+	{
+		"key": "here",
+		"value": {
+			"en-US": "here",
+			"es-ES": "aquí",
+			"ja-JP": "こちら",
+			"pt-BR": "aqui"
 		}
 	},
 	{
@@ -66,15 +84,6 @@
 			"es-ES": "No se encontraron aspectos destacados para las capacidades del producto seleccionado.",
 			"ja-JP": "選択した製品機能のハイライトは見つかりませんでした。",
 			"pt-BR": "Nenhum destaque encontrado para os recursos do produto selecionado."
-		}
-	},
-	{
-		"key": "no-features-found-for-the-selected-product-capabilities-and-feature-availability",
-		"value": {
-			"en-US": "No features found for the selected product capabilities and feature availability.",
-			"es-ES": "No se encontraron funciones para las capacidades del producto seleccionado y la disponibilidad de funciones.",
-			"ja-JP": "選択した製品の機能と利用可能な機能に対応する機能が見つかりません。",
-			"pt-BR": "Nenhum recurso encontrado para os recursos e disponibilidade de recursos do produto selecionado."
 		}
 	},
 	{

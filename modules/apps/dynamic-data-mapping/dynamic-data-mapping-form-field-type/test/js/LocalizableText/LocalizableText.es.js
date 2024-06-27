@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-import {act, fireEvent, render} from '@testing-library/react';
+import {act, cleanup, fireEvent, render} from '@testing-library/react';
 import {PageProvider} from 'data-engine-js-components-web';
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -12,11 +12,25 @@ import LocalizableText from '../../../src/main/resources/META-INF/resources/Loca
 
 const spritemap = 'icons.svg';
 
+const globalLanguageDirection = Liferay.Language.direction;
+
 const LocalizableTextWithProvider = (props) => (
 	<PageProvider value={{editingLanguageId: 'en_US'}}>
 		<LocalizableText {...props} />
 	</PageProvider>
 );
+
+beforeAll(() => {
+	Liferay.Language.direction = {
+		en_US: 'ltr',
+	};
+});
+
+afterAll(() => {
+	Liferay.Language.direction = globalLanguageDirection;
+});
+
+afterEach(cleanup);
 
 const defaultLocalizableTextConfig = {
 	availableLocales: [
@@ -55,21 +69,23 @@ const defaultLocalizableTextConfig = {
 		icon: 'en-us',
 		localeId: 'en_US',
 	},
-	name:
-		'_com_liferay_configuration_admin_web_portlet_SystemSettingsPortlet_ddm$$emailArticleAddedSubject$uoeJR4Me$0$$en_US',
+	name: '_com_liferay_configuration_admin_web_portlet_SystemSettingsPortlet_ddm$$emailArticleAddedSubject$uoeJR4Me$0$$en_US',
 	spritemap,
 };
 
 describe('Field LocalizableText', () => {
+
 	// eslint-disable-next-line no-console
 	const originalWarn = console.warn;
 
 	afterAll(() => {
+
 		// eslint-disable-next-line no-console
 		console.warn = originalWarn;
 	});
 
 	beforeAll(() => {
+
 		// eslint-disable-next-line no-console
 		console.warn = (...args) => {
 			if (/DataProvider: Trying/.test(args[0])) {

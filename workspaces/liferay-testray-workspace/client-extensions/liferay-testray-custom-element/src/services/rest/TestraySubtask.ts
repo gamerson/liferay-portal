@@ -72,7 +72,7 @@ class TestraySubtaskImpl extends Rest<SubtaskForm, TestraySubtask> {
 						},
 						[]
 					) || [],
-				mergedToSubtaskId: subtask.r_mergedToTestraySubtask_c_subtaskId,
+				mergedToSubtask: subtask.r_mergedToTestraySubtask_c_subtask,
 				splitFromSubtask: subtask.r_splitFromTestraySubtask_c_subtask,
 				task: subtask.r_taskToSubtasks_c_task,
 				tests: subtask.subtaskToCaseResults?.length,
@@ -83,11 +83,10 @@ class TestraySubtaskImpl extends Rest<SubtaskForm, TestraySubtask> {
 	}
 
 	private async getCaseResultsFromSubtask(subtaskId: number) {
-		const subtaskCaseResultResponse = await testraySubtaskCaseResultImpl.getAll(
-			{
+		const subtaskCaseResultResponse =
+			await testraySubtaskCaseResultImpl.getAll({
 				filter: SearchBuilder.eq('subtaskId', subtaskId),
-			}
-		);
+			});
 
 		if (!subtaskCaseResultResponse) {
 			return [];
@@ -125,9 +124,8 @@ class TestraySubtaskImpl extends Rest<SubtaskForm, TestraySubtask> {
 			let mbThreadId = data.mbThreadId;
 
 			if (!mbThreadId) {
-				const mbThread = await liferayMessageBoardImpl.createMbThread(
-					message
-				);
+				const mbThread =
+					await liferayMessageBoardImpl.createMbThread(message);
 
 				mbThreadId = mbThread.id;
 
@@ -156,9 +154,8 @@ class TestraySubtaskImpl extends Rest<SubtaskForm, TestraySubtask> {
 		const _issues = issues.length ? issues.join(', ') : '';
 
 		if (subtaskcomment.comment) {
-			const {mbMessage, mbThreadId} = await this.addComment(
-				subtaskcomment
-			);
+			const {mbMessage, mbThreadId} =
+				await this.addComment(subtaskcomment);
 
 			subtaskcomment.mbMessageId = mbMessage.id;
 			subtaskcomment.mbThreadId = mbThreadId;
@@ -229,6 +226,11 @@ class TestraySubtaskImpl extends Rest<SubtaskForm, TestraySubtask> {
 			dueStatus: parentTestraySubtask.dueStatus.key,
 			score: sumScore,
 		});
+
+		return {
+			childTestraySubtasks,
+			parentTestraySubtask,
+		};
 	}
 
 	public async split(
@@ -246,9 +248,9 @@ class TestraySubtaskImpl extends Rest<SubtaskForm, TestraySubtask> {
 			this.getOne(subtaskId),
 		]);
 
-		const [{number: subtaskIndex}] = (subtaskResponse as APIResponse<
-			TestraySubtask
-		>)?.items || [{number: 1}];
+		const [{number: subtaskIndex}] = (
+			subtaskResponse as APIResponse<TestraySubtask>
+		)?.items || [{number: 1}];
 
 		const [selectedSubtask] = selectedSubtaskCaseResults.map(
 			({subtask}) => subtask as TestraySubtask

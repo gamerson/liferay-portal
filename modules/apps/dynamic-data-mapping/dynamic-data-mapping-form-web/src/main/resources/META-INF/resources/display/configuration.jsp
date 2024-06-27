@@ -57,8 +57,8 @@ DDMFormInstance selFormInstance = DDMFormInstanceServiceUtil.fetchFormInstance(f
 										<div class="input-group-inset-item input-group-inset-item-after">
 											<clay:button
 												data-qa-id="searchButton"
-												icon="search"
 												displayType="unstyled"
+												icon="search"
 												monospaced="<%= false %>"
 												type="submit"
 											/>
@@ -148,9 +148,8 @@ DDMFormInstance selFormInstance = DDMFormInstanceServiceUtil.fetchFormInstance(f
 		window,
 		'<portlet:namespace />selectFormInstance',
 		(formInstanceId, formInstanceName) => {
-			document.getElementById(
-				'<portlet:namespace />formInstanceId'
-			).value = formInstanceId;
+			document.getElementById('<portlet:namespace />formInstanceId').value =
+				formInstanceId;
 
 			const formInstanceHolder = document.querySelector(
 				'.displaying-form-instance-id-holder'

@@ -173,15 +173,17 @@ test.describe('Object Unique Composite Key Validation', () => {
 
 		await viewObjectEntriesPage.goto(objectDefinition1.id);
 
-		await viewObjectEntriesPage.addObjectEntryButton.click();
+		await viewObjectEntriesPage.clickAddObjectEntry(
+			objectDefinition1.label['en_US']
+		);
 
 		await viewObjectEntriesPage.fillObjectEntry({
-			objectFieldName: integerFieldName,
+			objectFieldLabel: integerFieldName,
 			objectFieldValue: '0',
 		});
 
 		await viewObjectEntriesPage.fillObjectEntry({
-			objectFieldName: 'textField',
+			objectFieldLabel: 'textField',
 			objectFieldValue: 'entry',
 		});
 
@@ -190,15 +192,17 @@ test.describe('Object Unique Composite Key Validation', () => {
 
 		await viewObjectEntriesPage.backButton.click();
 
-		await viewObjectEntriesPage.addObjectEntryButton.click();
+		await viewObjectEntriesPage.clickAddObjectEntry(
+			objectDefinition1.label['en_US']
+		);
 
 		await viewObjectEntriesPage.fillObjectEntry({
-			objectFieldName: integerFieldName,
+			objectFieldLabel: integerFieldName,
 			objectFieldValue: '123',
 		});
 
 		await viewObjectEntriesPage.fillObjectEntry({
-			objectFieldName: 'textField',
+			objectFieldLabel: 'textField',
 			objectFieldValue: 'entry 2',
 		});
 

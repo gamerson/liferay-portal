@@ -7,30 +7,28 @@ import {useEffect, useState} from 'react';
 
 import {Filters} from '../../../common/utils/constants/filters';
 import {getCamelCase} from '../../../common/utils/getCamelCase';
-import getSearchFilterTerm from '../../../common/utils/getSearchFilterTerm';
 import {INITIAL_FILTER} from '../utils/constants/initialFilter';
 import getActivityPeriodFilterTerm from '../utils/getActivityPeriodFilterTerm';
 
 export default function useFilters(
 	openRequestFilter: boolean,
 	urlParams: URLSearchParams,
-	isChannel?: boolean
+	sort: string,
+	isChannel?: boolean,
+	nestedFields?: string
 ) {
 	const [filters, setFilters] = useState(() => {
-		const initialFilter: typeof INITIAL_FILTER = structuredClone(
-			INITIAL_FILTER
-		);
+		const initialFilter: typeof INITIAL_FILTER =
+			structuredClone(INITIAL_FILTER);
 
 		if (urlParams.get('enddate')) {
-			initialFilter.activityPeriod.dates.endDate = urlParams.get(
-				'enddate'
-			)!;
+			initialFilter.activityPeriod.dates.endDate =
+				urlParams.get('enddate')!;
 		}
 
 		if (urlParams.get('startdate')) {
-			initialFilter.activityPeriod.dates.startDate = urlParams.get(
-				'startdate'
-			)!;
+			initialFilter.activityPeriod.dates.startDate =
+				urlParams.get('startdate')!;
 		}
 
 		if (urlParams.getAll('partner').length) {
@@ -48,15 +46,13 @@ export default function useFilters(
 		return initialFilter;
 	});
 
-	const [filtersTerm, setFilterTerm] = useState('');
-
 	const mdfRequestRoleFilter = isChannel
 		? openRequestFilter
 			? Filters.MDF_REQUEST_LISTING.channelsOpen
 			: Filters.MDF_REQUEST_LISTING.channelsCompleted
 		: openRequestFilter
-		? Filters.MDF_REQUEST_LISTING.partnersOpen
-		: Filters.MDF_REQUEST_LISTING.partnersCompleted;
+			? Filters.MDF_REQUEST_LISTING.partnersOpen
+			: Filters.MDF_REQUEST_LISTING.partnersCompleted;
 
 	const onFilter = (newFilters: Partial<typeof INITIAL_FILTER>) => {
 		setFilters((previousFilters) => {
@@ -106,6 +102,10 @@ export default function useFilters(
 			urlParams.delete('startdate');
 		}
 
+		if (nestedFields) {
+			urlParams.set('nestedFields', nestedFields);
+		}
+
 		if (filters.status.value.length) {
 			hasFilter = true;
 
@@ -118,15 +118,6 @@ export default function useFilters(
 			initialFilter = initialFilter
 				? initialFilter.concat(` and (${statusFilter})`)
 				: initialFilter.concat(`(${statusFilter})`);
-
-			urlParams.delete('status');
-
-			filters.status.value.forEach((value) =>
-				urlParams.append('status', value)
-			);
-		}
-		else {
-			urlParams.delete('status');
 		}
 
 		if (filters.partner.value.length) {
@@ -152,26 +143,23 @@ export default function useFilters(
 			urlParams.delete('partner');
 		}
 
-		if (filters.searchTerm) {
-			initialFilter = initialFilter.concat(
-				getSearchFilterTerm(filters.searchTerm)
-			);
-		}
-
 		onFilter({
 			hasValue: hasFilter,
 		});
 
-		setFilterTerm(initialFilter);
+		urlParams.set('filter', initialFilter);
+		urlParams.set('sort', sort);
 	}, [
 		filters.activityPeriod,
 		filters.searchTerm,
 		filters.status,
 		filters.partner,
-		setFilters,
 		mdfRequestRoleFilter,
+		nestedFields,
+		setFilters,
+		sort,
 		urlParams,
 	]);
 
-	return {filters, filtersTerm, onFilter, setFilters};
+	return {filters, onFilter, setFilters};
 }

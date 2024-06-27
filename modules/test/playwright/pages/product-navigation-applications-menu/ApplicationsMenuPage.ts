@@ -15,6 +15,7 @@ export class ApplicationsMenuPage {
 	private readonly applicationsMenuTabButton: Locator;
 	private readonly clientExtensionsLink: Locator;
 	private readonly commerceChannelsMenuItem: Locator;
+	private readonly commerceDiscountsMenuItem: Locator;
 	private readonly commerceOrdersMenuItem: Locator;
 	private readonly commercePanelButton: Locator;
 	private readonly controlPanelButton: Locator;
@@ -33,6 +34,7 @@ export class ApplicationsMenuPage {
 	private readonly processBuilderItem: Locator;
 	private readonly productsMenuItem: Locator;
 	private readonly queueMenuItem: Locator;
+	private readonly rolesItem: Locator;
 	private readonly searchItem: Locator;
 	private readonly serviceAccountsItem: Locator;
 	private readonly sitesItem: Locator;
@@ -67,6 +69,10 @@ export class ApplicationsMenuPage {
 		this.commerceChannelsMenuItem = page.getByRole('menuitem', {
 			exact: true,
 			name: 'Channels',
+		});
+		this.commerceDiscountsMenuItem = page.getByRole('menuitem', {
+			exact: true,
+			name: 'Discounts',
 		});
 		this.commerceOrdersMenuItem = page.getByRole('menuitem', {
 			exact: true,
@@ -131,6 +137,10 @@ export class ApplicationsMenuPage {
 		this.queueMenuItem = page.getByRole('menuitem', {
 			exact: true,
 			name: 'Queue',
+		});
+		this.rolesItem = page.getByRole('menuitem', {
+			exact: true,
+			name: 'Roles',
 		});
 		this.searchItem = page.getByRole('menuitem', {
 			exact: true,
@@ -270,6 +280,11 @@ export class ApplicationsMenuPage {
 		await this.commerceChannelsMenuItem.click();
 	}
 
+	async goToCommerceDiscounts() {
+		await this.goToCommercePanel();
+		await this.commerceDiscountsMenuItem.click();
+	}
+
 	async goToCommercePanel() {
 		await this.goto();
 		await this.commercePanelButton.click();
@@ -313,6 +328,12 @@ export class ApplicationsMenuPage {
 	async goToProcessBuilder() {
 		await this.goToApplicationsMenu();
 		await this.processBuilderItem.click();
+	}
+
+	async goToRoles() {
+		await this.goto();
+		await this.controlPanelButton.click();
+		await this.rolesItem.click();
 	}
 
 	async goToServiceAccounts() {

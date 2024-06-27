@@ -1,6 +1,6 @@
 {
 	"dependencies": {
-		"@clayui/button": "3.115.0",
+		"@clayui/button": "3.116.0",
 		"@clayui/icon": "3.111.0",
 		"@liferay/document-library-preview-css": "*",
 		"@liferay/frontend-js-react-web": "*",
@@ -13,9 +13,9 @@
 	"private": true,
 	"scripts": {
 		"build": "node-scripts build",
-		"checkFormat": "liferay-npm-scripts check",
-		"format": "liferay-npm-scripts fix",
-		"test": "liferay-npm-scripts test"
+		"checkFormat": "node-scripts format --check",
+		"format": "node-scripts format",
+		"test": "node-scripts test"
 	},
-	"version": "3.0.31"
+	"version": "3.0.32"
 }

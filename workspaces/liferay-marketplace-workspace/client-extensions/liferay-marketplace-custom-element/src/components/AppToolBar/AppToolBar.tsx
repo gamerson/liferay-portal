@@ -12,7 +12,6 @@ import './AppToolbar.scss';
 
 import ClayIcon from '@clayui/icon';
 import {ComponentProps} from 'react';
-import {Link} from 'react-router-dom';
 
 import i18n from '../../i18n';
 
@@ -21,14 +20,15 @@ type AppToolbarProps = {
 	accountName: string;
 	appImage?: string;
 	appName?: string;
-	display?: {preview?: boolean; saveAsDraft?: boolean};
+	display?: {preview?: boolean; saveAsDraft?: boolean; submit?: boolean};
 	exitHref?: string;
-	exitProps?: ComponentProps<typeof Link>;
+	exitProps?: ComponentProps<typeof ClayButton>;
 	previewProps?: Omit<
 		ComponentProps<typeof ClayButtonWithIcon>,
 		'aria-label' | 'symbol'
 	>;
 	saveAsDraftProps?: ComponentProps<typeof ClayButton>;
+	submitProps?: ComponentProps<typeof ClayButton>;
 };
 
 const AppToolbar: React.FC<AppToolbarProps> = ({
@@ -36,10 +36,10 @@ const AppToolbar: React.FC<AppToolbarProps> = ({
 	accountName,
 	appImage,
 	appName,
-	display = {preview: false, saveAsDraft: false},
-	exitHref,
+	display = {preview: false, saveAsDraft: false, submit: false},
 	exitProps,
 	saveAsDraftProps,
+	submitProps,
 }) => (
 	<div className="new-app-tool-bar-container">
 		<ClayManagementToolbar.ItemList expand>
@@ -100,13 +100,13 @@ const AppToolbar: React.FC<AppToolbarProps> = ({
 
 		<ClayManagementToolbar.ItemList>
 			<div className="align-items-center d-flex flex-row gap-3 justify-content-between mkt-gap-1">
-				<Link
+				<ClayButton
 					className="new-app-tool-bar-button-text text-dark"
-					to={exitHref as string}
+					displayType="unstyled"
 					{...exitProps}
 				>
 					{i18n.translate('exit')}
-				</Link>
+				</ClayButton>
 
 				{display.saveAsDraft && (
 					<ClayButton
@@ -115,7 +115,18 @@ const AppToolbar: React.FC<AppToolbarProps> = ({
 						size="xs"
 						{...saveAsDraftProps}
 					>
-						Save as Draft
+						{i18n.translate('save-as-draft')}
+					</ClayButton>
+				)}
+
+				{display.submit && (
+					<ClayButton
+						className="text-dark"
+						displayType="secondary"
+						size="xs"
+						{...submitProps}
+					>
+						{i18n.translate('submit')}
 					</ClayButton>
 				)}
 			</div>

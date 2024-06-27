@@ -9,6 +9,7 @@ import com.liferay.layout.utility.page.kernel.constants.LayoutUtilityPageEntryCo
 import com.liferay.layout.utility.page.kernel.provider.util.LayoutUtilityPageEntryLayoutProviderUtil;
 import com.liferay.petra.string.CharPool;
 import com.liferay.portal.kernel.model.Layout;
+import com.liferay.portal.kernel.portlet.LiferayWindowState;
 import com.liferay.portal.kernel.portlet.PortletURLFactoryUtil;
 import com.liferay.portal.kernel.portlet.WindowStateFactory;
 import com.liferay.portal.kernel.portlet.url.builder.PortletURLBuilder;
@@ -156,7 +157,7 @@ public class LoginAction implements Action {
 			).setPortletMode(
 				PortletMode.VIEW
 			).setWindowState(
-				getWindowState(httpServletRequest)
+				getWindowState(httpServletRequest, layout.isTypeUtility())
 			).buildString();
 		}
 
@@ -179,7 +180,7 @@ public class LoginAction implements Action {
 	}
 
 	protected WindowState getWindowState(
-		HttpServletRequest httpServletRequest) {
+		HttpServletRequest httpServletRequest, boolean utility) {
 
 		WindowState windowState = WindowState.MAXIMIZED;
 
@@ -188,6 +189,10 @@ public class LoginAction implements Action {
 
 		if (Validator.isNotNull(windowStateString)) {
 			windowState = WindowStateFactory.getWindowState(windowStateString);
+		}
+
+		if (utility && (windowState != LiferayWindowState.EXCLUSIVE)) {
+			windowState = WindowState.NORMAL;
 		}
 
 		return windowState;

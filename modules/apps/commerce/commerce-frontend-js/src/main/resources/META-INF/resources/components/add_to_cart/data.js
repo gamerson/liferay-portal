@@ -109,9 +109,9 @@ export async function addToCart(
 					// eslint-disable-next-line no-unused-expressions
 					currentSkuOption
 						? (includedCartItem = Array.isArray(option.value)
-								? option.value === []
+								? !option.value.length
 								: option.value === currentSkuOption.value ||
-								  option.skuOptionValueKey ===
+									option.skuOptionValueKey ===
 										currentSkuOption.skuOptionValueKey)
 						: (includedCartItem = false);
 				});

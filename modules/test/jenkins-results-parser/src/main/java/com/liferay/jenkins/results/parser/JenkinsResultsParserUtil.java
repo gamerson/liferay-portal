@@ -1428,7 +1428,7 @@ public class JenkinsResultsParserUtil {
 				properties.load(
 					new StringReader(
 						toString(
-							getLocalURL(url), false, 0, null, null, 0,
+							getLocalURL(url), false, 3, null, null, 30,
 							_MILLIS_TIMEOUT_DEFAULT, null, true)));
 			}
 
@@ -4729,7 +4729,8 @@ public class JenkinsResultsParserUtil {
 
 				Matcher testray2URLMatcher = _testray2URLPattern.matcher(url);
 
-				if (testray2URLMatcher.find() &&
+				if ((httpAuthorizationHeader == null) &&
+					testray2URLMatcher.find() &&
 					!url.contains("/o/oauth2/token")) {
 
 					Properties buildProperties = getBuildProperties();

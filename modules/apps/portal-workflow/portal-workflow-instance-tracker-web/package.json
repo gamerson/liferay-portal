@@ -1,9 +1,9 @@
 {
 	"dependencies": {
 		"@clayui/alert": "3.111.0",
-		"@clayui/drop-down": "3.115.1",
+		"@clayui/drop-down": "3.116.0",
 		"@clayui/icon": "3.111.0",
-		"@clayui/tooltip": "3.115.0",
+		"@clayui/tooltip": "3.116.0",
 		"classnames": "2.3.1",
 		"dagre": "0.8.2",
 		"frontend-js-web": "*",
@@ -21,9 +21,9 @@
 	"private": true,
 	"scripts": {
 		"build": "node-scripts build",
-		"checkFormat": "liferay-npm-scripts check",
-		"format": "liferay-npm-scripts fix",
-		"test": "liferay-npm-scripts test"
+		"checkFormat": "node-scripts format --check",
+		"format": "node-scripts format",
+		"test": "node-scripts test"
 	},
-	"version": "1.0.39"
+	"version": "1.0.40"
 }

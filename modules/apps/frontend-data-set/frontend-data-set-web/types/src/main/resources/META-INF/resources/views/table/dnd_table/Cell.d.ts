@@ -11,7 +11,6 @@ declare const Cell: ({
 	defaultWidth,
 	heading,
 	resizable,
-	...otherProps
 }: {
 	children?: React.ReactNode;
 	className?: string | undefined;

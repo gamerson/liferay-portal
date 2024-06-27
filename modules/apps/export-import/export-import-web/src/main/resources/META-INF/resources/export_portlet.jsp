@@ -346,9 +346,9 @@ PortletURL portletURL = PortletURLBuilder.createRenderURL(
 
 																		<clay:button
 																			cssClass="content-link modify-link pr-1"
-																			id='<%= liferayPortletResponse.getNamespace() + "contentLink_" + selPortlet.getRootPortletId() %>'
 																			data-portletid="<%= selPortlet.getRootPortletId() %>"
 																			displayType="link"
+																			id='<%= liferayPortletResponse.getNamespace() + "contentLink_" + selPortlet.getRootPortletId() %>'
 																			label="change"
 																		/>
 
@@ -531,7 +531,8 @@ PortletURL portletURL = PortletURLBuilder.createRenderURL(
 						}
 						%>
 
-						var blacklistCharJSONArray = <%= blacklistCharJSONArray.toJSONString() %>;
+						var blacklistCharJSONArray =
+							<%= blacklistCharJSONArray.toJSONString() %>;
 
 						for (var i = 0; i < blacklistCharJSONArray.length; i++) {
 							if (val.indexOf(blacklistCharJSONArray[i]) !== -1) {

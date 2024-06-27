@@ -22,6 +22,8 @@ test('LPD-13560 Can sort specifications by specification group and label priorit
 	commerceLayoutsPage,
 	specificationFacetsPage,
 }) => {
+	test.setTimeout(180000);
+
 	const pageLabel = 'Specification Facet Page';
 
 	await commerceLayoutsPage.goToPages();
@@ -30,9 +32,8 @@ test('LPD-13560 Can sort specifications by specification group and label priorit
 	await specificationFacetsPage.addRequiredFacetWidgets();
 	await specificationFacetsPage.configureSearchOptions();
 
-	const site = await apiHelpers.headlessAdminUser.getSiteByFriendlyUrlPath(
-		'guest'
-	);
+	const site =
+		await apiHelpers.headlessAdminUser.getSiteByFriendlyUrlPath('guest');
 
 	await apiHelpers.headlessCommerceAdminChannel.postChannel({
 		name: 'Specification Facet Channel',

@@ -28,12 +28,12 @@ definition {
 					"recipientType": "email",
 					"recipients": [
 						{
-							"cc": "${cc}",
 							"bcc": "${bcc}",
+							"cc": "${cc}",
+							"from": "${fromAddress}",
 							"fromName": {
 								"en_US": "${fromName}"
 							},
-							"from": "${fromAddress}",
 							"to": {
 								"en_US": "${toAddress}"
 							}
@@ -79,12 +79,13 @@ definition {
 				-H 'Content-Type: application/json' \
 				-u ${userEmailAddress}:${userPassword} \
 				-d '{
+					"externalReferenceCode": "${externalReferenceCode}",
 					"label": {
 						"en_US": "${labelName}"
 					},
-					"externalReferenceCode": "${externalReferenceCode}",
 					"name": "${objectName}",
-					"objectFields": [],
+					"objectFields": [
+					],
 					"panelCategoryKey": "${panelCategoryKey}",
 					"pluralLabel": {
 						"en_US": "${pluralLabelName}"
@@ -252,7 +253,7 @@ definition {
 	}
 
 	@summary = "Default summary"
-	macro addObjectField(fieldName = null, picklistName = null, fieldLabelName = null, timeStorageOption = null, isRequired = null, outputOption = null, fileSource = null, fieldBusinessType = null, formulaScript = null, objectName = null, fieldType = null) {
+	macro addObjectField(externalReferenceCode = null, fieldName = null, fieldBusinessType = null, fieldLabelName = null, fieldType = null, fileSource = null, formulaScript = null, isRequired = null, objectName = null, outputOption = null, picklistName = null, timeStorageOption = null) {
 		var portalURL = JSONCompany.getPortalURL();
 		var objectId = JSONObject.getObjectId(
 			objectName = ${objectName},
@@ -307,6 +308,10 @@ definition {
 		}
 		else {
 			var readOnlyExpression = "";
+		}
+
+		if (!(isSet(externalReferenceCode))) {
+			var externalReferenceCode = "";
 		}
 
 		if (${fileSource} == "userComputer") {
@@ -559,6 +564,7 @@ definition {
 							"en_US": "${fieldLabelName}"
 						},
 						"listTypeDefinitionId": ${picklistId},
+						"externalReferenceCode": "${externalReferenceCode}",
 						"name": "${fieldName}",
 						"readOnly": "${isReadOnly}",
 						"readOnlyConditionExpression": "${readOnlyExpression}",
@@ -704,8 +710,8 @@ definition {
 					-H 'Content-Type: application/json' \
 					-u ${userEmailAddress}:${userPassword} \
 					-d '{
-						"externalReferenceCode": "${ercName}",
-						"${fieldName}": "${value}"
+						"${fieldName}": "${value}",
+						"externalReferenceCode": "${ercName}"
 					}'
 			''';
 		}
@@ -1136,7 +1142,7 @@ definition {
 
 		var curl = '''
 			${portalURL}/o/object-admin/v1.0/object-definitions/${objectId} \
-				-u test@liferay.com:test
+				-u test@liferay.com:${PropsUtil.get("default.admin.password")}
 		''';
 
 		var objectDefinition = JSONCurlUtil.get(${curl});
@@ -1152,7 +1158,7 @@ definition {
 
 		var curl = '''
 			${portalURL}/api/jsonws/object.objectdefinition/get-object-definitions \
-				-u test@liferay.com:test \
+				-u test@liferay.com:${PropsUtil.get("default.admin.password")} \
 				-d <CURL_DATA[start=-1]CURL_DATA> \
 				-d <CURL_DATA[end=-1]CURL_DATA>
 		''';
@@ -1184,7 +1190,7 @@ definition {
 		}
 
 		if (!(isSet(userPassword))) {
-			var userPassword = "test";
+			var userPassword = PropsUtil.get("default.admin.password");
 		}
 
 		var objectName = StringUtil.toLowerCase(${objectName});
@@ -1214,7 +1220,7 @@ definition {
 		}
 
 		if (!(isSet(userPassword))) {
-			var userPassword = "test";
+			var userPassword = PropsUtil.get("default.admin.password");
 		}
 
 		var objectName = StringUtil.toLowerCase(${objectName});
@@ -1252,7 +1258,7 @@ definition {
 		}
 
 		if (!(isSet(userPassword))) {
-			var userPassword = "test";
+			var userPassword = PropsUtil.get("default.admin.password");
 		}
 
 		var objectName = StringUtil.toLowerCase(${objectName});
@@ -1290,7 +1296,7 @@ definition {
 		}
 
 		if (!(isSet(userPassword))) {
-			var userPassword = "test";
+			var userPassword = PropsUtil.get("default.admin.password");
 		}
 
 		if (!(isSet(index))) {
@@ -1320,7 +1326,7 @@ definition {
 		}
 
 		if (!(isSet(userPassword))) {
-			var userPassword = "test";
+			var userPassword = PropsUtil.get("default.admin.password");
 		}
 
 		var objectFieldId = JSONObject.getObjectFieldId(
@@ -1355,7 +1361,7 @@ definition {
 		}
 
 		if (!(isSet(userPassword))) {
-			var userPassword = "test";
+			var userPassword = PropsUtil.get("default.admin.password");
 		}
 
 		var curl = '''
@@ -1390,7 +1396,7 @@ definition {
 		}
 
 		if (!(isSet(userPassword))) {
-			var userPassword = "test";
+			var userPassword = PropsUtil.get("default.admin.password");
 		}
 
 		var curl = '''
@@ -1416,7 +1422,7 @@ definition {
 		}
 
 		if (!(isSet(userPassword))) {
-			var userPassword = "test";
+			var userPassword = PropsUtil.get("default.admin.password");
 		}
 
 		if (!(isSet(objectDefinitionId))) {
@@ -1442,7 +1448,7 @@ definition {
 		}
 
 		if (!(isSet(userPassword))) {
-			var userPassword = "test";
+			var userPassword = PropsUtil.get("default.admin.password");
 		}
 
 		var objectName = StringUtil.toLowerCase(${objectName});
@@ -1466,7 +1472,7 @@ definition {
 		}
 
 		if (!(isSet(userPassword))) {
-			var userPassword = "test";
+			var userPassword = PropsUtil.get("default.admin.password");
 		}
 
 		var objectName = StringUtil.toLowerCase(${objectName});
@@ -1490,7 +1496,7 @@ definition {
 		}
 
 		if (!(isSet(userPassword))) {
-			var userPassword = "test";
+			var userPassword = PropsUtil.get("default.admin.password");
 		}
 
 		var curl = '''
@@ -1516,7 +1522,7 @@ definition {
 		}
 
 		if (!(isSet(userPassword))) {
-			var userPassword = "test";
+			var userPassword = PropsUtil.get("default.admin.password");
 		}
 
 		var curl = '''
@@ -1545,7 +1551,7 @@ definition {
 		var curl = '''
 			${portalURL}/o/object-admin/v1.0/object-definitions/${objectId} \
 				-H 'Content-Type: application/json' \
-				-u test@liferay.com:test \
+				-u test@liferay.com:${PropsUtil.get("default.admin.password")} \
 				-d '{
 					"accountEntryRestricted": true,
 					"accountEntryRestrictedObjectFieldName": "${accountEntryRestrictedObjectFieldName}"
@@ -1565,7 +1571,7 @@ definition {
 		}
 
 		if (!(isSet(userPassword))) {
-			var userPassword = "test";
+			var userPassword = PropsUtil.get("default.admin.password");
 		}
 
 		var curl = '''
@@ -1594,7 +1600,7 @@ definition {
 		}
 
 		if (!(isSet(userPassword))) {
-			var userPassword = "test";
+			var userPassword = PropsUtil.get("default.admin.password");
 		}
 
 		var curl = '''

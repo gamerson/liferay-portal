@@ -3,16 +3,14 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-import ClayTable from '@clayui/table';
 import classNames from 'classnames';
 import React, {useContext, useLayoutEffect, useRef} from 'react';
 
 import TableContext from './TableContext';
 
 function Table({children, className}) {
-	const {draggingColumnName, isFixed, updateTableWidth} = useContext(
-		TableContext
-	);
+	const {draggingColumnName, isFixed, updateTableWidth} =
+		useContext(TableContext);
 
 	const dndTableRef = useRef(null);
 
@@ -20,28 +18,6 @@ function Table({children, className}) {
 		const tableWidth = dndTableRef.current.getBoundingClientRect().width;
 		updateTableWidth(tableWidth);
 	}, [updateTableWidth]);
-
-	if (Liferay.FeatureFlags['LPS-193005']) {
-		return (
-			<ClayTable
-				className={classNames(
-					'fds-table',
-					{
-						'fixed': isFixed,
-						'is-dragging': draggingColumnName !== null,
-					},
-					className
-				)}
-				ref={dndTableRef}
-				style={{
-					tableLayout: isFixed ? 'fixed' : 'auto',
-				}}
-				tableVerticalAlignment="middle"
-			>
-				{children}
-			</ClayTable>
-		);
-	}
 
 	return (
 		<div

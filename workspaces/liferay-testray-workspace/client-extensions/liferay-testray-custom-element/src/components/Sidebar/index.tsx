@@ -20,6 +20,7 @@ import TestrayIcons from '../Icons/TestrayIcon';
 import Tooltip from '../Tooltip';
 import SidebarFooter from './SidebarFooter';
 import SidebarItem from './SidebarItem';
+import TaskSidebar from './TasksSidebar';
 
 const Sidebar = () => {
 	const {pathname} = useLocation();
@@ -88,8 +89,7 @@ const Sidebar = () => {
 		{
 			icon: 'merge',
 			label: i18n.translate('testflow'),
-			path:
-				'/testflow?filter=%7B"dueStatus"%3A%5B"INANALYSIS"%5D%7D&filterSchema=testflow',
+			path: '/testflow?filter=%7B"dueStatus"%3A%5B"INANALYSIS"%5D%7D&filterSchema=testflow',
 		},
 		{
 			element: (
@@ -154,7 +154,8 @@ const Sidebar = () => {
 								className={classNames(
 									'tr-sidebar__content__title__brand',
 									{
-										'tr-sidebar__content__title__brand--expanded': expanded,
+										'tr-sidebar__content__title__brand--expanded':
+											expanded,
 									}
 								)}
 							/>
@@ -218,7 +219,10 @@ const Sidebar = () => {
 								visible={visible}
 							/>
 						)}
+						<div className="tr-sidebar__content__divider" />
 					</div>
+
+					<TaskSidebar expanded={expanded} />
 
 					<div className="pb-1">
 						<SidebarFooter

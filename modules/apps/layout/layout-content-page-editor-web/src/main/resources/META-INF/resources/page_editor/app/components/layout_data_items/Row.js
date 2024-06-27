@@ -40,9 +40,8 @@ const Row = React.forwardRef(({children, className, item}, ref) => {
 	const style = {};
 
 	if (backgroundImageValue.url) {
-		style[
-			`--lfr-background-image-${item.itemId}`
-		] = `url(${backgroundImageValue.url})`;
+		style[`--lfr-background-image-${item.itemId}`] =
+			`url(${backgroundImageValue.url})`;
 
 		if (backgroundImage?.fileEntryId) {
 			style['--background-image-file-entry-id'] =
@@ -57,6 +56,7 @@ const Row = React.forwardRef(({children, className, item}, ref) => {
 				getLayoutDataItemCssClasses(item),
 				getLayoutDataItemUniqueClassName(item.itemId)
 			)}
+			style={style}
 		>
 			<ClayLayout.Row
 				className={classNames(
@@ -72,7 +72,6 @@ const Row = React.forwardRef(({children, className, item}, ref) => {
 				)}
 				id={elementId}
 				ref={ref}
-				style={style}
 			>
 				{backgroundImageValue.mediaQueries ? (
 					<style>{backgroundImageValue.mediaQueries}</style>

@@ -137,6 +137,7 @@ JSONPackageJSONCheck | [Bug Prevention](bug_prevention_checks.markdown#bug-preve
 JSONPackageJSONDependencyVersionCheck | [Bug Prevention](bug_prevention_checks.markdown#bug-prevention-checks) | .ipynb, .json or .npmbridgerc | Checks the version for dependencies in `package.json` files. |
 JSONPageFileCheck | [Styling](styling_checks.markdown#styling-checks) | .ipynb, .json or .npmbridgerc | Sorts by `roleName` in `page.json` files. |
 JSONPortletResponseUtilCheck | [Styling](styling_checks.markdown#styling-checks) | .java | Checks if `JSONPortletResponseUtil.writeJSON ` should come before method calling `hideDefaultSuccessMessage`. |
+JSONReplacementsFileCheck | [Styling](styling_checks.markdown#styling-checks) | .ipynb, .json or .npmbridgerc | Sorts by `issueKey`, `from` and `to` in `replacements.json` file. |
 JSONResourcePermissionsFileCheck | [Styling](styling_checks.markdown#styling-checks) | .ipynb, .json or .npmbridgerc | Sorts by `resourceName` and `roleName` in `resource-permissions.json` files. |
 JSONStylingCheck | [Styling](styling_checks.markdown#styling-checks) | .ipynb, .json or .npmbridgerc | Applies rules to enforce consistency in code style. |
 JSONUpgradeLiferayThemePackageJSONCheck | [Upgrade](upgrade_checks.markdown#upgrade-checks) | .ipynb, .json or .npmbridgerc | Upgrade the `package.json` of a Liferay Theme to make it compatible with Liferay 7.4. |
@@ -301,6 +302,7 @@ JavaUpgradeConnectionCheck | [Bug Prevention](bug_prevention_checks.markdown#bug
 [JavaUpgradeDropTableCheck](check/java_upgrade_drop_table_check.markdown#javaupgradedroptablecheck) | [Bug Prevention](bug_prevention_checks.markdown#bug-prevention-checks) | .java | Finds cases where `DROP_TABLE_IF_EXISTS` should be used (instead of `drop table if exists`). |
 JavaUpgradeEmptyLinesCheck | [Styling](styling_checks.markdown#styling-checks) | .java | Finds missing and unnecessary empty lines in upgrade classes. |
 [JavaUpgradeIndexCheck](check/java_upgrade_index_check.markdown#javaupgradeindexcheck) | [Bug Prevention](bug_prevention_checks.markdown#bug-prevention-checks) | .java | Finds cases where the service builder indexes are updated manually in Upgrade classes. This is not needed because Liferay takes care of it. |
+JavaUpgradeMissingCTCollectionIdDuringUpdateCheck | [Bug Prevention](bug_prevention_checks.markdown#bug-prevention-checks) | .java | Finds missing `ctCollectionId` in where clause during update. |
 JavaUpgradeMissingTestCheck | [Bug Prevention](bug_prevention_checks.markdown#bug-prevention-checks) | .java | Finds missing integration tests for upgrade classes. |
 JavaUpgradeModelPermissionsCheck | [Upgrade](upgrade_checks.markdown#upgrade-checks) | .java | Replace setGroupPermissions and setGuestPermissions by new implementation. |
 JavaUpgradeVersionCheck | [Bug Prevention](bug_prevention_checks.markdown#bug-prevention-checks) | .java | Verifies that the correct upgrade versions are used in classes that implement `UpgradeStepRegistrator`. |
@@ -382,6 +384,7 @@ PoshiImportsCheck | [Styling](styling_checks.markdown#styling-checks) | .functio
 PoshiIndentationCheck | [Styling](styling_checks.markdown#styling-checks) | .function, .jar, .lar, .macro, .path, .testcase, .war or .zip | Finds incorrect indentation in Poshi Script files. |
 [PoshiPauseUsageCheck](check/poshi_pause_usage_check.markdown#poshipauseusagecheck) | [Performance](performance_checks.markdown#performance-checks) | .function, .jar, .lar, .macro, .path, .testcase, .war or .zip | Finds missing comment with JIRA project when using `Pause`. |
 PoshiPropertiesOrderCheck | [Styling](styling_checks.markdown#styling-checks) | .function, .jar, .lar, .macro, .path, .testcase, .war or .zip | Sorts the values of properties in `.testcase` file. |
+PoshiPropsUtilCheck | [Bug Prevention](bug_prevention_checks.markdown#bug-prevention-checks) | .function, .jar, .lar, .macro, .path, .testcase, .war or .zip | Finds cases where `PropsUtil.get` should be inlined. |
 PoshiSmokeTestCheck | [Bug Prevention](bug_prevention_checks.markdown#bug-prevention-checks) | .function, .jar, .lar, .macro, .path, .testcase, .war or .zip | Checks for missing and unnecessary `property ci.retries.disabled = true` in smoke test. |
 PoshiStylingCheck | [Styling](styling_checks.markdown#styling-checks) | .function, .jar, .lar, .macro, .path, .testcase, .war or .zip | Applies rules to enforce consistency in code style. |
 PoshiVariableNameCheck | [Styling](styling_checks.markdown#styling-checks) | .function, .jar, .lar, .macro, .path, .testcase, .war or .zip | Checks variable names for correct use of `camelCase`. |

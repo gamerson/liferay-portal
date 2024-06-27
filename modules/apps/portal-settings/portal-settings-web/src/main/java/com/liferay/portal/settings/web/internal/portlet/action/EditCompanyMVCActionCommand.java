@@ -29,6 +29,8 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.exception.WebsiteURLException;
 import com.liferay.portal.kernel.language.Language;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Address;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.EmailAddress;
@@ -48,6 +50,7 @@ import com.liferay.portal.kernel.service.PhoneLocalService;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.service.WebsiteLocalService;
 import com.liferay.portal.kernel.servlet.SessionErrors;
+import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.url.validator.URLValidator;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.Constants;
@@ -61,6 +64,7 @@ import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.settings.web.internal.exception.RequiredLocaleException;
 import com.liferay.portlet.usersadmin.util.UsersAdminUtil;
 
@@ -220,6 +224,22 @@ public class EditCompanyMVCActionCommand extends BaseFormMVCActionCommand {
 		UnicodeProperties unicodeProperties = PropertiesParamUtil.getProperties(
 			actionRequest, "settings--");
 
+		if (_log.isDebugEnabled()) {
+			_log.debug(
+				"Updating company properties " + unicodeProperties.toString());
+
+			_log.debug(
+				"Current complete URL: " +
+					actionRequest.getAttribute(WebKeys.CURRENT_COMPLETE_URL));
+
+			ThemeDisplay themeDisplay =
+				(ThemeDisplay)actionRequest.getAttribute(WebKeys.THEME_DISPLAY);
+
+			if (themeDisplay != null) {
+				_log.debug("User ID: " + themeDisplay.getUserId());
+			}
+		}
+
 		if (unicodeProperties.containsKey(PropsKeys.ADMIN_EMAIL_FROM_ADDRESS) &&
 			!Validator.isEmailAddress(
 				unicodeProperties.getProperty(
@@ -254,6 +274,10 @@ public class EditCompanyMVCActionCommand extends BaseFormMVCActionCommand {
 
 				for (String discardLegacyKey : discardLegacyKeys) {
 					if (curName.startsWith(discardLegacyKey + "_")) {
+						if (_log.isDebugEnabled()) {
+							_log.debug("Discarding property key " + curName);
+						}
+
 						portletPreferences.reset(curName);
 						unicodeProperties.remove(curName);
 					}
@@ -386,6 +410,9 @@ public class EditCompanyMVCActionCommand extends BaseFormMVCActionCommand {
 					"language");
 		}
 	}
+
+	private static final Log _log = LogFactoryUtil.getLog(
+		EditCompanyMVCActionCommand.class);
 
 	@Reference
 	private AddressLocalService _addressLocalService;

@@ -27,6 +27,10 @@ const UserGroupsListView: React.FC<UserGroupsListViewProps> = ({
 }) => {
 	return (
 		<ListView
+			managementToolbarProps={{
+				applyFilters: false,
+				hasSearch: true,
+			}}
 			resource="/user-groups"
 			tableProps={{
 				columns: [

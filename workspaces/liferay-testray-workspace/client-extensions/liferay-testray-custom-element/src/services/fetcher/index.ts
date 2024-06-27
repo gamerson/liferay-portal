@@ -1,4 +1,5 @@
 /* eslint-disable @liferay/portal/no-global-fetch */
+
 /**
  * SPDX-FileCopyrightText: (c) 2000 Liferay, Inc. https://liferay.com
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
@@ -67,6 +68,12 @@ const safeLiferaySessionExtend = () => {
 		sessionStorage.setItem('lastTimestamp', String(currentTimestamp));
 	}
 
+	if (currentTimestamp - lastTimestamp >= 15 * 60 * 1000) {
+		window.location.reload();
+
+		sessionStorage.setItem('lastTimestamp', String(currentTimestamp));
+	}
+
 	if (currentTimestamp - lastTimestamp > EXTEND_SESSION_5_MINUTES) {
 		try {
 			Liferay.Session.reset();
@@ -74,7 +81,7 @@ const safeLiferaySessionExtend = () => {
 			sessionStorage.setItem('lastTimestamp', String(currentTimestamp));
 		}
 		catch (error) {
-			console.error('Unable to extend Session', error);
+			error;
 		}
 	}
 };

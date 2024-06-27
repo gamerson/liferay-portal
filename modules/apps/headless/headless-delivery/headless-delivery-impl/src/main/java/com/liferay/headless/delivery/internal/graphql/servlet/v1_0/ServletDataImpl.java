@@ -703,10 +703,55 @@ public class ServletDataImpl implements ServletData {
 							DocumentShortcutResourceImpl.class,
 							"postAssetLibraryDocumentShortcutsPageExportBatch"));
 					put(
+						"mutation#createAssetLibraryDocumentShortcut",
+						new ObjectValuePair<>(
+							DocumentShortcutResourceImpl.class,
+							"postAssetLibraryDocumentShortcut"));
+					put(
+						"mutation#createAssetLibraryDocumentShortcutBatch",
+						new ObjectValuePair<>(
+							DocumentShortcutResourceImpl.class,
+							"postAssetLibraryDocumentShortcutBatch"));
+					put(
+						"mutation#deleteDocumentShortcut",
+						new ObjectValuePair<>(
+							DocumentShortcutResourceImpl.class,
+							"deleteDocumentShortcut"));
+					put(
+						"mutation#deleteDocumentShortcutBatch",
+						new ObjectValuePair<>(
+							DocumentShortcutResourceImpl.class,
+							"deleteDocumentShortcutBatch"));
+					put(
+						"mutation#patchDocumentShortcut",
+						new ObjectValuePair<>(
+							DocumentShortcutResourceImpl.class,
+							"patchDocumentShortcut"));
+					put(
+						"mutation#updateDocumentShortcut",
+						new ObjectValuePair<>(
+							DocumentShortcutResourceImpl.class,
+							"putDocumentShortcut"));
+					put(
+						"mutation#updateDocumentShortcutBatch",
+						new ObjectValuePair<>(
+							DocumentShortcutResourceImpl.class,
+							"putDocumentShortcutBatch"));
+					put(
 						"mutation#createSiteDocumentShortcutsPageExportBatch",
 						new ObjectValuePair<>(
 							DocumentShortcutResourceImpl.class,
 							"postSiteDocumentShortcutsPageExportBatch"));
+					put(
+						"mutation#createSiteDocumentShortcut",
+						new ObjectValuePair<>(
+							DocumentShortcutResourceImpl.class,
+							"postSiteDocumentShortcut"));
+					put(
+						"mutation#createSiteDocumentShortcutBatch",
+						new ObjectValuePair<>(
+							DocumentShortcutResourceImpl.class,
+							"postSiteDocumentShortcutBatch"));
 					put(
 						"mutation#deleteKnowledgeBaseArticle",
 						new ObjectValuePair<>(

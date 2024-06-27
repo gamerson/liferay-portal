@@ -74,11 +74,13 @@ const HOVER_EXPAND_DELAY = 1000;
 
 const loadCollectionFields = (
 	dispatch,
+	fieldName,
 	itemType,
 	itemSubtype,
 	mappingFieldsKey
 ) => {
 	CollectionService.getCollectionMappingFields({
+		fieldName: fieldName || '',
 		itemSubtype: itemSubtype || '',
 		itemType,
 	})
@@ -121,6 +123,7 @@ export default function StructureTreeNode({node, setEditingNodeId}) {
 
 			const {
 				classNameId,
+				fieldName,
 				itemSubtype,
 				itemType,
 				key: collectionKey,
@@ -128,10 +131,18 @@ export default function StructureTreeNode({node, setEditingNodeId}) {
 
 			const key = classNameId
 				? getMappingFieldsKey(item.config.collection)
-				: collectionKey;
+				: fieldName
+					? `${collectionKey}-${fieldName}`
+					: collectionKey;
 
 			if (!mappingFields[key]) {
-				loadCollectionFields(dispatch, itemType, itemSubtype, key);
+				loadCollectionFields(
+					dispatch,
+					fieldName,
+					itemType,
+					itemSubtype,
+					key
+				);
 			}
 		}
 	}, [
@@ -449,9 +460,12 @@ const NameLabel = React.forwardRef(
 				className={classNames(
 					'page-editor__page-structure__tree-node__name d-flex flex-grow-1 align-items-center',
 					{
-						'page-editor__page-structure__tree-node__name--hidden': hidden,
-						'page-editor__page-structure__tree-node__name--mapped': isMapped,
-						'page-editor__page-structure__tree-node__name--master-item': isMasterItem,
+						'page-editor__page-structure__tree-node__name--hidden':
+							hidden,
+						'page-editor__page-structure__tree-node__name--mapped':
+							isMapped,
+						'page-editor__page-structure__tree-node__name--master-item':
+							isMasterItem,
 					}
 				)}
 				ref={ref}
@@ -643,11 +657,8 @@ function computeHover({
 	// Apparently valid drag, calculate vertical position and
 	// nesting validation
 
-	const [
-		targetPositionWithMiddle,
-		targetPositionWithoutMiddle,
-		elevation,
-	] = getItemPosition(siblingItem || targetItem, monitor, targetRefs);
+	const [targetPositionWithMiddle, targetPositionWithoutMiddle, elevation] =
+		getItemPosition(siblingItem || targetItem, monitor, targetRefs);
 
 	// Drop inside target
 
@@ -718,7 +729,7 @@ function computeHover({
 				? {
 						...layoutDataRef.current.items[target.parentId],
 						collectionItemIndex: target.collectionItemIndex,
-				  }
+					}
 				: null;
 
 			if (parent) {
@@ -745,9 +756,8 @@ function computeHover({
 			return [null, null];
 		};
 
-		const [elevatedTargetItem, siblingItem] = getElevatedTargetItem(
-			targetItem
-		);
+		const [elevatedTargetItem, siblingItem] =
+			getElevatedTargetItem(targetItem);
 
 		if (elevatedTargetItem && elevatedTargetItem !== targetItem) {
 			return computeHover({
@@ -775,15 +785,13 @@ function getItemPosition(item, monitor, targetRefs) {
 	const clientOffsetY = monitor.getClientOffset().y;
 	const hoverBoundingRect = targetRef.current.getBoundingClientRect();
 
-	const [
-		targetPositionWithMiddle,
-		targetPositionWithoutMiddle,
-	] = getDropTargetPosition(
-		clientOffsetY,
-		ELEVATION_BORDER_SIZE,
-		getTargetPositions(ORIENTATIONS.vertical),
-		getTargetData(hoverBoundingRect, ORIENTATIONS.vertical)
-	);
+	const [targetPositionWithMiddle, targetPositionWithoutMiddle] =
+		getDropTargetPosition(
+			clientOffsetY,
+			ELEVATION_BORDER_SIZE,
+			getTargetPositions(ORIENTATIONS.vertical),
+			getTargetData(hoverBoundingRect, ORIENTATIONS.vertical)
+		);
 
 	const elevation = targetPositionWithMiddle !== TARGET_POSITIONS.MIDDLE;
 

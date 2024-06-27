@@ -48,21 +48,20 @@ export function ModalAddObjectValidation({
 	const getObjectValidationRuleEngines = () => {
 		let newObjectValidationRuleEngines = [...objectValidationRuleEngines];
 
-		if (
-			Liferay.FeatureFlags['LPD-11179'] &&
-			!allowScriptContentToBeExecutedOrIncluded
-		) {
-			newObjectValidationRuleEngines = newObjectValidationRuleEngines.filter(
-				(objectValidationRuleEngine) =>
-					objectValidationRuleEngine.value !== 'groovy'
-			);
+		if (!allowScriptContentToBeExecutedOrIncluded) {
+			newObjectValidationRuleEngines =
+				newObjectValidationRuleEngines.filter(
+					(objectValidationRuleEngine) =>
+						objectValidationRuleEngine.value !== 'groovy'
+				);
 		}
 
 		if (!Liferay.FeatureFlags['LPS-187854']) {
-			newObjectValidationRuleEngines = newObjectValidationRuleEngines.filter(
-				(objectValidationRuleEngine) =>
-					objectValidationRuleEngine.value !== 'compositeKey'
-			);
+			newObjectValidationRuleEngines =
+				newObjectValidationRuleEngines.filter(
+					(objectValidationRuleEngine) =>
+						objectValidationRuleEngine.value !== 'compositeKey'
+				);
 		}
 
 		return newObjectValidationRuleEngines;
@@ -78,7 +77,7 @@ export function ModalAddObjectValidation({
 							objectValidation.engine === 'compositeKey'
 								? Liferay.Language.get(
 										'the-field-values-are-already-in-use'
-								  )
+									)
 								: '',
 					},
 				} as Partial<ObjectValidation>,

@@ -6,27 +6,57 @@
 
 /* eslint-disable no-undef */
 
-const fs = require('fs');
-const path = require('path');
-
 const COMMANDS = {
 	'build': {
 		description: 'builds frontend stuff of current project',
 		parameters: '',
+		script: './bundle/index.mjs',
 	},
 	'build:report': {
 		description: 'generates an aggregated report of build timings',
 		parameters:
 			'[<timings directory> (falls back to LIFERAY_NPM_SCRIPTS_TIMING env var)]',
+		script: './bundle/report.mjs',
+	},
+	'check:preflight': {
+		description: 'runs several other infra-type checks',
+		parameters: '',
+		script: './preflight/index.mjs',
 	},
 	'check:tsc': {
 		description:
 			'runs TypeScript checks in the current project or globally (if run from modules)',
-		parameters: '[<tsc arguments>]',
+		parameters: '[--modified-since=<git commit>]',
+		script: './tsc/index.mjs',
+	},
+	'format': {
+		description:
+			'formats source files or optionally only checks with "--check" flag.',
+		parameters: '[--all] [--check]',
+		script: './format/index.mjs',
+	},
+	'format:file': {
+		description: 'formats a single source file.',
+		parameters: '<source file path>',
+		script: './format/file.mjs',
 	},
 	'generate:tsconfig': {
 		description: 'generates tsconfig.json files for all projects',
 		parameters: '',
+		script: './tsconfig/index.mjs',
+	},
+	'setup': {
+		description: 'setup working environment used by node-scripts',
+		parameters: '',
+		script: './setup.mjs',
+	},
+	'test': {
+		description: 'runs unit tests in a single or multiple projects.',
+		script: './test/index.mjs',
+	},
+	'test:sync': {
+		description: 'Synchronously runs tests across multiple projects.',
+		script: './test/sync.mjs',
 	},
 };
 
@@ -36,20 +66,9 @@ if (COMMANDS[command] === undefined) {
 	showHelpAndExit();
 }
 
-const commandPath = command.split(':');
+const {script} = COMMANDS[command];
 
-let modulePath = path.join(__dirname, ...commandPath, 'index.mjs');
-
-if (!fs.existsSync(modulePath)) {
-	showHelpAndExit();
-}
-
-// Node.js wants "file://" in front of absolute paths because otherwise it thinks "C:" is a URL
-// protocol and refuses to load the module.
-
-modulePath = `file://${modulePath}`;
-
-const mainPromise = import(modulePath);
+const mainPromise = import(script);
 
 mainPromise
 	.then(({default: main}) => main())

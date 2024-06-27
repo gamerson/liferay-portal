@@ -67,7 +67,8 @@ $productMenuWidth: 320px;
 			left: 0;
 			min-height: 3.5rem;
 			position: fixed;
-			transition: left ease $productMenuTransitionDuration,
+			transition:
+				left ease $productMenuTransitionDuration,
 				width ease $productMenuTransitionDuration;
 			width: 100%;
 			z-index: $toolbarZIndex;
@@ -118,18 +119,11 @@ $productMenuWidth: 320px;
 			}
 
 			.input-localized {
-				flex-direction: row-reverse;
-
 				.form-validator-stack {
 					display: none;
 				}
 
-				.input-group-item {
-					order: 2;
-				}
-
 				.input-localized-content {
-					order: 1;
 					padding-right: 0.5rem;
 				}
 			}

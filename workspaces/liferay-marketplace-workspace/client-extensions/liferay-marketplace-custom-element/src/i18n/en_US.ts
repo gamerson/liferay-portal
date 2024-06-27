@@ -20,6 +20,8 @@ export default {
 	'additional-apps-requested': 'Additional Apps Requested',
 	'address': 'Address',
 	'all-orders': 'All Orders',
+	'all-progress-and-information-related-to-the-creation-of-the-solution-will-be-lost-do-you-still-want-to-exit':
+		'All progress and information related to the creation of the solution will be lost, Do you still want to exit?',
 	'all-progress-and-information-related-to-the-creation-of-the-solution-will-be-lost-unless-you-save-the-solution-as-a-draft-do-you-still-want-to-exit':
 		'All progress and information related to the creation of the solution will be lost unless you save the solution as a draft, Do you still want to exit?',
 	'all-published-apps': 'All Published Apps',
@@ -42,6 +44,7 @@ export default {
 	'back': 'Back',
 	'back-to-apps': 'Back to Apps',
 	'back-to-my-apps': 'Back to My Apps',
+	'back-to-my-solutions': 'Back to My Solutions',
 	'back-to-solutions': 'Back to Solutions',
 	'becoming-a-liferay-marketplace-customer':
 		'Becoming a Liferay Marketplace Customer',
@@ -86,6 +89,7 @@ export default {
 		'Create new licenses and they will show up here.',
 	'create-template': 'Create template',
 	'created-at': 'Created At',
+	'created-by': 'Created By',
 	'customer-account': 'Customer Account',
 	'customer-dashboard': 'Customer Dashboard',
 	'customer-roject': 'Customer Project',
@@ -249,13 +253,16 @@ export default {
 	'provide-app-build': 'Provide app build',
 	'provide-company-profile-details': 'Provide company profile details',
 	'provide-contact-us-details': 'Provide contact us details',
+	'provisioning': 'Provisioning',
 	'publish-apps-and-they-will-show-up-here':
 		'Publish apps and they will show up here',
 	'publish-apps-to-the-liferay-marketplace':
 		'Publish apps to the Liferay Marketplace',
 	'published-apps': 'Published Apps',
+	'published-at': 'Published At',
 	'publisher-account-request': 'Publisher Account Request.',
 	'publisher-dashboard': 'Publisher Dashboard',
+	'publisher-name': 'Publisher Name',
 	'publisher-requests': 'Publisher Requests',
 	'publisher-type': 'Publisher Type',
 	'publisher-website-url': 'Publisher website URL',
@@ -286,6 +293,7 @@ export default {
 	'review-the-new-publisher-info-and-the-liferay-marketplace-terms-before-proceeding':
 		'Review the new publisher info and the Liferay Marketplace terms before proceeding',
 	'save-as-a-draft-exit': 'Save as a draft & exit',
+	'save-as-draft': 'Save as Draft',
 	'search': 'Search',
 	'select-a-file': 'Select a file',
 	'select-a-local-file-to-upload': 'Select a local file to upload',
@@ -301,6 +309,7 @@ export default {
 	'solution-details': 'Solution Details',
 	'solution-header': 'Solution Header',
 	'solution-submission': 'Solution Submission',
+	'solution-summary': 'Solution Summary',
 	'solution-x-submitted': 'Solution <b>{0}</b> submitted',
 	'solutions': 'Solutions',
 	'solutions-info': 'Solutions Info',
@@ -358,8 +367,12 @@ export default {
 	'title': 'Title',
 	'total': 'Total',
 	'trial': 'Trial',
+	'trial-details': 'Trial Details',
+	'trial-end-date': 'Trial End Date',
 	'trial-resources': 'Trial Resources',
+	'trial-start-date': 'Trial Start Date',
 	'trial-status': 'Trial Status',
+	'trial-url': 'Trial URL',
 	'trials': 'Trials',
 	'type': 'Type',
 	'unable-to-download-your-license-file-please-try-again-and-or-contact-support-via-the-manage-menu-on-the-dashboard':

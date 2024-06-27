@@ -33,9 +33,8 @@ export class ViewObjectDefinitionsPage {
 		this.confirmObjectFolderNameInput = page.locator(
 			'input[placeholder="Confirm Folder Name"]'
 		);
-		this.createObjectDefinitionButton = page.getByTestId(
-			'fdsCreationActionButton'
-		);
+		this.createObjectDefinitionButton =
+			page.getByLabel('Create New Object');
 		this.createObjectFolderButton = page.getByRole('button', {
 			name: 'Create Folder',
 		});
@@ -71,24 +70,26 @@ export class ViewObjectDefinitionsPage {
 		);
 	}
 
+	async changeObjectActivateStatus(objectDefinitionName: string) {
+		await this.clickEditObjectDefinitionLink(objectDefinitionName);
+
+		await this.page.getByRole('switch', {name: 'Activate Object'}).click();
+
+		await this.page.getByRole('button', {name: 'Save'}).click();
+	}
+
 	async clickDefaultObjectFolder() {
 		await this.defaultObjectFolder.click();
 	}
 
-	async clickEditObjectDefinitionLink(objectDefinitionName: string) {
-		await this.page.getByRole('link', {name: objectDefinitionName}).click();
+	async clickEditObjectDefinitionLink(objectDefinitionLabel: string) {
+		await this.page
+			.getByRole('link', {exact: true, name: objectDefinitionLabel})
+			.click();
 	}
 
 	async clickDeleteObjectDefinition() {
 		await this.deleteObjectDefinitionOption.click();
-	}
-
-	async clickEditObjectDefinitionFDSLink(objectDefinitionLabel: string) {
-		await this.frontendDataSetEntries
-			.filter({
-				hasText: objectDefinitionLabel,
-			})
-			.click();
 	}
 
 	async createObjectFolder(objectFolderLabel: string) {

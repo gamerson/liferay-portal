@@ -6,12 +6,15 @@
 package com.liferay.headless.delivery.internal.resource.v1_0;
 
 import com.liferay.document.library.kernel.model.DLFileShortcut;
+import com.liferay.document.library.kernel.model.DLFolderConstants;
 import com.liferay.document.library.kernel.service.DLAppService;
 import com.liferay.document.library.kernel.service.DLFileShortcutService;
+import com.liferay.headless.common.spi.service.context.ServiceContextBuilder;
 import com.liferay.headless.delivery.dto.v1_0.DocumentShortcut;
 import com.liferay.headless.delivery.resource.v1_0.DocumentShortcutResource;
 import com.liferay.portal.kernel.repository.model.FileShortcut;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
+import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.repository.liferayrepository.model.LiferayFileShortcut;
 import com.liferay.portal.vulcan.dto.converter.DTOConverter;
@@ -19,6 +22,9 @@ import com.liferay.portal.vulcan.dto.converter.DTOConverterRegistry;
 import com.liferay.portal.vulcan.dto.converter.DefaultDTOConverterContext;
 import com.liferay.portal.vulcan.pagination.Page;
 import com.liferay.portal.vulcan.pagination.Pagination;
+import com.liferay.portlet.documentlibrary.constants.DLConstants;
+
+import java.util.Map;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -35,11 +41,36 @@ public class DocumentShortcutResourceImpl
 	extends BaseDocumentShortcutResourceImpl {
 
 	@Override
+	public void deleteDocumentShortcut(Long documentShortcutId)
+		throws Exception {
+
+		_dlAppService.deleteFileShortcut(documentShortcutId);
+	}
+
+	@Override
 	public Page<DocumentShortcut> getAssetLibraryDocumentShortcutsPage(
 			Long assetLibraryId, Pagination pagination)
 		throws Exception {
 
-		return getSiteDocumentShortcutsPage(assetLibraryId, pagination);
+		return _getPage(
+			HashMapBuilder.put(
+				"create",
+				addAction(
+					ActionKeys.ADD_SHORTCUT, "postAssetLibraryDocumentShortcut",
+					DLConstants.RESOURCE_NAME, assetLibraryId)
+			).put(
+				"createBatch",
+				addAction(
+					ActionKeys.ADD_SHORTCUT,
+					"postAssetLibraryDocumentShortcutBatch",
+					DLConstants.RESOURCE_NAME, assetLibraryId)
+			).put(
+				"get",
+				addAction(
+					ActionKeys.VIEW, "getAssetLibraryDocumentShortcutsPage",
+					DLConstants.RESOURCE_NAME, assetLibraryId)
+			).build(),
+			assetLibraryId, pagination);
 	}
 
 	@Override
@@ -55,15 +86,97 @@ public class DocumentShortcutResourceImpl
 			Long siteId, Pagination pagination)
 		throws Exception {
 
+		return _getPage(
+			HashMapBuilder.put(
+				"create",
+				addAction(
+					ActionKeys.ADD_SHORTCUT, "postSiteDocumentShortcut",
+					DLConstants.RESOURCE_NAME, siteId)
+			).put(
+				"createBatch",
+				addAction(
+					ActionKeys.ADD_SHORTCUT, "postSiteDocumentShortcutBatch",
+					DLConstants.RESOURCE_NAME, siteId)
+			).put(
+				"get",
+				addAction(
+					ActionKeys.VIEW, "getSiteDocumentShortcutsPage",
+					DLConstants.RESOURCE_NAME, siteId)
+			).build(),
+			siteId, pagination);
+	}
+
+	@Override
+	public DocumentShortcut postAssetLibraryDocumentShortcut(
+			Long assetLibraryId, DocumentShortcut documentShortcut)
+		throws Exception {
+
+		return postSiteDocumentShortcut(assetLibraryId, documentShortcut);
+	}
+
+	@Override
+	public DocumentShortcut postSiteDocumentShortcut(
+			Long siteId, DocumentShortcut documentShortcut)
+		throws Exception {
+
+		Long documentFolderId = documentShortcut.getFolderId();
+
+		if (documentFolderId == null) {
+			documentFolderId = DLFolderConstants.DEFAULT_PARENT_FOLDER_ID;
+		}
+
+		return _toDocumentShortcut(
+			_dlAppService.addFileShortcut(
+				siteId, documentFolderId,
+				documentShortcut.getTargetDocumentId(),
+				_createServiceContext(
+					siteId, documentShortcut.getViewableByAsString())));
+	}
+
+	@Override
+	public DocumentShortcut putDocumentShortcut(
+			Long documentShortcutId, DocumentShortcut documentShortcut)
+		throws Exception {
+
+		FileShortcut fileShortcut = _dlAppService.getFileShortcut(
+			documentShortcutId);
+
+		return _toDocumentShortcut(
+			_dlAppService.updateFileShortcut(
+				documentShortcutId, documentShortcut.getFolderId(),
+				documentShortcut.getTargetDocumentId(),
+				_createServiceContext(
+					fileShortcut.getGroupId(),
+					documentShortcut.getViewableByAsString())));
+	}
+
+	private ServiceContext _createServiceContext(
+		long groupId, String viewableBy) {
+
+		ServiceContext serviceContext = ServiceContextBuilder.create(
+			groupId, contextHttpServletRequest, viewableBy
+		).build();
+
+		serviceContext.setUserId(contextUser.getUserId());
+
+		return serviceContext;
+	}
+
+	private Page<DocumentShortcut> _getPage(
+			Map<String, Map<String, String>> actions, Long groupId,
+			Pagination pagination)
+		throws Exception {
+
 		return Page.of(
+			actions,
 			transform(
 				_dlFileShortcutService.getGroupFileShortcuts(
-					siteId, pagination.getStartPosition(),
+					groupId, pagination.getStartPosition(),
 					pagination.getEndPosition()),
 				dlFileShortcut -> _toDocumentShortcut(
 					new LiferayFileShortcut(dlFileShortcut))),
 			pagination,
-			_dlFileShortcutService.getGroupFileShortcutsCount(siteId));
+			_dlFileShortcutService.getGroupFileShortcutsCount(groupId));
 	}
 
 	private DocumentShortcut _toDocumentShortcut(FileShortcut fileShortcut)

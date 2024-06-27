@@ -12,6 +12,7 @@ import {isolatedSiteTest} from '../../fixtures/isolatedSiteTest';
 import {loginTest} from '../../fixtures/loginTest';
 import {pageEditorPagesTest} from '../../fixtures/pageEditorPagesTest';
 import {wemSiteTest} from '../../fixtures/wemSiteTest';
+import {ANIMALS_COLLECTION_NAME} from '../../setup/wem-site/constants';
 import getRandomString from '../../utils/getRandomString';
 import getCollectionDefinition from './utils/getCollectionDefinition';
 import getCollectionItemDefinition from './utils/getCollectionItemDefinition';
@@ -49,16 +50,16 @@ test('allows adding a Collection Display with a manual collection into another C
 		provider: 'Recent Content',
 	});
 
-	// Create definition for a collection mapped to Samples collection
+	// Create definition for a collection mapped to Animals collection
 
-	const samplesClassPK = await collectionsPage.getCollectionClassPK(
-		'Samples',
+	const animalsClassPK = await collectionsPage.getCollectionClassPK(
+		ANIMALS_COLLECTION_NAME,
 		wemSite.friendlyUrlPath
 	);
 
-	const samplesCollection = getCollectionItemDefinition(getRandomString(), [
+	const animalsCollection = getCollectionItemDefinition(getRandomString(), [
 		getCollectionDefinition({
-			classPK: samplesClassPK,
+			classPK: animalsClassPK,
 			id: getRandomString(),
 			listStyle: 'Bulleted List (Journal)',
 		}),
@@ -70,7 +71,7 @@ test('allows adding a Collection Display with a manual collection into another C
 
 	const secondCollectionDefinition = getCollectionDefinition({
 		id: secondCollectionId,
-		pageElements: [samplesCollection],
+		pageElements: [animalsCollection],
 		provider: 'Recent Content',
 	});
 
@@ -93,17 +94,13 @@ test('allows adding a Collection Display with a manual collection into another C
 
 	const count = await firstCollection.locator('.list-group-item').count();
 
-	// Expect second collection to display only Sample 01 content that times
+	// Expect second collection to display only Animal 01 and Animal 02 contents that times
 
-	const secondCollection = await pageEditorPage.getFragment(
-		secondCollectionId
-	);
+	const secondCollection = pageEditorPage.getFragment(secondCollectionId);
 
-	await expect(secondCollection.getByText('Sample 01')).toHaveCount(count);
-
-	for (const item of await secondCollection.getByRole('listitem').all()) {
-		await expect(item).toHaveText('Sample 01');
-	}
+	await expect(secondCollection.locator('li')).toHaveCount(count * 2);
+	await expect(secondCollection.getByText('Animal 01')).toHaveCount(count);
+	await expect(secondCollection.getByText('Animal 02')).toHaveCount(count);
 
 	await apiHelpers.jsonWebServicesLayout.deleteLayout(layout.id);
 });
@@ -145,10 +142,8 @@ test('checks Content Flags, Content Ratings and Content Display are compatible w
 
 	// Create definition for a collection mapped to Animals collection with Content Flags, Content Ratings and Display Content fragments.
 
-	const collectionName = 'Animals';
-
 	const animalsClassPK = await collectionsPage.getCollectionClassPK(
-		collectionName,
+		ANIMALS_COLLECTION_NAME,
 		wemSite.friendlyUrlPath
 	);
 
@@ -196,7 +191,7 @@ test('checks Content Flags, Content Ratings and Content Display are compatible w
 	// Check that the Content Display shows the content in each item
 
 	await expect(
-		await page.locator('.page-editor').getByText('Content', {exact: true})
+		page.locator('.page-editor').getByText('Content', {exact: true})
 	).toHaveCount(2);
 	await expect(page.getByText('Animal 01 content')).toBeVisible();
 	await expect(page.getByText('Animal 02 content')).toBeVisible();
@@ -256,10 +251,8 @@ test('modifies inline text on all collection items', async ({
 
 	// Create definition for a collection mapped to Animals collection
 
-	const collectionName = 'Animals';
-
 	const animalsClassPK = await collectionsPage.getCollectionClassPK(
-		collectionName,
+		ANIMALS_COLLECTION_NAME,
 		wemSite.friendlyUrlPath
 	);
 
@@ -285,25 +278,13 @@ test('modifies inline text on all collection items', async ({
 
 	await pageEditorPage.goto(layout, wemSite.friendlyUrlPath);
 
-	// Go to Page Contents panel and edit inline text
+	// Fill new content
 
-	await pageEditorPage.goToSidebarTab('Page Content');
-
-	await page.getByLabel('Edit Text Heading Example').click();
-
-	const editable = pageEditorPage.getEditable(headingId, 'element-text');
-
-	await editable.locator('.cke_editable_inline').waitFor();
-
-	// Clear current content and fill with new one
-
-	await page.keyboard.press('Control+KeyA');
-	await page.keyboard.press('Backspace');
-
-	await page.keyboard.type('New Content');
-	await page.locator('body').click();
-
-	await pageEditorPage.waitForChangesSaved();
+	await pageEditorPage.editTextEditable(
+		headingId,
+		'element-text',
+		'New Content'
+	);
 
 	// Check that the inline text changes in all items of the collection
 
@@ -369,7 +350,7 @@ test('checks the different styles for the Display Collection', async ({
 	// Create several definitions with different Style Display
 
 	const animalsClassPK = await collectionsPage.getCollectionClassPK(
-		'Animals',
+		ANIMALS_COLLECTION_NAME,
 		wemSite.friendlyUrlPath
 	);
 
@@ -466,11 +447,11 @@ test('checks that fragment ids used within a display collection are not repeated
 			await fragmentIds.push(fragment.getAttribute('id'));
 		}
 
-		await expect(Array.from(new Set(fragmentIds))).toHaveLength(4);
+		expect(Array.from(new Set(fragmentIds))).toHaveLength(4);
 	};
 
 	const animalsClassPK = await collectionsPage.getCollectionClassPK(
-		'Animals',
+		ANIMALS_COLLECTION_NAME,
 		wemSite.friendlyUrlPath
 	);
 

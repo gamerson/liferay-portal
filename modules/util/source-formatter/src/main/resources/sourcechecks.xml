@@ -869,6 +869,11 @@
 			<description name="Finds cases where the service builder indexes are updated manually in Upgrade classes. This is not needed because Liferay takes care of it." />
 			<property name="enabled" value="false" />
 		</check>
+		<check name="JavaUpgradeMissingCTCollectionIdDuringUpdateCheck">
+			<category name="Bug Prevention" />
+			<description name="Finds missing `ctCollectionId` in where clause during update." />
+			<property name="enabled" value="false" />
+		</check>
 		<check name="JavaUpgradeMissingTestCheck">
 			<category name="Bug Prevention" />
 			<description name="Finds missing integration tests for upgrade classes." />
@@ -1039,6 +1044,10 @@
 		<check name="JSONPageFileCheck">
 			<category name="Styling" />
 			<description name="Sorts by `roleName` in `page.json` files." />
+		</check>
+		<check name="JSONReplacementsFileCheck">
+			<category name="Styling" />
+			<description name="Sorts by `issueKey`, `from` and `to` in `replacements.json` file." />
 		</check>
 		<check name="JSONResourcePermissionsFileCheck">
 			<category name="Styling" />
@@ -1428,6 +1437,11 @@
 		<check name="PoshiPropertiesOrderCheck">
 			<category name="Styling" />
 			<description name="Sorts the values of properties in `.testcase` file." />
+		</check>
+		<check name="PoshiPropsUtilCheck">
+			<category name="Bug Prevention" />
+			<description name="Finds cases where `PropsUtil.get` should be inlined." />
+			<property name="enabled" value="false" />
 		</check>
 		<check name="PoshiSmokeTestCheck">
 			<category name="Bug Prevention" />

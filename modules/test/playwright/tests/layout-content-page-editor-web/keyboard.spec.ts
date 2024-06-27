@@ -10,7 +10,6 @@ import {featureFlagsTest} from '../../fixtures/featureFlagsTest';
 import {isolatedSiteTest} from '../../fixtures/isolatedSiteTest';
 import {loginTest} from '../../fixtures/loginTest';
 import {pageEditorPagesTest} from '../../fixtures/pageEditorPagesTest';
-import {expectElementToHaveClass} from '../../utils/expectElementToHaveClass';
 import getRandomString from '../../utils/getRandomString';
 import getFragmentDefinition from './utils/getFragmentDefinition';
 import getPageDefinition from './utils/getPageDefinition';
@@ -75,7 +74,7 @@ test('allows moving through layout content with keyboard', async ({
 	await card.press('Enter');
 
 	await expect(card).toBeFocused();
-	await expectElementToHaveClass(card, 'active');
+	await expect(card).toHaveClass(/active/);
 
 	// Check we can move to editables with Tab
 
@@ -95,10 +94,7 @@ test('allows moving through layout content with keyboard', async ({
 	await secondEditable.press('Enter');
 
 	await expect(secondEditable).toBeFocused();
-	await expectElementToHaveClass(
-		secondEditable,
-		'page-editor__editable--active'
-	);
+	await expect(secondEditable).toHaveClass(/page-editor__editable--active/);
 });
 
 test('focus order is correct', async ({
@@ -160,4 +156,76 @@ test('focus order is correct', async ({
 	await breadcrumbItem.press('Tab');
 
 	await expect(generalTab).toBeFocused();
+});
+
+test('check that it cannot be accessed by keyboard in disabled areas', async ({
+	apiHelpers,
+	page,
+	pageEditorPage,
+	site,
+}) => {
+	const layout = await apiHelpers.headlessDelivery.createSitePage({
+		siteId: site.id,
+		title: getRandomString(),
+	});
+
+	await pageEditorPage.goto(layout, site.friendlyUrlPath);
+
+	for (const item of await page
+		.locator('.page-editor__disabled-area .navbar-classic')
+		.all()) {
+		await expect(item).toHaveAttribute('inert', '');
+		await expect(item).toHaveAttribute('aria-hidden', 'true');
+	}
+});
+
+test('checks the correct keyboard navigation in the experience selector', async ({
+	apiHelpers,
+	page,
+	pageEditorPage,
+	site,
+}) => {
+	const layout = await apiHelpers.headlessDelivery.createSitePage({
+		siteId: site.id,
+		title: getRandomString(),
+	});
+
+	await pageEditorPage.goto(layout, site.friendlyUrlPath);
+
+	// Open the experience selector
+
+	const experienceSelectorButton = await page.getByLabel(
+		'Experience: Default'
+	);
+
+	await experienceSelectorButton.press('Enter');
+
+	// Go back and check that the experience selector button is focused and the dropdown is closed
+
+	const newExperienceButton = page.getByLabel('New Experience', {
+		exact: true,
+	});
+
+	await newExperienceButton.press('Shift+Tab');
+
+	await expect(newExperienceButton).not.toBeVisible();
+	await expect(experienceSelectorButton).toBeFocused();
+
+	// Open the experience selector again
+
+	await experienceSelectorButton.press('Enter');
+
+	// Check the focus goes to New Experience button and continue navigating
+
+	await expect(newExperienceButton).toBeFocused();
+
+	await newExperienceButton.press('Tab');
+
+	await page
+		.getByRole('link', {name: 'Content Page Personalization.'})
+		.press('Tab');
+
+	// Check that the dropdown is closed
+
+	await expect(newExperienceButton).not.toBeVisible();
 });

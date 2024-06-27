@@ -29,15 +29,29 @@ export const BUILD_NPM_EXPORTS_PATH = path.join(
 	BUILD_MAIN_EXPORTS_PATH,
 	'exports'
 );
+export const BUILD_SASS_CACHE_PATH = path.join(
+	BUILD_RESOURCES_PATH,
+	'.sass-cache'
+);
 
 export const WORK_PATH = path.join('build', 'node-scripts');
 export const WORK_EXPORT_PATH = path.join(WORK_PATH, 'export');
 
 const IGNORED_PROJECT_DIRS = ['modules'];
 const NO_RECURSE_PROJECT_DIRS = [
-	'_node-scripts', 'build', 'classes', 'node_modules', 'osb-faro', 'osb-site-initializer-evp',
-	'sdk', 'test'
+	'_node-scripts',
+	'build',
+	'classes',
+	'node_modules',
+	'osb-faro',
+	'osb-site-initializer-evp',
+	'sdk',
+	'test',
 ];
+
+export async function getBuildPropertiesPath() {
+	return path.resolve(await getRootDir(), '..', 'build.properties');
+}
 
 let cachedProjectDirs;
 
@@ -53,7 +67,10 @@ export async function getProjectDirs(dir = undefined) {
 	const projectDirs = [];
 
 	for (const dirent of await fs.readdir(dir, {withFileTypes: true})) {
-		if (dirent.name === 'package.json' && !IGNORED_PROJECT_DIRS.includes(path.basename(dir))) {
+		if (
+			dirent.name === 'package.json' &&
+			!IGNORED_PROJECT_DIRS.includes(path.basename(dir))
+		) {
 			projectDirs.push(path.resolve(dir));
 			break;
 		}
@@ -61,7 +78,9 @@ export async function getProjectDirs(dir = undefined) {
 			continue;
 		}
 		else if (dirent.isDirectory()) {
-			for (const childDir of await getProjectDirs(path.resolve(dir, dirent.name))) {
+			for (const childDir of await getProjectDirs(
+				path.resolve(dir, dirent.name)
+			)) {
 				projectDirs.push(childDir);
 			}
 		}
@@ -78,7 +97,7 @@ export async function getRootDir() {
 
 		cachedRootDir = path.resolve(__dirname, '..', '..');
 
-		if (!await fileExists(path.join(cachedRootDir, 'yarn.lock'))) {
+		if (!(await fileExists(path.join(cachedRootDir, 'yarn.lock')))) {
 			throw new Error(
 				`Root project folder is no longer at ${cachedRootDir}. Please check if yarn.lock` +
 					' has been deleted or modules/_node-scripts/util/constants.js has been moved.'

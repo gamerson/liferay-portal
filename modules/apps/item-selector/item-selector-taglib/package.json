@@ -1,14 +1,14 @@
 {
 	"dependencies": {
 		"@clayui/alert": "3.111.0",
-		"@clayui/button": "3.115.0",
-		"@clayui/form": "3.115.0",
+		"@clayui/button": "3.116.0",
+		"@clayui/form": "3.116.0",
 		"@clayui/icon": "3.111.0",
 		"@clayui/layout": "3.111.0",
-		"@clayui/modal": "3.115.0",
+		"@clayui/modal": "3.116.0",
 		"@clayui/progress-bar": "3.111.0",
-		"@clayui/tabs": "3.115.0",
-		"@clayui/toolbar": "3.115.0",
+		"@clayui/tabs": "3.116.0",
+		"@clayui/toolbar": "3.116.0",
 		"@liferay/frontend-js-react-web": "*",
 		"@liferay/frontend-js-state-web": "*",
 		"classnames": "2.3.1",
@@ -23,9 +23,9 @@
 	"name": "item-selector-taglib",
 	"scripts": {
 		"build": "node-scripts build",
-		"checkFormat": "liferay-npm-scripts check",
-		"format": "liferay-npm-scripts fix",
-		"test": "liferay-npm-scripts test"
+		"checkFormat": "node-scripts format --check",
+		"format": "node-scripts format",
+		"test": "node-scripts test"
 	},
-	"version": "6.0.13"
+	"version": "6.0.14"
 }

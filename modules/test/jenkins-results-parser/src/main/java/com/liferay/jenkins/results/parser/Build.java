@@ -50,6 +50,8 @@ public interface Build {
 
 	public String getBranchName();
 
+	public BuildDatabase getBuildDatabase();
+
 	public String getBuildDescription();
 
 	public String getBuildDirPath();
@@ -192,6 +194,8 @@ public interface Build {
 	public String replaceBuildURL(String text);
 
 	public void reset();
+
+	public void saveBuildURLInBuildDatabase();
 
 	public void setArchiveName(String archiveName);
 

@@ -1,14 +1,14 @@
 {
 	"dependencies": {
 		"@clayui/alert": "3.111.0",
-		"@clayui/button": "3.115.0",
-		"@clayui/card": "3.115.1",
-		"@clayui/drop-down": "3.115.1",
-		"@clayui/form": "3.115.0",
+		"@clayui/button": "3.116.0",
+		"@clayui/card": "3.116.0",
+		"@clayui/drop-down": "3.116.0",
+		"@clayui/form": "3.116.0",
 		"@clayui/icon": "3.111.0",
-		"@clayui/list": "3.115.1",
-		"@clayui/modal": "3.115.0",
-		"@clayui/tabs": "3.115.0",
+		"@clayui/list": "3.116.0",
+		"@clayui/modal": "3.116.0",
+		"@clayui/tabs": "3.116.0",
 		"@liferay/frontend-data-set-web": "*",
 		"@liferay/frontend-js-react-web": "*",
 		"frontend-js-components-web": "*",
@@ -20,8 +20,8 @@
 	"name": "@liferay/frontend-taglib",
 	"scripts": {
 		"build": "node-scripts build",
-		"checkFormat": "liferay-npm-scripts check",
-		"format": "liferay-npm-scripts fix"
+		"checkFormat": "node-scripts format --check",
+		"format": "node-scripts format"
 	},
-	"version": "13.6.1"
+	"version": "13.6.2"
 }

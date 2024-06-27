@@ -56,9 +56,8 @@ export default function TrafficSources({dataProvider, onTrafficSourceClick}) {
 
 	const {languageTag, publishedToday} = useContext(StoreStateContext);
 
-	const {pieChartLoading, timeSpanKey, timeSpanOffset} = useContext(
-		ChartStateContext
-	);
+	const {pieChartLoading, timeSpanKey, timeSpanOffset} =
+		useContext(ChartStateContext);
 
 	const [trafficSources, setTrafficSources] = useStateSafe([]);
 
@@ -137,7 +136,7 @@ export default function TrafficSources({dataProvider, onTrafficSourceClick}) {
 
 	return (
 		<>
-			<h5 className="mt-3 sheet-subtitle">
+			<div className="mt-3 sheet-subtitle">
 				{Liferay.Language.get('traffic-channels')}
 
 				<Hint
@@ -145,7 +144,7 @@ export default function TrafficSources({dataProvider, onTrafficSourceClick}) {
 					secondary={true}
 					title={Liferay.Language.get('traffic-channels')}
 				/>
-			</h5>
+			</div>
 
 			{!fullPieChart && !missingTrafficSourceValue && (
 				<div className="mb-3 text-secondary">
@@ -183,9 +182,10 @@ export default function TrafficSources({dataProvider, onTrafficSourceClick}) {
 											<span
 												className="pie-chart-wrapper--legend--dot"
 												style={{
-													backgroundColor: getColorByName(
-														entry.name
-													),
+													backgroundColor:
+														getColorByName(
+															entry.name
+														),
 												}}
 											></span>
 										</td>
@@ -238,7 +238,7 @@ export default function TrafficSources({dataProvider, onTrafficSourceClick}) {
 														{
 															useCompact: true,
 														}
-												  )
+													)
 												: '-'}
 										</td>
 									</tr>
@@ -329,6 +329,7 @@ function TrafficSourcesCustomTooltip(props) {
 			<p className="mx-2 popover-header py-1">
 				<b>
 					{
+
 						// eslint-disable-next-line @liferay/no-length-jsx-expression
 						payload.length && payload[0].payload.title
 					}
@@ -338,6 +339,7 @@ function TrafficSourcesCustomTooltip(props) {
 			<ul className="list-unstyled mb-0 p-2 popover-body">
 				<>
 					{payload.map((item) => {
+
 						// eslint-disable-next-line no-unused-vars
 						const [value, _name, iconType] = formatter
 							? formatter(item.value, item.name, item.iconType)

@@ -54,12 +54,12 @@ const getExiredQuantity = (orderLastPeriod: Order[]) =>
 
 type FilterType = 'month' | 'q1' | 'q2' | 'q3' | 'q4' | 'week';
 
-const DISABLED_REFRESH_INTERVAL = 0;
-const REFRESH_INTERVAL_IN_SECONDS = 60;
+const ACTIVE_REFRESH_INTERVAL = 60 * 1000;
+const DEFAULT_REFRESH_INTERVAL = 240 * 1000;
 
 const useTrialMetrics = (param: FilterType) => {
 	const [refreshInterval, setRefreshInterval] = useState(
-		DISABLED_REFRESH_INTERVAL
+		DEFAULT_REFRESH_INTERVAL
 	);
 
 	const marketplaceSpringBootOAuth2 = useMarketplaceSpringBootOAuth2();
@@ -79,8 +79,7 @@ const useTrialMetrics = (param: FilterType) => {
 
 	const requestsParams = [
 		new URLSearchParams({
-			fields:
-				'id,account,orderStatusInfo,createDate,customFields,name,accountId',
+			fields: 'id,account,orderStatusInfo,createDate,customFields,name,accountId',
 			filter: trialSearchBuilder.clone().build(),
 			nestedFields: 'account,orderItems',
 			pageSize: '30',
@@ -114,7 +113,12 @@ const useTrialMetrics = (param: FilterType) => {
 		}),
 	];
 
-	const {data: trialDataResponse = [], error, isLoading} = useSWR<any>(
+	const {
+		data: trialDataResponse = [],
+		error,
+		isLoading,
+		mutate,
+	} = useSWR<any>(
 		'administrator-dashboard/metrics/trial',
 		() =>
 			Promise.all([
@@ -134,9 +138,10 @@ const useTrialMetrics = (param: FilterType) => {
 		ordersTrial,
 	] = trialDataResponse;
 
-	const orderItems = useMemo(() => orderTableData?.items ?? [], [
-		orderTableData?.items,
-	]);
+	const orderItems = useMemo(
+		() => orderTableData?.items ?? [],
+		[orderTableData?.items]
+	);
 
 	useEffect(() => {
 		const isProcessing = orderItems.some(({orderStatusInfo}: any) =>
@@ -147,9 +152,7 @@ const useTrialMetrics = (param: FilterType) => {
 		);
 
 		setRefreshInterval(
-			isProcessing
-				? REFRESH_INTERVAL_IN_SECONDS
-				: DISABLED_REFRESH_INTERVAL
+			isProcessing ? ACTIVE_REFRESH_INTERVAL : DEFAULT_REFRESH_INTERVAL
 		);
 	}, [orderItems]);
 
@@ -180,6 +183,7 @@ const useTrialMetrics = (param: FilterType) => {
 			expiredTrialsBeforeLastPeriod
 		),
 		isLoading,
+		mutate,
 		orderTableData,
 		orders: getPeriodMetrics(
 			orderLastPeriod?.totalCount,

@@ -87,10 +87,8 @@ const BaseNotificationsInfo = ({
 	userRecipientUpdateSelectedItem,
 	...restProps
 }) => {
-	const {
-		allowScriptContentToBeExecutedOrIncluded,
-		hadGroovyScriptBefore,
-	} = useContext(DefinitionBuilderContext);
+	const {allowScriptContentToBeExecutedOrIncluded, hadGroovyScriptBefore} =
+		useContext(DefinitionBuilderContext);
 	const [networkStatus, setNetworkStatus] = useState(4);
 	const {resource} = useResource({
 		fetchOptions: {
@@ -152,7 +150,6 @@ const BaseNotificationsInfo = ({
 
 	const getRecipientTypeOptions = () => {
 		if (
-			Liferay.FeatureFlags['LPD-11179'] &&
 			!allowScriptContentToBeExecutedOrIncluded &&
 			!hadGroovyScriptBefore
 		) {
@@ -202,6 +199,7 @@ const BaseNotificationsInfo = ({
 
 				setAccountRoles(accountRoleItems);
 			});
+
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [accountEntryId]);
 

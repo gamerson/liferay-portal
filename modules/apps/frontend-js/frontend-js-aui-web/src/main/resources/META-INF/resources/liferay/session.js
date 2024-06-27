@@ -325,7 +325,7 @@ AUI.add(
 						'LFR_SESSION_STATE_' + themeDisplay.getRealUserId();
 
 					instance._cookieOptions = {
-						path: '/',
+						path: themeDisplay.getPathContext() || '/',
 						secure: A.UA.secure,
 					};
 
@@ -604,9 +604,8 @@ AUI.add(
 					remainingTime = instance._formatTime(remainingTime);
 
 					if (!instance._alertClosed) {
-						const alert = counterTextNode.closest(
-							'div[role="alert"]'
-						);
+						const alert =
+							counterTextNode.closest('div[role="alert"]');
 
 						// Prevent screen reader from rereading alert
 

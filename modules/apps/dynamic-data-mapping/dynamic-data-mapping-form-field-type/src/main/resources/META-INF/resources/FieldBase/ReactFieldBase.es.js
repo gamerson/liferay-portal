@@ -23,6 +23,10 @@ import React, {useCallback, useEffect, useMemo, useState} from 'react';
 
 import './FieldBase.scss';
 
+export function updateFieldNameLocale(editingLanguageId, locale, name) {
+	return name.replace(new RegExp(`${editingLanguageId}$`), locale);
+}
+
 function normalizeInputValue(fieldType, locale, value) {
 	if (!value) {
 		return '';
@@ -223,9 +227,8 @@ export default function FieldBase({
 	warningMessage,
 }) {
 	const {editingLanguageId, pages} = useFormState();
-	const [disabledRepeatableButton, setDisabledRepeatableButton] = useState(
-		false
-	);
+	const [disabledRepeatableButton, setDisabledRepeatableButton] =
+		useState(false);
 	const dispatch = useForm();
 
 	const hasError = displayErrors && errorMessage && !valid;
@@ -264,7 +267,11 @@ export default function FieldBase({
 						!!localizedValueEdited?.[editingLanguageId]
 					}
 					key={locale}
-					name={name.replace(editingLanguageId, locale)}
+					name={updateFieldNameLocale(
+						editingLanguageId,
+						locale,
+						name
+					)}
 					type="hidden"
 					value={normalizeInputValue(type, locale, value)}
 				/>
@@ -601,7 +608,8 @@ export default function FieldBase({
 							className={classNames(
 								'ddm-form-field-repeatable-delete-button p-0',
 								{
-									'ddm-form-field-repeatable-button-disabled': disabledRepeatableButton,
+									'ddm-form-field-repeatable-button-disabled':
+										disabledRepeatableButton,
 								}
 							)}
 							disabled={readOnly || disabledRepeatableButton}
@@ -627,7 +635,8 @@ export default function FieldBase({
 						className={classNames(
 							'ddm-form-field-repeatable-add-button p-0',
 							{
-								'ddm-form-field-repeatable-button-disabled': disabledRepeatableButton,
+								'ddm-form-field-repeatable-button-disabled':
+									disabledRepeatableButton,
 								'hide': overMaximumRepetitionsLimit,
 							}
 						)}

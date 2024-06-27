@@ -580,6 +580,14 @@ public class DownstreamBuild extends BaseBuild {
 		return warningMessages;
 	}
 
+	@Override
+	public void saveBuildURLInBuildDatabase() {
+		BuildDatabase buildDatabase = getBuildDatabase();
+
+		buildDatabase.putProperty(
+			BUILD_URLS_PROPERTIES_KEY, getAxisName(), getBuildURL());
+	}
+
 	protected DownstreamBuild(String url, TopLevelBuild topLevelBuild) {
 		super(url, topLevelBuild);
 	}

@@ -139,9 +139,9 @@ public class DXPCloudClientTestrayImporter {
 				htmlFileContent.replaceAll(
 					"(screenshots/(?:after|before|screenshot)\\d+)\\.jpg",
 					JenkinsResultsParserUtil.combine(
-						_testrayServerURL, "/reports/", _testrayReleaseName,
-						"/logs/", _getRelativeURLPath(), "/",
-						parentFile.getName(), "/$1.jpg.gz")));
+						_testrayS3Bucket.getTestrayS3BaseURL(), "/",
+						_getRelativeURLPath(), "/", parentFile.getName(),
+						"/$1.jpg.gz")));
 		}
 		catch (IOException ioException) {
 			throw new RuntimeException(ioException);
@@ -258,12 +258,14 @@ public class DXPCloudClientTestrayImporter {
 			return null;
 		}
 
-		Element attachmentElement = Dom4JUtil.getNewElement("attachment");
+		Element attachmentElement = Dom4JUtil.getNewElement("file");
 
 		attachmentElement.addAttribute("name", "Poshi Log");
 		attachmentElement.addAttribute(
 			"url",
-			_testrayS3Bucket.getTestrayS3BaseURL() + key + "?authuser=0");
+			JenkinsResultsParserUtil.combine(
+				_testrayS3Bucket.getTestrayS3BaseURL(), "/", key,
+				"?authuser=0"));
 		attachmentElement.addAttribute("value", key + "?authuser=0");
 
 		return attachmentElement;
@@ -411,8 +413,8 @@ public class DXPCloudClientTestrayImporter {
 			attachmentElement.addAttribute(
 				"url",
 				JenkinsResultsParserUtil.combine(
-					_testrayServerURL, "/reports/", _testrayReleaseName,
-					"/logs/", key, "?authuser=0"));
+					_testrayS3Bucket.getTestrayS3BaseURL(), "/", key,
+					"?authuser=0"));
 			attachmentElement.addAttribute("value", key + "?authuser=0");
 		}
 
@@ -583,18 +585,9 @@ public class DXPCloudClientTestrayImporter {
 		TestrayServer testrayServer = TestrayFactory.newTestrayServer(
 			_testrayServerURL);
 
-		if ((testrayServer instanceof Testray1TestrayServer) &&
-			!JenkinsResultsParserUtil.isNullOrEmpty(_testrayUserName) &&
-			!JenkinsResultsParserUtil.isNullOrEmpty(_testrayUserPassword)) {
-
-			testrayServer.setHTTPAuthorization(
-				new JenkinsResultsParserUtil.BasicHTTPAuthorization(
-					_testrayUserPassword, _testrayUserName));
-		}
-		else if (!JenkinsResultsParserUtil.isNullOrEmpty(
-					_testrayOAuth2ClientId) &&
-				 !JenkinsResultsParserUtil.isNullOrEmpty(
-					 _testrayOAuth2ClientSecret)) {
+		if (!JenkinsResultsParserUtil.isNullOrEmpty(_testrayOAuth2ClientId) &&
+			!JenkinsResultsParserUtil.isNullOrEmpty(
+				_testrayOAuth2ClientSecret)) {
 
 			URL tokenURL;
 
@@ -609,6 +602,15 @@ public class DXPCloudClientTestrayImporter {
 				new JenkinsResultsParserUtil.ClientCredentialsHTTPAuthorization(
 					_testrayOAuth2ClientId, _testrayOAuth2ClientSecret,
 					tokenURL));
+		}
+		else if ((testrayServer instanceof Testray1TestrayServer) &&
+				 !JenkinsResultsParserUtil.isNullOrEmpty(_testrayUserName) &&
+				 !JenkinsResultsParserUtil.isNullOrEmpty(
+					 _testrayUserPassword)) {
+
+			testrayServer.setHTTPAuthorization(
+				new JenkinsResultsParserUtil.BasicHTTPAuthorization(
+					_testrayUserPassword, _testrayUserName));
 		}
 
 		TestrayProject testrayProject = testrayServer.getTestrayProjectByName(
@@ -666,6 +668,10 @@ public class DXPCloudClientTestrayImporter {
 
 		Properties properties = new Properties();
 
+		properties.setProperty(
+			"testray.build.date",
+			JenkinsResultsParserUtil.toDateString(
+				new Date(), "yyy-MM-dd HH:mm:ss", "America/Los_Angeles"));
 		properties.setProperty("testray.build.name", testrayBuild.getName());
 		properties.setProperty("testray.build.type", testrayRoutine.getName());
 		properties.setProperty(
@@ -768,12 +774,6 @@ public class DXPCloudClientTestrayImporter {
 
 		if (!JenkinsResultsParserUtil.isNullOrEmpty(testrayProjectName)) {
 			_testrayProjectName = testrayProjectName;
-		}
-
-		String testrayReleaseName = _getEnvVarValue("testrayReleaseName");
-
-		if (!JenkinsResultsParserUtil.isNullOrEmpty(testrayReleaseName)) {
-			_testrayReleaseName = testrayReleaseName;
 		}
 
 		String testrayRoutineName = _getEnvVarValue("testrayRoutineName");
@@ -928,7 +928,6 @@ public class DXPCloudClientTestrayImporter {
 	private static String _testrayOAuth2ClientSecret;
 	private static String _testrayProductVersion = "1.x";
 	private static String _testrayProjectName = "DXP Cloud Client";
-	private static String _testrayReleaseName = "production";
 	private static String _testrayRoutineName = "DXP Cloud Client Routine";
 	private static TestrayS3Bucket _testrayS3Bucket;
 	private static String _testrayServerURL = "https://testray.liferay.com";

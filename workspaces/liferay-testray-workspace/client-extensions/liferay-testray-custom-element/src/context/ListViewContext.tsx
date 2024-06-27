@@ -1,4 +1,5 @@
 /* eslint-disable no-case-declarations */
+
 /**
  * SPDX-FileCopyrightText: (c) 2000 Liferay, Inc. https://liferay.com
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
@@ -47,10 +48,10 @@ export type InitialState = {
 	customFilterFields: {[key: string]: string};
 	filters: ListViewFilter;
 	id: string;
-	keywords: string;
 	page: number;
 	pageSize: number;
 	pin: boolean;
+	search: string;
 	selectedRows: number[];
 	sort: Sort | Sort[];
 };
@@ -66,10 +67,10 @@ const initialState: InitialState = {
 		filter: {},
 	},
 	id: '',
-	keywords: '',
 	page: 1,
 	pageSize: PAGINATION_DELTA[0],
 	pin: false,
+	search: '',
 	selectedRows: [],
 	sort: {direction: SortOption.ASC, key: ''},
 };
@@ -108,9 +109,8 @@ type ListViewPayload = {
 	[ListViewTypes.SET_SORT]: Sort;
 };
 
-export type AppActions = ActionMap<ListViewPayload>[keyof ActionMap<
-	ListViewPayload
->];
+export type AppActions =
+	ActionMap<ListViewPayload>[keyof ActionMap<ListViewPayload>];
 
 export const ListViewContext = createContext<
 	[InitialState, (param: AppActions) => void]
@@ -153,7 +153,7 @@ const reducer = (state: InitialState, action: AppActions) => {
 				rowAlreadyInserted
 					? (selectedRows = selectedRows.filter(
 							(row) => row !== rowIds
-					  ))
+						))
 					: (selectedRows = [...selectedRows, rowIds as number]);
 			}
 
@@ -172,7 +172,7 @@ const reducer = (state: InitialState, action: AppActions) => {
 			return {
 				...state,
 				filters: initialState.filters,
-				keywords: '',
+				search: '',
 			};
 
 		case ListViewTypes.SET_CLEAR_CHECKED_ROW:
@@ -271,13 +271,13 @@ const reducer = (state: InitialState, action: AppActions) => {
 			};
 		}
 
-		case ListViewTypes.SET_SEARCH:
+		case ListViewTypes.SET_SEARCH: {
 			return {
 				...state,
-				keywords: action.payload,
 				page: 1,
+				search: action.payload,
 			};
-
+		}
 		case ListViewTypes.SET_SORT:
 			return {
 				...state,

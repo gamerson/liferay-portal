@@ -9,9 +9,11 @@ import React, {useState} from 'react';
 import RESTApplicationDropdownItem from './RESTApplicationDropdownItem';
 
 export default function RESTApplicationDropdownMenu({
+	className,
 	onItemClick,
 	restApplications: initialRESTApplications,
 }: {
+	className?: string;
 	onItemClick: Function;
 	restApplications: Array<string>;
 }) {
@@ -29,7 +31,7 @@ export default function RESTApplicationDropdownMenu({
 			query
 				? initialRESTApplications.filter((restApplication) =>
 						restApplication.match(regexp)
-				  ) || []
+					) || []
 				: initialRESTApplications
 		);
 	};
@@ -38,6 +40,7 @@ export default function RESTApplicationDropdownMenu({
 		<>
 			<ClayDropDown.Search
 				aria-label={Liferay.Language.get('search')}
+				className={className}
 				onChange={onSearch}
 				value={query}
 			/>
