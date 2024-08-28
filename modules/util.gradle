@@ -342,6 +342,10 @@ private void _createSetUpPortalToolTasks() {
 			inputFile = ivyXmlFile
 			into new File(portalToolDir, "lib")
 
+			eachFile {
+				fileMode it.mode | 0644
+			}
+
 			outputs.upToDateWhen {
 				false
 			}
