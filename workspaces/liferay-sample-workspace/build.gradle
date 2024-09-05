@@ -18,6 +18,7 @@ import com.github.dockerjava.api.exception.NotFoundException
 import com.github.dockerjava.api.model.ContainerNetwork
 import com.github.dockerjava.api.model.Network
 import com.github.dockerjava.api.model.Network.Ipam
+import com.github.dockerjava.api.model.HostConfig
 
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
@@ -29,9 +30,11 @@ import java.util.jar.Attributes
 import java.util.jar.Attributes.Name
 import java.util.stream.Collectors
 import java.util.zip.ZipEntry
+import javax.inject.Inject
 
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.Optional
 
 abstract public class CXContainerExtension {
@@ -113,6 +116,41 @@ abstract class DockerGetOrCreateNetwork extends DockerCreateNetwork {
 
 }
 
+abstract class LazyDockerCreateContainer extends DockerCreateContainer {
+
+	@Inject
+	public LazyDockerCreateContainer(ObjectFactory objectFactory) {
+		super(objectFactory)
+	}
+
+	@Nested
+	abstract HostConfig hostConfig
+
+	@Input
+	@Optional
+	abstract ListProperty<String> extraHosts
+
+	@Override
+	public void runRemoteCommand() {
+		// String containerIP = project.extensions.cxContainer.containerIP
+		// String containerName = getContainerName().get()
+		// String networkName = getNetworkName().get()
+		// getLogger().quiet("Connecting container '${containerName}' to network '${networkName}' with IP '${containerIP}'.")
+
+		// ConnectToNetworkCmd connectToNetworkCmd = getDockerClient().connectToNetworkCmd().withNetworkId(
+		// 	networkName
+		// ).withContainerId(
+		// 	containerName
+		// )
+
+		// connectToNetworkCmd.withContainerNetwork(
+		// 	new ContainerNetwork().withIpv4Address(
+		// 		containerIP
+		// 	)
+		// ).exec()
+	}
+}
+
 abstract class DockerConnectNetwork extends AbstractDockerRemoteApiTask {
 	@Input
 	abstract Property<String> getContainerName()
@@ -140,8 +178,10 @@ abstract class DockerConnectNetwork extends AbstractDockerRemoteApiTask {
 	}
 }
 
-def liferayVirtualInstanceId = providers.gradleProperty('liferay.workspace.virtual.instance.id').getOrElse('default')
-def liferayHome = providers.gradleProperty('liferay.workspace.home.dir').getOrElse('ERROR')
+def liferayVirtualInstanceId = gradle.liferayWorkspace.virtualInstanceId ?: 'default'
+def liferayHome = gradle.liferayWorkspace.homeDir
+
+println "gradle.liferayWorkspace.virtualInstanceId = ${liferayVirtualInstanceId}"
 
 configure(
 	subprojects.findAll {
@@ -166,16 +206,22 @@ configure(
 	}
 
 	tasks.register('createDockerContainer', DockerCreateContainer) {
-		dependsOn tasks.buildDockerImage, tasks.preInspectDockerContainer
+		dependsOn tasks.registerClientExtensionOnly, tasks.buildDockerImage, tasks.preInspectDockerContainer
 		targetImageId "${projectName}:latest"
 		containerName = projectName
 
 		hostConfig.extraHosts.add("${liferayVirtualInstanceId}:${hostIP}")
 
-		def _lcpJsonObject = getLcpJsonObject(project)
+		envVars.value project.provider(() -> {
+			Map<String, String> envs = new HashMap<>();
 
-		_lcpJsonObject?.env.each(entry -> {
-			envVars.put(entry.key, entry.value)
+			def _lcpJsonObject = getLcpJsonObject(project)
+
+			_lcpJsonObject?.env.each(entry -> {
+				envs.put(entry.key, entry.value)
+			})
+
+			return envs;
 		})
 
 		hostConfig.binds.put("${liferayHome}/routes/${liferayVirtualInstanceId}/dxp", "/etc/liferay/lxc/dxp-metadata")
@@ -185,7 +231,7 @@ configure(
 	}
 
 	tasks.register('runDockerContainer', DockerStartContainer) {
-		dependsOn tasks.registerClientExtensionOnly
+		dependsOn tasks.createDockerContainer
 		targetContainerId projectName
 
 		doFirst {
@@ -233,7 +279,7 @@ configure(
 	}
 
 	tasks.register('registerClientExtensionOnly') {
-		dependsOn tasks.createClientExtensionConfig, tasks.getOrCreateDockerNetwork, tasks.createDockerContainer
+		dependsOn tasks.createClientExtensionConfig, tasks.getOrCreateDockerNetwork
 
 		doLast {
 			getLogger().quiet("Host IP: ${hostIP}")
