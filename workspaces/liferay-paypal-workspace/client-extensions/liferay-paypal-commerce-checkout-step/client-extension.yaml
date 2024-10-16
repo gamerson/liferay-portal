@@ -1,7 +1,6 @@
 assemble:
     - from: assets
       into: static
-    - fromTask: bootJar
 liferay-paypal-commerce-checkout-step:
     active: true
     checkoutStepLabel: PayPal SDK Checkout Step
