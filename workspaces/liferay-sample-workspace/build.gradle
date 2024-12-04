@@ -40,6 +40,7 @@ import org.gradle.api.tasks.Optional
 abstract public class CXContainerExtension {
 	String configJarName
 	String containerIP
+	String domainName
 	boolean requiresRoute
 }
 
@@ -51,6 +52,43 @@ abstract class DockerGetOrCreateNetwork extends DockerCreateNetwork {
 
 	@Input
 	abstract Property<String> getContainerName()
+
+  private String toAlphaNumericLowerCase(String value) {
+    return toLowerCase(value.toString().replaceAll("[^a-zA-Z0-9]", ""))
+  }
+
+  private String toLowerCase(String s) {
+    if (s == null) {
+      return null;
+    }
+
+    StringBuilder sb = null;
+
+    for (int i = 0; i < s.length(); i++) {
+      char c = s.charAt(i);
+
+      if (c > 127) {
+
+        // Found non-ascii char, fallback to the slow unicode detection
+
+        return s.toLowerCase(Locale.getDefault());
+      }
+
+      if ((c >= 'A') && (c <= 'Z')) {
+        if (sb == null) {
+          sb = new StringBuilder(s);
+        }
+
+        sb.setCharAt(i, (char)(c + 32));
+      }
+    }
+
+    if (sb == null) {
+      return s;
+    }
+
+    return sb.toString();
+  }
 
 	@Override
 	public void runRemoteCommand() {
@@ -88,7 +126,11 @@ abstract class DockerGetOrCreateNetwork extends DockerCreateNetwork {
 
 		project.extensions.cxContainer.containerIP = getNextNetworkIP(network);
 		getLogger().quiet("Next Network IP: ${project.extensions.cxContainer.containerIP}");
+		project.extensions.cxContainer.domainName = toAlphaNumericLowerCase(getContainerName().get()) + ".localtest.me"
+		getLogger().quiet("DomainName: ${project.extensions.cxContainer.domainName}");
 	}
+
+  
 
 	private String getNextNetworkIP(Network network) {
 		def subnetPrefix = network.ipam.config.get(0).subnet[0..-4].split('\\.')[0..2].join('.')
@@ -210,7 +252,7 @@ configure(
 		targetImageId "${projectName}:latest"
 		containerName = projectName
 
-		hostConfig.extraHosts.add("${liferayVirtualInstanceId}:${hostIP}")
+		hostConfig.extraHosts.add("dxp.localtest.me:${hostIP}")
 
 		envVars.value project.provider(() -> {
 			Map<String, String> envs = new HashMap<>();
@@ -284,17 +326,15 @@ configure(
 		doLast {
 			getLogger().quiet("Host IP: ${hostIP}")
 
-			def containerIP = project.extensions.cxContainer.containerIP
+			def cxDomainName = project.extensions.cxContainer.domainName
 			def clientExtensionConfigJsonFile = new File("${project.buildDir}/liferay-client-extension-build/${projectName}.client-extension-config.json")
 			def clientExtensionConfigJsonObject = new JsonSlurper().parse(clientExtensionConfigJsonFile)
-			def clientExtensionAddress = containerIP
 
 			def _lcpJsonObject = getLcpJsonObject(project)
 
 			if (_lcpJsonObject?.loadBalancer?.targetPort) {
 				def lcpJsonLoadBalancerTargetPort = _lcpJsonObject.loadBalancer.targetPort
-				clientExtensionAddress = "${containerIP}:${lcpJsonLoadBalancerTargetPort}"
-				getLogger().quiet("Address of CX Docker Container: ${clientExtensionAddress}")
+				getLogger().quiet("Address of CX Docker Container: ${cxDomainName}")
 			}
 
 			def keysToScope = []
@@ -305,12 +345,12 @@ configure(
 				}
 
 				if (entry.key.startsWith("com.liferay.oauth2.provider.configuration.OAuth2ProviderApplication")) {
-					entry.value.put(".serviceAddress", clientExtensionAddress)
+					entry.value.put(".serviceAddress", cxDomainName)
 					requiresRoute = true;
 				}
 
 				entry.value.put("dxp.lxc.liferay.com.virtualInstanceId", liferayVirtualInstanceId)
-				entry.value.put("baseURL", "http://${clientExtensionAddress}")
+				entry.value.put("baseURL", "http://${cxDomainName}")
 			}
 
 			for (keyToScope in keysToScope) {
@@ -335,7 +375,7 @@ configure(
 
 			try (JarOutputStream output = new JarOutputStream(new FileOutputStream(zipFileName), manifest)) {
 				output.putNextEntry(new ZipEntry("OSGI-INF/configurator/${projectName}.client-extension-config.json"))
-				Files.copy(new ByteArrayInputStream(jsonString.getBytes("UTF-8")), output)
+				new ByteArrayInputStream(jsonString.getBytes("UTF-8")).transferTo(output)
 				output.closeEntry()
 			}
 
@@ -366,13 +406,16 @@ configure(
 
 def getHostIP() {
 	// Define a different command per OS to obtain the host IP
-	def cmd = ['sh', '-c', /ip -p -j route get 8.8.8.8 | jq -r '.[] | .prefsrc'/];
-	def proc = cmd.execute()
-	proc.waitFor()
-	return proc.text.trim();
+	//def cmd = ['sh', '-c', /ip -p -j route get 8.8.8.8 | jq -r '.[] | .prefsrc'/];
+	//def proc = cmd.execute()
+	//proc.waitFor()
+	//return proc.text.trim();
+  return "172.20.0.1"
 }
 
 def getLcpJsonObject(theProject) {
 	def lcpJsonFile = new File("${theProject.buildDir}/liferay-client-extension-build/LCP.json")
 	return new JsonSlurper().parse(lcpJsonFile)
 }
+
+

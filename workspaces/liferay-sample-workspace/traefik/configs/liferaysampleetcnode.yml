@@ -1,0 +1,12 @@
+http:
+  routers:
+    liferaysampleetcnode-router:
+      entryPoints: 
+        - web
+      rule: "Host(`liferaysampleetcnode.localtest.me`)"
+      service: "liferaysampleetcnode"
+  services:
+    liferaysampleetcnode:
+      loadBalancer:
+        servers:
+          - url: "http://172.20.0.6:3001"

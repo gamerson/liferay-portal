@@ -1,0 +1,13 @@
+http:
+  routers:
+    dxp-router:
+      entryPoints: 
+        - web
+      rule: "Host(`dxp.localtest.me:8080`)"
+      service: "dxp"
+  services:
+    dxp:
+      loadBalancer:
+        servers:
+          - url: "http://172.20.0.1:8080"
+

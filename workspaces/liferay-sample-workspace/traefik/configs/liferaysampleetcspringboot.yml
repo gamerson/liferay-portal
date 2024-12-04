@@ -1,0 +1,12 @@
+http:
+  routers:
+    liferaysampleetcspringboot-router:
+      entryPoints: 
+        - web
+      rule: "Host(`liferaysampleetcspringboot.localtest.me`)"
+      service: "liferaysampleetcspringboot"
+  services:
+    liferaysampleetcspringboot:
+      loadBalancer:
+        servers:
+          - url: "http://172.20.0.5:58081"

@@ -1,0 +1,12 @@
+http:
+  routers:
+    liferaysamplecustomelement2-router:
+      entryPoints: 
+        - web
+      rule: "Host(`liferaysamplecustomelement2.localtest.me`)"
+      service: "liferaysamplecustomelement2"
+  services:
+    liferaysamplecustomelement2:
+      loadBalancer:
+        servers:
+          - url: "http://172.20.0.4"
