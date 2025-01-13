@@ -7,6 +7,7 @@ package com.liferay.sample;
 
 import com.liferay.client.extension.util.spring.boot.BaseRestController;
 
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,6 +22,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class ReadyRestController extends BaseRestController {
 
 	@GetMapping
+	@CrossOrigin(
+		originPatterns = "*",
+	)
 	public String get() {
 		return "READY";
 	}

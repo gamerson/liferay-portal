@@ -39,9 +39,6 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 /**
  * @author Raymond Augé
@@ -52,26 +49,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 @EnableWebSecurity
 public class LiferayOAuth2ResourceServerEnableWebSecurity {
-
-	@Bean
-	public CorsConfigurationSource corsConfigurationSource() {
-		UrlBasedCorsConfigurationSource urlBasedCorsConfigurationSource =
-			new UrlBasedCorsConfigurationSource();
-
-		CorsConfiguration corsConfiguration = new CorsConfiguration();
-
-		corsConfiguration.setAllowedHeaders(
-			Arrays.asList("Authorization", "Content-Type"));
-		corsConfiguration.setAllowedMethods(
-			Arrays.asList(
-				"DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"));
-		corsConfiguration.setAllowedOrigins(_getAllowedOrigins());
-
-		urlBasedCorsConfigurationSource.registerCorsConfiguration(
-			"/**", corsConfiguration);
-
-		return urlBasedCorsConfigurationSource;
-	}
 
 	@Bean
 	public JwtDecoder jwtDecoder() throws Exception {
@@ -149,17 +126,6 @@ public class LiferayOAuth2ResourceServerEnableWebSecurity {
 		).oauth2ResourceServer(
 			OAuth2ResourceServerConfigurer::jwt
 		).build();
-	}
-
-	private List<String> _getAllowedOrigins() {
-		List<String> allowedOrigins = new ArrayList<>();
-
-		for (String lxcDXPDomain : _lxcDXPDomains.split("\\s*[,\n]\\s*")) {
-			allowedOrigins.add("http://" + lxcDXPDomain);
-			allowedOrigins.add("https://" + lxcDXPDomain);
-		}
-
-		return allowedOrigins;
 	}
 
 	private static final Log _log = LogFactory.getLog(
