@@ -607,6 +607,38 @@ public class ObjectServiceTrackerMapTest {
 	}
 
 	@Test
+	public void testGetServiceWithWhenOneServiceFailsMapping()
+		throws Exception {
+
+		try (ServiceTrackerMap<String, TrackedOne> serviceTrackerMap =
+				ServiceTrackerMapFactory.openSingleValueMap(
+					_bundleContext, TrackedOne.class, null,
+					(serviceReference, emitter) -> {
+						if (Objects.equals(
+								serviceReference.getProperty(
+									"shouldFailMapping"),
+								true)) {
+
+							throw new IllegalStateException();
+						}
+
+						TrackedOne trackedOne = _bundleContext.getService(
+							serviceReference);
+
+						emitter.emit(trackedOne.getKey());
+					})) {
+
+			_serviceRegistrations.add(
+				registerService(new TrackedOne("bad"), true));
+			_serviceRegistrations.add(
+				registerService(new TrackedOne("good"), false));
+
+			Assert.assertFalse(serviceTrackerMap.containsKey("bad"));
+			Assert.assertTrue(serviceTrackerMap.containsKey("good"));
+		}
+	}
+
+	@Test
 	public void testOperationBalancesOutGetServiceAndUngetService() {
 		BundleContextWrapper bundleContextWrapper = wrapContext();
 
@@ -713,31 +745,6 @@ public class ObjectServiceTrackerMapTest {
 		}
 	}
 
-	@Test
-	public void testGetServiceWithWhenOneServiceFailsMapping() throws Exception {
-		try (ServiceTrackerMap<String, TrackedOne> serviceTrackerMap =
-				 ServiceTrackerMapFactory.openSingleValueMap(
-					 _bundleContext, TrackedOne.class, null,
-					 (serviceReference, emitter) -> {
-						 if (Objects.equals(serviceReference.getProperty("shouldFailMapping"), true)) {
-							 throw new IllegalStateException();
-						 }
-
-						 TrackedOne trackedOne = _bundleContext.getService(serviceReference);
-
-						 String key = trackedOne.getKey();
-
-						 emitter.emit(key);
-					 })) {
-
-			_serviceRegistrations.add(registerService(new TrackedOne("bad"), true));
-			_serviceRegistrations.add(registerService(new TrackedOne("good"), false));
-
-			Assert.assertFalse(serviceTrackerMap.containsKey("bad"));
-			Assert.assertTrue(serviceTrackerMap.containsKey("good"));
-		}
-	}
-
 	protected ServiceTrackerMap<String, TrackedOne> createServiceTrackerMap(
 		BundleContext bundleContext) {
 
@@ -756,18 +763,20 @@ public class ObjectServiceTrackerMapTest {
 	}
 
 	protected ServiceRegistration<TrackedOne> registerService(
-		TrackedOne trackedOne, int ranking) {
+		TrackedOne trackedOne, boolean shouldFailMapping) {
 
-		return registerService(trackedOne, ranking, "aTarget");
-	}
-
-	protected ServiceRegistration<TrackedOne> registerService(TrackedOne trackedOne, boolean shouldFailMapping) {
 		Dictionary<String, Object> properties = new Hashtable<>();
 
 		properties.put("shouldFailMapping", shouldFailMapping);
 
 		return _bundleContext.registerService(
 			TrackedOne.class, trackedOne, properties);
+	}
+
+	protected ServiceRegistration<TrackedOne> registerService(
+		TrackedOne trackedOne, int ranking) {
+
+		return registerService(trackedOne, ranking, "aTarget");
 	}
 
 	protected ServiceRegistration<TrackedOne> registerService(

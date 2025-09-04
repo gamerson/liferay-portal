@@ -255,8 +255,9 @@ public class ServiceTrackerMapImpl<K, SR, TS, R>
 
 			try {
 				_serviceReferenceMapper.map(
-					(ServiceReference) serviceReference, defaultEmitter);
-			} catch (Throwable throwable) {
+					(ServiceReference)serviceReference, defaultEmitter);
+			}
+			catch (Throwable throwable) {
 				return null;
 			}
 
