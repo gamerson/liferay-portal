@@ -154,6 +154,8 @@ public class AgentPortalK8sConfigMapModifierTest {
 					AgentPortalK8sConfigMapModifierTest.class,
 					"dependencies/ca.crt")
 			).put(
+				"debounceDelayMillis", 10
+			).put(
 				"namespace", "test"
 			).put(
 				"saToken", "saToken"
@@ -178,6 +180,129 @@ public class AgentPortalK8sConfigMapModifierTest {
 		_kubernetesMockServer.destroy();
 
 		_serviceTracker.close();
+	}
+
+	@Test
+	public void testBufferedUpdatesFast() throws Exception {
+		String serviceId = RandomTestUtil.randomString();
+
+		String configMapName = StringBundler.concat(
+			serviceId, StringPool.DASH, TestPropsValues.COMPANY_WEB_ID,
+			"-lxc-ext-init-metadata");
+
+		PortalK8sConfigMapModifier.Result firstResult =
+			_portalK8sConfigMapModifier.modifyConfigMap(
+				configMapModel -> {
+					Map<String, String> data = configMapModel.data();
+
+					data.put(
+						"com.liferay.lxc.dxp.mainDomain",
+						RandomTestUtil.randomString());
+
+					Map<String, String> labels = configMapModel.labels();
+
+					labels.put("lxc.liferay.com/metadataType", "ext-init");
+				},
+				configMapName);
+
+		Assert.assertEquals(
+			PortalK8sConfigMapModifier.Result.BUFFERED, firstResult);
+
+		PortalK8sConfigMapModifier.Result secondResult =
+			_portalK8sConfigMapModifier.modifyConfigMap(
+				configMapModel -> {
+					Map<String, String> data = configMapModel.data();
+
+					data.put(
+						"com.liferay.lxc.dxp.main.domain",
+						TestPropsValues.COMPANY_WEB_ID);
+
+					Map<String, String> labels = configMapModel.labels();
+
+					labels.put("lxc.liferay.com/metadataType", "ext-init");
+				},
+				configMapName);
+
+		Assert.assertEquals(
+			PortalK8sConfigMapModifier.Result.BUFFERED, secondResult);
+
+		ConfigMap configMap = _kubernetesMockClient.configMaps(
+		).withName(
+			configMapName
+		).waitUntilCondition(
+			it -> it != null, 20, TimeUnit.SECONDS
+		);
+
+		Assert.assertNotNull(configMap);
+
+		Map<String, String> data = configMap.getData();
+
+		Assert.assertEquals(
+			TestPropsValues.COMPANY_WEB_ID,
+			data.get("com.liferay.lxc.dxp.main.domain"));
+
+		Assert.assertEquals(
+			Long.valueOf(1),
+			configMap.getMetadata(
+			).getGeneration());
+	}
+
+	@Test
+	public void testBufferedUpdatesSlow() throws Exception {
+		String serviceId = RandomTestUtil.randomString();
+
+		String configMapName = StringBundler.concat(
+			serviceId, StringPool.DASH, TestPropsValues.COMPANY_WEB_ID,
+			"-lxc-ext-init-metadata");
+
+		_portalK8sConfigMapModifier.modifyConfigMap(
+			configMapModel -> {
+				Map<String, String> data = configMapModel.data();
+
+				data.put(
+					"com.liferay.lxc.dxp.mainDomain",
+					RandomTestUtil.randomString());
+
+				Map<String, String> labels = configMapModel.labels();
+
+				labels.put("lxc.liferay.com/metadataType", "ext-init");
+			},
+			configMapName);
+
+		Thread.sleep(50);
+
+		_portalK8sConfigMapModifier.modifyConfigMap(
+			configMapModel -> {
+				Map<String, String> data = configMapModel.data();
+
+				data.put(
+					"com.liferay.lxc.dxp.main.domain",
+					TestPropsValues.COMPANY_WEB_ID);
+
+				Map<String, String> labels = configMapModel.labels();
+
+				labels.put("lxc.liferay.com/metadataType", "ext-init");
+			},
+			configMapName);
+
+		ConfigMap configMap = _kubernetesMockClient.configMaps(
+		).withName(
+			configMapName
+		).waitUntilCondition(
+			it -> it != null, 20, TimeUnit.SECONDS
+		);
+
+		Assert.assertNotNull(configMap);
+
+		Map<String, String> data = configMap.getData();
+
+		Assert.assertEquals(
+			TestPropsValues.COMPANY_WEB_ID,
+			data.get("com.liferay.lxc.dxp.main.domain"));
+
+		ObjectMeta objectMeta = configMap.getMetadata();
+
+		Assert.assertEquals(Long.valueOf(2), objectMeta.getGeneration());
 	}
 
 	@Test
@@ -461,8 +586,7 @@ public class AgentPortalK8sConfigMapModifierTest {
 					RandomTestUtil.randomString(), StringPool.DASH,
 					TestPropsValues.COMPANY_WEB_ID, "-lxc-ext-init-metadata"));
 
-		Assert.assertEquals(
-			PortalK8sConfigMapModifier.Result.UNCHANGED, result);
+		Assert.assertEquals(PortalK8sConfigMapModifier.Result.BUFFERED, result);
 	}
 
 	private void _assertNotInDatabase(String pid) throws Exception {

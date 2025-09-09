@@ -47,9 +47,14 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
 import org.apache.felix.configurator.impl.json.BinUtil;
@@ -162,15 +167,21 @@ public class AgentPortalK8sConfigMapModifier
 	public Result modifyConfigMap(
 		Consumer<ConfigMapModel> configMapModelConsumer, String configMapName) {
 
-		Result result = _modifyConfigMap(configMapModelConsumer, configMapName);
+		if (_portalK8sAgentConfiguration.debounceDelayMillis() <= 0) {
+			return _modifyConfigMap(configMapModelConsumer, configMapName);
+		}
+
+		_configMapBufferedUpdateMap.merge(
+			configMapName, configMapModelConsumer, Consumer::andThen);
+
+		_scheduleUpdate(configMapName);
 
 		if (_log.isInfoEnabled()) {
 			_log.info(
-				StringBundler.concat(
-					"Config map ", configMapName, " ", result));
+				"Buffered request for modifying config map " + configMapName);
 		}
 
-		return result;
+		return Result.BUFFERED;
 	}
 
 	@Deactivate
@@ -261,6 +272,33 @@ public class AgentPortalK8sConfigMapModifier
 		}
 	}
 
+	private Result _flushBufferedUpdates(String configMapName) {
+		Consumer<ConfigMapModel> bufferedConsumer =
+			_configMapBufferedUpdateMap.remove(configMapName);
+
+		_scheduledUpdateTasksMap.remove(configMapName);
+
+		if (bufferedConsumer == null) {
+			return Result.UNCHANGED;
+		}
+
+		if (_log.isInfoEnabled()) {
+			_log.info(
+				"Quiet period ended. Flushing changes for " + configMapName);
+		}
+
+		Result result = _modifyConfigMap(bufferedConsumer, configMapName);
+
+		if (_log.isInfoEnabled()) {
+			_log.info(
+				StringBundler.concat(
+					"Flushed config map ", configMapName, " with result: ",
+					result));
+		}
+
+		return result;
+	}
+
 	private Configuration _getConfiguration(String pid) throws Exception {
 		if (pid.endsWith(_FILE_EXTENSION)) {
 			pid = pid.substring(0, pid.length() - _FILE_EXTENSION.length());
@@ -312,9 +350,7 @@ public class AgentPortalK8sConfigMapModifier
 	}
 
 	private Result _modifyConfigMap(
-		Consumer<PortalK8sConfigMapModifier.ConfigMapModel>
-			configMapModelConsumer,
-		String configMapName) {
+		Consumer<ConfigMapModel> configMapModelConsumer, String configMapName) {
 
 		if (_clusterMasterExecutor.isEnabled()) {
 			if (_log.isDebugEnabled()) {
@@ -720,6 +756,32 @@ public class AgentPortalK8sConfigMapModifier
 		}
 	}
 
+	private ScheduledFuture<Result> _scheduleUpdate(String configMapName) {
+		_schedulingLock.lock();
+
+		try {
+			Future<Result> update = _scheduledUpdateTasksMap.remove(
+				configMapName);
+
+			if (update != null) {
+				update.cancel(false);
+			}
+
+			ScheduledFuture<Result> scheduledUpdate =
+				_scheduledExecutorService.schedule(
+					() -> _flushBufferedUpdates(configMapName),
+					_portalK8sAgentConfiguration.debounceDelayMillis(),
+					TimeUnit.MILLISECONDS);
+
+			_scheduledUpdateTasksMap.put(configMapName, scheduledUpdate);
+
+			return scheduledUpdate;
+		}
+		finally {
+			_schedulingLock.unlock();
+		}
+	}
+
 	private Config _toConfig(
 		PortalK8sAgentConfiguration portalK8sAgentConfiguration) {
 
@@ -961,12 +1023,17 @@ public class AgentPortalK8sConfigMapModifier
 	private final Bundle _bundle;
 	private final ClusterExecutor _clusterExecutor;
 	private final ClusterMasterExecutor _clusterMasterExecutor;
+	private final Map<String, Consumer<ConfigMapModel>>
+		_configMapBufferedUpdateMap = new ConcurrentHashMap<>();
 	private final ConfigurationAdmin _configurationAdmin;
 	private final KubernetesClient _kubernetesClient;
 	private final PortalK8sAgentConfiguration _portalK8sAgentConfiguration;
 	private final List<PortalK8sConfigurationPropertiesMutator>
 		_portalK8sConfigurationPropertiesMutators;
 	private final ScheduledExecutorService _scheduledExecutorService;
+	private final Map<String, Future<Result>> _scheduledUpdateTasksMap =
+		new ConcurrentHashMap<>();
+	private final Lock _schedulingLock = new ReentrantLock();
 	private final SharedIndexInformer<ConfigMap> _sharedIndexInformer;
 
 }
