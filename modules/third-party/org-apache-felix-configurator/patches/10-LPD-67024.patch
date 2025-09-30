@@ -1,0 +1,21 @@
+diff --git a/org/apache/felix/configurator/impl/Configurator.java b/modules/third-party/org-apache-felix-configurator/src/main/java/org/apache/felix/configurator/impl/Configurator.java
+index 929e3317c1d97..b3fd9719984e0 100644
+--- a/org/apache/felix/configurator/impl/Configurator.java
++++ b/org/apache/felix/configurator/impl/Configurator.java
+@@ -302,9 +302,13 @@ public class Configurator {
+         final long bundleLastModified = bundle.getLastModified();
+ 
+         final Long lastModified = state.getLastModified(bundleId);
+-        if ( lastModified != null && lastModified.longValue() == bundleLastModified ) {
+-            // no changes, nothing to do
+-            return false;
++        if ( lastModified != null && lastModified.longValue() == bundleLastModified) {
++            final Object liferayConfiguratorPolicy = bundle.getHeaders(null).get("Liferay-Configurator-Policy");
++
++            if (!"always".equals(liferayConfiguratorPolicy)) {
++                // no changes, nothing to do
++                return false;
++            }
+         }
+ 
+         BundleState config = null;

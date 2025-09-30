@@ -302,9 +302,13 @@ public class Configurator {
         final long bundleLastModified = bundle.getLastModified();
 
         final Long lastModified = state.getLastModified(bundleId);
-        if ( lastModified != null && lastModified.longValue() == bundleLastModified ) {
-            // no changes, nothing to do
-            return false;
+        if ( lastModified != null && lastModified.longValue() == bundleLastModified) {
+            final Object liferayConfiguratorPolicy = bundle.getHeaders(null).get("Liferay-Configurator-Policy");
+
+            if (!"always".equals(liferayConfiguratorPolicy)) {
+                // no changes, nothing to do
+                return false;
+            }
         }
 
         BundleState config = null;
