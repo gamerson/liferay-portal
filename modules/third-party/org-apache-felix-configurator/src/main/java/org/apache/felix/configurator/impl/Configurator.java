@@ -351,7 +351,13 @@ public class Configurator {
             for(final String pid : config.getPids()) {
                 state.addAll(pid, config.getConfigurations(pid));
             }
-            state.setLastModified(bundleId, bundleLastModified);
+            final Object liferayConfiguratorPolicy = bundle.getHeaders(null).get("Liferay-Configurator-Policy");
+            if ("always".equals(liferayConfiguratorPolicy)) {
+                state.checkEnvironments(bundleId);
+                state.removeLastModified(bundleId);
+            } else {
+                state.setLastModified(bundleId, bundleLastModified);
+            }
             return true;
         }
         return lastModified != null;

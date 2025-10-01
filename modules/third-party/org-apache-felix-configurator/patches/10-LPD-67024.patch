@@ -1,0 +1,31 @@
+diff --git a/org/apache/felix/configurator/impl/Configurator.java b/modules/third-party/org-apache-felix-configurator/src/main/java/org/apache/felix/configurator/impl/Configurator.java
+index 929e3317c1d97..126c6ef16e02d 100644
+--- a/org/apache/felix/configurator/impl/Configurator.java
++++ b/org/apache/felix/configurator/impl/Configurator.java
+@@ -351,7 +351,13 @@ public class Configurator {
+             for(final String pid : config.getPids()) {
+                 state.addAll(pid, config.getConfigurations(pid));
+             }
+-            state.setLastModified(bundleId, bundleLastModified);
++            final Object liferayConfiguratorPolicy = bundle.getHeaders(null).get("Liferay-Configurator-Policy");
++            if ("always".equals(liferayConfiguratorPolicy)) {
++                state.checkEnvironments(bundleId);
++                state.removeLastModified(bundleId);
++            } else {
++                state.setLastModified(bundleId, bundleLastModified);
++            }
+             return true;
+         }
+         return lastModified != null;
+diff --git a/modules/third-party/org-apache-felix-configurator/src/main/java/org/apache/felix/configurator/impl/model/State.java b/modules/third-party/org-apache-felix-configurator/src/main/java/org/apache/felix/configurator/impl/model/State.java
+index 75009a60c84cf..15355ca82cf77 100644
+--- a/org/apache/felix/configurator/impl/model/State.java
++++ b/org/apache/felix/configurator/impl/model/State.java
+@@ -175,6 +175,7 @@ public class State extends AbstractState implements Serializable {
+             final ConfigList configList = this.getConfigurations(pid);
+             for(final Config cfg : configList) {
+                 if ( cfg.getBundleId() == bundleId ) {
++                    cfg.setState(ConfigState.INSTALL);
+                     configList.setHasChanges(true);
+                     break;
+                 }

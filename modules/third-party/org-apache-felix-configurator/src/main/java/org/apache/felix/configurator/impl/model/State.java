@@ -175,6 +175,7 @@ public class State extends AbstractState implements Serializable {
             final ConfigList configList = this.getConfigurations(pid);
             for(final Config cfg : configList) {
                 if ( cfg.getBundleId() == bundleId ) {
+                    cfg.setState(ConfigState.INSTALL);
                     configList.setHasChanges(true);
                     break;
                 }
