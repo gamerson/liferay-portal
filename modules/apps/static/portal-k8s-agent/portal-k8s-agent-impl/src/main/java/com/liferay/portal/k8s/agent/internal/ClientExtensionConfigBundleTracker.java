@@ -9,19 +9,22 @@ import com.liferay.osgi.util.configuration.ConfigurationFactoryUtil;
 import com.liferay.petra.string.CharPool;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
-import com.liferay.petra.string.StringUtil;
 import com.liferay.portal.configuration.persistence.InMemoryOnlyConfigurationThreadLocal;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.PropsValues;
+import com.liferay.portal.kernel.util.URLUtil;
 import com.liferay.portal.tools.DBUpgrader;
 
 import java.net.URL;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -29,6 +32,7 @@ import java.util.Set;
 import org.apache.felix.configurator.impl.json.BinUtil;
 import org.apache.felix.configurator.impl.json.BinaryManager;
 import org.apache.felix.configurator.impl.json.JSONUtil;
+import org.apache.felix.configurator.impl.model.Config;
 import org.apache.felix.configurator.impl.model.ConfigurationFile;
 
 import org.osgi.framework.Bundle;
@@ -65,6 +69,35 @@ public class ClientExtensionConfigBundleTracker {
 		_bundleTracker.close();
 	}
 
+	private List<String> _addConfigurations(Bundle bundle) {
+		List<String> addedPids = new ArrayList<>();
+
+		Enumeration<URL> enumeration = bundle.findEntries(
+			"/META-INF/client-extension-config", "*.json", false);
+
+		if (enumeration != null) {
+			while (enumeration.hasMoreElements()) {
+				URL url = enumeration.nextElement();
+
+				try {
+					List<String> processedPids = _processConfigurations(
+						bundle, url.getPath(), URLUtil.toString(url));
+
+					if (processedPids != null) {
+						addedPids.addAll(processedPids);
+					}
+				}
+				catch (Exception exception) {
+					_log.error(
+						"Unable to process client extension config " + url,
+						exception);
+				}
+			}
+		}
+
+		return addedPids;
+	}
+
 	private Configuration _getConfiguration(String pid) throws Exception {
 		if (pid.endsWith(_FILE_EXTENSION)) {
 			pid = pid.substring(0, pid.length() - _FILE_EXTENSION.length());
@@ -93,8 +126,7 @@ public class ClientExtensionConfigBundleTracker {
 	}
 
 	private String _getVirtualInstancePid(
-		org.apache.felix.configurator.impl.model.Config config,
-		String virtualInstanceId) {
+		Config config, String virtualInstanceId) {
 
 		String pid = config.getPid();
 
@@ -107,9 +139,7 @@ public class ClientExtensionConfigBundleTracker {
 		return StringBundler.concat(pid, "/", virtualInstanceId);
 	}
 
-	private void _processConfiguration(
-			Bundle bundle,
-			org.apache.felix.configurator.impl.model.Config config)
+	private String _processConfiguration(Bundle bundle, Config config)
 		throws Exception {
 
 		Dictionary<String, Object> properties = config.getProperties();
@@ -132,7 +162,7 @@ public class ClientExtensionConfigBundleTracker {
 			Configuration[] configurations =
 				_configurationAdmin.listConfigurations(
 					StringBundler.concat(
-						"(.cx.bundle.config.key=", virtualInstancePid, ")"));
+						"(.cx.config.key=", virtualInstancePid, ")"));
 
 			if (ArrayUtil.isNotEmpty(configurations)) {
 				configuration = configurations[0];
@@ -142,7 +172,7 @@ public class ClientExtensionConfigBundleTracker {
 
 				if (Objects.equals(
 						configurationProperties.get(
-							".cx.config.resource.version"),
+							".cx.config.bundle.last.modified"),
 						bundle.getLastModified())) {
 
 					if (_log.isInfoEnabled()) {
@@ -151,7 +181,7 @@ public class ClientExtensionConfigBundleTracker {
 								"are identical");
 					}
 
-					return;
+					return configuration.getPid();
 				}
 			}
 			else {
@@ -168,10 +198,10 @@ public class ClientExtensionConfigBundleTracker {
 					Configuration.ConfigurationAttribute.READ_ONLY);
 			}
 
-			properties.put(".cx.bundle.config.key", virtualInstancePid);
+			properties.put(".cx.config.key", virtualInstancePid);
 			properties.put(
-				".cx.bundle.config.resource.version", bundle.getLastModified());
-			properties.put(".cx.bundle.config.uid", bundle.getBundleId());
+				".cx.config.bundle.last.modified", bundle.getLastModified());
+			properties.put(".cx.config.bundle.id", bundle.getBundleId());
 
 			if (_log.isInfoEnabled()) {
 				_log.info("Processed configuration " + properties);
@@ -181,13 +211,15 @@ public class ClientExtensionConfigBundleTracker {
 
 			configuration.addAttributes(
 				Configuration.ConfigurationAttribute.READ_ONLY);
+
+			return configuration.getPid();
 		}
 		finally {
 			InMemoryOnlyConfigurationThreadLocal.setInMemoryOnly(false);
 		}
 	}
 
-	private void _processConfigurations(
+	private List<String> _processConfigurations(
 			Bundle bundle, String fileName, String json)
 		throws Exception {
 
@@ -240,19 +272,21 @@ public class ClientExtensionConfigBundleTracker {
 		}
 
 		if (configurationFile == null) {
-			return;
+			return null;
 		}
 
-		for (org.apache.felix.configurator.impl.model.Config config :
-				configurationFile.getConfigurations()) {
+		List<String> addedPids = new ArrayList<>();
 
+		for (Config config : configurationFile.getConfigurations()) {
 			try {
-				_processConfiguration(bundle, config);
+				addedPids.add(_processConfiguration(bundle, config));
 			}
 			catch (Exception exception) {
 				_log.error(exception);
 			}
 		}
+
+		return addedPids;
 	}
 
 	private static final String _FILE_EXTENSION =
@@ -275,39 +309,94 @@ public class ClientExtensionConfigBundleTracker {
 				return null;
 			}
 
-			Enumeration<URL> entries = bundle.findEntries(
-				"/", "*.client-extension-config.json", false);
+			List<String> addedPids = _addConfigurations(bundle);
 
-			if (entries != null) {
-				while (entries.hasMoreElements()) {
-					URL url = entries.nextElement();
-
-					try {
-						_processConfigurations(
-							bundle, url.getPath(),
-							StringUtil.read(url.openStream()));
-					}
-					catch (Exception exception) {
-						_log.error(
-							"Unable to process client extension config " + url,
-							exception);
-					}
-				}
-
-				return bundle;
+			if (addedPids.isEmpty()) {
+				return null;
 			}
 
-			return null;
+			return bundle;
 		}
 
 		@Override
 		public void modifiedBundle(
 			Bundle bundle, BundleEvent bundleEvent, Bundle unusedBundle) {
+
+			Map<String, Configuration> existingPidConfigurations =
+				new HashMap<>();
+
+			try {
+				Configuration[] configurations =
+					_configurationAdmin.listConfigurations(
+						"(.cx.config.bundle.id=" + bundle.getBundleId() + ")");
+
+				if (configurations != null) {
+					for (Configuration configuration : configurations) {
+						existingPidConfigurations.put(
+							configuration.getPid(), configuration);
+					}
+				}
+			}
+			catch (Exception exception) {
+				_log.error(exception);
+			}
+
+			List<String> addedPids = _addConfigurations(bundle);
+
+			for (Map.Entry<String, Configuration> entry :
+					existingPidConfigurations.entrySet()) {
+
+				if (!addedPids.contains(entry.getKey())) {
+					Configuration existingConfiguration = entry.getValue();
+
+					try {
+						if (_log.isInfoEnabled()) {
+							_log.info(
+								"Deleting configuration " +
+									existingConfiguration.getProperties());
+						}
+
+						existingConfiguration.delete();
+					}
+					catch (Exception exception) {
+						_log.error(exception);
+					}
+				}
+			}
 		}
 
 		@Override
 		public void removedBundle(
 			Bundle bundle, BundleEvent event, Bundle unusedBundle) {
+
+			Configuration[] configurations = null;
+
+			try {
+				configurations = _configurationAdmin.listConfigurations(
+					"(.cx.config.bundle.id=" + bundle.getBundleId() + ")");
+			}
+			catch (Exception exception) {
+				_log.error(exception);
+			}
+
+			if (configurations == null) {
+				return;
+			}
+
+			for (Configuration configuration : configurations) {
+				try {
+					if (_log.isInfoEnabled()) {
+						_log.info(
+							"Deleting configuration " +
+								configuration.getProperties());
+					}
+
+					configuration.delete();
+				}
+				catch (Exception exception) {
+					_log.error(exception);
+				}
+			}
 		}
 
 		private static final Log _log = LogFactoryUtil.getLog(
