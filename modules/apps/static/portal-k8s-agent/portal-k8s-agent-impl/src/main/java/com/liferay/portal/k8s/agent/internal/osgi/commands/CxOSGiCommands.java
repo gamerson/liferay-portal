@@ -50,12 +50,14 @@ public class CxOSGiCommands implements OSGiCommands {
 
 	private String _formatProperties(Dictionary<String, Object> properties) {
 		if (!properties.isEmpty()) {
-			Enumeration<String> keysEnumeration = properties.keys();
+			java.util.List<String> sortedKeys = java.util.Collections.list(
+				properties.keys());
+
+			java.util.Collections.sort(sortedKeys);
+
 			StringBundler sb = new StringBundler();
 
-			while (keysEnumeration.hasMoreElements()) {
-				String key = keysEnumeration.nextElement();
-
+			for (String key : sortedKeys) {
 				sb.append(key);
 
 				sb.append(StringPool.COLON);
@@ -94,7 +96,7 @@ public class CxOSGiCommands implements OSGiCommands {
 			boolean deploymentFilterIsSet = false;
 
 			for (String filter : filters) {
-				String[] splitFilter = filter.split("=");
+				String[] splitFilter = filter.split("=", 2);
 
 				if (splitFilter.length == 2) {
 					String key = splitFilter[0];
@@ -132,7 +134,7 @@ public class CxOSGiCommands implements OSGiCommands {
 					}
 					else if (key.equals("cxType")) {
 						otherFiltersSB.append(
-							"(Factory PID="
+							"(service.factoryPid="
 						).append(
 							value
 						).append(
