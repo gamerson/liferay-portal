@@ -87,9 +87,7 @@ public class CxOSGiCommands implements OSGiCommands {
 	private Configuration[] _getConfigurations(String... filters)
 		throws InvalidSyntaxException, IOException, PortalException {
 
-		String deploymentFilter =
-			"(|(.k8s.config.key=*)" +
-				"(.persistenceManager.storagePolicy=ephemeral))";
+		String deploymentFilter = "(|(.cx.config.key=*)(.k8s.config.key=*))";
 
 		if (filters.length > 0) {
 			StringBundler otherFiltersSB = new StringBundler();
@@ -108,10 +106,9 @@ public class CxOSGiCommands implements OSGiCommands {
 								deploymentFilter = "(.k8s.config.key=*)";
 								deploymentFilterIsSet = true;
 							}
-							else if (value.equals("direct")) {
+							else if (value.equals("bundle")) {
 								deploymentFilter =
-									"(.persistenceManager.storagePolicy" +
-										"=ephemeral)";
+									"(.cx.config.key=*)";
 								deploymentFilterIsSet = true;
 							}
 						}
