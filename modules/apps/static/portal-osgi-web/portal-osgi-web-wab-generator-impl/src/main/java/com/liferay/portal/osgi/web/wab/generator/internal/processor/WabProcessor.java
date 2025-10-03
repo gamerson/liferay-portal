@@ -302,6 +302,8 @@ public class WabProcessor {
 
 			Path metatInfBatchPath = _createPath(
 				clientExtensionBundlePath, "META-INF/batch");
+			Path metaInfClientExtensionConfigBundlePath = _createPath(
+				clientExtensionBundlePath, "META-INF/client-extension-config");
 			Path metatInfResourcesPath = _createPath(
 				clientExtensionBundlePath, "META-INF/resources");
 			Path siteInitializerResourcesPath = _createPath(
@@ -342,7 +344,14 @@ public class WabProcessor {
 					continue;
 				}
 
-				if (name.startsWith(batchPathString)) {
+				if (!name.contains("/") &&
+					name.endsWith(".client-extension-config.json")) {
+
+					Files.copy(
+						zipFile.getInputStream(zipEntry),
+						metaInfClientExtensionConfigBundlePath.resolve(name));
+				}
+				else if (name.startsWith(batchPathString)) {
 					Files.copy(
 						zipFile.getInputStream(zipEntry),
 						metatInfBatchPath.resolve(
