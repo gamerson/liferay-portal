@@ -36,6 +36,7 @@ import com.liferay.portal.kernel.util.ClassUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
+import com.liferay.portal.kernel.zip.ZipFileUtil;
 import com.liferay.portal.kernel.zip.ZipWriter;
 import com.liferay.portal.kernel.zip.ZipWriterFactory;
 import com.liferay.portal.test.rule.Inject;
@@ -361,37 +362,11 @@ public class BatchEngineBundleTrackerTest {
 	}
 
 	private InputStream _toInputStream(String dirName) throws Exception {
-		ZipWriter zipWriter = _zipWriterFactory.getZipWriter();
-
 		String basePath = StringBundler.concat(
 			"com/liferay/batch/engine/internal/test/dependencies/", dirName,
 			StringPool.SLASH);
 
-		Enumeration<URL> enumeration = _bundle.findEntries(basePath, "*", true);
-
-		if (enumeration != null) {
-			while (enumeration.hasMoreElements()) {
-				URL url = enumeration.nextElement();
-
-				String urlPath = url.getPath();
-
-				if (urlPath.endsWith(StringPool.SLASH)) {
-					continue;
-				}
-
-				String zipPath = urlPath.substring(basePath.length());
-
-				if (zipPath.startsWith(StringPool.SLASH)) {
-					zipPath = zipPath.substring(1);
-				}
-
-				try (InputStream inputStream = url.openStream()) {
-					zipWriter.addEntry(zipPath, inputStream);
-				}
-			}
-		}
-
-		return new FileInputStream(zipWriter.getFile());
+		return ZipFileUtil.toInputStream(basePath, _bundle, _zipWriterFactory.getZipWriter());
 	}
 
 	private static StopWatch _originalStopWatch;

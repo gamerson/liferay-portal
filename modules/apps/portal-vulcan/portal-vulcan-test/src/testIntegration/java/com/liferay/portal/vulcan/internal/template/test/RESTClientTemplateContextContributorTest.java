@@ -13,6 +13,7 @@ import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.util.HTTPTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.util.Http;
+import com.liferay.portal.kernel.zip.ZipFileUtil;
 import com.liferay.portal.kernel.zip.ZipWriter;
 import com.liferay.portal.kernel.zip.ZipWriterFactory;
 import com.liferay.portal.test.rule.Inject;
@@ -90,8 +91,6 @@ public class RESTClientTemplateContextContributorTest {
 	}
 
 	private InputStream _toInputStream() throws Exception {
-		ZipWriter zipWriter = _zipWriterFactory.getZipWriter();
-
 		String basePath =
 			"com/liferay/portal/vulcan/internal/template/test/dependencies" +
 				"/site-initializer/";
@@ -99,31 +98,7 @@ public class RESTClientTemplateContextContributorTest {
 		Bundle bundle = FrameworkUtil.getBundle(
 			RESTClientTemplateContextContributorTest.class);
 
-		Enumeration<URL> enumeration = bundle.findEntries(basePath, "*", true);
-
-		if (enumeration != null) {
-			while (enumeration.hasMoreElements()) {
-				URL url = enumeration.nextElement();
-
-				String urlPath = url.getPath();
-
-				if (urlPath.endsWith(StringPool.SLASH)) {
-					continue;
-				}
-
-				String zipPath = urlPath.substring(basePath.length());
-
-				if (zipPath.startsWith(StringPool.SLASH)) {
-					zipPath = zipPath.substring(1);
-				}
-
-				try (InputStream inputStream = url.openStream()) {
-					zipWriter.addEntry(zipPath, inputStream);
-				}
-			}
-		}
-
-		return new FileInputStream(zipWriter.getFile());
+		return ZipFileUtil.toInputStream(basePath, bundle, _zipWriterFactory.getZipWriter());
 	}
 
 	@Inject

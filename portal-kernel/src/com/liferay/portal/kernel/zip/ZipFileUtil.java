@@ -6,9 +6,12 @@
 package com.liferay.portal.kernel.zip;
 
 import com.liferay.petra.io.StreamUtil;
+import com.liferay.petra.string.StringBundler;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.io.unsync.UnsyncFilterInputStream;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.uuid.PortalUUIDUtil;
+import org.osgi.framework.Bundle;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -25,6 +28,7 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 
+import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
@@ -53,6 +57,34 @@ public class ZipFileUtil {
 		throws Exception {
 
 		return _toZipFile(clazz, fileName, "zip");
+	}
+
+	public static InputStream toInputStream(String basePath, Bundle bundle, ZipWriter zipWriter) throws Exception {
+		Enumeration<URL> enumeration = bundle.findEntries(basePath, "*", true);
+
+		if (enumeration != null) {
+			while (enumeration.hasMoreElements()) {
+				URL url = enumeration.nextElement();
+
+				String urlPath = url.getPath();
+
+				if (urlPath.endsWith(StringPool.SLASH)) {
+					continue;
+				}
+
+				String zipPath = urlPath.substring(basePath.length());
+
+				if (zipPath.startsWith(StringPool.SLASH)) {
+					zipPath = zipPath.substring(1);
+				}
+
+				try (InputStream inputStream = url.openStream()) {
+					zipWriter.addEntry(zipPath, inputStream);
+				}
+			}
+		}
+
+		return new FileInputStream(zipWriter.getFile());
 	}
 
 	private static <T> File _toZipFile(
