@@ -1,5 +1,5 @@
 /**
- * SPDX-FileCopyrightText: (c) 2000 Liferay, Inc. https://liferay.com
+ * SPDX-FileCopyrightText: (c) 2025 Liferay, Inc. https://liferay.com
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
@@ -70,7 +70,7 @@ public class ClientExtensionConfigBundleTracker {
 	}
 
 	private List<String> _addConfigurations(Bundle bundle) {
-		List<String> addedPids = new ArrayList<>();
+		List<String> pids = new ArrayList<>();
 
 		Enumeration<URL> enumeration = bundle.findEntries(
 			"/META-INF/client-extension-config", "*.json", false);
@@ -84,7 +84,7 @@ public class ClientExtensionConfigBundleTracker {
 						bundle, url.getPath(), URLUtil.toString(url));
 
 					if (processedPids != null) {
-						addedPids.addAll(processedPids);
+						pids.addAll(processedPids);
 					}
 				}
 				catch (Exception exception) {
@@ -95,7 +95,7 @@ public class ClientExtensionConfigBundleTracker {
 			}
 		}
 
-		return addedPids;
+		return pids;
 	}
 
 	private Configuration _getConfiguration(String pid) throws Exception {
@@ -177,8 +177,8 @@ public class ClientExtensionConfigBundleTracker {
 
 					if (_log.isInfoEnabled()) {
 						_log.info(
-							"Configuration and CX Bundle resource versions " +
-								"are identical");
+							"Configuration and Bundle resource versions are " +
+								"identical");
 					}
 
 					return configuration.getPid();
@@ -198,10 +198,10 @@ public class ClientExtensionConfigBundleTracker {
 					Configuration.ConfigurationAttribute.READ_ONLY);
 			}
 
-			properties.put(".cx.config.key", virtualInstancePid);
+			properties.put(".cx.config.bundle.id", bundle.getBundleId());
 			properties.put(
 				".cx.config.bundle.last.modified", bundle.getLastModified());
-			properties.put(".cx.config.bundle.id", bundle.getBundleId());
+			properties.put(".cx.config.key", virtualInstancePid);
 
 			if (_log.isInfoEnabled()) {
 				_log.info("Processed configuration " + properties);
@@ -275,18 +275,18 @@ public class ClientExtensionConfigBundleTracker {
 			return null;
 		}
 
-		List<String> addedPids = new ArrayList<>();
+		List<String> pids = new ArrayList<>();
 
 		for (Config config : configurationFile.getConfigurations()) {
 			try {
-				addedPids.add(_processConfiguration(bundle, config));
+				pids.add(_processConfiguration(bundle, config));
 			}
 			catch (Exception exception) {
 				_log.error(exception);
 			}
 		}
 
-		return addedPids;
+		return pids;
 	}
 
 	private static final String _FILE_EXTENSION =
@@ -322,23 +322,26 @@ public class ClientExtensionConfigBundleTracker {
 		public void modifiedBundle(
 			Bundle bundle, BundleEvent bundleEvent, Bundle unusedBundle) {
 
-			Map<String, Configuration> existingPidConfigurations =
-				new HashMap<>();
+			Configuration[] configurations = null;
 
 			try {
-				Configuration[] configurations =
-					_configurationAdmin.listConfigurations(
-						"(.cx.config.bundle.id=" + bundle.getBundleId() + ")");
-
-				if (configurations != null) {
-					for (Configuration configuration : configurations) {
-						existingPidConfigurations.put(
-							configuration.getPid(), configuration);
-					}
-				}
+				configurations = _configurationAdmin.listConfigurations(
+					"(.cx.config.bundle.id=" + bundle.getBundleId() + ")");
 			}
 			catch (Exception exception) {
 				_log.error(exception);
+
+				return;
+			}
+
+			Map<String, Configuration> existingPidConfigurations =
+				new HashMap<>();
+
+			if (configurations != null) {
+				for (Configuration configuration : configurations) {
+					existingPidConfigurations.put(
+						configuration.getPid(), configuration);
+				}
 			}
 
 			List<String> addedPids = _addConfigurations(bundle);
@@ -377,6 +380,8 @@ public class ClientExtensionConfigBundleTracker {
 			}
 			catch (Exception exception) {
 				_log.error(exception);
+
+				return;
 			}
 
 			if (configurations == null) {
@@ -398,9 +403,6 @@ public class ClientExtensionConfigBundleTracker {
 				}
 			}
 		}
-
-		private static final Log _log = LogFactoryUtil.getLog(
-			ClientExtensionConfigBundleTracker.class);
 
 	}
 
