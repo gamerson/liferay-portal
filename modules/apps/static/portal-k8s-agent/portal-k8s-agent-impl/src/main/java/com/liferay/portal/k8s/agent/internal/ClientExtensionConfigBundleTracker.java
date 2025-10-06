@@ -6,10 +6,9 @@
 package com.liferay.portal.k8s.agent.internal;
 
 import com.liferay.osgi.util.configuration.ConfigurationFactoryUtil;
-import com.liferay.petra.string.CharPool;
 import com.liferay.petra.string.StringBundler;
-import com.liferay.petra.string.StringPool;
 import com.liferay.portal.configuration.persistence.InMemoryOnlyConfigurationThreadLocal;
+import com.liferay.portal.k8s.agent.internal.util.ConfigurationUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
@@ -20,7 +19,6 @@ import com.liferay.portal.tools.DBUpgrader;
 import java.net.URL;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -29,8 +27,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import org.apache.felix.configurator.impl.json.BinUtil;
-import org.apache.felix.configurator.impl.json.BinaryManager;
 import org.apache.felix.configurator.impl.json.JSONUtil;
 import org.apache.felix.configurator.impl.model.Config;
 import org.apache.felix.configurator.impl.model.ConfigurationFile;
@@ -98,33 +94,6 @@ public class ClientExtensionConfigBundleTracker {
 		return pids;
 	}
 
-	private Configuration _getConfiguration(String pid) throws Exception {
-		if (pid.endsWith(_FILE_EXTENSION)) {
-			pid = pid.substring(0, pid.length() - _FILE_EXTENSION.length());
-		}
-
-		int index = pid.indexOf(CharPool.TILDE);
-
-		if (index <= 0) {
-			index = pid.indexOf(CharPool.UNDERLINE);
-
-			if (index <= 0) {
-				index = pid.indexOf(CharPool.DASH);
-			}
-		}
-
-		if (index > 0) {
-			String name = pid.substring(index + 1);
-
-			pid = pid.substring(0, index);
-
-			return _configurationAdmin.getFactoryConfiguration(
-				pid, name, StringPool.QUESTION);
-		}
-
-		return _configurationAdmin.getConfiguration(pid, StringPool.QUESTION);
-	}
-
 	private String _getVirtualInstancePid(
 		Config config, String virtualInstanceId) {
 
@@ -185,7 +154,8 @@ public class ClientExtensionConfigBundleTracker {
 				}
 			}
 			else {
-				configuration = _getConfiguration(virtualInstancePid);
+				configuration = ConfigurationUtil.getConfiguration(
+					_configurationAdmin, virtualInstancePid);
 			}
 
 			Set<Configuration.ConfigurationAttribute> configurationAttributes =
@@ -223,43 +193,11 @@ public class ClientExtensionConfigBundleTracker {
 			Bundle bundle, String fileName, String json)
 		throws Exception {
 
-		if (!fileName.endsWith(_FILE_EXTENSION)) {
-			throw new IllegalArgumentException("Invalid file " + fileName);
-		}
-
 		JSONUtil.Report report = new JSONUtil.Report();
 
-		BinaryManager binaryManager = new BinaryManager(
-			new BinUtil.ResourceProvider() {
-
-				@Override
-				public Enumeration<URL> findEntries(
-					String path, String pattern) {
-
-					return Collections.emptyEnumeration();
-				}
-
-				@Override
-				public long getBundleId() {
-					return bundle.getBundleId();
-				}
-
-				@Override
-				public URL getEntry(String path) {
-					return null;
-				}
-
-				@Override
-				public String getIdentifier() {
-					return fileName;
-				}
-
-			},
-			report);
-
-		ConfigurationFile configurationFile = JSONUtil.readJSON(
-			binaryManager, fileName, new URL("file", null, fileName),
-			bundle.getBundleId(), json, report);
+		ConfigurationFile configurationFile =
+			ConfigurationUtil.getConfigurationFile(
+				bundle, fileName, json, report);
 
 		for (String error : report.errors) {
 			_log.error(error);
@@ -288,9 +226,6 @@ public class ClientExtensionConfigBundleTracker {
 
 		return pids;
 	}
-
-	private static final String _FILE_EXTENSION =
-		".client-extension-config.json";
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		ClientExtensionConfigBundleTracker.class);
