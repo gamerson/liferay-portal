@@ -37,21 +37,16 @@ import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.kernel.zip.ZipFileUtil;
-import com.liferay.portal.kernel.zip.ZipWriter;
 import com.liferay.portal.kernel.zip.ZipWriterFactory;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.tools.DBUpgrader;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 
-import java.net.URL;
-
 import java.util.Arrays;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -366,7 +361,8 @@ public class BatchEngineBundleTrackerTest {
 			"com/liferay/batch/engine/internal/test/dependencies/", dirName,
 			StringPool.SLASH);
 
-		return ZipFileUtil.toInputStream(basePath, _bundle, _zipWriterFactory.getZipWriter());
+		return ZipFileUtil.toInputStream(
+			basePath, _bundle, _zipWriterFactory.getZipWriter());
 	}
 
 	private static StopWatch _originalStopWatch;

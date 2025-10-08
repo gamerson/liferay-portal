@@ -6,12 +6,10 @@
 package com.liferay.portal.kernel.zip;
 
 import com.liferay.petra.io.StreamUtil;
-import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.io.unsync.UnsyncFilterInputStream;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.uuid.PortalUUIDUtil;
-import org.osgi.framework.Bundle;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,6 +31,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
+import org.osgi.framework.Bundle;
+
 /**
  * @author Shuyang Zhou
  */
@@ -47,19 +47,10 @@ public class ZipFileUtil {
 			zipFile.getInputStream(zipFile.getEntry(entryName)), zipFile);
 	}
 
-	public static <T> File toJarFile(Class<T> clazz, String fileName)
+	public static InputStream toInputStream(
+			String basePath, Bundle bundle, ZipWriter zipWriter)
 		throws Exception {
 
-		return _toZipFile(clazz, fileName, "jar");
-	}
-
-	public static <T> File toZipFile(Class<T> clazz, String fileName)
-		throws Exception {
-
-		return _toZipFile(clazz, fileName, "zip");
-	}
-
-	public static InputStream toInputStream(String basePath, Bundle bundle, ZipWriter zipWriter) throws Exception {
 		Enumeration<URL> enumeration = bundle.findEntries(basePath, "*", true);
 
 		if (enumeration != null) {
@@ -85,6 +76,18 @@ public class ZipFileUtil {
 		}
 
 		return new FileInputStream(zipWriter.getFile());
+	}
+
+	public static <T> File toJarFile(Class<T> clazz, String fileName)
+		throws Exception {
+
+		return _toZipFile(clazz, fileName, "jar");
+	}
+
+	public static <T> File toZipFile(Class<T> clazz, String fileName)
+		throws Exception {
+
+		return _toZipFile(clazz, fileName, "zip");
 	}
 
 	private static <T> File _toZipFile(

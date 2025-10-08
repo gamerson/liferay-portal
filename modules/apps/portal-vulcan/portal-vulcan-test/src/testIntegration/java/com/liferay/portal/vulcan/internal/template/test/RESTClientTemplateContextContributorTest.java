@@ -6,7 +6,6 @@
 package com.liferay.portal.vulcan.internal.template.test;
 
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
-import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
@@ -14,17 +13,11 @@ import com.liferay.portal.kernel.test.util.HTTPTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.util.Http;
 import com.liferay.portal.kernel.zip.ZipFileUtil;
-import com.liferay.portal.kernel.zip.ZipWriter;
 import com.liferay.portal.kernel.zip.ZipWriterFactory;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 
-import java.io.FileInputStream;
 import java.io.InputStream;
-
-import java.net.URL;
-
-import java.util.Enumeration;
 
 import org.hamcrest.CoreMatchers;
 
@@ -95,10 +88,9 @@ public class RESTClientTemplateContextContributorTest {
 			"com/liferay/portal/vulcan/internal/template/test/dependencies" +
 				"/site-initializer/";
 
-		Bundle bundle = FrameworkUtil.getBundle(
-			RESTClientTemplateContextContributorTest.class);
-
-		return ZipFileUtil.toInputStream(basePath, bundle, _zipWriterFactory.getZipWriter());
+		return ZipFileUtil.toInputStream(
+			basePath, FrameworkUtil.getBundle(
+				RESTClientTemplateContextContributorTest.class), _zipWriterFactory.getZipWriter());
 	}
 
 	@Inject
