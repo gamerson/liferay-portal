@@ -89,8 +89,10 @@ public class RESTClientTemplateContextContributorTest {
 				"/site-initializer/";
 
 		return ZipFileUtil.toInputStream(
-			basePath, FrameworkUtil.getBundle(
-				RESTClientTemplateContextContributorTest.class), _zipWriterFactory.getZipWriter());
+			basePath,
+			FrameworkUtil.getBundle(
+				RESTClientTemplateContextContributorTest.class),
+			_zipWriterFactory.getZipWriter());
 	}
 
 	@Inject

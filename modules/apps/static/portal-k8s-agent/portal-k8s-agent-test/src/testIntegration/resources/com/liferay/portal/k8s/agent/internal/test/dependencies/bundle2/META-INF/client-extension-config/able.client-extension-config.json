@@ -1,5 +1,5 @@
 {
-	"com.liferay.client.extension.type.configuration.CETConfiguration~able": {
+	"com.liferay.client.extension.type.configuration.CETConfiguration~able/able.liferay.com": {
 		":configurator:policy": "force",
 		"baseURL": "${portalURL}/o/able",
 		"description": "",

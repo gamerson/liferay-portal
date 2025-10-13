@@ -103,14 +103,13 @@ public class ClientExtensionConfigBundleTrackerTest {
 
 			Thread.sleep(2000);
 
-			_assertConfigurationPids(
-				bundle.getBundleId(), 3,
-				Arrays.asList(
-					_FACTORY_PID + "~able/able.liferay.com",
-					_FACTORY_PID + "~baker/liferay.com"));
+			List<String> pids = Arrays.asList(
+				_FACTORY_PID + "~able/able.liferay.com",
+				_FACTORY_PID + "~baker/liferay.com");
 
-			_assertVirtualInstancePids(
-				Arrays.asList("able.liferay.com", "liferay.com"));
+			_assertConfigurationPids(bundle.getBundleId(), 2, pids);
+
+			_assertVirtualInstancePids(pids);
 
 			bundle.stop();
 
