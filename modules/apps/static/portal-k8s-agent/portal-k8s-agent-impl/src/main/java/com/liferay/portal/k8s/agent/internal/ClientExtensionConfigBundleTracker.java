@@ -104,6 +104,27 @@ public class ClientExtensionConfigBundleTracker {
 			return pid;
 		}
 
+		int index = pid.indexOf('/');
+
+		if (index != -1) {
+			String scopedVirtualInstanceId = pid.substring(index);
+
+			if (!Objects.equals(
+					scopedVirtualInstanceId, "/" + virtualInstanceId)) {
+
+				if (_log.isWarnEnabled()) {
+					_log.warn(
+						StringBundler.concat(
+							"Overriding virtual instance ID from ",
+							scopedVirtualInstanceId, " to ", virtualInstanceId,
+							" for factory configuration with PID ", pid));
+				}
+			}
+
+			return StringBundler.concat(
+				pid.substring(0, index), "/", virtualInstanceId);
+		}
+
 		return StringBundler.concat(pid, "/", virtualInstanceId);
 	}
 
@@ -219,7 +240,8 @@ public class ClientExtensionConfigBundleTracker {
 				pids.add(_processConfiguration(bundle, config));
 			}
 			catch (Exception exception) {
-				_log.error(exception);
+				_log.error(
+					"Unable to process configuration " + config, exception);
 			}
 		}
 
@@ -284,7 +306,8 @@ public class ClientExtensionConfigBundleTracker {
 					}
 				}
 				catch (Exception exception) {
-					_log.error(exception);
+					_log.error(
+						"Unable to delete configuration " + pid, exception);
 				}
 			}
 
