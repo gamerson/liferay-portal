@@ -6,6 +6,7 @@
 package com.liferay.portal.configuration.persistence.test;
 
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
+import com.liferay.petra.lang.SafeCloseable;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.configuration.persistence.ConfigurationOverridePropertiesUtil;
 import com.liferay.portal.configuration.persistence.InMemoryOnlyConfigurationThreadLocal;
@@ -214,15 +215,11 @@ public class ConfigurationPersistenceManagerTest {
 
 	@Test
 	public void testMemoryOnlyConfiguration() throws Exception {
-		InMemoryOnlyConfigurationThreadLocal.setInMemoryOnlyWithSafeCloseable(
-			true);
+		try (SafeCloseable safeCloseable =
+				InMemoryOnlyConfigurationThreadLocal.
+					setInMemoryOnlyWithSafeCloseable(true)) {
 
-		try {
 			_assertConfiguration(false, false);
-		}
-		finally {
-			InMemoryOnlyConfigurationThreadLocal.
-				setInMemoryOnlyWithSafeCloseable(false);
 		}
 	}
 
