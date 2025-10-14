@@ -145,15 +145,17 @@ public class ClientExtensionConfigBundleTrackerTest {
 			Arrays.toString(configurations), expectedPids.size(),
 			configurations.length);
 
-		List<String> sortedPids = Arrays.stream(
-			configurations
-		).map(
-			Configuration::getPid
-		).sorted(
-		).toList();
+		Arrays.sort(
+			configurations,
+			(configuration1, configuration2) -> {
+				String pid1 = configuration1.getPid();
+
+				return pid1.compareTo(configuration2.getPid());
+			});
 
 		for (int i = 0; i < expectedPids.size(); i++) {
-			Assert.assertEquals(expectedPids.get(i), sortedPids.get(i));
+			Assert.assertEquals(
+				expectedPids.get(i), configurations[i].getPid());
 		}
 	}
 
