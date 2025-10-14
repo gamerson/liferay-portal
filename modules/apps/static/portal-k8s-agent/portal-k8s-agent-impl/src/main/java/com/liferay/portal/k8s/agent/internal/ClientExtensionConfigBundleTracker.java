@@ -21,7 +21,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -256,51 +255,6 @@ public class ClientExtensionConfigBundleTracker {
 		@Override
 		public void modifiedBundle(
 			Bundle bundle, BundleEvent bundleEvent, Bundle unusedBundle) {
-
-			Configuration[] configurations = null;
-
-			try {
-				configurations = _configurationAdmin.listConfigurations(
-					"(.cx.config.bundle.id=" + bundle.getBundleId() + ")");
-			}
-			catch (Exception exception) {
-				_log.error(exception);
-
-				return;
-			}
-
-			Map<String, Configuration> existingPidConfigurations =
-				new HashMap<>();
-
-			if (configurations != null) {
-				for (Configuration configuration : configurations) {
-					existingPidConfigurations.put(
-						configuration.getPid(), configuration);
-				}
-			}
-
-			List<String> addedPids = _addConfigurations(bundle);
-
-			for (Map.Entry<String, Configuration> entry :
-					existingPidConfigurations.entrySet()) {
-
-				if (!addedPids.contains(entry.getKey())) {
-					Configuration existingConfiguration = entry.getValue();
-
-					try {
-						if (_log.isInfoEnabled()) {
-							_log.info(
-								"Deleting configuration " +
-									existingConfiguration.getProperties());
-						}
-
-						existingConfiguration.delete();
-					}
-					catch (Exception exception) {
-						_log.error(exception);
-					}
-				}
-			}
 		}
 
 		@Override
