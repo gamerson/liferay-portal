@@ -60,8 +60,6 @@ public class ClientExtensionConfigBundleTrackerTest {
 		try {
 			bundle.start();
 
-			Thread.sleep(2000);
-
 			_assertConfigurationPids(
 				bundle.getBundleId(), 3,
 				Arrays.asList(
@@ -70,8 +68,6 @@ public class ClientExtensionConfigBundleTrackerTest {
 					_FACTORY_PID + "~charlie/liferay.com"));
 
 			bundle.stop();
-
-			Thread.sleep(2000);
 
 			_assertConfigurationPids(
 				bundle.getBundleId(), 0, Collections.emptyList());
@@ -101,8 +97,6 @@ public class ClientExtensionConfigBundleTrackerTest {
 
 			bundle.start();
 
-			Thread.sleep(2000);
-
 			List<String> pids = Arrays.asList(
 				_FACTORY_PID + "~able/able.liferay.com",
 				_FACTORY_PID + "~baker/liferay.com");
@@ -112,8 +106,6 @@ public class ClientExtensionConfigBundleTrackerTest {
 			_assertVirtualInstancePids(pids);
 
 			bundle.stop();
-
-			Thread.sleep(2000);
 
 			_assertConfigurationPids(
 				bundle.getBundleId(), 0, Collections.emptyList());
