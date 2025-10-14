@@ -262,13 +262,7 @@ public class ClientExtensionConfigBundleTracker {
 		public List<Configuration> addingBundle(
 			Bundle bundle, BundleEvent bundleEvent) {
 
-			List<Configuration> configurations = _addConfigurations(bundle);
-
-			if (configurations.isEmpty()) {
-				return null;
-			}
-
-			return configurations;
+			return _addConfigurations(bundle);
 		}
 
 		@Override
