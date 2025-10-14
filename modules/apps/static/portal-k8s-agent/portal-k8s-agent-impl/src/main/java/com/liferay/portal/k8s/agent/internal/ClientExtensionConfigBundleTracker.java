@@ -234,6 +234,8 @@ public class ClientExtensionConfigBundleTracker {
 	@Reference
 	private ConfigurationAdmin _configurationAdmin;
 
+	private final List<String> _trackedPids = new ArrayList<>();
+
 	private class ClientExtensionConfigBundleTrackerCustomizer
 		implements BundleTrackerCustomizer<Bundle> {
 
@@ -249,6 +251,8 @@ public class ClientExtensionConfigBundleTracker {
 				return null;
 			}
 
+			_trackedPids.addAll(addedPids);
+
 			return bundle;
 		}
 
@@ -261,36 +265,30 @@ public class ClientExtensionConfigBundleTracker {
 		public void removedBundle(
 			Bundle bundle, BundleEvent event, Bundle unusedBundle) {
 
-			Configuration[] configurations = null;
-
-			try {
-				configurations = _configurationAdmin.listConfigurations(
-					"(.cx.config.bundle.id=" + bundle.getBundleId() + ")");
-			}
-			catch (Exception exception) {
-				_log.error(exception);
-
-				return;
-			}
-
-			if (configurations == null) {
-				return;
-			}
-
-			for (Configuration configuration : configurations) {
+			for (String pid : _trackedPids) {
 				try {
-					if (_log.isInfoEnabled()) {
-						_log.info(
-							"Deleting configuration " +
-								configuration.getProperties());
-					}
+					Configuration[] configurations =
+						_configurationAdmin.listConfigurations(
+							StringBundler.concat("(service.pid=", pid, ")"));
 
-					configuration.delete();
+					if (ArrayUtil.isNotEmpty(configurations)) {
+						Configuration configuration = configurations[0];
+
+						if (_log.isInfoEnabled()) {
+							_log.info(
+								"Deleting configuration " +
+									configuration.getProperties());
+						}
+
+						configuration.delete();
+					}
 				}
 				catch (Exception exception) {
 					_log.error(exception);
 				}
 			}
+
+			_trackedPids.clear();
 		}
 
 	}
