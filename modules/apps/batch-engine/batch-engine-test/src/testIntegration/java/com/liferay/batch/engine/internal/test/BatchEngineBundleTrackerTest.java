@@ -32,7 +32,7 @@ import com.liferay.portal.kernel.test.util.CompanyTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.test.util.UserTestUtil;
-import com.liferay.portal.kernel.test.util.ZipFileUtil;
+import com.liferay.portal.kernel.test.util.ZipFileTestUtil;
 import com.liferay.portal.kernel.util.ClassUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -361,7 +361,7 @@ public class BatchEngineBundleTrackerTest {
 			"com/liferay/batch/engine/internal/test/dependencies/", dirName,
 			StringPool.SLASH);
 
-		return ZipFileUtil.toInputStream(
+		return ZipFileTestUtil.toInputStream(
 			basePath, _bundle, _zipWriterFactory.getZipWriter());
 	}
 

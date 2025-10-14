@@ -11,7 +11,7 @@ import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.util.HTTPTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
-import com.liferay.portal.kernel.test.util.ZipFileUtil;
+import com.liferay.portal.kernel.test.util.ZipFileTestUtil;
 import com.liferay.portal.kernel.util.Http;
 import com.liferay.portal.kernel.zip.ZipWriterFactory;
 import com.liferay.portal.test.rule.Inject;
@@ -88,7 +88,7 @@ public class RESTClientTemplateContextContributorTest {
 			"com/liferay/portal/vulcan/internal/template/test/dependencies" +
 				"/site-initializer/";
 
-		return ZipFileUtil.toInputStream(
+		return ZipFileTestUtil.toInputStream(
 			basePath,
 			FrameworkUtil.getBundle(
 				RESTClientTemplateContextContributorTest.class),

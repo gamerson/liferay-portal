@@ -20,7 +20,7 @@ import org.osgi.framework.Bundle;
 /**
  * @author Gregory Amerson
  */
-public class ZipFileUtil {
+public class ZipFileTestUtil {
 
 	public static InputStream toInputStream(
 			String basePath, Bundle bundle, ZipWriter zipWriter)

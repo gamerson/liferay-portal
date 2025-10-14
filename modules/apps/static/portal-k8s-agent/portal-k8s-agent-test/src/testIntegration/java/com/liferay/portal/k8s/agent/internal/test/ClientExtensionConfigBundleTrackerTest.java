@@ -12,7 +12,7 @@ import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
-import com.liferay.portal.kernel.test.util.ZipFileUtil;
+import com.liferay.portal.kernel.test.util.ZipFileTestUtil;
 import com.liferay.portal.kernel.zip.ZipWriterFactory;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
@@ -191,7 +191,7 @@ public class ClientExtensionConfigBundleTrackerTest {
 
 		return _bundleContext.installBundle(
 			RandomTestUtil.randomString(),
-			ZipFileUtil.toInputStream(
+			ZipFileTestUtil.toInputStream(
 				basePath, _bundle, _zipWriterFactory.getZipWriter()));
 	}
 
