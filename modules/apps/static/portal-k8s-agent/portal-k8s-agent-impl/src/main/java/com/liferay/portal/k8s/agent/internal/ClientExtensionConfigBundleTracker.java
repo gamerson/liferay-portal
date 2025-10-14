@@ -6,6 +6,7 @@
 package com.liferay.portal.k8s.agent.internal;
 
 import com.liferay.osgi.util.configuration.ConfigurationFactoryUtil;
+import com.liferay.petra.lang.SafeCloseable;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.configuration.persistence.InMemoryOnlyConfigurationThreadLocal;
 import com.liferay.portal.k8s.agent.internal.util.ConfigurationUtil;
@@ -146,8 +147,9 @@ public class ClientExtensionConfigBundleTracker {
 		String virtualInstancePid = _getVirtualInstancePid(
 			config, virtualInstanceId);
 
-		try {
-			InMemoryOnlyConfigurationThreadLocal.setInMemoryOnly(true);
+		try (SafeCloseable safeCloseable =
+				InMemoryOnlyConfigurationThreadLocal.
+					setInMemoryOnlyWithSafeCloseable(true)) {
 
 			Configuration configuration = null;
 
@@ -206,9 +208,6 @@ public class ClientExtensionConfigBundleTracker {
 				Configuration.ConfigurationAttribute.READ_ONLY);
 
 			return configuration;
-		}
-		finally {
-			InMemoryOnlyConfigurationThreadLocal.setInMemoryOnly(false);
 		}
 	}
 

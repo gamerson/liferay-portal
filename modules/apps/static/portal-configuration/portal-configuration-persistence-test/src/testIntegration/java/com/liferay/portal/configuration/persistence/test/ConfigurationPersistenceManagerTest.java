@@ -214,13 +214,15 @@ public class ConfigurationPersistenceManagerTest {
 
 	@Test
 	public void testMemoryOnlyConfiguration() throws Exception {
-		InMemoryOnlyConfigurationThreadLocal.setInMemoryOnly(true);
+		InMemoryOnlyConfigurationThreadLocal.setInMemoryOnlyWithSafeCloseable(
+			true);
 
 		try {
 			_assertConfiguration(false, false);
 		}
 		finally {
-			InMemoryOnlyConfigurationThreadLocal.setInMemoryOnly(false);
+			InMemoryOnlyConfigurationThreadLocal.
+				setInMemoryOnlyWithSafeCloseable(false);
 		}
 	}
 
