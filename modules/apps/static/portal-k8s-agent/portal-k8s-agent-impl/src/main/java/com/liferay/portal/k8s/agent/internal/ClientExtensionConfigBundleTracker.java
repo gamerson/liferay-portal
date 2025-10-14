@@ -52,6 +52,10 @@ public class ClientExtensionConfigBundleTracker {
 	protected void activate(
 		BundleContext bundleContext, Map<String, Object> properties) {
 
+		if (DBUpgrader.isUpgradeClient()) {
+			return;
+		}
+
 		_bundleTracker = new BundleTracker<>(
 			bundleContext, Bundle.ACTIVE,
 			new ClientExtensionConfigBundleTrackerCustomizer());
@@ -61,11 +65,13 @@ public class ClientExtensionConfigBundleTracker {
 
 	@Deactivate
 	protected void deactivate() {
-		_bundleTracker.close();
+		if (_bundleTracker != null) {
+			_bundleTracker.close();
+		}
 	}
 
-	private List<String> _addConfigurations(Bundle bundle) {
-		List<String> pids = new ArrayList<>();
+	private List<Configuration> _addConfigurations(Bundle bundle) {
+		List<Configuration> configurations = new ArrayList<>();
 
 		Enumeration<URL> enumeration = bundle.findEntries(
 			"/META-INF/client-extension-config", "*.json", false);
@@ -75,12 +81,9 @@ public class ClientExtensionConfigBundleTracker {
 				URL url = enumeration.nextElement();
 
 				try {
-					List<String> processedPids = _processConfigurations(
-						bundle, url.getPath(), URLUtil.toString(url));
-
-					if (processedPids != null) {
-						pids.addAll(processedPids);
-					}
+					_processConfigurations(
+						bundle, configurations, url.getPath(),
+						URLUtil.toString(url));
 				}
 				catch (Exception exception) {
 					_log.error(
@@ -90,7 +93,7 @@ public class ClientExtensionConfigBundleTracker {
 			}
 		}
 
-		return pids;
+		return configurations;
 	}
 
 	private String _getVirtualInstancePid(
@@ -128,7 +131,7 @@ public class ClientExtensionConfigBundleTracker {
 		return StringBundler.concat(pid, "/", virtualInstanceId);
 	}
 
-	private String _processConfiguration(Bundle bundle, Config config)
+	private Configuration _processConfiguration(Bundle bundle, Config config)
 		throws Exception {
 
 		Dictionary<String, Object> properties = config.getProperties();
@@ -170,7 +173,7 @@ public class ClientExtensionConfigBundleTracker {
 								"identical");
 					}
 
-					return configuration.getPid();
+					return configuration;
 				}
 			}
 			else {
@@ -202,15 +205,16 @@ public class ClientExtensionConfigBundleTracker {
 			configuration.addAttributes(
 				Configuration.ConfigurationAttribute.READ_ONLY);
 
-			return configuration.getPid();
+			return configuration;
 		}
 		finally {
 			InMemoryOnlyConfigurationThreadLocal.setInMemoryOnly(false);
 		}
 	}
 
-	private List<String> _processConfigurations(
-			Bundle bundle, String fileName, String json)
+	private void _processConfigurations(
+			Bundle bundle, List<Configuration> configurations, String fileName,
+			String json)
 		throws Exception {
 
 		JSONUtil.Report report = new JSONUtil.Report();
@@ -230,82 +234,70 @@ public class ClientExtensionConfigBundleTracker {
 		}
 
 		if (configurationFile == null) {
-			return null;
+			return;
 		}
-
-		List<String> pids = new ArrayList<>();
 
 		for (Config config : configurationFile.getConfigurations()) {
 			try {
-				pids.add(_processConfiguration(bundle, config));
+				configurations.add(_processConfiguration(bundle, config));
 			}
 			catch (Exception exception) {
 				_log.error(
 					"Unable to process configuration " + config, exception);
 			}
 		}
-
-		return pids;
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		ClientExtensionConfigBundleTracker.class);
 
-	private BundleTracker<List<String>> _bundleTracker;
+	private BundleTracker<List<Configuration>> _bundleTracker;
 
 	@Reference
 	private ConfigurationAdmin _configurationAdmin;
 
 	private class ClientExtensionConfigBundleTrackerCustomizer
-		implements BundleTrackerCustomizer<List<String>> {
+		implements BundleTrackerCustomizer<List<Configuration>> {
 
 		@Override
-		public List<String> addingBundle(
+		public List<Configuration> addingBundle(
 			Bundle bundle, BundleEvent bundleEvent) {
 
-			if (DBUpgrader.isUpgradeClient()) {
+			List<Configuration> configurations = _addConfigurations(bundle);
+
+			if (configurations.isEmpty()) {
 				return null;
 			}
 
-			List<String> pids = _addConfigurations(bundle);
-
-			if (pids.isEmpty()) {
-				return null;
-			}
-
-			return pids;
+			return configurations;
 		}
 
 		@Override
 		public void modifiedBundle(
-			Bundle bundle, BundleEvent bundleEvent, List<String> unusedPids) {
+			Bundle bundle, BundleEvent bundleEvent,
+			List<Configuration> unusedConfigurations) {
 		}
 
 		@Override
 		public void removedBundle(
-			Bundle bundle, BundleEvent event, List<String> pids) {
+			Bundle bundle, BundleEvent event,
+			List<Configuration> configurations) {
 
-			for (String pid : pids) {
+			for (Configuration configuration : configurations) {
 				try {
-					Configuration[] configurations =
-						_configurationAdmin.listConfigurations(
-							StringBundler.concat("(service.pid=", pid, ")"));
-
-					if (ArrayUtil.isNotEmpty(configurations)) {
-						Configuration configuration = configurations[0];
-
-						if (_log.isInfoEnabled()) {
-							_log.info(
-								"Deleting configuration " +
-									configuration.getProperties());
-						}
-
-						configuration.delete();
+					if (_log.isInfoEnabled()) {
+						_log.info(
+							"Deleting configuration " +
+								configuration.getProperties());
 					}
+
+					configuration.delete();
 				}
 				catch (Exception exception) {
 					_log.error(
-						"Unable to delete configuration " + pid, exception);
+						"Unable to delete configuration " +
+							configuration.getPid(),
+						exception);
 				}
 			}
 		}
