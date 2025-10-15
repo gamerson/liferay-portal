@@ -71,32 +71,6 @@ public class ClientExtensionConfigBundleTracker {
 		}
 	}
 
-	private List<Configuration> _addConfigurations(Bundle bundle) {
-		List<Configuration> configurations = new ArrayList<>();
-
-		Enumeration<URL> enumeration = bundle.findEntries(
-			"/META-INF/client-extension-config", "*.json", false);
-
-		if (enumeration != null) {
-			while (enumeration.hasMoreElements()) {
-				URL url = enumeration.nextElement();
-
-				try {
-					_processConfigurations(
-						bundle, configurations, url.getPath(),
-						URLUtil.toString(url));
-				}
-				catch (Exception exception) {
-					_log.error(
-						"Unable to process client extension config " + url,
-						exception);
-				}
-			}
-		}
-
-		return configurations;
-	}
-
 	private String _getVirtualInstancePid(
 		Config config, String virtualInstanceId) {
 
@@ -262,7 +236,33 @@ public class ClientExtensionConfigBundleTracker {
 		public List<Configuration> addingBundle(
 			Bundle bundle, BundleEvent bundleEvent) {
 
-			return _addConfigurations(bundle);
+			List<Configuration> configurations = new ArrayList<>();
+
+			Enumeration<URL> enumeration = bundle.findEntries(
+				"/META-INF/client-extension-config", "*.json", false);
+
+			if (enumeration != null) {
+				while (enumeration.hasMoreElements()) {
+					URL url = enumeration.nextElement();
+
+					try {
+						_processConfigurations(
+							bundle, configurations, url.getPath(),
+							URLUtil.toString(url));
+					}
+					catch (Exception exception) {
+						_log.error(
+							"Unable to process client extension config " + url,
+							exception);
+					}
+				}
+			}
+
+			if (configurations.isEmpty()) {
+				return null;
+			}
+
+			return configurations;
 		}
 
 		@Override
