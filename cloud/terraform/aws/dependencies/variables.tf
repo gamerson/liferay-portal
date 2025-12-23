@@ -21,6 +21,13 @@ variable "deployment_name" {
 		error_message="The deployment_name must contain only lowercase letters, numbers, and hyphens."
 	}
 }
+variable "liferay_extensions_bucket_name_prefix" {
+	default="liferay-extensions"
+	validation {
+		condition=can(regex("^[a-z0-9-]*$", var.liferay_extensions_bucket_name_prefix))
+		error_message="The liferay_extensions_bucket_name_prefix must contain only lowercase letters, numbers, and hyphens."
+	}
+}
 variable "deployment_namespace" {
 	default="liferay-system"
 	validation {

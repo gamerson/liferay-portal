@@ -1,5 +1,6 @@
 locals {
 	bucket_active=local.is_active_data_blue ? module.s3_bucket_blue : module.s3_bucket_green
+	bucket_extensions=module.s3_bucket_liferay_extensions
 	bucket_inactive=local.is_active_data_blue ? module.s3_bucket_green : module.s3_bucket_blue
 	data_inactive=local.is_active_data_blue ? "green" : "blue"
 	db_active=local.is_active_data_blue ? module.postgres_blue[0] : module.postgres_green[0]
@@ -48,6 +49,68 @@ module "s3_bucket_green" {
 		"Active"=tostring(local.is_active_data_green)
 	}
 	source="../modules/s3-bucket"
+}
+module "s3_bucket_liferay_extensions" {
+	block_public_acls=true
+	block_public_policy=true
+	bucket_prefix="${var.liferay_extensions_bucket_name_prefix}-s3-bucket-"
+	control_object_ownership=true
+	force_destroy=true
+	ignore_public_acls=true
+	object_ownership="BucketOwnerPreferred"
+	restrict_public_buckets=true
+  server_side_encryption_configuration={
+		rule={
+			apply_server_side_encryption_by_default={
+				sse_algorithm="aws:kms"
+			}
+			bucket_key_enabled=true
+		}
+	}
+	source="terraform-aws-modules/s3-bucket/aws"
+	version="~> 4.1.1"
+	versioning={
+		enabled=true
+	}
+}
+resource "aws_iam_access_key" "ci_uploader_key" {
+  user = aws_iam_user.ci_uploader.name
+}
+resource "aws_iam_policy" "ci_upload_only_policy" {
+	name="${var.deployment_name}-ci-upload-only-policy"
+	policy=jsonencode({
+		Statement=[
+			{
+				Action="s3:ListBucket",
+				Effect="Allow",
+				Resource="arn:${var.arn_partition}:s3:::${var.liferay_extensions_bucket_name_prefix}-s3-bucket-*",
+				Sid="AllowListBucket",
+			},
+			{
+				Action="s3:PutObject",
+				Effect="Allow",
+				Resource="arn:${var.arn_partition}:s3:::${var.liferay_extensions_bucket_name_prefix}-s3-bucket-*/*",
+				Sid="AllowPutObject",
+			},
+			{
+				Action=[
+					"s3:DeleteObject",
+					"s3:DeleteObjectVersion"
+				],
+				Effect="Deny",
+				Resource="arn:${var.arn_partition}:s3:::${var.liferay_extensions_bucket_name_prefix}-s3-bucket-*/*",
+				Sid="DenyDelete",
+			}
+		]
+		Version = "2012-10-17",
+	})
+}
+resource "aws_iam_user" "ci_uploader" {
+	name="${var.deployment_name}-ci-uploader"
+}
+resource "aws_iam_user_policy_attachment" "ci_uploader_attachment" {
+	user=aws_iam_user.ci_uploader.name
+	policy_arn=aws_iam_policy.ci_upload_only_policy.arn
 }
 resource "aws_db_subnet_group" "rds" {
 	name="${var.deployment_name}-rds-sub-grp"
@@ -186,6 +249,7 @@ resource "kubernetes_secret" "managed_service_details" {
 		"OPENSEARCH_USERNAME"=random_string.opensearch_username.result
 		"S3_BUCKET_ID"=local.bucket_active.s3_bucket_id
 		"S3_BUCKET_REGION"=var.region
+		"S3_EXTENSIONS_BUCKET_ID"=module.s3_bucket_liferay_extensions.s3_bucket_id
 	}
 	metadata {
 		name="managed-service-details"
