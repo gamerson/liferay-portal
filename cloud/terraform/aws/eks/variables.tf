@@ -19,6 +19,13 @@ variable "ecr_repositories" {
 	type=map(object({ arn=string, url=string }))
 	default={}
 }
+variable "liferay_extensions_bucket_name_prefix" {
+	default="liferay-extensions"
+	validation {
+		condition=can(regex("^[a-z0-9-]*$", var.liferay_extensions_bucket_name_prefix))
+		error_message="The liferay_extensions_bucket_name_prefix must contain only lowercase letters, numbers, and hyphens."
+	}
+}
 variable "node_group_ami_type" {
 	default="AL2023_x86_64_STANDARD"
 }

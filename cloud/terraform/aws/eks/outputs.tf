@@ -10,6 +10,9 @@ output "deployment_name" {
 output "deployment_namespace" {
 	value=var.deployment_namespace
 }
+output "liferay_extensions_bucket_name_prefix" {
+	value=var.liferay_extensions_bucket_name_prefix
+}
 output "liferay_sa_role_arn" {
 	value=aws_iam_role.irsa.arn
 }
