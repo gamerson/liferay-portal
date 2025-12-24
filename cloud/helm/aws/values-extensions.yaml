@@ -1,0 +1,11 @@
+liferay-default:
+    customVolumes:
+        x-liferay-extensions-storage:
+            - name: liferay-extensions-s3-bucket
+              persistentVolumeClaim:
+                  claimName: liferay-extensions-s3-claim
+    customVolumeMounts:
+        x-liferay-extensions-storage:
+            - mountPath: /opt/liferay/osgi/client-extensions/
+              name: liferay-extensions-s3-bucket
+              subPath: ci_build_1/osgi/client-extensions/

@@ -2,3 +2,5 @@
 *.tfstate.*
 .terraform.lock.hcl
 .terraform/
+Chart.lock
+helm/aws/charts/

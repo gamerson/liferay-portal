@@ -79,3 +79,11 @@ liferay-default:
                     requests:
                         storage: 10Gi
                 storageClassName: gp2
+liferayExtensionsStorage:
+  enabled: false
+  bucketName: "liferay-extensions-s3-bucket-20251223191747997700000003" # Please change this to your bucket name
+  storageClassName: "s3-csi-sc"
+  volumeName: "liferay-extensions-s3-volume"
+  claimName: "liferay-extensions-s3-claim"
+  accessModes: "ReadWriteMany"
+  storageRequest: "1Gi"
