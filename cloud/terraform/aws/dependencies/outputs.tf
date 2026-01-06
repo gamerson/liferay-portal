@@ -23,6 +23,9 @@ output "deployment_namespace" {
 output "is_restoring" {
 	value=var.is_restoring
 }
+output "liferay_extensions_storage_class" {
+	value=kubernetes_storage_class.liferay_extensions_storage.id
+}
 output "liferay_sa_role" {
 	value=var.liferay_sa_role_arn
 }

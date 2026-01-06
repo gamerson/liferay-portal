@@ -1,0 +1,2 @@
+bucketName: "" # see outputs of terraform/aws/dependencies/
+storageClassName: "" # see outputs of terraform/aws/dependencies/
