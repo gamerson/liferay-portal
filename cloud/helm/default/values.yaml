@@ -152,6 +152,11 @@ env:
 envFrom:
     -   secretRef:
             name: liferay-default
+extensions:
+    bucketPrefix: ""
+    bucketName: ""
+    dirs: []
+    enabled: false
 fullnameOverride: ""
 image:
     pullPolicy: IfNotPresent

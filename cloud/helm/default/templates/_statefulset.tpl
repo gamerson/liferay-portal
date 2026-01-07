@@ -88,6 +88,14 @@ spec:
                         {{- with .statefulset.volumeMounts }}
                         {{- toYaml . | nindent 22 }}
                         {{- end }}
+                        {{- if and .statefulset.extensions .statefulset.extensions.enabled }}
+                        {{- $extensions := .statefulset.extensions -}}
+                        {{- range $extensions.dirs }}
+                      - mountPath: /opt/liferay/{{ . }}
+                        name: {{ $extensions.bucketName }}
+                        subPath: {{ $extensions.bucketPrefix }}/{{ . }}
+                        {{- end }}
+                        {{- end }}
                         {{- range $k, $v := .statefulset.customVolumeMounts }}
                         {{- toYaml $v | nindent 22 }}
                         {{- end }}
@@ -144,6 +152,11 @@ spec:
             volumes:
                 {{- with .statefulset.volumes }}
                 {{- toYaml . | nindent 16 }}
+                {{- end }}
+                {{- if and .statefulset.extensions .statefulset.extensions.enabled }}
+                - name: {{ .statefulset.extensions.bucketName }}
+                  persistentVolumeClaim:
+                    claimName: {{ .statefulset.extensions.bucketName }}
                 {{- end }}
                 {{- range $k, $v := .statefulset.customVolumes }}
                 {{- toYaml $v | nindent 16 }}

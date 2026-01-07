@@ -1,0 +1,7 @@
+liferay-default:
+    extensions:
+        bucketPrefix: extensions_drop_01
+        bucketName: greg-test-49360a-extensions-20260106211939818700000001
+        dirs:
+            - osgi/client-extensions
+        enabled: true
