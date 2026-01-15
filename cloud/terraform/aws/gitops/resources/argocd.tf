@@ -11,6 +11,9 @@ resource "kubernetes_manifest" "infrastructure_provider_application" {
 		apiVersion="argoproj.io/v1alpha1"
 		kind="Application"
 		metadata={
+			annotations={
+				"argocd.argoproj.io/compare-options"="IgnoreExtraneous,ServerSideDiff=false"
+			}
 			finalizers=["resources-finalizer.argocd.argoproj.io"]
 			labels=merge(
 				local.common_labels,
@@ -78,7 +81,6 @@ resource "kubernetes_manifest" "infrastructure_provider_application" {
 				syncOptions=[
 					"CreateNamespace=true",
 					"ServerSideApply=true",
-					"ServerSideDiff=true",
 					"SkipDryRunOnMissingResource=true",
 					"Validate=false",
 				]
@@ -124,6 +126,9 @@ resource "kubernetes_manifest" "infrastructure_applicationset" {
 			]
 			template={
 				metadata={
+					annotations={
+						"argocd.argoproj.io/compare-options"="IgnoreExtraneous,ServerSideDiff=false"
+					}
 					name: "{{path[2]}}-{{path[4]}}-infra"
 				}
 				spec={
@@ -220,6 +225,9 @@ resource "kubernetes_manifest" "liferay_applicationset" {
 			]
 			template={
 				metadata={
+					annotations={
+						"argocd.argoproj.io/compare-options"="IgnoreExtraneous,ServerSideDiff=false"
+					}
 					name: "{{path[2]}}-{{path[4]}}-app"
 				}
 				spec={
@@ -344,6 +352,9 @@ resource "kubernetes_manifest" "liferay_appproject" {
 		apiVersion="argoproj.io/v1alpha1"
 		kind="AppProject"
 		metadata={
+			annotations={
+				"argocd.argoproj.io/compare-options"="IgnoreExtraneous,ServerSideDiff=false"
+			}
 			name=local.liferay_appproject_name
 			namespace=var.argocd_namespace
 			labels=merge(

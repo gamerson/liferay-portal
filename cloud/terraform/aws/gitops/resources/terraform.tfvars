@@ -1,3 +1,19 @@
-deployment_name="jared-test-7147"
-liferay_git_repo_url="https://github.com/jaredgorski/cloud-native-gitops-boilerplate.git"
+deployment_name="gregtest-20260115a"
+liferay_git_repo_config={
+	auth={
+		vault_secret_name="argocd/pat/gamerson"
+	},
+	source_paths={
+		base="liferay/projects/{{path[2]}}/base"
+		environments="liferay/projects/*/environments/*"
+		values_filename="liferay.yaml"
+	}
+}
+liferay_git_repo_url="https://github.com/gamerson/cloud-native-gitops-boilerplate.git"
 liferay_helm_chart_version="0.1.4"
+region="us-east-2"
+deploy_infrastructure_provider_application=true
+deploy_infrastructure_applicationset=true
+deploy_liferay_applicationset=true
+deploy_infrastructure_appproject=true
+deploy_liferay_appproject=true

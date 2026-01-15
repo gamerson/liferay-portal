@@ -15,17 +15,18 @@ resource "helm_release" "argocd" {
 				applicationSet={
 					resources={
 						requests={
-							cpu="100m"
-							memory="256Mi"
+							cpu="500m"
+							memory="1Gi"
 						}
 						limits={
-							cpu="500m"
-							memory="512Mi"
+							cpu="800m"
+							memory="2Gi"
 						}
 					}
 				}
 				configs={
 					cm={
+						"application.resourceTrackingMethod"="annotation"
 						"resource.exclusions"=yamlencode([
 							{
 								apiGroups=["*"]
@@ -90,8 +91,8 @@ resource "helm_release" "argocd" {
 					}
 					resources={
 						requests={
-							cpu="300m"
-							memory="512Mi"
+							cpu="500m"
+							memory="1Gi"
 						}
 						limits={
 							cpu="1000m"
@@ -101,6 +102,7 @@ resource "helm_release" "argocd" {
 					service={
 						type="ClusterIP"
 					}
+					extraArgs=["--insecure"]
 				}
 			}),
 	]
