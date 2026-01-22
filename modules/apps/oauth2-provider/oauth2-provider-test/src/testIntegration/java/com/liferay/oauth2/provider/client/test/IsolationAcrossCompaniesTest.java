@@ -17,7 +17,6 @@ import com.liferay.portal.test.log.LogCapture;
 import com.liferay.portal.test.log.LoggerTestUtil;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 
-import jakarta.ws.rs.NotAuthorizedException;
 import jakarta.ws.rs.client.Invocation;
 import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.Response;
@@ -41,7 +40,7 @@ public class IsolationAcrossCompaniesTest extends BaseClientTestCase {
 	public static final AggregateTestRule aggregateTestRule =
 		new LiferayIntegrationTestRule();
 
-	@Test(expected = NotAuthorizedException.class)
+	@Test
 	public void testAnnotated() throws Exception {
 		WebTarget webTarget = getWebTarget("/annotated");
 
@@ -59,9 +58,7 @@ public class IsolationAcrossCompaniesTest extends BaseClientTestCase {
 		builder = builder.header("Host", "host2.xyz");
 
 		try (LogCapture logCapture = LoggerTestUtil.configureLog4JLogger(
-				"com.liferay.oauth2.provider.rest.internal.endpoint.liferay." +
-					"LiferayOAuthDataProvider",
-				LoggerTestUtil.OFF)) {
+				"portal_web.docroot.errors.code_jsp", LoggerTestUtil.WARN)) {
 
 			Response response = builder.get();
 
@@ -69,7 +66,7 @@ public class IsolationAcrossCompaniesTest extends BaseClientTestCase {
 		}
 	}
 
-	@Test(expected = NotAuthorizedException.class)
+	@Test
 	public void testNoScopes() throws Exception {
 		WebTarget webTarget = getWebTarget("/no-scopes");
 
@@ -87,9 +84,7 @@ public class IsolationAcrossCompaniesTest extends BaseClientTestCase {
 		builder = builder.header("Host", "host2.xyz");
 
 		try (LogCapture logCapture = LoggerTestUtil.configureLog4JLogger(
-				"com.liferay.oauth2.provider.rest.internal.endpoint.liferay." +
-					"LiferayOAuthDataProvider",
-				LoggerTestUtil.OFF)) {
+				"portal_web.docroot.errors.code_jsp", LoggerTestUtil.WARN)) {
 
 			Response response = builder.get();
 

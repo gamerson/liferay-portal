@@ -1593,6 +1593,10 @@ public abstract class BatchTestClassGroup extends BaseTestClassGroup {
 						getBatchName(), new JSONObject(buildReportFileContent),
 						null);
 
+				if (downstreamBuildReport == null) {
+					continue;
+				}
+
 				List<DownstreamBuildReport> cachedDownstreamBuildReports =
 					_cachedDownstreamBuildReportsMap.computeIfAbsent(
 						downstreamBuildReport.getAxisName(),
