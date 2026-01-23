@@ -49,9 +49,16 @@ resource "kubernetes_manifest" "infrastructure_applicationset" {
 					project=local.infrastructure_appproject_name
 					sources=[
 						{
-							chart=var.infrastructure_helm_chart_config.image_name
 							helm={
 								parameters=[
+									{
+										name="aws.accountId"
+										value=local.account_id
+									},
+									{
+										name="deploymentName"
+										value=var.deployment_name
+									},
 									{
 										name="environmentId"
 										value=var.infrastructure_git_repo_config.target.slugEnvironmentId
@@ -68,6 +75,7 @@ resource "kubernetes_manifest" "infrastructure_applicationset" {
 							}
 							repoURL=var.infrastructure_helm_chart_config.image_url
 							targetRevision=var.infrastructure_helm_chart_config.version
+							path=var.infrastructure_helm_chart_config.path
 						},
 						{
 							ref="values"
@@ -167,7 +175,6 @@ resource "kubernetes_manifest" "infrastructure_provider_application" {
 			}
 			project=local.infrastructure_appproject_name
 			source={
-				chart=var.infrastructure_provider_helm_chart_config.image_name
 				helm={
 					parameters=[
 						{
@@ -206,6 +213,7 @@ resource "kubernetes_manifest" "infrastructure_provider_application" {
 				}
 				repoURL=var.infrastructure_provider_helm_chart_config.image_url
 				targetRevision=var.infrastructure_provider_helm_chart_config.version
+				path=var.infrastructure_provider_helm_chart_config.path
 			}
 			syncPolicy={
 				automated={
