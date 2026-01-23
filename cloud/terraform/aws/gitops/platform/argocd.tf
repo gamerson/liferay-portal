@@ -38,6 +38,7 @@ resource "helm_release" "argocd" {
 									kinds=["ManagedResourceDefinition"]
 								},
 							])
+						"server.insecure"="true"
 					}
 				}
 				controller={
@@ -81,6 +82,14 @@ resource "helm_release" "argocd" {
 					livenessProbe={
 						initialDelaySeconds=90
 						timeoutSeconds=5
+					}
+					ingress={
+						enabled=true
+						annotations={
+							"nginx.ingress.kubernetes.io/force-ssl-redirect"="false"
+						}
+						ingressClassName="nginx"
+						hostname="argocd-server.runray.xyz"
 					}
 					readinessProbe={
 						initialDelaySeconds=60
