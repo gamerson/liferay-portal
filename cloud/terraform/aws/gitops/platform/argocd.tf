@@ -38,6 +38,8 @@ resource "helm_release" "argocd" {
 									kinds=["ManagedResourceDefinition"]
 								},
 							])
+					}
+					params={
 						"server.insecure"="true"
 					}
 				}
@@ -87,6 +89,7 @@ resource "helm_release" "argocd" {
 						enabled=true
 						annotations={
 							"nginx.ingress.kubernetes.io/force-ssl-redirect"="false"
+							"nginx.ingress.kubernetes.io/ssl-redirect"="false"
 						}
 						ingressClassName="nginx"
 						hostname="argocd-server.runray.xyz"
