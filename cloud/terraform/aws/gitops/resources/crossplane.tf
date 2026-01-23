@@ -53,6 +53,7 @@ resource "aws_iam_policy" "provider_aws_iam_policy" {
 					"iam:ListAccessKeys",
 					"iam:ListAttachedRolePolicies",
 					"iam:ListAttachedUserPolicies",
+					"iam:ListGroupsForUser",
 					"iam:ListPolicyVersions",
 					"iam:ListUserPolicies",
 					"iam:PutUserPolicy",
