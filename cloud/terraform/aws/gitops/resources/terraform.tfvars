@@ -1,4 +1,4 @@
-deployment_name="gma-lcd49553d"
+deployment_name="gma-lcd49553e"
 liferay_git_repo_config={
 	auth={
 		vault_secret_name="argocd/pat/gamerson_sko_demo_test"
