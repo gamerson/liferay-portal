@@ -1,0 +1,11 @@
+arn_partition = "aws"
+cluster_name = "gma-lcd49553e-eks"
+deployment_name = "gma-lcd49553e"
+deployment_namespace = "liferay-system"
+liferay_sa_role_arn = "arn:aws:iam::713881832303:role/gma-lcd49553e-irsa"
+liferay_sa_role_name = "gma-lcd49553e-irsa"
+private_subnet_ids = [
+  "subnet-03233bf557f13e09e",
+  "subnet-08d1cb0b7a196f991",
+]
+region = "us-east-2"
