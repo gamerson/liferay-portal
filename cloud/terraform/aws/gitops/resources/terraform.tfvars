@@ -1,0 +1,51 @@
+deployment_name="gma-lcd49553d"
+liferay_git_repo_config={
+	auth={
+		vault_secret_name="argocd/pat/gamerson_sko_demo_test"
+	}
+	revision="LCD-49553d"
+	source_paths={
+		base="liferay/projects/{{path[2]}}/base"
+		environments="liferay/projects/*/environments/*"
+		values_filename="liferay.yaml"
+	}
+	target={
+		name="{{path[2]}}-{{path[4]}}-liferay"
+		namespace="{{path[2]}}-{{path[4]}}"
+		slugEnvironmentId="{{path[4]}}"
+		slugProjectId="{{path[2]}}"
+	}
+}
+infrastructure_git_repo_config={
+	auth={
+		vault_secret_name="argocd/pat/gamerson_sko_demo_test"
+	}
+	revision="LCD-49553d"
+	source_paths={
+		base="liferay/projects/{{path[2]}}/base"
+		environments="liferay/projects/*/environments/*"
+		values_filename="infrastructure.yaml"
+	}
+	target={
+		name="{{path[2]}}-{{path[4]}}-infra"
+		namespace="{{path[2]}}-{{path[4]}}"
+		slugEnvironmentId="{{path[4]}}"
+		slugProjectId="{{path[2]}}"
+	}
+	url="https://github.com/gamerson/cloud-native-gitops-boilerplate.git"
+}
+liferay_git_repo_url="https://github.com/gamerson/cloud-native-gitops-boilerplate.git"
+infrastructure_helm_chart_config={
+	image_name="liferay-aws-infrastructure"
+	image_url="https://github.com/gamerson/cloud-native-gitops-boilerplate.git"
+	path="charts/aws-infrastructure/"
+	version="LCD-49553d"
+}
+infrastructure_provider_helm_chart_config={
+	image_name="liferay-aws-infrastructure-provider"
+	image_url="https://github.com/gamerson/cloud-native-gitops-boilerplate.git"
+	path="charts/aws-infrastructure-provider/"
+	version="LCD-49553d"
+}
+liferay_helm_chart_version="0.1.6"
+region="us-east-2"
