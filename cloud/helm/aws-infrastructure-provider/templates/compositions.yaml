@@ -70,7 +70,7 @@ spec:
                                         projectId: {{ $projectId }}
                                         slot: {{ $slot }}
                                 engine: postgres
-                                engineVersion: {{ $spec.engineVersion }}
+                                engineVersion: {{ $spec.engineVersion | quote }}
                                 identifier: {{ $baseName }}-database-{{ $slot }}
                                 instanceClass: {{ $spec.instanceClass }}
                                 multiAz: false
@@ -500,22 +500,22 @@ spec:
                             forProvider:
                                 policy: |
                                     {
-                                        Statement: [
+                                        "Statement": [
                                             {
-                                                Action: [
+                                                "Action": [
                                                     "s3:DeleteObject",
                                                     "s3:GetObject",
                                                     "s3:ListBucket",
                                                     "s3:PutObject"
                                                 ],
-                                                Effect: "Allow",
-                                                Resource: [
+                                                "Effect": "Allow",
+                                                "Resource": [
                                                     "arn:aws:s3:::{{ $storageName }}-{{ $slot }}",
                                                     "arn:aws:s3:::{{ $storageName }}-{{ $slot }}/*"
                                                 ]
                                             }
                                         ],
-                                        Version: 2012-10-17
+                                        "Version": "2012-10-17"
                                     }
                             managementPolicies: {{ $managementPolicies }}
                         ---
@@ -589,7 +589,7 @@ spec:
                                     volumeType: gp3
                                 encryptAtRest:
                                     enabled: true
-                                engineVersion: {{ $searchSpec.engineVersion }}
+                                engineVersion: {{ $searchSpec.engineVersion | quote }}
                                 nodeToNodeEncryption:
                                     enabled: true
                                 region: {{ $searchSpec.region }}
@@ -623,15 +623,15 @@ spec:
                             forProvider:
                                 accessPolicies: |
                                     {
-                                        Version: "2012-10-17",
-                                        Statement: [
+                                        "Version": "2012-10-17",
+                                        "Statement": [
                                             {
-                                                Action: "es:*",
-                                                Effect: "Allow",
-                                                Principal: {
-                                                    AWS: "*"
+                                                "Action": "es:*",
+                                                "Effect": "Allow",
+                                                "Principal": {
+                                                    "AWS": "*"
                                                 },
-                                                Resource: arn:aws:es:{{ $searchSpec.region }}:{{ $accountId }}:domain/{{ $searchName }}/*
+                                                "Resource": "arn:aws:es:{{ $searchSpec.region }}:{{ $accountId }}:domain/{{ $searchName }}/*"
                                             }
                                         ]
                                     }
