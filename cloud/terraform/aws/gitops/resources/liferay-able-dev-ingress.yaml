@@ -5,12 +5,8 @@ metadata:
     nginx.ingress.kubernetes.io/backend-protocol: HTTP
     nginx.ingress.kubernetes.io/rewrite-target: /
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
-  creationTimestamp: "2026-01-27T01:49:59Z"
-  generation: 2
   name: liferay-default
   namespace: liferay-able-dev
-  resourceVersion: "240687"
-  uid: 5db58bc3-a616-4e16-87b4-f0ab35bfe024
 spec:
   ingressClassName: nginx
   rules:
@@ -28,7 +24,3 @@ spec:
   - hosts:
     - liferay-able-dev.runray.xyz
     secretName: runray.xyz-tls
-status:
-  loadBalancer:
-    ingress:
-    - hostname: k8s-nginxing-nginxing-3b5c4dfc6d-fa15776a695410d8.elb.us-east-2.amazonaws.com
