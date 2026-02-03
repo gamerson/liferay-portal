@@ -148,6 +148,7 @@ customInitContainers:
                     name: liferay-wait-on-services
 customLabels:
     origin: liferay-cloud
+customObjects: {}
 customPorts: {}
 customPullSecrets: {}
 customServicePorts: {}
