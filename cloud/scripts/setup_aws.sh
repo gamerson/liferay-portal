@@ -4,11 +4,9 @@ set -eux
 
 root_cloud_dir="$(dirname "$0")/.."
 
-# Capture the input argument
 INPUT_FILE="${1:-}"
 TFVARS_ARG=""
 
-# If it ends in .tfvars, we prepare the argument using an absolute path
 if [[ "$INPUT_FILE" == *.tfvars ]]; then
 	TFVARS_ARG="-var-file=$(realpath "$INPUT_FILE")"
 fi
@@ -22,8 +20,7 @@ function main {
 
 	aws sso login
 
-	local deployment_info
-	deployment_info=$(setup_aws_eks)
+	local deployment_info=$(setup_aws_eks)
 
 	echo $deployment_info
 

@@ -23,7 +23,7 @@ jobs:
                 run: |
                     set -e
 
-                    CURRENT_VERSION=$(jq '."aws-bootstrap"' versions.json)
+                    CURRENT_VERSION=$(jq -r '."aws-bootstrap"' versions.json)
 
                     if ! gcloud artifacts tags list \
                         --package=liferay-aws-bootstrap \
@@ -46,13 +46,12 @@ jobs:
                 run: |
                     set -e
 
-                    OUTPUT_FILE=/tmp/aws-bootstrap-${CURRENT_VERSION}.tar.gz
+                    OUTPUT_FILE="/tmp/aws-bootstrap-${CURRENT_VERSION}.tar.gz"
 
                     tar \
                         --create \
-                        --file \
+                        --file ${OUTPUT_FILE} \
                         --verbose \
-                        ${OUTPUT_FILE} \
                         ./scripts/setup_aws.sh \
                         ./terraform/aws/eks/*.tf \
                         ./terraform/aws/gitops/platform/*.tf \
