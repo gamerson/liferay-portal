@@ -46,7 +46,7 @@ jobs:
                 run: |
                     set -eux
 
-                    OUTPUT_FILENAME="aws-bootstrap-${CURRENT_VERSION}.tar.gz"
+                    OUTPUT_FILENAME="liferay-aws-bootstrap-${CURRENT_VERSION}.tar.gz"
                     OUTPUT_LOCATION="/tmp/${OUTPUT_FILENAME}"
 
                     tar \
