@@ -25,7 +25,7 @@ jobs:
 
                     CURRENT_VERSION=$(jq -r '."aws-bootstrap"' versions.json)
 
-                    if ! gcloud artifacts tags list \
+                    if ! gcloud artifacts versions list \
                         --package=liferay-aws-bootstrap \
                         --repository=bootstrap-scripts \
                         --project=liferaycloud-research \
