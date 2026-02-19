@@ -21,7 +21,7 @@ jobs:
             -   id: verify_version
                 name: Verify version
                 run: |
-                    set -e
+                    set -eux
 
                     CURRENT_VERSION=$(jq -r '."aws-bootstrap"' versions.json)
 
@@ -44,7 +44,7 @@ jobs:
             -   if: ${{steps.verify_version.outputs.should_publish == 'true'}}
                 name: Package and push aws bootstrap script
                 run: |
-                    set -e
+                    set -eux
 
                     OUTPUT_FILENAME="aws-bootstrap-${CURRENT_VERSION}.tar.gz"
                     OUTPUT_LOCATION="/tmp/${OUTPUT_FILENAME}"
@@ -73,5 +73,5 @@ on:
             -   .github/workflows/ci-publish-cloud-scripts.yaml
             -   cloud/scripts/**
             -   cloud/terraform/aws/**
-permissions:
-    id-token: write
+#permissions:
+#    id-token: write
