@@ -62,7 +62,7 @@ jobs:
                         --repository=bootstrap-scripts \
                         --location=us-central1 \
                         --package=my-app-bootstrap \
-                        --version="${CURRENT_VERSION} \
+                        --version="${CURRENT_VERSION}" \
                         --file="${OUTPUT_LOCATION}"
                 working-directory: ./cloud
 on:
