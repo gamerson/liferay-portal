@@ -1,0 +1,76 @@
+defaults:
+    run:
+        shell: bash
+jobs:
+    publish-aws-bootstrap:
+        if: ${{github.repository == 'gamerson/liferay-portal'}}
+        runs-on: ubuntu-latest
+        steps:
+            -   name: Checkout code
+                uses: actions/checkout@v4
+            -   name: Authenticate to Google Cloud
+                id: 'auth'
+                uses: 'google-github-actions/auth@v2'
+                with:
+                    workload_identity_provider: 'projects/145157750604/locations/global/workloadIdentityPools/github-pool/providers/github-provider'
+                    service_account: 'github-actions-uploader@liferaycloud-research.iam.gserviceaccount.com'
+            -   name: Set up gcloud CLI
+                uses: 'google-github-actions/setup-gcloud@v2'
+                with:
+                    project_id: 'liferaycloud-research'
+            -   id: verify_version
+                name: Verify version
+                run: |
+                    set -e
+
+                    CURRENT_VERSION=$(jq '."aws-bootstrap"' versions.json)
+
+                    if ! gcloud artifacts tags list \
+                        --package=liferay-aws-bootstrap \
+                        --repository=bootstrap-scripts \
+                        --project=liferaycloud-research \
+                        --location=us-central1 \
+                        --quiet | grep -e "^${CURRENT_VERSION}\s" >/dev/null 2>&1
+                    then
+                        echo "Verified version ${CURRENT_VERSION}."
+
+                        echo "CURRENT_VERSION=${CURRENT_VERSION}" >> ${GITHUB_ENV}
+
+                        echo "should_publish=true" >> ${GITHUB_OUTPUT}
+                    else
+                        echo "Version ${CURRENT_VERSION} already exists. Skipping publish."
+                    fi
+                working-directory: ./cloud/scripts
+            -   if: ${{steps.verify_version.outputs.should_publish == 'true'}}
+                name: Package and push aws bootstrap script
+                run: |
+                    set -e
+
+                    OUTPUT_FILE=/tmp/aws-bootstrap-${CURRENT_VERSION}.tar.gz
+
+                    tar \
+                        --create \
+                        --file \
+                        --verbose \
+                        ${OUTPUT_FILE} \
+                        ./scripts/setup_aws.sh \
+                        ./terraform/aws/eks/*.tf \
+                        ./terraform/aws/gitops/platform/*.tf \
+                        ./terraform/aws/gitops/resources/*.tf
+
+                    gcloud artifacts generic upload \
+                        --location=us-central-1 \
+                        --package=liferay-aws-bootstrap \
+                        --repository=bootstrap-scripts \
+                        --source=${OUTPUT_FILE} \
+                        --version=${CURRENT_VERSION}
+                working-directory: ./cloud
+on:
+    push:
+        branches:
+            -   LCD-49898
+        paths:
+            -   cloud/scripts/**
+            -   cloud/terraform/aws/**
+permissions:
+    id-token: write
