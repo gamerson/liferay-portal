@@ -60,7 +60,7 @@ jobs:
 
                     gcloud artifacts generic upload \
                         --location=us-central1 \
-                        --package=my-app-bootstrap \
+                        --package=liferay-aws-bootstrap \
                         --repository=bootstrap-scripts \
                         --source="${OUTPUT_LOCATION}" \
                         --version="${CURRENT_VERSION}"
