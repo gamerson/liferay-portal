@@ -46,29 +46,31 @@ jobs:
                 run: |
                     set -e
 
-                    OUTPUT_FILE="/tmp/aws-bootstrap-${CURRENT_VERSION}.tar.gz"
+                    OUTPUT_FILENAME="aws-bootstrap-${CURRENT_VERSION}.tar.gz"
+                    OUTPUT_LOCATION="/tmp/${OUTPUT_FILENAME}"
 
                     tar \
                         --create \
-                        --file ${OUTPUT_FILE} \
+                        --file ${OUTPUT_LOCATION} \
                         --verbose \
                         ./scripts/setup_aws.sh \
                         ./terraform/aws/eks/*.tf \
                         ./terraform/aws/gitops/platform/*.tf \
                         ./terraform/aws/gitops/resources/*.tf
 
-                    gcloud artifacts generic upload \
-                        --location=us-central-1 \
-                        --package=liferay-aws-bootstrap \
+                    gcloud artifacts generic upload "${OUTPUT_FILE}" \
                         --repository=bootstrap-scripts \
-                        --source=${OUTPUT_FILE} \
-                        --version=${CURRENT_VERSION}
+                        --location=us-central1 \
+                        --package=my-app-bootstrap \
+                        --version="${CURRENT_VERSION} \
+                        --file="${OUTPUT_LOCATION}"
                 working-directory: ./cloud
 on:
     push:
         branches:
             -   LCD-49898
         paths:
+            -   .github/workflows/ci-publish-cloud-scripts.yaml
             -   cloud/scripts/**
             -   cloud/terraform/aws/**
 permissions:
