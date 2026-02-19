@@ -58,12 +58,12 @@ jobs:
                         ./terraform/aws/gitops/platform/*.tf \
                         ./terraform/aws/gitops/resources/*.tf
 
-                    gcloud artifacts generic upload "${OUTPUT_FILE}" \
-                        --repository=bootstrap-scripts \
+                    gcloud artifacts generic upload \
                         --location=us-central1 \
                         --package=my-app-bootstrap \
-                        --version="${CURRENT_VERSION}" \
-                        --file="${OUTPUT_LOCATION}"
+                        --repository=bootstrap-scripts \
+                        --source="${OUTPUT_LOCATION}" \
+                        --version="${CURRENT_VERSION}"
                 working-directory: ./cloud
 on:
     push:
