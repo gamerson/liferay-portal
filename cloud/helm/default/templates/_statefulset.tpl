@@ -208,8 +208,8 @@ spec:
                         value: /
             {{- with .statefulset.network.timeouts }}
             timeouts:
-                request: {{ .request }}
                 backendRequest: {{ .backendRequest }}
+                request: {{ .request }}
             {{- end }}
         {{- with .statefulset.network.extraRules }}
         {{- toYaml . | nindent 8 }}
@@ -232,11 +232,12 @@ spec:
             name: {{ .statefulset.network.gatewayName }}
             sectionName: http
     rules:
-        -   filters:
-            -   requestRedirect:
+        -   -
+                requestRedirect:
                     scheme: https
                     statusCode: 301
                 type: RequestRedirect
+            filters:
 {{- end }}
 {{- end }}
 ---
