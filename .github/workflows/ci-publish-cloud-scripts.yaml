@@ -52,6 +52,7 @@ jobs:
                     tar \
                         --create \
                         --file ${OUTPUT_LOCATION} \
+                        --gzip \
                         --verbose \
                         ./scripts/setup_aws.sh \
                         ./terraform/aws/eks/*.tf \
