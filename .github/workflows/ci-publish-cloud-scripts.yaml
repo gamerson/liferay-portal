@@ -3,7 +3,7 @@ defaults:
         shell: bash
 jobs:
     publish-liferay-aws-bootstrap:
-        if: ${{github.repository == 'liferay/liferay-portal'}}
+        if: ${{github.repository == 'gamerson/liferay-portal'}}
         runs-on: ubuntu-latest
         steps:
             -   name: Checkout code
@@ -21,13 +21,11 @@ jobs:
                 name: Verify version
                 run: |
                     CURRENT_VERSION=$(jq -r '."liferay-aws-bootstrap"' ./scripts/versions.json)
+                    GCS_BUCKET_NAME="liferay-cloud-native-bootstrap-nonprd"
+                    PACKAGE_NAME="liferay-aws-bootstrap"
+                    GCS_PATH="gs://${GCS_BUCKET_NAME}/${PACKAGE_NAME}/${PACKAGE_NAME}-${CURRENT_VERSION}.tar.gz"
 
-                    if ! gcloud artifacts versions list \
-                        --location=${LOCATION} \
-                        --package=liferay-aws-bootstrap \
-                        --project=${GCP_PROJECT_ID} \
-                        --quiet \
-                        --repository=${GAR_REPOSITORY_NAME} | grep -e "^${CURRENT_VERSION}\s" >/dev/null 2>&1
+                    if ! gsutil --quiet ${GCS_PATH}
                     then
                         echo "Verified version ${CURRENT_VERSION}."
 
@@ -41,8 +39,6 @@ jobs:
             -   if: ${{steps.verify_version.outputs.should_publish == 'true'}}
                 name: Package and push AWS bootstrap scripts
                 run: |
-                    set -eux
-
                     OUTPUT_FILENAME="liferay-aws-bootstrap-${CURRENT_VERSION}.tar.gz"
                     OUTPUT_LOCATION="/tmp/${OUTPUT_FILENAME}"
 
@@ -55,19 +51,21 @@ jobs:
                         ./terraform/aws/gitops/platform/*.tf \
                         ./terraform/aws/gitops/resources/*.tf
 
-                    gcloud artifacts generic upload \
-                        --location=${LOCATION} \
-                        --package=liferay-aws-bootstrap \
-                        --repository=${GAR_REPOSITORY_NAME} \
-                        --source="${OUTPUT_LOCATION}" \
-                        --version="${CURRENT_VERSION}"
+                    GCS_BUCKET_NAME="liferay-cloud-native-bootstrap-nonprd"
+                    PACKAGE_NAME="liferay-aws-bootstrap"
+                    GCS_DEST_PATH="gs://${GCS_BUCKET_NAME}/${PACKAGE_NAME}/${PACKAGE_NAME}-${CURRENT_VERSION}.tar.gz"
+
+                    gcloud storage cp \
+                        ${OUTPUT_LOCATION} \
+                        ${GCS_DEST_PATH}
                 working-directory: ./cloud
 on:
     push:
         branches:
-            -   master
+            -   LCD-49898-gcs-test
         paths:
             -   .github/workflows/ci-publish-cloud-scripts.yaml
+            -   cloud/scripts/versions.json
             -   cloud/terraform/aws/eks/*
             -   cloud/terraform/aws/gitops/platform/*
             -   cloud/terraform/aws/gitops/resources/*
