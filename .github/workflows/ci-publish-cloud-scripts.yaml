@@ -9,14 +9,15 @@ jobs:
             -   name: Checkout code
                 uses: actions/checkout@v4
             -   name: Authenticate to Google Cloud
+                id: 'auth'
                 uses: 'google-github-actions/auth@v2'
                 with:
-                    service_account: '${secrets.GCP_GITHUB_ACTIONS_UPLOADER_SA}'
-                    workload_identity_provider: 'projects/${secrets.GCP_PROJECT_ID}/locations/global/workloadIdentityPools/${secrets.GCP_WORKLOAD_IDENTITY_POOL_NAME}/providers/${secrets.GCP_GITHUB_PROVIDER_NAME}'
+                    workload_identity_provider: 'projects/145157750604/locations/global/workloadIdentityPools/github-actions-pool/providers/github-provider'
+                    service_account: 'github-actions-uploader@liferaycloud-research.iam.gserviceaccount.com'
             -   name: Set up gcloud CLI
                 uses: 'google-github-actions/setup-gcloud@v2'
                 with:
-                    project_id: '${secrets.GCP_PROJECT_NAME}'
+                    project_id: 'liferaycloud-research'
             -   id: verify_version
                 name: Verify version
                 run: |
