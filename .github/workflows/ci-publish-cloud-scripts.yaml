@@ -9,7 +9,6 @@ jobs:
             -   name: Checkout code
                 uses: actions/checkout@v4
             -   name: Authenticate to Google Cloud
-                id: 'auth'
                 uses: 'google-github-actions/auth@v2'
                 with:
                     workload_identity_provider: 'projects/145157750604/locations/global/workloadIdentityPools/github-actions-pool/providers/github-provider'
@@ -18,14 +17,14 @@ jobs:
                 uses: 'google-github-actions/setup-gcloud@v2'
                 with:
                     project_id: 'liferaycloud-research'
-            -   id: verify_version
-                name: Verify version
+            -   name: Set up variables
                 run: |
-                    CURRENT_VERSION=$(jq -r '."liferay-aws-bootstrap"' ./scripts/versions.json)
-                    GCS_BUCKET_NAME="liferay-cloud-native-bootstrap-nonprd"
-                    PACKAGE_NAME="liferay-aws-bootstrap"
-                    GCS_PATH="gs://${GCS_BUCKET_NAME}/${PACKAGE_NAME}/${PACKAGE_NAME}-${CURRENT_VERSION}.tar.gz"
-
+                    echo "CURRENT_VERSION=$(jq -r '."liferay-aws-bootstrap"' ./scripts/versions.json)" >> $GITHUB_ENV
+                    echo "GCS_BASE_PATH=liferay-cloud-native-bootstrap-nonprd/bootstrap" >> $GITHUB_ENV
+                    echo "PACKAGE_NAME=liferay-aws-bootstrap" >> $GITHUB_ENV
+                    echo "GCS_PATH=gs://${GCS_BASE_PATH}/${PACKAGE_NAME}/${PACKAGE_NAME}-${CURRENT_VERSION}.tar.gz" >> $GITHUB_ENV
+            -   name: Verify version
+                run: |
                     if ! gsutil --quiet stat ${GCS_PATH}
                     then
                         echo "Verified version ${CURRENT_VERSION}."
@@ -52,13 +51,9 @@ jobs:
                         ./terraform/aws/gitops/platform/*.tf \
                         ./terraform/aws/gitops/resources/*.tf
 
-                    GCS_BUCKET_NAME="liferay-cloud-native-bootstrap-nonprd"
-                    PACKAGE_NAME="liferay-aws-bootstrap"
-                    GCS_DEST_PATH="gs://${GCS_BUCKET_NAME}/${PACKAGE_NAME}/${PACKAGE_NAME}-${CURRENT_VERSION}.tar.gz"
-
                     gcloud storage cp \
                         ${OUTPUT_LOCATION} \
-                        ${GCS_DEST_PATH}
+                        ${GCS_PATH}
                 working-directory: ./cloud
 on:
     push:
