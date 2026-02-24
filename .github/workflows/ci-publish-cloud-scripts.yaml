@@ -19,7 +19,7 @@ jobs:
                     project_id: 'liferaycloud-research'
             -   name: Set up variables
                 run: |
-                    echo "CURRENT_VERSION=$(jq -r '."liferay-aws-bootstrap"' ./scripts/versions.json)" >> $GITHUB_ENV
+                    echo "CURRENT_VERSION=$(jq -r '."liferay-aws-bootstrap"' ./cloud/scripts/versions.json)" >> $GITHUB_ENV
                     echo "GCS_BASE_PATH=liferay-cloud-native-bootstrap-nonprd/bootstrap" >> $GITHUB_ENV
                     echo "PACKAGE_NAME=liferay-aws-bootstrap" >> $GITHUB_ENV
                     echo "GCS_PATH=gs://${GCS_BASE_PATH}/${PACKAGE_NAME}/${PACKAGE_NAME}-${CURRENT_VERSION}.tar.gz" >> $GITHUB_ENV
@@ -35,7 +35,6 @@ jobs:
                     else
                         echo "Version ${CURRENT_VERSION} already exists. Skipping publish."
                     fi
-                working-directory: ./cloud
             -   if: ${{steps.verify_version.outputs.should_publish == 'true'}}
                 name: Package and push AWS bootstrap scripts
                 run: |
@@ -47,14 +46,13 @@ jobs:
                         --file ${OUTPUT_LOCATION} \
                         --gzip \
                         --verbose \
-                        ./terraform/aws/eks/*.tf \
-                        ./terraform/aws/gitops/platform/*.tf \
-                        ./terraform/aws/gitops/resources/*.tf
+                        ./cloud/terraform/aws/eks/*.tf \
+                        ./cloud/terraform/aws/gitops/platform/*.tf \
+                        ./cloud/terraform/aws/gitops/resources/*.tf
 
                     gcloud storage cp \
                         ${OUTPUT_LOCATION} \
                         ${GCS_PATH}
-                working-directory: ./cloud
 on:
     push:
         branches:
