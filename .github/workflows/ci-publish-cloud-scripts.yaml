@@ -19,10 +19,15 @@ jobs:
                     project_id: 'liferaycloud-research'
             -   name: Set up variables
                 run: |
-                    echo "CURRENT_VERSION=$(jq -r '."liferay-aws-bootstrap"' ./cloud/scripts/versions.json)" >> $GITHUB_ENV
-                    echo "GCS_BASE_PATH=liferay-cloud-native-bootstrap-nonprd/bootstrap" >> $GITHUB_ENV
-                    echo "PACKAGE_NAME=liferay-aws-bootstrap" >> $GITHUB_ENV
-                    echo "GCS_PATH=gs://${GCS_BASE_PATH}/${PACKAGE_NAME}/${PACKAGE_NAME}-${CURRENT_VERSION}.tar.gz" >> $GITHUB_ENV
+                    CURRENT_VERSION="$(jq -r '."liferay-aws-bootstrap"' ./cloud/scripts/versions.json)"
+                    GCS_BASE_PATH="liferay-cloud-native-bootstrap-nonprd/bootstrap"
+                    PACKAGE_NAME="liferay-aws-bootstrap"
+                    GCS_PATH="gs://${GCS_BASE_PATH}/${PACKAGE_NAME}/${PACKAGE_NAME}-${CURRENT_VERSION}.tar.gz"
+
+                    echo "CURRENT_VERSION=${CURRENT_VERSION}" >> $GITHUB_ENV
+                    echo "GCS_BASE_PATH=${GCS_BASE_PATH}" >> $GITHUB_ENV
+                    echo "PACKAGE_NAME=${PACKAGE_NAME}" >> $GITHUB_ENV
+                    echo "GCS_PATH=${GCS_PATH}" >> $GITHUB_ENV
             -   name: Verify version
                 run: |
                     if ! gsutil --quiet stat ${GCS_PATH}
