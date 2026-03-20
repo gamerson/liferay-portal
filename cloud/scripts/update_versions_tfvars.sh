@@ -19,8 +19,6 @@ function main {
 
 	echo "${terraform_tfvars_files}" | while read -r tfvars_file
 	do
-		[[ -z "${tfvars_file}" ]] && continue
-
 		cat "${tfvars_file}" >> "${_VERSIONS_TFVARS_FILE}"
 
 		echo "" >> "${_VERSIONS_TFVARS_FILE}"
