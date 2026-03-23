@@ -97,11 +97,11 @@ function _check_chart_yaml {
 
 	local commit_count
 
-	commit_count=$(git rev-list --count "${target_sha}..HEAD" -- "${helm_dir}")
+	commit_count=$(git rev-list --count "${git_blame_sha}..HEAD" -- "${helm_dir}")
 
 	if [[ "${commit_count}" -gt 0 ]]
 	then
-		git rev-list --oneline "${target_sha}..HEAD" -- "${helm_dir}"
+		git rev-list --oneline "${git_blame_sha}..HEAD" -- "${helm_dir}"
 
 		echo "The version in ${helm_chart_yaml} is outdated."
 		echo ""
