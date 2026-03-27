@@ -21,9 +21,9 @@ function main {
 		_check_chart_yaml "$(dirname "${chart_yaml_file}")"
 	done
 
-	_update_versions_tfvars "${_ROOT_CLOUD_DIR}/terraform/aws" "${_ROOT_CLOUD_DIR}/scripts/versions_aws.tfvars"
+	_update_versions_tfvars "${_ROOT_CLOUD_DIR}/terraform/aws" "${_VERSIONS_AWS_TFVARS_FILE}"
 
-	_update_versions_tfvars "${_ROOT_CLOUD_DIR}/terraform/gcp" "${_ROOT_CLOUD_DIR}/scripts/versions_gcp.tfvars"
+	_update_versions_tfvars "${_ROOT_CLOUD_DIR}/terraform/gcp" "${_VERSIONS_GCP_TFVARS_FILE}"
 
 	local aws_bootstrap_sources=(
 		"${_ROOT_CLOUD_DIR}/scripts/setup_aws.sh"
@@ -109,16 +109,14 @@ function _check_bootstrap {
 		if [[ "${commit_count}" -gt 0 ]]; then
 			git rev-list --oneline "${git_blame_sha}..HEAD" -- "${clean_source}"
 
-			echo "The version in ${_VERSIONS_JSON_FILE} is outdated. Updating liferay-${bootstrap_name}-bootstrap version."
-			echo ""
+			echo "The version in ${_VERSIONS_JSON_FILE} is outdated. Updating liferay-${bootstrap_name}-bootstrap version." >&2
+			echo "" >&2
 
 			_bump_bootstrap_version "${bootstrap_name}"
 
 			exit 0
 		fi
 	done
-
-	_bump_bootstrap_version "${bootstrap_name}"
 }
 
 function _check_chart_yaml {
@@ -138,14 +136,14 @@ function _check_chart_yaml {
 	then
 		git rev-list --oneline "${git_blame_sha}..HEAD" -- "${helm_dir}"
 
-		echo "The version in ${helm_chart_yaml} is outdated."
-		echo ""
+		echo "The version in ${helm_chart_yaml} is outdated." >&2
+		echo "" >&2
 
 		local new_version
 
 		new_version=$(_bump_chart_yaml_version "${helm_chart_yaml}")
 
-		echo "Updating ${helm_chart_yaml} to new version ${new_version}."
+		echo "Updating ${helm_chart_yaml} to new version ${new_version}." >&2
 
 		_update_default_chart_version "${helm_chart_yaml}" "${new_version}"
 	fi
