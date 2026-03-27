@@ -114,7 +114,7 @@ function _check_bootstrap {
 
 			_bump_bootstrap_version "${bootstrap_name}"
 
-			exit 0
+			return
 		fi
 	done
 }
