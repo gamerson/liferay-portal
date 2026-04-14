@@ -5,10 +5,13 @@ jobs:
     publish:
         env:
             GITHUB_TOKEN: ${{github.token}}
+            IS_STAGING: ${{github.repository == 'pt-cloudnative/liferay-portal' && github.ref_name == 'staging'}}
         runs-on: ubuntu-latest
         steps:
             -   name: Checkout code
                 uses: actions/checkout@v4
+                with:
+                    fetch-depth: 0
             -   id: verify_version
                 name: Verify Helm chart version
                 run: |
@@ -16,13 +19,22 @@ jobs:
 
                     CHART_VERSION=$(cat ./Chart.yaml | yq .version)
 
-                    echo "Verifying Helm chart version ${CHART_VERSION}."
+                    if [[ "${{env.IS_STAGING}}" == "true" ]]
+                    then
+                        REGISTRY="ghcr.io/${{github.repository_owner}}/charts"
+                    else
+                        REGISTRY="${{inputs.registry}}"
+                    fi
 
-                    if ! helm show readme "oci://${{inputs.registry}}/${{inputs.chart_name}}:${CHART_VERSION}" >/dev/null 2>&1
+                    echo "Verifying Helm chart version ${CHART_VERSION} in ${REGISTRY}."
+
+                    if ! helm show readme "oci://${REGISTRY}/${{inputs.chart_name}}:${CHART_VERSION}" >/dev/null 2>&1
                     then
                         echo "Verified Helm Chart version ${CHART_VERSION}."
 
                         echo "CHART_VERSION=${CHART_VERSION}" >> ${GITHUB_ENV}
+
+                        echo "registry=${REGISTRY}" >> ${GITHUB_OUTPUT}
 
                         echo "should_publish=true" >> ${GITHUB_OUTPUT}
                     else
@@ -30,20 +42,27 @@ jobs:
                     fi
                 working-directory: ${{inputs.working_directory}}
             -   id: auth
-                if: ${{steps.verify_version.outputs.should_publish == 'true'}}
+                if: ${{steps.verify_version.outputs.should_publish == 'true' && env.IS_STAGING == 'false'}}
                 name: Authenticate to Google Cloud
                 uses: google-github-actions/auth@v2
                 with:
                     service_account: ${{secrets.GCP_SA}}
                     token_format: access_token
                     workload_identity_provider: ${{secrets.GCP_WORKLOAD_IDENTITY_PROVIDER}}
-            -   if: ${{steps.verify_version.outputs.should_publish == 'true'}}
+            -   if: ${{steps.verify_version.outputs.should_publish == 'true' && env.IS_STAGING == 'false'}}
                 name: Log in to GAR
                 run: |
                     echo "${{steps.auth.outputs.access_token}}" \
                         | helm registry login "${{inputs.registry}}" \
                             --password-stdin \
                             --username oauth2accesstoken
+            -   if: ${{steps.verify_version.outputs.should_publish == 'true' && env.IS_STAGING == 'true'}}
+                name: Log in to GHCR
+                run: |
+                    echo "${{github.token}}" \
+                        | helm registry login ghcr.io \
+                            --password-stdin \
+                            --username "${{github.actor}}"
             -   if: ${{steps.verify_version.outputs.should_publish == 'true'}}
                 name: Package and push Helm chart
                 run: |
@@ -63,11 +82,24 @@ jobs:
 
                     for file_name in "${DIST_DIR}"/*.tgz
                     do
-                        echo "Pushing ${file_name}."
+                        echo "Pushing ${file_name} to oci://${{steps.verify_version.outputs.registry}}."
 
-                        helm push "${file_name}" "oci://${{inputs.registry}}"
+                        helm push "${file_name}" "oci://${{steps.verify_version.outputs.registry}}"
                     done
                 working-directory: ${{inputs.working_directory}}
+            -   if: ${{steps.verify_version.outputs.should_publish == 'true' && env.IS_STAGING == 'true'}}
+                name: Configure Git
+                run: |
+                    git config user.name "${{github.actor}}"
+                    git config user.email "${{github.actor}}@users.noreply.github.com"
+            -   if: ${{steps.verify_version.outputs.should_publish == 'true' && env.IS_STAGING == 'true'}}
+                name: Run chart-releaser
+                uses: helm/chart-releaser-action@v1.7.0
+                env:
+                    CR_TOKEN: "${{github.token}}"
+                with:
+                    charts_dir: cloud/helm
+                    skip_existing: true
 on:
     workflow_call:
         inputs:

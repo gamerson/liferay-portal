@@ -3,7 +3,7 @@ defaults:
         shell: bash
 jobs:
     publish-aws:
-        if: ${{github.repository == 'liferay/liferay-portal'}}
+        if: ${{github.repository == 'liferay/liferay-portal' || (github.repository == 'pt-cloudnative/liferay-portal' && github.ref_name == 'staging')}}
         needs: publish-default
         secrets: inherit
         uses: ./.github/workflows/ci-reusable-publish-helm-chart-to-gar.yaml
@@ -12,7 +12,7 @@ jobs:
             registry: us-central1-docker.pkg.dev/liferay-artifact-registry/liferay-helm-chart
             working_directory: ./cloud/helm/aws
     publish-aws-infrastructure:
-        if: ${{github.repository == 'liferay/liferay-portal'}}
+        if: ${{github.repository == 'liferay/liferay-portal' || (github.repository == 'pt-cloudnative/liferay-portal' && github.ref_name == 'staging')}}
         secrets: inherit
         uses: ./.github/workflows/ci-reusable-publish-helm-chart-to-gar.yaml
         with:
@@ -20,7 +20,7 @@ jobs:
             registry: us-central1-docker.pkg.dev/external-assets-prd/liferay-helm-chart
             working_directory: ./cloud/helm/aws-infrastructure
     publish-aws-infrastructure-provider:
-        if: ${{github.repository == 'liferay/liferay-portal'}}
+        if: ${{github.repository == 'liferay/liferay-portal' || (github.repository == 'pt-cloudnative/liferay-portal' && github.ref_name == 'staging')}}
         secrets: inherit
         uses: ./.github/workflows/ci-reusable-publish-helm-chart-to-gar.yaml
         with:
@@ -95,7 +95,7 @@ jobs:
                     done
                 working-directory: ./cloud/helm/aws-marketplace
     publish-default:
-        if: ${{github.repository == 'liferay/liferay-portal'}}
+        if: ${{github.repository == 'liferay/liferay-portal' || (github.repository == 'pt-cloudnative/liferay-portal' && github.ref_name == 'staging')}}
         secrets: inherit
         uses: ./.github/workflows/ci-reusable-publish-helm-chart-to-gar.yaml
         with:
@@ -103,7 +103,7 @@ jobs:
             registry: us-central1-docker.pkg.dev/liferay-artifact-registry/liferay-helm-chart
             working_directory: ./cloud/helm/default
     publish-gcp:
-        if: ${{github.repository == 'liferay/liferay-portal'}}
+        if: ${{github.repository == 'liferay/liferay-portal' || (github.repository == 'pt-cloudnative/liferay-portal' && github.ref_name == 'staging')}}
         needs: publish-default
         secrets: inherit
         uses: ./.github/workflows/ci-reusable-publish-helm-chart-to-gar.yaml
@@ -112,7 +112,7 @@ jobs:
             registry: us-central1-docker.pkg.dev/liferay-artifact-registry/liferay-helm-chart
             working_directory: ./cloud/helm/gcp
     publish-gcp-infrastructure:
-        if: ${{github.repository == 'liferay/liferay-portal'}}
+        if: ${{github.repository == 'liferay/liferay-portal' || (github.repository == 'pt-cloudnative/liferay-portal' && github.ref_name == 'staging')}}
         secrets: inherit
         uses: ./.github/workflows/ci-reusable-publish-helm-chart-to-gar.yaml
         with:
@@ -120,7 +120,7 @@ jobs:
             registry: us-central1-docker.pkg.dev/external-assets-prd/liferay-helm-chart
             working_directory: ./cloud/helm/gcp-infrastructure
     publish-gcp-infrastructure-provider:
-        if: ${{github.repository == 'liferay/liferay-portal'}}
+        if: ${{github.repository == 'liferay/liferay-portal' || (github.repository == 'pt-cloudnative/liferay-portal' && github.ref_name == 'staging')}}
         secrets: inherit
         uses: ./.github/workflows/ci-reusable-publish-helm-chart-to-gar.yaml
         with:
@@ -131,9 +131,12 @@ on:
     push:
         branches:
             -   master
+            -   staging
         paths:
             -   .github/workflows/ci-publish-cloud-helm-charts.yaml
             -   .github/workflows/ci-reusable-publish-helm-chart-to-gar.yaml
             -   cloud/helm/**
 permissions:
+    contents: write
     id-token: write
+    packages: write
