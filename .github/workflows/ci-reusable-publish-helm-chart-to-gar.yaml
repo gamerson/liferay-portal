@@ -12,6 +12,8 @@ jobs:
                 uses: actions/checkout@v4
                 with:
                     fetch-depth: 0
+                    filter: blob:none
+                    show-progress: false
             -   id: verify_version
                 name: Verify Helm chart version
                 run: |

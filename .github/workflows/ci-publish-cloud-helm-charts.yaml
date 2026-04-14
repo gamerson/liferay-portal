@@ -48,6 +48,9 @@ jobs:
                             --username AWS
             -   name: Checkout code
                 uses: actions/checkout@v4
+                with:
+                    filter: blob:none
+                    show-progress: false
             -   env:
                     GITHUB_TOKEN: ${{github.token}}
                 id: verify_version
