@@ -5,7 +5,7 @@ jobs:
     publish:
         env:
             GITHUB_TOKEN: ${{github.token}}
-            IS_STAGING: ${{github.repository == 'pt-cloudnative/liferay-portal' && github.ref_name == 'staging'}}
+            IS_STAGING: ${{github.repository == 'pt-cloudnative/liferay-portal' && (github.ref_name == 'staging' || github.event_name == 'pull_request')}}
         runs-on: ubuntu-latest
         steps:
             -   name: Checkout code
@@ -30,6 +30,7 @@ jobs:
 
                     echo "Verifying Helm chart version ${CHART_VERSION} in ${REGISTRY}."
 
+                    # We try to verify version, but ignore failure if it's a dry run and we might not have registry access
                     if ! helm show readme "oci://${REGISTRY}/${{inputs.chart_name}}:${CHART_VERSION}" >/dev/null 2>&1
                     then
                         echo "Verified Helm Chart version ${CHART_VERSION}."
@@ -40,25 +41,33 @@ jobs:
 
                         echo "should_publish=true" >> ${GITHUB_OUTPUT}
                     else
-                        echo "Chart version ${CHART_VERSION} already exists. Skipping publish."
+                        if [[ "${{inputs.dry_run}}" == "true" ]]
+                        then
+                             echo "Chart version ${CHART_VERSION} already exists, but continuing dry-run verification."
+                             echo "CHART_VERSION=${CHART_VERSION}" >> ${GITHUB_ENV}
+                             echo "registry=${REGISTRY}" >> ${GITHUB_OUTPUT}
+                             echo "should_publish=true" >> ${GITHUB_OUTPUT}
+                        else
+                             echo "Chart version ${CHART_VERSION} already exists. Skipping publish."
+                        fi
                     fi
                 working-directory: ${{inputs.working_directory}}
             -   id: auth
-                if: ${{steps.verify_version.outputs.should_publish == 'true' && env.IS_STAGING == 'false'}}
+                if: ${{steps.verify_version.outputs.should_publish == 'true' && env.IS_STAGING == 'false' && inputs.dry_run == false}}
                 name: Authenticate to Google Cloud
                 uses: google-github-actions/auth@v2
                 with:
                     service_account: ${{secrets.GCP_SA}}
                     token_format: access_token
                     workload_identity_provider: ${{secrets.GCP_WORKLOAD_IDENTITY_PROVIDER}}
-            -   if: ${{steps.verify_version.outputs.should_publish == 'true' && env.IS_STAGING == 'false'}}
+            -   if: ${{steps.verify_version.outputs.should_publish == 'true' && env.IS_STAGING == 'false' && inputs.dry_run == false}}
                 name: Log in to GAR
                 run: |
                     echo "${{steps.auth.outputs.access_token}}" \
                         | helm registry login "${{inputs.registry}}" \
                             --password-stdin \
                             --username oauth2accesstoken
-            -   if: ${{steps.verify_version.outputs.should_publish == 'true' && env.IS_STAGING == 'true'}}
+            -   if: ${{steps.verify_version.outputs.should_publish == 'true' && env.IS_STAGING == 'true' && inputs.dry_run == false}}
                 name: Log in to GHCR
                 run: |
                     echo "${{github.token}}" \
@@ -66,7 +75,7 @@ jobs:
                             --password-stdin \
                             --username "${{github.actor}}"
             -   if: ${{steps.verify_version.outputs.should_publish == 'true'}}
-                name: Package and push Helm chart
+                name: Package Helm chart
                 run: |
                     set -e
 
@@ -81,6 +90,13 @@ jobs:
                     helm package . \
                         --destination "${DIST_DIR}" \
                         --version "${CHART_VERSION}"
+                working-directory: ${{inputs.working_directory}}
+            -   if: ${{steps.verify_version.outputs.should_publish == 'true' && inputs.dry_run == false}}
+                name: Push Helm chart
+                run: |
+                    set -e
+
+                    DIST_DIR="${{runner.temp}}/${{inputs.chart_name}}/dist"
 
                     for file_name in "${DIST_DIR}"/*.tgz
                     do
@@ -89,12 +105,12 @@ jobs:
                         helm push "${file_name}" "oci://${{steps.verify_version.outputs.registry}}"
                     done
                 working-directory: ${{inputs.working_directory}}
-            -   if: ${{steps.verify_version.outputs.should_publish == 'true' && env.IS_STAGING == 'true'}}
+            -   if: ${{steps.verify_version.outputs.should_publish == 'true' && env.IS_STAGING == 'true' && inputs.dry_run == false}}
                 name: Configure Git
                 run: |
                     git config user.name "${{github.actor}}"
                     git config user.email "${{github.actor}}@users.noreply.github.com"
-            -   if: ${{steps.verify_version.outputs.should_publish == 'true' && env.IS_STAGING == 'true'}}
+            -   if: ${{steps.verify_version.outputs.should_publish == 'true' && env.IS_STAGING == 'true' && inputs.dry_run == false}}
                 name: Run chart-releaser
                 uses: helm/chart-releaser-action@v1.7.0
                 env:
@@ -108,6 +124,10 @@ on:
             chart_name:
                 required: true
                 type: string
+            dry_run:
+                default: false
+                required: false
+                type: boolean
             registry:
                 required: true
                 type: string
