@@ -183,6 +183,7 @@ customInitContainers:
                             type: RuntimeDefault
 customLabels:
     origin: liferay-cloud
+customObjects: {}
 customPorts: {}
 customPullSecrets: {}
 customServicePorts: {}
