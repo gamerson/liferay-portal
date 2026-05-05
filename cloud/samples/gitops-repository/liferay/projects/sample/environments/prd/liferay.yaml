@@ -1,0 +1,7 @@
+liferay-default:
+    network:
+        enabled: true
+        forceHttpsRedirect: true
+        hostnames:
+            -   sample-prd.example.com
+    replicaCount: 2

@@ -1,0 +1,9 @@
+backup:
+    enabled: false
+database:
+    instanceType: db-custom-1-3840
+    storageGB: 20
+overlay:
+    enabled: true
+storage:
+    enableVersioning: true

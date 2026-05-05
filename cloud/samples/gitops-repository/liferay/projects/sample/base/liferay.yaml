@@ -1,0 +1,9 @@
+liferay-default:
+    image:
+        tag: 2026.q1.6-lts
+    overlay:
+        copy:
+            -   from: "overlay-build-1/osgi/*"
+                into: "osgi/"
+        enabled: true
+        type: gcs
