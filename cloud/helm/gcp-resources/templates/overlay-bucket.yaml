@@ -1,0 +1,20 @@
+{{- if .Values.overlay.enabled }}
+apiVersion: storage.gcp.m.upbound.io/v1beta1
+kind: Bucket
+metadata:
+    annotations:
+        argocd.argoproj.io/sync-wave: "-30"
+    labels:
+        app.kubernetes.io/component: gcp-resources
+        app.kubernetes.io/managed-by: liferay-gcp-resources
+        app.kubernetes.io/name: overlay-bucket
+    name: {{ .Values.deploymentName }}-liferay-overlay
+spec:
+    forProvider:
+        forceDestroy: {{ .Values.overlay.forceDestroy }}
+        location: {{ .Values.region }}
+        storageClass: {{ .Values.overlay.storageClass | quote }}
+        uniformBucketLevelAccess: true
+        versioning:
+            enabled: {{ .Values.overlay.versioning }}
+{{- end }}

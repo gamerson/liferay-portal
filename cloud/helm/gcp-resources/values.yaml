@@ -1,0 +1,7 @@
+deploymentName: ""
+region: ""
+overlay:
+    enabled: true
+    forceDestroy: false
+    storageClass: STANDARD
+    versioning: true

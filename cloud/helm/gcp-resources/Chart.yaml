@@ -1,0 +1,8 @@
+apiVersion: v2
+appVersion: latest
+description:
+    Liferay is an all-in-one DXP, LCAP, and Commerce platform. This chart provides per-deployment cloud resources shared across all environments in a single Liferay GitOps deployment on GCP.
+icon: https://www-cdn.liferay.com/documents/d/guest/liferay-logo
+name: liferay-gcp-resources
+type: application
+version: 0.0.1
