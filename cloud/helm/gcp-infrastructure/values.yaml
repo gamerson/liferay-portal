@@ -36,9 +36,9 @@ license:
     targetSecretName: liferay-license
 orphanOnDelete: false
 overlay:
+    bucketName: ""
     enabled: false
     githubRepo: ""
-    region: ""
 podMonitoring:
     instances:
         envoy:

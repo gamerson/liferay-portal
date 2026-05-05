@@ -89,6 +89,8 @@ locals {
 		} : {},
 	)
 	liferay_namespace_pattern="liferay-*"
+	overlay_bucket_name="${var.deployment_name}-liferay-overlay"
+	resources_appproject_name="liferay-gcp-resources"
 	secret_prefixes={
 		certificates="liferay-certificates-"
 		licenses="liferay-licenses-"

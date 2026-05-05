@@ -73,12 +73,12 @@ spec:
                                     type: boolean
                                 overlay:
                                     properties:
+                                        bucketName:
+                                            type: string
                                         enabled:
                                             default: false
                                             type: boolean
                                         githubRepo:
-                                            type: string
-                                        region:
                                             type: string
                                     type: object
                                 projectId:

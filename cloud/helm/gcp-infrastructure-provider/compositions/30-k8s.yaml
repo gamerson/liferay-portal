@@ -171,7 +171,7 @@ spec:
                 DATABASE_PORT: {{ $databasePort | default 5432 | toString | b64enc | quote }}
                 DATABASE_USERNAME: {{ $databaseIamUser | toString | b64enc | quote }}
                 LIFERAY_GCS_BUCKET_NAME: {{ printf "%s-dl-%s" $baseName $activeDataPlane | b64enc | quote }}
-                LIFERAY_OVERLAY_BUCKET_NAME: {{ printf "%s-overlay" $baseName | b64enc | quote }}
+                LIFERAY_OVERLAY_BUCKET_NAME: {{ $overlay.bucketName | default "" | b64enc | quote }}
             kind: Secret
             metadata:
                 labels:

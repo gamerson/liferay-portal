@@ -56,6 +56,7 @@ variable "infrastructure_git_repo_config" {
 				base=optional(string, "liferay/projects/{{path[2]}}/base")
 				environments=optional(string, "liferay/projects/*/environments/*")
 				infrastructure_provider_values_filename=optional(string, "infrastructure-provider.yaml")
+				resources_values_filename=optional(string, "resources.yaml")
 				system=optional(string, "liferay/system")
 				values_filename=optional(string, "infrastructure.yaml")
 			})
@@ -171,6 +172,23 @@ variable "project_id" {
 	type=string
 }
 variable "region" {
+	type=string
+}
+variable "resources_helm_chart_config" {
+	default={}
+	type=object(
+		{
+			chart_name=optional(string, "liferay-gcp-resources")
+			chart_url=optional(string, "oci://us-central1-docker.pkg.dev/external-assets-prd/liferay-helm-chart/liferay-gcp-resources")
+			path=optional(string, null)
+			version=optional(string, null)
+		})
+}
+variable "resources_helm_chart_version" {
+	type=string
+}
+variable "resources_namespace" {
+	default="liferay-gcp-resources"
 	type=string
 }
 variable "vpc_name" {
