@@ -41,10 +41,24 @@ jobs:
                     -   gcp
                     -   gcp-infrastructure
                     -   gcp-infrastructure-provider
+                    -   gcp-resources
+    test-render-cloud-helm-chart:
+        if: ${{github.repository == 'cloudnative-team/liferay-portal'}}
+        runs-on: ubuntu-latest
+        steps:
+            -   name: Checkout code
+                uses: actions/checkout@v4
+            -   name: Install Helm
+                uses: azure/setup-helm@v4
+            -   name: Run Helm template golden tests
+                run: ./test-render.sh
+                working-directory: ./cloud/test/helm
 on:
     pull_request:
         paths:
             -   cloud/helm/**
+            -   cloud/samples/gitops-repository/**
+            -   cloud/test/helm/**
     push:
         branches:
             -   master

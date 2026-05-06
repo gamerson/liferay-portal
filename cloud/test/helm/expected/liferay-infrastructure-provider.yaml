@@ -1,0 +1,3648 @@
+---
+# Source: liferay-gcp-infrastructure-provider/templates/cluster-bootstrap.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+    labels:
+        name: cluster-bootstrap-system
+    name: cluster-bootstrap-system
+---
+# Source: liferay-gcp-infrastructure-provider/templates/eck-namespace.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+    labels:
+        name: elastic-system
+        pod-security.kubernetes.io/enforce: restricted
+    name: elastic-system
+---
+# Source: liferay-gcp-infrastructure-provider/charts/liferay-subchart-backup-controller/templates/networkpolicy.yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+    name: backup-controller-deny-all-ingress
+    namespace: crossplane-system
+spec:
+    ingress: []
+    podSelector:
+        matchLabels:
+            app.kubernetes.io/name: backup-controller
+    policyTypes:
+        -   Ingress
+---
+# Source: liferay-gcp-infrastructure-provider/charts/liferay-subchart-backup-controller/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+    name: backup-controller
+    namespace: crossplane-system
+---
+# Source: liferay-gcp-infrastructure-provider/charts/liferay-subchart-backup-controller/templates/configmap.yaml
+apiVersion: v1
+data:
+    GOMEMLIMIT: "819MiB"
+    LCP_ENABLE_DATABASE_DUMPS: "false"
+    LCP_ENABLE_DEPLOYMENT_MUTATION: "false"
+    LCP_ENABLE_SANDBOX_FILTER: "false"
+kind: ConfigMap
+metadata:
+    name: backup-controller-configmap
+    namespace: crossplane-system
+---
+# Source: liferay-gcp-infrastructure-provider/charts/liferay-subchart-backup-controller/templates/clusterrole.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+    name: backup-controller-clusterrole
+rules:
+    -   apiGroups:
+            -   ""
+        resources:
+            -   configmaps
+        verbs:
+            -   get
+            -   list
+            -   watch
+            -   create
+            -   update
+            -   patch
+            -   delete
+    -   apiGroups:
+            -   ""
+        resources:
+            -   events
+        verbs:
+            -   create
+            -   patch
+    -   apiGroups:
+            -   backup.liferay.cloud
+        resources:
+            -   liferaybackups
+            -   liferaydatabasesnapshotoperations
+            -   liferaydatabasesnapshots
+            -   liferaydocumentlibrarybackups
+            -   stsjoboperations
+        verbs:
+            -   create
+            -   delete
+            -   get
+            -   list
+            -   patch
+            -   update
+            -   watch
+    -   apiGroups:
+            -   backup.liferay.cloud
+        resources:
+            -   liferaybackups/finalizers
+            -   liferaydatabasesnapshotoperations/finalizers
+            -   liferaydatabasesnapshots/finalizers
+            -   liferaydocumentlibrarybackups/finalizers
+            -   stsjoboperations/finalizers
+        verbs:
+            -   update
+    -   apiGroups:
+            -   backup.liferay.cloud
+        resources:
+            -   liferaybackups/status
+            -   liferaydatabasesnapshotoperations/status
+            -   liferaydatabasesnapshots/status
+            -   liferaydocumentlibrarybackups/status
+            -   stsjoboperations/status
+        verbs:
+            -   get
+            -   patch
+            -   update
+    -   apiGroups:
+            -   coordination.k8s.io
+        resources:
+            -   leases
+        verbs:
+            -   get
+            -   list
+            -   watch
+            -   create
+            -   update
+            -   patch
+            -   delete
+---
+# Source: liferay-gcp-infrastructure-provider/charts/liferay-subchart-backup-create/templates/clusterrole.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+    labels:
+        component: backup-create-platform
+    name: backup-create-cluster-role
+rules:
+    -   apiGroups: ["argoproj.io"]
+        resources: ["workflowtaskresults"]
+        verbs:
+            -   create
+            -   patch
+    -   apiGroups: ["backup.liferay.cloud"]
+        resources: ["liferaybackups"]
+        verbs:
+            -   create
+            -   get
+            -   list
+            -   watch
+    -   apiGroups: ["gcp.liferay.com"]
+        resources: ["liferayinfrastructures"]
+        verbs:
+            -   get
+            -   list
+---
+# Source: liferay-gcp-infrastructure-provider/charts/liferay-subchart-backup-restore/templates/rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+    labels:
+        component: backup-restore-platform
+    name: backup-restore-backup-reader-cluster-role
+rules:
+    -   apiGroups: ["backup.liferay.cloud"]
+        resources: ["liferaybackups"]
+        verbs:
+            -   get
+            -   list
+---
+# Source: liferay-gcp-infrastructure-provider/charts/liferay-subchart-backup-restore/templates/rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+    labels:
+        component: backup-restore-platform
+    name: backup-restore-env-cluster-role
+rules:
+    -   apiGroups: [""]
+        resources: ["namespaces"]
+        verbs:
+            -   get
+            -   list
+    -   apiGroups: ["apps"]
+        resources: ["statefulsets"]
+        verbs:
+            -   get
+            -   list
+            -   patch
+            -   watch
+    -   apiGroups: ["argoproj.io"]
+        resources: ["workflowtaskresults"]
+        verbs:
+            -   create
+            -   patch
+    -   apiGroups: ["gcp.liferay.com"]
+        resources: ["liferayinfrastructures"]
+        verbs:
+            -   get
+            -   list
+            -   patch
+            -   watch
+    -   apiGroups: ["storage.gcp.m.upbound.io"]
+        resources: ["buckets"]
+        verbs:
+            -   get
+            -   list
+    -   apiGroups: ["sql.gcp.m.upbound.io"]
+        resources: ["databaseinstances"]
+        verbs:
+            -   get
+            -   list
+---
+# Source: liferay-gcp-infrastructure-provider/templates/rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+    name: crossplane-provider-gcp
+rules:
+    -   apiGroups:
+            -   "cloudplatform.gcp.upbound.io"
+            -   "compute.gcp.upbound.io"
+            -   "sql.gcp.upbound.io"
+            -   "storage.gcp.upbound.io"
+        resources: ["*"]
+        verbs: ["*"]
+---
+# Source: liferay-gcp-infrastructure-provider/templates/rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+    annotations:
+        argocd.argoproj.io/sync-wave: "-40"
+    labels:
+        rbac.crossplane.io/aggregate-to-crossplane: "true"
+    name: crossplane-provider-kubernetes
+rules:
+    -   apiGroups: [""]
+        resources: ["configmaps", "secrets", "serviceaccounts"]
+        verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]
+    -   apiGroups: [""]
+        resources: ["namespaces"]
+        verbs: ["get", "list"]
+    -   apiGroups: ["batch"]
+        resources: ["jobs"]
+        verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]
+    -   apiGroups: ["elasticsearch.k8s.elastic.co"]
+        resources: ["*"]
+        verbs: ["*"]
+    -   apiGroups: ["rbac.authorization.k8s.io"]
+        resources: ["clusterroles"]
+        verbs: ["bind", "get", "list", "watch"]
+    -   apiGroups: ["rbac.authorization.k8s.io"]
+        resources: ["clusterrolebindings", "rolebindings"]
+        verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]
+---
+# Source: liferay-gcp-infrastructure-provider/charts/liferay-subchart-backup-controller/templates/clusterrolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+    name: backup-controller-clusterrolebinding
+roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: ClusterRole
+    name: backup-controller-clusterrole
+subjects:
+    -   kind: ServiceAccount
+        name: backup-controller
+        namespace: crossplane-system
+---
+# Source: liferay-gcp-infrastructure-provider/templates/rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+    annotations:
+        argocd.argoproj.io/sync-wave: "-40"
+    name: crossplane-provider-kubernetes-binding
+roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: ClusterRole
+    name: crossplane-provider-kubernetes
+subjects:
+    -   kind: ServiceAccount
+        name: provider-kubernetes
+        namespace: crossplane-system
+---
+# Source: liferay-gcp-infrastructure-provider/templates/cluster-bootstrap.yaml
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+    name: cluster-bootstrap
+    namespace: cluster-bootstrap-system
+spec:
+    selector:
+        matchLabels:
+            app: cluster-bootstrap
+    template:
+        metadata:
+            labels:
+                app: cluster-bootstrap
+        spec:
+            containers:
+                -   image: registry.k8s.io/pause:3.9
+                    name: pause
+                    resources:
+                        limits:
+                          cpu: 3m
+                          memory: 16Mi
+                        requests:
+                          cpu: 1m
+                          memory: 8Mi
+            initContainers:
+                -   command:
+                        -   sh
+                        -   -c
+                        -   |
+                            sysctl -w vm.max_map_count=1048576
+                            
+                    image: alpine:3
+                    name: init-bootstraper
+                    resources:
+                        limits:
+                          cpu: 3m
+                          memory: 16Mi
+                        requests:
+                          cpu: 1m
+                          memory: 8Mi
+                    securityContext:
+                        privileged: true
+                        runAsUser: 0
+            nodeSelector:
+                kubernetes.io/os: linux
+---
+# Source: liferay-gcp-infrastructure-provider/charts/liferay-subchart-backup-controller/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: backup-controller
+    namespace: crossplane-system
+spec:
+    replicas: 3
+    selector:
+        matchLabels:
+            app.kubernetes.io/name: backup-controller
+    template:
+        metadata:
+            annotations:
+                checksum/configs: 42d439279dafd5ecc523d1fadce6e9cf7f6a7e5e5d4dc8c42d749cbc7048f0ec
+            labels:
+                app.kubernetes.io/name: backup-controller
+        spec:
+            containers:
+                -   args:
+                        -   --leader-elect
+                        -   --health-probe-bind-address=:8081
+                    command:
+                        -   /manager
+                    envFrom:
+                        -   configMapRef:
+                                name: backup-controller-configmap
+                                optional: false
+                    image: "liferaycloud/backup-controller:1.7.0"
+                    livenessProbe:
+                        httpGet:
+                            path: /healthz
+                            port: 8081
+                        initialDelaySeconds: 15
+                        periodSeconds: 20
+                    name: backup-controller
+                    readinessProbe:
+                        httpGet:
+                            path: /readyz
+                            port: 8081
+                        initialDelaySeconds: 5
+                        periodSeconds: 10
+                    resources:
+                        limits:
+                            cpu: "1"
+                            memory: "1Gi"
+                        requests:
+                            cpu: "1"
+                            memory: "1Gi"
+                    securityContext:
+                        allowPrivilegeEscalation: false
+                        capabilities:
+                            drop:
+                                -   ALL
+                        privileged: false
+            securityContext:
+                fsGroup: 1000
+                runAsGroup: 10000
+                runAsNonRoot: true
+                runAsUser: 10000
+                seccompProfile:
+                    type: RuntimeDefault
+            serviceAccountName: backup-controller
+            terminationGracePeriodSeconds: 60
+---
+# Source: liferay-gcp-infrastructure-provider/templates/provider-configs.yaml
+apiVersion: gcp.m.upbound.io/v1beta1
+kind: ClusterProviderConfig
+metadata:
+    annotations:
+        argocd.argoproj.io/sync-wave: "-70"
+    name: default
+spec:
+    credentials:
+        source: InjectedIdentity
+    projectID: sample-project
+---
+# Source: liferay-gcp-infrastructure-provider/templates/provider-configs.yaml
+apiVersion: kubernetes.m.crossplane.io/v1alpha1
+kind: ClusterProviderConfig
+metadata:
+    annotations:
+        argocd.argoproj.io/sync-wave: "-70"
+    name: default
+spec:
+    credentials:
+        source: InjectedIdentity
+---
+# Source: liferay-gcp-infrastructure-provider/charts/liferay-subchart-backup-create/templates/clusterworkflowtemplate.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: ClusterWorkflowTemplate
+metadata:
+    labels:
+        component: backup-create-platform
+    name: backup-create-cluster-workflow-template
+spec:
+    entrypoint: main
+    podGC:
+        strategy: OnWorkflowSuccess
+    serviceAccountName: backup-create-service-account
+    templates:
+        -   inputs:
+                parameters:
+                    -   name: environment-id
+                    -   name: project-id
+            name: create-backup
+            outputs:
+                parameters:
+                    -   name: backup-name
+                        valueFrom:
+                            jsonPath: "{.metadata.name}"
+            resource:
+                action: create
+                manifest: |-
+                    apiVersion: backup.liferay.cloud/v1alpha1
+                    kind: LiferayBackup
+                    metadata:
+                        generateName: "liferay-backup-"
+                        namespace: {{workflow.namespace}}
+                    spec:
+                        databaseSnapshot:
+                            databaseInstanceLookup:
+                                matchLabels:
+                                    active: "true"
+                                    app: liferay
+                                    environment-id: {{inputs.parameters.environment-id}}
+                                    project-id: {{inputs.parameters.project-id}}
+                                    should-back-up: "true"
+                        documentLibrary:
+                            destination:
+                                gcs:
+                                    bucketLookup:
+                                        matchLabels:
+                                            app: liferay
+                                            environment-id: {{inputs.parameters.environment-id}}
+                                            is-backup-vault: "true"
+                                            project-id: {{inputs.parameters.project-id}}
+                                type: gcs
+                            source:
+                                gcs:
+                                    bucketLookup:
+                                        matchLabels:
+                                            active: "true"
+                                            app: liferay
+                                            environment-id: {{inputs.parameters.environment-id}}
+                                            project-id: {{inputs.parameters.project-id}}
+                                            should-back-up: "true"
+                                type: gcs
+        -   name: get-project-id-and-environment-id
+            outputs:
+                parameters:
+                    -   name: environment-id
+                        valueFrom:
+                            path: /tmp/environment-id.txt
+                    -   name: project-id
+                        valueFrom:
+                            path: /tmp/project-id.txt
+            script:
+                command: [sh]
+                image: "dtzar/helm-kubectl:4.1.1"
+                resources:
+                    limits:
+                      cpu: 250m
+                      memory: 256Mi
+                    requests:
+                      cpu: 100m
+                      memory: 128Mi
+                source: |-
+                    #!/bin/sh
+                    
+                    set -o errexit
+                    set -o nounset
+                    
+                    function main {
+                    	local liferay_infrastructure_json
+                    
+                    	liferay_infrastructure_json=$( \
+                    		kubectl \
+                    			get \
+                    			liferayinfrastructure \
+                    			--output json \
+                    			| jq ".items[0]")
+                    
+                    	echo "${liferay_infrastructure_json}" | jq --raw-output ".spec.environmentId" > /tmp/environment-id.txt
+                    	echo "${liferay_infrastructure_json}" | jq --raw-output ".spec.projectId" > /tmp/project-id.txt
+                    }
+                    
+                    main
+        -   name: main
+            steps:
+                -   -   name: get-project-id-and-environment-id
+                        template: get-project-id-and-environment-id
+                -   -   arguments:
+                            parameters:
+                                -   name: environment-id
+                                    value: "{{steps.get-project-id-and-environment-id.outputs.parameters.environment-id}}"
+                                -   name: project-id
+                                    value: "{{steps.get-project-id-and-environment-id.outputs.parameters.project-id}}"
+                        name: create-backup
+                        template: create-backup
+                -   -   arguments:
+                            parameters:
+                                -   name: backup-name
+                                    value: "{{steps.create-backup.outputs.parameters.backup-name}}"
+                        name: wait-for-backup
+                        template: wait-for-backup
+        -   inputs:
+                parameters:
+                    -   name: backup-name
+            name: wait-for-backup
+            script:
+                command: [sh]
+                image: "dtzar/helm-kubectl:4.1.1"
+                resources:
+                    limits:
+                      cpu: 250m
+                      memory: 256Mi
+                    requests:
+                      cpu: 100m
+                      memory: 128Mi
+                source: |-
+                    #!/bin/sh
+                    
+                    set -o errexit
+                    set -o nounset
+                    
+                    function main {
+                    	local backup_name="{{inputs.parameters.backup-name}}"
+                    
+                    	local timeout
+                    
+                    	timeout=$(($(date +%s) + 7200))
+                    
+                    	while [ $(date +%s) -lt ${timeout} ]
+                    	do
+                    		local succeeded_condition
+                    
+                    		succeeded_condition=$( \
+                    			kubectl \
+                    				get \
+                    				liferaybackup \
+                    				"${backup_name}" \
+                    				--output jsonpath="{.status.conditions[?(@.type==\"Succeeded\")]}" 2>/dev/null || echo "{}")
+                    
+                    		local status
+                    
+                    		status=$(echo "${succeeded_condition}" | jq --raw-output ".status")
+                    
+                    		if [ "${status}" = "True" ]
+                    		then
+                    			exit 0
+                    		fi
+                    
+                    		if [ "${status}" = "False" ]
+                    		then
+                    			echo "LiferayBackup ${backup_name} failed: $(echo "${succeeded_condition}" | jq --raw-output ".reason")" >&2
+                    
+                    			exit 1
+                    		fi
+                    
+                    		sleep 30
+                    	done
+                    
+                    	echo "The system timed out waiting for LiferayBackup ${backup_name} to succeed." >&2
+                    
+                    	exit 1
+                    }
+                    
+                    main
+    ttlStrategy:
+        secondsAfterCompletion: 86400
+---
+# Source: liferay-gcp-infrastructure-provider/charts/liferay-subchart-backup-restore/templates/clusterworkflowtemplate.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: ClusterWorkflowTemplate
+metadata:
+    labels:
+        component: backup-restore-platform
+    name: backup-restore-cluster-workflow-template
+spec:
+    arguments:
+        parameters:
+            -   name: liferay-backup-name
+            -   name: liferay-backup-namespace
+                value: "{{workflow.namespace}}"
+    entrypoint: main
+    podGC:
+        strategy: OnWorkflowSuccess
+    serviceAccountName: backup-restore-service-account
+    templates:
+        -   inputs:
+                parameters:
+                    -   name: liferay-infrastructure-name
+                    -   name: restore-phase
+                    -   name: target-active-data-plane
+            name: apply-infrastructure
+            outputs:
+                parameters:
+                    -   name: generation
+                        valueFrom:
+                            jsonPath: "{.metadata.generation}"
+            resource:
+                action: patch
+                manifest: |-
+                    apiVersion: gcp.liferay.com/v1alpha1
+                    kind: LiferayInfrastructure
+                    metadata:
+                        name: {{inputs.parameters.liferay-infrastructure-name}}
+                        namespace: {{workflow.namespace}}
+                    spec:
+                        restorePhase: {{inputs.parameters.restore-phase}}
+                        targetActiveDataPlane: {{inputs.parameters.target-active-data-plane}}
+                mergeStrategy: merge
+        -   inputs:
+                parameters:
+                    -   name: liferay-infrastructure-name
+                    -   name: restore-phase
+                    -   name: target-active-data-plane
+            name: apply-wait-infrastructure
+            steps:
+                -   -   arguments:
+                            parameters:
+                                -   name: liferay-infrastructure-name
+                                    value: "{{inputs.parameters.liferay-infrastructure-name}}"
+                                -   name: restore-phase
+                                    value: "{{inputs.parameters.restore-phase}}"
+                                -   name: target-active-data-plane
+                                    value: "{{inputs.parameters.target-active-data-plane}}"
+                        name: apply-infrastructure
+                        template: apply-infrastructure
+                -   -   arguments:
+                            parameters:
+                                -   name: expected-generation
+                                    value: "{{steps.apply-infrastructure.outputs.parameters.generation}}"
+                        name: wait-for-infrastructure
+                        template: wait-for-infrastructure
+        -   container:
+                args:
+                    -   storage
+                    -   rm
+                    -   --recursive
+                    -   "gs://{{inputs.parameters.dl-bucket-id}}/**"
+                command: [gcloud]
+                env:
+                    -   name: CLOUDSDK_CONFIG
+                        value: /tmp/gcloud
+                image: "google/cloud-sdk:565.0.0-stable"
+                resources:
+                    limits:
+                      cpu: 250m
+                      memory: 256Mi
+                    requests:
+                      cpu: 100m
+                      memory: 128Mi
+            inputs:
+                parameters:
+                    -   name: dl-bucket-id
+            name: clean-up-dl-bucket
+        -   inputs:
+                parameters:
+                    -   name: dl-bucket-id
+                    -   name: liferay-infrastructure-name
+                    -   name: target-active-data-plane
+            name: clean-up-infrastructure
+            steps:
+                -   -   arguments:
+                            parameters:
+                                -   name: liferay-infrastructure-name
+                                    value: "{{inputs.parameters.liferay-infrastructure-name}}"
+                                -   name: restore-phase
+                                    value: none
+                                -   name: target-active-data-plane
+                                    value: "{{inputs.parameters.target-active-data-plane}}"
+                        name: clean-up-cloudsql-instance
+                        template: apply-wait-infrastructure
+                    -   arguments:
+                            parameters:
+                                -   name: dl-bucket-id
+                                    value: "{{inputs.parameters.dl-bucket-id}}"
+                        name: clean-up-dl-bucket
+                        template: clean-up-dl-bucket
+        -   inputs:
+                parameters:
+                    -   name: liferay-backup-namespace
+            name: get-current-infrastructure-state
+            outputs:
+                parameters:
+                    -   name: data-active
+                        valueFrom:
+                            path: /tmp/data-plane-active.txt
+                    -   name: data-inactive
+                        valueFrom:
+                            path: /tmp/data-plane-inactive.txt
+                    -   name: database-snapshot-uuid
+                        valueFrom:
+                            path: /tmp/database-snapshot-uuid.txt
+                    -   name: dl-bucket-active
+                        valueFrom:
+                            path: /tmp/dl-bucket-active.txt
+                    -   name: dl-bucket-inactive
+                        valueFrom:
+                            path: /tmp/dl-bucket-inactive.txt
+                    -   name: liferay-infrastructure-name
+                        valueFrom:
+                            path: /tmp/liferay-infrastructure-name.txt
+                    -   name: liferay-workload-name
+                        valueFrom:
+                            path: /tmp/liferay-workload-name.txt
+                    -   name: vault-bucket
+                        valueFrom:
+                            path: /tmp/vault-bucket.txt
+                    -   name: vault-path
+                        valueFrom:
+                            path: /tmp/vault-path.txt
+            script:
+                command: [sh]
+                image: "dtzar/helm-kubectl:4.1.1"
+                resources:
+                    limits:
+                      cpu: 250m
+                      memory: 256Mi
+                    requests:
+                      cpu: 100m
+                      memory: 128Mi
+                source: |-
+                    #!/bin/sh
+                    
+                    set -o errexit
+                    set -o nounset
+                    
+                    function main {
+                    	local liferay_backup_name="{{workflow.parameters.liferay-backup-name}}"
+                    	local liferay_backup_namespace="{{inputs.parameters.liferay-backup-namespace}}"
+                    
+                    	local liferay_backup_json
+                    
+                    	liferay_backup_json=$( \
+                    		kubectl \
+                    			get \
+                    			liferaybackups.backup.liferay.cloud \
+                    			"${liferay_backup_name}" \
+                    			--namespace "${liferay_backup_namespace}" \
+                    			--output json)
+                    
+                    	local database_snapshot_uuid
+                    
+                    	database_snapshot_uuid=$(echo "${liferay_backup_json}" | jq --raw-output ".status.databaseSnapshot.uuid // \"\"")
+                    
+                    	if [ -z "${database_snapshot_uuid}" ]
+                    	then
+                    		echo "The LiferayBackup \"${liferay_backup_name}\" has no status.databaseSnapshot.uuid." >&2
+                    
+                    		exit 1
+                    	fi
+                    
+                    	echo "${database_snapshot_uuid}" > /tmp/database-snapshot-uuid.txt
+                    
+                    	local vault_bucket
+                    
+                    	vault_bucket=$(echo "${liferay_backup_json}" | jq --raw-output ".status.documentLibrary.destinationBucket // \"\"")
+                    
+                    	if [ -z "${vault_bucket}" ]
+                    	then
+                    		echo "The LiferayBackup \"${liferay_backup_name}\" has no status.documentLibrary.destinationBucket." >&2
+                    
+                    		exit 1
+                    	fi
+                    
+                    	echo "${vault_bucket}" > /tmp/vault-bucket.txt
+                    
+                    	local vault_path
+                    
+                    	vault_path=$(echo "${liferay_backup_json}" | jq --raw-output ".status.documentLibrary.destinationPath // \"\"")
+                    
+                    	echo "${vault_path}" > /tmp/vault-path.txt
+                    
+                    	local liferay_infrastructure_json
+                    
+                    	liferay_infrastructure_json=$( \
+                    		kubectl \
+                    			get \
+                    			liferayinfrastructure \
+                    			--output json \
+                    			| jq ".items[0]")
+                    
+                    	local restore_phase
+                    
+                    	restore_phase=$(echo "${liferay_infrastructure_json}" | jq --raw-output ".spec.restorePhase // \"none\"")
+                    
+                    	if [ "${restore_phase}" = "promoting" ] || [ "${restore_phase}" = "provisioning" ]
+                    	then
+                    		echo "The LiferayInfrastructure spec.restorePhase is set to ${restore_phase}. A restore is in progress." >&2
+                    
+                    		exit 1
+                    	fi
+                    
+                    	local data_plane_active
+                    
+                    	data_plane_active=$(echo "${liferay_infrastructure_json}" | jq --raw-output ".spec.targetActiveDataPlane // \"blue\"")
+                    
+                    	echo "${data_plane_active}" > /tmp/data-plane-active.txt
+                    
+                    	local data_plane_inactive
+                    
+                    	if [ "${data_plane_active}" = "blue" ]
+                    	then
+                    		data_plane_inactive="green"
+                    	else
+                    		data_plane_inactive="blue"
+                    	fi
+                    
+                    	echo "${data_plane_inactive}" > /tmp/data-plane-inactive.txt
+                    
+                    	local liferay_infrastructure_name
+                    
+                    	liferay_infrastructure_name=$(echo "${liferay_infrastructure_json}" | jq --raw-output ".metadata.name")
+                    
+                    	echo "${liferay_infrastructure_name}" > /tmp/liferay-infrastructure-name.txt
+                    
+                    	local liferay_workload_name
+                    
+                    	liferay_workload_name=$( \
+                    		kubectl \
+                    			get \
+                    			statefulset \
+                    			--output jsonpath="{.items[0].metadata.name}" \
+                    			--selector "component=liferay")
+                    
+                    	echo "${liferay_workload_name}" > /tmp/liferay-workload-name.txt
+                    
+                    	kubectl \
+                    		get \
+                    		buckets.storage.gcp.m.upbound.io \
+                    		--output jsonpath="{.items[0].metadata.name}" \
+                    		--selector "dataPlane=${data_plane_active}" \
+                    		> /tmp/dl-bucket-active.txt
+                    
+                    	kubectl \
+                    		get \
+                    		buckets.storage.gcp.m.upbound.io \
+                    		--output jsonpath="{.items[0].metadata.name}" \
+                    		--selector "dataPlane=${data_plane_inactive}" \
+                    		> /tmp/dl-bucket-inactive.txt
+                    }
+                    
+                    main
+        -   container:
+                args:
+                    -   get
+                    -   databaseinstances.sql.gcp.m.upbound.io
+                    -   --output
+                    -   jsonpath={.items[0].metadata.name}
+                    -   --selector
+                    -   dataPlane={{inputs.parameters.data-inactive}}
+                command: [kubectl]
+                image: "dtzar/helm-kubectl:4.1.1"
+                resources:
+                    limits:
+                      cpu: 250m
+                      memory: 256Mi
+                    requests:
+                      cpu: 100m
+                      memory: 128Mi
+            inputs:
+                parameters:
+                    -   name: data-inactive
+            name: get-inactive-cloudsql-instance
+        -   container:
+                args:
+                    -   rollout
+                    -   restart
+                    -   statefulset
+                    -   "{{inputs.parameters.liferay-workload-name}}"
+                command: [kubectl]
+                image: "dtzar/helm-kubectl:4.1.1"
+                resources:
+                    limits:
+                      cpu: 250m
+                      memory: 256Mi
+                    requests:
+                      cpu: 100m
+                      memory: 128Mi
+            inputs:
+                parameters:
+                    -   name: liferay-workload-name
+            name: kubectl-rollout-restart
+        -   container:
+                args:
+                    -   rollout
+                    -   status
+                    -   statefulset
+                    -   "{{inputs.parameters.liferay-workload-name}}"
+                    -   --timeout=15m
+                command: [kubectl]
+                image: "dtzar/helm-kubectl:4.1.1"
+                resources:
+                    limits:
+                      cpu: 250m
+                      memory: 256Mi
+                    requests:
+                      cpu: 100m
+                      memory: 128Mi
+            inputs:
+                parameters:
+                    -   name: liferay-workload-name
+            name: kubectl-rollout-status
+        -   dag:
+                tasks:
+                    -   arguments:
+                            parameters:
+                                -   name: dl-bucket-id
+                                    value: "{{tasks.get-current-infrastructure-state.outputs.parameters.dl-bucket-active}}"
+                                -   name: liferay-infrastructure-name
+                                    value: "{{tasks.get-current-infrastructure-state.outputs.parameters.liferay-infrastructure-name}}"
+                                -   name: target-active-data-plane
+                                    value: "{{tasks.get-current-infrastructure-state.outputs.parameters.data-inactive}}"
+                        depends: restart-liferay
+                        name: clean-up-infrastructure
+                        template: clean-up-infrastructure
+                    -   arguments:
+                            parameters:
+                                -   name: liferay-backup-namespace
+                                    value: "{{workflow.parameters.liferay-backup-namespace}}"
+                        name: get-current-infrastructure-state
+                        template: get-current-infrastructure-state
+                    -   arguments:
+                            parameters:
+                                -   name: data-inactive
+                                    value: "{{tasks.get-current-infrastructure-state.outputs.parameters.data-inactive}}"
+                        depends: provision-inactive-data-plane
+                        name: get-inactive-cloudsql-instance
+                        template: get-inactive-cloudsql-instance
+                    -   arguments:
+                            parameters:
+                                -   name: liferay-infrastructure-name
+                                    value: "{{tasks.get-current-infrastructure-state.outputs.parameters.liferay-infrastructure-name}}"
+                                -   name: restore-phase
+                                    value: promoting
+                                -   name: target-active-data-plane
+                                    value: "{{tasks.get-current-infrastructure-state.outputs.parameters.data-inactive}}"
+                        depends: restore-cloudsql-backup && restore-dl-bucket
+                        name: promote-inactive-data-plane
+                        template: apply-wait-infrastructure
+                    -   arguments:
+                            parameters:
+                                -   name: liferay-infrastructure-name
+                                    value: "{{tasks.get-current-infrastructure-state.outputs.parameters.liferay-infrastructure-name}}"
+                                -   name: restore-phase
+                                    value: provisioning
+                                -   name: target-active-data-plane
+                                    value: "{{tasks.get-current-infrastructure-state.outputs.parameters.data-inactive}}"
+                        depends: get-current-infrastructure-state
+                        name: provision-inactive-data-plane
+                        template: apply-wait-infrastructure
+                    -   arguments:
+                            parameters:
+                                -   name: liferay-workload-name
+                                    value: "{{tasks.get-current-infrastructure-state.outputs.parameters.liferay-workload-name}}"
+                        depends: promote-inactive-data-plane
+                        name: restart-liferay
+                        template: restart-liferay
+                    -   arguments:
+                            parameters:
+                                -   name: database-snapshot-uuid
+                                    value: "{{tasks.get-current-infrastructure-state.outputs.parameters.database-snapshot-uuid}}"
+                                -   name: restore-instance
+                                    value: "{{tasks.get-inactive-cloudsql-instance.outputs.result}}"
+                        depends: get-inactive-cloudsql-instance
+                        name: restore-cloudsql-backup
+                        template: restore-cloudsql-backup
+                    -   arguments:
+                            parameters:
+                                -   name: dl-bucket-inactive
+                                    value: "{{tasks.get-current-infrastructure-state.outputs.parameters.dl-bucket-inactive}}"
+                                -   name: vault-bucket
+                                    value: "{{tasks.get-current-infrastructure-state.outputs.parameters.vault-bucket}}"
+                                -   name: vault-path
+                                    value: "{{tasks.get-current-infrastructure-state.outputs.parameters.vault-path}}"
+                        depends: get-current-infrastructure-state
+                        name: restore-dl-bucket
+                        template: restore-dl-bucket
+                    -   arguments:
+                            parameters:
+                                -   name: dl-bucket-id
+                                    value: "{{tasks.get-current-infrastructure-state.outputs.parameters.dl-bucket-inactive}}"
+                                -   name: liferay-infrastructure-name
+                                    value: "{{tasks.get-current-infrastructure-state.outputs.parameters.liferay-infrastructure-name}}"
+                                -   name: target-active-data-plane
+                                    value: "{{tasks.get-current-infrastructure-state.outputs.parameters.data-active}}"
+                        depends: "(!provision-inactive-data-plane.Omitted && !provision-inactive-data-plane.Skipped || !restore-cloudsql-backup.Omitted && !restore-cloudsql-backup.Skipped || !restore-dl-bucket.Omitted && !restore-dl-bucket.Skipped) && !promote-inactive-data-plane.Succeeded"
+                        name: roll-back-infrastructure
+                        template: clean-up-infrastructure
+                    -   arguments:
+                            parameters:
+                                -   name: dl-bucket-id
+                                    value: "{{tasks.get-current-infrastructure-state.outputs.parameters.dl-bucket-inactive}}"
+                                -   name: liferay-infrastructure-name
+                                    value: "{{tasks.get-current-infrastructure-state.outputs.parameters.liferay-infrastructure-name}}"
+                                -   name: liferay-workload-name
+                                    value: "{{tasks.get-current-infrastructure-state.outputs.parameters.liferay-workload-name}}"
+                                -   name: target-active-data-plane
+                                    value: "{{tasks.get-current-infrastructure-state.outputs.parameters.data-active}}"
+                        depends: "promote-inactive-data-plane.Succeeded && !restart-liferay.Succeeded"
+                        name: roll-back-restart
+                        template: roll-back-restart
+            name: main
+        -   inputs:
+                parameters:
+                    -   name: liferay-workload-name
+            name: restart-liferay
+            steps:
+                -   -   arguments:
+                            parameters:
+                                -   name: liferay-workload-name
+                                    value: "{{inputs.parameters.liferay-workload-name}}"
+                        name: kubectl-rollout-restart
+                        template: kubectl-rollout-restart
+                -   -   arguments:
+                            parameters:
+                                -   name: liferay-workload-name
+                                    value: "{{inputs.parameters.liferay-workload-name}}"
+                        name: kubectl-rollout-status
+                        template: kubectl-rollout-status
+        -   container:
+                args:
+                    -   sql
+                    -   backups
+                    -   restore
+                    -   "{{inputs.parameters.database-snapshot-uuid}}"
+                    -   --project=sample-project
+                    -   --quiet
+                    -   --restore-instance
+                    -   "{{inputs.parameters.restore-instance}}"
+                command: [gcloud]
+                env:
+                    -   name: CLOUDSDK_CONFIG
+                        value: /tmp/gcloud
+                image: "google/cloud-sdk:565.0.0-stable"
+                resources:
+                    limits:
+                      cpu: 250m
+                      memory: 256Mi
+                    requests:
+                      cpu: 100m
+                      memory: 128Mi
+            inputs:
+                parameters:
+                    -   name: database-snapshot-uuid
+                    -   name: restore-instance
+            name: restore-cloudsql-backup
+        -   container:
+                args:
+                    -   transfer
+                    -   jobs
+                    -   create
+                    -   "gs://{{inputs.parameters.vault-bucket}}/{{inputs.parameters.vault-path}}/"
+                    -   "gs://{{inputs.parameters.dl-bucket-inactive}}/"
+                    -   --delete-from=destination-if-unique
+                    -   --no-async
+                    -   --overwrite-when=always
+                command: [gcloud]
+                env:
+                    -   name: CLOUDSDK_CONFIG
+                        value: /tmp/gcloud
+                image: "google/cloud-sdk:565.0.0-stable"
+                resources:
+                    limits:
+                      cpu: 250m
+                      memory: 256Mi
+                    requests:
+                      cpu: 100m
+                      memory: 128Mi
+            inputs:
+                parameters:
+                    -   name: dl-bucket-inactive
+                    -   name: vault-bucket
+                    -   name: vault-path
+            name: restore-dl-bucket
+        -   inputs:
+                parameters:
+                    -   name: dl-bucket-id
+                    -   name: liferay-infrastructure-name
+                    -   name: liferay-workload-name
+                    -   name: target-active-data-plane
+            name: roll-back-restart
+            steps:
+                -   -   arguments:
+                            parameters:
+                                -   name: liferay-infrastructure-name
+                                    value: "{{inputs.parameters.liferay-infrastructure-name}}"
+                                -   name: restore-phase
+                                    value: promoting
+                                -   name: target-active-data-plane
+                                    value: "{{inputs.parameters.target-active-data-plane}}"
+                        name: apply-wait-infrastructure
+                        template: apply-wait-infrastructure
+                -   -   arguments:
+                            parameters:
+                                -   name: liferay-workload-name
+                                    value: "{{inputs.parameters.liferay-workload-name}}"
+                        name: restart-liferay
+                        template: restart-liferay
+                -   -   arguments:
+                            parameters:
+                                -   name: dl-bucket-id
+                                    value: "{{inputs.parameters.dl-bucket-id}}"
+                                -   name: liferay-infrastructure-name
+                                    value: "{{inputs.parameters.liferay-infrastructure-name}}"
+                                -   name: target-active-data-plane
+                                    value: "{{inputs.parameters.target-active-data-plane}}"
+                        name: clean-up-infrastructure
+                        template: clean-up-infrastructure
+        -   inputs:
+                parameters:
+                    -   name: expected-generation
+            name: wait-for-infrastructure
+            script:
+                command: [sh]
+                image: "dtzar/helm-kubectl:4.1.1"
+                resources:
+                    limits:
+                      cpu: 250m
+                      memory: 256Mi
+                    requests:
+                      cpu: 100m
+                      memory: 128Mi
+                source: |-
+                    #!/bin/sh
+                    
+                    set -o errexit
+                    set -o nounset
+                    
+                    function main {
+                    	local expected_generation="{{inputs.parameters.expected-generation}}"
+                    
+                    	local timeout
+                    
+                    	timeout=$(($(date +%s) + 3600))
+                    
+                    	while [ $(date +%s) -lt ${timeout} ]
+                    	do
+                    		local ready_condition
+                    
+                    		ready_condition=$( \
+                    			kubectl \
+                    				get \
+                    				liferayinfrastructure \
+                    				--output jsonpath="{.items[0].status.conditions[?(@.type==\"Ready\")]}" 2>/dev/null || echo "{}")
+                    
+                    		local observed_generation
+                    
+                    		observed_generation=$(echo "${ready_condition}" | jq --raw-output ".observedGeneration // 0")
+                    
+                    		local status
+                    
+                    		status=$(echo "${ready_condition}" | jq --raw-output ".status // \"False\"")
+                    
+                    		if [ "${observed_generation}" -ge "${expected_generation}" ] && [ "${status}" = "True" ]
+                    		then
+                    			exit 0
+                    		fi
+                    
+                    		sleep 30
+                    	done
+                    
+                    	echo "The system timed out waiting for the LiferayInfrastructure to be ready." >&2
+                    
+                    	exit 1
+                    }
+                    
+                    main
+    ttlStrategy:
+        secondsAfterCompletion: 86400
+---
+# Source: liferay-gcp-infrastructure-provider/templates/definitions.yaml
+apiVersion: apiextensions.crossplane.io/v2
+kind: CompositeResourceDefinition
+metadata:
+    annotations:
+        argocd.argoproj.io/sync-options: ServerSideApply=true
+        argocd.argoproj.io/sync-wave: "-60"
+    name: liferayinfrastructures.gcp.liferay.com
+spec:
+    group: gcp.liferay.com
+    names:
+        kind: LiferayInfrastructure
+        plural: liferayinfrastructures
+        shortNames:
+            -   lfrinfra
+            -   lri
+        singular: liferayinfrastructure
+    versions:
+        -   name: v1alpha1
+            referenceable: true
+            schema:
+                openAPIV3Schema:
+                    properties:
+                        spec:
+                            properties:
+                                backup:
+                                    properties:
+                                        enabled:
+                                            type: boolean
+                                        region:
+                                            type: string
+                                        retentionDays:
+                                            type: integer
+                                        storageClass:
+                                            type: string
+                                    type: object
+                                cmk:
+                                    default:
+                                        enabled: false
+                                    properties:
+                                        enabled:
+                                            default: false
+                                            type: boolean
+                                    type: object
+                                commonTags:
+                                    additionalProperties:
+                                        type: string
+                                    default: {}
+                                    type: object
+                                database:
+                                    properties:
+                                        databaseVersion:
+                                            type: string
+                                        deletionProtection:
+                                            type: boolean
+                                        instanceType:
+                                            type: string
+                                        queryInsightsEnabled:
+                                            type: boolean
+                                        region:
+                                            type: string
+                                        rootPasswordSecretName:
+                                            type: string
+                                        storageGB:
+                                            type: integer
+                                    type: object
+                                environmentId:
+                                    type: string
+                                forceDestroy:
+                                    default: false
+                                    type: boolean
+                                orphanOnDelete:
+                                    default: false
+                                    type: boolean
+                                overlay:
+                                    properties:
+                                        bucketName:
+                                            type: string
+                                        enabled:
+                                            default: false
+                                            type: boolean
+                                        githubRepo:
+                                            type: string
+                                    type: object
+                                projectId:
+                                    type: string
+                                region:
+                                    type: string
+                                restorePhase:
+                                    enum:
+                                        -   none
+                                        -   promoting
+                                        -   provisioning
+                                    type: string
+                                storage:
+                                    properties:
+                                        enableVersioning:
+                                            default: true
+                                            type: boolean
+                                        region:
+                                            type: string
+                                    type: object
+                                targetActiveDataPlane:
+                                    enum:
+                                        -   blue
+                                        -   green
+                                    type: string
+                            required:
+                                -   database
+                                -   environmentId
+                                -   projectId
+                                -   region
+                                -   storage
+                            type: object
+                        status:
+                            properties:
+                                managedServiceDetailsReady:
+                                    default: false
+                                    type: boolean
+                            type: object
+                    type: object
+            served: true
+---
+# Source: liferay-gcp-infrastructure-provider/templates/compositions.yaml
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+    annotations:
+        argocd.argoproj.io/sync-wave: "-50"
+        liferay.com/template-hash: "db4e771f550f42a2442171957ff9c8eb4ac6f1070c2323eb0a2e21e088bf09d8"
+    labels:
+        liferay.com/template-hash: "h-db4e771f550f42a2442171957ff9c8eb4ac6f1070c2323eb0a2e21e088bf0"
+    name: liferay-gcp-infrastructure-provider.gcp.liferay.com
+spec:
+    compositeTypeRef:
+        apiVersion: gcp.liferay.com/v1alpha1
+        kind: LiferayInfrastructure
+    mode: Pipeline
+    pipeline:
+        -   functionRef:
+                name: function-environment-configs
+            input:
+                apiVersion: environmentconfigs.fn.crossplane.io/v1beta1
+                kind: Input
+                spec:
+                    environmentConfigs:
+                        -   ref:
+                                name: environment-config
+                            type: Reference
+                        -   ref:
+                                name: liferay-template-store
+                            type: Reference
+            step: environment-configs
+        -   functionRef:
+                name: function-go-templating
+            input:
+                apiVersion: gotemplating.fn.crossplane.io/v1beta1
+                inline:
+                    template: |
+                        {{- $databasePort := "5432" -}}
+                        {{- $elasticsearchHealth := "" -}}
+                        {{- $env := index .context "apiextensions.crossplane.io/environment" -}}
+                        {{- $isReady := false -}}
+                        {{- $isSearchReady := false -}}
+                        {{- $managementPoliciesOnce := (list "Create" "Observe" "Delete") | toJson -}}
+                        {{- $xr := .observed.composite.resource -}}
+                        
+                        {{- $backup := $xr.spec.backup | default dict -}}
+                        {{- $cmkEnabled := $xr.spec.cmk.enabled | default false -}}
+                        {{- $databaseName := $xr.spec.database.name | default "lportal" -}}
+                        {{- $databaseSpec := $xr.spec.database -}}
+                        {{- $environmentId := $xr.spec.environmentId -}}
+                        {{- $forceDestroy := $xr.spec.forceDestroy | default false -}}
+                        {{- $gsaName := printf "%s-sa" $xr.metadata.name -}}
+                        {{- $managementPolicies := $xr.spec.orphanOnDelete | ternary (list "Create" "Observe" "Update") (list "*") | toJson -}}
+                        {{- $managementPoliciesNoUpdate := $xr.spec.orphanOnDelete | ternary (list "Create" "Observe") (list "Create" "Delete" "Observe") | toJson -}}
+                        {{- $namespace := $xr.metadata.namespace -}}
+                        {{- $overlay := $xr.spec.overlay | default dict -}}
+                        {{- $projectId := $xr.spec.projectId -}}
+                        {{- $restorePhase := $xr.spec.restorePhase | default "none" -}}
+                        {{- $searchName := printf "%s-es" $xr.metadata.name -}}
+                        {{- $storage := $xr.spec.storage | default dict -}}
+                        {{- $targetActiveDataPlane := $xr.spec.targetActiveDataPlane | default "blue" -}}
+                        
+                        {{- $activeDataPlane := $targetActiveDataPlane -}}
+                        {{- $databaseIamUser := printf "%s@%s.iam" $gsaName $env.projectId -}}
+                        {{- $databaseInstanceManagementPolicies := $backup.enabled | ternary ((list "*") | toJson) $managementPolicies -}}
+                        {{- $dataPlanes := list $targetActiveDataPlane -}}
+                        {{- $gsaEmail := printf "%s@%s.iam.gserviceaccount.com" $gsaName $env.projectId -}}
+                        {{- $hash := printf "%s-%s" $databaseName $env.projectId | sha256sum | trunc 7 -}}
+                        {{- $labels := merge ($xr.spec.commonTags | default dict) (dict "app" "liferay" "deployment-name" $env.deploymentName "environment-id" $environmentId "project-id" $projectId) -}}
+                        {{- $projectIdFull := printf "%s-%s" $projectId $environmentId -}}
+                        {{- $region := $databaseSpec.region | default $xr.spec.region -}}
+                        {{- $searchNamespace := printf "%s-elasticsearch" $namespace -}}
+                        {{- $searchSecretName := printf "%s-es-elastic-user" $searchName -}}
+                        {{- $targetInactiveDataPlane := (eq $targetActiveDataPlane "blue") | ternary "green" "blue" -}}
+                        
+                        {{- if (eq $restorePhase "promoting") -}}
+                            {{- $dataPlanes = list "blue" "green" -}}
+                        {{- else if (eq $restorePhase "provisioning") -}}
+                            {{- $activeDataPlane = $targetInactiveDataPlane -}}
+                            {{- $dataPlanes = list "blue" "green" -}}
+                        {{- end }}
+                        
+                        {{- $backupTargetLabels := merge (dict) $labels (dict "should-back-up" "true") -}}
+                        {{- $uidHash := printf "%s-%s" $env.projectNumber $projectIdFull | sha256sum | trunc 6 -}}
+                        
+                        {{- $baseName := printf "%.18s-%s" $projectIdFull $uidHash -}}
+                        
+                        {{- $cmkKeyName := printf "projects/%s/locations/%s/keyRings/%s-keyring/cryptoKeys/%s-key" $env.projectId $region $baseName $baseName -}}
+                        ---
+                        
+                        apiVersion: cloudplatform.gcp.m.upbound.io/v1beta1
+                        kind: ServiceAccount
+                        metadata:
+                            annotations:
+                                gotemplating.fn.crossplane.io/composition-resource-name: liferay-gsa
+                            labels:
+                                {{- $labels | toYaml | nindent 8 }}
+                            name: {{ $gsaName }}
+                        spec:
+                            forProvider:
+                                displayName: Liferay {{ $gsaName }} Service Account
+                        ---
+                        apiVersion: cloudplatform.gcp.m.upbound.io/v1beta1
+                        kind: ServiceAccountIAMMember
+                        metadata:
+                            annotations:
+                                gotemplating.fn.crossplane.io/composition-resource-name: liferay-wi-binding
+                            labels:
+                                {{- $labels | toYaml | nindent 8 }}
+                        spec:
+                            forProvider:
+                                member: serviceAccount:{{ $env.projectId }}.svc.id.goog[{{ $namespace }}/liferay-default]
+                                role: roles/iam.workloadIdentityUser
+                                serviceAccountIdRef:
+                                    name: {{ $gsaName }}
+                        ---
+                        apiVersion: cloudplatform.gcp.m.upbound.io/v1beta1
+                        kind: ProjectIAMMember
+                        metadata:
+                            annotations:
+                                gotemplating.fn.crossplane.io/composition-resource-name: liferay-sql-instance-user-role
+                            labels:
+                                {{- $labels | toYaml | nindent 8 }}
+                        spec:
+                            forProvider:
+                                member: serviceAccount:{{ $gsaEmail }}
+                                project: {{ $env.projectId }}
+                                role: roles/cloudsql.instanceUser
+                        ---
+                        apiVersion: cloudplatform.gcp.m.upbound.io/v1beta1
+                        kind: ProjectIAMMember
+                        metadata:
+                            annotations:
+                                gotemplating.fn.crossplane.io/composition-resource-name: liferay-sql-client-role
+                            labels:
+                                {{- $labels | toYaml | nindent 8 }}
+                        spec:
+                            forProvider:
+                                member: serviceAccount:{{ $gsaEmail }}
+                                project: {{ $env.projectId }}
+                                role: roles/cloudsql.client
+                        ---
+                        
+                        {{- range $i, $dataPlane := $dataPlanes }}
+                        {{- $databaseInstanceName := printf "%s-db-instance-%s" $xr.metadata.name $dataPlane }}
+                        {{- if $i }}
+                        ---
+                        {{- end }}
+                        apiVersion: sql.gcp.m.upbound.io/v1beta1
+                        kind: DatabaseInstance
+                        metadata:
+                            annotations:
+                                gotemplating.fn.crossplane.io/composition-resource-name: database-primary-{{ $dataPlane }}
+                            labels:
+                                {{- $labels | toYaml | nindent 8 }}
+                                dataPlane: {{ $dataPlane }}
+                            name: {{ $databaseInstanceName }}
+                        spec:
+                            forProvider:
+                                databaseVersion: {{ $databaseSpec.databaseVersion | default "POSTGRES_18" }}
+                                deletionProtection: {{ and ($databaseSpec.deletionProtection | default ($xr.spec.deletionProtection | default false)) (eq $dataPlane $activeDataPlane) }}
+                                {{- if $cmkEnabled }}
+                                encryptionKmsKeyName: {{ $cmkKeyName }}
+                                {{- end }}
+                                region: {{ $region }}
+                                rootPasswordSecretRef:
+                                    key: password
+                                    name: {{ $databaseSpec.rootPasswordSecretName }}
+                                settings:
+                                    databaseFlags:
+                                        -   name: cloudsql.iam_authentication
+                                            value: "on"
+                                    diskSize: {{ $databaseSpec.storageGB | default 10 }}
+                                    diskType: PD_SSD
+                                    edition: ENTERPRISE
+                                    insightsConfig:
+                                        queryInsightsEnabled: {{ $databaseSpec.queryInsightsEnabled | default true }}
+                                    ipConfiguration:
+                                        ipv4Enabled: false
+                                        privateNetwork: projects/{{ $env.projectId }}/global/networks/{{ $env.vpcName }}
+                                        sslMode: TRUSTED_CLIENT_CERTIFICATE_REQUIRED
+                                    retainBackupsOnDelete: true
+                                    tier: {{ $databaseSpec.instanceType | default "db-custom-1-3840" }}
+                                    userLabels:
+                                        {{- $backupTargetLabels | toYaml | nindent 16 }}
+                                        active: {{ printf "%t" (eq $dataPlane $activeDataPlane) | quote }}
+                            managementPolicies: {{ $databaseInstanceManagementPolicies }}
+                        ---
+                        apiVersion: sql.gcp.m.upbound.io/v1beta1
+                        kind: Database
+                        metadata:
+                            annotations:
+                                crossplane.io/external-name: {{ $databaseName }}
+                                gotemplating.fn.crossplane.io/composition-resource-name: liferay-db-{{ $dataPlane }}
+                            labels:
+                                {{- $labels | toYaml | nindent 8 }}
+                                dataPlane: {{ $dataPlane }}
+                            name: {{ $xr.metadata.name }}-db-{{ $dataPlane }}
+                        spec:
+                            forProvider:
+                                charset: UTF8
+                                collation: en_US.UTF8
+                                instanceSelector:
+                                    matchLabels:
+                                        dataPlane: {{ $dataPlane }}
+                            managementPolicies: ["Create", "Observe", "Update"]
+                        ---
+                        apiVersion: sql.gcp.m.upbound.io/v1beta1
+                        kind: User
+                        metadata:
+                            annotations:
+                                crossplane.io/external-name: {{ $databaseIamUser }}
+                                gotemplating.fn.crossplane.io/composition-resource-name: liferay-iam-user-{{ $dataPlane }}
+                            labels:
+                                {{- $labels | toYaml | nindent 8 }}
+                                dataPlane: {{ $dataPlane }}
+                            name: {{ $xr.metadata.name }}-db-user-{{ $dataPlane }}
+                        spec:
+                            forProvider:
+                                instanceSelector:
+                                    matchLabels:
+                                        dataPlane: {{ $dataPlane }}
+                                type: CLOUD_IAM_SERVICE_ACCOUNT
+                            managementPolicies: ["Create", "Observe", "Update"]
+                        {{- end }}
+                        {{- range $dataPlane := list "blue" "green" }}
+                        {{- $databaseInstanceName := printf "%s-db-instance-%s" $xr.metadata.name $dataPlane }}
+                        {{- $databaseResourceName := printf "liferay-db-%s" $dataPlane }}
+                        {{- $userResourceName := printf "liferay-iam-user-%s" $dataPlane }}
+                        {{- if or (has $dataPlane $dataPlanes) (and $.observed.resources (index $.observed.resources $databaseResourceName)) }}
+                        ---
+                        apiVersion: protection.crossplane.io/v1beta1
+                        kind: Usage
+                        metadata:
+                            annotations:
+                                gotemplating.fn.crossplane.io/composition-resource-name: usage-instance-by-database-{{ $dataPlane }}
+                            name: {{ $xr.metadata.name }}-instance-by-database-{{ $dataPlane }}
+                            namespace: {{ $namespace }}
+                        spec:
+                            by:
+                                apiVersion: sql.gcp.m.upbound.io/v1beta1
+                                kind: Database
+                                resourceRef:
+                                    name: {{ $xr.metadata.name }}-db-{{ $dataPlane }}
+                            of:
+                                apiVersion: sql.gcp.m.upbound.io/v1beta1
+                                kind: DatabaseInstance
+                                resourceRef:
+                                    name: {{ $databaseInstanceName }}
+                        {{- end }}
+                        {{- if or (has $dataPlane $dataPlanes) (and $.observed.resources (index $.observed.resources $userResourceName)) }}
+                        ---
+                        apiVersion: protection.crossplane.io/v1beta1
+                        kind: Usage
+                        metadata:
+                            annotations:
+                                gotemplating.fn.crossplane.io/composition-resource-name: usage-instance-by-user-{{ $dataPlane }}
+                            name: {{ $xr.metadata.name }}-instance-by-user-{{ $dataPlane }}
+                            namespace: {{ $namespace }}
+                        spec:
+                            by:
+                                apiVersion: sql.gcp.m.upbound.io/v1beta1
+                                kind: User
+                                resourceRef:
+                                    name: {{ $xr.metadata.name }}-db-user-{{ $dataPlane }}
+                            of:
+                                apiVersion: sql.gcp.m.upbound.io/v1beta1
+                                kind: DatabaseInstance
+                                resourceRef:
+                                    name: {{ $databaseInstanceName }}
+                        {{- end }}
+                        {{- end }}
+                        ---
+                        
+                        apiVersion: kubernetes.m.crossplane.io/v1alpha1
+                        kind: Object
+                        metadata:
+                            annotations:
+                                gotemplating.fn.crossplane.io/composition-resource-name: liferay-ksa
+                            labels:
+                                {{- $labels | toYaml | nindent 8 }}
+                            name: {{ $xr.metadata.name }}-ksa
+                        spec:
+                            forProvider:
+                                manifest:
+                                    apiVersion: v1
+                                    kind: ServiceAccount
+                                    metadata:
+                                        annotations:
+                                            iam.gke.io/gcp-service-account: {{ $gsaEmail }}
+                                        labels:
+                                            {{- $labels | toYaml | nindent 20 }}
+                                        name: liferay-default
+                                        namespace: {{ $namespace }}
+                        {{- range $dataPlane := $dataPlanes }}
+                        {{- $dbInstanceResourceName := printf "database-primary-%s" $dataPlane }}
+                        {{- $dbReady := false }}
+                        {{- if $.observed.resources }}
+                            {{- if (index $.observed.resources $dbInstanceResourceName) }}
+                                {{- $db := index $.observed.resources $dbInstanceResourceName }}
+                                {{- range $cond := $db.resource.status.conditions | default list }}
+                                    {{- if and (eq $cond.type "Ready") (eq $cond.status "True") }}
+                                        {{- $dbReady = true }}
+                                    {{- end }}
+                                {{- end }}
+                            {{- end }}
+                        {{- end }}
+                        {{- if $dbReady }}
+                        {{- $instanceConnectionName := printf "%s:%s:%s-db-instance-%s" $env.projectId $region $xr.metadata.name $dataPlane }}
+                        {{- $jobName := printf "%s-db-grant-%s" $xr.metadata.name $dataPlane }}
+                        ---
+                        apiVersion: kubernetes.m.crossplane.io/v1alpha1
+                        kind: Object
+                        metadata:
+                            annotations:
+                                gotemplating.fn.crossplane.io/composition-resource-name: liferay-db-grant-job-{{ $dataPlane }}
+                            labels:
+                                {{- $labels | toYaml | nindent 8 }}
+                                dataPlane: {{ $dataPlane }}
+                            name: {{ $jobName }}
+                        spec:
+                            forProvider:
+                                manifest:
+                                    apiVersion: batch/v1
+                                    kind: Job
+                                    metadata:
+                                        labels:
+                                            {{- $labels | toYaml | nindent 20 }}
+                                            dataPlane: {{ $dataPlane }}
+                                        name: {{ $jobName }}
+                                        namespace: {{ $namespace }}
+                                    spec:
+                                        template:
+                                            spec:
+                                                containers:
+                                                    -   args:
+                                                            -   |
+                                                                    set -e
+                                                                    until pg_isready -h 127.0.0.1 -p {{ $databasePort }} -U postgres; do sleep 2; done
+                                                                    psql -h 127.0.0.1 -v "ON_ERROR_STOP=1" -U postgres -d {{ $databaseName }} <<EOF
+                                                                    GRANT ALL PRIVILEGES ON DATABASE "{{ $databaseName }}" TO "{{ $databaseIamUser }}";
+                                                                    GRANT ALL ON ALL TABLES IN SCHEMA public TO "{{ $databaseIamUser }}";
+                                                                    GRANT cloudsqlsuperuser TO "{{ $databaseIamUser }}";
+                                                                    GRANT "{{ $databaseIamUser }}" to postgres;
+                                                                    EOF
+                                                        command:
+                                                            -   /bin/sh
+                                                            -   -c
+                                                        env:
+                                                            -   name: PGPASSWORD
+                                                                valueFrom:
+                                                                    secretKeyRef:
+                                                                        key: password
+                                                                        name: {{ $databaseSpec.rootPasswordSecretName }}
+                                                        image: postgres:18-alpine
+                                                        name: sql-runner
+                                                        resources:
+                                                            limits:
+                                                                cpu: 200m
+                                                                memory: 256Mi
+                                                            requests:
+                                                                cpu: 100m
+                                                                memory: 128Mi
+                                                        securityContext:
+                                                            allowPrivilegeEscalation: false
+                                                            capabilities:
+                                                                drop:
+                                                                    -   ALL
+                                                            runAsNonRoot: true
+                                                            runAsUser: 1000
+                                                            seccompProfile:
+                                                                type: RuntimeDefault
+                                                initContainers:
+                                                    -   args:
+                                                            -   --auto-iam-authn
+                                                            -   --port={{ $databasePort }}
+                                                            -   --private-ip
+                                                            -   --structured-logs
+                                                            -   "{{ $instanceConnectionName }}"
+                                                        image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.14.1
+                                                        name: cloud-sql-proxy
+                                                        resources:
+                                                            limits:
+                                                                cpu: 200m
+                                                                memory: 256Mi
+                                                            requests:
+                                                                cpu: 100m
+                                                                memory: 128Mi
+                                                        restartPolicy: Always
+                                                        securityContext:
+                                                            allowPrivilegeEscalation: false
+                                                            capabilities:
+                                                                drop:
+                                                                    -   ALL
+                                                            runAsNonRoot: true
+                                                            runAsUser: 65532
+                                                            seccompProfile:
+                                                                type: RuntimeDefault
+                                                restartPolicy: OnFailure
+                                                securityContext:
+                                                    fsGroup: 1000
+                                                    runAsNonRoot: true
+                                                    seccompProfile:
+                                                        type: RuntimeDefault
+                                                serviceAccountName: liferay-default
+                                                volumes:
+                                                    -   emptyDir: {}
+                                                        name: term-log
+                            managementPolicies: {{ $managementPoliciesOnce }}
+                            readiness:
+                                celQuery: object.status.succeeded == 1
+                                policy: DeriveFromCelQuery
+                        {{- end }}
+                        {{- end }}
+                        ---
+                        {{- $isReady = false }}
+                        {{- if .observed.resources }}
+                            {{- $activeJobResourceName := printf "liferay-db-grant-job-%s" $activeDataPlane }}
+                            {{- if (index .observed.resources $activeJobResourceName) }}
+                                {{- $job := index .observed.resources $activeJobResourceName }}
+                                {{- range $cond := $job.resource.status.conditions | default list }}
+                                    {{- if and (eq $cond.type "Ready") (eq $cond.status "True") }}
+                                        {{- $isReady = true }}
+                                    {{- end }}
+                                {{- end }}
+                            {{- end }}
+                        {{- end }}
+                        {{- if $isReady }}
+                        apiVersion: kubernetes.m.crossplane.io/v1alpha1
+                        kind: Object
+                        metadata:
+                            annotations:
+                                crossplane.io/external-name: {{ $baseName }}-managed-service-details-secret
+                                gotemplating.fn.crossplane.io/composition-resource-name: managed-service-details-secret
+                            labels:
+                                {{- $labels | toYaml | nindent 8 }}
+                            name: {{ $baseName }}-managed-service-details-secret
+                        spec:
+                            forProvider:
+                                manifest:
+                                    apiVersion: v1
+                                    data:
+                                        DATABASE_ENDPOINT: {{ "localhost" | b64enc | quote }}
+                                        DATABASE_INSTANCE_NAME: {{ printf "%s:%s:%s-db-instance-%s" $env.projectId $region $xr.metadata.name $activeDataPlane | b64enc | quote }}
+                                        DATABASE_PORT: {{ $databasePort | default 5432 | toString | b64enc | quote }}
+                                        DATABASE_USERNAME: {{ $databaseIamUser | toString | b64enc | quote }}
+                                        LIFERAY_GCS_BUCKET_NAME: {{ printf "%s-dl-%s" $baseName $activeDataPlane | b64enc | quote }}
+                                        LIFERAY_OVERLAY_BUCKET_NAME: {{ $overlay.bucketName | default "" | b64enc | quote }}
+                                    kind: Secret
+                                    metadata:
+                                        labels:
+                                            {{- $labels | toYaml | nindent 20 }}
+                                        name: managed-service-details
+                                        namespace: {{ $namespace }}
+                                    type: Opaque
+                            managementPolicies: {{ $managementPolicies }}
+                        {{- end }}
+                        ---
+                        apiVersion: gcp.liferay.com/v1alpha1
+                        kind: LiferayInfrastructure
+                        status:
+                            managedServiceDetailsReady: {{ $isReady }}
+                        ---
+                        
+                        apiVersion: kubernetes.m.crossplane.io/v1alpha1
+                        kind: Object
+                        metadata:
+                            annotations:
+                                gotemplating.fn.crossplane.io/composition-resource-name: elasticsearch-observer
+                            name: {{ $searchName }}-observer
+                        spec:
+                            forProvider:
+                                manifest:
+                                    apiVersion: elasticsearch.k8s.elastic.co/v1
+                                    kind: Elasticsearch
+                                    metadata:
+                                        name: {{ $searchName }}
+                                        namespace: {{ $searchNamespace }}
+                            managementPolicies: ["Observe"]
+                        ---
+                        apiVersion: kubernetes.m.crossplane.io/v1alpha1
+                        kind: Object
+                        metadata:
+                            annotations:
+                                gotemplating.fn.crossplane.io/composition-resource-name: elasticsearch-secret-observer
+                            name: {{ $searchSecretName }}-observer
+                        spec:
+                            forProvider:
+                                manifest:
+                                    apiVersion: v1
+                                    kind: Secret
+                                    metadata:
+                                        name: {{ $searchSecretName }}
+                                        namespace: {{ $searchNamespace }}
+                            managementPolicies: ["Observe"]
+                        ---
+                        {{- if .observed.resources }}
+                        {{- $elasticsearchObject := (index .observed.resources "elasticsearch-observer" | default dict).resource | default dict -}}
+                        {{- $elasticsearchObjectAtProvider := ($elasticsearchObject.status | default dict).atProvider | default dict -}}
+                        {{- $elasticsearchObjectAtProviderManifest := (index $elasticsearchObjectAtProvider "manifest" | default dict) -}}
+                        {{- $elasticsearchObjectAtProviderManifestStatus := (index $elasticsearchObjectAtProviderManifest "status" | default dict) -}}
+                        
+                        {{- $elasticsearchHealth = (index $elasticsearchObjectAtProviderManifestStatus "health" | default "") -}}
+                        {{- $isSearchReady = or (eq $elasticsearchHealth "green") (eq $elasticsearchHealth "yellow") -}}
+                        
+                        {{- $secretObject := (index .observed.resources "elasticsearch-secret-observer" | default dict).resource | default dict -}}
+                        {{- $secretObjectAtProvider := ($secretObject.status | default dict).atProvider | default dict -}}
+                        {{- $secretObjectAtProviderManifest := (index $secretObjectAtProvider "manifest" | default dict) -}}
+                        {{- $secretObjectAtProviderManifestData := (index $secretObjectAtProviderManifest "data" | default dict) -}}
+                        {{- $secretObjectAtProviderManifestDataPassword := (index $secretObjectAtProviderManifestData "elastic" | default "") -}}
+                        
+                        {{- if and $isSearchReady $secretObjectAtProviderManifestDataPassword }}
+                        apiVersion: kubernetes.m.crossplane.io/v1alpha1
+                        kind: Object
+                        metadata:
+                            annotations:
+                                crossplane.io/external-name: elasticsearch-connection-details
+                                gotemplating.fn.crossplane.io/composition-resource-name: elasticsearch-connection-details-secret
+                            labels:
+                                {{- $labels | toYaml | nindent 8 }}
+                            name: {{ $xr.metadata.name }}-elasticsearch-connection-details-secret
+                        spec:
+                            forProvider:
+                                manifest:
+                                    apiVersion: v1
+                                    data:
+                                        ELASTICSEARCH_PASSWORD: {{ $secretObjectAtProviderManifestDataPassword }}
+                                    kind: Secret
+                                    metadata:
+                                        labels:
+                                            {{- $labels | toYaml | nindent 20 }}
+                                        name: elasticsearch-connection-details
+                                        namespace: {{ $namespace }}
+                                    stringData:
+                                        ELASTICSEARCH_URL: http://{{ $searchName }}-es-http.{{ $searchNamespace }}.svc:9200
+                                        ELASTICSEARCH_USERNAME: elastic
+                                    type: Opaque
+                            managementPolicies: {{ $managementPolicies }}
+                        {{- end }}
+                        {{- end }}
+                        ---
+                        
+                        {{- range $i, $dataPlane := list "blue" "green" }}
+                        {{- if $i }}
+                        ---
+                        {{- end }}
+                        apiVersion: storage.gcp.m.upbound.io/v1beta1
+                        kind: Bucket
+                        metadata:
+                            annotations:
+                                gotemplating.fn.crossplane.io/composition-resource-name: liferay-gcs-bucket-{{ $dataPlane }}
+                            labels:
+                                {{- $labels | toYaml | nindent 8 }}
+                                dataPlane: {{ $dataPlane }}
+                            name: {{ $baseName }}-dl-{{ $dataPlane }}
+                        spec:
+                            forProvider:
+                                {{- if $cmkEnabled }}
+                                encryption:
+                                    defaultKmsKeyName: {{ $cmkKeyName }}
+                                {{- end }}
+                                forceDestroy: {{ $forceDestroy }}
+                                labels:
+                                    {{- $backupTargetLabels | toYaml | nindent 12 }}
+                                    active: {{ printf "%t" (eq $dataPlane $activeDataPlane) | quote }}
+                                location: {{ $storage.region | default $region }}
+                                storageClass: STANDARD
+                                uniformBucketLevelAccess: true
+                                versioning:
+                                    enabled: {{ $storage.enableVersioning | default true }}
+                            managementPolicies: {{ $managementPolicies }}
+                        ---
+                        apiVersion: storage.gcp.m.upbound.io/v1beta1
+                        kind: BucketIAMMember
+                        metadata:
+                            annotations:
+                                gotemplating.fn.crossplane.io/composition-resource-name: liferay-gcs-iam-{{ $dataPlane }}
+                            labels:
+                                {{- $labels | toYaml | nindent 8 }}
+                                dataPlane: {{ $dataPlane }}
+                        spec:
+                            forProvider:
+                                bucketSelector:
+                                    matchLabels:
+                                        dataPlane: {{ $dataPlane }}
+                                member: serviceAccount:{{ $gsaEmail }}
+                                role: roles/storage.admin
+                            managementPolicies: {{ $managementPolicies }}
+                        {{- end }}
+                        ---
+                        
+                        {{- if and $overlay.enabled $overlay.bucketName }}
+                        apiVersion: storage.gcp.m.upbound.io/v1beta1
+                        kind: BucketIAMMember
+                        metadata:
+                            annotations:
+                                gotemplating.fn.crossplane.io/composition-resource-name: liferay-gsa-overlay-bucket-iam
+                            labels:
+                                {{- $labels | toYaml | nindent 8 }}
+                        spec:
+                            forProvider:
+                                bucket: {{ $overlay.bucketName }}
+                                member: serviceAccount:{{ $gsaEmail }}
+                                role: roles/storage.objectViewer
+                            managementPolicies: {{ $managementPolicies }}
+                        {{- end }}
+                        
+                        ---
+                        
+                        {{- if $cmkEnabled }}
+                        apiVersion: kms.gcp.m.upbound.io/v1beta1
+                        kind: KeyRing
+                        metadata:
+                            annotations:
+                                gotemplating.fn.crossplane.io/composition-resource-name: liferay-keyring
+                            labels:
+                                {{- $labels | toYaml | nindent 8 }}
+                            name: {{ $baseName }}-keyring
+                        spec:
+                            forProvider:
+                                location: {{ $region }}
+                            managementPolicies: {{ $managementPolicies }}
+                        ---
+                        apiVersion: kms.gcp.m.upbound.io/v1beta1
+                        kind: CryptoKey
+                        metadata:
+                            annotations:
+                                gotemplating.fn.crossplane.io/composition-resource-name: liferay-cryptokey
+                            labels:
+                                {{- $labels | toYaml | nindent 8 }}
+                            name: {{ $baseName }}-key
+                        spec:
+                            forProvider:
+                                keyRingSelector:
+                                    matchControllerRef: true
+                                purpose: ENCRYPT_DECRYPT
+                                rotationPeriod: 86400s
+                            managementPolicies: {{ $managementPolicies }}
+                        ---
+                        apiVersion: kms.gcp.m.upbound.io/v1beta1
+                        kind: CryptoKeyIAMMember
+                        metadata:
+                            annotations:
+                                gotemplating.fn.crossplane.io/composition-resource-name: liferay-sql-kms-binding
+                            labels:
+                                {{- $labels | toYaml | nindent 8 }}
+                        spec:
+                            forProvider:
+                                cryptoKeyIdRef:
+                                    name: {{ $baseName }}-key
+                                member: serviceAccount:service-{{ $env.projectNumber }}@gcp-sa-cloud-sql.iam.gserviceaccount.com
+                                role: roles/cloudkms.cryptoKeyEncrypterDecrypter
+                            managementPolicies: {{ $managementPolicies }}
+                        ---
+                        apiVersion: kms.gcp.m.upbound.io/v1beta1
+                        kind: CryptoKeyIAMMember
+                        metadata:
+                            annotations:
+                                gotemplating.fn.crossplane.io/composition-resource-name: liferay-storage-kms-binding
+                            labels:
+                                {{- $labels | toYaml | nindent 8 }}
+                        spec:
+                            forProvider:
+                                cryptoKeyIdRef:
+                                    name: {{ $baseName }}-key
+                                member: serviceAccount:service-{{ $env.projectNumber }}@gs-project-accounts.iam.gserviceaccount.com
+                                role: roles/cloudkms.cryptoKeyEncrypterDecrypter
+                            managementPolicies: {{ $managementPolicies }}
+                        {{- end }}
+                        ---
+                        
+                        {{- if $backup.enabled }}
+                        {{- $backupRestorePrincipal := printf "principal://iam.googleapis.com/projects/%s/locations/global/workloadIdentityPools/%s.svc.id.goog/subject/ns/%s/sa/backup-restore-service-account" $env.projectNumber $env.projectId $namespace }}
+                        {{- $backupVaultLabels := merge (dict) $labels (dict "is-backup-vault" "true") }}
+                        apiVersion: cloudplatform.gcp.m.upbound.io/v1beta1
+                        kind: ProjectIAMMember
+                        metadata:
+                            annotations:
+                                gotemplating.fn.crossplane.io/composition-resource-name: backup-restore-cloudsql-admin
+                            labels:
+                                {{- $labels | toYaml | nindent 8 }}
+                        spec:
+                            forProvider:
+                                member: {{ $backupRestorePrincipal | quote }}
+                                project: {{ $env.projectId }}
+                                role: roles/cloudsql.admin
+                            managementPolicies: {{ $managementPolicies }}
+                        ---
+                        apiVersion: cloudplatform.gcp.m.upbound.io/v1beta1
+                        kind: ProjectIAMMember
+                        metadata:
+                            annotations:
+                                gotemplating.fn.crossplane.io/composition-resource-name: backup-restore-sts-admin
+                            labels:
+                                {{- $labels | toYaml | nindent 8 }}
+                        spec:
+                            forProvider:
+                                member: {{ $backupRestorePrincipal | quote }}
+                                project: {{ $env.projectId }}
+                                role: roles/storagetransfer.admin
+                            managementPolicies: {{ $managementPolicies }}
+                        ---
+                        apiVersion: kubernetes.m.crossplane.io/v1alpha1
+                        kind: Object
+                        metadata:
+                            annotations:
+                                gotemplating.fn.crossplane.io/composition-resource-name: backup-create-role-binding
+                            labels:
+                                {{- $labels | toYaml | nindent 8 }}
+                            name: backup-create-role-binding
+                        spec:
+                            forProvider:
+                                manifest:
+                                    apiVersion: rbac.authorization.k8s.io/v1
+                                    kind: RoleBinding
+                                    metadata:
+                                        labels:
+                                            {{- $labels | toYaml | nindent 20 }}
+                                        name: backup-create-role-binding
+                                        namespace: {{ $namespace }}
+                                    roleRef:
+                                        apiGroup: rbac.authorization.k8s.io
+                                        kind: ClusterRole
+                                        name: backup-create-cluster-role
+                                    subjects:
+                                        -   kind: ServiceAccount
+                                            name: backup-create-service-account
+                                            namespace: {{ $namespace }}
+                            managementPolicies: {{ $managementPolicies }}
+                        ---
+                        apiVersion: kubernetes.m.crossplane.io/v1alpha1
+                        kind: Object
+                        metadata:
+                            annotations:
+                                gotemplating.fn.crossplane.io/composition-resource-name: backup-create-service-account
+                            labels:
+                                {{- $labels | toYaml | nindent 8 }}
+                            name: backup-create-service-account
+                        spec:
+                            forProvider:
+                                manifest:
+                                    apiVersion: v1
+                                    kind: ServiceAccount
+                                    metadata:
+                                        labels:
+                                            {{- $labels | toYaml | nindent 20 }}
+                                        name: backup-create-service-account
+                                        namespace: {{ $namespace }}
+                            managementPolicies: {{ $managementPolicies }}
+                        ---
+                        apiVersion: kubernetes.m.crossplane.io/v1alpha1
+                        kind: Object
+                        metadata:
+                            annotations:
+                                gotemplating.fn.crossplane.io/composition-resource-name: backup-restore-backup-reader-cluster-role-binding
+                            labels:
+                                {{- $labels | toYaml | nindent 8 }}
+                            name: backup-restore-backup-reader-cluster-role-binding-{{ $baseName }}
+                        spec:
+                            forProvider:
+                                manifest:
+                                    apiVersion: rbac.authorization.k8s.io/v1
+                                    kind: ClusterRoleBinding
+                                    metadata:
+                                        labels:
+                                            {{- $labels | toYaml | nindent 20 }}
+                                        name: backup-restore-backup-reader-cluster-role-binding-{{ $baseName }}
+                                    roleRef:
+                                        apiGroup: rbac.authorization.k8s.io
+                                        kind: ClusterRole
+                                        name: backup-restore-backup-reader-cluster-role
+                                    subjects:
+                                        -   kind: ServiceAccount
+                                            name: backup-restore-service-account
+                                            namespace: {{ $namespace }}
+                            managementPolicies: {{ $managementPolicies }}
+                        ---
+                        apiVersion: kubernetes.m.crossplane.io/v1alpha1
+                        kind: Object
+                        metadata:
+                            annotations:
+                                gotemplating.fn.crossplane.io/composition-resource-name: backup-restore-role-binding
+                            labels:
+                                {{- $labels | toYaml | nindent 8 }}
+                            name: backup-restore-role-binding
+                        spec:
+                            forProvider:
+                                manifest:
+                                    apiVersion: rbac.authorization.k8s.io/v1
+                                    kind: RoleBinding
+                                    metadata:
+                                        labels:
+                                            {{- $labels | toYaml | nindent 20 }}
+                                        name: backup-restore-role-binding
+                                        namespace: {{ $namespace }}
+                                    roleRef:
+                                        apiGroup: rbac.authorization.k8s.io
+                                        kind: ClusterRole
+                                        name: backup-restore-env-cluster-role
+                                    subjects:
+                                        -   kind: ServiceAccount
+                                            name: backup-restore-service-account
+                                            namespace: {{ $namespace }}
+                            managementPolicies: {{ $managementPolicies }}
+                        ---
+                        apiVersion: kubernetes.m.crossplane.io/v1alpha1
+                        kind: Object
+                        metadata:
+                            annotations:
+                                gotemplating.fn.crossplane.io/composition-resource-name: backup-restore-service-account
+                            labels:
+                                {{- $labels | toYaml | nindent 8 }}
+                            name: backup-restore-service-account
+                        spec:
+                            forProvider:
+                                manifest:
+                                    apiVersion: v1
+                                    kind: ServiceAccount
+                                    metadata:
+                                        labels:
+                                            {{- $labels | toYaml | nindent 20 }}
+                                        name: backup-restore-service-account
+                                        namespace: {{ $namespace }}
+                            managementPolicies: {{ $managementPolicies }}
+                        ---
+                        apiVersion: storage.gcp.m.upbound.io/v1beta1
+                        kind: Bucket
+                        metadata:
+                            annotations:
+                                gotemplating.fn.crossplane.io/composition-resource-name: {{ $baseName }}-vault
+                            labels:
+                                {{- $backupVaultLabels | toYaml | nindent 8 }}
+                            name: {{ $baseName }}-vault
+                        spec:
+                            forProvider:
+                                {{- if $cmkEnabled }}
+                                encryption:
+                                    defaultKmsKeyName: {{ $cmkKeyName | quote }}
+                                {{- end }}
+                                forceDestroy: {{ $forceDestroy }}
+                                labels:
+                                    {{- $backupVaultLabels | toYaml | nindent 12 }}
+                                lifecycleRule:
+                                    -   action:
+                                            type: Delete
+                                        condition:
+                                            age: {{ add $backup.retentionDays 2 }}
+                                location: {{ $backup.region | default $region }}
+                                storageClass: {{ $backup.storageClass | quote }}
+                                uniformBucketLevelAccess: true
+                            managementPolicies: {{ $managementPolicies }}
+                        {{- range $dataPlane := list "blue" "green" }}
+                        ---
+                        apiVersion: storage.gcp.m.upbound.io/v1beta1
+                        kind: BucketIAMMember
+                        metadata:
+                            annotations:
+                                gotemplating.fn.crossplane.io/composition-resource-name: backup-restore-dl-writer-{{ $dataPlane }}
+                            labels:
+                                {{- $labels | toYaml | nindent 8 }}
+                                dataPlane: {{ $dataPlane }}
+                        spec:
+                            forProvider:
+                                bucketSelector:
+                                    matchLabels:
+                                        dataPlane: {{ $dataPlane }}
+                                member: {{ $backupRestorePrincipal | quote }}
+                                role: roles/storage.objectUser
+                            managementPolicies: {{ $managementPolicies }}
+                        {{- end }}
+                        {{- end }}
+                        ---
+                        
+                        apiVersion: kubernetes.m.crossplane.io/v1alpha1
+                        kind: Object
+                        metadata:
+                            annotations:
+                                gotemplating.fn.crossplane.io/composition-resource-name: composition-context
+                            name: {{ $xr.metadata.name }}-composition-context
+                        spec:
+                            forProvider:
+                                manifest:
+                                    apiVersion: v1
+                                    kind: ConfigMap
+                                    metadata:
+                                        name: composition-context
+                                        namespace: {{ $namespace }}
+                                    data:
+                                        variables: |
+                                            backup: {{ $backup | toJson }}
+                                            backupTargetLabels: {{ $backupTargetLabels | toJson }}
+                                            baseName: {{ $baseName | toJson }}
+                                            cmkEnabled: {{ $cmkEnabled | toJson }}
+                                            cmkKeyName: {{ $cmkKeyName | toJson }}
+                                            databaseIamUser: {{ $databaseIamUser | toJson }}
+                                            databaseName: {{ $databaseName | toJson }}
+                                            databasePort: {{ $databasePort | toJson }}
+                                            databaseSpec: {{ $databaseSpec | toJson }}
+                                            elasticsearchHealth: {{ $elasticsearchHealth | toJson }}
+                                            environmentId: {{ $environmentId | toJson }}
+                                            forceDestroy: {{ $forceDestroy | toJson }}
+                                            gsaEmail: {{ $gsaEmail | toJson }}
+                                            gsaName: {{ $gsaName | toJson }}
+                                            hash: {{ $hash | toJson }}
+                                            isReady: {{ $isReady | toJson }}
+                                            isSearchReady: {{ $isSearchReady | toJson }}
+                                            labels: {{ $labels | toJson }}
+                                            managementPolicies: {{ $managementPolicies | toJson }}
+                                            managementPoliciesOnce: {{ $managementPoliciesOnce | toJson }}
+                                            namespace: {{ $namespace | toJson }}
+                                            overlay: {{ $overlay | toJson }}
+                                            projectId: {{ $projectId | toJson }}
+                                            projectIdFull: {{ $projectIdFull | toJson }}
+                                            region: {{ $region | toJson }}
+                                            searchName: {{ $searchName | toJson }}
+                                            searchNamespace: {{ $searchNamespace | toJson }}
+                                            searchSecretName: {{ $searchSecretName | toJson }}
+                                            storage: {{ $storage | toJson }}
+                                            uidHash: {{ $uidHash | toJson }}
+                            managementPolicies: {{ $managementPolicies }}
+                        
+                kind: Input
+                source: Inline
+            step: go-templating
+        -   functionRef:
+                name: function-auto-ready
+            step: auto-detect-ready-composed-resources
+---
+# Source: liferay-gcp-infrastructure-provider/templates/runtime-configs.yaml
+apiVersion: pkg.crossplane.io/v1beta1
+kind: DeploymentRuntimeConfig
+metadata:
+    annotations:
+        argocd.argoproj.io/sync-wave: "-90"
+    name: gcp-cloudplatform-config
+spec:
+    deploymentTemplate:
+        spec:
+            selector:
+                matchLabels:
+                    pkg.crossplane.io/provider: provider-gcp-cloudplatform
+            template:
+                metadata:
+                    annotations:
+                        instrumentation.opentelemetry.io/inject-dotnet: "false"
+                        instrumentation.opentelemetry.io/inject-java: "false"
+                        instrumentation.opentelemetry.io/inject-nodejs: "false"
+                        instrumentation.opentelemetry.io/inject-python: "false"
+                        sidecar.opentelemetry.io/inject: "false"
+                    labels:
+                        pkg.crossplane.io/provider: provider-gcp-cloudplatform
+                spec:
+                    containers:
+                        -   name: package-runtime
+                            resources:
+                                limits:
+                                    cpu: 1000m
+                                    memory: 2Gi
+                                requests:
+                                    cpu: 250m
+                                    memory: 512Mi
+                            securityContext:
+                                allowPrivilegeEscalation: false
+                                capabilities:
+                                    drop:
+                                        -   ALL
+                                privileged: false
+                                readOnlyRootFilesystem: true
+                    securityContext:
+                        fsGroup: 2000
+                        runAsGroup: 2000
+                        runAsNonRoot: true
+                        runAsUser: 2000
+                        seccompProfile:
+                            type: RuntimeDefault
+                    serviceAccountName: provider-gcp-cloudplatform
+    serviceAccountTemplate:
+        metadata:
+            annotations:
+                iam.gke.io/gcp-service-account: "sample-cp-iam@sample-project.iam.gserviceaccount.com"
+            name: provider-gcp-cloudplatform
+---
+# Source: liferay-gcp-infrastructure-provider/templates/runtime-configs.yaml
+apiVersion: pkg.crossplane.io/v1beta1
+kind: DeploymentRuntimeConfig
+metadata:
+    annotations:
+        argocd.argoproj.io/sync-wave: "-90"
+    name: gcp-compute-config
+spec:
+    deploymentTemplate:
+        spec:
+            selector:
+                matchLabels:
+                    pkg.crossplane.io/provider: provider-gcp-compute
+            template:
+                metadata:
+                    annotations:
+                        instrumentation.opentelemetry.io/inject-dotnet: "false"
+                        instrumentation.opentelemetry.io/inject-java: "false"
+                        instrumentation.opentelemetry.io/inject-nodejs: "false"
+                        instrumentation.opentelemetry.io/inject-python: "false"
+                        sidecar.opentelemetry.io/inject: "false"
+                    labels:
+                        pkg.crossplane.io/provider: provider-gcp-compute
+                spec:
+                    containers:
+                        -   name: package-runtime
+                            resources:
+                                limits:
+                                    cpu: 1000m
+                                    memory: 2Gi
+                                requests:
+                                    cpu: 250m
+                                    memory: 512Mi
+                            securityContext:
+                                allowPrivilegeEscalation: false
+                                capabilities:
+                                    drop:
+                                        -   ALL
+                                privileged: false
+                                readOnlyRootFilesystem: true
+                    securityContext:
+                        fsGroup: 2000
+                        runAsGroup: 2000
+                        runAsNonRoot: true
+                        runAsUser: 2000
+                        seccompProfile:
+                            type: RuntimeDefault
+                    serviceAccountName: provider-gcp-compute
+    serviceAccountTemplate:
+        metadata:
+            name: provider-gcp-compute
+---
+# Source: liferay-gcp-infrastructure-provider/templates/runtime-configs.yaml
+apiVersion: pkg.crossplane.io/v1beta1
+kind: DeploymentRuntimeConfig
+metadata:
+    annotations:
+        argocd.argoproj.io/sync-wave: "-90"
+    name: gcp-family-config
+spec:
+    deploymentTemplate:
+        spec:
+            selector:
+                matchLabels:
+                    pkg.crossplane.io/provider: upbound-provider-family-gcp
+            template:
+                metadata:
+                    annotations:
+                        instrumentation.opentelemetry.io/inject-dotnet: "false"
+                        instrumentation.opentelemetry.io/inject-java: "false"
+                        instrumentation.opentelemetry.io/inject-nodejs: "false"
+                        instrumentation.opentelemetry.io/inject-python: "false"
+                        sidecar.opentelemetry.io/inject: "false"
+                    labels:
+                        pkg.crossplane.io/provider: upbound-provider-family-gcp
+                spec:
+                    containers:
+                        -   name: package-runtime
+                            resources:
+                                limits:
+                                    cpu: 1000m
+                                    memory: 1Gi
+                                requests:
+                                    cpu: 500m
+                                    memory: 512Mi
+                            securityContext:
+                                allowPrivilegeEscalation: false
+                                capabilities:
+                                    drop:
+                                        -   ALL
+                                privileged: false
+                                readOnlyRootFilesystem: true
+                    securityContext:
+                        fsGroup: 2000
+                        runAsGroup: 2000
+                        runAsNonRoot: true
+                        runAsUser: 2000
+                        seccompProfile:
+                            type: RuntimeDefault
+                    serviceAccountName: upbound-provider-family-gcp
+    serviceAccountTemplate:
+        metadata:
+            name: upbound-provider-family-gcp
+---
+# Source: liferay-gcp-infrastructure-provider/templates/runtime-configs.yaml
+apiVersion: pkg.crossplane.io/v1beta1
+kind: DeploymentRuntimeConfig
+metadata:
+    annotations:
+        argocd.argoproj.io/sync-wave: "-90"
+    name: gcp-kms-config
+spec:
+    deploymentTemplate:
+        spec:
+            selector:
+                matchLabels:
+                    pkg.crossplane.io/provider: provider-gcp-kms
+            template:
+                metadata:
+                    annotations:
+                        instrumentation.opentelemetry.io/inject-dotnet: "false"
+                        instrumentation.opentelemetry.io/inject-java: "false"
+                        instrumentation.opentelemetry.io/inject-nodejs: "false"
+                        instrumentation.opentelemetry.io/inject-python: "false"
+                        sidecar.opentelemetry.io/inject: "false"
+                    labels:
+                        pkg.crossplane.io/provider: provider-gcp-kms
+                spec:
+                    containers:
+                        -   name: package-runtime
+                            resources:
+                                limits:
+                                    cpu: 1000m
+                                    memory: 2Gi
+                                requests:
+                                    cpu: 250m
+                                    memory: 512Mi
+                            securityContext:
+                                allowPrivilegeEscalation: false
+                                capabilities:
+                                    drop:
+                                        -   ALL
+                                privileged: false
+                                readOnlyRootFilesystem: true
+                    securityContext:
+                        fsGroup: 2000
+                        runAsGroup: 2000
+                        runAsNonRoot: true
+                        runAsUser: 2000
+                        seccompProfile:
+                            type: RuntimeDefault
+                    serviceAccountName: provider-gcp-kms
+    serviceAccountTemplate:
+        metadata:
+            name: provider-gcp-kms
+---
+# Source: liferay-gcp-infrastructure-provider/templates/runtime-configs.yaml
+apiVersion: pkg.crossplane.io/v1beta1
+kind: DeploymentRuntimeConfig
+metadata:
+    annotations:
+        argocd.argoproj.io/sync-wave: "-90"
+    name: gcp-sql-config
+spec:
+    deploymentTemplate:
+        spec:
+            selector:
+                matchLabels:
+                    pkg.crossplane.io/provider: provider-gcp-sql
+            template:
+                metadata:
+                    annotations:
+                        instrumentation.opentelemetry.io/inject-dotnet: "false"
+                        instrumentation.opentelemetry.io/inject-java: "false"
+                        instrumentation.opentelemetry.io/inject-nodejs: "false"
+                        instrumentation.opentelemetry.io/inject-python: "false"
+                        sidecar.opentelemetry.io/inject: "false"
+                    labels:
+                        pkg.crossplane.io/provider: provider-gcp-sql
+                spec:
+                    containers:
+                        -   name: package-runtime
+                            resources:
+                                limits:
+                                    cpu: 1000m
+                                    memory: 2Gi
+                                requests:
+                                    cpu: 250m
+                                    memory: 512Mi
+                            securityContext:
+                                allowPrivilegeEscalation: false
+                                capabilities:
+                                    drop:
+                                        -   ALL
+                                privileged: false
+                                readOnlyRootFilesystem: true
+                    securityContext:
+                        fsGroup: 2000
+                        runAsGroup: 2000
+                        runAsNonRoot: true
+                        runAsUser: 2000
+                        seccompProfile:
+                            type: RuntimeDefault
+                    serviceAccountName: provider-gcp-sql
+    serviceAccountTemplate:
+        metadata:
+            name: provider-gcp-sql
+---
+# Source: liferay-gcp-infrastructure-provider/templates/runtime-configs.yaml
+apiVersion: pkg.crossplane.io/v1beta1
+kind: DeploymentRuntimeConfig
+metadata:
+    annotations:
+        argocd.argoproj.io/sync-wave: "-90"
+    name: gcp-storage-config
+spec:
+    deploymentTemplate:
+        spec:
+            selector:
+                matchLabels:
+                    pkg.crossplane.io/provider: provider-gcp-storage
+            template:
+                metadata:
+                    annotations:
+                        instrumentation.opentelemetry.io/inject-dotnet: "false"
+                        instrumentation.opentelemetry.io/inject-java: "false"
+                        instrumentation.opentelemetry.io/inject-nodejs: "false"
+                        instrumentation.opentelemetry.io/inject-python: "false"
+                        sidecar.opentelemetry.io/inject: "false"
+                    labels:
+                        pkg.crossplane.io/provider: provider-gcp-storage
+                spec:
+                    containers:
+                        -   name: package-runtime
+                            resources:
+                                limits:
+                                    cpu: 1000m
+                                    memory: 2Gi
+                                requests:
+                                    cpu: 250m
+                                    memory: 512Mi
+                            securityContext:
+                                allowPrivilegeEscalation: false
+                                capabilities:
+                                    drop:
+                                        -   ALL
+                                privileged: false
+                                readOnlyRootFilesystem: true
+                    securityContext:
+                        fsGroup: 2000
+                        runAsGroup: 2000
+                        runAsNonRoot: true
+                        runAsUser: 2000
+                        seccompProfile:
+                            type: RuntimeDefault
+                    serviceAccountName: provider-gcp-storage
+    serviceAccountTemplate:
+        metadata:
+            name: provider-gcp-storage
+---
+# Source: liferay-gcp-infrastructure-provider/templates/runtime-configs.yaml
+apiVersion: pkg.crossplane.io/v1beta1
+kind: DeploymentRuntimeConfig
+metadata:
+    annotations:
+        argocd.argoproj.io/sync-wave: "-90"
+    name: kubernetes-config
+spec:
+    deploymentTemplate:
+        spec:
+            selector:
+                matchLabels:
+                    pkg.crossplane.io/provider: provider-kubernetes
+            template:
+                metadata:
+                    annotations:
+                        instrumentation.opentelemetry.io/inject-dotnet: "false"
+                        instrumentation.opentelemetry.io/inject-java: "false"
+                        instrumentation.opentelemetry.io/inject-nodejs: "false"
+                        instrumentation.opentelemetry.io/inject-python: "false"
+                        sidecar.opentelemetry.io/inject: "false"
+                    labels:
+                        pkg.crossplane.io/provider: provider-kubernetes
+                spec:
+                    containers:
+                        -   name: package-runtime
+                            resources:
+                                limits:
+                                    cpu: 1000m
+                                    memory: 2Gi
+                                requests:
+                                    cpu: 250m
+                                    memory: 512Mi
+                            securityContext:
+                                allowPrivilegeEscalation: false
+                                capabilities:
+                                    drop:
+                                        -   ALL
+                                privileged: false
+                                readOnlyRootFilesystem: true
+                    securityContext:
+                        fsGroup: 2000
+                        runAsGroup: 2000
+                        runAsNonRoot: true
+                        runAsUser: 2000
+                        seccompProfile:
+                            type: RuntimeDefault
+                    serviceAccountName: provider-kubernetes
+    serviceAccountTemplate:
+        metadata:
+            name: provider-kubernetes
+---
+# Source: liferay-gcp-infrastructure-provider/templates/environment-config.yaml
+apiVersion: apiextensions.crossplane.io/v1beta1
+data:
+    deploymentName: "sample"
+    projectId: "sample-project"
+    projectNumber: "123456789012"
+    vpcName: "sample-vpc"
+kind: EnvironmentConfig
+metadata:
+    name: environment-config
+---
+# Source: liferay-gcp-infrastructure-provider/templates/templates-environment-config.yaml
+apiVersion: apiextensions.crossplane.io/v1beta1
+data:
+    liferay-templates: |
+        {{- $databasePort := "5432" -}}
+        {{- $elasticsearchHealth := "" -}}
+        {{- $env := index .context "apiextensions.crossplane.io/environment" -}}
+        {{- $isReady := false -}}
+        {{- $isSearchReady := false -}}
+        {{- $managementPoliciesOnce := (list "Create" "Observe" "Delete") | toJson -}}
+        {{- $xr := .observed.composite.resource -}}
+        
+        {{- $backup := $xr.spec.backup | default dict -}}
+        {{- $cmkEnabled := $xr.spec.cmk.enabled | default false -}}
+        {{- $databaseName := $xr.spec.database.name | default "lportal" -}}
+        {{- $databaseSpec := $xr.spec.database -}}
+        {{- $environmentId := $xr.spec.environmentId -}}
+        {{- $forceDestroy := $xr.spec.forceDestroy | default false -}}
+        {{- $gsaName := printf "%s-sa" $xr.metadata.name -}}
+        {{- $managementPolicies := $xr.spec.orphanOnDelete | ternary (list "Create" "Observe" "Update") (list "*") | toJson -}}
+        {{- $managementPoliciesNoUpdate := $xr.spec.orphanOnDelete | ternary (list "Create" "Observe") (list "Create" "Delete" "Observe") | toJson -}}
+        {{- $namespace := $xr.metadata.namespace -}}
+        {{- $overlay := $xr.spec.overlay | default dict -}}
+        {{- $projectId := $xr.spec.projectId -}}
+        {{- $restorePhase := $xr.spec.restorePhase | default "none" -}}
+        {{- $searchName := printf "%s-es" $xr.metadata.name -}}
+        {{- $storage := $xr.spec.storage | default dict -}}
+        {{- $targetActiveDataPlane := $xr.spec.targetActiveDataPlane | default "blue" -}}
+        
+        {{- $activeDataPlane := $targetActiveDataPlane -}}
+        {{- $databaseIamUser := printf "%s@%s.iam" $gsaName $env.projectId -}}
+        {{- $databaseInstanceManagementPolicies := $backup.enabled | ternary ((list "*") | toJson) $managementPolicies -}}
+        {{- $dataPlanes := list $targetActiveDataPlane -}}
+        {{- $gsaEmail := printf "%s@%s.iam.gserviceaccount.com" $gsaName $env.projectId -}}
+        {{- $hash := printf "%s-%s" $databaseName $env.projectId | sha256sum | trunc 7 -}}
+        {{- $labels := merge ($xr.spec.commonTags | default dict) (dict "app" "liferay" "deployment-name" $env.deploymentName "environment-id" $environmentId "project-id" $projectId) -}}
+        {{- $projectIdFull := printf "%s-%s" $projectId $environmentId -}}
+        {{- $region := $databaseSpec.region | default $xr.spec.region -}}
+        {{- $searchNamespace := printf "%s-elasticsearch" $namespace -}}
+        {{- $searchSecretName := printf "%s-es-elastic-user" $searchName -}}
+        {{- $targetInactiveDataPlane := (eq $targetActiveDataPlane "blue") | ternary "green" "blue" -}}
+        
+        {{- if (eq $restorePhase "promoting") -}}
+            {{- $dataPlanes = list "blue" "green" -}}
+        {{- else if (eq $restorePhase "provisioning") -}}
+            {{- $activeDataPlane = $targetInactiveDataPlane -}}
+            {{- $dataPlanes = list "blue" "green" -}}
+        {{- end }}
+        
+        {{- $backupTargetLabels := merge (dict) $labels (dict "should-back-up" "true") -}}
+        {{- $uidHash := printf "%s-%s" $env.projectNumber $projectIdFull | sha256sum | trunc 6 -}}
+        
+        {{- $baseName := printf "%.18s-%s" $projectIdFull $uidHash -}}
+        
+        {{- $cmkKeyName := printf "projects/%s/locations/%s/keyRings/%s-keyring/cryptoKeys/%s-key" $env.projectId $region $baseName $baseName -}}
+        apiVersion: cloudplatform.gcp.m.upbound.io/v1beta1
+        kind: ServiceAccount
+        metadata:
+            annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: liferay-gsa
+            labels:
+                {{- $labels | toYaml | nindent 8 }}
+            name: {{ $gsaName }}
+        spec:
+            forProvider:
+                displayName: Liferay {{ $gsaName }} Service Account
+        ---
+        apiVersion: cloudplatform.gcp.m.upbound.io/v1beta1
+        kind: ServiceAccountIAMMember
+        metadata:
+            annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: liferay-wi-binding
+            labels:
+                {{- $labels | toYaml | nindent 8 }}
+        spec:
+            forProvider:
+                member: serviceAccount:{{ $env.projectId }}.svc.id.goog[{{ $namespace }}/liferay-default]
+                role: roles/iam.workloadIdentityUser
+                serviceAccountIdRef:
+                    name: {{ $gsaName }}
+        ---
+        apiVersion: cloudplatform.gcp.m.upbound.io/v1beta1
+        kind: ProjectIAMMember
+        metadata:
+            annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: liferay-sql-instance-user-role
+            labels:
+                {{- $labels | toYaml | nindent 8 }}
+        spec:
+            forProvider:
+                member: serviceAccount:{{ $gsaEmail }}
+                project: {{ $env.projectId }}
+                role: roles/cloudsql.instanceUser
+        ---
+        apiVersion: cloudplatform.gcp.m.upbound.io/v1beta1
+        kind: ProjectIAMMember
+        metadata:
+            annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: liferay-sql-client-role
+            labels:
+                {{- $labels | toYaml | nindent 8 }}
+        spec:
+            forProvider:
+                member: serviceAccount:{{ $gsaEmail }}
+                project: {{ $env.projectId }}
+                role: roles/cloudsql.client
+        {{- range $i, $dataPlane := $dataPlanes }}
+        {{- $databaseInstanceName := printf "%s-db-instance-%s" $xr.metadata.name $dataPlane }}
+        {{- if $i }}
+        ---
+        {{- end }}
+        apiVersion: sql.gcp.m.upbound.io/v1beta1
+        kind: DatabaseInstance
+        metadata:
+            annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: database-primary-{{ $dataPlane }}
+            labels:
+                {{- $labels | toYaml | nindent 8 }}
+                dataPlane: {{ $dataPlane }}
+            name: {{ $databaseInstanceName }}
+        spec:
+            forProvider:
+                databaseVersion: {{ $databaseSpec.databaseVersion | default "POSTGRES_18" }}
+                deletionProtection: {{ and ($databaseSpec.deletionProtection | default ($xr.spec.deletionProtection | default false)) (eq $dataPlane $activeDataPlane) }}
+                {{- if $cmkEnabled }}
+                encryptionKmsKeyName: {{ $cmkKeyName }}
+                {{- end }}
+                region: {{ $region }}
+                rootPasswordSecretRef:
+                    key: password
+                    name: {{ $databaseSpec.rootPasswordSecretName }}
+                settings:
+                    databaseFlags:
+                        -   name: cloudsql.iam_authentication
+                            value: "on"
+                    diskSize: {{ $databaseSpec.storageGB | default 10 }}
+                    diskType: PD_SSD
+                    edition: ENTERPRISE
+                    insightsConfig:
+                        queryInsightsEnabled: {{ $databaseSpec.queryInsightsEnabled | default true }}
+                    ipConfiguration:
+                        ipv4Enabled: false
+                        privateNetwork: projects/{{ $env.projectId }}/global/networks/{{ $env.vpcName }}
+                        sslMode: TRUSTED_CLIENT_CERTIFICATE_REQUIRED
+                    retainBackupsOnDelete: true
+                    tier: {{ $databaseSpec.instanceType | default "db-custom-1-3840" }}
+                    userLabels:
+                        {{- $backupTargetLabels | toYaml | nindent 16 }}
+                        active: {{ printf "%t" (eq $dataPlane $activeDataPlane) | quote }}
+            managementPolicies: {{ $databaseInstanceManagementPolicies }}
+        ---
+        apiVersion: sql.gcp.m.upbound.io/v1beta1
+        kind: Database
+        metadata:
+            annotations:
+                crossplane.io/external-name: {{ $databaseName }}
+                gotemplating.fn.crossplane.io/composition-resource-name: liferay-db-{{ $dataPlane }}
+            labels:
+                {{- $labels | toYaml | nindent 8 }}
+                dataPlane: {{ $dataPlane }}
+            name: {{ $xr.metadata.name }}-db-{{ $dataPlane }}
+        spec:
+            forProvider:
+                charset: UTF8
+                collation: en_US.UTF8
+                instanceSelector:
+                    matchLabels:
+                        dataPlane: {{ $dataPlane }}
+            managementPolicies: ["Create", "Observe", "Update"]
+        ---
+        apiVersion: sql.gcp.m.upbound.io/v1beta1
+        kind: User
+        metadata:
+            annotations:
+                crossplane.io/external-name: {{ $databaseIamUser }}
+                gotemplating.fn.crossplane.io/composition-resource-name: liferay-iam-user-{{ $dataPlane }}
+            labels:
+                {{- $labels | toYaml | nindent 8 }}
+                dataPlane: {{ $dataPlane }}
+            name: {{ $xr.metadata.name }}-db-user-{{ $dataPlane }}
+        spec:
+            forProvider:
+                instanceSelector:
+                    matchLabels:
+                        dataPlane: {{ $dataPlane }}
+                type: CLOUD_IAM_SERVICE_ACCOUNT
+            managementPolicies: ["Create", "Observe", "Update"]
+        {{- end }}
+        {{- range $dataPlane := list "blue" "green" }}
+        {{- $databaseInstanceName := printf "%s-db-instance-%s" $xr.metadata.name $dataPlane }}
+        {{- $databaseResourceName := printf "liferay-db-%s" $dataPlane }}
+        {{- $userResourceName := printf "liferay-iam-user-%s" $dataPlane }}
+        {{- if or (has $dataPlane $dataPlanes) (and $.observed.resources (index $.observed.resources $databaseResourceName)) }}
+        ---
+        apiVersion: protection.crossplane.io/v1beta1
+        kind: Usage
+        metadata:
+            annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: usage-instance-by-database-{{ $dataPlane }}
+            name: {{ $xr.metadata.name }}-instance-by-database-{{ $dataPlane }}
+            namespace: {{ $namespace }}
+        spec:
+            by:
+                apiVersion: sql.gcp.m.upbound.io/v1beta1
+                kind: Database
+                resourceRef:
+                    name: {{ $xr.metadata.name }}-db-{{ $dataPlane }}
+            of:
+                apiVersion: sql.gcp.m.upbound.io/v1beta1
+                kind: DatabaseInstance
+                resourceRef:
+                    name: {{ $databaseInstanceName }}
+        {{- end }}
+        {{- if or (has $dataPlane $dataPlanes) (and $.observed.resources (index $.observed.resources $userResourceName)) }}
+        ---
+        apiVersion: protection.crossplane.io/v1beta1
+        kind: Usage
+        metadata:
+            annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: usage-instance-by-user-{{ $dataPlane }}
+            name: {{ $xr.metadata.name }}-instance-by-user-{{ $dataPlane }}
+            namespace: {{ $namespace }}
+        spec:
+            by:
+                apiVersion: sql.gcp.m.upbound.io/v1beta1
+                kind: User
+                resourceRef:
+                    name: {{ $xr.metadata.name }}-db-user-{{ $dataPlane }}
+            of:
+                apiVersion: sql.gcp.m.upbound.io/v1beta1
+                kind: DatabaseInstance
+                resourceRef:
+                    name: {{ $databaseInstanceName }}
+        {{- end }}
+        {{- end }}
+        apiVersion: kubernetes.m.crossplane.io/v1alpha1
+        kind: Object
+        metadata:
+            annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: liferay-ksa
+            labels:
+                {{- $labels | toYaml | nindent 8 }}
+            name: {{ $xr.metadata.name }}-ksa
+        spec:
+            forProvider:
+                manifest:
+                    apiVersion: v1
+                    kind: ServiceAccount
+                    metadata:
+                        annotations:
+                            iam.gke.io/gcp-service-account: {{ $gsaEmail }}
+                        labels:
+                            {{- $labels | toYaml | nindent 20 }}
+                        name: liferay-default
+                        namespace: {{ $namespace }}
+        {{- range $dataPlane := $dataPlanes }}
+        {{- $dbInstanceResourceName := printf "database-primary-%s" $dataPlane }}
+        {{- $dbReady := false }}
+        {{- if $.observed.resources }}
+            {{- if (index $.observed.resources $dbInstanceResourceName) }}
+                {{- $db := index $.observed.resources $dbInstanceResourceName }}
+                {{- range $cond := $db.resource.status.conditions | default list }}
+                    {{- if and (eq $cond.type "Ready") (eq $cond.status "True") }}
+                        {{- $dbReady = true }}
+                    {{- end }}
+                {{- end }}
+            {{- end }}
+        {{- end }}
+        {{- if $dbReady }}
+        {{- $instanceConnectionName := printf "%s:%s:%s-db-instance-%s" $env.projectId $region $xr.metadata.name $dataPlane }}
+        {{- $jobName := printf "%s-db-grant-%s" $xr.metadata.name $dataPlane }}
+        ---
+        apiVersion: kubernetes.m.crossplane.io/v1alpha1
+        kind: Object
+        metadata:
+            annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: liferay-db-grant-job-{{ $dataPlane }}
+            labels:
+                {{- $labels | toYaml | nindent 8 }}
+                dataPlane: {{ $dataPlane }}
+            name: {{ $jobName }}
+        spec:
+            forProvider:
+                manifest:
+                    apiVersion: batch/v1
+                    kind: Job
+                    metadata:
+                        labels:
+                            {{- $labels | toYaml | nindent 20 }}
+                            dataPlane: {{ $dataPlane }}
+                        name: {{ $jobName }}
+                        namespace: {{ $namespace }}
+                    spec:
+                        template:
+                            spec:
+                                containers:
+                                    -   args:
+                                            -   |
+                                                    set -e
+                                                    until pg_isready -h 127.0.0.1 -p {{ $databasePort }} -U postgres; do sleep 2; done
+                                                    psql -h 127.0.0.1 -v "ON_ERROR_STOP=1" -U postgres -d {{ $databaseName }} <<EOF
+                                                    GRANT ALL PRIVILEGES ON DATABASE "{{ $databaseName }}" TO "{{ $databaseIamUser }}";
+                                                    GRANT ALL ON ALL TABLES IN SCHEMA public TO "{{ $databaseIamUser }}";
+                                                    GRANT cloudsqlsuperuser TO "{{ $databaseIamUser }}";
+                                                    GRANT "{{ $databaseIamUser }}" to postgres;
+                                                    EOF
+                                        command:
+                                            -   /bin/sh
+                                            -   -c
+                                        env:
+                                            -   name: PGPASSWORD
+                                                valueFrom:
+                                                    secretKeyRef:
+                                                        key: password
+                                                        name: {{ $databaseSpec.rootPasswordSecretName }}
+                                        image: postgres:18-alpine
+                                        name: sql-runner
+                                        resources:
+                                            limits:
+                                                cpu: 200m
+                                                memory: 256Mi
+                                            requests:
+                                                cpu: 100m
+                                                memory: 128Mi
+                                        securityContext:
+                                            allowPrivilegeEscalation: false
+                                            capabilities:
+                                                drop:
+                                                    -   ALL
+                                            runAsNonRoot: true
+                                            runAsUser: 1000
+                                            seccompProfile:
+                                                type: RuntimeDefault
+                                initContainers:
+                                    -   args:
+                                            -   --auto-iam-authn
+                                            -   --port={{ $databasePort }}
+                                            -   --private-ip
+                                            -   --structured-logs
+                                            -   "{{ $instanceConnectionName }}"
+                                        image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.14.1
+                                        name: cloud-sql-proxy
+                                        resources:
+                                            limits:
+                                                cpu: 200m
+                                                memory: 256Mi
+                                            requests:
+                                                cpu: 100m
+                                                memory: 128Mi
+                                        restartPolicy: Always
+                                        securityContext:
+                                            allowPrivilegeEscalation: false
+                                            capabilities:
+                                                drop:
+                                                    -   ALL
+                                            runAsNonRoot: true
+                                            runAsUser: 65532
+                                            seccompProfile:
+                                                type: RuntimeDefault
+                                restartPolicy: OnFailure
+                                securityContext:
+                                    fsGroup: 1000
+                                    runAsNonRoot: true
+                                    seccompProfile:
+                                        type: RuntimeDefault
+                                serviceAccountName: liferay-default
+                                volumes:
+                                    -   emptyDir: {}
+                                        name: term-log
+            managementPolicies: {{ $managementPoliciesOnce }}
+            readiness:
+                celQuery: object.status.succeeded == 1
+                policy: DeriveFromCelQuery
+        {{- end }}
+        {{- end }}
+        ---
+        {{- $isReady = false }}
+        {{- if .observed.resources }}
+            {{- $activeJobResourceName := printf "liferay-db-grant-job-%s" $activeDataPlane }}
+            {{- if (index .observed.resources $activeJobResourceName) }}
+                {{- $job := index .observed.resources $activeJobResourceName }}
+                {{- range $cond := $job.resource.status.conditions | default list }}
+                    {{- if and (eq $cond.type "Ready") (eq $cond.status "True") }}
+                        {{- $isReady = true }}
+                    {{- end }}
+                {{- end }}
+            {{- end }}
+        {{- end }}
+        {{- if $isReady }}
+        apiVersion: kubernetes.m.crossplane.io/v1alpha1
+        kind: Object
+        metadata:
+            annotations:
+                crossplane.io/external-name: {{ $baseName }}-managed-service-details-secret
+                gotemplating.fn.crossplane.io/composition-resource-name: managed-service-details-secret
+            labels:
+                {{- $labels | toYaml | nindent 8 }}
+            name: {{ $baseName }}-managed-service-details-secret
+        spec:
+            forProvider:
+                manifest:
+                    apiVersion: v1
+                    data:
+                        DATABASE_ENDPOINT: {{ "localhost" | b64enc | quote }}
+                        DATABASE_INSTANCE_NAME: {{ printf "%s:%s:%s-db-instance-%s" $env.projectId $region $xr.metadata.name $activeDataPlane | b64enc | quote }}
+                        DATABASE_PORT: {{ $databasePort | default 5432 | toString | b64enc | quote }}
+                        DATABASE_USERNAME: {{ $databaseIamUser | toString | b64enc | quote }}
+                        LIFERAY_GCS_BUCKET_NAME: {{ printf "%s-dl-%s" $baseName $activeDataPlane | b64enc | quote }}
+                        LIFERAY_OVERLAY_BUCKET_NAME: {{ $overlay.bucketName | default "" | b64enc | quote }}
+                    kind: Secret
+                    metadata:
+                        labels:
+                            {{- $labels | toYaml | nindent 20 }}
+                        name: managed-service-details
+                        namespace: {{ $namespace }}
+                    type: Opaque
+            managementPolicies: {{ $managementPolicies }}
+        {{- end }}
+        ---
+        apiVersion: gcp.liferay.com/v1alpha1
+        kind: LiferayInfrastructure
+        status:
+            managedServiceDetailsReady: {{ $isReady }}
+        apiVersion: kubernetes.m.crossplane.io/v1alpha1
+        kind: Object
+        metadata:
+            annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: elasticsearch-observer
+            name: {{ $searchName }}-observer
+        spec:
+            forProvider:
+                manifest:
+                    apiVersion: elasticsearch.k8s.elastic.co/v1
+                    kind: Elasticsearch
+                    metadata:
+                        name: {{ $searchName }}
+                        namespace: {{ $searchNamespace }}
+            managementPolicies: ["Observe"]
+        ---
+        apiVersion: kubernetes.m.crossplane.io/v1alpha1
+        kind: Object
+        metadata:
+            annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: elasticsearch-secret-observer
+            name: {{ $searchSecretName }}-observer
+        spec:
+            forProvider:
+                manifest:
+                    apiVersion: v1
+                    kind: Secret
+                    metadata:
+                        name: {{ $searchSecretName }}
+                        namespace: {{ $searchNamespace }}
+            managementPolicies: ["Observe"]
+        ---
+        {{- if .observed.resources }}
+        {{- $elasticsearchObject := (index .observed.resources "elasticsearch-observer" | default dict).resource | default dict -}}
+        {{- $elasticsearchObjectAtProvider := ($elasticsearchObject.status | default dict).atProvider | default dict -}}
+        {{- $elasticsearchObjectAtProviderManifest := (index $elasticsearchObjectAtProvider "manifest" | default dict) -}}
+        {{- $elasticsearchObjectAtProviderManifestStatus := (index $elasticsearchObjectAtProviderManifest "status" | default dict) -}}
+        
+        {{- $elasticsearchHealth = (index $elasticsearchObjectAtProviderManifestStatus "health" | default "") -}}
+        {{- $isSearchReady = or (eq $elasticsearchHealth "green") (eq $elasticsearchHealth "yellow") -}}
+        
+        {{- $secretObject := (index .observed.resources "elasticsearch-secret-observer" | default dict).resource | default dict -}}
+        {{- $secretObjectAtProvider := ($secretObject.status | default dict).atProvider | default dict -}}
+        {{- $secretObjectAtProviderManifest := (index $secretObjectAtProvider "manifest" | default dict) -}}
+        {{- $secretObjectAtProviderManifestData := (index $secretObjectAtProviderManifest "data" | default dict) -}}
+        {{- $secretObjectAtProviderManifestDataPassword := (index $secretObjectAtProviderManifestData "elastic" | default "") -}}
+        
+        {{- if and $isSearchReady $secretObjectAtProviderManifestDataPassword }}
+        apiVersion: kubernetes.m.crossplane.io/v1alpha1
+        kind: Object
+        metadata:
+            annotations:
+                crossplane.io/external-name: elasticsearch-connection-details
+                gotemplating.fn.crossplane.io/composition-resource-name: elasticsearch-connection-details-secret
+            labels:
+                {{- $labels | toYaml | nindent 8 }}
+            name: {{ $xr.metadata.name }}-elasticsearch-connection-details-secret
+        spec:
+            forProvider:
+                manifest:
+                    apiVersion: v1
+                    data:
+                        ELASTICSEARCH_PASSWORD: {{ $secretObjectAtProviderManifestDataPassword }}
+                    kind: Secret
+                    metadata:
+                        labels:
+                            {{- $labels | toYaml | nindent 20 }}
+                        name: elasticsearch-connection-details
+                        namespace: {{ $namespace }}
+                    stringData:
+                        ELASTICSEARCH_URL: http://{{ $searchName }}-es-http.{{ $searchNamespace }}.svc:9200
+                        ELASTICSEARCH_USERNAME: elastic
+                    type: Opaque
+            managementPolicies: {{ $managementPolicies }}
+        {{- end }}
+        {{- end }}
+        {{- range $i, $dataPlane := list "blue" "green" }}
+        {{- if $i }}
+        ---
+        {{- end }}
+        apiVersion: storage.gcp.m.upbound.io/v1beta1
+        kind: Bucket
+        metadata:
+            annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: liferay-gcs-bucket-{{ $dataPlane }}
+            labels:
+                {{- $labels | toYaml | nindent 8 }}
+                dataPlane: {{ $dataPlane }}
+            name: {{ $baseName }}-dl-{{ $dataPlane }}
+        spec:
+            forProvider:
+                {{- if $cmkEnabled }}
+                encryption:
+                    defaultKmsKeyName: {{ $cmkKeyName }}
+                {{- end }}
+                forceDestroy: {{ $forceDestroy }}
+                labels:
+                    {{- $backupTargetLabels | toYaml | nindent 12 }}
+                    active: {{ printf "%t" (eq $dataPlane $activeDataPlane) | quote }}
+                location: {{ $storage.region | default $region }}
+                storageClass: STANDARD
+                uniformBucketLevelAccess: true
+                versioning:
+                    enabled: {{ $storage.enableVersioning | default true }}
+            managementPolicies: {{ $managementPolicies }}
+        ---
+        apiVersion: storage.gcp.m.upbound.io/v1beta1
+        kind: BucketIAMMember
+        metadata:
+            annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: liferay-gcs-iam-{{ $dataPlane }}
+            labels:
+                {{- $labels | toYaml | nindent 8 }}
+                dataPlane: {{ $dataPlane }}
+        spec:
+            forProvider:
+                bucketSelector:
+                    matchLabels:
+                        dataPlane: {{ $dataPlane }}
+                member: serviceAccount:{{ $gsaEmail }}
+                role: roles/storage.admin
+            managementPolicies: {{ $managementPolicies }}
+        {{- end }}
+        {{- if and $overlay.enabled $overlay.bucketName }}
+        apiVersion: storage.gcp.m.upbound.io/v1beta1
+        kind: BucketIAMMember
+        metadata:
+            annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: liferay-gsa-overlay-bucket-iam
+            labels:
+                {{- $labels | toYaml | nindent 8 }}
+        spec:
+            forProvider:
+                bucket: {{ $overlay.bucketName }}
+                member: serviceAccount:{{ $gsaEmail }}
+                role: roles/storage.objectViewer
+            managementPolicies: {{ $managementPolicies }}
+        {{- end }}
+        {{- if $cmkEnabled }}
+        apiVersion: kms.gcp.m.upbound.io/v1beta1
+        kind: KeyRing
+        metadata:
+            annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: liferay-keyring
+            labels:
+                {{- $labels | toYaml | nindent 8 }}
+            name: {{ $baseName }}-keyring
+        spec:
+            forProvider:
+                location: {{ $region }}
+            managementPolicies: {{ $managementPolicies }}
+        ---
+        apiVersion: kms.gcp.m.upbound.io/v1beta1
+        kind: CryptoKey
+        metadata:
+            annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: liferay-cryptokey
+            labels:
+                {{- $labels | toYaml | nindent 8 }}
+            name: {{ $baseName }}-key
+        spec:
+            forProvider:
+                keyRingSelector:
+                    matchControllerRef: true
+                purpose: ENCRYPT_DECRYPT
+                rotationPeriod: 86400s
+            managementPolicies: {{ $managementPolicies }}
+        ---
+        apiVersion: kms.gcp.m.upbound.io/v1beta1
+        kind: CryptoKeyIAMMember
+        metadata:
+            annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: liferay-sql-kms-binding
+            labels:
+                {{- $labels | toYaml | nindent 8 }}
+        spec:
+            forProvider:
+                cryptoKeyIdRef:
+                    name: {{ $baseName }}-key
+                member: serviceAccount:service-{{ $env.projectNumber }}@gcp-sa-cloud-sql.iam.gserviceaccount.com
+                role: roles/cloudkms.cryptoKeyEncrypterDecrypter
+            managementPolicies: {{ $managementPolicies }}
+        ---
+        apiVersion: kms.gcp.m.upbound.io/v1beta1
+        kind: CryptoKeyIAMMember
+        metadata:
+            annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: liferay-storage-kms-binding
+            labels:
+                {{- $labels | toYaml | nindent 8 }}
+        spec:
+            forProvider:
+                cryptoKeyIdRef:
+                    name: {{ $baseName }}-key
+                member: serviceAccount:service-{{ $env.projectNumber }}@gs-project-accounts.iam.gserviceaccount.com
+                role: roles/cloudkms.cryptoKeyEncrypterDecrypter
+            managementPolicies: {{ $managementPolicies }}
+        {{- end }}
+        {{- if $backup.enabled }}
+        {{- $backupRestorePrincipal := printf "principal://iam.googleapis.com/projects/%s/locations/global/workloadIdentityPools/%s.svc.id.goog/subject/ns/%s/sa/backup-restore-service-account" $env.projectNumber $env.projectId $namespace }}
+        {{- $backupVaultLabels := merge (dict) $labels (dict "is-backup-vault" "true") }}
+        apiVersion: cloudplatform.gcp.m.upbound.io/v1beta1
+        kind: ProjectIAMMember
+        metadata:
+            annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: backup-restore-cloudsql-admin
+            labels:
+                {{- $labels | toYaml | nindent 8 }}
+        spec:
+            forProvider:
+                member: {{ $backupRestorePrincipal | quote }}
+                project: {{ $env.projectId }}
+                role: roles/cloudsql.admin
+            managementPolicies: {{ $managementPolicies }}
+        ---
+        apiVersion: cloudplatform.gcp.m.upbound.io/v1beta1
+        kind: ProjectIAMMember
+        metadata:
+            annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: backup-restore-sts-admin
+            labels:
+                {{- $labels | toYaml | nindent 8 }}
+        spec:
+            forProvider:
+                member: {{ $backupRestorePrincipal | quote }}
+                project: {{ $env.projectId }}
+                role: roles/storagetransfer.admin
+            managementPolicies: {{ $managementPolicies }}
+        ---
+        apiVersion: kubernetes.m.crossplane.io/v1alpha1
+        kind: Object
+        metadata:
+            annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: backup-create-role-binding
+            labels:
+                {{- $labels | toYaml | nindent 8 }}
+            name: backup-create-role-binding
+        spec:
+            forProvider:
+                manifest:
+                    apiVersion: rbac.authorization.k8s.io/v1
+                    kind: RoleBinding
+                    metadata:
+                        labels:
+                            {{- $labels | toYaml | nindent 20 }}
+                        name: backup-create-role-binding
+                        namespace: {{ $namespace }}
+                    roleRef:
+                        apiGroup: rbac.authorization.k8s.io
+                        kind: ClusterRole
+                        name: backup-create-cluster-role
+                    subjects:
+                        -   kind: ServiceAccount
+                            name: backup-create-service-account
+                            namespace: {{ $namespace }}
+            managementPolicies: {{ $managementPolicies }}
+        ---
+        apiVersion: kubernetes.m.crossplane.io/v1alpha1
+        kind: Object
+        metadata:
+            annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: backup-create-service-account
+            labels:
+                {{- $labels | toYaml | nindent 8 }}
+            name: backup-create-service-account
+        spec:
+            forProvider:
+                manifest:
+                    apiVersion: v1
+                    kind: ServiceAccount
+                    metadata:
+                        labels:
+                            {{- $labels | toYaml | nindent 20 }}
+                        name: backup-create-service-account
+                        namespace: {{ $namespace }}
+            managementPolicies: {{ $managementPolicies }}
+        ---
+        apiVersion: kubernetes.m.crossplane.io/v1alpha1
+        kind: Object
+        metadata:
+            annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: backup-restore-backup-reader-cluster-role-binding
+            labels:
+                {{- $labels | toYaml | nindent 8 }}
+            name: backup-restore-backup-reader-cluster-role-binding-{{ $baseName }}
+        spec:
+            forProvider:
+                manifest:
+                    apiVersion: rbac.authorization.k8s.io/v1
+                    kind: ClusterRoleBinding
+                    metadata:
+                        labels:
+                            {{- $labels | toYaml | nindent 20 }}
+                        name: backup-restore-backup-reader-cluster-role-binding-{{ $baseName }}
+                    roleRef:
+                        apiGroup: rbac.authorization.k8s.io
+                        kind: ClusterRole
+                        name: backup-restore-backup-reader-cluster-role
+                    subjects:
+                        -   kind: ServiceAccount
+                            name: backup-restore-service-account
+                            namespace: {{ $namespace }}
+            managementPolicies: {{ $managementPolicies }}
+        ---
+        apiVersion: kubernetes.m.crossplane.io/v1alpha1
+        kind: Object
+        metadata:
+            annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: backup-restore-role-binding
+            labels:
+                {{- $labels | toYaml | nindent 8 }}
+            name: backup-restore-role-binding
+        spec:
+            forProvider:
+                manifest:
+                    apiVersion: rbac.authorization.k8s.io/v1
+                    kind: RoleBinding
+                    metadata:
+                        labels:
+                            {{- $labels | toYaml | nindent 20 }}
+                        name: backup-restore-role-binding
+                        namespace: {{ $namespace }}
+                    roleRef:
+                        apiGroup: rbac.authorization.k8s.io
+                        kind: ClusterRole
+                        name: backup-restore-env-cluster-role
+                    subjects:
+                        -   kind: ServiceAccount
+                            name: backup-restore-service-account
+                            namespace: {{ $namespace }}
+            managementPolicies: {{ $managementPolicies }}
+        ---
+        apiVersion: kubernetes.m.crossplane.io/v1alpha1
+        kind: Object
+        metadata:
+            annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: backup-restore-service-account
+            labels:
+                {{- $labels | toYaml | nindent 8 }}
+            name: backup-restore-service-account
+        spec:
+            forProvider:
+                manifest:
+                    apiVersion: v1
+                    kind: ServiceAccount
+                    metadata:
+                        labels:
+                            {{- $labels | toYaml | nindent 20 }}
+                        name: backup-restore-service-account
+                        namespace: {{ $namespace }}
+            managementPolicies: {{ $managementPolicies }}
+        ---
+        apiVersion: storage.gcp.m.upbound.io/v1beta1
+        kind: Bucket
+        metadata:
+            annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: {{ $baseName }}-vault
+            labels:
+                {{- $backupVaultLabels | toYaml | nindent 8 }}
+            name: {{ $baseName }}-vault
+        spec:
+            forProvider:
+                {{- if $cmkEnabled }}
+                encryption:
+                    defaultKmsKeyName: {{ $cmkKeyName | quote }}
+                {{- end }}
+                forceDestroy: {{ $forceDestroy }}
+                labels:
+                    {{- $backupVaultLabels | toYaml | nindent 12 }}
+                lifecycleRule:
+                    -   action:
+                            type: Delete
+                        condition:
+                            age: {{ add $backup.retentionDays 2 }}
+                location: {{ $backup.region | default $region }}
+                storageClass: {{ $backup.storageClass | quote }}
+                uniformBucketLevelAccess: true
+            managementPolicies: {{ $managementPolicies }}
+        {{- range $dataPlane := list "blue" "green" }}
+        ---
+        apiVersion: storage.gcp.m.upbound.io/v1beta1
+        kind: BucketIAMMember
+        metadata:
+            annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: backup-restore-dl-writer-{{ $dataPlane }}
+            labels:
+                {{- $labels | toYaml | nindent 8 }}
+                dataPlane: {{ $dataPlane }}
+        spec:
+            forProvider:
+                bucketSelector:
+                    matchLabels:
+                        dataPlane: {{ $dataPlane }}
+                member: {{ $backupRestorePrincipal | quote }}
+                role: roles/storage.objectUser
+            managementPolicies: {{ $managementPolicies }}
+        {{- end }}
+        {{- end }}
+        apiVersion: kubernetes.m.crossplane.io/v1alpha1
+        kind: Object
+        metadata:
+            annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: composition-context
+            name: {{ $xr.metadata.name }}-composition-context
+        spec:
+            forProvider:
+                manifest:
+                    apiVersion: v1
+                    kind: ConfigMap
+                    metadata:
+                        name: composition-context
+                        namespace: {{ $namespace }}
+                    data:
+                        variables: |
+                            backup: {{ $backup | toJson }}
+                            backupTargetLabels: {{ $backupTargetLabels | toJson }}
+                            baseName: {{ $baseName | toJson }}
+                            cmkEnabled: {{ $cmkEnabled | toJson }}
+                            cmkKeyName: {{ $cmkKeyName | toJson }}
+                            databaseIamUser: {{ $databaseIamUser | toJson }}
+                            databaseName: {{ $databaseName | toJson }}
+                            databasePort: {{ $databasePort | toJson }}
+                            databaseSpec: {{ $databaseSpec | toJson }}
+                            elasticsearchHealth: {{ $elasticsearchHealth | toJson }}
+                            environmentId: {{ $environmentId | toJson }}
+                            forceDestroy: {{ $forceDestroy | toJson }}
+                            gsaEmail: {{ $gsaEmail | toJson }}
+                            gsaName: {{ $gsaName | toJson }}
+                            hash: {{ $hash | toJson }}
+                            isReady: {{ $isReady | toJson }}
+                            isSearchReady: {{ $isSearchReady | toJson }}
+                            labels: {{ $labels | toJson }}
+                            managementPolicies: {{ $managementPolicies | toJson }}
+                            managementPoliciesOnce: {{ $managementPoliciesOnce | toJson }}
+                            namespace: {{ $namespace | toJson }}
+                            overlay: {{ $overlay | toJson }}
+                            projectId: {{ $projectId | toJson }}
+                            projectIdFull: {{ $projectIdFull | toJson }}
+                            region: {{ $region | toJson }}
+                            searchName: {{ $searchName | toJson }}
+                            searchNamespace: {{ $searchNamespace | toJson }}
+                            searchSecretName: {{ $searchSecretName | toJson }}
+                            storage: {{ $storage | toJson }}
+                            uidHash: {{ $uidHash | toJson }}
+            managementPolicies: {{ $managementPolicies }}
+kind: EnvironmentConfig
+metadata:
+    name: liferay-template-store
+---
+# Source: liferay-gcp-infrastructure-provider/templates/gateway.yaml
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: EnvoyProxy
+metadata:
+    annotations:
+        argocd.argoproj.io/sync-wave: "-110"
+    labels:
+        app: liferay
+        component: gateway
+    name: liferay-proxy-config
+    namespace: envoy-gateway-system
+spec:
+    provider:
+        kubernetes:
+            envoyDeployment:
+                pod:
+                    annotations:
+                        iam.gke.io/gcp-service-account: "sample-envoy-proxy@sample-project.iam.gserviceaccount.com"
+                    topologySpreadConstraints:
+                        -   labelSelector:
+                                matchLabels:
+                                    app.kubernetes.io/name: envoy
+                            maxSkew: 1
+                            topologyKey: kubernetes.io/hostname
+                            whenUnsatisfiable: ScheduleAnyway
+                replicas: 3
+            envoyHpa:
+                maxReplicas: 10
+                metrics:
+                    -   resource:
+                            name: cpu
+                            target:
+                                averageUtilization: 75
+                                type: Utilization
+                        type: Resource
+                minReplicas: 3
+            envoyService:
+                annotations:
+                externalTrafficPolicy: Local
+                type: LoadBalancer
+        type: Kubernetes
+---
+# Source: liferay-gcp-infrastructure-provider/templates/gateway.yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: GatewayClass
+metadata:
+    annotations:
+        argocd.argoproj.io/sync-wave: "-110"
+    labels:
+        app: liferay
+        component: gateway
+    name: liferay-gateway-class
+spec:
+    controllerName: gateway.envoyproxy.io/gatewayclass-controller
+    parametersRef:
+        group: gateway.envoyproxy.io
+        kind: EnvoyProxy
+        name: liferay-proxy-config
+        namespace: envoy-gateway-system
+---
+# Source: liferay-gcp-infrastructure-provider/templates/providers.yaml
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+    annotations:
+        argocd.argoproj.io/sync-wave: "-80"
+    name: provider-gcp-compute
+spec:
+    package: xpkg.upbound.io/upbound/provider-gcp-compute:v2.5.0
+    runtimeConfigRef:
+        name: gcp-compute-config
+---
+# Source: liferay-gcp-infrastructure-provider/templates/providers.yaml
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+    annotations:
+        argocd.argoproj.io/sync-wave: "-80"
+    name: provider-gcp-cloudplatform
+spec:
+    package: xpkg.upbound.io/upbound/provider-gcp-cloudplatform:v2.5.0
+    runtimeConfigRef:
+        name: gcp-cloudplatform-config
+---
+# Source: liferay-gcp-infrastructure-provider/templates/providers.yaml
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+    annotations:
+        argocd.argoproj.io/sync-wave: "-80"
+    name: provider-gcp-kms
+spec:
+    package: xpkg.upbound.io/upbound/provider-gcp-kms:v2.5.0
+    runtimeConfigRef:
+        name: gcp-kms-config
+---
+# Source: liferay-gcp-infrastructure-provider/templates/providers.yaml
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+    annotations:
+        argocd.argoproj.io/sync-wave: "-80"
+    name: provider-gcp-sql
+spec:
+    package: xpkg.upbound.io/upbound/provider-gcp-sql:v2.5.0
+    runtimeConfigRef:
+        name: gcp-sql-config
+---
+# Source: liferay-gcp-infrastructure-provider/templates/providers.yaml
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+    annotations:
+        argocd.argoproj.io/sync-wave: "-80"
+    name: provider-gcp-storage
+spec:
+    package: xpkg.upbound.io/upbound/provider-gcp-storage:v2.5.0
+    runtimeConfigRef:
+        name: gcp-storage-config
+---
+# Source: liferay-gcp-infrastructure-provider/templates/providers.yaml
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+    annotations:
+        argocd.argoproj.io/sync-options: ServerSideApply=true
+        argocd.argoproj.io/sync-wave: "-80"
+    name: provider-kubernetes
+spec:
+    package: xpkg.upbound.io/upbound/provider-kubernetes:v1.2.0
+    runtimeConfigRef:
+        name: kubernetes-config
+    skipDependencyResolution: true
+---
+# Source: liferay-gcp-infrastructure-provider/templates/providers.yaml
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+    annotations:
+        argocd.argoproj.io/sync-wave: "-80"
+    name: upbound-provider-family-gcp
+spec:
+    package: xpkg.upbound.io/upbound/provider-family-gcp:v2.5.0
+    runtimeConfigRef:
+        name: gcp-family-config

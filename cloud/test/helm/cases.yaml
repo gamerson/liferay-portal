@@ -1,0 +1,108 @@
+# Helm template golden tests.
+#
+# Each case mirrors one ArgoCD Application/ApplicationSet defined in
+# terraform/gcp/gitops/resources/argocd.tf. Helm parameters MUST be kept
+# in sync with that file — comments below point at the relevant resource.
+#
+# Inputs come from samples/gitops-repository/.
+# Run: ./test-render.sh           (diff against expected/, exits non-zero on drift)
+# Run: ./test-render.sh --update  (regenerate expected/)
+defaults:
+    api_versions:
+        -   apiextensions.crossplane.io/v2
+        -   argoproj.io/v1alpha1
+        -   external-secrets.io/v1
+        -   gateway.networking.k8s.io/v1
+        -   pkg.crossplane.io/v1
+        -   storage.gcp.m.upbound.io/v1beta1
+cases:
+        # mirrors kubernetes_manifest.resources_application
+    -   name: liferay-resources
+        chart: helm/gcp-resources
+        release_name: liferay-resources
+        namespace: liferay-gcp-resources
+        value_files:
+            -   samples/gitops-repository/liferay/system/resources.yaml
+        helm_params:
+            deploymentName: sample
+            region: us-central1
+        # mirrors kubernetes_manifest.infrastructure_provider_application
+    -   name: liferay-infrastructure-provider
+        chart: helm/gcp-infrastructure-provider
+        release_name: liferay-infrastructure-provider
+        namespace: crossplane-system
+        value_files:
+            -   samples/gitops-repository/liferay/system/infrastructure-provider.yaml
+        helm_params:
+            crossplaneGsaEmail: sample-cp-iam@sample-project.iam.gserviceaccount.com
+            crossplaneNamespace: crossplane-system
+            deploymentName: sample
+            gateway.className: liferay-gateway-class
+            gateway.namespace: envoy-gateway-system
+            global.gcp.projectId: sample-project
+            global.gcp.projectNumber: "123456789012"
+            global.gcp.vpcName: sample-vpc
+        # mirrors kubernetes_manifest.infrastructure_applicationset, env=dev
+    -   name: sample-dev-infrastructure
+        chart: helm/gcp-infrastructure
+        release_name: sample-dev-infra
+        namespace: liferay-sample-dev
+        value_files:
+            -   samples/gitops-repository/liferay/projects/sample/base/infrastructure.yaml
+            -   samples/gitops-repository/liferay/projects/sample/environments/dev/infrastructure.yaml
+        helm_params:
+            environmentId: dev
+            gateway.className: liferay-gateway-class
+            gateway.name: sample-dev-gateway
+            overlay.bucketName: sample-liferay-overlay
+            projectId: sample
+            region: us-central1
+            secretStoreName: sample-secret-store
+        # mirrors kubernetes_manifest.infrastructure_applicationset, env=prd
+    -   name: sample-prd-infrastructure
+        chart: helm/gcp-infrastructure
+        release_name: sample-prd-infra
+        namespace: liferay-sample-prd
+        value_files:
+            -   samples/gitops-repository/liferay/projects/sample/base/infrastructure.yaml
+            -   samples/gitops-repository/liferay/projects/sample/environments/prd/infrastructure.yaml
+        helm_params:
+            environmentId: prd
+            gateway.className: liferay-gateway-class
+            gateway.name: sample-prd-gateway
+            overlay.bucketName: sample-liferay-overlay
+            projectId: sample
+            region: us-central1
+            secretStoreName: sample-secret-store
+        # mirrors kubernetes_manifest.liferay_applicationset, env=dev
+    -   name: sample-dev-liferay
+        chart: helm/gcp
+        release_name: sample-dev-app
+        namespace: liferay-sample-dev
+        value_files:
+            -   samples/gitops-repository/liferay/projects/sample/base/liferay.yaml
+            -   samples/gitops-repository/liferay/projects/sample/environments/dev/liferay.yaml
+        helm_params:
+            liferay-default.environmentId: dev
+            liferay-default.network.gatewayName: sample-dev-gateway
+            liferay-default.overlay.bucketName: sample-liferay-overlay
+            global.deploymentName: sample
+            global.liferayServiceAccount.create: "true"
+            global.liferayServiceAccount.name: liferay-default
+            global.projectId: sample
+        # mirrors kubernetes_manifest.liferay_applicationset, env=prd
+    -   name: sample-prd-liferay
+        chart: helm/gcp
+        release_name: sample-prd-app
+        namespace: liferay-sample-prd
+        value_files:
+            -   samples/gitops-repository/liferay/projects/sample/base/liferay.yaml
+            -   samples/gitops-repository/liferay/projects/sample/environments/prd/liferay.yaml
+        helm_params:
+            liferay-default.environmentId: prd
+            liferay-default.network.gatewayName: sample-prd-gateway
+            liferay-default.overlay.bucketName: sample-liferay-overlay
+            global.deploymentName: sample
+            global.liferayServiceAccount.create: "true"
+            global.liferayServiceAccount.name: liferay-default
+            global.projectId: sample

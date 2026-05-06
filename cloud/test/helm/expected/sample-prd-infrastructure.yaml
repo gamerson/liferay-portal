@@ -1,0 +1,259 @@
+---
+# Source: liferay-gcp-infrastructure/templates/elasticsearch.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+    labels:
+        name: liferay-sample-prd-elasticsearch
+        pod-security.kubernetes.io/enforce: restricted
+    name: liferay-sample-prd-elasticsearch
+---
+# Source: liferay-gcp-infrastructure/templates/gateway.yaml
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: ClientTrafficPolicy
+metadata:
+    annotations:
+        argocd.argoproj.io/sync-wave: "-30"
+    labels:
+        app: liferay
+        component: gateway
+        environmentId: prd
+        projectId: sample
+    name: sample-prd-gateway-attachment
+    namespace: liferay-sample-prd
+spec:
+    targetSelectors:
+        -   group: gateway.networking.k8s.io
+            kind: Gateway
+            matchLabels:
+                name: sample-prd-gateway
+---
+# Source: liferay-gcp-infrastructure/templates/elasticsearch.yaml
+apiVersion: elasticsearch.k8s.elastic.co/v1
+kind: Elasticsearch
+metadata:
+    annotations:
+        instrumentation.opentelemetry.io/inject-dotnet: "false"
+        instrumentation.opentelemetry.io/inject-java: "false"
+        instrumentation.opentelemetry.io/inject-nodejs: "false"
+        instrumentation.opentelemetry.io/inject-python: "false"
+        sidecar.opentelemetry.io/inject: "false"
+    name: sample-prd-infra-es
+    namespace: liferay-sample-prd-elasticsearch
+spec:
+    http:
+        tls:
+            selfSignedCertificate:
+                disabled: true
+    nodeSets:
+        -   count: 1
+            name: default
+            podTemplate:
+                metadata:
+                    annotations:
+                        instrumentation.opentelemetry.io/inject-dotnet: "false"
+                        instrumentation.opentelemetry.io/inject-java: "false"
+                        instrumentation.opentelemetry.io/inject-nodejs: "false"
+                        instrumentation.opentelemetry.io/inject-python: "false"
+                        sidecar.opentelemetry.io/inject: "false"
+                spec:
+                    containers:
+                        -   env:
+                                -   name:   ES_JAVA_OPTS
+                                    value: -Xms4g -Xmx4g
+                            name: elasticsearch
+                            resources:
+                                limits:
+                                    cpu: 1000m
+                                    memory: 8Gi
+                                requests:
+                                    cpu: 500m
+                                    memory: 4Gi
+                            securityContext:
+                                allowPrivilegeEscalation: false
+                                capabilities:
+                                  drop:
+                                  - ALL
+                                privileged: false
+                                readOnlyRootFilesystem: false
+                    initContainers:
+                        -   command:
+                                -   sh
+                                -   -c
+                                -   |
+                                    elasticsearch-plugin \
+                                        install \
+                                        --batch \
+                                        analysis-icu \
+                                        analysis-kuromoji \
+                                        analysis-smartcn \
+                                        analysis-stempel
+                            name: install-plugins
+                            securityContext:
+                                allowPrivilegeEscalation: false
+                                capabilities:
+                                  drop:
+                                  - ALL
+                                privileged: false
+                                readOnlyRootFilesystem: false
+                    securityContext:
+                        fsGroup: 1000
+                        runAsGroup: 1000
+                        runAsNonRoot: true
+                        runAsUser: 1000
+                        seccompProfile:
+                          type: RuntimeDefault
+            volumeClaimTemplates:
+                -   metadata:
+                        name: elasticsearch-data
+                    spec:
+                        accessModes:
+                            -   ReadWriteOnce
+                        resources:
+                            requests:
+                                storage: 10Gi
+                        storageClassName: standard-rwo
+    version: 8.12.0
+---
+# Source: liferay-gcp-infrastructure/templates/database-root-password.yaml
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+    annotations:
+        argocd.argoproj.io/sync-wave: "-30"
+        helm.sh/resource-policy: keep
+    name: sample-prd-infra-db-root-password
+    namespace: liferay-sample-prd
+spec:
+    dataFrom:
+        -   sourceRef:
+                generatorRef:
+                    apiVersion: generators.external-secrets.io/v1alpha1
+                    kind: Password
+                    name: sample-prd-infra-db-root-password-generator
+    refreshInterval: 0s
+    target:
+        creationPolicy: Owner
+        deletionPolicy: Retain
+        name: sample-prd-infra-db-root-password
+---
+# Source: liferay-gcp-infrastructure/templates/gateway.yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+    annotations:
+        argocd.argoproj.io/sync-wave: "-30"
+    labels:
+        app: liferay
+        component: gateway
+        environmentId: prd
+        projectId: sample
+    name: sample-prd-gateway
+    namespace: liferay-sample-prd
+spec:
+    gatewayClassName: liferay-gateway-class
+    listeners:
+        -   allowedRoutes:
+                namespaces:
+                    from: Same
+            name: http
+            port: 80
+            protocol: HTTP
+---
+# Source: liferay-gcp-infrastructure/templates/liferayinfrastructure.yaml
+apiVersion: gcp.liferay.com/v1alpha1
+kind: LiferayInfrastructure
+metadata:
+    annotations:
+        argocd.argoproj.io/sync-options: ServerSideApply=true
+        argocd.argoproj.io/sync-wave: "-20"
+    name: sample-prd-infra
+    namespace: liferay-sample-prd
+spec:
+    backup:
+        enabled: false
+        region: ""
+        retentionDays: 30
+        storageClass: "NEARLINE"
+    cmk: 
+        enabled: false
+    commonTags:
+        environment_id: prd
+        project_id: sample
+    database:
+        databaseVersion: POSTGRES_18
+        deletionProtection: true
+        instanceType: db-custom-1-3840
+        queryInsightsEnabled: true
+        rootPasswordSecretName: sample-prd-infra-db-root-password
+        storageGB: 20
+    environmentId: prd
+    forceDestroy: false
+    orphanOnDelete: false
+    overlay: 
+        bucketName: sample-liferay-overlay
+        enabled: true
+        githubRepo: ""
+    projectId: sample
+    region: us-central1
+    storage: 
+        enableVersioning: true
+        region: ""
+---
+# Source: liferay-gcp-infrastructure/templates/database-root-password.yaml
+apiVersion: generators.external-secrets.io/v1alpha1
+kind: Password
+metadata:
+    annotations:
+        argocd.argoproj.io/sync-wave: "-40"
+        helm.sh/resource-policy: keep
+    name: sample-prd-infra-db-root-password-generator
+    namespace: liferay-sample-prd
+spec:
+    allowRepeat: false
+    digits: 5
+    length: 24
+    noUpper: false
+    symbolCharacters: -_$@
+    symbols: 2
+---
+# Source: liferay-gcp-infrastructure/templates/pod-monitoring.yaml
+apiVersion: monitoring.googleapis.com/v1
+kind: PodMonitoring
+metadata:
+    name: envoy
+    namespace: liferay-sample-prd
+spec:
+    endpoints:
+        -   interval: 1m
+            metricRelabeling:
+                -   action: keep
+                    regex: "^envoy_(http_downstream_(rq_(total|xx|time_(bucket|sum|count))|cx_[rt]x_bytes_total)|cluster_upstream_rq_(total|time_(bucket|sum|count)))$"
+                    sourceLabels:
+                        -   __name__
+            path: /stats/prometheus
+            port: 19001
+    selector:
+        matchLabels:
+            app.kubernetes.io/name: "envoy"
+---
+# Source: liferay-gcp-infrastructure/templates/pod-monitoring.yaml
+apiVersion: monitoring.googleapis.com/v1
+kind: PodMonitoring
+metadata:
+    name: liferay
+    namespace: liferay-sample-prd
+spec:
+    endpoints:
+        -   interval: 1m
+            metricRelabeling:
+                -   action: keep
+                    regex: "^(?:Catalina_(?:GlobalRequestProcessor_(?:.*_)?(?:errorCount|processingTime|requestCount)|ThreadPool_(?:.*_)?(?:currentThreadCount|currentThreadsBusy))|com_zaxxer_hikari_Pool_(?:.*_)?(?:ActiveConnections|IdleConnections|ThreadsAwaitingConnection|TotalConnections)|java_lang_Threading_ThreadCount|jvm_(?:(?:buffer_pool|memory(?:_pool)?)_used_bytes|classes_currently_loaded|gc_collection_seconds_(?:count|sum)|threads_(?:current|peak|state))|process_(?:cpu_seconds_total|open_fds|resident_memory_bytes))$"
+                    sourceLabels:
+                        -   __name__
+            path: /metrics
+            port: 12345
+    selector:
+        matchLabels:
+            app: "liferay-default"
+            app.kubernetes.io/name: "liferay-default"

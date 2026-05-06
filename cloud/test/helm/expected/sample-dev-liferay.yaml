@@ -1,0 +1,968 @@
+---
+# Source: liferay-gcp/charts/liferay-default/templates/serviceaccount.yaml
+apiVersion: v1
+automountServiceAccountToken: true
+kind: ServiceAccount
+metadata:
+    labels:
+        app.kubernetes.io/instance: sample-dev-app
+        app.kubernetes.io/name: liferay-default
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/version: "latest"
+        component: liferay
+        helm.sh/chart: liferay-default-0.5.0
+        origin: liferay-gcp
+    name: liferay-default
+    namespace: liferay-sample-dev
+---
+# Source: liferay-gcp/charts/liferay-default/templates/secret.yaml
+apiVersion: v1
+data:
+    LIFERAY_DEFAULT_PERIOD_ADMIN_PERIOD_PASSWORD: "<REDACTED>"
+kind: Secret
+metadata:
+    annotations:
+        helm.sh/resource-policy: keep
+    labels:
+        app.kubernetes.io/instance: sample-dev-app
+        app.kubernetes.io/name: liferay-default
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/version: "latest"
+        component: liferay
+        helm.sh/chart: liferay-default-0.5.0
+        origin: liferay-gcp
+    name: liferay-default
+    namespace: liferay-sample-dev
+type: Opaque
+---
+# Source: liferay-gcp/charts/liferay-default/templates/configmap.yaml
+apiVersion: v1
+data:
+    000_jdk_java_options.sh: |
+        #!/usr/bin/env bash
+
+        export JDK_JAVA_OPTIONS="${JDK_JAVA_OPTIONS} --add-opens=jdk.naming.dns/com.sun.jndi.dns=java.naming"
+    010_install_prometheus_jmx_agent.sh: |
+        #!/usr/bin/env bash
+
+        if [ "${JMX_AGENT_YAML}x" != "x" ]
+        then
+            if [ ! -f /opt/liferay/metrics/jmx_prometheus_javaagent.jar ]
+            then
+                JMX_AGENT_VERSION=${JMX_AGENT_VERSION:-1.5.0}
+
+                curl \
+                    --fail \
+                    --location \
+                    --output /opt/liferay/metrics/jmx_prometheus_javaagent.jar \
+                    --show-error \
+                    --silent \
+                    https://github.com/prometheus/jmx_exporter/releases/download/${JMX_AGENT_VERSION}/jmx_prometheus_javaagent-${JMX_AGENT_VERSION}.jar
+            fi
+
+            export CATALINA_OPTS="${CATALINA_OPTS} -javaagent:/opt/liferay/metrics/jmx_prometheus_javaagent.jar=${JMX_AGENT_PORT:+${JMX_AGENT_PORT}:}/opt/liferay/metrics/metrics_exporter.yaml"
+
+            echo "${JMX_AGENT_YAML}" > /opt/liferay/metrics/metrics_exporter.yaml
+        fi
+    portal-cloud.properties: |
+        configuration.override.com.liferay.portal.bundle.blacklist.internal.configuration.BundleBlacklistConfiguration_blacklistBundleSymbolicNames=[\
+        ]
+        configuration.override.com.liferay.portal.component.blacklist.internal.configuration.ComponentBlacklistConfiguration_blacklistComponentNames=[\
+        ]
+        
+        schema.module.build.auto.upgrade=true
+        upgrade.database.auto.run=true
+        upgrade.log.context.enabled=true
+        upgrade.report.enabled=true
+        company.default.virtual.host.sync.on.startup=true
+        passwords.default.policy.change.required=true
+        feature.flag.LPS-155284=true
+        feature.flag.LPS-202104=true
+        module.framework.properties.org.apache.felix.configadmin.plugin.interpolation.secretsdir=/opt/liferay/osgi/configs,/var/run/secrets/kubernetes.io/serviceaccount
+        virtual.hosts.valid.hosts=*
+        web.server.http.port=80
+        
+        open.id.connect.user.info.processor.impl.issuer=
+        open.id.connect.user.info.processor.impl.regular.role=
+        
+        configuration.override.com.liferay.portal.http.internal.configuration.HttpConfiguration_tcpKeepAliveEnabled=B"true"
+        configuration.override.com.liferay.redirect.internal.configuration.RedirectURLConfiguration_securityMode="domain"
+    portal-ext.properties: |
+        include-and-override=portal-liferay-online-config.properties
+        include-and-override=portal-cloud.properties
+    
+    com.liferay.portal.search.elasticsearch7.configuration.ElasticsearchConfiguration.config: |
+      authenticationEnabled=B"true"
+      httpSSLEnabled=B"false"
+      networkHostAddresses=["$[env:ELASTICSEARCH_URL]"]
+      operationMode="REMOTE"
+      password="$[env:ELASTICSEARCH_PASSWORD]"
+      productionModeEnabled=B"true"
+      username="$[env:ELASTICSEARCH_USERNAME]"
+    com.liferay.portal.search.elasticsearch8.configuration.ElasticsearchConfiguration.config: |
+      authenticationEnabled=B"true"
+      httpSSLEnabled=B"false"
+      networkHostAddresses=["$[env:ELASTICSEARCH_URL]"]
+      password="$[env:ELASTICSEARCH_PASSWORD]"
+      productionModeEnabled=B"true"
+      username="$[env:ELASTICSEARCH_USERNAME]"
+    com.liferay.portal.store.gcs.configuration.GCSStoreConfiguration.config: |
+      bucketName="$[env:LIFERAY_GCS_BUCKET_NAME]"
+kind: ConfigMap
+metadata:
+    labels:
+        app.kubernetes.io/instance: sample-dev-app
+        app.kubernetes.io/name: liferay-default
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/version: "latest"
+        component: liferay
+        helm.sh/chart: liferay-default-0.5.0
+        origin: liferay-gcp
+    name: liferay-default
+    namespace: liferay-sample-dev
+---
+# Source: liferay-gcp/charts/liferay-default/templates/liferay-init-scripts-cm.yaml
+apiVersion: v1
+data:
+    overlay-sync.sh: |
+
+        #!/bin/sh
+        
+        set -o errexit
+        set -o nounset
+        
+        function main {
+        	if [ "${#}" -ne 3 ]
+        	then
+        		_log_json "Usage: ${0} <provider-type> <from-path> <into-path>." "ERROR"
+        
+        		exit 1
+        	fi
+        
+        	local bucket_name="${LIFERAY_OVERLAY_BUCKET_NAME:-}"
+        	local from_path="${2}"
+        	local into_path="${3}"
+        	local provider_type="${1}"
+        
+        	if [ -z "${bucket_name}" ]
+        	then
+        		_log_json "Overlay bucket does not exist (checked LIFERAY_OVERLAY_BUCKET_NAME). Skipping sync." "ERROR"
+        
+        		exit 1
+        	fi
+        
+        	local include_pattern=""
+        
+        	if echo "${from_path}" | grep -q "\*"
+        	then
+        		include_pattern="${from_path##*/}"
+        
+        		from_path="${from_path%/*}"
+        	fi
+        
+        	local source_uri=":${provider_type}:${bucket_name}/${from_path}"
+        	local target_path="/temp/${into_path}"
+        
+        	_log_json "Copying from \"${source_uri}\" to \"${target_path}\"."
+        
+        	if [ -n "${include_pattern}" ]
+        	then
+        		rclone copy "${source_uri}" "${target_path}" --include "${include_pattern}" --log-level INFO --use-json-log
+        	else
+        		rclone copy "${source_uri}" "${target_path}" --log-level INFO --use-json-log
+        	fi
+        
+        	_log_json "Copy completed successfully."
+        }
+        
+        function _log_json {
+        	local escaped_message
+        
+        	escaped_message=$(echo "${1}" | sed 's/"/\\"/g')
+        
+        	local script_name
+        
+        	script_name=$(basename "${0}")
+        
+        	local severity="${2:-INFO}"
+        
+        	local timestamp
+        
+        	timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+        
+        	printf '{"message": "%s", "script": "%s", "severity": "%s", "timestamp": "%s"}\n' "${escaped_message}" "${script_name}" "${severity}" "${timestamp}"
+        }
+        
+        main "${@}"
+kind: ConfigMap
+metadata:
+    name: liferay-init-scripts-default
+    namespace: liferay-sample-dev
+---
+# Source: liferay-gcp/templates/liferay-init-scripts-cm.yaml
+apiVersion: v1
+data:
+    wait-for-elasticsearch.sh: |
+
+        #!/bin/sh
+        
+        set -o errexit
+        set -o nounset
+        
+        function main {
+        	_log_json "Waiting for Elasticsearch health to be \"green\" or \"yellow\" at \"${ELASTICSEARCH_URL}/_cluster/health\"."
+        
+        	local authenticated_health_url="http://${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD}@${ELASTICSEARCH_URL#*//}/_cluster/health"
+        
+        	until wget -qO- "${authenticated_health_url}" | grep -qE "\"status\":\"(green|yellow)\""
+        	do
+        		_log_json "Waiting for Elasticsearch (current status: \"red\" or \"unreachable\")."
+        
+        		sleep 5
+        	done
+        
+        	_log_json "Elasticsearch is ready."
+        }
+        
+        function _log_json {
+        	local escaped_message
+        
+        	escaped_message=$(echo "${1}" | sed 's/"/\\"/g')
+        
+        	local script_name
+        
+        	script_name=$(basename "${0}")
+        
+        	local severity="${2:-INFO}"
+        
+        	local timestamp
+        
+        	timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+        
+        	printf '{"message": "%s", "script": "%s", "severity": "%s", "timestamp": "%s"}\n' "${escaped_message}" "${script_name}" "${severity}" "${timestamp}"
+        }
+        
+        main
+kind: ConfigMap
+metadata:
+    name: liferay-init-scripts-gcp
+    namespace: liferay-sample-dev
+---
+# Source: liferay-gcp/templates/liferay-network-cm.yaml
+apiVersion: v1
+data:
+    LIFERAY_COMPANY_PERIOD_DEFAULT_PERIOD_VIRTUAL_PERIOD_HOST_PERIOD_NAME: "sample-dev.example.com"
+    LIFERAY_COMPANY_PERIOD_DEFAULT_PERIOD_WEB_PERIOD_ID: "sample-dev.example.com"
+    LIFERAY_VIRTUAL_PERIOD_HOSTS_PERIOD_VALID_PERIOD_HOSTS: "sample-dev.example.com,localhost,${env.POD_IP}"
+kind: ConfigMap
+metadata:
+    name: liferay-network
+    namespace: liferay-sample-dev
+---
+# Source: liferay-gcp/charts/liferay-default/templates/serviceaccount.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+    labels:
+        app.kubernetes.io/instance: sample-dev-app
+        app.kubernetes.io/name: liferay-default
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/version: "latest"
+        component: liferay
+        helm.sh/chart: liferay-default-0.5.0
+        origin: liferay-gcp
+    name: liferay-default
+    namespace: liferay-sample-dev
+rules:
+    - apiGroups:
+      - ""
+      resources:
+      - configmaps
+      verbs:
+      - get
+      - list
+      - watch
+---
+# Source: liferay-gcp/charts/liferay-default/templates/serviceaccount.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+    labels:
+        app.kubernetes.io/instance: sample-dev-app
+        app.kubernetes.io/name: liferay-default
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/version: "latest"
+        component: liferay
+        helm.sh/chart: liferay-default-0.5.0
+        origin: liferay-gcp
+    name: liferay-default
+    namespace: liferay-sample-dev
+roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: Role
+    name: liferay-default
+subjects:
+    -   kind: ServiceAccount
+        name: liferay-default
+        namespace: liferay-sample-dev
+---
+# Source: liferay-gcp/charts/liferay-default/templates/workloads.yaml
+apiVersion: v1
+kind: Service
+metadata:
+    labels:
+        app: liferay-default
+        app.kubernetes.io/instance: sample-dev-app
+        app.kubernetes.io/name: liferay-default
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/version: "latest"
+        component: liferay
+        helm.sh/chart: liferay-default-0.5.0
+        origin: liferay-gcp
+    name: liferay-default
+    namespace: liferay-sample-dev
+spec:
+    ports:
+        - name: cluster
+          port: 7800
+          protocol: TCP
+          targetPort: cluster
+        - name: http
+          port: 8080
+          protocol: TCP
+          targetPort: http
+    selector:
+        app: liferay-default
+        app.kubernetes.io/instance: sample-dev-app
+        app.kubernetes.io/name: liferay-default
+    type: ClusterIP
+---
+# Source: liferay-gcp/charts/liferay-default/templates/workloads.yaml
+apiVersion: v1
+kind: Service
+metadata:
+    labels:
+        app: liferay-default
+        app.kubernetes.io/instance: sample-dev-app
+        app.kubernetes.io/name: liferay-default
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/version: "latest"
+        component: liferay
+        helm.sh/chart: liferay-default-0.5.0
+        origin: liferay-gcp
+    name: liferay-default-headless
+    namespace: liferay-sample-dev
+spec:
+    clusterIP: None
+    ports:
+        - name: cluster
+          port: 7800
+          protocol: TCP
+          targetPort: cluster
+        - name: http
+          port: 8080
+          protocol: TCP
+          targetPort: http
+    selector:
+        app: liferay-default
+        app.kubernetes.io/instance: sample-dev-app
+        app.kubernetes.io/name: liferay-default
+    type: ClusterIP
+---
+# Source: liferay-gcp/charts/liferay-default/templates/workloads.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+    annotations:
+        instrumentation.opentelemetry.io/inject-dotnet: "false"
+        instrumentation.opentelemetry.io/inject-java: "false"
+        instrumentation.opentelemetry.io/inject-nodejs: "false"
+        instrumentation.opentelemetry.io/inject-python: "false"
+        sidecar.opentelemetry.io/inject: "false"
+    labels:
+        app: liferay-default
+        app.kubernetes.io/instance: sample-dev-app
+        app.kubernetes.io/name: liferay-default
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/version: "latest"
+        component: liferay
+        helm.sh/chart: liferay-default-0.5.0
+        origin: liferay-gcp
+    name: liferay-default
+    namespace: liferay-sample-dev
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: liferay-default
+            app.kubernetes.io/instance: sample-dev-app
+            app.kubernetes.io/name: liferay-default
+    serviceName: liferay-default
+    template:
+        metadata:
+            annotations:
+                checksum/config: e74ee090cba24af0cfc1ddb41f7f1850e0693c528e13ff57bac5acd359e580c3
+                checksum/init-scripts: aa1b5c22ff83f0f05af8bd6737611e98ca6002c074398e4e6c13779b611a940b
+                instrumentation.opentelemetry.io/inject-dotnet: "false"
+                instrumentation.opentelemetry.io/inject-java: "false"
+                instrumentation.opentelemetry.io/inject-nodejs: "false"
+                instrumentation.opentelemetry.io/inject-python: "false"
+                sidecar.opentelemetry.io/inject: "false"
+            labels:
+                app: liferay-default
+                app.kubernetes.io/instance: sample-dev-app
+                app.kubernetes.io/name: liferay-default
+                app.kubernetes.io/managed-by: Helm
+                app.kubernetes.io/version: "latest"
+                component: liferay
+                helm.sh/chart: liferay-default-0.5.0
+                origin: liferay-gcp
+        spec:
+            containers:
+                -   #
+                    env:
+                      - name: DNS_MEMBERSHIP_SERVICE_NAME
+                        value: liferay-default-headless
+                      - name: JMX_AGENT_PORT
+                        value: "12345"
+                      - name: JMX_AGENT_YAML
+                        value: |
+                          rules:
+                          -   pattern: ".*"
+                      - name: LIFERAY_CLUSTER_PERIOD_LINK_PERIOD_BIND_PERIOD_ADDR_OPENBRACKET__QUOTE_CLUSTER_MINUS_LINK_MINUS_CONTROL_QUOTE__CLOSEBRACKET_
+                        value: ${env.POD_IP}
+                      - name: LIFERAY_CLUSTER_PERIOD_LINK_PERIOD_BIND_PERIOD_ADDR_OPENBRACKET__QUOTE_CLUSTER_MINUS_LINK_MINUS_UDP_QUOTE__CLOSEBRACKET_
+                        value: ${env.POD_IP}
+                      - name: LIFERAY_PORTAL_PERIOD_INSTANCE_PERIOD_INET_PERIOD_SOCKET_PERIOD_ADDRESS
+                        value: ${env.POD_IP}:8080
+                      - name: LIFERAY_PORTLET_PERIOD_SESSION_PERIOD_REPLICATE_PERIOD_ENABLED
+                        value: "true"
+                      - name: LIFERAY_TOMCAT_SESSION_REPLICATION_ENABLED
+                        value: "true"
+                      - name: LIFERAY_VIRTUAL_PERIOD_HOSTS_PERIOD_IGNORE_PERIOD_HOSTS
+                        value: 127.0.0.1,localhost,${env:POD_IP}
+                      - name: POD_APP
+                        valueFrom:
+                          fieldRef:
+                            fieldPath: metadata.labels['app.kubernetes.io/name']
+                      - name: POD_IP
+                        valueFrom:
+                          fieldRef:
+                            fieldPath: status.podIP
+                      - name: POD_NAME
+                        valueFrom:
+                          fieldRef:
+                            fieldPath: metadata.name
+                      - name: POD_NAMESPACE
+                        valueFrom:
+                          fieldRef:
+                            fieldPath: metadata.namespace
+                      - name: LIFERAY_DISABLE_TRIAL_LICENSE
+                        value: "true"
+                      - name: LIFERAY_DL_PERIOD_STORE_PERIOD_IMPL
+                        value: com.liferay.portal.store.gcs.GCSStore
+                      - name: LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_DRIVER_UPPERCASEC_LASS_UPPERCASEN_AME
+                        value: org.postgresql.Driver
+                      - name: LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_URL
+                        value: jdbc:postgresql://localhost:${env.DATABASE_PORT}/lportal?useUnicode=true&characterEncoding=UTF-8&useFastDateParsing=false
+                      - name: LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_USERNAME
+                        value: ${env.DATABASE_USERNAME}
+                      - name: LIFERAY_WEB_PERIOD_SERVER_PERIOD_FORWARDED_PERIOD_PORT_PERIOD_ENABLED
+                        value: "true"
+                      - name: LIFERAY_WEB_PERIOD_SERVER_PERIOD_FORWARDED_PERIOD_PROTOCOL_PERIOD_ENABLED
+                        value: "true"
+                    envFrom:
+                      - secretRef:
+                          name: liferay-default
+                      - configMapRef:
+                          name: liferay-network
+                      - secretRef:
+                          name: elasticsearch-connection-details
+                      - secretRef:
+                          name: managed-service-details
+                    image: liferay/dxp:2026.q1.6-lts
+                    imagePullPolicy: IfNotPresent
+                    livenessProbe:
+                      failureThreshold: 3
+                      httpGet:
+                        path: /c/portal/robots
+                        port: http
+                      initialDelaySeconds: 60
+                      periodSeconds: 30
+                      timeoutSeconds: 5
+                    name: liferay-default
+                    ports:
+                      - containerPort: 4000
+                        name: glowroot
+                        protocol: TCP
+                      - containerPort: 7800
+                        name: cluster
+                        protocol: TCP
+                      - containerPort: 8000
+                        name: debug
+                        protocol: TCP
+                      - containerPort: 8080
+                        name: http
+                        protocol: TCP
+                    readinessProbe:
+                      failureThreshold: 2
+                      httpGet:
+                        path: /c/portal/robots
+                        port: http
+                      initialDelaySeconds: 0
+                      periodSeconds: 10
+                      timeoutSeconds: 5
+                    resources:
+                      limits:
+                        cpu: 4000m
+                        memory: 12Gi
+                      requests:
+                        cpu: 2000m
+                        memory: 4Gi
+                    securityContext:
+                      allowPrivilegeEscalation: false
+                      capabilities:
+                        drop:
+                        - ALL
+                      runAsNonRoot: true
+                      runAsUser: 1000
+                      seccompProfile:
+                        type: RuntimeDefault
+                    startupProbe:
+                      exec:
+                        command:
+                        - /bin/sh
+                        - -c
+                        - |
+                          curl -f http://localhost:9801/startup && \
+                          curl -f http://localhost:8080/c/portal/robots
+                      failureThreshold: 90
+                      initialDelaySeconds: 60
+                      periodSeconds: 10
+                      timeoutSeconds: 5
+                    volumeMounts:
+                      - mountPath: /opt/liferay/data
+                        name: liferay-persistent-volume
+                        subPath: liferay/data
+                      - mountPath: /opt/liferay/deploy
+                        name: liferay-persistent-volume
+                        subPath: liferay/deploy
+                      - mountPath: /opt/liferay/glowroot
+                        name: liferay-persistent-volume
+                        subPath: liferay/glowroot
+                      - mountPath: /opt/liferay/liferay.pid
+                        name: liferay-persistent-volume
+                        subPath: liferay/liferay.pid
+                      - mountPath: /opt/liferay/logs
+                        name: liferay-persistent-volume
+                        subPath: liferay/logs
+                      - mountPath: /opt/liferay/metrics
+                        name: liferay-persistent-volume
+                        subPath: liferay/metrics
+                      - mountPath: /opt/liferay/osgi/client-extensions
+                        name: liferay-persistent-volume
+                        subPath: osgi/client-extensions
+                      - mountPath: /opt/liferay/osgi/configs
+                        name: liferay-persistent-volume
+                        subPath: osgi/configs
+                      - mountPath: /opt/liferay/osgi/modules
+                        name: liferay-persistent-volume
+                        subPath: osgi/modules
+                      - mountPath: /opt/liferay/osgi/state
+                        name: liferay-persistent-volume
+                        subPath: osgi/state
+                      - mountPath: /opt/liferay/portal-cloud.properties
+                        name: liferay-configmap
+                        subPath: portal-cloud.properties
+                      - mountPath: /opt/liferay/portal-ext.properties
+                        name: liferay-configmap
+                        subPath: portal-ext.properties
+                      - mountPath: /opt/liferay/reports
+                        name: liferay-persistent-volume
+                        subPath: liferay/reports
+                      - mountPath: /opt/liferay/routes
+                        name: liferay-persistent-volume
+                        subPath: liferay/routes
+                      - mountPath: /opt/liferay/tomcat/conf/logging.properties
+                        name: liferay-persistent-volume
+                        subPath: tomcat/conf/logging.properties
+                      - mountPath: /opt/liferay/tomcat/conf/server.xml
+                        name: liferay-persistent-volume
+                        subPath: tomcat/conf/server.xml
+                      - mountPath: /opt/liferay/tomcat/logs
+                        name: liferay-persistent-volume
+                        subPath: tomcat/logs
+                      - mountPath: /opt/liferay/tomcat/temp
+                        name: liferay-persistent-volume
+                        subPath: tomcat/temp
+                      - mountPath: /opt/liferay/tomcat/work
+                        name: liferay-persistent-volume
+                        subPath: tomcat/work
+                      - mountPath: /opt/liferay/unicast.xml
+                        name: liferay-configmap
+                        subPath: unicast.xml
+                      - mountPath: /opt/liferay/work
+                        name: liferay-persistent-volume
+                        subPath: liferay/work
+                      - mountPath: /tmp
+                        name: liferay-persistent-volume
+                        subPath: system/tmp
+                      - mountPath: /usr/local/liferay/scripts/pre-configure/000_jdk_java_options.sh
+                        name: liferay-configmap
+                        subPath: 000_jdk_java_options.sh
+                      - mountPath: /usr/local/liferay/scripts/pre-configure/010_install_prometheus_jmx_agent.sh
+                        name: liferay-configmap
+                        subPath: 010_install_prometheus_jmx_agent.sh
+                      - mountPath: /etc/liferay/mount/files/deploy/license.xml
+                        name: liferay-license
+                        subPath: license.xml
+                      - mountPath: /opt/liferay/osgi/configs/com.liferay.portal.search.elasticsearch7.configuration.ElasticsearchConfiguration.config
+                        name: liferay-configmap
+                        subPath: com.liferay.portal.search.elasticsearch7.configuration.ElasticsearchConfiguration.config
+                      - mountPath: /opt/liferay/osgi/configs/com.liferay.portal.search.elasticsearch8.configuration.ElasticsearchConfiguration.config
+                        name: liferay-configmap
+                        subPath: com.liferay.portal.search.elasticsearch8.configuration.ElasticsearchConfiguration.config
+                      - mountPath: /opt/liferay/osgi/configs/com.liferay.portal.store.gcs.configuration.GCSStoreConfiguration.config
+                        name: liferay-configmap
+                        subPath: com.liferay.portal.store.gcs.configuration.GCSStoreConfiguration.config
+            initContainers:
+                -   #
+                  args:
+                  - $(DATABASE_INSTANCE_NAME)
+                  - --auto-iam-authn
+                  - --port=$(DATABASE_PORT)
+                  - --private-ip
+                  - --structured-logs
+                  env:
+                  - name: CSQL_PROXY_HEALTH_CHECK
+                    value: "true"
+                  - name: CSQL_PROXY_HTTP_ADDRESS
+                    value: 0.0.0.0
+                  - name: CSQL_PROXY_HTTP_PORT
+                    value: "9801"
+                  envFrom:
+                  - secretRef:
+                      name: managed-service-details
+                  image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.14.1
+                  name: cloud-sql-proxy
+                  restartPolicy: Always
+                  securityContext:
+                    allowPrivilegeEscalation: false
+                    capabilities:
+                      drop:
+                      - ALL
+                    runAsNonRoot: true
+                    seccompProfile:
+                      type: RuntimeDefault
+                
+                -   command:
+                        -   sh
+                        -   -c
+                        -   |
+                            /liferay-init-scripts/overlay-sync.sh "gcs" "overlay-build-1/osgi/*" "osgi/"
+                    envFrom:
+                        -   secretRef:
+                                name: managed-service-details
+                    image: rclone/rclone:1.66
+                    name: liferay-overlay
+                    securityContext:
+                        allowPrivilegeEscalation: false
+                        capabilities:
+                            drop:
+                                -   ALL
+                        runAsNonRoot: true
+                        runAsUser: 1000
+                        seccompProfile:
+                            type: RuntimeDefault
+                    volumeMounts:
+                        -   mountPath: /liferay-init-scripts/overlay-sync.sh
+                            name: liferay-init-scripts-default
+                            subPath: overlay-sync.sh
+                        -   mountPath: /temp
+                            name: liferay-persistent-volume
+                
+                -   command:
+                        -   bash
+                        -   -c
+                        -   |
+                            rm --force --recursive /temp/liferay/liferay.pid 2>/dev/null
+                
+                            mkdir --parents \
+                                /temp/liferay \
+                                /temp/liferay/logs \
+                                /temp/liferay/metrics \
+                                /temp/liferay/reports \
+                                /temp/liferay/routes \
+                                /temp/liferay/work \
+                                /temp/osgi/client-extensions \
+                                /temp/osgi/configs \
+                                /temp/osgi/modules \
+                                /temp/osgi/state \
+                                /temp/system/tmp \
+                                /temp/tomcat/logs \
+                                /temp/tomcat/temp \
+                                /temp/tomcat/work
+                
+                            touch /temp/liferay/liferay.pid
+                
+                            if [ ! -d /temp/liferay/data ] || [ -z "$(ls --all /temp/liferay/data)" ]
+                            then
+                                mkdir --parents /temp/liferay/data
+                
+                                cp --force --recursive --verbose /opt/liferay/data/* /temp/liferay/data
+                            fi
+                
+                            if [ ! -d /temp/liferay/glowroot ] || [ -z "$(ls --all /temp/liferay/glowroot)" ]
+                            then
+                                mkdir --parents /temp/liferay/glowroot
+                
+                                cp --force --recursive --verbose /opt/liferay/glowroot/* /temp/liferay/glowroot
+                            fi
+                
+                            if [ ! -f /temp/tomcat/conf/server.xml ]
+                            then
+                                mkdir --parents /temp/tomcat/conf
+                
+                                cp /opt/liferay/tomcat/conf/logging.properties /temp/tomcat/conf/logging.properties
+                
+                                echo -e "\norg.apache.catalina.tribes.membership.cloud.level=SEVERE" >> /temp/tomcat/conf/logging.properties
+                
+                                cat /opt/liferay/tomcat/conf/server.xml | sed '/<!--.*-->/d' | sed '/<!--/,/-->/d' > /temp/tomcat/conf/server.xml
+                
+                                IFS='' read -r -d '' SERVER_XML_CLUSTER <<EOF
+                                <Cluster className="org.apache.catalina.ha.tcp.SimpleTcpCluster">
+                                    <Manager className="com.liferay.support.tomcat.session.LiferayDeltaManager" />
+                                    <Channel className="org.apache.catalina.tribes.group.GroupChannel">
+                                        <Membership
+                                            className="org.apache.catalina.tribes.membership.cloud.CloudMembershipService"
+                                            membershipProviderClassName="org.apache.catalina.tribes.membership.cloud.DNSMembershipProvider"
+                                        />
+                                        <Sender className="org.apache.catalina.tribes.transport.ReplicationTransmitter">
+                                            <Transport
+                                                className="org.apache.catalina.tribes.transport.nio.PooledParallelSender"
+                                                timeout="300000"
+                                            />
+                                        </Sender>
+                                    </Channel>
+                                </Cluster>
+                            EOF
+                
+                                sed --in-place '/<Engine/r'<(echo "${SERVER_XML_CLUSTER}") /temp/tomcat/conf/server.xml
+                            fi
+                
+                            if [ -d /opt/liferay/deploy ] && [ -z "$(ls --all /temp/liferay/deploy/*license* 2>/dev/null)" ]
+                            then
+                                if [ ! -d /temp/liferay/data/license ] || [ -z "$(ls --all /temp/liferay/data/license/*.li)" ]
+                                then
+                                    mkdir --parents /temp/liferay/deploy
+                
+                                    cp --force --verbose /opt/liferay/deploy/* /temp/liferay/deploy
+                                fi
+                            fi
+                    image: liferay/dxp:2026.q1.6-lts
+                    imagePullPolicy: IfNotPresent
+                    name: liferay-prepopulate-data
+                    securityContext:
+                        allowPrivilegeEscalation: false
+                        capabilities:
+                            drop:
+                                -   ALL
+                        seccompProfile:
+                            type: RuntimeDefault
+                    volumeMounts:
+                        -   mountPath: /temp
+                            name: liferay-persistent-volume
+                
+                -   command:
+                        -   bash
+                        -   -c
+                        -   |
+                            trap "echo 'Received signal to terminate.'; exit 0" SIGINT SIGTERM
+                    image: liferay/dxp:2026.q1.6-lts
+                    imagePullPolicy: IfNotPresent
+                    name: liferay-wait-on-services
+                    securityContext:
+                        allowPrivilegeEscalation: false
+                        capabilities:
+                            drop:
+                                -   ALL
+                        seccompProfile:
+                            type: RuntimeDefault
+                
+                -   #
+                  command:
+                  - sh
+                  - /liferay-init-scripts/wait-for-elasticsearch.sh
+                  envFrom:
+                  - secretRef:
+                      name: elasticsearch-connection-details
+                  image: busybox:1.36
+                  name: wait-for-elasticsearch
+                  securityContext:
+                    allowPrivilegeEscalation: false
+                    capabilities:
+                      drop:
+                      - ALL
+                    runAsNonRoot: true
+                    runAsUser: 1000
+                    seccompProfile:
+                      type: RuntimeDefault
+                  volumeMounts:
+                  - mountPath: /liferay-init-scripts/wait-for-elasticsearch.sh
+                    name: liferay-init-scripts-gcp
+                    subPath: wait-for-elasticsearch.sh
+            securityContext:
+                fsGroup: 1000
+                runAsNonRoot: true
+                runAsUser: 1000
+                seccompProfile:
+                  type: RuntimeDefault
+            serviceAccountName: liferay-default
+            volumes:
+                - configMap:
+                    name: liferay-default
+                    optional: true
+                  name: liferay-configmap
+                - name: liferay-license
+                  secret:
+                    secretName: liferay-license
+                - configMap:
+                    defaultMode: 493
+                    name: liferay-init-scripts-default
+                  name: liferay-init-scripts-default
+                - configMap:
+                    defaultMode: 493
+                    name: liferay-init-scripts-gcp
+                  name: liferay-init-scripts-gcp
+    updateStrategy:
+        type: RollingUpdate
+    volumeClaimTemplates:
+        - metadata:
+            name: liferay-persistent-volume
+          spec:
+            accessModes:
+            - ReadWriteOnce
+            resources:
+              requests:
+                storage: 10Gi
+            storageClassName: standard-rwo
+---
+# Source: liferay-gcp/charts/liferay-default/templates/workloads.yaml
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: BackendTrafficPolicy
+metadata:
+    labels:
+        app: liferay-default
+        app.kubernetes.io/instance: sample-dev-app
+        app.kubernetes.io/name: liferay-default
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/version: "latest"
+        component: liferay
+        helm.sh/chart: liferay-default-0.5.0
+        origin: liferay-gcp
+    name: liferay-default-hash-policy
+    namespace: liferay-sample-dev
+spec:
+    loadBalancer:
+        consistentHash:
+            cookie:
+                name:
+                    JSESSIONID
+            type: Cookie
+        type: ConsistentHash
+    targetRefs:
+        -   group: gateway.networking.k8s.io
+            kind: HTTPRoute
+            name: liferay-default-httproute
+---
+# Source: liferay-gcp/charts/liferay-default/templates/workloads.yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+    labels:
+        app: liferay-default
+        app.kubernetes.io/instance: sample-dev-app
+        app.kubernetes.io/name: liferay-default
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/version: "latest"
+        component: liferay
+        helm.sh/chart: liferay-default-0.5.0
+        origin: liferay-gcp
+    name: liferay-default-httproute
+    namespace: liferay-sample-dev
+spec:
+    hostnames:
+        - sample-dev.example.com
+    parentRefs:
+        -   group: gateway.networking.k8s.io
+            kind: Gateway
+            name: sample-dev-gateway
+            sectionName: http
+    rules:
+        -   backendRefs:
+                -   name: liferay-default
+                    port: 8080
+            matches:
+                -   path:
+                        type: PathPrefix
+                        value: /
+            timeouts:
+                backendRequest: 300s
+                request: 300s
+---
+# Source: liferay-gcp/charts/liferay-default/templates/tests/test-connection.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+    annotations:
+        helm.sh/hook: test
+    labels:
+        app.kubernetes.io/instance: sample-dev-app
+        app.kubernetes.io/name: liferay-default
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/version: "latest"
+        component: liferay
+        helm.sh/chart: liferay-default-0.5.0
+        origin: liferay-gcp
+    name: liferay-default-test-connection
+    namespace: liferay-sample-dev
+spec:
+    containers:
+        -   command:
+                -   /bin/sh
+                -   -c
+                -   |
+                        trap "echo 'Received signal to terminate.'; exit 0" SIGINT SIGTERM
+
+                        START_TIME=$(date +%s)
+
+                        until nc -vz -w 2 liferay-default 8080
+                        do
+                            CURRENT_TIME=$(date +%s)
+
+                            DELTA_TIME=$((${CURRENT_TIME} - ${START_TIME}))
+
+                            if [ ${DELTA_TIME} -gt 300 ]
+                            then
+                                echo "Liferay did not start."
+
+                                exit 1
+                            fi
+
+                            echo "Waiting for Liferay..."
+
+                            sleep 2
+                        done
+            image: busybox:latest
+            name: test-connection
+            securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                    drop:
+                        -   ALL
+                runAsNonRoot: true
+                runAsUser: 1000
+                seccompProfile:
+                    type: RuntimeDefault
+    restartPolicy: Never
+    serviceAccountName: liferay-default
