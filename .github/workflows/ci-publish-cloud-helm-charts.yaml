@@ -122,11 +122,39 @@ jobs:
                     }
 
                     main "${@}"
+    checks:
+        outputs:
+            publish: ${{steps.eval.outputs.publish}}
+        runs-on: ubuntu-latest
+        steps:
+            -   env:
+                    EVENT_NAME: ${{github.event_name}}
+                    PR_ACTION: ${{github.event.action}}
+                    PR_HEAD_REPO: ${{github.event.pull_request.head.repo.full_name}}
+                    REPOSITORY: ${{github.repository}}
+                id: eval
+                name: Evaluate publish condition
+                run: |
+                    set -o errexit
+                    set -o nounset
+                    set -o pipefail
+
+                    function main {
+                        if [[ "${EVENT_NAME}" == "push" && "${REPOSITORY}" == "liferay/liferay-portal" ]] ||
+                           [[ "${EVENT_NAME}" == "pull_request" && "${PR_ACTION}" != "closed" && "${PR_HEAD_REPO}" == "cloudnative-team/liferay-portal" && "${REPOSITORY}" == "cloudnative-team/liferay-portal" ]]
+                        then
+                            echo "publish=true" >> "${GITHUB_OUTPUT}"
+                        else
+                            echo "publish=false" >> "${GITHUB_OUTPUT}"
+                        fi
+                    }
+
+                    main "${@}"
     publish-aws:
-        if: |
-            (github.event_name == 'push' && github.repository == 'liferay/liferay-portal') ||
-            (github.event.action != 'closed' && github.event.pull_request.head.repo.full_name == 'cloudnative-team/liferay-portal' && github.event_name == 'pull_request' && github.repository == 'cloudnative-team/liferay-portal')
-        needs: publish-default
+        if: needs.checks.outputs.publish == 'true'
+        needs:
+            -   checks
+            -   publish-default
         secrets: inherit
         uses: ./.github/workflows/ci-reusable-publish-helm-chart-to-gar.yaml
         with:
@@ -135,9 +163,8 @@ jobs:
             registry: us-central1-docker.pkg.dev/liferay-artifact-registry/liferay-helm-chart
             working_directory: ./cloud/helm/aws
     publish-aws-infrastructure:
-        if: |
-            (github.event_name == 'push' && github.repository == 'liferay/liferay-portal') ||
-            (github.event.action != 'closed' && github.event.pull_request.head.repo.full_name == 'cloudnative-team/liferay-portal' && github.event_name == 'pull_request' && github.repository == 'cloudnative-team/liferay-portal')
+        if: needs.checks.outputs.publish == 'true'
+        needs: checks
         secrets: inherit
         uses: ./.github/workflows/ci-reusable-publish-helm-chart-to-gar.yaml
         with:
@@ -146,9 +173,8 @@ jobs:
             registry: us-central1-docker.pkg.dev/external-assets-prd/liferay-helm-chart
             working_directory: ./cloud/helm/aws-infrastructure
     publish-aws-infrastructure-provider:
-        if: |
-            (github.event_name == 'push' && github.repository == 'liferay/liferay-portal') ||
-            (github.event.action != 'closed' && github.event.pull_request.head.repo.full_name == 'cloudnative-team/liferay-portal' && github.event_name == 'pull_request' && github.repository == 'cloudnative-team/liferay-portal')
+        if: needs.checks.outputs.publish == 'true'
+        needs: checks
         secrets: inherit
         uses: ./.github/workflows/ci-reusable-publish-helm-chart-to-gar.yaml
         with:
@@ -240,9 +266,8 @@ jobs:
                     main "${@}"
                 working-directory: ./cloud/helm/aws-marketplace
     publish-default:
-        if: |
-            (github.event_name == 'push' && github.repository == 'liferay/liferay-portal') ||
-            (github.event.action != 'closed' && github.event.pull_request.head.repo.full_name == 'cloudnative-team/liferay-portal' && github.event_name == 'pull_request' && github.repository == 'cloudnative-team/liferay-portal')
+        if: needs.checks.outputs.publish == 'true'
+        needs: checks
         secrets: inherit
         uses: ./.github/workflows/ci-reusable-publish-helm-chart-to-gar.yaml
         with:
@@ -251,10 +276,10 @@ jobs:
             registry: us-central1-docker.pkg.dev/liferay-artifact-registry/liferay-helm-chart
             working_directory: ./cloud/helm/default
     publish-gcp:
-        if: |
-            (github.event_name == 'push' && github.repository == 'liferay/liferay-portal') ||
-            (github.event.action != 'closed' && github.event.pull_request.head.repo.full_name == 'cloudnative-team/liferay-portal' && github.event_name == 'pull_request' && github.repository == 'cloudnative-team/liferay-portal')
-        needs: publish-default
+        if: needs.checks.outputs.publish == 'true'
+        needs:
+            -   checks
+            -   publish-default
         secrets: inherit
         uses: ./.github/workflows/ci-reusable-publish-helm-chart-to-gar.yaml
         with:
@@ -263,9 +288,8 @@ jobs:
             registry: us-central1-docker.pkg.dev/liferay-artifact-registry/liferay-helm-chart
             working_directory: ./cloud/helm/gcp
     publish-gcp-infrastructure:
-        if: |
-            (github.event_name == 'push' && github.repository == 'liferay/liferay-portal') ||
-            (github.event.action != 'closed' && github.event.pull_request.head.repo.full_name == 'cloudnative-team/liferay-portal' && github.event_name == 'pull_request' && github.repository == 'cloudnative-team/liferay-portal')
+        if: needs.checks.outputs.publish == 'true'
+        needs: checks
         secrets: inherit
         uses: ./.github/workflows/ci-reusable-publish-helm-chart-to-gar.yaml
         with:
@@ -274,9 +298,8 @@ jobs:
             registry: us-central1-docker.pkg.dev/external-assets-prd/liferay-helm-chart
             working_directory: ./cloud/helm/gcp-infrastructure
     publish-gcp-infrastructure-provider:
-        if: |
-            (github.event_name == 'push' && github.repository == 'liferay/liferay-portal') ||
-            (github.event.action != 'closed' && github.event.pull_request.head.repo.full_name == 'cloudnative-team/liferay-portal' && github.event_name == 'pull_request' && github.repository == 'cloudnative-team/liferay-portal')
+        if: needs.checks.outputs.publish == 'true'
+        needs: checks
         secrets: inherit
         uses: ./.github/workflows/ci-reusable-publish-helm-chart-to-gar.yaml
         with:
@@ -285,9 +308,8 @@ jobs:
             registry: us-central1-docker.pkg.dev/external-assets-prd/liferay-helm-chart
             working_directory: ./cloud/helm/gcp-infrastructure-provider
     publish-openshift:
-        if: |
-            (github.event_name == 'push' && github.repository == 'liferay/liferay-portal') ||
-            (github.event.action != 'closed' && github.event.pull_request.head.repo.full_name == 'cloudnative-team/liferay-portal' && github.event_name == 'pull_request' && github.repository == 'cloudnative-team/liferay-portal')
+        if: needs.checks.outputs.publish == 'true'
+        needs: checks
         secrets: inherit
         uses: ./.github/workflows/ci-reusable-publish-helm-chart-to-gar.yaml
         with:
@@ -295,7 +317,6 @@ jobs:
             pr_number: ${{github.event.pull_request.number}}
             registry: us-central1-docker.pkg.dev/external-assets-prd/liferay-helm-chart
             working_directory: ./cloud/helm/openshift
-
     release-helm-charts:
         env:
             CR_TOKEN: ${{secrets.GITHUB_TOKEN}}
