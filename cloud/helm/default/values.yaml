@@ -56,19 +56,10 @@ customInitContainers:
                                 name: managed-service-details
                     image: {{ printf "%s:%s" .overlay.image.repository (.overlay.image.tag | toString) }}
                     name: liferay-overlay
+                    {{- with .securityContext }}
                     securityContext:
-                        allowPrivilegeEscalation: false
-                        capabilities:
-                            drop:
-                                -   ALL
-                        runAsNonRoot: true
-                        {{- $runAsUser := 1000 }}
-                        {{- if and .securityContext (not (kindIs "invalid" .securityContext.runAsUser)) }}{{ $runAsUser = .securityContext.runAsUser }}{{ end }}
-                        {{- if gt (int $runAsUser) -1 }}
-                        runAsUser: {{ $runAsUser }}
-                        {{- end }}
-                        seccompProfile:
-                            type: RuntimeDefault
+                        {{- toYaml . | nindent 24 }}
+                    {{- end }}
                     volumeMounts:
                         -   mountPath: /liferay-init-scripts/overlay-sync.sh
                             name: {{ .overlay.initScriptsVolumeName }}
@@ -317,12 +308,7 @@ overlay:
     initScriptsVolumeName: liferay-init-scripts-default
     type: ""
 podLabels: {}
-podSecurityContext:
-    fsGroup: 1000
-    runAsNonRoot: true
-    runAsUser: 1000
-    seccompProfile:
-        type: RuntimeDefault
+podSecurityContext: {}
 portalBundleDenyList: []
 portalComponentDenyList: []
 portalProperties:
@@ -357,15 +343,7 @@ resources:
         cpu: 2000m
         memory: 6Gi
 schedulingGates: []
-securityContext:
-    allowPrivilegeEscalation: false
-    capabilities:
-        drop:
-            -   ALL
-    runAsNonRoot: true
-    runAsUser: 1000
-    seccompProfile:
-        type: RuntimeDefault
+securityContext: {}
 service:
     annotations: {}
     ports:

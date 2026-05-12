@@ -1,18 +1,19 @@
 liferay-default:
     podSecurityContext:
-        # `-1` is a sentinel meaning "omit this key" so OpenShift's SCC can inject
-        # `fsGroup` / `runAsUser` from the namespace's annotated UID range.
-        fsGroup: -1
-        runAsUser: -1
+        runAsNonRoot: true
+        seccompProfile:
+            type: RuntimeDefault
     securityContext:
-        # Same sentinel — let SCC pick the container-level `runAsUser`.
-        runAsUser: -1
+        allowPrivilegeEscalation: false
+        capabilities:
+            drop:
+                -   ALL
+        runAsNonRoot: true
+        seccompProfile:
+            type: RuntimeDefault
 route:
-    # OpenShift Route exposing the chart's main Service.
     annotations: {}
     enabled: true
-    # Optional explicit hostname. Leave empty to let OpenShift auto-generate one
-    # of the form `<name>-<namespace>.<apps-domain>`.
     host: ""
     labels: {}
     port:

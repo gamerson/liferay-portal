@@ -88,14 +88,8 @@ spec:
                         {{- toYaml . | nindent 22 }}
                     {{- end }}
                     {{- with .statefulset.securityContext }}
-                    {{- $containerSecurityContext := . }}
-                    {{- if le (int .runAsUser) -1 }}
-                    {{- $containerSecurityContext = omit $containerSecurityContext "runAsUser" }}
-                    {{- end }}
-                    {{- with $containerSecurityContext }}
                     securityContext:
                         {{- toYaml . | nindent 22 }}
-                    {{- end }}
                     {{- end }}
                     {{- with .statefulset.startupProbe }}
                     startupProbe:
@@ -152,17 +146,8 @@ spec:
                 {{- toYaml . | nindent 16 }}
             {{- end }}
             {{- with .statefulset.podSecurityContext }}
-            {{- $podSecurityContext := . }}
-            {{- if le (int .runAsUser) -1 }}
-            {{- $podSecurityContext = omit $podSecurityContext "runAsUser" }}
-            {{- end }}
-            {{- if le (int .fsGroup) -1 }}
-            {{- $podSecurityContext = omit $podSecurityContext "fsGroup" }}
-            {{- end }}
-            {{- with $podSecurityContext }}
             securityContext:
                 {{- toYaml . | nindent 16 }}
-            {{- end }}
             {{- end }}
             serviceAccountName: {{ include "liferay.serviceAccountName" .root }}
             {{- with .statefulset.tolerations }}
