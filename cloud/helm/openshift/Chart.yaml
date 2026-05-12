@@ -3,7 +3,7 @@ appVersion: latest
 dependencies:
     -   name: liferay-default
         repository: file://../default
-        version: 0.5.2
+        version: 0.5.3
 description:
     Liferay is an all-in-one DXP, LCAP, and Commerce platform. This chart is optimized for OpenShift.
 icon: https://www-cdn.liferay.com/documents/d/guest/liferay-logo
