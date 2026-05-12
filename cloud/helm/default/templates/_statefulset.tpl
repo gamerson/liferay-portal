@@ -87,13 +87,15 @@ spec:
                     resources:
                         {{- toYaml . | nindent 22 }}
                     {{- end }}
-                    {{- $containerSecurityContext := .statefulset.securityContext }}
-                    {{- if le (int .statefulset.securityContext.runAsUser) -1 }}
+                    {{- with .statefulset.securityContext }}
+                    {{- $containerSecurityContext := . }}
+                    {{- if le (int .runAsUser) -1 }}
                     {{- $containerSecurityContext = omit $containerSecurityContext "runAsUser" }}
                     {{- end }}
                     {{- with $containerSecurityContext }}
                     securityContext:
                         {{- toYaml . | nindent 22 }}
+                    {{- end }}
                     {{- end }}
                     {{- with .statefulset.startupProbe }}
                     startupProbe:
@@ -149,16 +151,18 @@ spec:
             schedulingGates:
                 {{- toYaml . | nindent 16 }}
             {{- end }}
-            {{- $podSecurityContext := .statefulset.podSecurityContext }}
-            {{- if le (int .statefulset.podSecurityContext.runAsUser) -1 }}
+            {{- with .statefulset.podSecurityContext }}
+            {{- $podSecurityContext := . }}
+            {{- if le (int .runAsUser) -1 }}
             {{- $podSecurityContext = omit $podSecurityContext "runAsUser" }}
             {{- end }}
-            {{- if le (int .statefulset.podSecurityContext.fsGroup) -1 }}
+            {{- if le (int .fsGroup) -1 }}
             {{- $podSecurityContext = omit $podSecurityContext "fsGroup" }}
             {{- end }}
             {{- with $podSecurityContext }}
             securityContext:
                 {{- toYaml . | nindent 16 }}
+            {{- end }}
             {{- end }}
             serviceAccountName: {{ include "liferay.serviceAccountName" .root }}
             {{- with .statefulset.tolerations }}

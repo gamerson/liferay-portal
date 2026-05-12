@@ -42,8 +42,10 @@ spec:
                     drop:
                         -   ALL
                 runAsNonRoot: true
-                {{- if gt (int .Values.securityContext.runAsUser) -1 }}
-                runAsUser: {{ .Values.securityContext.runAsUser }}
+                {{- with .Values.securityContext }}
+                    {{- if gt (int .runAsUser) -1 }}
+                runAsUser: {{ .runAsUser }}
+                    {{- end }}
                 {{- end }}
                 seccompProfile:
                     type: RuntimeDefault
