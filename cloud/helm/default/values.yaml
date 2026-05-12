@@ -62,7 +62,7 @@ customInitContainers:
                             drop:
                                 -   ALL
                         runAsNonRoot: true
-                        {{- if and .securityContext .securityContext.runAsUser (gt (int .securityContext.runAsUser) -1) }}
+                        {{- if and .securityContext (not (kindIs "invalid" .securityContext.runAsUser)) (gt (int .securityContext.runAsUser) -1) }}
                         runAsUser: {{ .securityContext.runAsUser }}
                         {{- end }}
                         seccompProfile:
