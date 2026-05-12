@@ -2,6 +2,34 @@ defaults:
     run:
         shell: bash
 jobs:
+    checks:
+        outputs:
+            publish: ${{steps.eval.outputs.publish}}
+        runs-on: ubuntu-latest
+        steps:
+            -   env:
+                    EVENT_NAME: ${{github.event_name}}
+                    PR_ACTION: ${{github.event.action}}
+                    PR_HEAD_REPO: ${{github.event.pull_request.head.repo.full_name}}
+                    REPOSITORY: ${{github.repository}}
+                id: eval
+                name: Evaluate publish condition
+                run: |
+                    set -o errexit
+                    set -o nounset
+                    set -o pipefail
+
+                    function main {
+                        if [[ "${EVENT_NAME}" == "push" && "${REPOSITORY}" == "liferay/liferay-portal" ]] ||
+                           [[ "${EVENT_NAME}" == "pull_request" && "${PR_ACTION}" != "closed" && "${PR_HEAD_REPO}" == "cloudnative-team/liferay-portal" && "${REPOSITORY}" == "cloudnative-team/liferay-portal" ]]
+                        then
+                            echo "publish=true" >> "${GITHUB_OUTPUT}"
+                        else
+                            echo "publish=false" >> "${GITHUB_OUTPUT}"
+                        fi
+                    }
+
+                    main "${@}"
     delete-packages-pr:
         if: github.event.action == 'closed' && github.event.pull_request.head.repo.full_name == 'cloudnative-team/liferay-portal' && github.event_name == 'pull_request' && github.repository == 'cloudnative-team/liferay-portal'
         permissions:
@@ -118,34 +146,6 @@ jobs:
                             git push
                         else
                             echo "No preview entries were found for PR #${PR_NUMBER}."
-                        fi
-                    }
-
-                    main "${@}"
-    checks:
-        outputs:
-            publish: ${{steps.eval.outputs.publish}}
-        runs-on: ubuntu-latest
-        steps:
-            -   env:
-                    EVENT_NAME: ${{github.event_name}}
-                    PR_ACTION: ${{github.event.action}}
-                    PR_HEAD_REPO: ${{github.event.pull_request.head.repo.full_name}}
-                    REPOSITORY: ${{github.repository}}
-                id: eval
-                name: Evaluate publish condition
-                run: |
-                    set -o errexit
-                    set -o nounset
-                    set -o pipefail
-
-                    function main {
-                        if [[ "${EVENT_NAME}" == "push" && "${REPOSITORY}" == "liferay/liferay-portal" ]] ||
-                           [[ "${EVENT_NAME}" == "pull_request" && "${PR_ACTION}" != "closed" && "${PR_HEAD_REPO}" == "cloudnative-team/liferay-portal" && "${REPOSITORY}" == "cloudnative-team/liferay-portal" ]]
-                        then
-                            echo "publish=true" >> "${GITHUB_OUTPUT}"
-                        else
-                            echo "publish=false" >> "${GITHUB_OUTPUT}"
                         fi
                     }
 
