@@ -46,6 +46,7 @@ jobs:
                     -   liferay-gcp
                     -   liferay-gcp-infrastructure
                     -   liferay-gcp-infrastructure-provider
+                    -   liferay-openshift
     delete-releases-pr:
         env:
             PR_NUMBER: ${{github.event.pull_request.number}}
@@ -283,6 +284,18 @@ jobs:
             pr_number: ${{github.event.pull_request.number}}
             registry: us-central1-docker.pkg.dev/external-assets-prd/liferay-helm-chart
             working_directory: ./cloud/helm/gcp-infrastructure-provider
+    publish-openshift:
+        if: |
+            (github.event_name == 'push' && github.repository == 'liferay/liferay-portal') ||
+            (github.event.action != 'closed' && github.event.pull_request.head.repo.full_name == 'cloudnative-team/liferay-portal' && github.event_name == 'pull_request' && github.repository == 'cloudnative-team/liferay-portal')
+        secrets: inherit
+        uses: ./.github/workflows/ci-reusable-publish-helm-chart-to-gar.yaml
+        with:
+            chart_name: liferay-openshift
+            pr_number: ${{github.event.pull_request.number}}
+            registry: us-central1-docker.pkg.dev/external-assets-prd/liferay-helm-chart
+            working_directory: ./cloud/helm/openshift
+
     release-helm-charts:
         env:
             CR_TOKEN: ${{secrets.GITHUB_TOKEN}}
@@ -296,6 +309,7 @@ jobs:
             -   publish-gcp
             -   publish-gcp-infrastructure
             -   publish-gcp-infrastructure-provider
+            -   publish-openshift
         permissions:
             contents: write
         runs-on: ubuntu-latest

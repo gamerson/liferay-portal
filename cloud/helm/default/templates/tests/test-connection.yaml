@@ -42,7 +42,9 @@ spec:
                     drop:
                         -   ALL
                 runAsNonRoot: true
-                runAsUser: 1000
+                {{- if gt (int .Values.securityContext.runAsUser) -1 }}
+                runAsUser: {{ .Values.securityContext.runAsUser }}
+                {{- end }}
                 seccompProfile:
                     type: RuntimeDefault
     restartPolicy: Never

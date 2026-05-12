@@ -1,0 +1,37 @@
+{{- if .Values.route.enabled }}
+{{- $liferayDefault := index .Values "liferay-default" | default dict -}}
+{{- $serviceName := $liferayDefault.nameOverride | default "liferay-default" -}}
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+    {{- with .Values.route.annotations }}
+    annotations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    labels:
+        app: {{ $serviceName }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+        app.kubernetes.io/name: {{ $serviceName }}
+        {{- with .Values.route.labels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    name: {{ $serviceName }}
+    namespace: {{ .Release.Namespace }}
+spec:
+    {{- with .Values.route.host }}
+    host: {{ . | quote }}
+    {{- end }}
+    port:
+        targetPort: {{ .Values.route.port.targetPort }}
+    to:
+        kind: Service
+        name: {{ $serviceName }}
+        weight: 100
+    {{- if .Values.route.tls.enabled }}
+    tls:
+        insecureEdgeTerminationPolicy: {{ .Values.route.tls.insecureEdgeTerminationPolicy }}
+        termination: {{ .Values.route.tls.termination }}
+    {{- end }}
+    wildcardPolicy: None
+{{- end }}

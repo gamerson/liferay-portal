@@ -62,7 +62,9 @@ customInitContainers:
                             drop:
                                 -   ALL
                         runAsNonRoot: true
-                        runAsUser: 1000
+                        {{- if and .securityContext .securityContext.runAsUser (gt (int .securityContext.runAsUser) -1) }}
+                        runAsUser: {{ .securityContext.runAsUser }}
+                        {{- end }}
                         seccompProfile:
                             type: RuntimeDefault
                     volumeMounts:
