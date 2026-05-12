@@ -62,8 +62,10 @@ customInitContainers:
                             drop:
                                 -   ALL
                         runAsNonRoot: true
-                        {{- if and .securityContext (not (kindIs "invalid" .securityContext.runAsUser)) (gt (int .securityContext.runAsUser) -1) }}
-                        runAsUser: {{ .securityContext.runAsUser }}
+                        {{- $runAsUser := 1000 }}
+                        {{- if and .securityContext (not (kindIs "invalid" .securityContext.runAsUser)) }}{{ $runAsUser = .securityContext.runAsUser }}{{ end }}
+                        {{- if gt (int $runAsUser) -1 }}
+                        runAsUser: {{ $runAsUser }}
                         {{- end }}
                         seccompProfile:
                             type: RuntimeDefault

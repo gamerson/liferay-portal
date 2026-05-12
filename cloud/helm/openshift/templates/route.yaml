@@ -30,8 +30,8 @@ spec:
         weight: 100
     {{- if .Values.route.tls.enabled }}
     tls:
-        insecureEdgeTerminationPolicy: {{ .Values.route.tls.insecureEdgeTerminationPolicy }}
-        termination: {{ .Values.route.tls.termination }}
+        insecureEdgeTerminationPolicy: {{ .Values.route.tls.insecureEdgeTerminationPolicy | quote }}
+        termination: {{ .Values.route.tls.termination | quote }}
     {{- end }}
     wildcardPolicy: None
 {{- end }}
