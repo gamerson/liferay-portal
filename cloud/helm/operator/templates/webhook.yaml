@@ -1,0 +1,89 @@
+{{- if .Values.webhook.enabled -}}
+{{- $fullname := include "operator.fullname" . -}}
+{{- $svcName := include "operator.webhookServiceName" . -}}
+{{- $ns := include "operator.namespace" . -}}
+{{- $days := int .Values.webhook.certificateValidityDays -}}
+{{- $altNames := list (printf "%s.%s.svc" $svcName $ns) (printf "%s.%s.svc.cluster.local" $svcName $ns) -}}
+{{/*
+    Reuse the existing cert across upgrades so the serving cert and the
+    published caBundle stay consistent. NOTE: helm template / dry-run and some
+    ArgoCD render modes cannot run lookup, so they regenerate the cert each
+    render. That churn is acceptable for the PoC and is the seam to replace
+    with cert-manager later (see cloud/operator/cne-licensing-agent-design.md).
+*/}}
+{{- $existing := lookup "v1" "Secret" $ns $svcName -}}
+{{- $caCrt := "" -}}
+{{- $tlsCrt := "" -}}
+{{- $tlsKey := "" -}}
+{{- if and $existing $existing.data (index $existing.data "tls.crt") -}}
+{{- $caCrt = index $existing.data "ca.crt" -}}
+{{- $tlsCrt = index $existing.data "tls.crt" -}}
+{{- $tlsKey = index $existing.data "tls.key" -}}
+{{- else -}}
+{{- $ca := genCA (printf "%s-webhook-ca" $fullname) $days -}}
+{{- $cert := genSignedCert (index $altNames 0) nil $altNames $days $ca -}}
+{{- $caCrt = $ca.Cert | b64enc -}}
+{{- $tlsCrt = $cert.Cert | b64enc -}}
+{{- $tlsKey = $cert.Key | b64enc -}}
+{{- end -}}
+apiVersion: v1
+kind: Secret
+metadata:
+    labels:
+        {{- include "operator.labels" . | nindent 8 }}
+    name: {{ $svcName }}
+    namespace: {{ $ns }}
+type: kubernetes.io/tls
+data:
+    ca.crt: {{ $caCrt }}
+    tls.crt: {{ $tlsCrt }}
+    tls.key: {{ $tlsKey }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+    labels:
+        {{- include "operator.labels" . | nindent 8 }}
+    name: {{ $svcName }}
+    namespace: {{ $ns }}
+spec:
+    ports:
+        -   name: https
+            port: 443
+            protocol: TCP
+            targetPort: webhook
+    selector:
+        {{- include "operator.selectorLabels" . | nindent 8 }}
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+    labels:
+        {{- include "operator.labels" . | nindent 8 }}
+    name: {{ $fullname }}
+webhooks:
+    -   admissionReviewVersions:
+            - v1
+        clientConfig:
+            caBundle: {{ $caCrt }}
+            service:
+                name: {{ $svcName }}
+                namespace: {{ $ns }}
+                path: /validate-apps-v1-statefulset
+                port: 443
+        failurePolicy: {{ .Values.webhook.failurePolicy }}
+        matchPolicy: Equivalent
+        name: vstatefulsetscale.licensing.liferay.com
+        rules:
+            -   apiGroups:
+                    - apps
+                apiVersions:
+                    - v1
+                operations:
+                    - UPDATE
+                resources:
+                    - statefulsets
+                    - statefulsets/scale
+        sideEffects: None
+        timeoutSeconds: 10
+{{- end }}

@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    labels:
+        {{- include "operator.labels" . | nindent 8 }}
+    name: {{ include "operator.fullname" . }}
+    namespace: {{ include "operator.namespace" . }}
+spec:
+    replicas: {{ .Values.replicaCount }}
+    selector:
+        matchLabels:
+            {{- include "operator.selectorLabels" . | nindent 12 }}
+    template:
+        metadata:
+            {{- with .Values.podAnnotations }}
+            annotations:
+                {{- toYaml . | nindent 16 }}
+            {{- end }}
+            labels:
+                {{- include "operator.labels" . | nindent 16 }}
+        spec:
+            containers:
+                -   name: manager
+                    image: {{ printf "%s:%s" .Values.image.repository (.Values.image.tag | toString) }}
+                    imagePullPolicy: {{ .Values.image.pullPolicy }}
+                    env:
+                        -   name: METRICS_ADDRESS
+                            value: {{ printf ":%d" (int .Values.metrics.port) | quote }}
+                        -   name: PROBE_ADDRESS
+                            value: {{ printf ":%d" (int .Values.probes.port) | quote }}
+                        -   name: WEBHOOK_ENABLED
+                            value: {{ .Values.webhook.enabled | quote }}
+                    ports:
+                        -   name: metrics
+                            containerPort: {{ .Values.metrics.port }}
+                            protocol: TCP
+                        -   name: health
+                            containerPort: {{ .Values.probes.port }}
+                            protocol: TCP
+                        {{- if .Values.webhook.enabled }}
+                        -   name: webhook
+                            containerPort: {{ .Values.webhook.port }}
+                            protocol: TCP
+                        {{- end }}
+                    livenessProbe:
+                        httpGet:
+                            path: /healthz
+                            port: health
+                        initialDelaySeconds: 15
+                        periodSeconds: 20
+                    readinessProbe:
+                        httpGet:
+                            path: /readyz
+                            port: health
+                        initialDelaySeconds: 5
+                        periodSeconds: 10
+                    resources:
+                        {{- toYaml .Values.resources | nindent 24 }}
+                    securityContext:
+                        {{- toYaml .Values.securityContext | nindent 24 }}
+                    {{- if .Values.webhook.enabled }}
+                    volumeMounts:
+                        -   name: webhook-certs
+                            mountPath: /tmp/k8s-webhook-server/serving-certs
+                            readOnly: true
+                    {{- end }}
+            {{- with .Values.image.pullSecrets }}
+            imagePullSecrets:
+                {{- toYaml . | nindent 16 }}
+            {{- end }}
+            {{- with .Values.nodeSelector }}
+            nodeSelector:
+                {{- toYaml . | nindent 16 }}
+            {{- end }}
+            securityContext:
+                {{- toYaml .Values.podSecurityContext | nindent 16 }}
+            serviceAccountName: {{ include "operator.serviceAccountName" . }}
+            {{- with .Values.tolerations }}
+            tolerations:
+                {{- toYaml . | nindent 16 }}
+            {{- end }}
+            {{- with .Values.affinity }}
+            affinity:
+                {{- toYaml . | nindent 16 }}
+            {{- end }}
+            {{- if .Values.webhook.enabled }}
+            volumes:
+                -   name: webhook-certs
+                    secret:
+                        secretName: {{ include "operator.webhookServiceName" . }}
+                        defaultMode: 420
+            {{- end }}

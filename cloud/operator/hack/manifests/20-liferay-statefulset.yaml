@@ -1,0 +1,37 @@
+# A stand-in for the Liferay cluster workload. It uses the pause image so it
+# schedules cheaply; the operator only reads and patches its replica count, so
+# the container itself does nothing.
+apiVersion: v1
+kind: Service
+metadata:
+    labels:
+        app: liferay-dxp
+    name: liferay-dxp
+    namespace: acme-prod
+spec:
+    clusterIP: None
+    ports:
+        -   name: http
+            port: 8080
+    selector:
+        app: liferay-dxp
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+    name: liferay-dxp
+    namespace: acme-prod
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: liferay-dxp
+    serviceName: liferay-dxp
+    template:
+        metadata:
+            labels:
+                app: liferay-dxp
+        spec:
+            containers:
+                -   image: registry.k8s.io/pause:3.9
+                    name: pause

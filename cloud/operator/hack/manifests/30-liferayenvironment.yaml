@@ -1,0 +1,16 @@
+apiVersion: licensing.liferay.com/v1alpha1
+kind: LiferayEnvironment
+metadata:
+    name: default
+    namespace: acme-prod
+spec:
+    activationCodeSecretRef:
+        key: activationCode
+        name: cne-activation-code
+    desiredReplicas: 3
+    environmentName: "ACME Production (local test)"
+    # Short interval so reconciles are easy to watch during testing.
+    heartbeatInterval: 1m
+    workloadRef:
+        kind: StatefulSet
+        name: liferay-dxp

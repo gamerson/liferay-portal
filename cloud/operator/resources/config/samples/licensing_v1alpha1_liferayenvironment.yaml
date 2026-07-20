@@ -1,0 +1,15 @@
+apiVersion: licensing.liferay.com/v1alpha1
+kind: LiferayEnvironment
+metadata:
+  name: default
+  namespace: acme-prod
+spec:
+  environmentName: "ACME Production"
+  activationCodeSecretRef:
+    name: cne-activation-code
+    key: activationCode
+  workloadRef:
+    kind: StatefulSet
+    name: liferay-dxp
+  desiredReplicas: 3
+  heartbeatInterval: 10m
