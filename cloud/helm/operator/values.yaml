@@ -16,6 +16,10 @@ podSecurityContext:
         type: RuntimeDefault
 probes:
     port: 8081
+provisioning:
+    # Base URL of the provisioning API. Point this at the local mock to test the
+    # full activation/entitlements path (see cloud/operator/hack/README.md).
+    baseURL: "https://provisioning.liferay.com"
 rbac:
     create: true
 replicaCount: 1

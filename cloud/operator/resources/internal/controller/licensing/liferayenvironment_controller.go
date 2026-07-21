@@ -8,6 +8,7 @@ import (
 	"encoding/pem"
 	"fmt"
 	"strings"
+	"time"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -80,7 +81,7 @@ func (r *LiferayEnvironmentReconciler) Reconcile(
 
 	// Ensure the cluster keypair exists; the private key never leaves here.
 
-	publicKey, err := r.ensureIdentity(ctx, env)
+	privateKey, err := r.ensureIdentity(ctx, env)
 
 	if err != nil {
 		return ctrl.Result{}, err
@@ -95,10 +96,23 @@ func (r *LiferayEnvironmentReconciler) Reconcile(
 			return r.finish(ctx, env)
 		}
 
+		publicKey, err := publicKeyPEM(privateKey)
+
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+
+		activationCode, err := r.readActivationCode(ctx, env)
+
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+
 		activateErr := r.Provisioning.Activate(
 			ctx,
+			privateKey,
 			provisioning.ActivationRequest{
-				ActivationCode:  "", // TODO: read from spec.activationCodeSecretRef
+				ActivationCode:  activationCode,
 				EnvironmentId:   environmentId,
 				EnvironmentName: env.Spec.EnvironmentName,
 				PublicKey:       publicKey,
@@ -144,6 +158,7 @@ func (r *LiferayEnvironmentReconciler) Reconcile(
 
 	entitlements, err := r.Provisioning.Entitlements(
 		ctx,
+		privateKey,
 		provisioning.EntitlementsRequest{
 			DxpVersion:    r.resolveDxpVersion(env),
 			EnvironmentId: environmentId,
@@ -188,13 +203,36 @@ func (r *LiferayEnvironmentReconciler) Reconcile(
 		return ctrl.Result{}, err
 	}
 
-	// TODO: reconcile apps — parse virtualEntryId from each download link,
-	// download the lpkg, write it to the artifact PVC, track by checksum.
+	// Download each entitled add-on. TODO: write the lpkg to the artifact PVC
+	// and track it by checksum so the sync sidecar can deploy it; for now the
+	// download proves the marketplace path end to end.
 	for _, app := range entitlements.Apps {
+		virtualEntryId := parseVirtualEntryId(app.LpkgDownloadLink)
+
+		lpkg, downloadErr := r.Provisioning.DownloadApp(
+			ctx,
+			privateKey,
+			app.LpkgDownloadLink,
+			provisioning.DownloadRequest{
+				EnvironmentId:  environmentId,
+				VirtualEntryId: virtualEntryId,
+			},
+		)
+
+		if downloadErr != nil {
+			log.Error(
+				downloadErr, "Add-on download failed",
+				"name", app.Name, "virtualEntryId", virtualEntryId,
+			)
+
+			continue
+		}
+
 		log.Info(
-			"Entitled app",
+			"Downloaded add-on",
 			"name", app.Name,
-			"virtualEntryId", parseVirtualEntryId(app.LpkgDownloadLink),
+			"virtualEntryId", virtualEntryId,
+			"bytes", len(lpkg),
 		)
 	}
 
@@ -203,13 +241,21 @@ func (r *LiferayEnvironmentReconciler) Reconcile(
 	return r.finish(ctx, env)
 }
 
-// finish requeues on the heartbeat interval and persists status.
+// finish persists status and requeues on the heartbeat interval.
 func (r *LiferayEnvironmentReconciler) finish(
 	ctx context.Context,
 	env *licensingv1alpha1.LiferayEnvironment,
 ) (ctrl.Result, error) {
 
 	if err := r.Status().Update(ctx, env); err != nil {
+		if apierrors.IsConflict(err) {
+			// The object changed under us (a concurrent edit, or an event
+			// from a prior reconcile's own write). This is benign: requeue
+			// promptly and re-reconcile against the fresh object rather than
+			// surfacing it as an error.
+			return ctrl.Result{RequeueAfter: time.Second}, nil
+		}
+
 		return ctrl.Result{}, err
 	}
 
@@ -260,12 +306,13 @@ func (r *LiferayEnvironmentReconciler) resolveDxpVersion(
 	return ""
 }
 
-// ensureIdentity generates and stores the cluster keypair if absent, returning
-// the PEM-encoded public key to register with provisioning.
+// ensureIdentity returns the environment's cluster private key, generating and
+// storing the keypair if the identity Secret does not yet exist. The private
+// key never leaves the agent; it signs every JWT to provisioning.
 func (r *LiferayEnvironmentReconciler) ensureIdentity(
 	ctx context.Context,
 	env *licensingv1alpha1.LiferayEnvironment,
-) (string, error) {
+) (*rsa.PrivateKey, error) {
 
 	name := env.Name + identitySecretSuffix
 
@@ -275,35 +322,34 @@ func (r *LiferayEnvironmentReconciler) ensureIdentity(
 	err := r.Get(ctx, key, secret)
 
 	if err == nil {
-		return string(secret.Data["public.pem"]), nil
+		return parsePrivateKey(secret.Data["private.pem"])
 	}
 
 	if !apierrors.IsNotFound(err) {
-		return "", err
+		return nil, err
 	}
 
 	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
 
 	if err != nil {
-		return "", err
+		return nil, err
+	}
+
+	privateBytes, err := x509.MarshalPKCS8PrivateKey(privateKey)
+
+	if err != nil {
+		return nil, err
 	}
 
 	privatePEM := pem.EncodeToMemory(
-		&pem.Block{
-			Type:  "PRIVATE KEY",
-			Bytes: x509.MarshalPKCS1PrivateKey(privateKey),
-		},
+		&pem.Block{Type: "PRIVATE KEY", Bytes: privateBytes},
 	)
 
-	publicBytes, err := x509.MarshalPKIXPublicKey(&privateKey.PublicKey)
+	publicPEM, err := publicKeyPEM(privateKey)
 
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-
-	publicPEM := pem.EncodeToMemory(
-		&pem.Block{Type: "PUBLIC KEY", Bytes: publicBytes},
-	)
 
 	secret = &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
@@ -313,19 +359,84 @@ func (r *LiferayEnvironmentReconciler) ensureIdentity(
 		},
 		Data: map[string][]byte{
 			"private.pem": privatePEM,
-			"public.pem":  publicPEM,
+			"public.pem":  []byte(publicPEM),
 		},
 	}
 
 	if err := ctrl.SetControllerReference(env, secret, r.Scheme()); err != nil {
-		return "", err
+		return nil, err
 	}
 
 	if err := r.Create(ctx, secret); err != nil {
+		return nil, err
+	}
+
+	return privateKey, nil
+}
+
+// parsePrivateKey decodes a PKCS#8 PEM-encoded RSA private key.
+func parsePrivateKey(data []byte) (*rsa.PrivateKey, error) {
+	block, _ := pem.Decode(data)
+
+	if block == nil {
+		return nil, fmt.Errorf("identity secret: no PEM block in private.pem")
+	}
+
+	parsed, err := x509.ParsePKCS8PrivateKey(block.Bytes)
+
+	if err != nil {
+		return nil, err
+	}
+
+	privateKey, ok := parsed.(*rsa.PrivateKey)
+
+	if !ok {
+		return nil, fmt.Errorf("identity secret: not an RSA private key")
+	}
+
+	return privateKey, nil
+}
+
+// publicKeyPEM returns the PKIX PEM encoding of a private key's public half.
+func publicKeyPEM(key *rsa.PrivateKey) (string, error) {
+	publicBytes, err := x509.MarshalPKIXPublicKey(&key.PublicKey)
+
+	if err != nil {
 		return "", err
 	}
 
-	return string(publicPEM), nil
+	return string(
+		pem.EncodeToMemory(
+			&pem.Block{Type: "PUBLIC KEY", Bytes: publicBytes},
+		),
+	), nil
+}
+
+// readActivationCode loads the one-time activation code from the referenced
+// Secret in the environment's namespace.
+func (r *LiferayEnvironmentReconciler) readActivationCode(
+	ctx context.Context,
+	env *licensingv1alpha1.LiferayEnvironment,
+) (string, error) {
+
+	ref := env.Spec.ActivationCodeSecretRef
+
+	secret := &corev1.Secret{}
+	key := types.NamespacedName{Namespace: env.Namespace, Name: ref.Name}
+
+	if err := r.Get(ctx, key, secret); err != nil {
+		return "", err
+	}
+
+	code, ok := secret.Data[ref.Key]
+
+	if !ok {
+		return "", fmt.Errorf(
+			"activation code secret %q missing key %q", ref.Name, ref.Key,
+		)
+	}
+
+	return string(code), nil
 }
 
 // clampReplicas enforces effective = min(desired, maxClusterNodes) on the

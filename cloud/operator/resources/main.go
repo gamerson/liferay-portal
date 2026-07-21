@@ -4,15 +4,10 @@ import (
 	"os"
 
 	"github.com/caarlos0/env/v11"
-	appsv1 "k8s.io/api/apps/v1"
-	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/cache"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
@@ -20,6 +15,7 @@ import (
 
 	licensingv1alpha1 "github.com/liferay/liferay-portal/cloud/operator/api/licensing/v1alpha1"
 	licensingcontroller "github.com/liferay/liferay-portal/cloud/operator/internal/controller/licensing"
+	"github.com/liferay/liferay-portal/cloud/operator/internal/provisioning"
 	licensingwebhook "github.com/liferay/liferay-portal/cloud/operator/internal/webhook/licensing"
 )
 
@@ -36,23 +32,11 @@ func main() {
 	mgr, err := ctrl.NewManager(
 		ctrl.GetConfigOrDie(),
 		ctrl.Options{
-			Cache: cache.Options{
-				// Unlabeled objects are filtered out by default to keep the
-				// watch cache small. The types the agent must read but does
-				// not own (its CR, the target workload, arbitrary Secrets,
-				// the namespace) opt out of that filter explicitly.
-				DefaultLabelSelector: labels.SelectorFromSet(
-					map[string]string{
-						"controller-watched": "yes",
-					},
-				),
-				ByObject: map[client.Object]cache.ByObject{
-					&appsv1.StatefulSet{}:                   {},
-					&corev1.Namespace{}:                     {},
-					&corev1.Secret{}:                        {},
-					&licensingv1alpha1.LiferayEnvironment{}: {},
-				},
-			},
+			// The operator reconciles unlabeled, user- and third-party-owned
+			// resources (its CRs, the target StatefulSets, the activation
+			// Secrets, and namespaces), so a label-filtered cache cannot be
+			// used. TODO(prod): scope the Secret cache by namespace/field
+			// selector rather than caching every Secret cluster-wide.
 			HealthProbeBindAddress: cfg.ProbeAddress,
 			Metrics: metricsserver.Options{
 				BindAddress: cfg.MetricsAddress,
@@ -80,7 +64,8 @@ func main() {
 	}
 
 	reconciler := &licensingcontroller.LiferayEnvironmentReconciler{
-		Client: mgr.GetClient(),
+		Client:       mgr.GetClient(),
+		Provisioning: provisioning.NewHTTPClient(cfg.ProvisioningBaseURL),
 	}
 
 	if err := reconciler.SetupWithManager(mgr); err != nil {
@@ -109,9 +94,10 @@ func main() {
 }
 
 type config struct {
-	MetricsAddress string `env:"METRICS_ADDRESS" envDefault:":8080"`
-	ProbeAddress   string `env:"PROBE_ADDRESS" envDefault:":8081"`
-	WebhookEnabled bool   `env:"WEBHOOK_ENABLED" envDefault:"true"`
+	MetricsAddress      string `env:"METRICS_ADDRESS" envDefault:":8080"`
+	ProbeAddress        string `env:"PROBE_ADDRESS" envDefault:":8081"`
+	ProvisioningBaseURL string `env:"PROVISIONING_BASE_URL" envDefault:"https://provisioning.liferay.com"`
+	WebhookEnabled      bool   `env:"WEBHOOK_ENABLED" envDefault:"true"`
 }
 
 var (

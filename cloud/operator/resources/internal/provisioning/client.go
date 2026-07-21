@@ -5,23 +5,29 @@ package provisioning
 
 import (
 	"context"
+	"crypto/rsa"
+	"errors"
 )
 
-// Client talks to the provisioning and marketplace services. The concrete
-// implementation signs each request as a JWT with the environment's private
-// key and verifies TLS against the Liferay hosts.
+// ErrActivationRejected is returned when provisioning rejects the activation
+// (HTTP 404) — an invalid or already-consumed activation code. It is terminal:
+// the reconciler should stop retrying and surface it for operator attention.
+var ErrActivationRejected = errors.New("provisioning: activation rejected")
+
+// Client talks to the provisioning and marketplace services. Each call is
+// signed as a JWT with the environment's private key (never shared with pods)
+// and sent over TLS to the Liferay hosts.
 type Client interface {
-	// Activate performs the one-time activation (API #1). It is idempotent
-	// from the caller's side: a replayed, already-consumed code surfaces as
-	// ErrActivationRejected so the reconciler can treat it as terminal.
-	Activate(ctx context.Context, req ActivationRequest) error
+	// Activate performs the one-time activation (API #1). A rejected or
+	// already-consumed code surfaces as ErrActivationRejected.
+	Activate(ctx context.Context, key *rsa.PrivateKey, req ActivationRequest) error
 
 	// Entitlements fetches the current license and add-on list (API #2).
-	Entitlements(ctx context.Context, req EntitlementsRequest) (*Entitlements, error)
+	Entitlements(ctx context.Context, key *rsa.PrivateKey, req EntitlementsRequest) (*Entitlements, error)
 
 	// DownloadApp fetches one add-on's lpkg binary (API #3). The link is the
 	// full marketplace URL from the entitlements response.
-	DownloadApp(ctx context.Context, link string, req DownloadRequest) ([]byte, error)
+	DownloadApp(ctx context.Context, key *rsa.PrivateKey, link string, req DownloadRequest) ([]byte, error)
 }
 
 // ActivationRequest is the payload of the activation JWT.

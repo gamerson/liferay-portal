@@ -1,0 +1,53 @@
+# Runs the stdlib mock server (server.py, mounted from a ConfigMap) inside the
+# cluster so the operator can reach it by Service DNS. The ConfigMap
+# "mock-provisioning-src" is created by 06-enable-mock.sh. Namespace is supplied
+# by that script via `kubectl -n`.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    labels:
+        app: mock-provisioning
+    name: mock-provisioning
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: mock-provisioning
+    template:
+        metadata:
+            labels:
+                app: mock-provisioning
+        spec:
+            containers:
+                -   command:
+                        - python3
+                        - /app/server.py
+                    env:
+                        -   name: PORT
+                            value: "8888"
+                        -   name: MAX_CLUSTER_NODES
+                            value: "2"
+                    image: python:3.12-slim
+                    name: mock
+                    ports:
+                        -   containerPort: 8888
+                    volumeMounts:
+                        -   mountPath: /app
+                            name: src
+            volumes:
+                -   configMap:
+                        name: mock-provisioning-src
+                    name: src
+---
+apiVersion: v1
+kind: Service
+metadata:
+    labels:
+        app: mock-provisioning
+    name: mock-provisioning
+spec:
+    ports:
+        -   port: 8888
+            targetPort: 8888
+    selector:
+        app: mock-provisioning

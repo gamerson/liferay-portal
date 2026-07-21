@@ -30,6 +30,7 @@ Each script is idempotent and can be run on its own, in order:
 | `03-install.sh` | `helm upgrade --install` the chart into `liferay-system`. |
 | `04-apply-samples.sh` | Apply the fixtures in `manifests/`. |
 | `05-verify.sh` | Print the CR status, identity Secret, events, and operator logs. |
+| `06-enable-mock.sh` | Deploy the in-cluster mock and point the operator at it. |
 | `99-teardown.sh` | Delete the cluster (`KEEP_CLUSTER=1` keeps it, removing only the release + fixtures). |
 
 Every default (cluster name, image tag, namespaces) is an overridable
@@ -47,49 +48,57 @@ environment variable — see `lib.sh`.
 - `30-liferayenvironment.yaml` — the `LiferayEnvironment` CR that drives
   reconciliation.
 
-## What To Expect (no provisioning backend)
+## What To Expect (default: real provisioning host)
 
-The operator ships without a provisioning client wired in, so the reconcile loop
-runs as far as it can offline and then stops cleanly. After `04-apply-samples.sh`
-you should see:
+By default the operator targets `https://provisioning.liferay.com`, which does
+not exist yet, so the reconcile loop runs as far as it can and then reports the
+failure. After `04-apply-samples.sh` you should see:
 
 - `status.environmentId` populated with the `acme-prod` namespace UID.
 - A Secret `default-cne-identity` created — the generated per-environment
   cluster keypair.
-- Condition `ProvisioningReachable = False`, reason `NoProvisioningClient`.
-- `status.phase = Pending`.
+- The activation POST failing (connection/404), so `status.phase = Degraded`
+  and the `Activated` condition reports the error.
 
 This confirms the controller is installed, watching, creating owned resources,
-and writing status — i.e. the reconcile wiring works. **Activation,
-entitlements, replica clamping, and add-on download stay dormant** because they
-all depend on a provisioning response.
-
-The validating webhook is installed and serving (self-signed cert), but it
-allows every scale for now: with no entitlement, `maxClusterNodes` is unset, so
-there is no ceiling to enforce yet.
+signing requests, and writing status — i.e. the reconcile wiring works. To make
+the loop succeed, point it at the mock (below).
 
 ## Mocking The Provisioning Server
 
-To exercise the dormant paths (activation, entitlements, the replica clamp, and
-the webhook denial), the operator needs to reach a provisioning backend.
 `mock-provisioning/server.py` implements the three contract endpoints with canned
-responses and needs no dependencies:
+responses (no dependencies). `06-enable-mock.sh` deploys it inside the cluster
+and reconfigures the operator to use it:
 
 ```bash
-MAX_CLUSTER_NODES=3 PORT=8888 mock-provisioning/server.py
+./06-enable-mock.sh
+./05-verify.sh
 ```
 
-It is **not yet consumed.** The operator's provisioning client
-(`resources/internal/provisioning/client.go`) is still an interface stub, and
-`main.go` passes `nil`. Wiring the mock in is the next step and needs:
+The mock is wired end to end: the operator reads `PROVISIONING_BASE_URL` (set by
+the chart's `provisioning.baseURL` value) and signs each request as an RS256 JWT
+with the environment's private key. With the mock returning
+`maxClusterNodes=2`, the reconcile loop now completes:
 
-1. A concrete HTTP `provisioning.Client` that reads a base URL from
-   configuration (e.g. a `PROVISIONING_BASE_URL` env var) and signs each request
-   as a JWT with the environment's private key.
-2. A chart/values knob to set that base URL, plus a way to run the mock reachable
-   from the cluster (a Deployment + Service in the cluster, or a host-mapped
-   endpoint).
+- activation succeeds → `Activated = True`, `status.activatedAt` set;
+- entitlements succeed → `ProvisioningReachable = True`,
+  `status.license.maxClusterNodes = 2`;
+- the clamp runs → the `liferay-dxp` StatefulSet is scaled to **2** (from the
+  CR's `desiredReplicas: 3`) and `ReplicasClamped = True`;
+- `status.phase = Ready`.
 
-Once that exists, pointing `PROVISIONING_BASE_URL` at the mock makes the loop
-complete: the StatefulSet gets clamped to `MAX_CLUSTER_NODES`, and a
-`kubectl scale` above it is rejected by the webhook.
+Then the validating webhook has a ceiling to enforce. A scale above it is
+rejected:
+
+```bash
+kubectl --context k3d-liferay-operator-test -n acme-prod \
+    scale statefulset/liferay-dxp --replicas=5
+# Error ... admission webhook "vstatefulsetscale.licensing.liferay.com" denied
+# the request: replicas 5 exceeds licensed maxClusterNodes 2 ...
+```
+
+To run the mock server directly on your host instead (e.g. for quick iteration):
+
+```bash
+MAX_CLUSTER_NODES=2 PORT=8888 mock-provisioning/server.py
+```
