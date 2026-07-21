@@ -74,12 +74,15 @@ webhooks:
         failurePolicy: {{ .Values.webhook.failurePolicy }}
         matchPolicy: Equivalent
         name: vstatefulsetscale.licensing.liferay.com
+        namespaceSelector:
+            {{- toYaml .Values.webhook.namespaceSelector | nindent 12 }}
         rules:
             -   apiGroups:
                     - apps
                 apiVersions:
                     - v1
                 operations:
+                    - CREATE
                     - UPDATE
                 resources:
                     - statefulsets

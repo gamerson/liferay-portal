@@ -1,6 +1,11 @@
-# A stand-in for the Liferay cluster workload. It uses the pause image so it
-# schedules cheaply; the operator only reads and patches its replica count, so
-# the container itself does nothing.
+# The Liferay cluster workload. Enforcement is scoped by the namespace label
+# (see 00-namespace.yaml), so any StatefulSet create/scale in this namespace is
+# gated against the licensed ceiling; the workload itself needs no special label.
+# It uses the pause image so it schedules cheaply; the operator only reads and
+# patches its replica count.
+#
+# Applied after the license is known (see 07-validate-enforcement.sh), because
+# fail-closed enforcement denies the create until maxClusterNodes is available.
 apiVersion: v1
 kind: Service
 metadata:
@@ -19,6 +24,8 @@ spec:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
+    labels:
+        app: liferay-dxp
     name: liferay-dxp
     namespace: acme-prod
 spec:

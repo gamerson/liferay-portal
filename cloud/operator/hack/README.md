@@ -31,7 +31,13 @@ Each script is idempotent and can be run on its own, in order:
 | `04-apply-samples.sh` | Apply the fixtures in `manifests/`. |
 | `05-verify.sh` | Print the CR status, identity Secret, events, and operator logs. |
 | `06-enable-mock.sh` | Deploy the in-cluster mock and point the operator at it. |
+| `07-validate-enforcement.sh` | Assert the node-limit enforcement against the acceptance criteria. |
 | `99-teardown.sh` | Delete the cluster (`KEEP_CLUSTER=1` keeps it, removing only the release + fixtures). |
+
+The Liferay workload is created by the validation step (`e2e.sh` runs
+`01 → 02 → 03 → 04 → 07 → 05`; `07` enables the mock itself). Enforcement is
+fail-closed, so `07` first confirms the workload's create is *denied* while no
+license is known, then enables the mock and confirms the enforced-ceiling cases.
 
 Every default (cluster name, image tag, namespaces) is an overridable
 environment variable — see `lib.sh`.
@@ -87,8 +93,10 @@ with the environment's private key. With the mock returning
   CR's `desiredReplicas: 3`) and `ReplicasClamped = True`;
 - `status.phase = Ready`.
 
-Then the validating webhook has a ceiling to enforce. A scale above it is
-rejected:
+Then `07-validate-enforcement.sh` exercises the ceiling and checks each
+acceptance criterion — within-limit create/scale allowed, over-limit
+create/scale denied, and a labeled workload with no known license denied
+(fail-closed). A scale above the ceiling looks like:
 
 ```bash
 kubectl --context k3d-liferay-operator-test -n acme-prod \
@@ -96,6 +104,20 @@ kubectl --context k3d-liferay-operator-test -n acme-prod \
 # Error ... admission webhook "vstatefulsetscale.licensing.liferay.com" denied
 # the request: replicas 5 exceeds licensed maxClusterNodes 2 ...
 ```
+
+### Enforcement model
+
+Enforcement is **fail-closed**: for a workload governed by a `LiferayEnvironment`,
+the webhook denies whenever it cannot confirm the ceiling (license not yet
+activated, or a lookup error). To keep that safe, the webhook is scoped by a
+`namespaceSelector` to namespaces labeled
+`licensing.liferay.com/enforce-node-limit: "true"` — so a webhook outage can only
+affect Liferay environment namespaces, never StatefulSets elsewhere. A
+`namespaceSelector` (not `objectSelector`) is required because the `scale`
+subresource admits a `Scale` object that does not carry the StatefulSet's labels.
+The Liferay environment namespace must carry the label (the test fixture in
+`manifests/00-namespace.yaml` does). A StatefulSet in the namespace that no
+`LiferayEnvironment` references is not a licensed workload and is allowed.
 
 To run the mock server directly on your host instead (e.g. for quick iteration):
 

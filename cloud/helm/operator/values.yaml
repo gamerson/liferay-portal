@@ -49,5 +49,15 @@ webhook:
     # revisit with cert-manager when webhooks proliferate on CNE.
     certificateValidityDays: 3650
     enabled: true
-    failurePolicy: Ignore
+    # Fail-closed (AC #6): if the ceiling cannot be confirmed, deny. Safe only
+    # because namespaceSelector scopes the webhook to Liferay environment
+    # namespaces, so an operator outage cannot freeze StatefulSets elsewhere.
+    failurePolicy: Fail
+    # Only namespaces carrying this label are subject to enforcement. The Liferay
+    # environment namespace must set it. namespaceSelector (not objectSelector)
+    # is required so the scale subresource is covered — the Scale object does not
+    # carry the StatefulSet's labels.
+    namespaceSelector:
+        matchLabels:
+            licensing.liferay.com/enforce-node-limit: "true"
     port: 9443

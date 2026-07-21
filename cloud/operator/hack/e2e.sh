@@ -14,6 +14,7 @@ require_cmd k3d docker kubectl helm
 "${HACK_DIR}/02-build-load.sh"
 "${HACK_DIR}/03-install.sh"
 "${HACK_DIR}/04-apply-samples.sh"
+"${HACK_DIR}/07-validate-enforcement.sh"
 "${HACK_DIR}/05-verify.sh"
 
 log "Done. Inspect with kubectl (context ${KUBE_CONTEXT}); tear down with 99-teardown.sh."

@@ -1,4 +1,9 @@
 apiVersion: v1
 kind: Namespace
 metadata:
+    labels:
+        # Marks this as a Liferay environment namespace; the validating webhook's
+        # namespaceSelector matches it, so StatefulSet create/scale here is gated
+        # against the licensed ceiling.
+        licensing.liferay.com/enforce-node-limit: "true"
     name: acme-prod

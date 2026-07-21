@@ -292,17 +292,30 @@ Two complementary mechanisms, because they cover different threats:
    surplus JVM (which would fail license validation on start) is removed
    gracefully rather than crash-looping.
 2. **Validating admission webhook (prevention).** A `ValidatingWebhookConfiguration`
-   intercepts updates to the workload's `scale` subresource and its
-   `spec.replicas`. If the requested count exceeds the current
-   `maxClusterNodes` (read from the CR status or a mirrored ConfigMap), the
-   webhook **rejects** the request with an explanatory message:
-   `replicas 5 exceeds licensed maxClusterNodes 3`. This stops a human
-   `kubectl scale` at the door, before the N+1 pod is ever scheduled.
+   intercepts **create and update** of the workload and its `scale` subresource.
+   If the requested count exceeds the current `maxClusterNodes` (read from the CR
+   status), the webhook **rejects** the request with an explanatory message:
+   `replicas 5 exceeds licensed maxClusterNodes 2`. This stops both a fresh
+   over-licensed deploy and a human `kubectl scale` at the door, before the N+1
+   pod is ever scheduled.
 
-The webhook needs a serving certificate; use cert-manager or the operator's own
-self-signed CA rotated on a timer. The webhook must **fail-open on its own
-outage** (a `failurePolicy: Ignore` with alerting) so a broken webhook can't
-freeze all scaling of the workload — the reconcile clamp remains the backstop.
+The webhook is **fail-closed** (`failurePolicy: Fail`): for a StatefulSet governed
+by a `LiferayEnvironment`, if it cannot confirm the ceiling — license not yet
+activated or a lookup error — it **denies** the request rather than letting the
+workload proceed possibly over-licensed. A StatefulSet that no `LiferayEnvironment`
+references is not a licensed workload and is allowed. Fail-closed is only safe
+because the webhook is scoped by a `namespaceSelector` to namespaces labeled
+`licensing.liferay.com/enforce-node-limit: "true"`: a webhook or operator outage
+can therefore freeze only Liferay environment namespaces, never StatefulSets
+elsewhere. A `namespaceSelector` (not `objectSelector`) is required because the
+`scale` subresource admits a `Scale` object that does not carry the StatefulSet's
+labels. The Liferay environment namespace carries the label.
+
+The webhook needs a serving certificate; the chart currently generates a
+self-signed one (revisit with cert-manager). Because fail-closed makes the
+webhook's availability load-bearing, a longer-term option worth weighing is a
+`ValidatingAdmissionPolicy` (CEL, evaluated in-process by the API server, no pod
+or cert to fail).
 
 Workload kind: the Liferay cluster runs as a **StatefulSet** for stable per-node
 identity. The agent references it via `workloadRef` and touches only the replica
@@ -364,6 +377,13 @@ The agent delivers truth; it does not unilaterally disable Liferay. Principles:
 - **De-provisioning:** removed entitlements are log-only in the first release.
 - **Environment model:** one environment = one namespace = one CR; the
   prod/non-prod `activationCode` is injected as the referenced Secret.
+- **Enforcement (per epic LCD-52024 AC):** the admission webhook is
+  **fail-closed** on create and update, scoped by `namespaceSelector` to Liferay
+  environment namespaces labeled `licensing.liferay.com/enforce-node-limit:
+  "true"` (a `namespaceSelector` is required so the `scale` subresource is
+  covered). The licensed ceiling is sourced from the provisioning `entitlements`
+  response (`maxClusterNodes`) via CR status — the agent does not parse the
+  license XML (product to confirm this satisfies AC #1).
 
 ## Open Decisions (need your call)
 

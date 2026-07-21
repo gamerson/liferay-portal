@@ -11,7 +11,7 @@ webhooks:
       name: webhook-service
       namespace: system
       path: /validate-apps-v1-statefulset
-  failurePolicy: Ignore
+  failurePolicy: Fail
   name: vstatefulsetscale.licensing.liferay.com
   rules:
   - apiGroups:
@@ -19,6 +19,7 @@ webhooks:
     apiVersions:
     - v1
     operations:
+    - CREATE
     - UPDATE
     resources:
     - statefulsets
