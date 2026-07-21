@@ -94,7 +94,7 @@ flowchart TB
         ACTSEC[("Secret:<br/>activationCode")]
         LICSEC[("Secret:<br/>licenseXML")]
         PVC[("RWX PVC:<br/>.lpkg artifacts")]
-        subgraph wl["Liferay workload (StatefulSet/Deployment)"]
+        subgraph wl["Liferay workload (StatefulSet)"]
             direction LR
             P1["Liferay pod<br/>+ sync sidecar"]
             P2["Liferay pod<br/>+ sync sidecar"]
@@ -111,7 +111,7 @@ flowchart TB
     REC -->|download JWT| MKT
     REC -->|write licenseXML| LICSEC
     REC -->|write .lpkg| PVC
-    REC -->|clamp replicas| wl
+    REC -->|replica count valid| wl
     WH -.->|reject scale > max| wl
     LICSEC -.->|mounted| P1 & P2
     PVC -.->|mounted| P1 & P2
@@ -125,7 +125,7 @@ flowchart TB
   single source of observed status.
 - **Reconciler** — a Go / Kubebuilder (controller-runtime) reconcile loop.
   Handles activation, the entitlements heartbeat, license/app reconciliation, and
-  replica clamping.
+  replica count validation.
 - **Validating admission webhook** — rejects `Scale` subresource updates and
   spec edits that push replicas above the current `maxClusterNodes`.
 - **Cluster-keypair Secret** — agent-generated, agent-only RBAC.
@@ -154,7 +154,7 @@ spec:
   workloadRef:                                # what the agent scales/enforces
     kind: StatefulSet
     name: liferay-dxp
-  desiredReplicas: 3                           # operator intent; clamped to max
+  desiredReplicas: 3                           # operator intent; cannot exceed max
   dxpVersion: ""                               # optional override; else derived
   heartbeatInterval: 10m
 status:
@@ -175,7 +175,7 @@ status:
   conditions:
     - type: Activated       status: "True"
     - type: LicenseValid    status: "True"
-    - type: ReplicasClamped status: "False"    # True when desired > max
+    - type: ReplicasCountValid status: "False"    # True when desired > max
     - type: ProvisioningReachable status: "True"
 ```
 
@@ -212,7 +212,7 @@ sequenceDiagram
     alt 200
         R->>K: write licenseXML to Secret if checksum changed
         R->>R: reconcile replicas = min(desired, maxClusterNodes)
-        R->>K: patch workload replicas; set ReplicasClamped
+        R->>K: patch workload replicas; set ReplicasCountValid
         loop each app not already Deployed
             R->>M: POST download (JWT{envId, virtualEntryId})
             M-->>R: app.lpkg
@@ -285,9 +285,9 @@ one is available.
 
 Two complementary mechanisms, because they cover different threats:
 
-1. **Reconcile-time clamp (correctness).** The reconciler always sets the
+1. **Reconcile-time (correctness).** The reconciler always sets the
    workload's replicas to `min(spec.desiredReplicas, maxClusterNodes)` and
-   reports `ReplicasClamped`. If a heartbeat *lowers* `maxClusterNodes` below the
+   reports `ReplicasCountValid`. If a heartbeat *lowers* `maxClusterNodes` below the
    running count, the agent scales the workload **down** to the new max so the
    surplus JVM (which would fail license validation on start) is removed
    gracefully rather than crash-looping.
@@ -313,7 +313,7 @@ labels. The Liferay environment namespace carries the label.
 
 The webhook needs a serving certificate; the chart currently generates a
 self-signed one (revisit with cert-manager). Because fail-closed makes the
-webhook's availability load-bearing, a longer-term option worth weighing is a
+webhook's availability critical path, a longer-term option worth weighing is a
 `ValidatingAdmissionPolicy` (CEL, evaluated in-process by the API server, no pod
 or cert to fail).
 
@@ -402,7 +402,7 @@ The agent delivers truth; it does not unilaterally disable Liferay. Principles:
    a Secret; status/conditions. (No pod wiring yet — validate the API contract
    end to end against a provisioning sandbox.)
 2. Sync sidecar + init container; license reaches `deploy/` and produces a `.LI`.
-3. Replica clamp in the reconciler; then the validating admission webhook.
+3. Replica Count Valid in the reconciler; then the validating admission webhook.
 4. Marketplace app download to the artifact PVC + sidecar propagation.
 5. Failure/grace hardening, NetworkPolicy, RBAC tightening, alerting on
    conditions.
