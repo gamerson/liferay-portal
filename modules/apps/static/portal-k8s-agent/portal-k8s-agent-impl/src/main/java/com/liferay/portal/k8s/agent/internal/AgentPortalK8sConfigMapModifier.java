@@ -8,7 +8,6 @@ package com.liferay.portal.k8s.agent.internal;
 import com.liferay.osgi.util.configuration.ConfigurationFactoryUtil;
 import com.liferay.petra.lang.SafeCloseable;
 import com.liferay.petra.string.StringBundler;
-import com.liferay.petra.string.StringPool;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.configuration.persistence.InMemoryOnlyConfigurationThreadLocal;
 import com.liferay.portal.k8s.agent.PortalK8sConfigMapModifier;
@@ -16,6 +15,7 @@ import com.liferay.portal.k8s.agent.configuration.PortalK8sAgentConfiguration;
 import com.liferay.portal.k8s.agent.custodian.VirtualInstanceCustodian;
 import com.liferay.portal.k8s.agent.internal.thread.local.AgentPortalK8sThreadLocal;
 import com.liferay.portal.k8s.agent.internal.util.ConfigurationUtil;
+import com.liferay.portal.k8s.agent.internal.util.KubernetesClientConfigUtil;
 import com.liferay.portal.k8s.agent.mutator.PortalK8sConfigurationPropertiesMutator;
 import com.liferay.portal.kernel.cluster.ClusterExecutor;
 import com.liferay.portal.kernel.cluster.ClusterMasterExecutor;
@@ -23,14 +23,12 @@ import com.liferay.portal.kernel.cluster.ClusterNode;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
-import com.liferay.portal.kernel.util.Http;
 import com.liferay.portal.kernel.util.Validator;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import io.fabric8.kubernetes.api.model.ConfigMapList;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
-import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.informers.ResourceEventHandler;
@@ -54,6 +52,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
 import org.apache.felix.configurator.impl.json.JSONUtil;
+import org.apache.felix.configurator.impl.model.Config;
 import org.apache.felix.configurator.impl.model.ConfigurationFile;
 
 import org.osgi.framework.Bundle;
@@ -117,7 +116,7 @@ public class AgentPortalK8sConfigMapModifier
 			Executors.newSingleThreadScheduledExecutor();
 
 		_kubernetesClient = new DefaultKubernetesClient(
-			_toConfig(_portalK8sAgentConfiguration));
+			KubernetesClientConfigUtil.toConfig(_portalK8sAgentConfiguration));
 
 		_sharedIndexInformer = _toSharedIndexInformer(
 			_kubernetesClient, _portalK8sAgentConfiguration);
@@ -316,8 +315,7 @@ public class AgentPortalK8sConfigMapModifier
 	}
 
 	private String _getVirtualInstancePid(
-		org.apache.felix.configurator.impl.model.Config config,
-		String virtualInstanceId) {
+		Config config, String virtualInstanceId) {
 
 		String pid = config.getPid();
 
@@ -544,9 +542,7 @@ public class AgentPortalK8sConfigMapModifier
 		return Result.CREATED;
 	}
 
-	private void _processConfiguration(
-			org.apache.felix.configurator.impl.model.Config config,
-			ObjectMeta objectMeta)
+	private void _processConfiguration(Config config, ObjectMeta objectMeta)
 		throws Exception {
 
 		Map<String, String> labels = _getMap(objectMeta.getLabels());
@@ -666,9 +662,7 @@ public class AgentPortalK8sConfigMapModifier
 			return;
 		}
 
-		for (org.apache.felix.configurator.impl.model.Config config :
-				configurationFile.getConfigurations()) {
-
+		for (Config config : configurationFile.getConfigurations()) {
 			try {
 				_processConfiguration(config, configMap.getMetadata());
 			}
@@ -742,38 +736,6 @@ public class AgentPortalK8sConfigMapModifier
 		finally {
 			_lock.unlock();
 		}
-	}
-
-	private Config _toConfig(
-		PortalK8sAgentConfiguration portalK8sAgentConfiguration) {
-
-		Config config = Config.empty();
-
-		Map<Integer, String> errorMessages = config.getErrorMessages();
-
-		errorMessages.put(401, _ERROR_MESSAGE);
-		errorMessages.put(403, _ERROR_MESSAGE);
-
-		config.setCaCertData(portalK8sAgentConfiguration.caCertData());
-
-		String protocol = Http.HTTP;
-
-		if (portalK8sAgentConfiguration.apiServerSSL()) {
-			protocol = Http.HTTPS;
-		}
-
-		config.setMasterUrl(
-			StringBundler.concat(
-				protocol, Http.PROTOCOL_DELIMITER,
-				portalK8sAgentConfiguration.apiServerHost(), StringPool.COLON,
-				portalK8sAgentConfiguration.apiServerPort(), StringPool.SLASH));
-
-		config.setNamespace(portalK8sAgentConfiguration.namespace());
-		config.setOauthToken(portalK8sAgentConfiguration.saToken());
-
-		Config.configFromSysPropsOrEnvVars(config);
-
-		return config;
 	}
 
 	private SharedIndexInformer<ConfigMap> _toSharedIndexInformer(
@@ -971,10 +933,6 @@ public class AgentPortalK8sConfigMapModifier
 			}
 		}
 	}
-
-	private static final String _ERROR_MESSAGE =
-		"Configured service account does not have access. Service account " +
-			"may have been revoked.";
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		AgentPortalK8sConfigMapModifier.class);
