@@ -10,7 +10,7 @@ function main {
 
 	local script
 
-	script="$(cd "$(dirname "${0}")/.." && pwd)/setup_k3d.sh"
+	script="$(cd "$(dirname "${0}")/../dev" && pwd)/setup_k3d.sh"
 
 	_run_test "${script}" _test_aborts_with_missing_required_utility
 	_run_test "${script}" _test_aborts_with_no_arguments

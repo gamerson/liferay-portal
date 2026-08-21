@@ -20,19 +20,19 @@ _K3S_IMAGE="rancher/k3s:v1.31.4-k3s1"
 
 _OPERATOR_IMAGE_REPOSITORY="liferay/liferay-dxp-operator"
 
-_OPERATOR_IMAGE_TAG="k3d"
+_OPERATOR_IMAGE_TAG="dev"
 
 _OPERATOR_NAMESPACE="liferay-system"
 
 _PROVISIONING_MOCK_IMAGE_REPOSITORY="liferay/provisioning-mock"
 
-_PROVISIONING_MOCK_IMAGE_TAG="k3d"
+_PROVISIONING_MOCK_IMAGE_TAG="dev"
 
 _REPOSITORY_URL="git://gitserver.liferay-cne.svc.cluster.local:9418/environment.git"
 
-_SCRIPTS_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+_DEV_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 
-_ROOT_CLOUD_DIR=$(cd "${_SCRIPTS_DIR}/.." && pwd)
+_ROOT_CLOUD_DIR=$(cd "${_DEV_DIR}/../.." && pwd)
 
 function main {
 	if [[ "${BASH_SOURCE[0]}" != "${0}" ]]
@@ -480,7 +480,7 @@ function _print_next_steps {
 	echo ""
 	echo "The cluster is ready. Drive the licensing scenarios with the regression suite."
 	echo ""
-	echo "    ${_SCRIPTS_DIR}/tests/licensing_conflicts_test.sh"
+	echo "    ${_ROOT_CLOUD_DIR}/scripts/tests/licensing_conflicts_test.sh"
 	echo ""
 	echo "Open the ArgoCD console with the following, then log in as admin."
 	echo ""

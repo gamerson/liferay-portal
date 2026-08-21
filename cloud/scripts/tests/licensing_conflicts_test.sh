@@ -4,14 +4,14 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-source "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/setup_k3d.sh"
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../dev" && pwd)/setup_k3d.sh"
 
 function main {
 	_check_utils kubectl
 
 	if ! _environment_is_ready
 	then
-		echo "The environment is not ready. Run cloud/scripts/setup_k3d.sh up first." >&2
+		echo "The environment is not ready. Run cloud/scripts/dev/setup_k3d.sh up first." >&2
 
 		exit 1
 	fi
