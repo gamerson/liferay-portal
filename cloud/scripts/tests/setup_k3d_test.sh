@@ -37,8 +37,8 @@ function _assert_aborts_with {
 	local result
 
 	result=$(_run_setup_k3d_test "${@}")
-	exit_code=$(echo "${result}" | head -n 1)
-	output=$(echo "${result}" | tail -n +2)
+	exit_code=$(echo "${result}" | head --lines=1)
+	output=$(echo "${result}" | tail --lines=+2)
 
 	if [[ "${exit_code}" -ne 0 ]] && [[ ${output} == *"${expected}"* ]]
 	then

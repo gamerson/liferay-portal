@@ -33,14 +33,12 @@ function main {
 		return 0
 	fi
 
-	cat << EOF
-
-Both known conflicts are expected to fail until their fixes land. The operator
-one fails because the operator writes the workload before it persists the status
-that its own admission policy reads, so a restored license never takes effect.
-The ArgoCD one fails because the policy denies every over-limit write, so a
-repository that asks for more replicas than the license allows can never sync.
-EOF
+	echo ""
+	echo "Both known conflicts are expected to fail until their fixes land. The operator"
+	echo "one fails because the operator writes the workload before it persists the status"
+	echo "that its own admission policy reads, so a restored license never takes effect."
+	echo "The ArgoCD one fails because the policy denies every over-limit write, so a"
+	echo "repository that asks for more replicas than the license allows can never sync."
 
 	return 1
 }

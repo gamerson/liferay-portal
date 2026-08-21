@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 set -o errexit
-set -o errtrace
 set -o nounset
 set -o pipefail
 
@@ -481,32 +480,30 @@ function _kubectl {
 function _print_next_steps {
 	local password=$(_kubectl get secret argocd-initial-admin-secret --namespace "${_ARGOCD_NAMESPACE}" --output jsonpath="{.data.password}" | base64 --decode)
 
-	cat << EOF
-
-The cluster is ready. Drive the licensing scenarios with the regression suite.
-
-    ${_SCRIPTS_DIR}/tests/licensing_conflicts_test.sh
-
-Open the ArgoCD console with the following, then log in as admin.
-
-    kubectl --context k3d-${_CLUSTER_NAME} --namespace ${_ARGOCD_NAMESPACE} port-forward svc/argocd-server 8090:80
-
-    Password: ${password}
-
-Reseed the GitOps repository from the working tree, or tear the cluster down.
-
-    ${0} seed
-    ${0} down
-
-Two things are expected rather than broken. The LiferayEnvironment stays
-OutOfSync, because the chart renders spec.marketplaceVolume and the CRD no
-longer declares it, so the API server prunes the field on every sync. The
-workload also runs a pause image rather than DXP, since a replica conflict only
-needs the StatefulSet write to be admitted or denied.
-
-This script installs the operator itself, so do not run tilt up against the
-same cluster. Use cloud/operator/tilt_up.sh on its own cluster instead.
-EOF
+	echo ""
+	echo "The cluster is ready. Drive the licensing scenarios with the regression suite."
+	echo ""
+	echo "    ${_SCRIPTS_DIR}/tests/licensing_conflicts_test.sh"
+	echo ""
+	echo "Open the ArgoCD console with the following, then log in as admin."
+	echo ""
+	echo "    kubectl --context k3d-${_CLUSTER_NAME} --namespace ${_ARGOCD_NAMESPACE} port-forward svc/argocd-server 8090:80"
+	echo ""
+	echo "    Password: ${password}"
+	echo ""
+	echo "Reseed the GitOps repository from the working tree, or tear the cluster down."
+	echo ""
+	echo "    ${0} seed"
+	echo "    ${0} down"
+	echo ""
+	echo "Two things are expected rather than broken. The LiferayEnvironment stays"
+	echo "OutOfSync, because the chart renders spec.marketplaceVolume and the CRD no"
+	echo "longer declares it, so the API server prunes the field on every sync. The"
+	echo "workload also runs a pause image rather than DXP, since a replica conflict"
+	echo "only needs the StatefulSet write to be admitted or denied."
+	echo ""
+	echo "This script installs the operator itself, so do not run tilt up against the"
+	echo "same cluster. Use cloud/operator/tilt_up.sh on its own cluster instead."
 }
 
 function _print_status {
@@ -542,18 +539,16 @@ function _print_status {
 }
 
 function _print_usage {
-	cat << EOF >&2
-Usage: ${0} <command>
-
-Commands:
-    down    Delete the k3d cluster
-    seed    Push the working tree's chart to the GitOps repository
-    status  Report the environment, workload, and sync state
-    up      Create the cluster and everything in it
-
-Environment variables:
-    LIFERAY_K3D_CLUSTER_NAME  The k3d cluster name, ${_CLUSTER_NAME} by default
-EOF
+	echo "Usage: ${0} <command>" >&2
+	echo "" >&2
+	echo "Commands:" >&2
+	echo "    down    Delete the k3d cluster" >&2
+	echo "    seed    Push the working tree's chart to the GitOps repository" >&2
+	echo "    status  Report the environment, workload, and sync state" >&2
+	echo "    up      Create the cluster and everything in it" >&2
+	echo "" >&2
+	echo "Environment variables:" >&2
+	echo "    LIFERAY_K3D_CLUSTER_NAME  The k3d cluster name, ${_CLUSTER_NAME} by default" >&2
 }
 
 function _provisioning_mock_source {
