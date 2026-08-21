@@ -379,13 +379,6 @@ spec:
 EOF
 
 	_kubectl --namespace "${_HARNESS_NAMESPACE}" rollout status deploy/gitserver --timeout=5m
-
-	_kubectl \
-		wait pod \
-		--for=condition=Ready \
-		--namespace "${_HARNESS_NAMESPACE}" \
-		--selector app=gitserver \
-		--timeout=5m
 }
 
 function _install_operator {
