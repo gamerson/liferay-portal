@@ -14,7 +14,7 @@ _ENVIRONMENT_NAME="liferay-default"
 
 _ENVIRONMENT_NAMESPACE="liferay-dev"
 
-_HARNESS_NAMESPACE="liferay-cne"
+_MOCK_NAMESPACE="liferay-cne"
 
 _OPERATOR_IMAGE_REPOSITORY="liferay/liferay-dxp-operator"
 
@@ -26,7 +26,7 @@ _PROVISIONING_MOCK_IMAGE_REPOSITORY="liferay/provisioning-mock"
 
 _PROVISIONING_MOCK_IMAGE_TAG="dev"
 
-_REPOSITORY_URL="git://gitserver.liferay-cne.svc.cluster.local:9418/environment.git"
+_REPOSITORY_URL="git://gitserver.${_MOCK_NAMESPACE}.svc.cluster.local:9418/environment.git"
 
 _DEV_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 
@@ -274,7 +274,7 @@ function _gitserver_pod {
 	_kubectl \
 		get pod \
 		--field-selector status.phase=Running \
-		--namespace "${_HARNESS_NAMESPACE}" \
+		--namespace "${_MOCK_NAMESPACE}" \
 		--output jsonpath="{.items[0].metadata.name}" \
 		--selector app=gitserver
 }
@@ -300,14 +300,14 @@ function _install_argocd {
 function _install_git_server {
 	echo "Installing the in-cluster git server that stands in for the GitOps repository."
 
-	_kubectl create namespace "${_HARNESS_NAMESPACE}" --dry-run=client --output yaml | _kubectl apply --filename -
+	_kubectl create namespace "${_MOCK_NAMESPACE}" --dry-run=client --output yaml | _kubectl apply --filename -
 
 	_kubectl apply --filename - << EOF
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
     name: gitserver
-    namespace: ${_HARNESS_NAMESPACE}
+    namespace: ${_MOCK_NAMESPACE}
 spec:
     accessModes:
         -   ReadWriteOnce
@@ -320,7 +320,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
     name: gitserver
-    namespace: ${_HARNESS_NAMESPACE}
+    namespace: ${_MOCK_NAMESPACE}
 spec:
     replicas: 1
     selector:
@@ -363,7 +363,7 @@ apiVersion: v1
 kind: Service
 metadata:
     name: gitserver
-    namespace: ${_HARNESS_NAMESPACE}
+    namespace: ${_MOCK_NAMESPACE}
 spec:
     ports:
         -   name: git
@@ -373,7 +373,7 @@ spec:
         app: gitserver
 EOF
 
-	_kubectl --namespace "${_HARNESS_NAMESPACE}" rollout status deploy/gitserver --timeout=5m
+	_kubectl --namespace "${_MOCK_NAMESPACE}" rollout status deploy/gitserver --timeout=5m
 }
 
 function _install_operator {
@@ -411,7 +411,7 @@ EOF
 		--set marketplace.claimName=marketplace \
 		--set marketplace.enabled=true \
 		--set podSecurityContext.fsGroup=65532 \
-		--set "provisioning.baseURL=http://provisioning-mock.${_HARNESS_NAMESPACE}.svc.cluster.local:8080" \
+		--set "provisioning.baseURL=http://provisioning-mock.${_MOCK_NAMESPACE}.svc.cluster.local:8080" \
 		--set retry.maxDelay=1m \
 		--timeout 5m \
 		--wait
@@ -427,7 +427,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
     name: provisioning-mock
-    namespace: ${_HARNESS_NAMESPACE}
+    namespace: ${_MOCK_NAMESPACE}
 spec:
     replicas: 1
     selector:
@@ -450,7 +450,7 @@ apiVersion: v1
 kind: Service
 metadata:
     name: provisioning-mock
-    namespace: ${_HARNESS_NAMESPACE}
+    namespace: ${_MOCK_NAMESPACE}
 spec:
     ports:
         -   name: http
@@ -460,9 +460,9 @@ spec:
         app: provisioning-mock
 EOF
 
-	_kubectl --namespace "${_HARNESS_NAMESPACE}" rollout restart deploy/provisioning-mock
+	_kubectl --namespace "${_MOCK_NAMESPACE}" rollout restart deploy/provisioning-mock
 
-	_kubectl --namespace "${_HARNESS_NAMESPACE}" rollout status deploy/provisioning-mock --timeout=5m
+	_kubectl --namespace "${_MOCK_NAMESPACE}" rollout status deploy/provisioning-mock --timeout=5m
 }
 
 function _kubectl {
@@ -561,7 +561,7 @@ function _seed_git_repository {
 
 	local pod=$(_gitserver_pod)
 
-	_kubectl --namespace "${_HARNESS_NAMESPACE}" exec "${pod}" -- sh -c '
+	_kubectl --namespace "${_MOCK_NAMESPACE}" exec "${pod}" -- sh -c '
 		if [ ! -d /srv/git/environment.git ]
 		then
 			git init --bare --initial-branch=main --quiet /srv/git/environment.git
@@ -569,11 +569,11 @@ function _seed_git_repository {
 
 		rm -rf /srv/git/seed && mkdir -p /srv/git/seed'
 
-	_kubectl cp "${temporary_dir}/." "${_HARNESS_NAMESPACE}/${pod}:/srv/git/seed"
+	_kubectl cp "${temporary_dir}/." "${_MOCK_NAMESPACE}/${pod}:/srv/git/seed"
 
 	rm --force --recursive "${temporary_dir}"
 
-	_kubectl --namespace "${_HARNESS_NAMESPACE}" exec "${pod}" -- sh -c '
+	_kubectl --namespace "${_MOCK_NAMESPACE}" exec "${pod}" -- sh -c '
 		cd /srv/git/seed
 
 		git init --initial-branch=main --quiet

@@ -68,7 +68,7 @@ function _assert_the_ceiling_is_restored {
 }
 
 function _configure_license {
-	_kubectl --namespace "${_HARNESS_NAMESPACE}" exec deploy/provisioning-mock -- \
+	_kubectl --namespace "${_MOCK_NAMESPACE}" exec deploy/provisioning-mock -- \
 		wget \
 			-O - \
 			--post-data "${1}" \
@@ -151,7 +151,7 @@ function _set_desired_replicas {
 
 	local pod=$(_gitserver_pod)
 
-	_kubectl --namespace "${_HARNESS_NAMESPACE}" exec "${pod}" -- sh -c "
+	_kubectl --namespace "${_MOCK_NAMESPACE}" exec "${pod}" -- sh -c "
 		cd /srv/git/seed
 
 		sed -i 's/^replicaCount: .*/replicaCount: ${count}/' chart/values-k3d.yaml
