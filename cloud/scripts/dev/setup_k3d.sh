@@ -16,8 +16,6 @@ _ENVIRONMENT_NAMESPACE="liferay-dev"
 
 _HARNESS_NAMESPACE="liferay-cne"
 
-_K3S_IMAGE="rancher/k3s:v1.31.4-k3s1"
-
 _OPERATOR_IMAGE_REPOSITORY="liferay/liferay-dxp-operator"
 
 _OPERATOR_IMAGE_TAG="dev"
@@ -186,10 +184,7 @@ function _create_cluster {
 	then
 		echo "Creating the k3d cluster ${_CLUSTER_NAME}."
 
-		k3d cluster create "${_CLUSTER_NAME}" \
-			--image "${_K3S_IMAGE}" \
-			--kubeconfig-switch-context=false \
-			--wait
+		k3d cluster create "${_CLUSTER_NAME}" --kubeconfig-switch-context=false --wait
 
 		return
 	fi
