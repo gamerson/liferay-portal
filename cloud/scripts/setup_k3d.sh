@@ -8,13 +8,13 @@ _ARGOCD_CHART_VERSION="9.5.16"
 
 _ARGOCD_NAMESPACE="argocd"
 
-_CLUSTER_NAME=${LIFERAY_K3D_CLUSTER_NAME:-liferay-repro}
+_CLUSTER_NAME=${LIFERAY_K3D_CLUSTER_NAME:-cne}
 
 _ENVIRONMENT_NAME="liferay-default"
 
 _ENVIRONMENT_NAMESPACE="liferay-dev"
 
-_HARNESS_NAMESPACE="liferay-repro"
+_HARNESS_NAMESPACE="liferay-cne"
 
 _K3S_IMAGE="rancher/k3s:v1.31.4-k3s1"
 
@@ -24,7 +24,7 @@ _OPERATOR_IMAGE_TAG="k3d"
 
 _OPERATOR_NAMESPACE="liferay-system"
 
-_REPOSITORY_URL="git://gitserver.liferay-repro.svc.cluster.local:9418/environment.git"
+_REPOSITORY_URL="git://gitserver.liferay-cne.svc.cluster.local:9418/environment.git"
 
 _SCRIPTS_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 
