@@ -14,7 +14,7 @@ _ENVIRONMENT_NAME="liferay-default"
 
 _ENVIRONMENT_NAMESPACE="liferay-dev"
 
-_MOCK_NAMESPACE="liferay-cne"
+_MOCK_NAMESPACE="liferay-mock"
 
 _OPERATOR_IMAGE_REPOSITORY="liferay/liferay-dxp-operator"
 
