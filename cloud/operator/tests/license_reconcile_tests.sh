@@ -4,14 +4,14 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../dev" && pwd)/setup_k3d.sh"
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/setup_test_harness.sh"
 
 function main {
 	_check_utils kubectl
 
 	if ! _environment_is_ready
 	then
-		echo "The environment is not ready. Run cloud/scripts/dev/setup_k3d.sh up first." >&2
+		echo "The environment is not ready. Run cloud/operator/tests/setup_test_harness.sh up first." >&2
 
 		exit 1
 	fi
@@ -171,7 +171,7 @@ function _sync_environment {
 	_kubectl \
 		patch application "${_ENVIRONMENT_NAMESPACE}" \
 		--namespace "${_ARGOCD_NAMESPACE}" \
-		--patch '{"operation": {"initiatedBy": {"username": "licensing_conflicts_test"}, "sync": {"revision": "main"}}}' \
+		--patch '{"operation": {"initiatedBy": {"username": "license_reconcile_tests"}, "sync": {"revision": "main"}}}' \
 		--type merge &> /dev/null || true
 }
 

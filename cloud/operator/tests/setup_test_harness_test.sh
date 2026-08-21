@@ -10,7 +10,7 @@ function main {
 
 	local script
 
-	script="$(cd "$(dirname "${0}")/../dev" && pwd)/setup_k3d.sh"
+	script="$(cd "$(dirname "${0}")" && pwd)/setup_test_harness.sh"
 
 	_run_test "${script}" _test_aborts_with_missing_required_utility
 	_run_test "${script}" _test_aborts_with_no_arguments
@@ -36,7 +36,7 @@ function _assert_aborts_with {
 	local output
 	local result
 
-	result=$(_run_setup_k3d_test "${@}")
+	result=$(_run_setup_test_harness_test "${@}")
 	exit_code=$(echo "${result}" | head --lines=1)
 	output=$(echo "${result}" | tail --lines=+2)
 
@@ -80,7 +80,7 @@ EOF
 	echo "${stub_dir}"
 }
 
-function _run_setup_k3d_test {
+function _run_setup_test_harness_test {
 	local script=${1}
 	local utility_to_remove=${2}
 

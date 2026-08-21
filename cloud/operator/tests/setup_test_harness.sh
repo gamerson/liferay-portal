@@ -28,9 +28,9 @@ _PROVISIONING_MOCK_IMAGE_TAG="dev"
 
 _REPOSITORY_URL="git://gitserver.${_MOCK_NAMESPACE}.svc.cluster.local:9418/environment.git"
 
-_DEV_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+_TESTS_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 
-_ROOT_CLOUD_DIR=$(cd "${_DEV_DIR}/../.." && pwd)
+_ROOT_CLOUD_DIR=$(cd "${_TESTS_DIR}/../.." && pwd)
 
 function main {
 	if [[ "${BASH_SOURCE[0]}" != "${0}" ]]
@@ -475,7 +475,7 @@ function _print_next_steps {
 	echo ""
 	echo "The cluster is ready. Drive the licensing scenarios with the regression suite."
 	echo ""
-	echo "    ${_ROOT_CLOUD_DIR}/scripts/tests/licensing_conflicts_test.sh"
+	echo "    ${_TESTS_DIR}/license_reconcile_tests.sh"
 	echo ""
 	echo "Open the ArgoCD console with the following, then log in as admin."
 	echo ""
