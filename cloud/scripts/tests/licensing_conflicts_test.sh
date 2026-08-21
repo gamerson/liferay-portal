@@ -69,17 +69,11 @@ function _assert_the_ceiling_is_restored {
 
 function _configure_license {
 	_kubectl --namespace "${_HARNESS_NAMESPACE}" exec deploy/provisioning-mock -- \
-		python3 -c "
-import sys, urllib.request
-
-request = urllib.request.Request(
-	'http://127.0.0.1:8080/_config',
-	data=sys.argv[1].encode(),
-	method='POST',
-)
-
-urllib.request.urlopen(request).read()
-" "${1}" > /dev/null
+		wget \
+			-O - \
+			--post-data "${1}" \
+			-q \
+			http://127.0.0.1:8080/_config > /dev/null
 
 	_nudge_environment
 }

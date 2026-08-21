@@ -1,0 +1,3 @@
+# Build output and local development helpers never belong in the operator image.
+resources/build/
+resources/dev/

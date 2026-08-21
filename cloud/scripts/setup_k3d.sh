@@ -24,6 +24,10 @@ _OPERATOR_IMAGE_TAG="k3d"
 
 _OPERATOR_NAMESPACE="liferay-system"
 
+_PROVISIONING_MOCK_IMAGE_REPOSITORY="liferay/provisioning-mock"
+
+_PROVISIONING_MOCK_IMAGE_TAG="k3d"
+
 _REPOSITORY_URL="git://gitserver.liferay-cne.svc.cluster.local:9418/environment.git"
 
 _SCRIPTS_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
@@ -139,6 +143,30 @@ EOF
 	)
 
 	k3d image import "${_OPERATOR_IMAGE_REPOSITORY}:${_OPERATOR_IMAGE_TAG}" --cluster "${_CLUSTER_NAME}"
+}
+
+function _build_provisioning_mock_image {
+	echo "Building the provisioning mock image ${_PROVISIONING_MOCK_IMAGE_REPOSITORY}:${_PROVISIONING_MOCK_IMAGE_TAG} from the working tree."
+
+	(
+		cd "${_ROOT_CLOUD_DIR}/operator/resources"
+
+		mkdir --parents build
+
+		CGO_ENABLED=0 GOOS=linux go build -o build/provisioning-mock ./dev/provisioning-mock
+
+		docker build \
+			--file - \
+			--quiet \
+			--tag "${_PROVISIONING_MOCK_IMAGE_REPOSITORY}:${_PROVISIONING_MOCK_IMAGE_TAG}" \
+			build << EOF
+FROM alpine:3
+COPY provisioning-mock /provisioning-mock
+ENTRYPOINT ["/provisioning-mock"]
+EOF
+	)
+
+	k3d image import "${_PROVISIONING_MOCK_IMAGE_REPOSITORY}:${_PROVISIONING_MOCK_IMAGE_TAG}" --cluster "${_CLUSTER_NAME}"
 }
 
 function _check_utils {
@@ -279,12 +307,12 @@ function _install_git_server {
 
 	_kubectl create namespace "${_HARNESS_NAMESPACE}" --dry-run=client --output yaml | _kubectl apply --filename -
 
-	_kubectl apply --filename - << 'EOF'
+	_kubectl apply --filename - << EOF
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
     name: gitserver
-    namespace: liferay-repro
+    namespace: ${_HARNESS_NAMESPACE}
 spec:
     accessModes:
         -   ReadWriteOnce
@@ -297,7 +325,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
     name: gitserver
-    namespace: liferay-repro
+    namespace: ${_HARNESS_NAMESPACE}
 spec:
     replicas: 1
     selector:
@@ -340,7 +368,7 @@ apiVersion: v1
 kind: Service
 metadata:
     name: gitserver
-    namespace: liferay-repro
+    namespace: ${_HARNESS_NAMESPACE}
 spec:
     ports:
         -   name: git
@@ -402,29 +430,16 @@ EOF
 }
 
 function _install_provisioning_mock {
+	_build_provisioning_mock_image
+
 	echo "Installing the provisioning mock that issues the license."
 
-	local temporary_dir
-
-	temporary_dir=$(mktemp --directory)
-
-	_provisioning_mock_source > "${temporary_dir}/provisioning_mock.py"
-
-	_kubectl \
-		create configmap provisioning-mock \
-		--dry-run=client \
-		--from-file="provisioning_mock.py=${temporary_dir}/provisioning_mock.py" \
-		--namespace "${_HARNESS_NAMESPACE}" \
-		--output yaml | _kubectl apply --filename -
-
-	rm --force --recursive "${temporary_dir}"
-
-	_kubectl apply --filename - << 'EOF'
+	_kubectl apply --filename - << EOF
 apiVersion: apps/v1
 kind: Deployment
 metadata:
     name: provisioning-mock
-    namespace: liferay-repro
+    namespace: ${_HARNESS_NAMESPACE}
 spec:
     replicas: 1
     selector:
@@ -436,29 +451,18 @@ spec:
                 app: provisioning-mock
         spec:
             containers:
-                -   command:
-                        -   python3
-                        -   -u
-                        -   /opt/provisioning_mock.py
-                    image: python:3.12-alpine
+                -   image: ${_PROVISIONING_MOCK_IMAGE_REPOSITORY}:${_PROVISIONING_MOCK_IMAGE_TAG}
+                    imagePullPolicy: Never
                     name: provisioning-mock
                     ports:
                         -   containerPort: 8080
                             name: http
-                    volumeMounts:
-                        -   mountPath: /opt/provisioning_mock.py
-                            name: source
-                            subPath: provisioning_mock.py
-            volumes:
-                -   configMap:
-                        name: provisioning-mock
-                    name: source
 ---
 apiVersion: v1
 kind: Service
 metadata:
     name: provisioning-mock
-    namespace: liferay-repro
+    namespace: ${_HARNESS_NAMESPACE}
 spec:
     ports:
         -   name: http
@@ -490,6 +494,11 @@ function _print_next_steps {
 	echo "    kubectl --context k3d-${_CLUSTER_NAME} --namespace ${_ARGOCD_NAMESPACE} port-forward svc/argocd-server 8090:80"
 	echo ""
 	echo "    Password: ${password}"
+	echo ""
+	echo "Run the provisioning mock on the host instead, and point the operator at it."
+	echo ""
+	echo "    (cd ${_ROOT_CLOUD_DIR}/operator/resources && go run ./dev/provisioning-mock)"
+	echo "    helm upgrade liferay-dxp-operator ${_ROOT_CLOUD_DIR}/helm/dxp-operator --namespace ${_OPERATOR_NAMESPACE} --reuse-values --set provisioning.baseURL=http://host.k3d.internal:8080"
 	echo ""
 	echo "Reseed the GitOps repository from the working tree, or tear the cluster down."
 	echo ""
@@ -549,121 +558,6 @@ function _print_usage {
 	echo "" >&2
 	echo "Environment variables:" >&2
 	echo "    LIFERAY_K3D_CLUSTER_NAME  The k3d cluster name, ${_CLUSTER_NAME} by default" >&2
-}
-
-function _provisioning_mock_source {
-	cat << 'EOF'
-"""A stand-in for the Liferay provisioning service, for local reproductions.
-
-Activation always succeeds. The manifest response is generated per request, so
-that the license owner defaults to the environment ID of the caller, which is
-the namespace UID the operator compares it against. POST a JSON body to
-/_config to change the ceiling, the owner, or the expiration date at runtime,
-and GET /_calls to read back every request the operator has made.
-"""
-
-import base64
-import json
-import os
-
-from http.server import BaseHTTPRequestHandler
-from http.server import ThreadingHTTPServer
-
-CALLS = []
-
-STATE = {
-	"expirationDate": "Friday, March 2, 2029 12:00:00 AM GMT",
-	"licenseOwner": None,
-	"maxClusterNodes": int(os.environ.get("MAX_CLUSTER_NODES", "3")),
-}
-
-
-def license_xml(owner):
-	return (
-		"<licenses><license>"
-		"<owner>{owner}</owner>"
-		"<expiration-date>{expiration_date}</expiration-date>"
-		"<license-type>virtual-cluster</license-type>"
-		"<max-cluster-nodes>{max_cluster_nodes}</max-cluster-nodes>"
-		"</license></licenses>"
-	).format(
-		expiration_date=STATE["expirationDate"],
-		max_cluster_nodes=STATE["maxClusterNodes"],
-		owner=owner,
-	)
-
-
-class Handler(BaseHTTPRequestHandler):
-	def do_GET(self):
-		if self.path == "/_calls":
-			self.respond(200, CALLS)
-
-			return
-
-		if self.path == "/_config":
-			self.respond(200, STATE)
-
-			return
-
-		self.respond(404, {"error": "not found"})
-
-	def do_POST(self):
-		length = int(self.headers.get("Content-Length") or 0)
-
-		body = self.rfile.read(length)
-
-		if self.path == "/_config":
-			STATE.update(json.loads(body or b"{}"))
-
-			self.respond(200, STATE)
-
-			return
-
-		segments = self.path.strip("/").split("/")
-
-		if len(segments) == 5 and segments[:3] == ["cloud", "v1", "environments"]:
-			CALLS.append({"path": self.path})
-
-			environment_id = segments[3]
-
-			if segments[4] == "activation":
-				self.respond(200, {})
-
-				return
-
-			if segments[4] == "manifest":
-				owner = STATE["licenseOwner"] or environment_id
-
-				self.respond(
-					200,
-					{
-						"add-ons": [],
-						"licenseXML": base64.b64encode(
-							license_xml(owner).encode()
-						).decode(),
-						"maxClusterNodes": STATE["maxClusterNodes"],
-					},
-				)
-
-				return
-
-		self.respond(404, {"error": "not found"})
-
-	def log_message(self, format, *args):
-		print(format % args, flush=True)
-
-	def respond(self, status, payload):
-		body = json.dumps(payload).encode()
-
-		self.send_response(status)
-		self.send_header("Content-Length", str(len(body)))
-		self.send_header("Content-Type", "application/json")
-		self.end_headers()
-		self.wfile.write(body)
-
-
-ThreadingHTTPServer(("", 8080), Handler).serve_forever()
-EOF
 }
 
 function _seed_git_repository {
