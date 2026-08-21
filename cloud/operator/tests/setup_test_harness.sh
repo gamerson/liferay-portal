@@ -14,6 +14,8 @@ _ENVIRONMENT_NAME="liferay-default"
 
 _ENVIRONMENT_NAMESPACE="liferay-dev"
 
+_K3S_IMAGE="rancher/k3s:v1.32.5-k3s1"
+
 _MOCK_NAMESPACE="liferay-mock"
 
 _OPERATOR_IMAGE_REPOSITORY="liferay/liferay-dxp-operator"
@@ -65,11 +67,11 @@ function main {
 
 			_install_git_server
 
-			_seed_git_repository
-
 			_install_provisioning_mock
 
 			_install_operator
+
+			_seed_git_repository
 
 			_create_environment
 
@@ -184,7 +186,10 @@ function _create_cluster {
 	then
 		echo "Creating the k3d cluster ${_CLUSTER_NAME}."
 
-		k3d cluster create "${_CLUSTER_NAME}" --kubeconfig-switch-context=false --wait
+		k3d cluster create "${_CLUSTER_NAME}" \
+			--image "${_K3S_IMAGE}" \
+			--kubeconfig-switch-context=false \
+			--wait
 
 		return
 	fi
@@ -422,6 +427,8 @@ function _install_provisioning_mock {
 
 	echo "Installing the provisioning mock that issues the license."
 
+	_kubectl create namespace "${_MOCK_NAMESPACE}" --dry-run=client --output yaml | _kubectl apply --filename -
+
 	_kubectl apply --filename - << EOF
 apiVersion: apps/v1
 kind: Deployment
@@ -519,20 +526,6 @@ function _print_status {
 	echo "ArgoCD application"
 
 	_kubectl get application "${_ENVIRONMENT_NAMESPACE}" --namespace "${_ARGOCD_NAMESPACE}" --output jsonpath="{.status.sync.status}{\"\t\"}{.status.operationState.phase}{\"\n\"}{.status.operationState.message}{\"\n\"}" || true
-
-	echo ""
-	echo "Operator service account exemption"
-
-	local match_conditions
-
-	match_conditions=$(_kubectl get validatingadmissionpolicy liferay-dxp-operator-statefulset-scale --output jsonpath="{.spec.matchConditions[*].name}" 2> /dev/null)
-
-	if [[ ${match_conditions} == *"exclude-operator-serviceaccount"* ]]
-	then
-		echo "Present. The operator's own replica writes bypass the policy."
-	else
-		echo "Absent. The operator's own replica writes are validated against the policy."
-	fi
 }
 
 function _print_usage {

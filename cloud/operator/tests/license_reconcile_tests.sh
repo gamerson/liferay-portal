@@ -50,9 +50,9 @@ function _application_message {
 function _assert_the_ceiling_is_restored {
 	_configure_license '{"licenseOwner": "some-other-environment-uid", "maxClusterNodes": 3}'
 
-	if ! _wait_until "the operator to block the workload" _workload_replicas_are 0
+	if ! _wait_until "the ceiling to be blocked" _licensed_ceiling_is 0
 	then
-		echo "The workload never scaled to zero, so the mismatch was never enforced."
+		echo "The ceiling is $(_licensed_ceiling), so the mismatch was never enforced."
 
 		return 1
 	fi
@@ -95,6 +95,12 @@ function _exempt_operator {
 		--reuse-values \
 		--timeout 5m \
 		--wait > /dev/null
+}
+
+function _exemption_is_present {
+	local match_conditions=$(_kubectl get validatingadmissionpolicy liferay-dxp-operator-statefulset-scale --output jsonpath="{.spec.matchConditions[*].name}" 2> /dev/null)
+
+	[[ ${match_conditions} == *"exclude-operator-serviceaccount"* ]]
 }
 
 function _licensed_ceiling {
@@ -216,11 +222,25 @@ function _test_argocd_converges_under_the_ceiling {
 function _test_operator_restores_the_ceiling_with_the_exemption {
 	_exempt_operator on
 
+	if ! _exemption_is_present
+	then
+		echo "The admission policy does not exempt the operator, so it was never restored."
+
+		return 1
+	fi
+
 	_assert_the_ceiling_is_restored
 }
 
 function _test_operator_restores_the_ceiling_without_the_exemption {
 	_exempt_operator off
+
+	if _exemption_is_present
+	then
+		echo "The admission policy still exempts the operator, so it was never removed."
+
+		return 1
+	fi
 
 	_assert_the_ceiling_is_restored
 }
