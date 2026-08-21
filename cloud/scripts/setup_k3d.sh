@@ -32,38 +32,18 @@ _SCRIPTS_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 _ROOT_CLOUD_DIR=$(cd "${_SCRIPTS_DIR}/.." && pwd)
 
 function main {
+	if [[ "${BASH_SOURCE[0]}" != "${0}" ]]
+	then
+		return
+	fi
+
 	local command=${1:-}
 
 	case "${command}" in
-		configure)
-			_check_utils kubectl
-
-			_configure_provisioning_mock "${2:-}"
-			;;
 		down)
 			_check_utils k3d
 
 			_delete_cluster
-			;;
-		exempt-operator)
-			_check_utils kubectl
-
-			_exempt_operator "${2:-}"
-			;;
-		nudge)
-			_check_utils kubectl
-
-			_nudge_environment
-			;;
-		replicas)
-			_check_utils kubectl
-
-			_set_desired_replicas "${2:-}"
-			;;
-		reproduce)
-			_check_utils kubectl
-
-			_reproduce "${2:-}"
 			;;
 		seed)
 			_check_utils git kubectl
@@ -174,35 +154,6 @@ function _check_utils {
 	done
 }
 
-function _configure_provisioning_mock {
-	local configuration=${1}
-
-	if [ -z "${configuration}" ]
-	then
-		echo "Usage: ${0} configure '<json>'" >&2
-		echo "" >&2
-		echo "Recognized keys are expirationDate, licenseOwner, and maxClusterNodes." >&2
-		echo "A null licenseOwner echoes the caller's environment ID, which matches." >&2
-
-		exit 1
-	fi
-
-	_kubectl --namespace "${_HARNESS_NAMESPACE}" exec deploy/provisioning-mock -- \
-		python3 -c "
-import json, sys, urllib.request
-
-request = urllib.request.Request(
-	'http://127.0.0.1:8080/_config',
-	data=sys.argv[1].encode(),
-	method='POST',
-)
-
-print(urllib.request.urlopen(request).read().decode())
-" "${configuration}"
-
-	_nudge_environment
-}
-
 function _create_cluster {
 	if ! k3d cluster list "${_CLUSTER_NAME}" &> /dev/null
 	then
@@ -297,39 +248,13 @@ function _environment_is_ready {
 	[[ ${phase} == "Ready" ]]
 }
 
-function _exempt_operator {
-	local state=${1}
-
-	if [[ ${state} == "off" ]]
-	then
-		echo "Removing the operator service account exemption from the admission policy."
-
-		_kubectl patch validatingadmissionpolicy liferay-dxp-operator-statefulset-scale --patch '{"spec": {"matchConditions": null}}' --type merge
-
-		return
-	fi
-
-	if [[ ${state} == "on" ]]
-	then
-		echo "Restoring the operator service account exemption from the chart."
-
-		helm upgrade \
-			--install liferay-dxp-operator "${_ROOT_CLOUD_DIR}/helm/dxp-operator" \
-			--kube-context "k3d-${_CLUSTER_NAME}" \
-			--namespace "${_OPERATOR_NAMESPACE}" \
-			--reuse-values \
-			--timeout 5m \
-			--wait > /dev/null
-
-		return
-	fi
-
-	echo "Usage: ${0} exempt-operator <on|off>" >&2
-	echo "" >&2
-	echo "Turning the exemption off restores the pre-LCD-53048 behavior, where the" >&2
-	echo "operator's own replica writes are validated against its own policy." >&2
-
-	exit 1
+function _gitserver_pod {
+	_kubectl \
+		get pod \
+		--field-selector status.phase=Running \
+		--namespace "${_HARNESS_NAMESPACE}" \
+		--output jsonpath="{.items[0].metadata.name}" \
+		--selector app=gitserver
 }
 
 function _install_argocd {
@@ -553,38 +478,14 @@ function _kubectl {
 	kubectl --context "k3d-${_CLUSTER_NAME}" "${@}"
 }
 
-function _nudge_environment {
-	_kubectl annotate liferayenvironment "${_ENVIRONMENT_NAME}" "k3d.liferay.com/nudge=$(date +%s)" --namespace "${_ENVIRONMENT_NAMESPACE}" --overwrite > /dev/null
-
-	echo "Nudged the environment; the operator reconciles it immediately."
-}
-
-function _operator_write_was_denied {
-	local log
-
-	log=$(_kubectl --namespace "${_OPERATOR_NAMESPACE}" logs deploy/liferay-dxp-operator --tail=50)
-
-	[[ ${log} == *"denied request: replicas"* ]]
-}
-
 function _print_next_steps {
-	local password
-
-	password=$(_kubectl get secret argocd-initial-admin-secret --namespace "${_ARGOCD_NAMESPACE}" --output jsonpath="{.data.password}" | base64 --decode)
+	local password=$(_kubectl get secret argocd-initial-admin-secret --namespace "${_ARGOCD_NAMESPACE}" --output jsonpath="{.data.password}" | base64 --decode)
 
 	cat << EOF
 
-The cluster is ready. Reproduce a conflict with one of the following.
+The cluster is ready. Drive the licensing scenarios with the regression suite.
 
-    ${0} reproduce argocd
-    ${0} reproduce operator
-
-Drive the license by hand instead with any of the following.
-
-    ${0} configure '{"maxClusterNodes": 1}'
-    ${0} configure '{"licenseOwner": "some-other-environment-uid"}'
-    ${0} configure '{"licenseOwner": null, "maxClusterNodes": 3}'
-    ${0} replicas 3
+    ${_SCRIPTS_DIR}/tests/licensing_conflicts_test.sh
 
 Open the ArgoCD console with the following, then log in as admin.
 
@@ -592,15 +493,16 @@ Open the ArgoCD console with the following, then log in as admin.
 
     Password: ${password}
 
-Tear the cluster down with the following.
+Reseed the GitOps repository from the working tree, or tear the cluster down.
 
+    ${0} seed
     ${0} down
 
 Two things are expected rather than broken. The LiferayEnvironment stays
 OutOfSync, because the chart renders spec.marketplaceVolume and the CRD no
 longer declares it, so the API server prunes the field on every sync. The
-workload also runs a pause image rather than DXP, since reproducing a replica
-conflict only needs the StatefulSet write to be admitted or denied.
+workload also runs a pause image rather than DXP, since a replica conflict only
+needs the StatefulSet write to be admitted or denied.
 
 This script installs the operator itself, so do not run tilt up against the
 same cluster. Use cloud/operator/tilt_up.sh on its own cluster instead.
@@ -641,18 +543,13 @@ function _print_status {
 
 function _print_usage {
 	cat << EOF >&2
-Usage: ${0} <command> [argument]
+Usage: ${0} <command>
 
 Commands:
-    configure '<json>'        Reconfigure the provisioning mock, then nudge
-    down                      Delete the k3d cluster
-    exempt-operator <on|off>  Toggle the operator's admission policy exemption
-    nudge                     Force an immediate reconcile
-    replicas <count>          Commit a new replicaCount to the GitOps repository
-    reproduce <scenario>      Run argocd or operator, and report what happened
-    seed                      Push the working tree's chart to the GitOps repository
-    status                    Report the environment, workload, and sync state
-    up                        Create the cluster and everything in it
+    down    Delete the k3d cluster
+    seed    Push the working tree's chart to the GitOps repository
+    status  Report the environment, workload, and sync state
+    up      Create the cluster and everything in it
 
 Environment variables:
     LIFERAY_K3D_CLUSTER_NAME  The k3d cluster name, ${_CLUSTER_NAME} by default
@@ -774,84 +671,6 @@ ThreadingHTTPServer(("", 8080), Handler).serve_forever()
 EOF
 }
 
-function _reproduce {
-	local scenario=${1}
-
-	if [[ ${scenario} == "argocd" ]]
-	then
-		_set_desired_replicas 3
-
-		echo "Lowering the licensed ceiling to 1 while the repository still asks for 3."
-
-		_configure_provisioning_mock '{"licenseOwner": null, "maxClusterNodes": 1}'
-
-		_wait_for "the operator to cap the workload" \
-			_workload_replicas_are 1
-
-		echo "Asking ArgoCD to sync, which is what its self heal does on its own."
-
-		_wait_for "the sync to be denied" \
-			_sync_is_denied
-
-		_print_status
-
-		cat << EOF
-
-The application is stuck. ArgoCD asks for 3 replicas, the operator caps the
-workload at the licensed 1, and the admission policy denies the difference, so
-the sync retries forever instead of converging.
-EOF
-
-		return
-	fi
-
-	if [[ ${scenario} == "operator" ]]
-	then
-		echo "Removing the exemption, so the operator is subject to its own policy."
-
-		_exempt_operator off
-
-		echo "Forcing a license owner mismatch, which drives the ceiling to 0."
-
-		_configure_provisioning_mock '{"licenseOwner": "some-other-environment-uid"}'
-
-		_wait_for "the operator to scale the workload to zero" \
-			_workload_replicas_are 0
-
-		echo "Restoring a valid license, which should be enough to recover."
-
-		_configure_provisioning_mock '{"licenseOwner": null}'
-
-		_wait_for "the operator to deny its own write" \
-			_operator_write_was_denied
-
-		_print_status
-
-		echo ""
-		echo "Operator log"
-
-		_kubectl --namespace "${_OPERATOR_NAMESPACE}" logs deploy/liferay-dxp-operator --tail=200 |
-			grep "Reconciler error" | tail -1 || true
-
-		cat << EOF
-
-The environment never recovers. The operator holds the restored ceiling in
-memory, writes the workload before it writes its own status, and the policy
-reads the persisted 0 and denies the write. Returning that error skips the
-status update that would have unblocked the next attempt, so every reconcile
-fails identically. Restore the exemption with the following.
-
-    ${0} exempt-operator on
-EOF
-
-		return
-	fi
-
-	echo "Usage: ${0} reproduce <argocd|operator>" >&2
-
-	exit 1
-}
-
 function _seed_git_repository {
 	echo "Pushing the working tree's default chart to the GitOps repository."
 
@@ -863,15 +682,7 @@ function _seed_git_repository {
 
 	_values_k3d > "${temporary_dir}/chart/values-k3d.yaml"
 
-	local pod
-
-	pod=$( \
-		_kubectl \
-			get pod \
-			--field-selector status.phase=Running \
-			--namespace "${_HARNESS_NAMESPACE}" \
-			--output jsonpath="{.items[0].metadata.name}" \
-			--selector app=gitserver)
+	local pod=$(_gitserver_pod)
 
 	_kubectl --namespace "${_HARNESS_NAMESPACE}" exec "${pod}" -- sh -c '
 		if [ ! -d /srv/git/environment.git ]
@@ -894,58 +705,6 @@ function _seed_git_repository {
 		git add --all
 		git commit --message "Seed the environment" --quiet
 		git push --force --quiet /srv/git/environment.git main'
-}
-
-function _set_desired_replicas {
-	local count=${1}
-
-	if [ -z "${count}" ]
-	then
-		echo "Usage: ${0} replicas <count>" >&2
-
-		exit 1
-	fi
-
-	echo "Committing replicaCount ${count} to the GitOps repository."
-
-	local pod
-
-	pod=$( \
-		_kubectl \
-			get pod \
-			--field-selector status.phase=Running \
-			--namespace "${_HARNESS_NAMESPACE}" \
-			--output jsonpath="{.items[0].metadata.name}" \
-			--selector app=gitserver)
-
-	_kubectl --namespace "${_HARNESS_NAMESPACE}" exec "${pod}" -- sh -c "
-		cd /srv/git/seed
-
-		sed -i 's/^replicaCount: .*/replicaCount: ${count}/' chart/values-k3d.yaml
-
-		if ! git diff --quiet
-		then
-			git commit --all --message 'Request ${count} replicas' --quiet
-			git push --quiet /srv/git/environment.git main
-		fi"
-
-	_kubectl annotate application "${_ENVIRONMENT_NAMESPACE}" argocd.argoproj.io/refresh=hard --namespace "${_ARGOCD_NAMESPACE}" --overwrite > /dev/null
-}
-
-function _sync_is_denied {
-	_kubectl annotate application "${_ENVIRONMENT_NAMESPACE}" argocd.argoproj.io/refresh=hard --namespace "${_ARGOCD_NAMESPACE}" --overwrite > /dev/null || true
-
-	_kubectl \
-		patch application "${_ENVIRONMENT_NAMESPACE}" \
-		--namespace "${_ARGOCD_NAMESPACE}" \
-		--patch '{"operation": {"initiatedBy": {"username": "setup_k3d"}, "sync": {"revision": "main"}}}' \
-		--type merge &> /dev/null || true
-
-	local message
-
-	message=$(_kubectl get application "${_ENVIRONMENT_NAMESPACE}" --namespace "${_ARGOCD_NAMESPACE}" --output jsonpath="{.status.operationState.message}" 2> /dev/null)
-
-	[[ ${message} == *"denied request: replicas"* ]]
 }
 
 function _values_k3d {
@@ -994,16 +753,6 @@ function _wait_for {
 	echo "Timed out waiting for ${description}." >&2
 
 	exit 1
-}
-
-function _workload_replicas_are {
-	local expected=${1}
-
-	local replicas
-
-	replicas=$(_kubectl get statefulset "${_ENVIRONMENT_NAME}" --namespace "${_ENVIRONMENT_NAMESPACE}" --output jsonpath="{.spec.replicas}" 2> /dev/null)
-
-	[[ ${replicas} == "${expected}" ]]
 }
 
 main "${@}"

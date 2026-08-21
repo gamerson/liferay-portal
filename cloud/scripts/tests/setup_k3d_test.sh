@@ -14,11 +14,7 @@ function main {
 
 	_run_test "${script}" _test_aborts_with_missing_required_utility
 	_run_test "${script}" _test_aborts_with_no_arguments
-	_run_test "${script}" _test_aborts_with_no_configure_argument
-	_run_test "${script}" _test_aborts_with_no_replicas_argument
 	_run_test "${script}" _test_aborts_with_unknown_command
-	_run_test "${script}" _test_aborts_with_unknown_exempt_operator_state
-	_run_test "${script}" _test_aborts_with_unknown_reproduce_scenario
 
 	echo ""
 	echo "Results: ${pass} passed, ${fail} failed."
@@ -59,7 +55,7 @@ function _make_stub_path {
 
 	stub_dir=$(mktemp --directory)
 
-	for util in docker git go helm k3d kubectl
+	for util in docker git go helm java jq k3d kubectl
 	do
 		cat > "${stub_dir}/${util}" << 'EOF'
 #!/usr/bin/env bash
@@ -146,24 +142,8 @@ function _test_aborts_with_no_arguments {
 	_assert_aborts_with "Usage:" "${1}" ""
 }
 
-function _test_aborts_with_no_configure_argument {
-	_assert_aborts_with "configure '<json>'" "${1}" "" configure
-}
-
-function _test_aborts_with_no_replicas_argument {
-	_assert_aborts_with "replicas <count>" "${1}" "" replicas
-}
-
 function _test_aborts_with_unknown_command {
 	_assert_aborts_with "Usage:" "${1}" "" not-a-command
-}
-
-function _test_aborts_with_unknown_exempt_operator_state {
-	_assert_aborts_with "exempt-operator <on|off>" "${1}" "" exempt-operator maybe
-}
-
-function _test_aborts_with_unknown_reproduce_scenario {
-	_assert_aborts_with "reproduce <argocd|operator>" "${1}" "" reproduce everything
 }
 
 main "${@}"
