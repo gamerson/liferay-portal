@@ -39,6 +39,11 @@ spec:
                         -   /data
                     kind: Secret
                     name: liferay-default
+                -   group: apps
+                    jsonPointers:
+                        -   /spec/replicas
+                    kind: StatefulSet
+                    name: liferay-default
             project: liferay-application
             sources:
                 -   {{- include "liferay-platform.chartSource" .Values.liferay | nindent 20 }}
