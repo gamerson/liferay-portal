@@ -1138,6 +1138,11 @@ func TestReconcilePersistsTheCeilingWhenTheWorkloadUpdateIsRejected(t *testing.T
 			*maxClusterNodes,
 		)
 	}
+
+	assertReplicasEqual(
+		getStatefulSet(liferayEnvironmentReconciler, t).Spec.Replicas,
+		pointerInt32(3), "Replicas", t,
+	)
 }
 
 func TestReconcilePersistsTheGracePeriodWhenTheWorkloadUpdateIsRejected(t *testing.T) {

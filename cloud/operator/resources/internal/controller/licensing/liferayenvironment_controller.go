@@ -460,6 +460,14 @@ func (liferayEnvironmentReconciler *LiferayEnvironmentReconciler) enforceLicense
 		},
 	)
 
+	if error := liferayEnvironmentReconciler.Status().Update(context, liferayEnvironment); error != nil {
+		if errors.IsConflict(error) {
+			return controllerruntime.Result{RequeueAfter: time.Second}, nil
+		}
+
+		return controllerruntime.Result{}, error
+	}
+
 	if error := liferayEnvironmentReconciler.enforceReplicaCeiling(
 		context, liferayEnvironment, entitlements.MaxClusterNodes,
 	); error != nil {
@@ -517,10 +525,33 @@ func (liferayEnvironmentReconciler *LiferayEnvironmentReconciler) enforceReplica
 	effectiveReplicas := min(desiredReplicas, maxClusterNodes)
 
 	if statefulSet.Spec.Replicas == nil || *statefulSet.Spec.Replicas != effectiveReplicas {
+		liveReplicas := statefulSet.Spec.Replicas
+
 		statefulSet.Spec.Replicas = &effectiveReplicas
 
 		if error := liferayEnvironmentReconciler.Update(context, statefulSet); error != nil {
-			return error
+			logger.Error(
+				error, "Unable to enforce the licensed replica ceiling",
+				"effectiveReplicas", effectiveReplicas,
+				"workload", statefulSet.Name,
+			)
+
+			liferayEnvironment.Status.EffectiveReplicas = liveReplicas
+
+			meta.SetStatusCondition(
+				&liferayEnvironment.Status.Conditions,
+				metav1.Condition{
+					Message: fmt.Sprintf(
+						"Unable to scale StatefulSet %q to %d replicas: %s.",
+						statefulSet.Name, effectiveReplicas, error,
+					),
+					Reason: "WorkloadUpdateRejected",
+					Status: metav1.ConditionFalse,
+					Type:   conditionReplicasCountValid,
+				},
+			)
+
+			return nil
 		}
 
 		logger.Info(

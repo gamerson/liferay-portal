@@ -176,6 +176,23 @@ func TestReconcileAgainstTheAdmissionPolicy(t *testing.T) {
 					*maxClusterNodes,
 				)
 			}
+
+			var statefulSet appsv1.StatefulSet
+
+			if error := liferayEnvironmentReconciler.Get(
+				context.Background(),
+				types.NamespacedName{
+					Name:      "dev-liferay",
+					Namespace: testCase.namespaceName,
+				},
+				&statefulSet,
+			); error != nil {
+				t.Fatalf("Unable to read the workload: %v", error)
+			}
+
+			assertReplicasEqual(
+				statefulSet.Spec.Replicas, pointerInt32(3), "Replicas", t,
+			)
 		})
 	}
 }
