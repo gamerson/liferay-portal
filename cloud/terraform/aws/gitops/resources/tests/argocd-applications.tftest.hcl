@@ -94,6 +94,16 @@ run "should_name_the_appprojects" {
 	}
 	command=plan
 }
+run "should_leave_the_replica_count_to_the_operator" {
+	assert {
+		condition=length([
+			for difference in kubernetes_manifest.liferay_applicationset.manifest.spec.template.spec.ignoreDifferences : difference
+			if difference.kind == "StatefulSet" && contains(difference.jsonPointers, "/spec/replicas")
+		]) == 1
+		error_message="The Liferay ApplicationSet template must ignore spec.replicas on the workload, since the operator caps it against the licensed ceiling"
+	}
+	command=plan
+}
 run "should_pass_cluster_identity_to_the_provider_application" {
 	assert {
 		condition=length([

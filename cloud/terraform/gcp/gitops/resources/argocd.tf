@@ -429,6 +429,12 @@ resource "kubernetes_manifest" "liferay_applicationset" {
 							kind="Secret"
 							name="liferay-default"
 						},
+						{
+							group="apps"
+							jsonPointers=["/spec/replicas"]
+							kind="StatefulSet"
+							name="liferay-default"
+						},
 					]
 					syncPolicy={
 						automated={
