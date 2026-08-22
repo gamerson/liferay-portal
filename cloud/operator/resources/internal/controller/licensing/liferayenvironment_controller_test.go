@@ -21,14 +21,17 @@ import (
 	provisioning "github.com/liferay/liferay-portal/cloud/operator/internal/provisioning"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	errors "k8s.io/apimachinery/pkg/api/errors"
 	meta "k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
+	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	types "k8s.io/apimachinery/pkg/types"
 	record "k8s.io/client-go/tools/record"
 	controllerruntime "sigs.k8s.io/controller-runtime"
 	client "sigs.k8s.io/controller-runtime/pkg/client"
 	fake "sigs.k8s.io/controller-runtime/pkg/client/fake"
+	interceptor "sigs.k8s.io/controller-runtime/pkg/client/interceptor"
 )
 
 func (stubProvisioning *stubProvisioning) Activate(
@@ -1061,6 +1064,81 @@ func TestReconcileOrphansRemovedEntitlement(t *testing.T) {
 	}
 }
 
+func TestReconcilePersistsTheCeilingWhenTheWorkloadUpdateIsRejected(t *testing.T) {
+	environment := activatedEnvironment()
+	environment.Spec.DesiredReplicas = pointerInt32(3)
+	environment.Status.License.MaxClusterNodes = pointerInt32(0)
+
+	provisioningClient := &stubProvisioning{
+		entitlements: &provisioning.Entitlements{
+			LicenseXML: []byte(virtualClusterLicenseXML(
+				"Friday, March 2, 2029 12:00:00 AM GMT", 3, "dev-namespace-uid",
+			)),
+			MaxClusterNodes: 3,
+		},
+	}
+
+	liferayEnvironmentReconciler := &LiferayEnvironmentReconciler{
+		Client: newFakeClientEnforcingCeiling(
+			t,
+			&corev1.Namespace{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: "liferay-dev",
+					UID:  "dev-namespace-uid",
+				},
+			},
+			&appsv1.StatefulSet{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "dev-liferay",
+					Namespace: "liferay-dev",
+				},
+				Spec: appsv1.StatefulSetSpec{
+					Replicas: pointerInt32(0),
+				},
+			},
+			environment,
+		),
+		HeartbeatInterval:    10 * time.Minute,
+		MarketplaceMountPath: t.TempDir(),
+		Provisioning:         provisioningClient,
+		Recorder:             record.NewFakeRecorder(10),
+		Syncer: addon.NewSyncer(
+			provisioningClient, 15*time.Second, 30*time.Second, 30*time.Minute,
+			inlineRunner{},
+		),
+	}
+
+	_, error := liferayEnvironmentReconciler.Reconcile(
+		context.Background(), controllerruntime.Request{
+			NamespacedName: types.NamespacedName{
+				Name:      "dev",
+				Namespace: "liferay-dev",
+			},
+		},
+	)
+
+	if error != nil {
+		t.Logf("The workload update was rejected: %v", error)
+	}
+
+	maxClusterNodes := getEnvironment(
+		liferayEnvironmentReconciler, t,
+	).Status.License.MaxClusterNodes
+
+	if maxClusterNodes == nil {
+		t.Fatal(
+			"License.MaxClusterNodes = <nil>, want the licensed 3 persisted so that the next attempt is admitted",
+		)
+	}
+
+	if *maxClusterNodes != 3 {
+		t.Errorf(
+			"License.MaxClusterNodes = %d, want the licensed 3 persisted so that the next attempt is admitted",
+			*maxClusterNodes,
+		)
+	}
+}
+
 func TestReconcileRejectsLicenseIssuedForAnotherEnvironment(t *testing.T) {
 	entitlements := &provisioning.Entitlements{
 		LicenseXML: []byte(virtualClusterLicenseXML(
@@ -1646,6 +1724,72 @@ func getStatefulSet(
 func newFakeClient(t *testing.T, objects ...client.Object) client.Client {
 	t.Helper()
 
+	return fake.NewClientBuilder().WithObjects(
+		objects...,
+	).WithScheme(
+		newScheme(t),
+	).WithStatusSubresource(
+		&licensingv1alpha1.LiferayEnvironment{},
+	).Build()
+}
+
+func newFakeClientEnforcingCeiling(
+	t *testing.T, objects ...client.Object,
+) client.Client {
+	t.Helper()
+
+	return fake.NewClientBuilder().WithInterceptorFuncs(
+		interceptor.Funcs{
+			Update: func(
+				context context.Context,
+				writer client.WithWatch,
+				object client.Object,
+				options ...client.UpdateOption,
+			) error {
+				statefulSet, ok := object.(*appsv1.StatefulSet)
+
+				if !ok || statefulSet.Spec.Replicas == nil {
+					return writer.Update(context, object, options...)
+				}
+
+				var liferayEnvironment licensingv1alpha1.LiferayEnvironment
+
+				if error := writer.Get(
+					context,
+					types.NamespacedName{Name: "dev", Namespace: "liferay-dev"},
+					&liferayEnvironment,
+				); error != nil {
+					return error
+				}
+
+				maxClusterNodes := liferayEnvironment.Status.License.MaxClusterNodes
+
+				if maxClusterNodes != nil && *statefulSet.Spec.Replicas > *maxClusterNodes {
+					return errors.NewForbidden(
+						schema.GroupResource{Group: "apps", Resource: "statefulsets"},
+						statefulSet.Name,
+						fmt.Errorf(
+							"replicas %d exceeds licensed maxClusterNodes %d",
+							*statefulSet.Spec.Replicas, *maxClusterNodes,
+						),
+					)
+				}
+
+				return writer.Update(context, object, options...)
+			},
+		},
+	).WithObjects(
+		objects...,
+	).WithScheme(
+		newScheme(t),
+	).WithStatusSubresource(
+		&licensingv1alpha1.LiferayEnvironment{},
+	).Build()
+}
+
+func newScheme(t *testing.T) *runtime.Scheme {
+	t.Helper()
+
 	scheme := runtime.NewScheme()
 
 	if error := appsv1.AddToScheme(scheme); error != nil {
@@ -1660,13 +1804,7 @@ func newFakeClient(t *testing.T, objects ...client.Object) client.Client {
 		t.Fatalf("Unable to register the licensing scheme: %v", error)
 	}
 
-	return fake.NewClientBuilder().WithObjects(
-		objects...,
-	).WithScheme(
-		scheme,
-	).WithStatusSubresource(
-		&licensingv1alpha1.LiferayEnvironment{},
-	).Build()
+	return scheme
 }
 
 func pendingEnvironment() *licensingv1alpha1.LiferayEnvironment {
