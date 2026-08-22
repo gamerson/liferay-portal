@@ -65,38 +65,25 @@ jobs:
                     }
 
                     main "${@}"
+            -   name: Set up envtest
+                run: |
+                    set -o errexit
+                    set -o nounset
+                    set -o pipefail
+
+                    function main {
+                        local assets_dir
+
+                        assets_dir=$(go run sigs.k8s.io/controller-runtime/tools/setup-envtest@release-0.21 use 1.32.x --bin-dir "${RUNNER_TEMP}/envtest" -p path)
+
+                        echo "KUBEBUILDER_ASSETS=${assets_dir}" >> "${GITHUB_ENV}"
+                    }
+
+                    main "${@}"
             -   name: Test
                 run: go test ./...
             -   name: Vet
                 run: go vet ./...
-    test-cloud-operator-license-reconcile:
-        defaults:
-            run:
-                shell: bash
-                working-directory: cloud/operator/tests
-        runs-on: ubuntu-latest
-        steps:
-            -   name: Checkout code
-                uses: actions/checkout@v4
-            -   name: Set up Go
-                uses: actions/setup-go@v5
-                with:
-                    go-version-file: cloud/operator/resources/go.mod
-            -   name: Set up Java
-                uses: actions/setup-java@v4
-                with:
-                    distribution: temurin
-                    java-version: 21
-            -   name: Install k3d
-                run: curl --fail --location --silent https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | TAG=v5.9.0 bash
-            -   name: Set up the test harness
-                run: ./setup_test_harness.sh up
-            -   name: Run the license reconcile tests
-                run: ./license_reconcile_tests.sh
-            -   if: ${{always()}}
-                name: Tear down the test harness
-                run: ./setup_test_harness.sh down
-        timeout-minutes: 45
 on:
     workflow_call:
 permissions:
