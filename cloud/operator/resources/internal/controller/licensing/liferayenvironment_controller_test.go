@@ -20,6 +20,7 @@ import (
 	addon "github.com/liferay/liferay-portal/cloud/operator/internal/addon"
 	provisioning "github.com/liferay/liferay-portal/cloud/operator/internal/provisioning"
 	appsv1 "k8s.io/api/apps/v1"
+	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	corev1 "k8s.io/api/core/v1"
 	errors "k8s.io/apimachinery/pkg/api/errors"
 	meta "k8s.io/apimachinery/pkg/api/meta"
@@ -1139,6 +1140,68 @@ func TestReconcilePersistsTheCeilingWhenTheWorkloadUpdateIsRejected(t *testing.T
 	}
 }
 
+func TestReconcilePersistsTheGracePeriodWhenTheWorkloadUpdateIsRejected(t *testing.T) {
+	unreachableSince := metav1.NewTime(time.Now().Add(-2 * time.Hour))
+
+	environment := activatedEnvironment()
+	environment.Spec.DesiredReplicas = pointerInt32(3)
+	environment.Status.License.MaxClusterNodes = pointerInt32(0)
+	environment.Status.UnreachableSince = &unreachableSince
+
+	liferayEnvironmentReconciler := &LiferayEnvironmentReconciler{
+		Client: newFakeClientEnforcingCeiling(
+			t,
+			&corev1.Namespace{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: "liferay-dev",
+					UID:  "dev-namespace-uid",
+				},
+			},
+			&appsv1.StatefulSet{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "dev-liferay",
+					Namespace: "liferay-dev",
+				},
+				Spec: appsv1.StatefulSetSpec{
+					Replicas: pointerInt32(0),
+				},
+			},
+			environment,
+		),
+		GracePeriod:          time.Hour,
+		HeartbeatInterval:    10 * time.Minute,
+		MarketplaceMountPath: t.TempDir(),
+		Provisioning: &stubProvisioning{
+			manifestError: fmt.Errorf("provisioning is unreachable"),
+		},
+		Recorder:          record.NewFakeRecorder(10),
+		RetryInitialDelay: 30 * time.Second,
+		RetryMaxDelay:     30 * time.Minute,
+	}
+
+	_, error := liferayEnvironmentReconciler.Reconcile(
+		context.Background(), controllerruntime.Request{
+			NamespacedName: types.NamespacedName{
+				Name:      "dev",
+				Namespace: "liferay-dev",
+			},
+		},
+	)
+
+	if error != nil {
+		t.Logf("The workload update was rejected: %v", error)
+	}
+
+	if phase := getEnvironment(
+		liferayEnvironmentReconciler, t,
+	).Status.Phase; phase != "Degraded" {
+		t.Errorf(
+			"Phase = %q, want Degraded persisted so that the grace period and the backoff survive the rejected write",
+			phase,
+		)
+	}
+}
+
 func TestReconcileRejectsLicenseIssuedForAnotherEnvironment(t *testing.T) {
 	entitlements := &provisioning.Entitlements{
 		LicenseXML: []byte(virtualClusterLicenseXML(
@@ -1794,6 +1857,10 @@ func newScheme(t *testing.T) *runtime.Scheme {
 
 	if error := appsv1.AddToScheme(scheme); error != nil {
 		t.Fatalf("Unable to register the apps/v1 scheme: %v", error)
+	}
+
+	if error := autoscalingv1.AddToScheme(scheme); error != nil {
+		t.Fatalf("Unable to register the autoscaling/v1 scheme: %v", error)
 	}
 
 	if error := corev1.AddToScheme(scheme); error != nil {

@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -13,7 +14,9 @@ import (
 	addon "github.com/liferay/liferay-portal/cloud/operator/internal/addon"
 	provisioning "github.com/liferay/liferay-portal/cloud/operator/internal/provisioning"
 	appsv1 "k8s.io/api/apps/v1"
+	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	corev1 "k8s.io/api/core/v1"
+	errors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	unstructured "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	types "k8s.io/apimachinery/pkg/types"
@@ -29,38 +32,89 @@ const chartDir = "../../../../../helm/dxp-operator"
 
 const operatorUsername = "system:serviceaccount:liferay-system:liferay-dxp-operator"
 
+func TestAdmissionPolicyDeniesOverLimitWrites(t *testing.T) {
+	config := startPolicyEnvironment(t)
+
+	testCases := map[string]struct {
+		labelNamespace   bool
+		maxClusterNodes  *int32
+		namespaceName    string
+		scaleSubresource bool
+		wantDenied       bool
+	}{
+		"a licensed namespace denies an over limit scale": {
+			labelNamespace:   true,
+			maxClusterNodes:  pointerInt32(1),
+			namespaceName:    "liferay-scale",
+			scaleSubresource: true,
+			wantDenied:       true,
+		},
+		"a licensed namespace denies an over limit write": {
+			labelNamespace:  true,
+			maxClusterNodes: pointerInt32(1),
+			namespaceName:   "liferay-licensed",
+			wantDenied:      true,
+		},
+		"a namespace the policy does not gate allows any write": {
+			labelNamespace:  false,
+			maxClusterNodes: pointerInt32(1),
+			namespaceName:   "liferay-ungated",
+			wantDenied:      false,
+		},
+		"an environment without a ceiling allows any write": {
+			labelNamespace:  true,
+			maxClusterNodes: nil,
+			namespaceName:   "liferay-unlicensed",
+			wantDenied:      false,
+		},
+	}
+
+	for name, testCase := range testCases {
+		t.Run(name, func(t *testing.T) {
+			writeClient := newPolicyFixture(
+				config, testCase.labelNamespace, testCase.maxClusterNodes,
+				testCase.namespaceName, t,
+			)
+
+			var statefulSet appsv1.StatefulSet
+
+			if error := writeClient.Get(
+				context.Background(),
+				types.NamespacedName{
+					Name:      "dev-liferay",
+					Namespace: testCase.namespaceName,
+				},
+				&statefulSet,
+			); error != nil {
+				t.Fatalf("Unable to read the workload: %v", error)
+			}
+
+			error := writeOverLimitReplicas(
+				writeClient, &statefulSet, testCase.scaleSubresource,
+			)
+
+			if testCase.wantDenied {
+				if !errors.IsForbidden(error) {
+					t.Errorf("Write error = %v, want a forbidden response", error)
+				} else if !strings.Contains(
+					error.Error(), "ValidatingAdmissionPolicy",
+				) {
+					t.Errorf(
+						"Write error = %v, want the admission policy to be the one refusing",
+						error,
+					)
+				}
+			}
+
+			if !testCase.wantDenied && error != nil {
+				t.Errorf("Write error = %v, want the write to be admitted", error)
+			}
+		})
+	}
+}
+
 func TestReconcileAgainstTheAdmissionPolicy(t *testing.T) {
-	assetsDir := envtestAssetsDir(t)
-
-	if assetsDir == "" {
-		t.Skip(
-			"Set KUBEBUILDER_ASSETS, or install the envtest binaries with setup-envtest, to run this test",
-		)
-	}
-
-	if _, error := exec.LookPath("helm"); error != nil {
-		t.Skip("Install helm to render the admission policy this test installs")
-	}
-
-	testEnvironment := &envtest.Environment{
-		BinaryAssetsDirectory: assetsDir,
-		CRDDirectoryPaths:     []string{filepath.Join(chartDir, "crds")},
-		ErrorIfCRDPathMissing: true,
-	}
-
-	config, error := testEnvironment.Start()
-
-	if error != nil {
-		t.Fatalf("Unable to start the test environment: %v", error)
-	}
-
-	t.Cleanup(func() {
-		if error := testEnvironment.Stop(); error != nil {
-			t.Logf("Unable to stop the test environment: %v", error)
-		}
-	})
-
-	installAdmissionPolicy(config, t)
+	config := startPolicyEnvironment(t)
 
 	testCases := map[string]struct {
 		impersonateOperator bool
@@ -124,6 +178,44 @@ func TestReconcileAgainstTheAdmissionPolicy(t *testing.T) {
 			}
 		})
 	}
+}
+
+func startPolicyEnvironment(t *testing.T) *rest.Config {
+	t.Helper()
+
+	assetsDir := envtestAssetsDir(t)
+
+	if assetsDir == "" {
+		t.Skip(
+			"Set KUBEBUILDER_ASSETS, or install the envtest binaries with setup-envtest, to run this test",
+		)
+	}
+
+	if _, error := exec.LookPath("helm"); error != nil {
+		t.Skip("Install helm to render the admission policy this test installs")
+	}
+
+	testEnvironment := &envtest.Environment{
+		BinaryAssetsDirectory: assetsDir,
+		CRDDirectoryPaths:     []string{filepath.Join(chartDir, "crds")},
+		ErrorIfCRDPathMissing: true,
+	}
+
+	config, error := testEnvironment.Start()
+
+	if error != nil {
+		t.Fatalf("Unable to start the test environment: %v", error)
+	}
+
+	t.Cleanup(func() {
+		if error := testEnvironment.Stop(); error != nil {
+			t.Logf("Unable to stop the test environment: %v", error)
+		}
+	})
+
+	installAdmissionPolicy(config, t)
+
+	return config
 }
 
 func envtestAssetsDir(t *testing.T) string {
@@ -193,6 +285,76 @@ func installAdmissionPolicy(config *rest.Config, t *testing.T) {
 			)
 		}
 	}
+}
+
+func newPolicyFixture(
+	config *rest.Config, labelNamespace bool, maxClusterNodes *int32,
+	namespaceName string, t *testing.T,
+) client.Client {
+	t.Helper()
+
+	setUpClient, error := client.New(config, client.Options{Scheme: newScheme(t)})
+
+	if error != nil {
+		t.Fatalf("Unable to build a client: %v", error)
+	}
+
+	labels := map[string]string{}
+
+	if labelNamespace {
+		labels[environmentLabel] = "true"
+	}
+
+	if error := setUpClient.Create(
+		context.Background(),
+		&corev1.Namespace{
+			ObjectMeta: metav1.ObjectMeta{
+				Labels: labels,
+				Name:   namespaceName,
+			},
+		},
+	); error != nil {
+		t.Fatalf("Unable to create the namespace: %v", error)
+	}
+
+	liferayEnvironment := &licensingv1alpha1.LiferayEnvironment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "dev",
+			Namespace: namespaceName,
+		},
+		Spec: licensingv1alpha1.LiferayEnvironmentSpec{
+			ActivationCodeSecretRef: licensingv1alpha1.SecretKeyRef{
+				Key:  "activationCode",
+				Name: "dev-activation",
+			},
+			DesiredReplicas: pointerInt32(3),
+			WorkloadRef: licensingv1alpha1.WorkloadRef{
+				Name: "dev-liferay",
+			},
+		},
+	}
+
+	if error := setUpClient.Create(
+		context.Background(), liferayEnvironment,
+	); error != nil {
+		t.Fatalf("Unable to create the environment: %v", error)
+	}
+
+	liferayEnvironment.Status.License.MaxClusterNodes = maxClusterNodes
+
+	if error := setUpClient.Status().Update(
+		context.Background(), liferayEnvironment,
+	); error != nil {
+		t.Fatalf("Unable to write the ceiling: %v", error)
+	}
+
+	if error := setUpClient.Create(
+		context.Background(), newWorkload(namespaceName),
+	); error != nil {
+		t.Fatalf("Unable to create the workload: %v", error)
+	}
+
+	return setUpClient
 }
 
 func newPolicyReconciler(
@@ -296,6 +458,30 @@ func newPolicyReconciler(
 			inlineRunner{},
 		),
 	}
+}
+
+func writeOverLimitReplicas(
+	writeClient client.Client, statefulSet *appsv1.StatefulSet,
+	scaleSubresource bool,
+) error {
+	if scaleSubresource {
+		return writeClient.SubResource("scale").Update(
+			context.Background(), statefulSet,
+			client.WithSubResourceBody(
+				&autoscalingv1.Scale{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      statefulSet.Name,
+						Namespace: statefulSet.Namespace,
+					},
+					Spec: autoscalingv1.ScaleSpec{Replicas: 3},
+				},
+			),
+		)
+	}
+
+	statefulSet.Spec.Replicas = pointerInt32(3)
+
+	return writeClient.Update(context.Background(), statefulSet)
 }
 
 func newWorkload(namespaceName string) *appsv1.StatefulSet {
