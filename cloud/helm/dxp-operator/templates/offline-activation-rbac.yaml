@@ -1,0 +1,15 @@
+{{- if .Values.offlineActivationWorkflow.enabled -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+    labels:
+        {{- include "dxp-operator.labels" . | nindent 8 }}
+    name: offline-activation-cluster-role
+rules:
+    -   apiGroups: ["argoproj.io"]
+        resources: ["workflowtaskresults"]
+        verbs: ["create", "patch"]
+    -   apiGroups: ["licensing.liferay.com"]
+        resources: ["liferayenvironments"]
+        verbs: ["get", "patch"]
+{{- end -}}

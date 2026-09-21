@@ -1,3 +1,16 @@
 Bundle-Name: Liferay License Manager Web
 Bundle-SymbolicName: com.liferay.license.manager.web
-Bundle-Version: 6.0.28
+Bundle-Version: 6.1.0
+#
+# The proof of concept runs bundles built from master against a published DXP
+# image whose API packages are behind. Widening the Liferay ranges lets them
+# resolve there,\
+	and they tighten back to the defaults once the image and the
+# branch line up.
+#
+Import-Package:\
+	com.liferay.*;version="[0,9999.0.0)",\
+	\
+	javax.servlet.*;resolution:=optional,\
+	\
+	*

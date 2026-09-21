@@ -24,6 +24,12 @@ metrics:
 nameOverride: ""
 namespaceOverride: ""
 nodeSelector: {}
+offlineActivationWorkflow:
+    defaultEnvironmentName: liferay-default
+    enabled: false
+    serviceAccountName: offline-activation-service-account
+    ttlSecondsAfterCompletion: 3600
+    waitTimeoutSeconds: 300
 onlineActivationWorkflow:
     defaultEnvironmentName: liferay-default
     enabled: false

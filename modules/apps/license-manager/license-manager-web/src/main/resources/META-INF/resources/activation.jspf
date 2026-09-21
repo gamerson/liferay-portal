@@ -1,0 +1,175 @@
+<%--
+/**
+ * SPDX-FileCopyrightText: (c) 2026 Liferay, Inc. https://liferay.com
+ * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
+ */
+--%>
+
+<%
+String offlineActivationRequest = (String)request.getAttribute("offlineActivationRequest");
+
+LicenseActivationAgent.ActivationWorkflow activationWorkflow = (LicenseActivationAgent.ActivationWorkflow)request.getAttribute("activationWorkflow");
+%>
+
+<clay:container-fluid
+	cssClass="container-form-lg"
+>
+	<liferay-ui:error key="agentUnavailable" message="The license activation agent is not available, so this instance cannot reach the Kubernetes API." />
+	<liferay-ui:error key="bundleNotStored" message="The bundle could not be written to the marketplace volume. Check that the volume is mounted and writable." />
+	<liferay-ui:error key="noActivationCode" message="Enter an activation code before submitting." />
+	<liferay-ui:error key="noBundleSelected" message="Select an offline activation bundle before submitting." />
+	<liferay-ui:error key="workflowNotSubmitted" message="The activation workflow could not be submitted. Check the portal log and the workflow RBAC." />
+
+	<clay:sheet
+		size="full"
+	>
+		<clay:sheet-section>
+			<h3 class="sheet-subtitle">Environment</h3>
+
+			<dl class="row">
+				<dt class="col-4">Name</dt>
+				<dd class="col-8"><%= liferayEnvironment.name() %></dd>
+
+				<dt class="col-4">Namespace</dt>
+				<dd class="col-8"><%= liferayEnvironment.namespace() %></dd>
+
+				<dt class="col-4">Mode</dt>
+				<dd class="col-8">
+					<clay:label
+						displayType='<%= liferayEnvironment.isOffline() ? "warning" : "info" %>'
+						label='<%= liferayEnvironment.isOffline() ? "Offline" : "Online" %>'
+					/>
+				</dd>
+				<dt class="col-4">Phase</dt>
+				<dd class="col-8"><%= liferayEnvironment.phase() %></dd>
+
+				<dt class="col-4">Activated</dt>
+				<dd class="col-8">
+					<c:choose>
+						<c:when test="<%= liferayEnvironment.isActivated() %>">
+							<clay:label
+								displayType="success"
+								label="<%= liferayEnvironment.activatedAt() %>"
+							/>
+						</c:when>
+						<c:otherwise>
+							<clay:label
+								displayType="secondary"
+								label="Not activated"
+							/>
+						</c:otherwise>
+					</c:choose>
+				</dd>
+
+				<c:if test="<%= Validator.isNotNull(liferayEnvironment.offlineActivationBundle()) %>">
+					<dt class="col-4">Bundle</dt>
+					<dd class="col-8"><%= liferayEnvironment.offlineActivationBundle() %></dd>
+				</c:if>
+			</dl>
+		</clay:sheet-section>
+
+		<c:choose>
+			<c:when test="<%= !liferayEnvironment.isOffline() %>">
+				<clay:sheet-section>
+					<h3 class="sheet-subtitle">Activation code</h3>
+
+					<p class="text-secondary">The code is written to the secret this environment points at, and the operator activates against the provisioning server.</p>
+
+					<portlet:actionURL name="/license_manager/activate_online" var="activateOnlineURL">
+						<portlet:param name="tab" value="activation" />
+					</portlet:actionURL>
+
+					<aui:form action="<%= activateOnlineURL %>" method="post">
+						<aui:input label="Activation code" name="activationCode" type="text" />
+
+						<aui:button type="submit" value="Activate" />
+					</aui:form>
+				</clay:sheet-section>
+			</c:when>
+			<c:otherwise>
+				<clay:sheet-section>
+					<h3 class="sheet-subtitle">Step 1 &mdash; Offline activation request</h3>
+
+					<p class="text-secondary">Send this request to Liferay to obtain the offline activation bundle for this environment.</p>
+
+					<c:choose>
+						<c:when test="<%= offlineActivationRequest != null %>">
+							<textarea class="form-control" readonly="readonly" rows="6"><%= offlineActivationRequest %></textarea>
+						</c:when>
+						<c:otherwise>
+							<portlet:renderURL var="revealRequestURL">
+								<portlet:param name="revealRequest" value="true" />
+								<portlet:param name="tab" value="activation" />
+							</portlet:renderURL>
+
+							<clay:link
+								displayType="secondary"
+								href="<%= revealRequestURL %>"
+								label="Reveal offline activation request"
+								type="button"
+							/>
+						</c:otherwise>
+					</c:choose>
+				</clay:sheet-section>
+
+				<clay:sheet-section>
+					<h3 class="sheet-subtitle">Step 2 &mdash; Upload the activation bundle</h3>
+
+					<p class="text-secondary">The bundle is written to the marketplace volume and an activation workflow is submitted for it.</p>
+
+					<portlet:actionURL name="/license_manager/activate_offline" var="activateOfflineURL">
+						<portlet:param name="tab" value="activation" />
+					</portlet:actionURL>
+
+					<aui:form action="<%= activateOfflineURL %>" enctype="multipart/form-data" method="post">
+						<aui:input accept=".zip" label="Offline activation bundle" name="bundle" type="file" />
+
+						<aui:button type="submit" value="Activate" />
+					</aui:form>
+				</clay:sheet-section>
+			</c:otherwise>
+		</c:choose>
+
+		<c:if test="<%= activationWorkflow != null %>">
+			<clay:sheet-section>
+				<h3 class="sheet-subtitle">Activation workflow</h3>
+
+				<dl class="row">
+					<dt class="col-4">Workflow</dt>
+					<dd class="col-8"><%= activationWorkflow.name() %></dd>
+
+					<dt class="col-4">Phase</dt>
+					<dd class="col-8">
+						<clay:label
+							displayType='<%= activationWorkflow.isFinished() ? "success" : "info" %>'
+							label="<%= activationWorkflow.phase() %>"
+						/>
+					</dd>
+				</dl>
+
+				<c:if test="<%= Validator.isNotNull(activationWorkflow.url()) %>">
+					<clay:link
+						displayType="primary"
+						href="<%= activationWorkflow.url() %>"
+						label="Open in Argo Workflows"
+						target="_blank"
+						type="button"
+					/>
+				</c:if>
+
+				<portlet:renderURL var="refreshWorkflowURL">
+					<portlet:param name="tab" value="activation" />
+					<portlet:param name="workflowName" value="<%= activationWorkflow.name() %>" />
+				</portlet:renderURL>
+
+				<clay:link
+					cssClass="ml-2"
+					displayType="secondary"
+					href="<%= refreshWorkflowURL %>"
+					label="Refresh"
+					type="button"
+				/>
+			</clay:sheet-section>
+		</c:if>
+	</clay:sheet>
+</clay:container-fluid>

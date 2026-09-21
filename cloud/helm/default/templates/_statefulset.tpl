@@ -10,6 +10,8 @@
 {{- $marketplace := .statefulset.marketplace | default dict }}
 {{- $marketplaceClaimName := printf "%s-marketplace" (include "liferay.name" .root) }}
 {{- $marketplaceVolumeName := "liferay-marketplace" }}
+{{- $offlineActivationWorkflow := $licensing.offlineActivationWorkflow | default dict }}
+{{- $marketplaceWritable := and $marketplace.enabled $licensing.enabled $offlineActivationWorkflow.enabled }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -112,7 +114,7 @@ spec:
                     startupProbe:
                         {{- toYaml . | nindent 22 }}
                     {{- end }}
-                    {{- if or .statefulset.volumeMounts .statefulset.customVolumeMounts}}
+                    {{- if or .statefulset.volumeMounts .statefulset.customVolumeMounts $marketplaceWritable }}
                     volumeMounts:
                         {{- with .statefulset.volumeMounts }}
                         {{- toYaml . | nindent 22 }}
@@ -121,6 +123,9 @@ spec:
                         {{- if and $v (gt (len $v) 0) }}
                         {{- toYaml $v | nindent 22 }}
                         {{- end }}
+                        {{- end }}
+                        {{- if $marketplaceWritable }}
+                        {{- list (dict "mountPath" $licensing.offlineActivationWorkflow.marketplacePath "name" $marketplaceVolumeName "subPathExpr" "$(POD_NAMESPACE)") | toYaml | nindent 22 }}
                         {{- end }}
                     {{- end }}
             {{- if or .statefulset.pullSecrets .statefulset.customPullSecrets}}
