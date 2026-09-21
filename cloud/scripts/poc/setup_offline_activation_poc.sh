@@ -208,6 +208,7 @@ function _install_operator {
 		--set "marketplace.enabled=true" \
 		--set "offlineActivationWorkflow.enabled=true" \
 		--set "onlineActivationWorkflow.enabled=true" \
+		--set "provisioning.baseURL=${_PROVISIONING_BASE_URL}" \
 		--wait \
 		liferay-dxp-operator "${_CLOUD_DIR}/helm/dxp-operator"
 }
@@ -270,5 +271,7 @@ _MARKETPLACE_DIR="${_SCRIPT_DIR}/marketplace"
 _OPERATOR_IMAGE="liferay-dxp-operator-poc:latest"
 
 _OPERATOR_NAMESPACE="dxp-operator-system"
+
+_PROVISIONING_BASE_URL="https://api.one-uat.liferay.com"
 
 main "${@}"
