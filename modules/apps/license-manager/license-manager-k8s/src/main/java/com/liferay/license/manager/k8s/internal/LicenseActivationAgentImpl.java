@@ -27,6 +27,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
+import java.nio.file.attribute.PosixFilePermissions;
+
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
@@ -194,6 +196,26 @@ public class LicenseActivationAgentImpl implements LicenseActivationAgent {
 
 			Files.copy(
 				inputStream, stagedPath, StandardCopyOption.REPLACE_EXISTING);
+
+			//
+			// The portal writes with a umask that leaves the file readable
+			// only by its own user, and the operator reads it as a different
+			// one. Widening the mode before the move means the operator never
+			// sees a file it cannot open.
+			//
+
+			try {
+				Files.setPosixFilePermissions(
+					stagedPath,
+					PosixFilePermissions.fromString("rw-r--r--"));
+			}
+			catch (UnsupportedOperationException unsupportedOperationException) {
+				if (_log.isDebugEnabled()) {
+					_log.debug(
+						"Unable to set the bundle permissions",
+						unsupportedOperationException);
+				}
+			}
 
 			Files.move(
 				stagedPath, marketplacePath.resolve(bundleFileName),
