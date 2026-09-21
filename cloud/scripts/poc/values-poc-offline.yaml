@@ -1,0 +1,14 @@
+#
+# Layered on values-poc.yaml. The mode decides which half of the activation
+# tab renders, and the port has to match the forward this instance is reached
+# through, because the portal builds absolute URLs from it.
+#
+
+customEnv:
+    x-license-activation:
+        -   name: LIFERAY_ARGO_BASE_URL
+            value: http://localhost:2746
+        -   name: LIFERAY_WEB_PERIOD_SERVER_PERIOD_HTTP_PERIOD_PORT
+            value: "8888"
+licensing:
+    offline: true

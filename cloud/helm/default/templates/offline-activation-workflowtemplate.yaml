@@ -1,0 +1,32 @@
+{{- if and .Values.licensing.enabled .Values.licensing.offlineActivationWorkflow.enabled -}}
+{{- $offlineActivationWorkflow := .Values.licensing.offlineActivationWorkflow -}}
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+    labels:
+        {{- include "liferay.labels" . | nindent 8 }}
+    name: {{ $offlineActivationWorkflow.workflowTemplateName }}
+    namespace: {{ include "liferay.namespace" . }}
+spec:
+    arguments:
+        parameters:
+            -   description:
+                    The offline activation bundle already written to the marketplace volume.
+                name: bundle-name
+            -   description:
+                    The LiferayEnvironment to activate in this namespace.
+                name: liferay-environment-name
+                value: {{ include "liferay.name" . }}
+    entrypoint: main
+    serviceAccountName: {{ $offlineActivationWorkflow.serviceAccountName }}
+    templates:
+        -   name: main
+            steps:
+                -   -   name: activate
+                        templateRef:
+                            clusterScope: true
+                            name: {{ $offlineActivationWorkflow.clusterWorkflowTemplateName }}
+                            template: main
+    ttlStrategy:
+        secondsAfterCompletion: {{ $offlineActivationWorkflow.ttlSecondsAfterCompletion }}
+{{- end -}}

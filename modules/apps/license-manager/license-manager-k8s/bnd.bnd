@@ -1,0 +1,25 @@
+Bundle-Name: Liferay License Manager K8s
+Bundle-SymbolicName: com.liferay.license.manager.k8s
+Bundle-Version: 1.0.0
+#
+# See the note in license-activation-web/bnd.bnd: the proof of concept runs
+# master built bundles against an older published DXP image.
+#
+Import-Package:\
+	!android.*,\
+	\
+	!javax.annotation.meta.*,\
+	\
+	!org.apache.commons.compress.*,\
+	\
+	!org.bouncycastle.*,\
+	\
+	!org.conscrypt.*,\
+	\
+	!org.openjsse.javax.net.ssl.*,\
+	!org.openjsse.net.ssl.*,\
+	\
+	com.liferay.*;version="[0,9999.0.0)",\
+	\
+	*
+-fixupmessages: Classes found in the wrong directory

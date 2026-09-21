@@ -1,0 +1,95 @@
+configmap:
+    data:
+        #
+        # The DXP image already ships com.liferay.license.manager.web in
+        # osgi/portal. Hot deploying a rebuilt copy installs a second bundle
+        # under the same symbolic name, which registers the portlet twice and
+        # leaves the control panel with two entries that each resolve to an
+        # ambiguous service. Removing the shipped jar before the portal starts
+        # leaves only the rebuilt one. A real change ships in the image and
+        # needs none of this.
+        #
+        020_remove_shipped_license_manager.sh: |
+            #!/usr/bin/env bash
+
+            rm --force /opt/liferay/osgi/portal/com.liferay.license.manager.web.jar
+customInitContainers:
+    x-license-activation-jars:
+        -   containerTemplate: |
+                -   command:
+                        -   bash
+                        -   -c
+                        -   |
+                            mkdir --parents /temp/liferay/deploy
+
+                            rm --force \
+                                /temp/liferay/deploy/com.liferay.license.activation.*.jar \
+                                /temp/liferay/deploy/com.liferay.portal.k8s.agent.*.jar \
+                                /temp/osgi/modules/com.liferay.license.activation.*.jar \
+                                /temp/osgi/modules/com.liferay.portal.k8s.agent.*.jar
+
+                            #
+                            # The framework cache keeps the previously
+                            # resolved revision of a bundle, so replacing the
+                            # jar alone is not enough to pick up a changed
+                            # manifest. Clearing the state forces a rebuild.
+                            #
+
+                            rm --force --recursive /temp/osgi/state/*
+
+                            #
+                            # The image ships a trial license in its deploy
+                            # folder, which the persistent volume masks, so
+                            # DXP comes up unlicensed and redirects every
+                            # request to its own activation page. Copying it
+                            # in is what makes the control panel reachable.
+                            #
+
+                            mkdir --parents /temp/osgi/modules
+
+                            cp --force --verbose /opt/liferay/deploy/trial-dxp-license-*.xml /temp/liferay/deploy 2>/dev/null || true
+
+                            cp --force --verbose /opt/liferay/osgi/modules/trial-dxp-license-*.xml /temp/osgi/modules 2>/dev/null || true
+
+                            cp --force --verbose /liferay-jars/*.jar /temp/liferay/deploy
+                    image: {{ printf "%s:%s" .image.repository (.image.tag | toString) }}
+                    imagePullPolicy: {{ .image.pullPolicy }}
+                    name: liferay-license-activation-jars
+                    volumeMounts:
+                        -   mountPath: /liferay-jars
+                            name: liferay-license-activation-jars
+                        -   mountPath: /temp
+                            name: liferay-persistent-volume
+customVolumeMounts:
+    x-license-activation:
+        -   mountPath: /usr/local/liferay/scripts/pre-configure/020_remove_shipped_license_manager.sh
+            name: liferay-configmap
+            subPath: 020_remove_shipped_license_manager.sh
+customVolumes:
+    x-license-activation-jars:
+        -   hostPath:
+                path: /liferay-jars
+                type: Directory
+            name: liferay-license-activation-jars
+image:
+    tag: 2026.q3.3
+licensing:
+    enabled: true
+    offlineActivationWorkflow:
+        enabled: true
+    onlineActivationWorkflow:
+        enabled: true
+marketplace:
+    enabled: true
+persistence:
+    defaultStorageClassName: local-path
+replicaCount: 1
+volumeClaimTemplates:
+    -   metadata:
+            name: liferay-persistent-volume
+        spec:
+            accessModes:
+                -   ReadWriteOnce
+            resources:
+                requests:
+                    storage: 20Gi

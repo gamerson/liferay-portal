@@ -1,0 +1,58 @@
+{{- if .Values.offlineActivationWorkflow.enabled -}}
+{{- $offlineActivationWorkflow := .Values.offlineActivationWorkflow -}}
+apiVersion: argoproj.io/v1alpha1
+kind: ClusterWorkflowTemplate
+metadata:
+    labels:
+        {{- include "dxp-operator.labels" . | nindent 8 }}
+    name: offline-activation-cluster-workflow-template
+spec:
+    archiveLogs: false
+    arguments:
+        parameters:
+            -   description:
+                    The offline activation bundle already written to the marketplace volume.
+                name: bundle-name
+            -   description:
+                    The LiferayEnvironment to activate in this namespace.
+                name: liferay-environment-name
+                value: {{ $offlineActivationWorkflow.defaultEnvironmentName }}
+    entrypoint: main
+    podGC:
+        strategy: OnWorkflowSuccess
+    serviceAccountName: {{ $offlineActivationWorkflow.serviceAccountName }}
+    templates:
+        -   name: main
+            steps:
+                -   -   name: set-bundle
+                        template: set-bundle
+                -   -   name: wait
+                        template: wait
+        -   name: set-bundle
+            resource:
+                action: patch
+                manifest: |
+                    apiVersion: licensing.liferay.com/v1alpha1
+                    kind: LiferayEnvironment
+                    metadata:
+                        annotations:
+                            licensing.liferay.com/activation-requested-at: "{{ "{{" }}workflow.creationTimestamp.RFC3339}}"
+                            licensing.liferay.com/activation-requested-by: "{{ "{{" }}workflow.name}}"
+                        name: "{{ "{{" }}workflow.parameters.liferay-environment-name}}"
+                    spec:
+                        offlineActivationBundle: "{{ "{{" }}workflow.parameters.bundle-name}}"
+                mergeStrategy: merge
+        -   activeDeadlineSeconds: {{ $offlineActivationWorkflow.waitTimeoutSeconds }}
+            name: wait
+            resource:
+                action: get
+                failureCondition: status.phase == Degraded
+                manifest: |
+                    apiVersion: licensing.liferay.com/v1alpha1
+                    kind: LiferayEnvironment
+                    metadata:
+                        name: "{{ "{{" }}workflow.parameters.liferay-environment-name}}"
+                successCondition: status.activatedAt
+    ttlStrategy:
+        secondsAfterCompletion: {{ $offlineActivationWorkflow.ttlSecondsAfterCompletion }}
+{{- end -}}

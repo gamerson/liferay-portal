@@ -392,6 +392,14 @@ licensing:
     initScriptsVolumeName: liferay-init-scripts-default
     offline: false
     offlineActivationBundle: ""
+    offlineActivationWorkflow:
+        clusterRoleName: offline-activation-cluster-role
+        clusterWorkflowTemplateName: offline-activation-cluster-workflow-template
+        enabled: false
+        marketplacePath: /marketplace
+        serviceAccountName: offline-activation-service-account
+        ttlSecondsAfterCompletion: 3600
+        workflowTemplateName: offline-activation-workflow-template
     onlineActivationWorkflow:
         clusterRoleName: online-activation-cluster-role
         clusterWorkflowTemplateName: online-activation-cluster-workflow-template
