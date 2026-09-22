@@ -1,0 +1,130 @@
+apiVersion: cx.liferay.com/v1alpha1
+kind: ClientExtension
+metadata:
+    annotations:
+        argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    labels:
+        {{- include "liferay-client-extension.labels" . | nindent 8 }}
+    name: {{ include "liferay-client-extension.fullname" . }}
+spec:
+    {{- with .Values.clientExtension.clientExtensionYaml }}
+    clientExtensionYaml: |
+        {{- . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.clientExtension.configs }}
+    configs:
+        {{- range . }}
+        -   |
+            {{- . | nindent 12 }}
+        {{- end }}
+    {{- end }}
+    domains:
+        {{- with .Values.clientExtension.domains.internal }}
+        internal: {{ . | quote }}
+        {{- end }}
+        {{- with .Values.clientExtension.domains.public }}
+        public: {{ . | quote }}
+        {{- end }}
+    liferayEnvironmentRef:
+        name: {{ .Values.clientExtension.liferayEnvironment.name }}
+        {{- with .Values.clientExtension.liferayEnvironment.namespace }}
+        namespace: {{ . }}
+        {{- end }}
+    projectName: {{ default (include "liferay-client-extension.serviceId" .) .Values.clientExtension.projectName }}
+    serviceId: {{ include "liferay-client-extension.serviceId" . }}
+    {{- if .Values.service.enabled }}
+    serviceRef:
+        name: {{ include "liferay-client-extension.fullname" . }}
+        port: {{ .Values.service.port }}
+    {{- end }}
+    virtualInstanceId: {{ .Values.clientExtension.virtualInstanceId | quote }}
+    {{- if .Values.workload.enabled }}
+    workload:
+        {{- if ne .Values.workload.kind "Deployment" }}
+        backoffLimit: {{ .Values.workload.backoffLimit }}
+        {{- end }}
+        kind: {{ .Values.workload.kind }}
+        {{- if eq .Values.workload.kind "Deployment" }}
+        replicas: {{ .Values.workload.replicas }}
+        {{- end }}
+        {{- if eq .Values.workload.kind "CronJob" }}
+        schedule: {{ required "workload.schedule is required for a CronJob" .Values.workload.schedule | quote }}
+        {{- end }}
+        template:
+            metadata:
+                {{- with .Values.podAnnotations }}
+                annotations:
+                    {{- toYaml . | nindent 20 }}
+                {{- end }}
+                labels:
+                    {{- include "liferay-client-extension.selectorLabels" . | nindent 20 }}
+                    {{- with .Values.podLabels }}
+                    {{- toYaml . | nindent 20 }}
+                    {{- end }}
+            spec:
+                {{- with .Values.workload.affinity }}
+                affinity:
+                    {{- toYaml . | nindent 20 }}
+                {{- end }}
+                containers:
+                    -   {{- with .Values.workload.env }}
+                        env:
+                            {{- range $name, $value := . }}
+                            -   name: {{ $name }}
+                                value: {{ $value | quote }}
+                            {{- end }}
+                        {{- end }}
+                        image: "{{ required "image.repository is required" .Values.image.repository }}:{{ .Values.image.tag }}"
+                        imagePullPolicy: {{ .Values.image.pullPolicy }}
+                        {{- with .Values.workload.livenessProbe }}
+                        livenessProbe:
+                            {{- toYaml . | nindent 28 }}
+                        {{- end }}
+                        name: client-extension
+                        {{- if eq .Values.workload.kind "Deployment" }}
+                        ports:
+                            -   containerPort: {{ .Values.workload.containerPort }}
+                                name: http
+                                protocol: TCP
+                        {{- end }}
+                        {{- with .Values.workload.readinessProbe }}
+                        readinessProbe:
+                            {{- toYaml . | nindent 28 }}
+                        {{- end }}
+                        {{- with .Values.workload.resources }}
+                        resources:
+                            {{- toYaml . | nindent 28 }}
+                        {{- end }}
+                        {{- with .Values.workload.securityContext }}
+                        securityContext:
+                            {{- toYaml . | nindent 28 }}
+                        {{- end }}
+                        {{- with .Values.workload.volumeMounts }}
+                        volumeMounts:
+                            {{- toYaml . | nindent 28 }}
+                        {{- end }}
+                {{- with .Values.imagePullSecrets }}
+                imagePullSecrets:
+                    {{- toYaml . | nindent 20 }}
+                {{- end }}
+                {{- with .Values.workload.nodeSelector }}
+                nodeSelector:
+                    {{- toYaml . | nindent 20 }}
+                {{- end }}
+                {{- if ne .Values.workload.kind "Deployment" }}
+                restartPolicy: Never
+                {{- end }}
+                {{- with .Values.workload.podSecurityContext }}
+                securityContext:
+                    {{- toYaml . | nindent 20 }}
+                {{- end }}
+                serviceAccountName: {{ include "liferay-client-extension.serviceAccountName" . }}
+                {{- with .Values.workload.tolerations }}
+                tolerations:
+                    {{- toYaml . | nindent 20 }}
+                {{- end }}
+                {{- with .Values.workload.volumes }}
+                volumes:
+                    {{- toYaml . | nindent 20 }}
+                {{- end }}
+    {{- end }}

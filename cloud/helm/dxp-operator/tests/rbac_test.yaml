@@ -108,7 +108,38 @@ tests:
         it: Omits the service account annotations by default
     -   asserts:
             -   lengthEqual:
-                    count: 8
+                    count: 14
+                    path: rules
+            -   contains:
+                    content:
+                        apiGroups:
+                            -   cx.liferay.com
+                        resources:
+                            -   clientextensions
+                        verbs:
+                            -   create
+                            -   delete
+                            -   get
+                            -   list
+                            -   patch
+                            -   update
+                            -   watch
+                    path: rules
+            -   contains:
+                    content:
+                        apiGroups:
+                            -   batch
+                        resources:
+                            -   cronjobs
+                            -   jobs
+                        verbs:
+                            -   create
+                            -   delete
+                            -   get
+                            -   list
+                            -   patch
+                            -   update
+                            -   watch
                     path: rules
             -   contains:
                     content:

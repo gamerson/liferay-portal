@@ -1,0 +1,69 @@
+# The chart owns Ingress, Service and ServiceAccount. Everything else -- the
+# configuration payload, the ext-provision ConfigMaps and the workload itself
+# -- is owned by the DXP operator through the ClientExtension resource this
+# chart renders.
+
+clientExtension:
+    # Expanded client-extension.yaml. Globs and frontendTokenDefinitionJSON
+    # references must already be resolved by the build.
+    clientExtensionYaml: ""
+    # Pre-translated OSGi payloads, as an alternative to clientExtensionYaml.
+    configs: []
+    domains:
+        # Cluster-local address Liferay calls a microservice at. Use "auto" to
+        # derive it from the chart's Service.
+        internal: ""
+        # Routable host a browser fetches frontend assets from.
+        public: ""
+    liferayEnvironment:
+        name: liferay-default
+        # Empty means Liferay runs in this same namespace.
+        namespace: ""
+    # Defaults to serviceId. Must match what the build used.
+    projectName: ""
+    serviceId: ""
+    virtualInstanceId: liferay.com
+fullnameOverride: ""
+image:
+    pullPolicy: IfNotPresent
+    repository: ""
+    tag: latest
+imagePullSecrets: []
+ingress:
+    annotations: {}
+    className: ""
+    enabled: false
+    hosts: []
+    tls: []
+labels: {}
+nameOverride: ""
+podAnnotations: {}
+podLabels: {}
+service:
+    enabled: false
+    port: 80
+    targetPort: 80
+    type: ClusterIP
+serviceAccount:
+    annotations: {}
+    create: false
+    name: ""
+workload:
+    affinity: {}
+    backoffLimit: 6
+    containerPort: 80
+    enabled: true
+    env: {}
+    # CronJob, Deployment or Job. Immutable once created.
+    kind: Deployment
+    livenessProbe: {}
+    nodeSelector: {}
+    podSecurityContext: {}
+    readinessProbe: {}
+    replicas: 1
+    resources: {}
+    schedule: ""
+    securityContext: {}
+    tolerations: []
+    volumeMounts: []
+    volumes: []

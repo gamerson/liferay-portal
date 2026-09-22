@@ -86,7 +86,7 @@ function _format_generated {
 
 	"${dist_dir}/bin/source-formatter" \
 		source.auto.fix=true \
-		source.files="${_CRD_FILE}"
+		source.files="${_CRD_FILES}"
 }
 
 function _generate {
@@ -110,7 +110,9 @@ function _test {
 	go test ./...
 }
 
-_CRD_FILE="$(cd .. && pwd)/helm/dxp-operator/crds/licensing.liferay.com_liferayenvironments.yaml"
+_CRD_DIR="$(cd .. && pwd)/helm/dxp-operator/crds"
+
+_CRD_FILES="${_CRD_DIR}/cx.liferay.com_clientextensions.yaml,${_CRD_DIR}/licensing.liferay.com_liferayenvironments.yaml"
 
 _ENVTEST_BIN_DIR="${HOME}/.local/share/kubebuilder-envtest"
 

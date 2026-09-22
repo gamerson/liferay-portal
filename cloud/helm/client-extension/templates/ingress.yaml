@@ -1,0 +1,37 @@
+{{- if .Values.ingress.enabled -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+    {{- with .Values.ingress.annotations }}
+    annotations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    labels:
+        {{- include "liferay-client-extension.labels" . | nindent 8 }}
+    name: {{ include "liferay-client-extension.fullname" . }}
+spec:
+    {{- with .Values.ingress.className }}
+    ingressClassName: {{ . }}
+    {{- end }}
+    rules:
+        {{- $fullname := include "liferay-client-extension.fullname" . }}
+        {{- $port := .Values.service.port }}
+        {{- range .Values.ingress.hosts }}
+        -   host: {{ .host | quote }}
+            http:
+                paths:
+                    {{- range .paths }}
+                    -   backend:
+                            service:
+                                name: {{ $fullname }}
+                                port:
+                                    number: {{ $port }}
+                        path: {{ .path }}
+                        pathType: {{ default "Prefix" .pathType }}
+                    {{- end }}
+        {{- end }}
+    {{- with .Values.ingress.tls }}
+    tls:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+{{- end }}
