@@ -81,7 +81,13 @@ metadata:
     namespace: __LIFERAY_NAMESPACE__
 spec:
     ports:
+        # The virtual instance metadata advertises a bare domain, so a client
+        # extension resolves Liferay on the protocol's default port. Without
+        # port 80 the client hangs on a connect that never completes.
         -   name: http
+            port: 80
+            targetPort: 8080
+        -   name: http-direct
             port: 8080
             targetPort: 8080
     selector:
@@ -116,6 +122,11 @@ spec:
                             value: liferay
                         -   name: LIFERAY_SETUP_PERIOD_WIZARD_PERIOD_ENABLED
                             value: "false"
+                        # In cluster traffic is plain HTTP. This also sets
+                        # .serviceScheme, which is what Liferay calls a
+                        # microservice client extension with.
+                        -   name: LIFERAY_WEB_PERIOD_SERVER_PERIOD_PROTOCOL
+                            value: http
                         -   name: LIFERAY_TERMS_PERIOD_OF_PERIOD_USE_PERIOD_REQUIRED
                             value: "false"
                         -   name: LIFERAY_USERS_PERIOD_REMINDER_PERIOD_QUERIES_PERIOD_ENABLED
@@ -126,13 +137,16 @@ spec:
                     ports:
                         -   containerPort: 8080
                             name: http
+                    # A TCP probe on purpose. An HTTP probe sends the pod IP
+                    # as the Host header, which does not match the virtual
+                    # instance's virtual host, so Liferay answers 500 and the
+                    # pod never becomes Ready.
                     readinessProbe:
                         failureThreshold: 60
-                        httpGet:
-                            path: /c/portal/layout
-                            port: 8080
                         initialDelaySeconds: 120
-                        periodSeconds: 20
+                        periodSeconds: 15
+                        tcpSocket:
+                            port: 8080
                     resources:
                         limits:
                             cpu: "4"
