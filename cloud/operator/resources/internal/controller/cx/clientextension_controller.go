@@ -127,7 +127,13 @@ func (reconciler *ClientExtensionReconciler) Reconcile(
 		return controllerruntime.Result{}, error
 	}
 
-	if extInit == nil {
+	requiresOAuth, error := RequiresOAuth(&clientExtension)
+
+	if error != nil {
+		return reconciler.degrade(context, &clientExtension, "PayloadUnreadable", error.Error())
+	}
+
+	if (extInit == nil) && requiresOAuth {
 		setCondition(
 			&clientExtension, cxv1alpha1.ConditionProvisioned, metav1.ConditionFalse, "AwaitingLiferay",
 			"Waiting for Liferay to write back the ext-init metadata.",
@@ -146,16 +152,25 @@ func (reconciler *ClientExtensionReconciler) Reconcile(
 		return reconciler.requeue(context, &clientExtension)
 	}
 
-	extInitSecretName, error := reconciler.mirrorExtInit(context, &clientExtension, extInit)
+	var extInitSecretName string
 
-	if error != nil {
-		return controllerruntime.Result{}, error
+	if extInit == nil {
+		setCondition(
+			&clientExtension, cxv1alpha1.ConditionProvisioned, metav1.ConditionTrue, "NoCredentialsRequired",
+			"The client extension declares no OAuth2 application, so Liferay issues no credentials.",
+		)
+	} else {
+		extInitSecretName, error = reconciler.mirrorExtInit(context, &clientExtension, extInit)
+
+		if error != nil {
+			return controllerruntime.Result{}, error
+		}
+
+		setCondition(
+			&clientExtension, cxv1alpha1.ConditionProvisioned, metav1.ConditionTrue, "Provisioned",
+			fmt.Sprintf("Liferay published %q; credentials mirrored into %q.", extInit.Name, extInitSecretName),
+		)
 	}
-
-	setCondition(
-		&clientExtension, cxv1alpha1.ConditionProvisioned, metav1.ConditionTrue, "Provisioned",
-		fmt.Sprintf("Liferay published %q; credentials mirrored into %q.", extInit.Name, extInitSecretName),
-	)
 
 	clientExtension.Status.ExtInitSecretName = extInitSecretName
 

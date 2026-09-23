@@ -1071,13 +1071,14 @@ public class AgentPortalK8sConfigMapModifier
 
 		if ((metadataType == null) ||
 			(!Objects.equals(metadataType, "dxp") &&
-			 !Objects.equals(metadataType, "ext-init"))) {
+			 !Objects.equals(metadataType, "ext-init") &&
+			 !Objects.equals(metadataType, "ext-status"))) {
 
 			throw new IllegalArgumentException(
 				StringBundler.concat(
 					"Config map labels must contain the key ",
-					"\"lxc.liferay.com/metadataType\" with a value of \"dxp\" ",
-					"or \"ext-init\""));
+					"\"lxc.liferay.com/metadataType\" with a value of ",
+					"\"dxp\", \"ext-init\", or \"ext-status\""));
 		}
 
 		String virtualInstanceId = labels.get(

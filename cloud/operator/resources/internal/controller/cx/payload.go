@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"sort"
+	"strings"
 
 	cxv1alpha1 "github.com/liferay/liferay-portal/cloud/operator/api/cx/v1alpha1"
 	cxconfig "github.com/liferay/liferay-portal/cloud/operator/internal/cxconfig"
@@ -77,6 +78,41 @@ func BuildPayload(clientExtension *cxv1alpha1.ClientExtension) (*Payload, error)
 	}
 
 	return payload, nil
+}
+
+// RequiresOAuth reports whether a client extension declares an OAuth2
+// application. Liferay writes ext-init credentials only for those, so a client
+// extension without one has nothing to wait for.
+func RequiresOAuth(clientExtension *cxv1alpha1.ClientExtension) (bool, error) {
+	if len(clientExtension.Spec.Configs) > 0 {
+		for _, config := range clientExtension.Spec.Configs {
+			if strings.Contains(config, "oAuthApplication") {
+				return true, nil
+			}
+		}
+
+		return false, nil
+	}
+
+	if clientExtension.Spec.ClientExtensionYAML == "" {
+		return false, nil
+	}
+
+	document, error := cxconfig.Parse([]byte(clientExtension.Spec.ClientExtensionYAML))
+
+	if error != nil {
+		return false, error
+	}
+
+	for _, entry := range document {
+		extensionType, _ := entry["type"].(string)
+
+		if strings.HasPrefix(extensionType, "oAuthApplication") {
+			return true, nil
+		}
+	}
+
+	return false, nil
 }
 
 // BuildTimestamp is derived from the spec generation rather than the wall

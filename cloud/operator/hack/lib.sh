@@ -12,11 +12,22 @@ DXPSIM_IMAGE="${DXPSIM_IMAGE:-liferay/dxpsim:spike}"
 
 IMAGE_TAG="${IMAGE_TAG:-spike}"
 
+LIFERAY_IMAGE="${LIFERAY_IMAGE:-liferay/dxp:latest}"
+
 LIFERAY_NAMESPACE="${LIFERAY_NAMESPACE:-liferay-prod}"
+
+MARIADB_IMAGE="${MARIADB_IMAGE:-mariadb:11.4}"
+
+MINIO_IMAGE="${MINIO_IMAGE:-minio/minio:latest}"
 
 OPERATOR_IMAGE="${OPERATOR_IMAGE:-liferay/liferay-dxp-operator:spike}"
 
 OPERATOR_NAMESPACE="${OPERATOR_NAMESPACE:-liferay-system}"
+
+# The cluster bind mounts this directory, so it must exist before the cluster is
+# created and must never be deleted and recreated afterwards: a replaced
+# directory leaves the node holding a stale inode and the mount goes empty.
+PORTAL_MODULES_DIR="${PORTAL_MODULES_DIR:-${HOME}/.liferay/cx-spike/portal-modules}"
 
 SAMPLES_DIR="${SAMPLES_DIR:-$(cd "${HACK_DIR}/../../../workspaces/liferay-sample-workspace/client-extensions" && pwd)}"
 

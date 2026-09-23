@@ -1,0 +1,15 @@
+# The environment the client extensions attach to. Its
+# clientExtensionNamespaces list is the consent boundary.
+apiVersion: licensing.liferay.com/v1alpha1
+kind: LiferayEnvironment
+metadata:
+    name: liferay-default
+    namespace: __LIFERAY_NAMESPACE__
+spec:
+    activationCodeSecretRef:
+        key: activationCode
+        name: liferay-activation
+    clientExtensionNamespaces:
+        -   __CX_NAMESPACE_SPLIT__
+    workloadRef:
+        name: liferay

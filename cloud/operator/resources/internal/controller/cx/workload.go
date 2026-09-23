@@ -160,23 +160,27 @@ func injectPodTemplate(
 		},
 	})
 
-	template.Spec.Volumes = upsertVolume(template.Spec.Volumes, corev1.Volume{
-		Name: VolumeExtInit,
-		VolumeSource: corev1.VolumeSource{
-			Secret: &corev1.SecretVolumeSource{SecretName: sources.ExtInitSecretName},
-		},
-	})
+	// A client extension with no OAuth2 application has no credentials to
+	// mount. Liferay only writes ext-init for extensions that declare one.
+	if sources.ExtInitSecretName != "" {
+		template.Spec.Volumes = upsertVolume(template.Spec.Volumes, corev1.Volume{
+			Name: VolumeExtInit,
+			VolumeSource: corev1.VolumeSource{
+				Secret: &corev1.SecretVolumeSource{SecretName: sources.ExtInitSecretName},
+			},
+		})
+	}
 
 	for index := range template.Spec.Containers {
-		injectContainer(&template.Spec.Containers[index])
+		injectContainer(&template.Spec.Containers[index], sources)
 	}
 
 	for index := range template.Spec.InitContainers {
-		injectContainer(&template.Spec.InitContainers[index])
+		injectContainer(&template.Spec.InitContainers[index], sources)
 	}
 }
 
-func injectContainer(container *corev1.Container) {
+func injectContainer(container *corev1.Container, sources WorkloadSources) {
 	container.Env = upsertEnv(container.Env, corev1.EnvVar{
 		Name: EnvRoutesClientExtension, Value: MountPathExtInit,
 	})
@@ -187,9 +191,11 @@ func injectContainer(container *corev1.Container) {
 	container.VolumeMounts = upsertVolumeMount(container.VolumeMounts, corev1.VolumeMount{
 		MountPath: MountPathDXP, Name: VolumeDXP, ReadOnly: true,
 	})
-	container.VolumeMounts = upsertVolumeMount(container.VolumeMounts, corev1.VolumeMount{
-		MountPath: MountPathExtInit, Name: VolumeExtInit, ReadOnly: true,
-	})
+	if sources.ExtInitSecretName != "" {
+		container.VolumeMounts = upsertVolumeMount(container.VolumeMounts, corev1.VolumeMount{
+			MountPath: MountPathExtInit, Name: VolumeExtInit, ReadOnly: true,
+		})
+	}
 }
 
 func restartPolicyOrDefault(policy corev1.RestartPolicy) corev1.RestartPolicy {
