@@ -2,7 +2,7 @@
 
 ## Status
 
-Design spike for LCD-53515, implemented and exercised in k3d against a simulated Liferay. See **Implementation** for what is real and what is simulated. The prototype chart this evaluates lives at `cne-cookbook/resources/charts/client-extension`.
+Design spike for LCD-53515, implemented and exercised in k3d against Liferay DXP running the portal modules built from this checkout. The prototype chart this evaluates lives at `cne-cookbook/resources/charts/client-extension`.
 
 ## Summary
 
@@ -436,7 +436,6 @@ The design is implemented and exercised in a k3d cluster. Everything below is re
 | CRD types | `cloud/operator/resources/api/cx/v1alpha1/` |
 | Diagrams | `cloud/operator/DIAGRAMS.md` |
 | Generated CRD | `cloud/helm/dxp-operator/crds/cx.liferay.com_clientextensions.yaml` |
-| Liferay agent simulator | `cloud/operator/resources/cmd/dxpsim/` |
 | Reconciler | `cloud/operator/resources/internal/controller/cx/` |
 | Status API | `modules/apps/static/portal-k8s-agent/portal-k8s-agent-api/.../status/` |
 | Status report | `cloud/operator/STATUS_REPORT.md` |
@@ -447,28 +446,28 @@ The design is implemented and exercised in a k3d cluster. Everything below is re
 cloud/operator/hack/run-all.sh
 ```
 
-That creates a k3d cluster, builds the operator and the simulator, installs the CRDs and the operator chart, builds an image for every sample in `liferay-sample-workspace`, runs all three scenarios, and writes the status report. `teardown.sh` removes the cluster.
+That creates a k3d cluster, builds the operator, installs the CRDs and the operator chart, brings up Liferay DXP carrying the portal modules built from this checkout, builds an image for every sample in `liferay-sample-workspace`, runs every scenario, asserts the handshake end to end, and writes the status report. `teardown.sh` removes the cluster.
 
-### What Is Simulated
+### What Is Under Test
 
-`dxpsim` reproduces the observable contract of `portal-k8s-agent`: it watches ext-provision ConfigMaps in one namespace, treats their labels as configuration properties, resolves addressing from the `mainDomain` annotation, provisions an OAuth2 application per `oAuthApplication*` entry, writes the credentials back into `<serviceId>-<webId>-lxc-ext-init-metadata`, and withdraws them when the source ConfigMap disappears.
+Liferay itself is real. The bundle is the published `liferay/dxp` image with the portal modules built from this checkout copied over it by an init container, so `portal-k8s-agent` is the code in this repository, the OAuth2 applications are registered by Liferay, and the credentials in every ext-init Secret were issued by it.
 
-It serves no HTTP and has no database. It exists so the handshake can be exercised without a licensed DXP boot, and it is not a substitute for testing against real Liferay.
+An earlier revision of this spike ran against a simulator of the agent. It was removed once real DXP was in the loop, because it had agreed with the reading of the agent it was written from and so confirmed assumptions rather than testing them. Two defects appeared immediately once it was gone: Liferay writes ext-init only for a client extension that declares an OAuth2 application, which stranded every frontend-only sample the operator was gating on it, and the agent's own `_validateLabels` rejected a metadata type the simulator had accepted.
 
 ### Results
 
 - The Go translator reproduces the Gradle task's payload for **44 of 44** sample projects, compared entry by entry against the checked-in `*.client-extension-config.json`. Encoded `typeSettings` are compared as sets: the Go implementation sorts them, where the Gradle task's `HashMap` iteration order is unstable and would churn the ConfigMap on every reconcile.
 - All **44 of 44** client extensions reach `Delivered` and `Provisioned` in both the same-namespace and split-namespace scenarios.
 - A client extension in a namespace absent from `clientExtensionNamespaces` is refused with `Degraded: NamespaceNotPermitted`, and nothing is written into the Liferay namespace.
-- Seven workloads do not reach `Ready`. All seven are runtime failures caused by the simulator rather than by the operator, and are itemized in the status report.
+- The counts above come from the full 44-sample sweep, which was last run against the agent simulator. That simulator has since been removed in favour of real DXP, and the sweep has not been repeated end to end since; the samples exercised against real Liferay are the ones the scenarios cover. Re-running `hack/run-all.sh` is what restates these numbers.
 
-### Not Yet Verified Against A Real Liferay
+### Running The Portal Modules
 
-The control panel and the portal half of the error channel **compile but have not been run inside a portal**. Producing an OSGi bundle from this worktree needs `com.liferay.portal.impl:131.1.3-SNAPSHOT` in the local `.m2`, which requires building portal-kernel and portal-impl first (`ant all` at the repository root). Until that runs, every module here builds to a plain class jar with a one-line manifest and no declarative services descriptors, including modules nobody has touched -- so the gap is environmental rather than a defect in this change.
+The three portal modules are built from this checkout and run inside the DXP image. `hack/stage-modules.sh` builds them, lowers their `Import-Package` floors to what the target image exports, and stages them into a directory the k3d node bind mounts; an init container copies them over `$LIFERAY_HOME` before the portal starts. The bundles land in `tools/sdk/dist/`, not `build/libs`, and the portal artifacts they compile against are installed from the branch's own bundle rather than by running `ant all`.
 
-What that leaves unproven: the panel's rendering, the `ClientExtensionStatusStore` reading custom resources through fabric8, and the agent publishing ext-status from real injection failures. What is proven: the whole contract those pieces implement, exercised against the agent simulator, which publishes ext-status in the same shape and reproduces both the accepted and the rejected case.
+What remains unexercised is the control panel's rendering. Everything behind it is not: `ClientExtensionStatusReader` reads the custom resources through fabric8 in the running portal, and `ClientExtensionStatusPublisher` writes the `ConfigurationAccepted` condition onto the status subresource from the real injection path.
 
-Running it for real needs, in order: `ant all` at the repository root, `ant deploy install-portal-snapshot` from `portal-impl`, then rebuilding the three modules and layering them into the image through the MinIO overlay that `hack/manifests/` already defines.
+There is no ext-status ConfigMap. An earlier revision published one; the virtual instance now writes the status subresource directly, which is why two writers can share a status object without either clobbering the other's conditions.
 
 ### Deviations From This Document
 

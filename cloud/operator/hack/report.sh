@@ -116,7 +116,8 @@ function _header {
 	echo "| Component | Value |"
 	echo "|---|---|"
 	echo "| Cluster | $(kube version --output json 2> /dev/null | python3 -c 'import json,sys; print(json.load(sys.stdin)["serverVersion"]["gitVersion"])' 2> /dev/null || echo unknown) |"
-	echo "| Liferay namespace | \`${LIFERAY_NAMESPACE}\` (simulated agent) |"
+	echo "| Liferay namespace | \`${LIFERAY_NAMESPACE}\` |"
+	echo "| Liferay image | \`${LIFERAY_IMAGE}\` plus modules from this checkout |"
 	echo "| Operator | \`${OPERATOR_IMAGE}\` in \`${OPERATOR_NAMESPACE}\` |"
 	echo "| Split namespace | \`${CX_NAMESPACE_SPLIT}\` |"
 	echo "| Unlisted namespace | \`${CX_NAMESPACE_DENIED}\` |"
@@ -124,19 +125,11 @@ function _header {
 }
 
 function _notes {
-	echo "## What Is Real And What Is Simulated"
+	echo "## What Is Under Test"
 	echo
-	echo "Real: the CRD, the operator and both of its controllers, the configuration translator, the Helm chart, the ext-provision and ext-init ConfigMaps, the Secret mirroring, the shared virtual instance mirror, the cross-namespace consent check, and the workloads themselves."
+	echo "Everything in this report runs against a published Liferay DXP image carrying the portal modules built from this checkout. Nothing is simulated: the ext-provision payloads are read by \`portal-k8s-agent\`, the OAuth2 applications are registered by Liferay, and the credentials in every ext-init Secret were issued by it."
 	echo
-	echo "Simulated: Liferay. \`dxpsim\` reproduces the observable contract of \`portal-k8s-agent\` -- it watches ext-provision ConfigMaps, treats labels as configuration properties, and writes back ext-init credentials -- but it serves no HTTP and has no database."
-	echo
-	echo "That boundary explains every workload that is not Ready:"
-	echo
-	echo "- The \`liferay/jar-runner\` microservices boot, read the OAuth2 credentials from the mounted Secret, then try to fetch Liferay's JWKS endpoint over HTTP and exit when nothing answers. Reaching that failure proves the credentials arrived."
-	echo "- The \`liferay/batch\` importers call Liferay's headless batch API, which the simulator does not serve."
-	echo "- The CronJob sample is created on its declared schedule and does not run inside the test window."
-	echo
-	echo "The operator-level contract -- Delivered and Provisioned -- is what this spike validates, and it does not depend on the simulator's limits."
+	echo "A workload that is not Ready is therefore a real failure rather than a limit of the harness. The CronJob sample is the exception -- it is created on its declared schedule and does not run inside the test window."
 	echo
 }
 

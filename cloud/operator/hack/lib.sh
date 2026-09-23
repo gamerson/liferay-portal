@@ -8,8 +8,6 @@ CX_NAMESPACE_DENIED="${CX_NAMESPACE_DENIED:-team-b}"
 
 CX_NAMESPACE_SPLIT="${CX_NAMESPACE_SPLIT:-team-a}"
 
-DXPSIM_IMAGE="${DXPSIM_IMAGE:-liferay/dxpsim:spike}"
-
 IMAGE_TAG="${IMAGE_TAG:-spike}"
 
 LIFERAY_IMAGE="${LIFERAY_IMAGE:-liferay/dxp:latest}"

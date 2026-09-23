@@ -1,11 +1,7 @@
 #!/bin/bash
 
-# Creates a k3d cluster, builds and loads the operator and the Liferay agent
-# simulator, installs the CRDs, and brings up one simulated Liferay.
-#
-# The simulator stands in for Liferay's portal-k8s-agent. It is not Liferay:
-# it reproduces the ConfigMap contract the operator integrates with so the
-# handshake can be exercised without a licensed DXP boot.
+# Creates a k3d cluster, builds and loads the operator, installs the CRDs, and
+# brings up Liferay DXP carrying the rebuilt portal modules.
 
 set -o errexit
 set -o nounset
@@ -20,20 +16,12 @@ OPERATOR_DIR="$(cd "${HACK_DIR}/.." && pwd)"
 CLOUD_DIR="$(cd "${OPERATOR_DIR}/.." && pwd)"
 
 function main {
-	local liferay_mode=${1:---simulated}
-
 	_create_cluster
 	_build_images
 	_import_images
 	_install_crds
 	_install_operator
-
-	if [ "${liferay_mode}" == "--dxp" ]
-	then
-		_install_dxp
-	else
-		_install_liferay
-	fi
+	_install_liferay
 
 	log_step "Bootstrap complete"
 
@@ -41,54 +29,12 @@ function main {
 	kube get pods --all-namespaces
 }
 
-# _install_dxp brings up a published Liferay DXP image carrying the rebuilt
-# portal modules, in place of the agent simulator.
-function _install_dxp {
-	log_step "Installing Liferay DXP in ${LIFERAY_NAMESPACE}"
-
-	"${HACK_DIR}/stage-modules.sh"
-
-	kube create namespace "${LIFERAY_NAMESPACE}" --dry-run=client --output yaml | kube apply --filename -
-	kube create namespace "${CX_NAMESPACE_SPLIT}" --dry-run=client --output yaml | kube apply --filename -
-	kube create namespace "${CX_NAMESPACE_DENIED}" --dry-run=client --output yaml | kube apply --filename -
-
-	kube --namespace "${LIFERAY_NAMESPACE}" create secret generic liferay-activation \
-		--dry-run=client --from-literal=activationCode=spike --output yaml | kube apply --filename -
-
-	_render manifests/mariadb.yaml | kube apply --filename -
-	_render manifests/liferay-dxp.yaml | kube apply --filename -
-	_render manifests/liferay-environment.yaml | kube apply --filename -
-
-	kube --namespace "${LIFERAY_NAMESPACE}" rollout status deployment/mariadb --timeout 300s
-
-	log "Waiting for Liferay to boot. A first boot against an empty database takes several minutes."
-
-	kube --namespace "${LIFERAY_NAMESPACE}" rollout status deployment/liferay --timeout 1800s
-}
-
-function _render {
-	sed \
-		--expression "s|__CX_NAMESPACE_SPLIT__|${CX_NAMESPACE_SPLIT}|g" \
-		--expression "s|__DXPSIM_IMAGE__|${DXPSIM_IMAGE}|g" \
-		--expression "s|__LIFERAY_IMAGE__|${LIFERAY_IMAGE}|g" \
-		--expression "s|__LIFERAY_NAMESPACE__|${LIFERAY_NAMESPACE}|g" \
-		--expression "s|__MARIADB_IMAGE__|${MARIADB_IMAGE}|g" \
-		--expression "s|__MINIO_IMAGE__|${MINIO_IMAGE}|g" \
-		--expression "s|__VIRTUAL_INSTANCE_ID__|${VIRTUAL_INSTANCE_ID}|g" \
-		"${HACK_DIR}/${1}"
-}
-
 function _build_images {
-	log_step "Building the operator and the Liferay agent simulator"
+	log_step "Building the operator"
 
 	docker build \
 		--file "${OPERATOR_DIR}/Dockerfile" \
 		--tag "${OPERATOR_IMAGE}" \
-		"${OPERATOR_DIR}"
-
-	docker build \
-		--file "${HACK_DIR}/Dockerfile.dxpsim" \
-		--tag "${DXPSIM_IMAGE}" \
 		"${OPERATOR_DIR}"
 }
 
@@ -119,8 +65,7 @@ function _import_images {
 
 	k3d image import \
 		--cluster "${CLUSTER_NAME}" \
-		"${OPERATOR_IMAGE}" \
-		"${DXPSIM_IMAGE}"
+		"${OPERATOR_IMAGE}"
 }
 
 function _install_crds {
@@ -134,8 +79,13 @@ function _install_crds {
 		crd/liferayenvironments.licensing.liferay.com
 }
 
+# _install_liferay brings up a published Liferay DXP image carrying the portal
+# modules built from this checkout, copied in by an init container from a volume
+# the node mounts.
 function _install_liferay {
-	log_step "Installing the simulated Liferay in ${LIFERAY_NAMESPACE}"
+	log_step "Installing Liferay DXP in ${LIFERAY_NAMESPACE}"
+
+	"${HACK_DIR}/stage-modules.sh"
 
 	kube create namespace "${LIFERAY_NAMESPACE}" --dry-run=client --output yaml | kube apply --filename -
 	kube create namespace "${CX_NAMESPACE_SPLIT}" --dry-run=client --output yaml | kube apply --filename -
@@ -144,19 +94,15 @@ function _install_liferay {
 	kube --namespace "${LIFERAY_NAMESPACE}" create secret generic liferay-activation \
 		--dry-run=client --from-literal=activationCode=spike --output yaml | kube apply --filename -
 
-	sed \
-		--expression "s|__CX_NAMESPACE_SPLIT__|${CX_NAMESPACE_SPLIT}|g" \
-		--expression "s|__DXPSIM_IMAGE__|${DXPSIM_IMAGE}|g" \
-		--expression "s|__LIFERAY_NAMESPACE__|${LIFERAY_NAMESPACE}|g" \
-		--expression "s|__VIRTUAL_INSTANCE_ID__|${VIRTUAL_INSTANCE_ID}|g" \
-		"${HACK_DIR}/manifests/liferay.yaml" | kube apply --filename -
+	_render manifests/mariadb.yaml | kube apply --filename -
+	_render manifests/liferay-dxp.yaml | kube apply --filename -
+	_render manifests/liferay-environment.yaml | kube apply --filename -
 
-	kube --namespace "${LIFERAY_NAMESPACE}" rollout status deployment/dxpsim --timeout 120s
+	kube --namespace "${LIFERAY_NAMESPACE}" rollout status deployment/mariadb --timeout 300s
 
-	wait_for "the virtual instance metadata" 120 \
-		kube --namespace "${LIFERAY_NAMESPACE}" get "configmap/${VIRTUAL_INSTANCE_ID}-lxc-dxp-metadata"
+	log "Waiting for Liferay to boot. A first boot against an empty database takes several minutes."
 
-	log "Liferay metadata published"
+	kube --namespace "${LIFERAY_NAMESPACE}" rollout status deployment/liferay --timeout 1800s
 }
 
 function _install_operator {
@@ -175,6 +121,17 @@ function _install_operator {
 		--timeout 180s
 
 	kube --namespace "${OPERATOR_NAMESPACE}" rollout status deployment/dxp-operator --timeout 180s
+}
+
+function _render {
+	sed \
+		--expression "s|__CX_NAMESPACE_SPLIT__|${CX_NAMESPACE_SPLIT}|g" \
+		--expression "s|__LIFERAY_IMAGE__|${LIFERAY_IMAGE}|g" \
+		--expression "s|__LIFERAY_NAMESPACE__|${LIFERAY_NAMESPACE}|g" \
+		--expression "s|__MARIADB_IMAGE__|${MARIADB_IMAGE}|g" \
+		--expression "s|__MINIO_IMAGE__|${MINIO_IMAGE}|g" \
+		--expression "s|__VIRTUAL_INSTANCE_ID__|${VIRTUAL_INSTANCE_ID}|g" \
+		"${HACK_DIR}/${1}"
 }
 
 main "${@}"
