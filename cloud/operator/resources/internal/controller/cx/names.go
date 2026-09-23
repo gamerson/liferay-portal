@@ -28,6 +28,7 @@ const (
 
 // Labels and annotations owned by this operator.
 const (
+	AnnotationConfigDigest    = "cx.liferay.com/config-digest"
 	AnnotationDeletionStarted = "cx.liferay.com/deletion-started"
 	AnnotationSource          = "cx.liferay.com/source"
 

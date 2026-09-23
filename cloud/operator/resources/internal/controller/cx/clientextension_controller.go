@@ -181,7 +181,14 @@ func (reconciler *ClientExtensionReconciler) Reconcile(
 		dxpMetadataSource = mirrored
 	}
 
+	var extInitData map[string]string
+
+	if extInit != nil {
+		extInitData = extInit.Data
+	}
+
 	ready, error := reconciler.applyWorkload(context, &clientExtension, WorkloadSources{
+		ConfigDigest:             ConfigDigest(dxpMetadata.Data, extInitData),
 		DXPMetadataConfigMapName: dxpMetadataSource,
 		ExtInitSecretName:        extInitSecretName,
 	})

@@ -1,7 +1,10 @@
 package cx
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
+	"sort"
 
 	cxv1alpha1 "github.com/liferay/liferay-portal/cloud/operator/api/cx/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
@@ -13,6 +16,10 @@ import (
 
 // WorkloadSources names the objects the pod template is wired to.
 type WorkloadSources struct {
+	// ConfigDigest fingerprints the content those objects carry. It is
+	// stamped onto the pod template so that a change rolls the pods.
+	ConfigDigest string
+
 	// DXPMetadataConfigMapName is the ConfigMap carrying the virtual
 	// instance's routes, either Liferay's own or the mirror.
 	DXPMetadataConfigMapName string
@@ -149,6 +156,21 @@ func injectPodTemplate(
 		}
 	}
 
+	// Both payloads are mounted as files, and every client extension runtime
+	// reads them once at startup -- Spring Boot builds its configtree, Caddy
+	// its CORS allow list. Kubernetes propagates a changed ConfigMap or Secret
+	// into the running container, but nothing rereads it, so a credential
+	// Liferay reissued leaves the pod authenticating with the previous one
+	// until something restarts it. Stamping the digest here is what makes that
+	// restart happen.
+	if sources.ConfigDigest != "" {
+		if template.Annotations == nil {
+			template.Annotations = map[string]string{}
+		}
+
+		template.Annotations[AnnotationConfigDigest] = sources.ConfigDigest
+	}
+
 	template.Spec.Volumes = upsertVolume(template.Spec.Volumes, corev1.Volume{
 		Name: VolumeDXP,
 		VolumeSource: corev1.VolumeSource{
@@ -240,4 +262,29 @@ func upsertVolumeMount(values []corev1.VolumeMount, value corev1.VolumeMount) []
 	}
 
 	return append(values, value)
+}
+
+// ConfigDigest fingerprints the payloads a pod reads at startup. Keys are
+// sorted so that the digest depends on content alone, and each key and value
+// is length prefixed so that no two distinct maps can encode the same way.
+func ConfigDigest(payloads ...map[string]string) string {
+	hash := sha256.New()
+
+	for _, payload := range payloads {
+		keys := make([]string, 0, len(payload))
+
+		for key := range payload {
+			keys = append(keys, key)
+		}
+
+		sort.Strings(keys)
+
+		for _, key := range keys {
+			fmt.Fprintf(hash, "%d:%s=%d:%s\n", len(key), key, len(payload[key]), payload[key])
+		}
+
+		fmt.Fprintln(hash, "--")
+	}
+
+	return hex.EncodeToString(hash.Sum(nil))
 }
