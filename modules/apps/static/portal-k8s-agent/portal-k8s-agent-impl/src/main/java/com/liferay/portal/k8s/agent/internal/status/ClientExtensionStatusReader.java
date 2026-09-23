@@ -15,7 +15,6 @@ import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.Validator;
 
 import io.fabric8.kubernetes.client.KubernetesClient;
-import io.fabric8.kubernetes.client.dsl.base.CustomResourceDefinitionContext;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -129,7 +128,7 @@ public class ClientExtensionStatusReader {
 
 		try {
 			result = _kubernetesClient.customResource(
-				_customResourceDefinitionContext
+				ClientExtensionResource.CONTEXT
 			).list();
 		}
 		catch (Exception exception) {
@@ -141,7 +140,7 @@ public class ClientExtensionStatusReader {
 
 			try {
 				result = _kubernetesClient.customResource(
-					_customResourceDefinitionContext
+					ClientExtensionResource.CONTEXT
 				).list(
 					_namespace
 				);
@@ -220,30 +219,8 @@ public class ClientExtensionStatusReader {
 			_clientExtensionConfigurationErrorRegistry.getConfigurationErrors(
 				serviceId, virtualInstanceId);
 
-		List<ClientExtensionStatusCondition> conditions = _getConditions(status);
-
-		// The portal is the authority on whether it accepted the payload, so a
-		// locally observed failure is reported as a condition of its own rather
-		// than waiting for the operator to notice.
-
-		if (!configurationErrors.isEmpty()) {
-			conditions.add(
-				new ClientExtensionStatusCondition(
-					new Date(),
-					configurationErrors.size() +
-						" configuration entries were rejected by this virtual " +
-							"instance",
-					"ConfigurationRejected",
-					ClientExtensionStatusCondition.STATUS_FALSE,
-					ClientExtensionStatusCondition.CONFIGURATION_ACCEPTED));
-		}
-		else {
-			conditions.add(
-				new ClientExtensionStatusCondition(
-					new Date(), "The configuration payload was applied.",
-					"Applied", ClientExtensionStatusCondition.STATUS_TRUE,
-					ClientExtensionStatusCondition.CONFIGURATION_ACCEPTED));
-		}
+		List<ClientExtensionStatusCondition> conditions = _getConditions(
+			status);
 
 		return new ClientExtensionStatus(
 			conditions, configurationErrors,
@@ -251,29 +228,11 @@ public class ClientExtensionStatusReader {
 				serviceId, virtualInstanceId),
 			_getString(metadata, "namespace"), _getString(status, "phase"),
 			_getString(spec, "projectName"), serviceId, virtualInstanceId,
-			_getString(workload, "kind"),
-			_getString(status, "workloadName"));
+			_getString(workload, "kind"), _getString(status, "workloadName"));
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		ClientExtensionStatusReader.class);
-
-	private static final CustomResourceDefinitionContext
-		_customResourceDefinitionContext =
-			new CustomResourceDefinitionContext.Builder(
-			).withGroup(
-				"cx.liferay.com"
-			).withKind(
-				"ClientExtension"
-			).withName(
-				"clientextensions.cx.liferay.com"
-			).withPlural(
-				"clientextensions"
-			).withScope(
-				"Namespaced"
-			).withVersion(
-				"v1alpha1"
-			).build();
 
 	private final ClientExtensionConfigurationErrorRegistry
 		_clientExtensionConfigurationErrorRegistry;

@@ -46,7 +46,12 @@ subjects:
         namespace: __LIFERAY_NAMESPACE__
 ---
 # The control panel lists client extensions wherever they live, so the portal
-# reads the custom resource cluster wide. It is a read only grant.
+# reads the custom resource cluster wide.
+#
+# The portal also writes the status subresource. It is the only component that
+# knows whether a configuration payload was applied, and conditions are keyed by
+# type so the portal and the operator can each own the ones they know about. The
+# grant is deliberately narrow: status only, never the spec.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -60,6 +65,14 @@ rules:
             -   get
             -   list
             -   watch
+    -   apiGroups:
+            -   cx.liferay.com
+        resources:
+            -   clientextensions/status
+        verbs:
+            -   get
+            -   patch
+            -   update
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -168,6 +181,22 @@ spec:
                         -   mountPath: /mnt/liferay
                             name: overlay
             initContainers:
+                # Liferay's Spring context fails outright if the database is
+                # not accepting connections when it starts, and a TCP readiness
+                # probe still passes because Tomcat binds regardless. Waiting
+                # here turns a dead webapp into a slower start.
+                -   command:
+                        -   /bin/sh
+                        -   -c
+                        -   |
+                            until nc -z mariadb 3306
+                            do
+                                echo "Waiting for mariadb"
+                                sleep 3
+                            done
+                            echo "Database is accepting connections"
+                    image: busybox:1.36
+                    name: wait-for-database
                 -   command:
                         -   /bin/sh
                         -   -c

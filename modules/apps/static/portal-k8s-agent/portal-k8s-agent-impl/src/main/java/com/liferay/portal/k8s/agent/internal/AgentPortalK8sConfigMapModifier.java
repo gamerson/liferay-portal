@@ -15,11 +15,11 @@ import com.liferay.portal.k8s.agent.PortalK8sConfigMapModifier;
 import com.liferay.portal.k8s.agent.configuration.PortalK8sAgentConfiguration;
 import com.liferay.portal.k8s.agent.custodian.VirtualInstanceCustodian;
 import com.liferay.portal.k8s.agent.internal.status.ClientExtensionConfigurationErrorRegistry;
+import com.liferay.portal.k8s.agent.internal.status.ClientExtensionStatusPublisher;
 import com.liferay.portal.k8s.agent.internal.status.ClientExtensionStatusReader;
 import com.liferay.portal.k8s.agent.internal.thread.local.AgentPortalK8sThreadLocal;
 import com.liferay.portal.k8s.agent.internal.util.ConfigurationUtil;
 import com.liferay.portal.k8s.agent.mutator.PortalK8sConfigurationPropertiesMutator;
-import com.liferay.portal.k8s.agent.status.ClientExtensionConfigurationError;
 import com.liferay.portal.k8s.agent.status.ClientExtensionStatus;
 import com.liferay.portal.k8s.agent.status.ClientExtensionStatusStore;
 import com.liferay.portal.kernel.cluster.ClusterExecutor;
@@ -30,7 +30,6 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.Http;
-import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
@@ -133,6 +132,9 @@ public class AgentPortalK8sConfigMapModifier
 
 		_kubernetesClient = new DefaultKubernetesClient(
 			_toConfig(_portalK8sAgentConfiguration));
+
+		_clientExtensionStatusPublisher = new ClientExtensionStatusPublisher(
+			clientExtensionConfigurationErrorRegistry, _kubernetesClient);
 
 		_clientExtensionStatusReader = new ClientExtensionStatusReader(
 			clientExtensionConfigurationErrorRegistry, _kubernetesClient,
@@ -242,6 +244,9 @@ public class AgentPortalK8sConfigMapModifier
 			return;
 		}
 
+		_clientExtensionConfigurationErrorRegistry.startApply(
+			_getServiceId(configMap), _getVirtualInstanceId(configMap));
+
 		for (Map.Entry<String, String> entry : data.entrySet()) {
 			try {
 				_processConfigurations(
@@ -249,8 +254,16 @@ public class AgentPortalK8sConfigMapModifier
 			}
 			catch (Exception exception) {
 				_log.error(exception);
+
+				_clientExtensionConfigurationErrorRegistry.recordApplyError(
+					_getName(configMap), entry.getKey(),
+					_getServiceId(configMap), _getVirtualInstanceId(configMap),
+					exception);
 			}
 		}
+
+		_clientExtensionStatusPublisher.publish(
+			_getServiceId(configMap), _getVirtualInstanceId(configMap));
 	}
 
 	private Map<String, String> _copy(Map<String, String> annotations) {
@@ -756,82 +769,6 @@ public class AgentPortalK8sConfigMapModifier
 		}
 	}
 
-	/**
-	 * Publishes what happened to a client extension's payload back into
-	 * Kubernetes, so the operator can surface it on the ClientExtension
-	 * resource. Without this the only record of a rejected payload is the
-	 * portal log, which a devops administrator has no reason to be reading.
-	 */
-	private void _publishExtStatus(ConfigMap configMap) {
-		String serviceId = _getServiceId(configMap);
-		String virtualInstanceId = _getVirtualInstanceId(configMap);
-
-		if (Validator.isNull(serviceId) ||
-			Validator.isNull(virtualInstanceId)) {
-
-			return;
-		}
-
-		List<ClientExtensionConfigurationError> configurationErrors =
-			_clientExtensionConfigurationErrorRegistry.getConfigurationErrors(
-				serviceId, virtualInstanceId);
-		List<String> configurationPids =
-			_clientExtensionConfigurationErrorRegistry.getConfigurationPids(
-				serviceId, virtualInstanceId);
-
-		modifyConfigMap(
-			configMapModel -> {
-				Map<String, String> data = configMapModel.data();
-
-				data.clear();
-
-				data.put(
-					"accepted", String.valueOf(configurationErrors.isEmpty()));
-				data.put(
-					"acceptedPids",
-					StringUtil.merge(configurationPids, StringPool.NEW_LINE));
-				data.put(
-					"errorCount", String.valueOf(configurationErrors.size()));
-
-				int index = 0;
-
-				for (ClientExtensionConfigurationError
-						clientExtensionConfigurationError :
-							configurationErrors) {
-
-					data.put(
-						"error." + index + ".configMapName",
-						GetterUtil.getString(
-							clientExtensionConfigurationError.
-								getConfigMapName()));
-					data.put(
-						"error." + index + ".message",
-						GetterUtil.getString(
-							clientExtensionConfigurationError.getMessage()));
-					data.put(
-						"error." + index + ".phase",
-						GetterUtil.getString(
-							clientExtensionConfigurationError.getPhase()));
-					data.put(
-						"error." + index + ".pid",
-						GetterUtil.getString(
-							clientExtensionConfigurationError.getPid()));
-
-					index++;
-				}
-
-				Map<String, String> labels = configMapModel.labels();
-
-				labels.put(
-					"dxp.lxc.liferay.com/virtualInstanceId", virtualInstanceId);
-				labels.put("ext.lxc.liferay.com/serviceId", serviceId);
-				labels.put("lxc.liferay.com/metadataType", "ext-status");
-			},
-			StringBundler.concat(
-				serviceId, StringPool.DASH, virtualInstanceId,
-				"-lxc-ext-status-metadata"));
-	}
-
 	private void _run(Runnable runnable) {
 		ClusterNode localClusterNode = _clusterExecutor.getLocalClusterNode();
 
@@ -1009,7 +946,9 @@ public class AgentPortalK8sConfigMapModifier
 				}
 			}
 
-			_publishExtStatus(newConfigMap);
+			_clientExtensionStatusPublisher.publish(
+				_getServiceId(newConfigMap),
+				_getVirtualInstanceId(newConfigMap));
 		}
 
 		Configuration[] configurations = null;
@@ -1052,8 +991,7 @@ public class AgentPortalK8sConfigMapModifier
 		Objects.requireNonNull(configMapName, "Config map name is null");
 
 		if (!configMapName.endsWith("-lxc-dxp-metadata") &&
-			!configMapName.endsWith("-lxc-ext-init-metadata") &&
-			!configMapName.endsWith("-lxc-ext-status-metadata")) {
+			!configMapName.endsWith("-lxc-ext-init-metadata")) {
 
 			throw new IllegalArgumentException(
 				StringBundler.concat(
@@ -1071,14 +1009,13 @@ public class AgentPortalK8sConfigMapModifier
 
 		if ((metadataType == null) ||
 			(!Objects.equals(metadataType, "dxp") &&
-			 !Objects.equals(metadataType, "ext-init") &&
-			 !Objects.equals(metadataType, "ext-status"))) {
+			 !Objects.equals(metadataType, "ext-init"))) {
 
 			throw new IllegalArgumentException(
 				StringBundler.concat(
 					"Config map labels must contain the key ",
-					"\"lxc.liferay.com/metadataType\" with a value of ",
-					"\"dxp\", \"ext-init\", or \"ext-status\""));
+					"\"lxc.liferay.com/metadataType\" with a value of \"dxp\" ",
+					"or \"ext-init\""));
 		}
 
 		String virtualInstanceId = labels.get(
@@ -1149,6 +1086,8 @@ public class AgentPortalK8sConfigMapModifier
 	private final Bundle _bundle;
 	private final ClientExtensionConfigurationErrorRegistry
 		_clientExtensionConfigurationErrorRegistry;
+	private final ClientExtensionStatusPublisher
+		_clientExtensionStatusPublisher;
 	private final ClientExtensionStatusReader _clientExtensionStatusReader;
 	private final ClusterExecutor _clusterExecutor;
 	private final ClusterMasterExecutor _clusterMasterExecutor;
