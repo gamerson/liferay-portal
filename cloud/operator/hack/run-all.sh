@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Runs the whole spike end to end: cluster, operator, simulated Liferay, sample
-# images, all three scenarios, then the status report.
+# images, all scenarios, the end to end checks, then the status report.
 #
 # run-all.sh [--keep]
 #
@@ -33,6 +33,15 @@ function main {
 		liferay-sample-iframe-2
 
 	_wait_for_settle
+
+	log_step "Scenario D: a second virtual instance in its own namespace"
+
+	"${HACK_DIR}/scenario-second-instance.sh"
+
+	log_step "End to end checks"
+
+	"${HACK_DIR}/verify-handshake.sh"
+	"${HACK_DIR}/verify-object-action.sh"
 
 	"${HACK_DIR}/report.sh"
 }
