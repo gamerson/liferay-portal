@@ -122,11 +122,20 @@ func BuildTimestamp(clientExtension *cxv1alpha1.ClientExtension) int64 {
 	return clientExtension.Generation
 }
 
-// bucketOf routes an entry to an addressing bucket. Without an internal
-// address configured everything travels in the public bucket, which is the
-// behavior of the existing Helm chart.
+// bucketOf routes an entry to an addressing bucket by who places the call,
+// which is not the same question as what the entry is classified as. Without an
+// internal address configured everything travels in the public bucket, which is
+// the behavior of the existing Helm chart.
 func bucketOf(entry cxconfig.Entry, clientExtension *cxv1alpha1.ClientExtension) string {
 	if clientExtension.Spec.Domains.Internal == "" {
+		return BucketPublic
+	}
+
+	// A user agent OAuth2 application is called by the browser, so its address
+	// has to be routable from outside the cluster even though the registry
+	// classifies it alongside server side configuration. A headless server
+	// application is the opposite: Liferay calls it.
+	if entry.ExtensionType == "oAuthApplicationUserAgent" {
 		return BucketPublic
 	}
 

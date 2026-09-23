@@ -118,32 +118,26 @@ function _deploy_one {
 		arguments+=(--set "workload.env.LIFERAY_BATCH_OAUTH_APP_ERC=${batch_erc}")
 	fi
 
-	# A microservice is called by Liferay rather than fetched by a browser, so
-	# it gets a Service and a cluster-internal address. The operator then
-	# splits the payload into a public and an internal ext-provision ConfigMap.
+	# Every client extension gets a route of its own. A frontend one is fetched
+	# by the browser; a microservice is reached by the browser too whenever it
+	# exposes a user agent OAuth2 application, which the browser calls directly.
+	arguments+=(
+		--set "ingress.className=traefik"
+		--set "ingress.enabled=true"
+		--set "ingress.hosts[0].host=${sample}.${PUBLIC_DOMAIN_SUFFIX}"
+		--set "ingress.hosts[0].paths[0].path=/"
+		--set "ingress.hosts[0].paths[0].pathType=Prefix"
+		--set "service.enabled=true"
+		--set "service.port=${port}"
+		--set "service.targetPort=${port}"
+	)
+
+	# A microservice is also called by Liferay itself, server to server, which
+	# should stay inside the cluster. The operator splits the payload so each
+	# half is addressed the way its caller can reach it.
 	if _is_microservice "${sample}"
 	then
-		arguments+=(
-			--set "clientExtension.domains.internal=auto"
-			--set "service.enabled=true"
-			--set "service.port=${port}"
-			--set "service.targetPort=${port}"
-		)
-	else
-		# A frontend client extension is fetched by the browser, so it needs a
-		# route of its own. Its assets are then a cross origin request from the
-		# portal page, which is why the server hosting them has to know the
-		# virtual instance's domains.
-		arguments+=(
-			--set "ingress.className=traefik"
-			--set "ingress.enabled=true"
-			--set "ingress.hosts[0].host=${sample}.${PUBLIC_DOMAIN_SUFFIX}"
-			--set "ingress.hosts[0].paths[0].path=/"
-			--set "ingress.hosts[0].paths[0].pathType=Prefix"
-			--set "service.enabled=true"
-			--set "service.port=80"
-			--set "service.targetPort=${port}"
-		)
+		arguments+=(--set "clientExtension.domains.internal=auto")
 	fi
 
 	helm_cx upgrade --install "${sample}" "${CHART_DIR}" "${arguments[@]}" > /dev/null

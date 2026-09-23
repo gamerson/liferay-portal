@@ -10,6 +10,20 @@ metadata:
     namespace: __LIFERAY_NAMESPACE__
 spec:
     rules:
+        # The browser's OAuth2 client derives a PKCE challenge through
+        # crypto.subtle, which only exists in a secure context. Plain HTTP on a
+        # named host is not one; loopback is. Serving the portal on localhost as
+        # well gives a trustworthy origin without a certificate.
+        -   host: localhost
+            http:
+                paths:
+                    -   backend:
+                            service:
+                                name: liferay
+                                port:
+                                    number: 80
+                        path: /
+                        pathType: Prefix
         -   host: liferay.localtest.me
             http:
                 paths:
