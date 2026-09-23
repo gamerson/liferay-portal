@@ -11,16 +11,20 @@ function Comic() {
 
 	React.useEffect(() => {
 		OAuth2.FromUserAgentApplication('liferay-sample-etc-node-oaua')
-			.then((oAuth2Client) => {
+			.then((oAuth2Client) =>
 				oAuth2Client?.fetch('/comic').then((comic) => {
 					setComicData({
 						alt: comic.alt,
 						img: comic.img,
 						title: comic.safe_title,
 					});
-				});
-			})
-			.catch();
+				})
+			)
+			.catch((error) => {
+
+				// eslint-disable-next-line no-console
+				console.log(error);
+			});
 	}, []);
 
 	return !comicData ? (

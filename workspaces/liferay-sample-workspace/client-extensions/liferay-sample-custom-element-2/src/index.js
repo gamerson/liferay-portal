@@ -8,11 +8,18 @@ import {createRoot} from 'react-dom/client';
 
 import Comic from './common/components/Comic.js';
 import DadJoke from './common/components/DadJoke.js';
+import {installWebCryptoShim} from './common/services/crypto/webCryptoShim.js';
 import api from './common/services/liferay/api.js';
 import {Liferay} from './common/services/liferay/liferay.js';
 import HelloBar from './routes/hello-bar/pages/HelloBar.js';
 import HelloFoo from './routes/hello-foo/pages/HelloFoo.js';
 import HelloWorld from './routes/hello-world/pages/HelloWorld.js';
+
+// The OAuth2 client hashes the PKCE code verifier with crypto.subtle, which the
+// browser only exposes in a secure context. Install the shim before anything
+// can reach for it.
+
+installWebCryptoShim();
 
 const App = ({route}) => {
 	if (route === 'hello-bar') {
