@@ -114,6 +114,16 @@ spec:
                 -   env:
                         -   name: LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_DRIVER_UPPERCASEC_LASS_UPPERCASEN_AME
                             value: org.mariadb.jdbc.Driver
+                        # The web ID is the virtual instance identifier every
+                        # client extension targets, and it names the metadata
+                        # ConfigMap. Keeping it equal to the virtual host means
+                        # one name identifies the instance everywhere.
+                        -   name: LIFERAY_COMPANY_PERIOD_DEFAULT_PERIOD_WEB_PERIOD_ID
+                            value: __VIRTUAL_INSTANCE_ID__
+                        -   name: LIFERAY_COMPANY_PERIOD_DEFAULT_PERIOD_VIRTUAL_PERIOD_HOST_PERIOD_NAME
+                            value: __VIRTUAL_INSTANCE_ID__
+                        -   name: LIFERAY_COMPANY_PERIOD_DEFAULT_PERIOD_VIRTUAL_PERIOD_HOST_PERIOD_SYNC_PERIOD_ON_PERIOD_STARTUP
+                            value: "true"
                         -   name: LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_PASSWORD
                             value: liferay
                         -   name: LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_URL

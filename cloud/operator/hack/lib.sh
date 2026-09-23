@@ -31,7 +31,7 @@ PORTAL_MODULES_DIR="${PORTAL_MODULES_DIR:-${HOME}/.liferay/cx-spike/portal-modul
 
 SAMPLES_DIR="${SAMPLES_DIR:-$(cd "${HACK_DIR}/../../../workspaces/liferay-sample-workspace/client-extensions" && pwd)}"
 
-VIRTUAL_INSTANCE_ID="${VIRTUAL_INSTANCE_ID:-liferay.com}"
+VIRTUAL_INSTANCE_ID="${VIRTUAL_INSTANCE_ID:-liferay.localtest.me}"
 
 function log {
 	echo "==> ${*}"
