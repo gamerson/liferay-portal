@@ -34,7 +34,7 @@ public class ObjectAction2RestController extends BaseRestController {
 
 		JSONObject jsonObject = new JSONObject(json);
 
-		JSONObject modelDTOAccountJSONObject = jsonObject.getJSONObject(
+		JSONObject modelDTOAccountJSONObject = jsonObject.optJSONObject(
 			"modelDTOAccount");
 
 		if (modelDTOAccountJSONObject == null) {
