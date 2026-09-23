@@ -28,6 +28,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -49,6 +51,7 @@ const (
 	metadataTypeDXP          = "dxp"
 	metadataTypeExtInit      = "ext-init"
 	metadataTypeExtProvision = "ext-provision"
+	metadataTypeExtStatus    = "ext-status"
 )
 
 func main() {
@@ -122,6 +125,10 @@ func reconcile(context context.Context, clientSet *kubernetes.Clientset, namespa
 		live[extInitName] = true
 
 		if error := provisionOne(context, clientSet, namespace, provision, extInitName); error != nil {
+			return error
+		}
+
+		if error := publishExtStatus(context, clientSet, namespace, provision); error != nil {
 			return error
 		}
 	}
@@ -262,6 +269,86 @@ func provisionOne(
 	}
 
 	log.Printf("dxpsim: updating %q from %q", extInitName, provision.Name)
+
+	desired.ResourceVersion = existing.ResourceVersion
+
+	_, updateError := clientSet.CoreV1().ConfigMaps(namespace).Update(
+		context, desired, metav1.UpdateOptions{},
+	)
+
+	return updateError
+}
+
+// publishExtStatus reports whether the payload was applied, mirroring what the
+// portal publishes after injecting a client extension's configuration. The
+// simulator accepts everything it can parse and rejects what it cannot.
+func publishExtStatus(
+	context context.Context, clientSet *kubernetes.Clientset, namespace string,
+	provision *corev1.ConfigMap,
+) error {
+	serviceID := provision.Labels[labelServiceID]
+	virtualInstanceID := provision.Labels[labelVirtualInstance]
+
+	var acceptedPIDs []string
+	var data = map[string]string{}
+
+	errorCount := 0
+
+	for fileName, document := range provision.Data {
+		var payload map[string]map[string]any
+
+		if error := json.Unmarshal([]byte(document), &payload); error != nil {
+			data[fmt.Sprintf("error.%d.configMapName", errorCount)] = provision.Name
+			data[fmt.Sprintf("error.%d.message", errorCount)] = error.Error()
+			data[fmt.Sprintf("error.%d.phase", errorCount)] = "Parse"
+			data[fmt.Sprintf("error.%d.pid", errorCount)] = fileName
+
+			errorCount++
+
+			continue
+		}
+
+		for pid := range payload {
+			acceptedPIDs = append(acceptedPIDs, pid)
+		}
+	}
+
+	sort.Strings(acceptedPIDs)
+
+	data["accepted"] = strconv.FormatBool(errorCount == 0)
+	data["acceptedPids"] = strings.Join(acceptedPIDs, "\n")
+	data["errorCount"] = strconv.Itoa(errorCount)
+
+	name := fmt.Sprintf("%s-%s-lxc-ext-status-metadata", serviceID, virtualInstanceID)
+
+	desired := &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Labels: map[string]string{
+				labelMetadataType:    metadataTypeExtStatus,
+				labelServiceID:       serviceID,
+				labelVirtualInstance: virtualInstanceID,
+			},
+			Name:      name,
+			Namespace: namespace,
+		},
+		Data: data,
+	}
+
+	existing, error := clientSet.CoreV1().ConfigMaps(namespace).Get(
+		context, name, metav1.GetOptions{},
+	)
+
+	if apierrors.IsNotFound(error) {
+		_, createError := clientSet.CoreV1().ConfigMaps(namespace).Create(
+			context, desired, metav1.CreateOptions{},
+		)
+
+		return createError
+	}
+
+	if error != nil {
+		return error
+	}
 
 	desired.ResourceVersion = existing.ResourceVersion
 

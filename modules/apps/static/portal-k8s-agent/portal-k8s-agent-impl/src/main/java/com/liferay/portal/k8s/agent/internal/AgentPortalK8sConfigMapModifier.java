@@ -14,16 +14,23 @@ import com.liferay.portal.configuration.persistence.InMemoryOnlyConfigurationThr
 import com.liferay.portal.k8s.agent.PortalK8sConfigMapModifier;
 import com.liferay.portal.k8s.agent.configuration.PortalK8sAgentConfiguration;
 import com.liferay.portal.k8s.agent.custodian.VirtualInstanceCustodian;
+import com.liferay.portal.k8s.agent.internal.status.ClientExtensionConfigurationErrorRegistry;
+import com.liferay.portal.k8s.agent.internal.status.ClientExtensionStatusReader;
 import com.liferay.portal.k8s.agent.internal.thread.local.AgentPortalK8sThreadLocal;
 import com.liferay.portal.k8s.agent.internal.util.ConfigurationUtil;
 import com.liferay.portal.k8s.agent.mutator.PortalK8sConfigurationPropertiesMutator;
+import com.liferay.portal.k8s.agent.status.ClientExtensionConfigurationError;
+import com.liferay.portal.k8s.agent.status.ClientExtensionStatus;
+import com.liferay.portal.k8s.agent.status.ClientExtensionStatusStore;
 import com.liferay.portal.kernel.cluster.ClusterExecutor;
 import com.liferay.portal.kernel.cluster.ClusterMasterExecutor;
 import com.liferay.portal.kernel.cluster.ClusterNode;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
+import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.Http;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
@@ -75,14 +82,20 @@ import org.osgi.service.component.annotations.ReferencePolicyOption;
 	configurationPid = "com.liferay.portal.k8s.agent.configuration.PortalK8sAgentConfiguration",
 	configurationPolicy = ConfigurationPolicy.REQUIRE,
 	property = "portalK8sConfigurationPropertiesMutators.cardinality.minimum:Integer=3",
-	service = {PortalK8sConfigMapModifier.class, VirtualInstanceCustodian.class}
+	service = {
+		ClientExtensionStatusStore.class, PortalK8sConfigMapModifier.class,
+		VirtualInstanceCustodian.class
+	}
 )
 public class AgentPortalK8sConfigMapModifier
-	implements PortalK8sConfigMapModifier, VirtualInstanceCustodian {
+	implements ClientExtensionStatusStore, PortalK8sConfigMapModifier,
+			   VirtualInstanceCustodian {
 
 	@Activate
 	public AgentPortalK8sConfigMapModifier(
 			BundleContext bundleContext,
+			@Reference ClientExtensionConfigurationErrorRegistry
+				clientExtensionConfigurationErrorRegistry,
 			@Reference ClusterExecutor clusterExecutor,
 			@Reference ClusterMasterExecutor clusterMasterExecutor,
 			@Reference ConfigurationAdmin configurationAdmin,
@@ -104,6 +117,8 @@ public class AgentPortalK8sConfigMapModifier
 			_log.info("Initializing K8s agent with " + properties);
 		}
 
+		_clientExtensionConfigurationErrorRegistry =
+			clientExtensionConfigurationErrorRegistry;
 		_clusterExecutor = clusterExecutor;
 		_clusterMasterExecutor = clusterMasterExecutor;
 		_configurationAdmin = configurationAdmin;
@@ -118,6 +133,10 @@ public class AgentPortalK8sConfigMapModifier
 
 		_kubernetesClient = new DefaultKubernetesClient(
 			_toConfig(_portalK8sAgentConfiguration));
+
+		_clientExtensionStatusReader = new ClientExtensionStatusReader(
+			clientExtensionConfigurationErrorRegistry, _kubernetesClient,
+			_portalK8sAgentConfiguration.namespace());
 
 		_sharedIndexInformer = _toSharedIndexInformer(
 			_kubernetesClient, _portalK8sAgentConfiguration);
@@ -155,6 +174,16 @@ public class AgentPortalK8sConfigMapModifier
 				}
 			}
 		}
+	}
+
+	@Override
+	public List<ClientExtensionStatus> getClientExtensionStatuses() {
+		return _clientExtensionStatusReader.getClientExtensionStatuses();
+	}
+
+	@Override
+	public boolean isAvailable() {
+		return true;
 	}
 
 	@Override
@@ -233,6 +262,9 @@ public class AgentPortalK8sConfigMapModifier
 			_log.info("Deleting config map " + configMap);
 		}
 
+		_clientExtensionConfigurationErrorRegistry.clear(
+			_getServiceId(configMap), _getVirtualInstanceId(configMap));
+
 		Map<String, String> data = configMap.getData();
 
 		if (data == null) {
@@ -307,12 +339,45 @@ public class AgentPortalK8sConfigMapModifier
 		return result;
 	}
 
+	private String _getLabel(ConfigMap configMap, String key) {
+		ObjectMeta objectMeta = configMap.getMetadata();
+
+		if (objectMeta == null) {
+			return StringPool.BLANK;
+		}
+
+		return GetterUtil.getString(
+			_getMap(
+				objectMeta.getLabels()
+			).get(
+				key
+			));
+	}
+
 	private Map<String, String> _getMap(Map<String, String> map) {
 		if (map == null) {
 			map = new TreeMap<>();
 		}
 
 		return map;
+	}
+
+	private String _getName(ConfigMap configMap) {
+		ObjectMeta objectMeta = configMap.getMetadata();
+
+		if (objectMeta == null) {
+			return StringPool.BLANK;
+		}
+
+		return GetterUtil.getString(objectMeta.getName());
+	}
+
+	private String _getServiceId(ConfigMap configMap) {
+		return _getLabel(configMap, "ext.lxc.liferay.com/serviceId");
+	}
+
+	private String _getVirtualInstanceId(ConfigMap configMap) {
+		return _getLabel(configMap, "dxp.lxc.liferay.com/virtualInstanceId");
 	}
 
 	private String _getVirtualInstancePid(
@@ -654,6 +719,10 @@ public class AgentPortalK8sConfigMapModifier
 
 		for (String error : report.errors) {
 			_log.error(error);
+
+			_clientExtensionConfigurationErrorRegistry.recordParseError(
+				_getName(configMap), error, _getServiceId(configMap),
+				_getVirtualInstanceId(configMap));
 		}
 
 		for (String warning : report.warnings) {
@@ -671,11 +740,96 @@ public class AgentPortalK8sConfigMapModifier
 
 			try {
 				_processConfiguration(config, configMap.getMetadata());
+
+				_clientExtensionConfigurationErrorRegistry.recordSuccess(
+					config.getPid(), _getServiceId(configMap),
+					_getVirtualInstanceId(configMap));
 			}
 			catch (Exception exception) {
 				_log.error(exception);
+
+				_clientExtensionConfigurationErrorRegistry.recordApplyError(
+					_getName(configMap), config.getPid(),
+					_getServiceId(configMap), _getVirtualInstanceId(configMap),
+					exception);
 			}
 		}
+	}
+
+	/**
+	 * Publishes what happened to a client extension's payload back into
+	 * Kubernetes, so the operator can surface it on the ClientExtension
+	 * resource. Without this the only record of a rejected payload is the
+	 * portal log, which a devops administrator has no reason to be reading.
+	 */
+	private void _publishExtStatus(ConfigMap configMap) {
+		String serviceId = _getServiceId(configMap);
+		String virtualInstanceId = _getVirtualInstanceId(configMap);
+
+		if (Validator.isNull(serviceId) ||
+			Validator.isNull(virtualInstanceId)) {
+
+			return;
+		}
+
+		List<ClientExtensionConfigurationError> configurationErrors =
+			_clientExtensionConfigurationErrorRegistry.getConfigurationErrors(
+				serviceId, virtualInstanceId);
+		List<String> configurationPids =
+			_clientExtensionConfigurationErrorRegistry.getConfigurationPids(
+				serviceId, virtualInstanceId);
+
+		modifyConfigMap(
+			configMapModel -> {
+				Map<String, String> data = configMapModel.data();
+
+				data.clear();
+
+				data.put(
+					"accepted", String.valueOf(configurationErrors.isEmpty()));
+				data.put(
+					"acceptedPids",
+					StringUtil.merge(configurationPids, StringPool.NEW_LINE));
+				data.put(
+					"errorCount", String.valueOf(configurationErrors.size()));
+
+				int index = 0;
+
+				for (ClientExtensionConfigurationError
+						clientExtensionConfigurationError :
+							configurationErrors) {
+
+					data.put(
+						"error." + index + ".configMapName",
+						GetterUtil.getString(
+							clientExtensionConfigurationError.
+								getConfigMapName()));
+					data.put(
+						"error." + index + ".message",
+						GetterUtil.getString(
+							clientExtensionConfigurationError.getMessage()));
+					data.put(
+						"error." + index + ".phase",
+						GetterUtil.getString(
+							clientExtensionConfigurationError.getPhase()));
+					data.put(
+						"error." + index + ".pid",
+						GetterUtil.getString(
+							clientExtensionConfigurationError.getPid()));
+
+					index++;
+				}
+
+				Map<String, String> labels = configMapModel.labels();
+
+				labels.put(
+					"dxp.lxc.liferay.com/virtualInstanceId", virtualInstanceId);
+				labels.put("ext.lxc.liferay.com/serviceId", serviceId);
+				labels.put("lxc.liferay.com/metadataType", "ext-status");
+			},
+			StringBundler.concat(
+				serviceId, StringPool.DASH, virtualInstanceId,
+				"-lxc-ext-status-metadata"));
 	}
 
 	private void _run(Runnable runnable) {
@@ -836,6 +990,10 @@ public class AgentPortalK8sConfigMapModifier
 		ObjectMeta objectMeta = newConfigMap.getMetadata();
 
 		if (data != null) {
+			_clientExtensionConfigurationErrorRegistry.startApply(
+				_getServiceId(newConfigMap),
+				_getVirtualInstanceId(newConfigMap));
+
 			for (Map.Entry<String, String> entry : data.entrySet()) {
 				try {
 					_processConfigurations(
@@ -843,8 +1001,15 @@ public class AgentPortalK8sConfigMapModifier
 				}
 				catch (Exception exception) {
 					_log.error(exception);
+
+					_clientExtensionConfigurationErrorRegistry.recordApplyError(
+						_getName(newConfigMap), entry.getKey(),
+						_getServiceId(newConfigMap),
+						_getVirtualInstanceId(newConfigMap), exception);
 				}
 			}
+
+			_publishExtStatus(newConfigMap);
 		}
 
 		Configuration[] configurations = null;
@@ -887,7 +1052,8 @@ public class AgentPortalK8sConfigMapModifier
 		Objects.requireNonNull(configMapName, "Config map name is null");
 
 		if (!configMapName.endsWith("-lxc-dxp-metadata") &&
-			!configMapName.endsWith("-lxc-ext-init-metadata")) {
+			!configMapName.endsWith("-lxc-ext-init-metadata") &&
+			!configMapName.endsWith("-lxc-ext-status-metadata")) {
 
 			throw new IllegalArgumentException(
 				StringBundler.concat(
@@ -980,6 +1146,9 @@ public class AgentPortalK8sConfigMapModifier
 		AgentPortalK8sConfigMapModifier.class);
 
 	private final Bundle _bundle;
+	private final ClientExtensionConfigurationErrorRegistry
+		_clientExtensionConfigurationErrorRegistry;
+	private final ClientExtensionStatusReader _clientExtensionStatusReader;
 	private final ClusterExecutor _clusterExecutor;
 	private final ClusterMasterExecutor _clusterMasterExecutor;
 	private final Map<String, Consumer<ConfigMapModel>>

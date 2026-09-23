@@ -1,0 +1,2 @@
+# The module jars are build output; build-overlay.sh assembles them.
+osgi/

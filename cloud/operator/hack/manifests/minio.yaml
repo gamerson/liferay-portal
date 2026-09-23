@@ -1,0 +1,65 @@
+# MinIO stands in for the cloud object store that holds the Liferay overlay.
+# The portal image is immutable; everything environment specific -- the agent
+# configuration, the client extension status module, the rebuilt agent bundles
+# -- arrives from this bucket.
+apiVersion: v1
+kind: Service
+metadata:
+    name: minio
+    namespace: __LIFERAY_NAMESPACE__
+spec:
+    ports:
+        -   name: api
+            port: 9000
+            targetPort: 9000
+    selector:
+        app: minio
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: minio
+    namespace: __LIFERAY_NAMESPACE__
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: minio
+    template:
+        metadata:
+            labels:
+                app: minio
+        spec:
+            containers:
+                -   args:
+                        -   server
+                        -   /data
+                    env:
+                        -   name: MINIO_ROOT_PASSWORD
+                            value: liferaysecret
+                        -   name: MINIO_ROOT_USER
+                            value: liferay
+                    image: __MINIO_IMAGE__
+                    name: minio
+                    ports:
+                        -   containerPort: 9000
+                            name: api
+                    readinessProbe:
+                        httpGet:
+                            path: /minio/health/ready
+                            port: 9000
+                        initialDelaySeconds: 5
+                        periodSeconds: 5
+                    resources:
+                        limits:
+                            cpu: 500m
+                            memory: 512Mi
+                        requests:
+                            cpu: 100m
+                            memory: 256Mi
+                    volumeMounts:
+                        -   mountPath: /data
+                            name: data
+            volumes:
+                -   emptyDir: {}
+                    name: data

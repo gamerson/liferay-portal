@@ -1,6 +1,6 @@
 # Client Extension Operator: Status Report
 
-Generated 2026-09-22T22:26:10+00:00 against k3d cluster `cx-spike`.
+Generated 2026-09-23T00:21:41+00:00 against k3d cluster `cx-spike`.
 
 | Component | Value |
 |---|---|
@@ -28,10 +28,11 @@ Sample projects translated byte-equivalent to the Gradle output: **44 of 44**.
 
 ### Scenario A: Liferay and client extensions in one namespace
 
-**44 client extensions** — Delivered 44/44, Provisioned 44/44, Ready 37/44.
+**45 client extensions** — Delivered 45/45, Provisioned 44/45, Ready 37/45.
 
 | Client Extension | Workload | Payloads | Delivered | Provisioned | Phase | Note |
 |---|---|---|---|---|---|---|
+| `broken-payload-demo` | none | 1 | True | False | Degraded | AwaitingProvisioning |
 | `liferay-sample-audiences-custom-attributes` | Deployment | 1 | True | True | Ready | |
 | `liferay-sample-batch` | Job | 1 | True | True | Pending | WorkloadNotAvailable |
 | `liferay-sample-commerce-checkout-step` | Deployment | 2 | True | True | Pending | WorkloadNotAvailable |
@@ -157,11 +158,20 @@ liferay-sample-etc-spring-boot-liferay.com-lxc-ext-init-metadata   map[liferay-s
 NAME                                          TYPE     KEYS
 liferay-sample-etc-spring-boot-lxc-ext-init   Opaque   map[liferay-sample-etc-spring-boot-oaua.oauth2.authoriz
 
-# 5. The workload mounts both, and the operator injected them
+# 5. The virtual instance reports back on the payload it was given
+NAME                                                                              ACCEPTED   ERRORS
+broken-payload-demo-liferay.com-lxc-ext-status-metadata                           false      1
+liferay-sample-audiences-custom-attributes-liferay.com-lxc-ext-status-metadata    true       0
+liferay-sample-batch-liferay.com-lxc-ext-status-metadata                          true       0
+
+# 6. A rejected payload names the stage that failed
+The virtual instance refused 1 configuration entries. First failure during Parse of "broken-payload-demo.client-extension-config.json": json: cannot unmarshal string into Go value of type map[string]interface {}
+
+# 7. The workload mounts both, and the operator injected them
 lxc-dxp-metadata -> liferay.com-lxc-dxp-metadata
 lxc-ext-init-metadata -> liferay-sample-etc-spring-boot-lxc-ext-init
 
-# 6. A shared virtual instance mirror, owned by every client extension using it
+# 8. A shared virtual instance mirror, owned by every client extension using it
 liferay.com-lxc-dxp-metadata owners=liferay-sample-custom-element-1,liferay-sample-static-content,liferay-sample-etc-node,liferay-sample-audiences-custom-attributes,liferay-sample-batch,liferay-sample
 
 ```

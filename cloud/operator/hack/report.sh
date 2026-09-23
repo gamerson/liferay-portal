@@ -83,12 +83,23 @@ function _handshake {
 		--output 'custom-columns=NAME:.metadata.name,TYPE:.type,KEYS:.data' 2> /dev/null | cut -c 1-110 || true
 
 	echo
-	echo "# 5. The workload mounts both, and the operator injected them"
+	echo "# 5. The virtual instance reports back on the payload it was given"
+	kube --namespace "${LIFERAY_NAMESPACE}" get configmap \
+		--selector "lxc.liferay.com/metadataType=ext-status" \
+		--output 'custom-columns=NAME:.metadata.name,ACCEPTED:.data.accepted,ERRORS:.data.errorCount' 2> /dev/null | head -4 || true
+
+	echo
+	echo "# 6. A rejected payload names the stage that failed"
+	kube --namespace "${LIFERAY_NAMESPACE}" get clientextension broken-payload-demo \
+		--output jsonpath='{.status.conditions[?(@.type=="ConfigurationAccepted")].message}{"\n"}' 2> /dev/null || true
+
+	echo
+	echo "# 7. The workload mounts both, and the operator injected them"
 	kube --namespace "${LIFERAY_NAMESPACE}" get deployment liferay-sample-etc-spring-boot \
 		--output jsonpath='{range .spec.template.spec.volumes[*]}{.name}{" -> "}{.configMap.name}{.secret.secretName}{"\n"}{end}' 2> /dev/null || true
 
 	echo
-	echo "# 6. A shared virtual instance mirror, owned by every client extension using it"
+	echo "# 8. A shared virtual instance mirror, owned by every client extension using it"
 	kube --namespace "${CX_NAMESPACE_SPLIT}" get configmap "${VIRTUAL_INSTANCE_ID}-lxc-dxp-metadata" \
 		--output jsonpath='{.metadata.name}{" owners="}{range .metadata.ownerReferences[*]}{.name}{","}{end}' 2> /dev/null | cut -c 1-200 || true
 

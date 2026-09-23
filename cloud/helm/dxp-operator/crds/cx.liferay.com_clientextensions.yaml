@@ -28,6 +28,9 @@ spec:
         -   jsonPath: .status.conditions[?(@.type=="Delivered")].status
             name: Delivered
             type: string
+        -   jsonPath: .status.conditions[?(@.type=="ConfigurationAccepted")].status
+            name: Config-Accepted
+            type: string
         -   jsonPath: .status.conditions[?(@.type=="Provisioned")].status
             name: Provisioned
             type: string
@@ -8251,6 +8254,10 @@ spec:
                         type: object
                     status:
                         properties:
+                            appliedConfigurationPids:
+                                items:
+                                    type: string
+                                type: array
                             conditions:
                                 items:
                                     description:
@@ -8312,6 +8319,35 @@ spec:
                                 x-kubernetes-list-map-keys:
                                 -   type
                                 x-kubernetes-list-type: map
+                            configurationErrors:
+                                description: |-
+                                    ConfigurationErrors are the payload entries the virtual instance
+                                    refused. They come from Liferay, which is the only component that knows.
+                                items:
+                                    description: |-
+                                        ConfigurationError is one entry of the payload that the virtual instance
+                                        refused, reported back by Liferay.
+                                    properties:
+                                        configMapName:
+                                            description:
+                                                ConfigMapName is the ext-provision ConfigMap the entry came from.
+                                            type: string
+                                        message:
+                                            type: string
+                                        phase:
+                                            description: |-
+                                                Phase is Parse when the payload could not be read at all, and Apply when
+                                                a single configuration failed.
+                                            enum:
+                                            -   Apply
+                                            -   Parse
+                                            type: string
+                                        pid:
+                                            description:
+                                                PID is the configuration persistent identity that failed.
+                                            type: string
+                                    type: object
+                                type: array
                             extInitSecretName:
                                 description: |-
                                     ExtInitSecretName is the Secret the operator mirrors Liferay's ext-init

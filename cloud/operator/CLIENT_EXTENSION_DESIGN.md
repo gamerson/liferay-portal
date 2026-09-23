@@ -277,6 +277,16 @@ Two constraints on the port.
 
 - **`projectName` is the source directory name** and feeds `webContextPath`, `baseURL`, and the `serviceId` label. It must be an explicit field, not inferred from the custom resource's name.
 
+## The Control Panel
+
+`modules/apps/static/portal-k8s-web` adds a **Client Extension Status** application under Control Panel, Applications, Developer Integration. It exists because the two halves of the handshake are observed by different components: the operator knows about delivery and the workload, the portal knows whether the payload was actually applied. Neither view alone tells an administrator whether a client extension is working.
+
+The portlet reads `ClientExtension` resources through `ClientExtensionStatusStore`, a service the agent publishes because it already holds the Kubernetes client and its credentials. It lists cluster-wide when permitted so a split-namespace deployment is visible, falling back to the agent's own namespace. Locally recorded configuration errors are merged in directly rather than waiting for the operator to round-trip them, so a rejected payload shows up immediately.
+
+The list shows one row per client extension with all four handshake stages as coloured labels, and is searchable and sortable by service ID, virtual instance, and status. Sorting and searching run in memory: the list is one row per client extension attached to the portal, which is small by nature. Selecting a row opens the stages in order with each condition's reason and message, the rejected configuration entries with the failing PID and exception message, and the entries that were applied.
+
+Condition names are rendered verbatim rather than translated, so what the panel shows matches what `kubectl get cx` shows.
+
 ## Cross Namespace Deployment
 
 Some customers want Liferay in one namespace and client extensions in another.
@@ -354,11 +364,31 @@ Mirrors need their own `cx.liferay.com/mirror: "true"` label for two reasons: th
 
 **Mirror ext-init into a `Secret` rather than a `ConfigMap`.** The runtime reads `/etc/liferay/lxc/ext-init-metadata` as a directory of files, and a Secret volume produces an identical layout. The operator owns the volume definition, so the chart is unaffected.
 
-### There Is No Error Channel From Liferay Back To Kubernetes
+### The Error Channel From Liferay Back To Kubernetes
 
-The agent applies configurations and logs failures — a bad scope, malformed JSON, a missing company — without writing anything back. An extension that Liferay rejects sits at `Provisioned: False` with no reason, diagnosable only by reading `liferay.${date}.log`. For a design whose selling point is `kubectl get cx`, this is the weak spot.
+Originally this was the weak spot of the design: the agent applied configurations and logged failures -- a bad scope, malformed JSON, a missing company -- without writing anything back, so a client extension Liferay rejected sat at `Provisioned: False` with no reason and the only diagnosis was `grep` in `liferay.${date}.log`.
 
-The spike can accept it: wait a bounded interval, then report `Degraded` with a generic message. A production version wants a Liferay-side change, either annotating the ext-provision ConfigMap with a per-pid result or introducing an `ext-status` metadata type. Worth filing now so it can be scheduled against a release.
+It is now implemented in both halves.
+
+**Portal side.** `ClientExtensionConfigurationErrorRegistry` records what happened to each payload, and `AgentPortalK8sConfigMapModifier` feeds it from the three places a failure can occur: a parse report entry, an exception applying one configuration, and an exception processing one ConfigMap key. The registry is replaced wholesale on every apply, so a payload that starts working clears its own errors. The result is published as a ConfigMap labeled `lxc.liferay.com/metadataType=ext-status`, named `${serviceId}-${virtualInstanceId}-lxc-ext-status-metadata`.
+
+**Operator side.** The reconciler watches that label, folds the result into `.status.configurationErrors` and `.status.appliedConfigurationPids`, and reports a `ConfigurationAccepted` condition. A client extension whose payload was refused is `Degraded` even when its workload is running, because the workload without its configuration is not doing anything useful.
+
+The verdict is read **before** the wait on ext-init, not after. A payload that fails to parse never produces ext-init at all, and that is exactly the case an administrator needs to see.
+
+```
+NAME                  VIRTUAL-INSTANCE   DELIVERED   CONFIG-ACCEPTED   PROVISIONED   PHASE
+broken-payload-demo   liferay.com        True        False             False         Degraded
+```
+
+```yaml
+status:
+    configurationErrors:
+        -   configMapName: broken-payload-demo-liferay.com-public-lxc-ext-provision-metadata
+            message: 'json: cannot unmarshal string into Go value of type map[string]interface {}'
+            phase: Parse
+            pid: broken-payload-demo.client-extension-config.json
+```
 
 ### Never Delete And Recreate The ext-provision ConfigMap
 
@@ -400,12 +430,15 @@ The design is implemented and exercised in a k3d cluster. Everything below is re
 |---|---|
 | Bootstrap and scenario scripts | `cloud/operator/hack/` |
 | Client extension chart | `cloud/helm/client-extension/` |
+| Configuration error registry | `modules/apps/static/portal-k8s-agent/portal-k8s-agent-impl/.../internal/status/` |
 | Configuration translator | `cloud/operator/resources/internal/cxconfig/` |
+| Control panel | `modules/apps/static/portal-k8s-web/` |
 | CRD types | `cloud/operator/resources/api/cx/v1alpha1/` |
 | Diagrams | `cloud/operator/DIAGRAMS.md` |
 | Generated CRD | `cloud/helm/dxp-operator/crds/cx.liferay.com_clientextensions.yaml` |
 | Liferay agent simulator | `cloud/operator/resources/cmd/dxpsim/` |
 | Reconciler | `cloud/operator/resources/internal/controller/cx/` |
+| Status API | `modules/apps/static/portal-k8s-agent/portal-k8s-agent-api/.../status/` |
 | Status report | `cloud/operator/STATUS_REPORT.md` |
 
 ### Running It
@@ -428,6 +461,14 @@ It serves no HTTP and has no database. It exists so the handshake can be exercis
 - All **44 of 44** client extensions reach `Delivered` and `Provisioned` in both the same-namespace and split-namespace scenarios.
 - A client extension in a namespace absent from `clientExtensionNamespaces` is refused with `Degraded: NamespaceNotPermitted`, and nothing is written into the Liferay namespace.
 - Seven workloads do not reach `Ready`. All seven are runtime failures caused by the simulator rather than by the operator, and are itemized in the status report.
+
+### Not Yet Verified Against A Real Liferay
+
+The control panel and the portal half of the error channel **compile but have not been run inside a portal**. Producing an OSGi bundle from this worktree needs `com.liferay.portal.impl:131.1.3-SNAPSHOT` in the local `.m2`, which requires building portal-kernel and portal-impl first (`ant all` at the repository root). Until that runs, every module here builds to a plain class jar with a one-line manifest and no declarative services descriptors, including modules nobody has touched -- so the gap is environmental rather than a defect in this change.
+
+What that leaves unproven: the panel's rendering, the `ClientExtensionStatusStore` reading custom resources through fabric8, and the agent publishing ext-status from real injection failures. What is proven: the whole contract those pieces implement, exercised against the agent simulator, which publishes ext-status in the same shape and reproduces both the accepted and the rejected case.
+
+Running it for real needs, in order: `ant all` at the repository root, `ant deploy install-portal-snapshot` from `portal-impl`, then rebuilding the three modules and layering them into the image through the MinIO overlay that `hack/manifests/` already defines.
 
 ### Deviations From This Document
 

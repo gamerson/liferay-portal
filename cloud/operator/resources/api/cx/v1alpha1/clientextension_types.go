@@ -15,6 +15,12 @@ const (
 	// applied into the Liferay namespace.
 	ConditionDelivered = "Delivered"
 
+	// ConditionConfigurationAccepted reports whether the virtual instance
+	// applied the configuration payload. Liferay publishes the outcome as an
+	// ext-status ConfigMap; without it a rejected payload is visible only in
+	// the portal log while the client extension still looks delivered.
+	ConditionConfigurationAccepted = "ConfigurationAccepted"
+
 	// ConditionProvisioned reports that Liferay wrote back ext-init data for
 	// this client extension.
 	ConditionProvisioned = "Provisioned"
@@ -77,6 +83,27 @@ type ServiceRef struct {
 	Port int32 `json:"port,omitempty"`
 }
 
+// ConfigurationError is one entry of the payload that the virtual instance
+// refused, reported back by Liferay.
+type ConfigurationError struct {
+	// ConfigMapName is the ext-provision ConfigMap the entry came from.
+	// +optional
+	ConfigMapName string `json:"configMapName,omitempty"`
+
+	// +optional
+	Message string `json:"message,omitempty"`
+
+	// Phase is Parse when the payload could not be read at all, and Apply when
+	// a single configuration failed.
+	// +kubebuilder:validation:Enum=Apply;Parse
+	// +optional
+	Phase string `json:"phase,omitempty"`
+
+	// PID is the configuration persistent identity that failed.
+	// +optional
+	PID string `json:"pid,omitempty"`
+}
+
 // EmbeddedObjectMeta is the subset of ObjectMeta a pod template may carry.
 // The full ObjectMeta cannot be embedded: its generated schema is pruned by the
 // API server, which silently discards whatever the chart put in
@@ -129,6 +156,7 @@ type Workload struct {
 // +kubebuilder:printcolumn:JSONPath=`.spec.virtualInstanceId`,name="Virtual-Instance",type=string
 // +kubebuilder:printcolumn:JSONPath=`.spec.workload.kind`,name="Workload",type=string
 // +kubebuilder:printcolumn:JSONPath=`.status.conditions[?(@.type=="Delivered")].status`,name="Delivered",type=string
+// +kubebuilder:printcolumn:JSONPath=`.status.conditions[?(@.type=="ConfigurationAccepted")].status`,name="Config-Accepted",type=string
 // +kubebuilder:printcolumn:JSONPath=`.status.conditions[?(@.type=="Provisioned")].status`,name="Provisioned",type=string
 // +kubebuilder:printcolumn:JSONPath=`.status.phase`,name="Phase",type=string
 // +kubebuilder:printcolumn:JSONPath=`.metadata.creationTimestamp`,name="Age",type=date
@@ -203,6 +231,14 @@ type ClientExtensionStatus struct {
 	// OAuth2 client secrets.
 	// +optional
 	ExtInitSecretName string `json:"extInitSecretName,omitempty"`
+
+	// +optional
+	AppliedConfigurationPIDs []string `json:"appliedConfigurationPids,omitempty"`
+
+	// ConfigurationErrors are the payload entries the virtual instance
+	// refused. They come from Liferay, which is the only component that knows.
+	// +optional
+	ConfigurationErrors []ConfigurationError `json:"configurationErrors,omitempty"`
 
 	// +optional
 	ExtProvisionConfigMapNames []string `json:"extProvisionConfigMapNames,omitempty"`

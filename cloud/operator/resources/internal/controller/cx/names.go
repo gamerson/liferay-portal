@@ -24,6 +24,7 @@ const (
 	MetadataTypeDXP          = "dxp"
 	MetadataTypeExtInit      = "ext-init"
 	MetadataTypeExtProvision = "ext-provision"
+	MetadataTypeExtStatus    = "ext-status"
 )
 
 // Labels and annotations owned by this operator.

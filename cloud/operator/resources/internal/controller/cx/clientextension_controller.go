@@ -3,6 +3,7 @@ package cx
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	cxv1alpha1 "github.com/liferay/liferay-portal/cloud/operator/api/cx/v1alpha1"
@@ -114,6 +115,12 @@ func (reconciler *ClientExtensionReconciler) Reconcile(
 		fmt.Sprintf("Configuration payload applied into namespace %q.", liferayNamespace),
 	)
 
+	if error := reconciler.readExtStatus(
+		context, &clientExtension, liferayNamespace,
+	); error != nil {
+		return controllerruntime.Result{}, error
+	}
+
 	extInit, error := reconciler.findExtInit(context, &clientExtension, liferayNamespace)
 
 	if error != nil {
@@ -131,6 +138,10 @@ func (reconciler *ClientExtensionReconciler) Reconcile(
 		)
 
 		clientExtension.Status.Phase = cxv1alpha1.PhasePending
+
+		if len(clientExtension.Status.ConfigurationErrors) > 0 {
+			clientExtension.Status.Phase = cxv1alpha1.PhaseDegraded
+		}
 
 		return reconciler.requeue(context, &clientExtension)
 	}
@@ -171,7 +182,15 @@ func (reconciler *ClientExtensionReconciler) Reconcile(
 		return controllerruntime.Result{}, error
 	}
 
-	if ready {
+	if len(clientExtension.Status.ConfigurationErrors) > 0 {
+		setCondition(
+			&clientExtension, cxv1alpha1.ConditionReady, metav1.ConditionFalse,
+			"ConfigurationRejected",
+			"The workload is running, but the virtual instance refused part of the configuration payload.",
+		)
+
+		clientExtension.Status.Phase = cxv1alpha1.PhaseDegraded
+	} else if ready {
 		setCondition(
 			&clientExtension, cxv1alpha1.ConditionReady, metav1.ConditionTrue, "Available",
 			"The client extension is provisioned and its workload is available.",
@@ -204,7 +223,8 @@ func (reconciler *ClientExtensionReconciler) SetupWithManager(
 		labels := object.GetLabels()
 
 		if labels[LabelMetadataType] != MetadataTypeExtInit &&
-			labels[LabelMetadataType] != MetadataTypeDXP {
+			labels[LabelMetadataType] != MetadataTypeDXP &&
+			labels[LabelMetadataType] != MetadataTypeExtStatus {
 
 			return nil
 		}
@@ -366,6 +386,78 @@ func (reconciler *ClientExtensionReconciler) findExtInit(
 	}
 
 	return nil, nil
+}
+
+// readExtStatus folds Liferay's own verdict on the payload into the status.
+// Liferay is the only component that knows whether a configuration entry was
+// applied or refused, and it reports that through an ext-status ConfigMap.
+func (reconciler *ClientExtensionReconciler) readExtStatus(
+	context context.Context, clientExtension *cxv1alpha1.ClientExtension,
+	liferayNamespace string,
+) error {
+	var list corev1.ConfigMapList
+
+	if error := reconciler.List(
+		context, &list,
+		client.InNamespace(liferayNamespace),
+		client.MatchingLabels{
+			LabelMetadataType:    MetadataTypeExtStatus,
+			LabelServiceID:       clientExtension.Spec.ServiceID,
+			LabelVirtualInstance: clientExtension.Spec.VirtualInstanceID,
+		},
+	); error != nil {
+		return error
+	}
+
+	if len(list.Items) == 0 {
+		setCondition(
+			clientExtension, cxv1alpha1.ConditionConfigurationAccepted,
+			metav1.ConditionUnknown, "AwaitingVirtualInstance",
+			"The virtual instance has not reported on the configuration payload yet.",
+		)
+
+		return nil
+	}
+
+	data := list.Items[0].Data
+
+	clientExtension.Status.AppliedConfigurationPIDs = splitLines(data["acceptedPids"])
+	clientExtension.Status.ConfigurationErrors = parseConfigurationErrors(data)
+
+	if len(clientExtension.Status.ConfigurationErrors) == 0 {
+		setCondition(
+			clientExtension, cxv1alpha1.ConditionConfigurationAccepted,
+			metav1.ConditionTrue, "Applied",
+			fmt.Sprintf(
+				"The virtual instance applied %d configuration entries.",
+				len(clientExtension.Status.AppliedConfigurationPIDs),
+			),
+		)
+
+		return nil
+	}
+
+	first := clientExtension.Status.ConfigurationErrors[0]
+
+	setCondition(
+		clientExtension, cxv1alpha1.ConditionConfigurationAccepted,
+		metav1.ConditionFalse, "ConfigurationRejected",
+		fmt.Sprintf(
+			"The virtual instance refused %d configuration entries. First failure during %s of %q: %s",
+			len(clientExtension.Status.ConfigurationErrors), first.Phase, first.PID,
+			first.Message,
+		),
+	)
+
+	if reconciler.Recorder != nil {
+		reconciler.Recorder.Eventf(
+			clientExtension, corev1.EventTypeWarning, "ConfigurationRejected",
+			"The virtual instance refused %d configuration entries; the first failed during %s of %q.",
+			len(clientExtension.Status.ConfigurationErrors), first.Phase, first.PID,
+		)
+	}
+
+	return nil
 }
 
 // mirrorExtInit copies the ext-init payload into a Secret in the client
@@ -739,4 +831,45 @@ func setCondition(
 		Status:             status,
 		Type:               conditionType,
 	})
+}
+
+// parseConfigurationErrors reads the flat error.<n>.<field> map Liferay
+// publishes, which is flat because a ConfigMap has no nested values.
+func parseConfigurationErrors(data map[string]string) []cxv1alpha1.ConfigurationError {
+	var errors []cxv1alpha1.ConfigurationError
+
+	for index := 0; ; index++ {
+		prefix := fmt.Sprintf("error.%d.", index)
+
+		message, found := data[prefix+"message"]
+
+		if !found {
+			break
+		}
+
+		errors = append(errors, cxv1alpha1.ConfigurationError{
+			ConfigMapName: data[prefix+"configMapName"],
+			Message:       message,
+			Phase:         data[prefix+"phase"],
+			PID:           data[prefix+"pid"],
+		})
+	}
+
+	return errors
+}
+
+func splitLines(value string) []string {
+	if value == "" {
+		return nil
+	}
+
+	var lines []string
+
+	for _, line := range strings.Split(value, "\n") {
+		if line != "" {
+			lines = append(lines, line)
+		}
+	}
+
+	return lines
 }
