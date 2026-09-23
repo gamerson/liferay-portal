@@ -291,78 +291,66 @@ func (reconciler *ClientExtensionReconciler) SetupWithManager(
 func (reconciler *ClientExtensionReconciler) applyExtProvision(
 	context context.Context, clientExtension *cxv1alpha1.ClientExtension, liferayNamespace string,
 ) error {
-	payload, buildError := BuildPayload(clientExtension)
+	document, buildError := BuildPayload(clientExtension)
 
 	if buildError != nil {
 		return buildError
 	}
 
-	var names []string
+	name := ExtProvisionName(clientExtension)
 
-	for _, bucket := range []string{BucketInternal, BucketPublic} {
-		document, found := payload.Buckets[bucket]
+	if document == "" {
+		var existing corev1.ConfigMap
 
-		name := ExtProvisionName(clientExtension, bucket)
-
-		if !found {
-			var existing corev1.ConfigMap
-
-			if getError := reconciler.Get(
-				context, types.NamespacedName{Name: name, Namespace: liferayNamespace}, &existing,
-			); getError == nil {
-				if deleteError := reconciler.Delete(context, &existing); deleteError != nil {
-					return deleteError
-				}
+		if getError := reconciler.Get(
+			context, types.NamespacedName{Name: name, Namespace: liferayNamespace}, &existing,
+		); getError == nil {
+			if deleteError := reconciler.Delete(context, &existing); deleteError != nil {
+				return deleteError
 			}
-
-			continue
 		}
 
-		domain := DomainFor(clientExtension, bucket)
+		clientExtension.Status.ExtProvisionConfigMapNames = nil
 
-		if bucket == BucketInternal {
-			domain = InternalAddress(clientExtension)
-		}
-
-		configMap := &corev1.ConfigMap{
-			ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: liferayNamespace},
-		}
-
-		// Update in place. Liferay correlates its configurations with the
-		// ConfigMap UID, so a delete and recreate tears down the OAuth2
-		// application and issues a new client secret.
-		if _, updateError := controllerutil.CreateOrUpdate(context, reconciler.Client, configMap, func() error {
-			if configMap.Annotations == nil {
-				configMap.Annotations = map[string]string{}
-			}
-
-			if domain != "" {
-				configMap.Annotations[AnnotationDomains] = domain
-				configMap.Annotations[AnnotationMainDomain] = domain
-			}
-
-			configMap.Data = map[string]string{
-				clientExtension.Spec.ServiceID + ".client-extension-config.json": document,
-			}
-
-			configMap.Labels = map[string]string{
-				LabelMetadataType:    MetadataTypeExtProvision,
-				LabelOwnerName:       clientExtension.Name,
-				LabelOwnerNamespace:  clientExtension.Namespace,
-				LabelProjectName:     ProjectName(clientExtension),
-				LabelServiceID:       clientExtension.Spec.ServiceID,
-				LabelVirtualInstance: clientExtension.Spec.VirtualInstanceID,
-			}
-
-			return nil
-		}); updateError != nil {
-			return updateError
-		}
-
-		names = append(names, name)
+		return nil
 	}
 
-	clientExtension.Status.ExtProvisionConfigMapNames = names
+	configMap := &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: liferayNamespace},
+	}
+
+	// Update in place. Liferay correlates its configurations with the
+	// ConfigMap UID, so a delete and recreate tears down the OAuth2
+	// application and issues a new client secret.
+	if _, updateError := controllerutil.CreateOrUpdate(context, reconciler.Client, configMap, func() error {
+		if configMap.Annotations == nil {
+			configMap.Annotations = map[string]string{}
+		}
+
+		if clientExtension.Spec.Domain != "" {
+			configMap.Annotations[AnnotationDomains] = clientExtension.Spec.Domain
+			configMap.Annotations[AnnotationMainDomain] = clientExtension.Spec.Domain
+		}
+
+		configMap.Data = map[string]string{
+			clientExtension.Spec.ServiceID + ".client-extension-config.json": document,
+		}
+
+		configMap.Labels = map[string]string{
+			LabelMetadataType:    MetadataTypeExtProvision,
+			LabelOwnerName:       clientExtension.Name,
+			LabelOwnerNamespace:  clientExtension.Namespace,
+			LabelProjectName:     ProjectName(clientExtension),
+			LabelServiceID:       clientExtension.Spec.ServiceID,
+			LabelVirtualInstance: clientExtension.Spec.VirtualInstanceID,
+		}
+
+		return nil
+	}); updateError != nil {
+		return updateError
+	}
+
+	clientExtension.Status.ExtProvisionConfigMapNames = []string{name}
 
 	return nil
 }
@@ -607,17 +595,15 @@ func (reconciler *ClientExtensionReconciler) finalize(
 
 	liferayNamespace := LiferayNamespace(clientExtension)
 
-	for _, bucket := range []string{BucketInternal, BucketPublic} {
-		configMap := &corev1.ConfigMap{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      ExtProvisionName(clientExtension, bucket),
-				Namespace: liferayNamespace,
-			},
-		}
+	configMap := &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      ExtProvisionName(clientExtension),
+			Namespace: liferayNamespace,
+		},
+	}
 
-		if error := reconciler.Delete(context, configMap); client.IgnoreNotFound(error) != nil {
-			return controllerruntime.Result{}, error
-		}
+	if error := reconciler.Delete(context, configMap); client.IgnoreNotFound(error) != nil {
+		return controllerruntime.Result{}, error
 	}
 
 	extInit, error := reconciler.findExtInit(context, clientExtension, liferayNamespace)

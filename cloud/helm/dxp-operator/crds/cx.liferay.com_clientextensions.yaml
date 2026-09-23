@@ -82,27 +82,14 @@ spec:
                                 items:
                                     type: string
                                 type: array
-                            domains:
+                            domain:
                                 description: |-
-                                    Domains carries the two addresses a client extension can be reached at. They
-                                    are delivered to Liferay as separate ext-provision ConfigMaps, because the
-                                    ext.lxc.liferay.com/mainDomain annotation that drives baseURL and
-                                    .serviceAddress is per ConfigMap rather than per configuration entry.
-                                properties:
-                                    internal:
-                                        description: |-
-                                            Internal is the cluster-local address Liferay calls a microservice at,
-                                            as host or host:port. Set it to "auto" to have the operator derive
-                                            <serviceName>.<namespace>.svc.cluster.local:<port> from ServiceRef.
-                                            Applies to microservice and configuration classifications.
-                                        type: string
-                                    public:
-                                        description: |-
-                                            Public is the routable host a browser fetches frontend assets from.
-                                            Applies to the frontend classification. When empty, Liferay falls back
-                                            to the virtual instance's own virtual host.
-                                        type: string
-                                type: object
+                                    Domain is the host a client extension is reached at. One name serves
+                                    both callers: a browser resolves it through the ingress, and Liferay
+                                    resolves the same name to the Service inside the cluster. It becomes the
+                                    ext.lxc.liferay.com/mainDomain annotation, which Liferay turns into
+                                    .serviceAddress and baseURL.
+                                type: string
                             liferayEnvironmentRef:
                                 description: |-
                                     LiferayEnvironmentRef identifies the Liferay this client extension attaches
@@ -125,20 +112,6 @@ spec:
                                     ServiceID becomes the ext.lxc.liferay.com/serviceId label, which is what
                                     determines the name of the ext-init ConfigMap Liferay writes back.
                                 type: string
-                            serviceRef:
-                                description: |-
-                                    ServiceRef names the chart-owned Service used to derive the internal address
-                                    when Domains.Internal is "auto".
-                                properties:
-                                    name:
-                                        type: string
-                                    port:
-                                        default: 80
-                                        format: int32
-                                        type: integer
-                                required:
-                                -   name
-                                type: object
                             virtualInstanceId:
                                 description:
                                     VirtualInstanceID is the company web ID, such as liferay.com.

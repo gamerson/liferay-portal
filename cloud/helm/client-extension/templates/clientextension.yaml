@@ -18,13 +18,9 @@ spec:
             {{- . | nindent 12 }}
         {{- end }}
     {{- end }}
-    domains:
-        {{- with .Values.clientExtension.domains.internal }}
-        internal: {{ . | quote }}
-        {{- end }}
-        {{- with .Values.clientExtension.domains.public }}
-        public: {{ . | quote }}
-        {{- end }}
+    {{- with .Values.clientExtension.domain }}
+    domain: {{ . | quote }}
+    {{- end }}
     liferayEnvironmentRef:
         name: {{ .Values.clientExtension.liferayEnvironment.name }}
         {{- with .Values.clientExtension.liferayEnvironment.namespace }}
@@ -32,11 +28,6 @@ spec:
         {{- end }}
     projectName: {{ default (include "liferay-client-extension.serviceId" .) .Values.clientExtension.projectName }}
     serviceId: {{ include "liferay-client-extension.serviceId" . }}
-    {{- if .Values.service.enabled }}
-    serviceRef:
-        name: {{ include "liferay-client-extension.fullname" . }}
-        port: {{ .Values.service.port }}
-    {{- end }}
     virtualInstanceId: {{ .Values.clientExtension.virtualInstanceId | quote }}
     {{- if .Values.workload.enabled }}
     workload:

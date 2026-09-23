@@ -12,41 +12,21 @@ import (
 	cxconfig "github.com/liferay/liferay-portal/cloud/operator/internal/cxconfig"
 )
 
-// Payload is the configuration split across addressing buckets. Frontend
-// entries are fetched by a browser and carry the public domain; microservice
-// and configuration entries are called by Liferay and carry the internal
-// address. They must travel in separate ConfigMaps because the mainDomain
-// annotation that drives baseURL and .serviceAddress applies to the whole
-// ConfigMap.
-type Payload struct {
-	Buckets map[string]string
-}
-
-// BuildPayload translates the client extension document into one JSON document
-// per addressing bucket.
-func BuildPayload(clientExtension *cxv1alpha1.ClientExtension) (*Payload, error) {
-	var payload = &Payload{Buckets: map[string]string{}}
-
+// BuildPayload translates the client extension document into the single
+// configuration payload Liferay is given.
+func BuildPayload(clientExtension *cxv1alpha1.ClientExtension) (string, error) {
 	if len(clientExtension.Spec.Configs) > 0 {
-		merged, error := mergeConfigs(clientExtension.Spec.Configs)
-
-		if error != nil {
-			return nil, error
-		}
-
-		payload.Buckets[BucketPublic] = merged
-
-		return payload, nil
+		return mergeConfigs(clientExtension.Spec.Configs)
 	}
 
 	if clientExtension.Spec.ClientExtensionYAML == "" {
-		return payload, nil
+		return "", nil
 	}
 
 	document, error := cxconfig.Parse([]byte(clientExtension.Spec.ClientExtensionYAML))
 
 	if error != nil {
-		return nil, error
+		return "", error
 	}
 
 	entries, error := cxconfig.Translate(document, cxconfig.Options{
@@ -56,28 +36,16 @@ func BuildPayload(clientExtension *cxv1alpha1.ClientExtension) (*Payload, error)
 	})
 
 	if error != nil {
-		return nil, error
+		return "", error
 	}
 
-	var bucketed = map[string][]cxconfig.Entry{}
+	encoded, error := cxconfig.ConfigJSON(entries)
 
-	for _, entry := range entries {
-		bucketed[bucketOf(entry, clientExtension)] = append(
-			bucketed[bucketOf(entry, clientExtension)], entry,
-		)
+	if error != nil {
+		return "", error
 	}
 
-	for bucket, bucketEntries := range bucketed {
-		encoded, error := cxconfig.ConfigJSON(bucketEntries)
-
-		if error != nil {
-			return nil, error
-		}
-
-		payload.Buckets[bucket] = string(encoded)
-	}
-
-	return payload, nil
+	return string(encoded), nil
 }
 
 // RequiresOAuth reports whether a client extension declares an OAuth2
@@ -120,65 +88,6 @@ func RequiresOAuth(clientExtension *cxv1alpha1.ClientExtension) (bool, error) {
 // changed every reconcile would rewrite every configuration in Liferay.
 func BuildTimestamp(clientExtension *cxv1alpha1.ClientExtension) int64 {
 	return clientExtension.Generation
-}
-
-// bucketOf routes an entry to an addressing bucket by who places the call,
-// which is not the same question as what the entry is classified as. Without an
-// internal address configured everything travels in the public bucket, which is
-// the behavior of the existing Helm chart.
-func bucketOf(entry cxconfig.Entry, clientExtension *cxv1alpha1.ClientExtension) string {
-	if clientExtension.Spec.Domains.Internal == "" {
-		return BucketPublic
-	}
-
-	// A user agent OAuth2 application is called by the browser, so its address
-	// has to be routable from outside the cluster even though the registry
-	// classifies it alongside server side configuration. A headless server
-	// application is the opposite: Liferay calls it.
-	if entry.ExtensionType == "oAuthApplicationUserAgent" {
-		return BucketPublic
-	}
-
-	if entry.Classification == cxconfig.ClassificationFrontend {
-		return BucketPublic
-	}
-
-	return BucketInternal
-}
-
-// DomainFor returns the mainDomain annotation value for a bucket.
-func DomainFor(clientExtension *cxv1alpha1.ClientExtension, bucket string) string {
-	if bucket == BucketInternal {
-		return clientExtension.Spec.Domains.Internal
-	}
-
-	return clientExtension.Spec.Domains.Public
-}
-
-// InternalAddress resolves the cluster-local address for a client extension,
-// expanding the "auto" shorthand from the referenced Service.
-func InternalAddress(clientExtension *cxv1alpha1.ClientExtension) string {
-	internal := clientExtension.Spec.Domains.Internal
-
-	if internal != "auto" {
-		return internal
-	}
-
-	serviceRef := clientExtension.Spec.ServiceRef
-
-	if serviceRef == nil {
-		return ""
-	}
-
-	port := serviceRef.Port
-
-	if port == 0 {
-		port = 80
-	}
-
-	return fmt.Sprintf(
-		"%s.%s.svc.cluster.local:%d", serviceRef.Name, clientExtension.Namespace, port,
-	)
 }
 
 // Checksum fingerprints a payload so a ConfigMap is only rewritten when its

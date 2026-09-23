@@ -43,25 +43,6 @@ const (
 	PhaseReady    = "Ready"
 )
 
-// Domains carries the two addresses a client extension can be reached at. They
-// are delivered to Liferay as separate ext-provision ConfigMaps, because the
-// ext.lxc.liferay.com/mainDomain annotation that drives baseURL and
-// .serviceAddress is per ConfigMap rather than per configuration entry.
-type Domains struct {
-	// Internal is the cluster-local address Liferay calls a microservice at,
-	// as host or host:port. Set it to "auto" to have the operator derive
-	// <serviceName>.<namespace>.svc.cluster.local:<port> from ServiceRef.
-	// Applies to microservice and configuration classifications.
-	// +optional
-	Internal string `json:"internal,omitempty"`
-
-	// Public is the routable host a browser fetches frontend assets from.
-	// Applies to the frontend classification. When empty, Liferay falls back
-	// to the virtual instance's own virtual host.
-	// +optional
-	Public string `json:"public,omitempty"`
-}
-
 // LiferayEnvironmentRef identifies the Liferay this client extension attaches
 // to. An empty Namespace means the ClientExtension's own namespace.
 type LiferayEnvironmentRef struct {
@@ -70,17 +51,6 @@ type LiferayEnvironmentRef struct {
 
 	// +optional
 	Namespace string `json:"namespace,omitempty"`
-}
-
-// ServiceRef names the chart-owned Service used to derive the internal address
-// when Domains.Internal is "auto".
-type ServiceRef struct {
-	// +kubebuilder:validation:Required
-	Name string `json:"name"`
-
-	// +kubebuilder:default=80
-	// +optional
-	Port int32 `json:"port,omitempty"`
 }
 
 // ConfigurationError is one entry of the payload that the virtual instance
@@ -193,8 +163,13 @@ type ClientExtensionSpec struct {
 	// +optional
 	Configs []string `json:"configs,omitempty"`
 
+	// Domain is the host a client extension is reached at. One name serves
+	// both callers: a browser resolves it through the ingress, and Liferay
+	// resolves the same name to the Service inside the cluster. It becomes the
+	// ext.lxc.liferay.com/mainDomain annotation, which Liferay turns into
+	// .serviceAddress and baseURL.
 	// +optional
-	Domains Domains `json:"domains,omitempty"`
+	Domain string `json:"domain,omitempty"`
 
 	// +kubebuilder:validation:Required
 	LiferayEnvironmentRef LiferayEnvironmentRef `json:"liferayEnvironmentRef"`
@@ -208,9 +183,6 @@ type ClientExtensionSpec struct {
 	// determines the name of the ext-init ConfigMap Liferay writes back.
 	// +kubebuilder:validation:Required
 	ServiceID string `json:"serviceId"`
-
-	// +optional
-	ServiceRef *ServiceRef `json:"serviceRef,omitempty"`
 
 	// VirtualInstanceID is the company web ID, such as liferay.com.
 	// +kubebuilder:validation:Required

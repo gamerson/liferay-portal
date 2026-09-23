@@ -23,12 +23,6 @@ CXEXPAND="${BUILD_DIR:-/tmp/cx-spike-images}/cxexpand"
 
 PUBLIC_DOMAIN_SUFFIX="${PUBLIC_DOMAIN_SUFFIX:-localtest.me}"
 
-# Browsers reach the cluster through the port k3d publishes the load balancer
-# on, and an Origin header carries any non default port. Both the asset URL the
-# portal hands the browser and the origin the asset host allows have to include
-# it, so the port belongs in the domain rather than alongside it.
-PUBLIC_DOMAIN_PORT="${PUBLIC_DOMAIN_PORT:-8080}"
-
 function main {
 	local cx_namespace=${1}
 	local liferay_namespace=${2}
@@ -85,7 +79,7 @@ function _deploy_one {
 	local -a arguments=(
 		--create-namespace
 		--namespace "${cx_namespace}"
-		--set "clientExtension.domains.public=${sample}.${PUBLIC_DOMAIN_SUFFIX}:${PUBLIC_DOMAIN_PORT}"
+		--set "clientExtension.domain=${sample}.${PUBLIC_DOMAIN_SUFFIX}"
 		--set "clientExtension.serviceId=${sample}"
 		--set "clientExtension.virtualInstanceId=${VIRTUAL_INSTANCE_ID}"
 		--set "fullnameOverride=${sample}"
@@ -128,17 +122,9 @@ function _deploy_one {
 		--set "ingress.hosts[0].paths[0].path=/"
 		--set "ingress.hosts[0].paths[0].pathType=Prefix"
 		--set "service.enabled=true"
-		--set "service.port=${port}"
+		--set "service.port=80"
 		--set "service.targetPort=${port}"
 	)
-
-	# A microservice is also called by Liferay itself, server to server, which
-	# should stay inside the cluster. The operator splits the payload so each
-	# half is addressed the way its caller can reach it.
-	if _is_microservice "${sample}"
-	then
-		arguments+=(--set "clientExtension.domains.internal=auto")
-	fi
 
 	helm_cx upgrade --install "${sample}" "${CHART_DIR}" "${arguments[@]}" > /dev/null
 

@@ -38,13 +38,6 @@ const (
 	Finalizer = "cx.liferay.com/unprovision"
 )
 
-// Addressing buckets. Frontend assets are fetched by a browser and need the
-// public domain; everything Liferay calls itself can use the internal address.
-const (
-	BucketInternal = "internal"
-	BucketPublic   = "public"
-)
-
 // Paths and environment the client extension runtime expects.
 const (
 	EnvRoutesClientExtension = "LIFERAY_ROUTES_CLIENT_EXTENSION"
@@ -89,13 +82,14 @@ func ExtInitSecretName(clientExtension *cxv1alpha1.ClientExtension) string {
 }
 
 // ExtProvisionName is the ConfigMap the operator publishes into the Liferay
-// namespace. One is created per addressing bucket, because the mainDomain
-// annotation that drives baseURL and .serviceAddress is per ConfigMap.
-func ExtProvisionName(clientExtension *cxv1alpha1.ClientExtension, bucket string) string {
+// namespace. There is one per client extension: the domain it is annotated
+// with resolves to the same place for a browser and for Liferay, so a second
+// one addressed differently would serve no purpose.
+func ExtProvisionName(clientExtension *cxv1alpha1.ClientExtension) string {
 	return truncate(
 		fmt.Sprintf(
-			"%s-%s-%s-lxc-ext-provision-metadata",
-			clientExtension.Spec.ServiceID, clientExtension.Spec.VirtualInstanceID, bucket,
+			"%s-%s-lxc-ext-provision-metadata",
+			clientExtension.Spec.ServiceID, clientExtension.Spec.VirtualInstanceID,
 		),
 		253,
 	)
