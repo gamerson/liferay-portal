@@ -1,0 +1,22 @@
+# Reaching Liferay from the host. k3d publishes the load balancer on 8080, and
+# liferay.localtest.me resolves to 127.0.0.1 without touching /etc/hosts.
+#
+# The host must also be a virtual host of the virtual instance, otherwise
+# Liferay answers 500 to every request that carries it.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+    name: liferay
+    namespace: __LIFERAY_NAMESPACE__
+spec:
+    rules:
+        -   host: liferay.localtest.me
+            http:
+                paths:
+                    -   backend:
+                            service:
+                                name: liferay
+                                port:
+                                    number: 80
+                        path: /
+                        pathType: Prefix
