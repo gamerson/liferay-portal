@@ -150,6 +150,13 @@ spec:
                         # microservice client extension with.
                         -   name: LIFERAY_WEB_PERIOD_SERVER_PERIOD_PROTOCOL
                             value: http
+                        # Every company's default password policy is written
+                        # when the company is created, and it otherwise forces
+                        # a password change on first sign in. Until then the
+                        # admin is refused by every headless API, which the
+                        # verification scripts depend on.
+                        -   name: LIFERAY_PASSWORDS_PERIOD_DEFAULT_PERIOD_POLICY_PERIOD_CHANGE_PERIOD_REQUIRED
+                            value: "false"
                         -   name: LIFERAY_TERMS_PERIOD_OF_PERIOD_USE_PERIOD_REQUIRED
                             value: "false"
                         -   name: LIFERAY_USERS_PERIOD_REMINDER_PERIOD_QUERIES_PERIOD_ENABLED

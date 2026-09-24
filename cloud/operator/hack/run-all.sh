@@ -16,8 +16,13 @@ HACK_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${HACK_DIR}/lib.sh"
 
 function main {
-	"${HACK_DIR}/bootstrap.sh"
-	"${HACK_DIR}/build-samples.sh"
+	# Set SKIP_BOOTSTRAP=true to rerun the scenarios against a cluster that is
+	# already up, rather than rebuilding it and rebooting Liferay.
+	if [ "${SKIP_BOOTSTRAP:-false}" != "true" ]
+	then
+		"${HACK_DIR}/bootstrap.sh"
+		"${HACK_DIR}/build-samples.sh"
+	fi
 
 	log_step "Scenario A: Liferay and client extensions in one namespace"
 

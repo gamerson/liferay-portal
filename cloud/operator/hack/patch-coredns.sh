@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# Points the demo domain at the cluster's load balancer inside the cluster.
+# Points the demo domain at the cluster's ingress controller from inside the
+# cluster, and gives CoreDNS an upstream that works.
 #
 # The virtual instance publishes one domain and every caller uses it: the
 # browser, the Liferay pod calling a client extension, and a client extension
-# calling Liferay. Resolving the whole suffix to the load balancer means the
-# ingress controller routes all three the same way, and nothing here names a
-# Service or a ClusterIP, so it survives redeploys.
+# calling Liferay. Rewriting the whole suffix onto the traefik Service means the
+# ingress controller routes all three the same way.
 
 set -o errexit
 set -o nounset
@@ -48,12 +48,12 @@ function _forward_upstream {
 import json, os
 
 print(json.dumps({
-    "data": {
-        "Corefile": os.environ["COREFILE"].replace(
-            "forward . /etc/resolv.conf",
-            "forward . " + os.environ["DNS_UPSTREAM"],
-        )
-    }
+	"data": {
+		"Corefile": os.environ["COREFILE"].replace(
+			"forward . /etc/resolv.conf",
+			"forward . " + os.environ["DNS_UPSTREAM"],
+		)
+	}
 }))'
 	)" > /dev/null
 
@@ -64,47 +64,20 @@ print(json.dumps({
 function main {
 	_forward_upstream
 
-	log_step "Resolving *.${DOMAIN_SUFFIX} to the load balancer"
+	log_step "Resolving *.${DOMAIN_SUFFIX} to the ingress controller"
 
-	local gateway_ip
-
-	gateway_ip=$(_gateway_ip)
-
-	if [ -z "${gateway_ip}" ]
-	then
-		echo "Unable to find the load balancer for cluster ${CLUSTER_NAME}" >&2
-
-		return 1
-	fi
-
-	log "Load balancer is ${gateway_ip}"
+	# The suffix goes into a regular expression, so its dots are escaped. Each
+	# one needs two backslashes here: sed consumes one as its own escape.
+	local suffix_regex
+	suffix_regex=$(printf '%s' "${DOMAIN_SUFFIX}" | sed 's/\./\\\\./g')
 
 	sed \
+		--expression "s|__DOMAIN_SUFFIX_REGEX__|${suffix_regex}|g" \
 		--expression "s|__DOMAIN_SUFFIX__|${DOMAIN_SUFFIX}|g" \
-		--expression "s|__GATEWAY_IP__|${gateway_ip}|g" \
 		"${HACK_DIR}/manifests/coredns-custom.yaml" | kube apply --filename -
 
 	kube --namespace kube-system rollout restart deployment/coredns
 	kube --namespace kube-system rollout status deployment/coredns --timeout 120s
-}
-
-function _gateway_ip {
-	k3d cluster list "${CLUSTER_NAME}" --output json |
-		python3 -c '
-import json
-import sys
-
-cluster_name = sys.argv[1]
-
-for cluster in json.load(sys.stdin):
-	for node in cluster.get("nodes", []):
-		labels = node.get("runtimeLabels", {})
-
-		if labels.get("k3d.server.loadbalancer") == "k3d-%s-serverlb" % cluster_name:
-			print(node["IP"]["IP"])
-
-			break
-' "${CLUSTER_NAME}"
 }
 
 main "${@}"

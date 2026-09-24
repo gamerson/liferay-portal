@@ -62,7 +62,13 @@ function _build {
 function _stage {
 	log_step "Staging modules in ${PORTAL_MODULES_DIR}"
 
-	rm --force --recursive "${PORTAL_MODULES_DIR}"
+	# Clear the contents, never the directory itself. The k3d nodes bind mount
+	# it, and a directory that is removed and recreated leaves each node holding
+	# the old inode: the mount goes silently empty, and the init container that
+	# copies the modules in crashes on a glob that matches nothing.
+	mkdir --parents "${PORTAL_MODULES_DIR}"
+
+	find "${PORTAL_MODULES_DIR}" -mindepth 1 -type f -name '*.jar' -delete
 
 	mkdir --parents "${PORTAL_MODULES_DIR}/osgi/modules" "${PORTAL_MODULES_DIR}/osgi/static"
 
