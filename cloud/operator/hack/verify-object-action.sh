@@ -29,6 +29,8 @@ ADMIN_PASSWORD="${ADMIN_PASSWORD:-test}"
 # a long lived environment.
 PROBE="object-action-probe-$(date +%s)-${RANDOM}"
 
+HANDLER_SELECTOR="${HANDLER_SELECTOR:-app.kubernetes.io/name=liferay-sample-etc-spring-boot}"
+
 SINCE="${SINCE:-3m}"
 
 function main {
@@ -102,9 +104,15 @@ function _add_entry {
 
 # _handler_log reads a time window rather than the whole log, which keeps the
 # error report scoped to this run without depending on line positions.
+#
+# Reading by label rather than by deployment matters just after a rollout: with
+# an old pod still terminating, "logs deployment/x" resolves to one of the two
+# and may pick the one that never saw the request, which reads as the action
+# never arriving. A selector reads every matching pod.
 function _handler_log {
-	kube --namespace "${1}" logs deployment/liferay-sample-etc-spring-boot \
-		--since "${SINCE}" 2> /dev/null
+	kube --namespace "${1}" logs \
+		--all-containers --prefix --selector "${HANDLER_SELECTOR}" \
+		--since "${SINCE}" --tail -1 2> /dev/null
 }
 
 # _report_errors surfaces exceptions the handler raised. Liferay would record the
