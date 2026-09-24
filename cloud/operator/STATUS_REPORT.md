@@ -1,10 +1,10 @@
 # Client Extension Operator: Status Report
 
-Generated 2026-09-23T21:31:06+00:00 against k3d cluster `cx-spike`.
+Generated 2026-09-24T22:57:53+00:00 against k3d cluster `cx-spike`.
 
 | Component | Value |
 |---|---|
-| Cluster | v1.31.4+k3s1 |
+| Cluster | v1.36.4+k3s1 |
 | Liferay namespace | `liferay-prod` |
 | Liferay image | `liferay/dxp:latest` plus modules from this checkout |
 | Operator | `liferay/liferay-dxp-operator:spike` in `liferay-system` |
@@ -29,23 +29,113 @@ Sample projects translated byte-equivalent to the Gradle output: **44 of 44**.
 
 ### Scenario A: Liferay and client extensions in one namespace
 
-**5 client extensions** — Delivered 5/5, Provisioned 5/5, Ready 5/5.
+**44 client extensions** — Delivered 44/44, Provisioned 44/44, Ready 44/44.
 
 | Client Extension | Workload | Payloads | Delivered | Provisioned | Phase | Note |
 |---|---|---|---|---|---|---|
-| `liferay-sample-batch` | Job | 1 | True | True | Ready |  |
-| `liferay-sample-custom-element-2` | Deployment | 1 | True | True | Ready |  |
-| `liferay-sample-etc-node` | Deployment | 1 | True | True | Ready |  |
-| `liferay-sample-etc-spring-boot` | Deployment | 1 | True | True | Ready |  |
-| `liferay-sample-global-js-1` | Deployment | 1 | True | True | Ready |  |
+| `liferay-sample-audiences-custom-attributes` | none | 1 | True | True | Ready |  |
+| `liferay-sample-batch` | none | 1 | True | True | Ready |  |
+| `liferay-sample-commerce-checkout-step` | none | 1 | True | True | Ready |  |
+| `liferay-sample-commerce-payment-integration` | none | 1 | True | True | Ready |  |
+| `liferay-sample-commerce-shipping-engine` | none | 1 | True | True | Ready |  |
+| `liferay-sample-commerce-tax-engine` | none | 1 | True | True | Ready |  |
+| `liferay-sample-custom-element-1` | none | 1 | True | True | Ready |  |
+| `liferay-sample-custom-element-2` | none | 1 | True | True | Ready |  |
+| `liferay-sample-custom-element-3` | none | 1 | True | True | Ready |  |
+| `liferay-sample-custom-element-4` | none | 1 | True | True | Ready |  |
+| `liferay-sample-custom-element-5` | none | 1 | True | True | Ready |  |
+| `liferay-sample-custom-element-6` | none | 1 | True | True | Ready |  |
+| `liferay-sample-custom-element-7` | none | 1 | True | True | Ready |  |
+| `liferay-sample-custom-element-8` | none | 1 | True | True | Ready |  |
+| `liferay-sample-editor-config-contributor-1` | none | 1 | True | True | Ready |  |
+| `liferay-sample-editor-config-contributor-2` | none | 1 | True | True | Ready |  |
+| `liferay-sample-editor-config-contributor-3` | none | 1 | True | True | Ready |  |
+| `liferay-sample-editor-config-contributor-4` | none | 1 | True | True | Ready |  |
+| `liferay-sample-editor-config-contributor-5` | none | 1 | True | True | Ready |  |
+| `liferay-sample-editor-config-contributor-6` | none | 1 | True | True | Ready |  |
+| `liferay-sample-etc-cron` | none | 1 | True | True | Ready |  |
+| `liferay-sample-etc-frontend` | none | 1 | True | True | Ready |  |
+| `liferay-sample-etc-node` | none | 1 | True | True | Ready |  |
+| `liferay-sample-etc-spring-boot` | none | 1 | True | True | Ready |  |
+| `liferay-sample-fds-cell-renderer` | none | 1 | True | True | Ready |  |
+| `liferay-sample-fds-filter` | none | 1 | True | True | Ready |  |
+| `liferay-sample-global-css-1` | none | 1 | True | True | Ready |  |
+| `liferay-sample-global-css-2` | none | 1 | True | True | Ready |  |
+| `liferay-sample-global-js-1` | none | 1 | True | True | Ready |  |
+| `liferay-sample-global-js-2` | none | 1 | True | True | Ready |  |
+| `liferay-sample-global-js-3` | none | 1 | True | True | Ready |  |
+| `liferay-sample-iframe-1` | none | 1 | True | True | Ready |  |
+| `liferay-sample-iframe-2` | none | 1 | True | True | Ready |  |
+| `liferay-sample-instance-settings` | none | 1 | True | True | Ready |  |
+| `liferay-sample-js-import-maps-entry` | none | 1 | True | True | Ready |  |
+| `liferay-sample-site-initializer` | none | 1 | True | True | Ready |  |
+| `liferay-sample-static-content` | none | 1 | True | True | Ready |  |
+| `liferay-sample-theme-css-1` | none | 1 | True | True | Ready |  |
+| `liferay-sample-theme-css-2` | none | 1 | True | True | Ready |  |
+| `liferay-sample-theme-css-3` | none | 1 | True | True | Ready |  |
+| `liferay-sample-theme-css-4` | none | 1 | True | True | Ready |  |
+| `liferay-sample-theme-favicon` | none | 1 | True | True | Ready |  |
+| `liferay-sample-theme-spritemap-1` | none | 1 | True | True | Ready |  |
+| `liferay-sample-theme-spritemap-2` | none | 1 | True | True | Ready |  |
 
 ### Scenario B: client extensions in a separate namespace
 
-_No client extensions in `team-a`._
+**44 client extensions** — Delivered 44/44, Provisioned 44/44, Ready 44/44.
+
+| Client Extension | Workload | Payloads | Delivered | Provisioned | Phase | Note |
+|---|---|---|---|---|---|---|
+| `liferay-sample-audiences-custom-attributes` | none | 1 | True | True | Ready |  |
+| `liferay-sample-batch` | none | 1 | True | True | Ready |  |
+| `liferay-sample-commerce-checkout-step` | none | 1 | True | True | Ready |  |
+| `liferay-sample-commerce-payment-integration` | none | 1 | True | True | Ready |  |
+| `liferay-sample-commerce-shipping-engine` | none | 1 | True | True | Ready |  |
+| `liferay-sample-commerce-tax-engine` | none | 1 | True | True | Ready |  |
+| `liferay-sample-custom-element-1` | none | 1 | True | True | Ready |  |
+| `liferay-sample-custom-element-2` | none | 1 | True | True | Ready |  |
+| `liferay-sample-custom-element-3` | none | 1 | True | True | Ready |  |
+| `liferay-sample-custom-element-4` | none | 1 | True | True | Ready |  |
+| `liferay-sample-custom-element-5` | none | 1 | True | True | Ready |  |
+| `liferay-sample-custom-element-6` | none | 1 | True | True | Ready |  |
+| `liferay-sample-custom-element-7` | none | 1 | True | True | Ready |  |
+| `liferay-sample-custom-element-8` | none | 1 | True | True | Ready |  |
+| `liferay-sample-editor-config-contributor-1` | none | 1 | True | True | Ready |  |
+| `liferay-sample-editor-config-contributor-2` | none | 1 | True | True | Ready |  |
+| `liferay-sample-editor-config-contributor-3` | none | 1 | True | True | Ready |  |
+| `liferay-sample-editor-config-contributor-4` | none | 1 | True | True | Ready |  |
+| `liferay-sample-editor-config-contributor-5` | none | 1 | True | True | Ready |  |
+| `liferay-sample-editor-config-contributor-6` | none | 1 | True | True | Ready |  |
+| `liferay-sample-etc-cron` | none | 1 | True | True | Ready |  |
+| `liferay-sample-etc-frontend` | none | 1 | True | True | Ready |  |
+| `liferay-sample-etc-node` | none | 1 | True | True | Ready |  |
+| `liferay-sample-etc-spring-boot` | none | 1 | True | True | Ready |  |
+| `liferay-sample-fds-cell-renderer` | none | 1 | True | True | Ready |  |
+| `liferay-sample-fds-filter` | none | 1 | True | True | Ready |  |
+| `liferay-sample-global-css-1` | none | 1 | True | True | Ready |  |
+| `liferay-sample-global-css-2` | none | 1 | True | True | Ready |  |
+| `liferay-sample-global-js-1` | none | 1 | True | True | Ready |  |
+| `liferay-sample-global-js-2` | none | 1 | True | True | Ready |  |
+| `liferay-sample-global-js-3` | none | 1 | True | True | Ready |  |
+| `liferay-sample-iframe-1` | none | 1 | True | True | Ready |  |
+| `liferay-sample-iframe-2` | none | 1 | True | True | Ready |  |
+| `liferay-sample-instance-settings` | none | 1 | True | True | Ready |  |
+| `liferay-sample-js-import-maps-entry` | none | 1 | True | True | Ready |  |
+| `liferay-sample-site-initializer` | none | 1 | True | True | Ready |  |
+| `liferay-sample-static-content` | none | 1 | True | True | Ready |  |
+| `liferay-sample-theme-css-1` | none | 1 | True | True | Ready |  |
+| `liferay-sample-theme-css-2` | none | 1 | True | True | Ready |  |
+| `liferay-sample-theme-css-3` | none | 1 | True | True | Ready |  |
+| `liferay-sample-theme-css-4` | none | 1 | True | True | Ready |  |
+| `liferay-sample-theme-favicon` | none | 1 | True | True | Ready |  |
+| `liferay-sample-theme-spritemap-1` | none | 1 | True | True | Ready |  |
+| `liferay-sample-theme-spritemap-2` | none | 1 | True | True | Ready |  |
 
 ### Scenario C: a namespace Liferay has not consented to
 
-_No client extensions in `team-b`._
+**1 client extensions** — Delivered 0/1, Provisioned 0/1, Ready 0/1.
+
+| Client Extension | Workload | Payloads | Delivered | Provisioned | Phase | Note |
+|---|---|---|---|---|---|---|
+| `liferay-sample-iframe-2` | none | 0 | False | - | Degraded | EnvironmentUnusable |
 
 ## Handshake Artifacts
 
@@ -78,10 +168,12 @@ NAME   ACCEPTED   ERRORS
 # 6. A rejected payload names the stage that failed
 
 # 7. The workload mounts both, and the operator injected them
+artifact -> 
 lxc-dxp-metadata -> liferay.localtest.me-lxc-dxp-metadata
 lxc-ext-init-metadata -> liferay-sample-etc-spring-boot-lxc-ext-init
 
 # 8. A shared virtual instance mirror, owned by every client extension using it
+liferay.localtest.me-lxc-dxp-metadata owners=liferay-sample-audiences-custom-attributes,liferay-sample-batch,liferay-sample-commerce-checkout-step,liferay-sample-commerce-payment-integration,liferay-s
 
 ```
 
