@@ -1,0 +1,276 @@
+# Liferay DXP running the modules this branch changes.
+#
+# The image is used as published. The init container copies the rebuilt bundles
+# out of the directory the k3d node mounts from the host, into the overlay the
+# image already supports at /mnt/liferay. The agent bundles keep the filenames
+# the image ships them under, so the copy replaces the stock ones; the cleanup
+# script then removes any duplicate left elsewhere in the bundle, because two
+# copies of one bundle symbolic name is the failure this guards against.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+    name: liferay
+    namespace: __LIFERAY_NAMESPACE__
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+    name: liferay
+    namespace: __LIFERAY_NAMESPACE__
+rules:
+    -   apiGroups:
+            -   ""
+        resources:
+            -   configmaps
+        verbs:
+            -   create
+            -   delete
+            -   get
+            -   list
+            -   patch
+            -   update
+            -   watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+    name: liferay
+    namespace: __LIFERAY_NAMESPACE__
+roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: Role
+    name: liferay
+subjects:
+    -   kind: ServiceAccount
+        name: liferay
+        namespace: __LIFERAY_NAMESPACE__
+---
+# The control panel lists client extensions wherever they live, so the portal
+# reads the custom resource cluster wide.
+#
+# The portal also writes the status subresource. It is the only component that
+# knows whether a configuration payload was applied, and conditions are keyed by
+# type so the portal and the operator can each own the ones they know about. The
+# grant is deliberately narrow: status only, never the spec.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+    name: liferay-client-extension-reader
+rules:
+    -   apiGroups:
+            -   cx.liferay.com
+        resources:
+            -   clientextensions
+        verbs:
+            -   get
+            -   list
+            -   watch
+    -   apiGroups:
+            -   cx.liferay.com
+        resources:
+            -   clientextensions/status
+        verbs:
+            -   get
+            -   patch
+            -   update
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+    name: liferay-client-extension-reader
+roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: ClusterRole
+    name: liferay-client-extension-reader
+subjects:
+    -   kind: ServiceAccount
+        name: liferay
+        namespace: __LIFERAY_NAMESPACE__
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: liferay
+    namespace: __LIFERAY_NAMESPACE__
+spec:
+    ports:
+        # The virtual instance metadata advertises a bare domain, so a client
+        # extension resolves Liferay on the protocol's default port. Without
+        # port 80 the client hangs on a connect that never completes.
+        -   name: http
+            port: 80
+            targetPort: 8080
+        -   name: http-direct
+            port: 8080
+            targetPort: 8080
+    selector:
+        app: liferay
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: liferay
+    namespace: __LIFERAY_NAMESPACE__
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: liferay
+    strategy:
+        type: Recreate
+    template:
+        metadata:
+            labels:
+                app: liferay
+        spec:
+            containers:
+                -   env:
+                        -   name: LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_DRIVER_UPPERCASEC_LASS_UPPERCASEN_AME
+                            value: org.mariadb.jdbc.Driver
+                        # The web ID is the virtual instance identifier every
+                        # client extension targets, and it names the metadata
+                        # ConfigMap. Keeping it equal to the virtual host means
+                        # one name identifies the instance everywhere.
+                        -   name: LIFERAY_COMPANY_PERIOD_DEFAULT_PERIOD_WEB_PERIOD_ID
+                            value: __VIRTUAL_INSTANCE_ID__
+                        -   name: LIFERAY_COMPANY_PERIOD_DEFAULT_PERIOD_VIRTUAL_PERIOD_HOST_PERIOD_NAME
+                            value: __VIRTUAL_INSTANCE_ID__
+                        -   name: LIFERAY_COMPANY_PERIOD_DEFAULT_PERIOD_VIRTUAL_PERIOD_HOST_PERIOD_SYNC_PERIOD_ON_PERIOD_STARTUP
+                            value: "true"
+                        -   name: LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_PASSWORD
+                            value: liferay
+                        -   name: LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_URL
+                            value: jdbc:mariadb://mariadb:3306/lportal?characterEncoding=UTF-8&useFastDateParsing=false&useUnicode=true
+                        -   name: LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_USERNAME
+                            value: liferay
+                        -   name: LIFERAY_SETUP_PERIOD_WIZARD_PERIOD_ENABLED
+                            value: "false"
+                        # In cluster traffic is plain HTTP. This also sets
+                        # .serviceScheme, which is what Liferay calls a
+                        # microservice client extension with.
+                        -   name: LIFERAY_WEB_PERIOD_SERVER_PERIOD_PROTOCOL
+                            value: http
+                        # Every company's default password policy is written
+                        # when the company is created, and it otherwise forces
+                        # a password change on first sign in. Until then the
+                        # admin is refused by every headless API, which the
+                        # verification scripts depend on.
+                        -   name: LIFERAY_PASSWORDS_PERIOD_DEFAULT_PERIOD_POLICY_PERIOD_CHANGE_PERIOD_REQUIRED
+                            value: "false"
+                        -   name: LIFERAY_TERMS_PERIOD_OF_PERIOD_USE_PERIOD_REQUIRED
+                            value: "false"
+                        -   name: LIFERAY_USERS_PERIOD_REMINDER_PERIOD_QUERIES_PERIOD_ENABLED
+                            value: "false"
+                    image: __LIFERAY_IMAGE__
+                    imagePullPolicy: IfNotPresent
+                    name: liferay
+                    ports:
+                        -   containerPort: 8080
+                            name: http
+                    # A TCP probe on purpose. An HTTP probe sends the pod IP
+                    # as the Host header, which does not match the virtual
+                    # instance's virtual host, so Liferay answers 500 and the
+                    # pod never becomes Ready.
+                    readinessProbe:
+                        failureThreshold: 60
+                        initialDelaySeconds: 120
+                        periodSeconds: 15
+                        tcpSocket:
+                            port: 8080
+                    resources:
+                        limits:
+                            cpu: "4"
+                            memory: 6Gi
+                        requests:
+                            cpu: "1"
+                            memory: 3Gi
+                    volumeMounts:
+                        -   mountPath: /mnt/liferay
+                            name: overlay
+            initContainers:
+                # Liferay's Spring context fails outright if the database is
+                # not accepting connections when it starts, and a TCP readiness
+                # probe still passes because Tomcat binds regardless. Waiting
+                # here turns a dead webapp into a slower start.
+                -   command:
+                        -   /bin/sh
+                        -   -c
+                        -   |
+                            until nc -z mariadb 3306
+                            do
+                                echo "Waiting for mariadb"
+                                sleep 3
+                            done
+                            echo "Database is accepting connections"
+                    image: busybox:1.36
+                    name: wait-for-database
+                -   command:
+                        -   /bin/sh
+                        -   -c
+                        -   |
+                            set -eu
+                            echo "Staging rebuilt portal modules into the overlay"
+                            mkdir -p /mnt/liferay/files/osgi/modules \
+                                /mnt/liferay/files/osgi/static \
+                                /mnt/liferay/files/osgi/configs \
+                                /mnt/liferay/scripts
+                            cp -v /liferay-modules/osgi/modules/*.jar /mnt/liferay/files/osgi/modules/
+                            cp -v /liferay-modules/osgi/static/*.jar /mnt/liferay/files/osgi/static/
+                            # The agent reads the API server with this pod's own
+                            # service account. Nothing is baked into an image.
+
+                            SA=/var/run/secrets/kubernetes.io/serviceaccount
+                            cat > /mnt/liferay/files/osgi/configs/com.liferay.portal.k8s.agent.configuration.PortalK8sAgentConfiguration-default.config <<CONFIG
+                            apiServerHost="kubernetes.default.svc"
+                            apiServerPort="443"
+                            apiServerSSL="true"
+                            caCertData="$(base64 -w0 < ${SA}/ca.crt)"
+                            namespace="__LIFERAY_NAMESPACE__"
+                            saToken="$(cat ${SA}/token)"
+                            CONFIG
+                            sed -i 's/^ *//' /mnt/liferay/files/osgi/configs/com.liferay.portal.k8s.agent.configuration.PortalK8sAgentConfiguration-default.config
+                            # Files land before scripts run, so this removes any
+                            # duplicate of a bundle we just replaced. Two copies
+                            # of one symbolic name is what breaks resolution.
+
+                            cat > /mnt/liferay/scripts/10-remove-replaced-modules.sh <<'SCRIPT'
+                            #!/bin/bash
+
+                            for symbolic_name in \
+                                com.liferay.portal.k8s.agent.api \
+                                com.liferay.portal.k8s.agent.impl \
+                                com.liferay.portal.k8s.web
+                            do
+                                find /opt/liferay/osgi/marketplace /opt/liferay/osgi/modules /opt/liferay/osgi/static \
+                                    -name "${symbolic_name}*.jar" 2> /dev/null |
+                                    while read -r jar
+                                    do
+                                        if [ "$(basename "${jar}")" != "${symbolic_name}.jar" ] &&
+                                            [ "$(dirname "${jar}")" == "/opt/liferay/osgi/static" ]
+                                        then
+                                            echo "[LIFERAY] Removing replaced bundle ${jar}"
+                                            rm --force "${jar}"
+                                        fi
+                                    done
+                            done
+                            SCRIPT
+                            sed -i 's/^ *//' /mnt/liferay/scripts/10-remove-replaced-modules.sh
+                            chmod +x /mnt/liferay/scripts/10-remove-replaced-modules.sh
+                            echo "Overlay staged:"
+                            find /mnt/liferay -type f
+                    image: busybox:1.36
+                    name: stage-modules
+                    volumeMounts:
+                        -   mountPath: /liferay-modules
+                            name: portal-modules
+                            readOnly: true
+                        -   mountPath: /mnt/liferay
+                            name: overlay
+            serviceAccountName: liferay
+            volumes:
+                -   emptyDir: {}
+                    name: overlay
+                -   hostPath:
+                        path: /liferay-modules
+                        type: Directory
+                    name: portal-modules

@@ -80,6 +80,13 @@ type LiferayEnvironmentSpec struct {
 	// +kubebuilder:validation:Required
 	ActivationCodeSecretRef SecretKeyRef `json:"activationCodeSecretRef"`
 
+	// ClientExtensionNamespaces lists the namespaces permitted to attach a
+	// ClientExtension to this environment. Consent is granted from the Liferay
+	// side so a tenant cannot provision OAuth2 applications against a Liferay
+	// it does not own. The environment's own namespace is always permitted.
+	// +optional
+	ClientExtensionNamespaces []string `json:"clientExtensionNamespaces,omitempty"`
+
 	// +optional
 	DesiredReplicas *int32 `json:"desiredReplicas,omitempty"`
 

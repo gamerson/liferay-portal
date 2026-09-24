@@ -1,0 +1,44 @@
+apiVersion: cx.liferay.com/v1alpha1
+kind: ClientExtension
+metadata:
+    annotations:
+        argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    labels:
+        {{- include "liferay-client-extension.labels" . | nindent 8 }}
+    name: {{ include "liferay-client-extension.fullname" . }}
+spec:
+    {{- $configs := .Values.clientExtension.configs }}
+    {{- if and (not $configs) (.Files.Glob "files/*.client-extension-config.json") }}
+    {{- $collected := list }}
+    {{- range $path, $_ := .Files.Glob "files/*.client-extension-config.json" }}
+    {{- $collected = append $collected ($.Files.Get $path) }}
+    {{- end }}
+    {{- $configs = $collected }}
+    {{- end }}
+    {{- if $configs }}
+    configs:
+        {{- range $configs }}
+        -   |
+            {{- . | nindent 12 }}
+        {{- end }}
+    {{- else if .Values.clientExtension.clientExtensionYaml }}
+    clientExtensionYaml: |
+        {{- .Values.clientExtension.clientExtensionYaml | nindent 8 }}
+    {{- end }}
+    {{- with .Values.clientExtension.domain }}
+    domain: {{ . | quote }}
+    {{- end }}
+    liferayEnvironmentRef:
+        name: {{ .Values.clientExtension.liferayEnvironment.name }}
+        {{- with .Values.clientExtension.liferayEnvironment.namespace }}
+        namespace: {{ . }}
+        {{- end }}
+    projectName: {{ default (include "liferay-client-extension.serviceId" .) .Values.clientExtension.projectName }}
+    serviceId: {{ include "liferay-client-extension.serviceId" . }}
+    virtualInstanceId: {{ .Values.clientExtension.virtualInstanceId | quote }}
+    {{- if .Values.workload.enabled }}
+    workloadRef:
+        apiVersion: {{ if eq .Values.workload.kind "Deployment" }}apps/v1{{ else }}batch/v1{{ end }}
+        kind: {{ .Values.workload.kind }}
+        name: {{ include "liferay-client-extension.fullname" . }}
+    {{- end }}

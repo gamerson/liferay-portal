@@ -1,0 +1,26 @@
+apiVersion: v1
+data:
+    __DOMAIN_SUFFIX__.override: |
+        rewrite name regex ^(.+)\.__DOMAIN_SUFFIX_REGEX__\.$ traefik.kube-system.svc.cluster.local answer auto
+# Resolves every host under the demo domain to the ingress controller, so one
+# name works from everywhere.
+#
+# A client extension pod, the Liferay pod and the developer's browser all use
+# the same URL. Inside the cluster this rewrites the name onto the traefik
+# Service, where the ingress routes the request by Host exactly as it does for
+# the browser.
+#
+# The rewrite names the Service rather than an address. An earlier revision
+# answered with the load balancer container's IP, and Docker renumbers
+# containers when it restarts: the answer went on pointing at whatever took the
+# old address, first a node and then the OCI registry. A name resolved by the
+# kubernetes plugin follows the Service wherever it goes.
+#
+# The expression is anchored on the fully qualified name. Unanchored, it also
+# matched the search path expansions a pod tries first, such as
+# host.localtest.me.liferay-prod.svc.cluster.local, and answered those instead
+# of letting them fall through to the real name.
+kind: ConfigMap
+metadata:
+    name: coredns-custom
+    namespace: kube-system

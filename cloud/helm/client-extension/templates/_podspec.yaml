@@ -1,0 +1,150 @@
+{{/*
+Pod template metadata, shared by every workload kind.
+*/}}
+
+{{- define "liferay-client-extension.podTemplateMetadata" -}}
+{{- with .Values.podAnnotations }}
+annotations:
+    {{- toYaml . | nindent 4 }}
+{{- end }}
+labels:
+    {{- include "liferay-client-extension.selectorLabels" . | nindent 4 }}
+    {{- with .Values.podLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+{{- end }}
+
+{{/*
+The pod spec shared by every workload kind. Keeping it in one place is what
+makes a Deployment, a Job and a CronJob agree on how the Liferay metadata is
+mounted -- the operator validates this wiring and will report a
+WorkloadMisconfigured condition if it is missing, but it will not add it.
+Mapping keys are emitted in alphabetical order because the repository's source
+formatter sorts them, and a reordered key would otherwise move a Go template
+action away from the block it closes.
+*/}}
+
+{{- define "liferay-client-extension.podSpec" -}}
+{{- $oauth := include "liferay-client-extension.requiresOAuth" . -}}
+{{- with .Values.workload.affinity }}
+affinity:
+    {{- toYaml . | nindent 4 }}
+{{- end }}
+containers:
+    -   env:
+            -   name: LIFERAY_ROUTES_DXP
+                value: /etc/liferay/lxc/dxp-metadata
+            {{- if $oauth }}
+            -   name: LIFERAY_ROUTES_CLIENT_EXTENSION
+                value: /etc/liferay/lxc/ext-init-metadata
+            {{- end }}
+            {{- /*
+                The two variables above are the chart's to set: they are the
+                mount paths it just declared, so a caller overriding them would
+                point the runtime at directories nothing is mounted on. LCP.json
+                carries them as well, and a pipeline baking it into values would
+                otherwise emit each one twice, which server side apply rejects
+                outright as a duplicate key.
+            */}}
+            {{- range $name, $value := .Values.workload.env }}
+            {{- if not (has $name (list "LIFERAY_ROUTES_CLIENT_EXTENSION" "LIFERAY_ROUTES_DXP")) }}
+            -   name: {{ $name }}
+                value: {{ $value | quote }}
+            {{- end }}
+            {{- end }}
+        image: "{{ required "image.repository is required" .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        {{- with .Values.workload.livenessProbe }}
+        livenessProbe:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
+        name: client-extension
+        {{- if eq .Values.workload.kind "Deployment" }}
+        ports:
+            -   containerPort: {{ .Values.workload.containerPort }}
+                name: http
+                protocol: TCP
+        {{- end }}
+        {{- with .Values.workload.readinessProbe }}
+        readinessProbe:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
+        {{- with .Values.workload.resources }}
+        resources:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
+        {{- with .Values.workload.securityContext }}
+        securityContext:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
+        {{- with .Values.workload.startupProbe }}
+        startupProbe:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
+        volumeMounts:
+            -   mountPath: /etc/liferay/lxc/dxp-metadata
+                name: lxc-dxp-metadata
+                readOnly: true
+            {{- if $oauth }}
+            -   mountPath: /etc/liferay/lxc/ext-init-metadata
+                name: lxc-ext-init-metadata
+                readOnly: true
+            {{- end }}
+            {{- if .Values.artifact.reference }}
+            {{- range .Values.artifact.mounts }}
+            -   mountPath: {{ .mountPath }}
+                name: artifact
+                readOnly: true
+                {{- with .subPath }}
+                subPath: {{ . }}
+                {{- end }}
+            {{- end }}
+            {{- end }}
+            {{- with .Values.workload.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+{{- with .Values.imagePullSecrets }}
+imagePullSecrets:
+    {{- toYaml . | nindent 4 }}
+{{- end }}
+{{- with .Values.workload.nodeSelector }}
+nodeSelector:
+    {{- toYaml . | nindent 4 }}
+{{- end }}
+{{- if ne .Values.workload.kind "Deployment" }}
+restartPolicy: Never
+{{- end }}
+{{- with .Values.workload.podSecurityContext }}
+securityContext:
+    {{- toYaml . | nindent 4 }}
+{{- end }}
+serviceAccountName: {{ include "liferay-client-extension.serviceAccountName" . }}
+{{- with .Values.workload.tolerations }}
+tolerations:
+    {{- toYaml . | nindent 4 }}
+{{- end }}
+volumes:
+    {{- /*
+        The client extension's own files -- a jar, static assets, batch data --
+        arrive as an OCI image mounted into a stock base image, rather than
+        baked into an image of their own. That leaves nothing to build between
+        the zip and the cluster.
+    */}}
+    {{- with .Values.artifact.reference }}
+    -   image:
+            pullPolicy: {{ $.Values.artifact.pullPolicy }}
+            reference: {{ . }}
+        name: artifact
+    {{- end }}
+    -   configMap:
+            name: {{ include "liferay-client-extension.dxpMetadataName" . }}
+        name: lxc-dxp-metadata
+    {{- if $oauth }}
+    -   name: lxc-ext-init-metadata
+        secret:
+            secretName: {{ include "liferay-client-extension.extInitSecretName" . }}
+    {{- end }}
+    {{- with .Values.workload.volumes }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+{{- end }}

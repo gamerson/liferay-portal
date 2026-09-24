@@ -1,0 +1,97 @@
+# The chart owns the workload, Ingress, Service and ServiceAccount, so Helm and
+# Argo CD reconcile them like any other manifests. The DXP operator owns the
+# configuration payload, the ext-provision ConfigMaps and the credentials it
+# mirrors back, through the ClientExtension resource this chart renders. The
+# operator validates the workload's wiring and reports it on the resource, but
+# it never edits the spec -- the one exception is a digest annotation on the pod
+# template, which is what rolls the pods when Liferay reissues credentials.
+
+# The client extension's files, published by CI as an OCI image holding the
+# contents of the build zip, and mounted read only into the base image named by
+# image. Image volumes need Kubernetes 1.33 or newer. Each mount maps a directory
+# of the artifact onto a path in the container, following the COPY lines of the
+# Dockerfile the zip carries; only directories can be mounted.
+artifact:
+    mounts: []
+    pullPolicy: IfNotPresent
+    reference: ""
+clientExtension:
+    # Expanded client-extension.yaml, translated by the operator. A fallback for
+    # a local or hand-authored extension with no build artifact; ignored when
+    # configs is set. Globs and frontendTokenDefinitionJSON references must
+    # already be resolved.
+    clientExtensionYaml: ""
+    # The OSGi configuration payloads, taken verbatim from the build's
+    # *.client-extension-config.json. This is the production path: the payload
+    # deployed is byte for byte the one the build produced, with no second
+    # translation to disagree with it. A chart packaged with the artifact can
+    # leave this empty and ship the file in files/ instead.
+    configs: []
+    # The host this client extension is reached at. One name serves both
+    # callers: a browser resolves it through the Ingress, and Liferay resolves
+    # the same name to the Service inside the cluster.
+    domain: ""
+    liferayEnvironment:
+        name: liferay-default
+        # Empty means Liferay runs in this same namespace.
+        namespace: ""
+    # Defaults to serviceId. Must match what the build used.
+    projectName: ""
+    # Whether to mount the OAuth2 credentials. Left unset it is detected from
+    # the payload, since Liferay issues them only for a client extension that
+    # declares an oAuthApplication entry. Set it explicitly when the payload is
+    # pre-translated and opaque.
+    requiresOAuth: null
+    serviceId: ""
+    virtualInstanceId: liferay.com
+fullnameOverride: ""
+# The stock base image the workload runs, such as liferay/caddy or
+# liferay/jar-runner. With an artifact set, nothing client extension specific
+# lives in it.
+image:
+    pullPolicy: IfNotPresent
+    repository: ""
+    tag: latest
+imagePullSecrets: []
+ingress:
+    annotations: {}
+    className: ""
+    enabled: false
+    hosts: []
+    tls: []
+labels: {}
+nameOverride: ""
+podAnnotations: {}
+podLabels: {}
+service:
+    enabled: false
+    port: 80
+    targetPort: 80
+    type: ClusterIP
+serviceAccount:
+    annotations: {}
+    create: false
+    name: ""
+workload:
+    affinity: {}
+    backoffLimit: 6
+    containerPort: 80
+    enabled: true
+    env: {}
+    # CronJob, Deployment or Job. Immutable once created.
+    kind: Deployment
+    livenessProbe: {}
+    nodeSelector: {}
+    podSecurityContext: {}
+    readinessProbe: {}
+    replicas: 1
+    resources: {}
+    schedule: ""
+    securityContext: {}
+    # Holds off liveness and readiness until the process has come up once. A
+    # JVM client extension takes tens of seconds to start, and a liveness probe
+    # with no delay kills it before it ever listens.
+    startupProbe: {}
+    tolerations: []
+    volumeMounts: []
+    volumes: []

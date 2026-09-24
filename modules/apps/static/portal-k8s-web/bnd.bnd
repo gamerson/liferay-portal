@@ -1,0 +1,4 @@
+Bundle-Name: Liferay Portal K8s Web
+Bundle-SymbolicName: com.liferay.portal.k8s.web
+Bundle-Version: 1.0.0
+Web-ContextPath: /portal-k8s-web
