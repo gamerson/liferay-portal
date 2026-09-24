@@ -6,18 +6,27 @@
 # it never edits the spec -- the one exception is a digest annotation on the pod
 # template, which is what rolls the pods when Liferay reissues credentials.
 
+# The client extension's files, published by CI as an OCI image holding the
+# contents of the build zip, and mounted read only into the base image named by
+# image. Image volumes need Kubernetes 1.33 or newer. Each mount maps a directory
+# of the artifact onto a path in the container, following the COPY lines of the
+# Dockerfile the zip carries; only directories can be mounted.
+artifact:
+    mounts: []
+    pullPolicy: IfNotPresent
+    reference: ""
 clientExtension:
+    # Expanded client-extension.yaml, translated by the operator. A fallback for
+    # a local or hand-authored extension with no build artifact; ignored when
+    # configs is set. Globs and frontendTokenDefinitionJSON references must
+    # already be resolved.
+    clientExtensionYaml: ""
     # The OSGi configuration payloads, taken verbatim from the build's
     # *.client-extension-config.json. This is the production path: the payload
     # deployed is byte for byte the one the build produced, with no second
     # translation to disagree with it. A chart packaged with the artifact can
     # leave this empty and ship the file in files/ instead.
     configs: []
-    # Expanded client-extension.yaml, translated by the operator. A fallback for
-    # a local or hand-authored extension with no build artifact; ignored when
-    # configs is set. Globs and frontendTokenDefinitionJSON references must
-    # already be resolved.
-    clientExtensionYaml: ""
     # The host this client extension is reached at. One name serves both
     # callers: a browser resolves it through the Ingress, and Liferay resolves
     # the same name to the Service inside the cluster.
@@ -36,6 +45,9 @@ clientExtension:
     serviceId: ""
     virtualInstanceId: liferay.com
 fullnameOverride: ""
+# The stock base image the workload runs, such as liferay/caddy or
+# liferay/jar-runner. With an artifact set, nothing client extension specific
+# lives in it.
 image:
     pullPolicy: IfNotPresent
     repository: ""
@@ -76,6 +88,10 @@ workload:
     resources: {}
     schedule: ""
     securityContext: {}
+    # Holds off liveness and readiness until the process has come up once. A
+    # JVM client extension takes tens of seconds to start, and a liveness probe
+    # with no delay kills it before it ever listens.
+    startupProbe: {}
     tolerations: []
     volumeMounts: []
     volumes: []

@@ -10,6 +10,10 @@ CX_NAMESPACE_SPLIT="${CX_NAMESPACE_SPLIT:-team-a}"
 
 IMAGE_TAG="${IMAGE_TAG:-spike}"
 
+# Image volumes, which mount a client extension's artifact into a stock base
+# image, need Kubernetes 1.33 or newer and a containerd that implements them.
+K3S_IMAGE="${K3S_IMAGE:-rancher/k3s:v1.36.4-k3s1}"
+
 LIFERAY_IMAGE="${LIFERAY_IMAGE:-liferay/dxp:latest}"
 
 LIFERAY_NAMESPACE="${LIFERAY_NAMESPACE:-liferay-prod}"
@@ -17,6 +21,17 @@ LIFERAY_NAMESPACE="${LIFERAY_NAMESPACE:-liferay-prod}"
 MARIADB_IMAGE="${MARIADB_IMAGE:-mariadb:11.4}"
 
 MINIO_IMAGE="${MINIO_IMAGE:-minio/minio:latest}"
+
+# The OCI registry CI publishes client extension artifacts and charts to. It is
+# one registry under two names: the host pushes to localhost, and the cluster
+# pulls through the k3d registry alias.
+OCI_REGISTRY_NAME="${OCI_REGISTRY_NAME:-cx-oci}"
+
+OCI_REGISTRY_PORT="${OCI_REGISTRY_PORT:-5111}"
+
+OCI_CLUSTER_HOST="${OCI_CLUSTER_HOST:-k3d-${OCI_REGISTRY_NAME}:${OCI_REGISTRY_PORT}}"
+
+OCI_PUSH_HOST="${OCI_PUSH_HOST:-localhost:${OCI_REGISTRY_PORT}}"
 
 OPERATOR_IMAGE="${OPERATOR_IMAGE:-liferay/liferay-dxp-operator:spike}"
 

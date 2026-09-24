@@ -16,7 +16,9 @@ OPERATOR_DIR="$(cd "${HACK_DIR}/.." && pwd)"
 CLOUD_DIR="$(cd "${OPERATOR_DIR}/.." && pwd)"
 
 function main {
+	_create_registry
 	_create_cluster
+	"${HACK_DIR}/patch-coredns.sh"
 	_build_images
 	_import_images
 	_install_crds
@@ -55,9 +57,25 @@ function _create_cluster {
 
 	k3d cluster create "${CLUSTER_NAME}" \
 		--agents 1 \
+		--image "${K3S_IMAGE}" \
+		--port "80:80@loadbalancer" \
 		--port "8080:80@loadbalancer" \
+		--registry-use "${OCI_CLUSTER_HOST}" \
 		--volume "${PORTAL_MODULES_DIR}:/liferay-modules@all" \
 		--wait
+}
+
+function _create_registry {
+	if k3d registry list "${OCI_REGISTRY_NAME}" > /dev/null 2>&1
+	then
+		log "Registry ${OCI_REGISTRY_NAME} already exists"
+
+		return
+	fi
+
+	log_step "Creating OCI registry ${OCI_REGISTRY_NAME}"
+
+	k3d registry create "${OCI_REGISTRY_NAME}" --port "${OCI_REGISTRY_PORT}"
 }
 
 function _import_images {
@@ -97,6 +115,7 @@ function _install_liferay {
 	_render manifests/mariadb.yaml | kube apply --filename -
 	_render manifests/liferay-dxp.yaml | kube apply --filename -
 	_render manifests/liferay-environment.yaml | kube apply --filename -
+	_render manifests/liferay-ingress.yaml | kube apply --filename -
 
 	kube --namespace "${LIFERAY_NAMESPACE}" rollout status deployment/mariadb --timeout 300s
 

@@ -1,7 +1,12 @@
 #!/bin/bash
 
-# Builds a container image for every sample client extension from the zip its
-# Gradle build produced, then loads them into the k3d cluster.
+# Stages the stock base images the sample client extensions run on.
+#
+# Nothing client extension specific is built here. Each sample's files are
+# published as an OCI artifact by package-cx-chart.sh and mounted into one of
+# these images as an image volume, so the only images a cluster needs are the
+# Liferay base images themselves. They are imported into k3d up front so the
+# scenarios do not depend on Docker Hub rate limits.
 
 set -o errexit
 set -o nounset
@@ -11,53 +16,23 @@ HACK_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 source "${HACK_DIR}/lib.sh"
 
-BUILD_DIR="${BUILD_DIR:-/tmp/cx-spike-images}"
+BASE_IMAGES=(
+	liferay/batch:latest
+	liferay/caddy:latest
+	liferay/jar-runner:latest
+	liferay/node-runner:latest
+	liferay/noop:latest
+)
 
 function main {
 	_pull_base_images
-	_build_samples
-	_import_samples
+	_import_base_images
 }
 
-function _build_samples {
-	log_step "Building sample images"
+function _import_base_images {
+	log_step "Importing base images into ${CLUSTER_NAME}"
 
-	rm --force --recursive "${BUILD_DIR}"
-	mkdir --parents "${BUILD_DIR}"
-
-	local sample
-
-	for sample in $(samples)
-	do
-		local context="${BUILD_DIR}/${sample}"
-
-		mkdir --parents "${context}"
-
-		unzip -q -o "${SAMPLES_DIR}/${sample}/dist/${sample}.zip" -d "${context}"
-
-		if ! docker build --quiet --tag "${sample}:${IMAGE_TAG}" "${context}" > /dev/null
-		then
-			echo "failed to build ${sample}" >&2
-
-			return 1
-		fi
-
-		echo "built ${sample}:${IMAGE_TAG}"
-	done
-}
-
-function _import_samples {
-	log_step "Importing sample images into ${CLUSTER_NAME}"
-
-	local images=()
-	local sample
-
-	for sample in $(samples)
-	do
-		images+=("${sample}:${IMAGE_TAG}")
-	done
-
-	k3d image import --cluster "${CLUSTER_NAME}" "${images[@]}"
+	k3d image import --cluster "${CLUSTER_NAME}" "${BASE_IMAGES[@]}"
 }
 
 function _pull_base_images {
@@ -65,12 +40,7 @@ function _pull_base_images {
 
 	local image
 
-	for image in \
-		liferay/batch:latest \
-		liferay/caddy:latest \
-		liferay/jar-runner:latest \
-		liferay/node-runner:latest \
-		liferay/noop:latest
+	for image in "${BASE_IMAGES[@]}"
 	do
 		docker pull --quiet "${image}" > /dev/null &
 	done

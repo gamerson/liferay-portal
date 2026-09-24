@@ -77,6 +77,10 @@ containers:
         securityContext:
             {{- toYaml . | nindent 12 }}
         {{- end }}
+        {{- with .Values.workload.startupProbe }}
+        startupProbe:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
         volumeMounts:
             -   mountPath: /etc/liferay/lxc/dxp-metadata
                 name: lxc-dxp-metadata
@@ -85,6 +89,16 @@ containers:
             -   mountPath: /etc/liferay/lxc/ext-init-metadata
                 name: lxc-ext-init-metadata
                 readOnly: true
+            {{- end }}
+            {{- if .Values.artifact.reference }}
+            {{- range .Values.artifact.mounts }}
+            -   mountPath: {{ .mountPath }}
+                name: artifact
+                readOnly: true
+                {{- with .subPath }}
+                subPath: {{ . }}
+                {{- end }}
+            {{- end }}
             {{- end }}
             {{- with .Values.workload.volumeMounts }}
             {{- toYaml . | nindent 12 }}
@@ -110,6 +124,18 @@ tolerations:
     {{- toYaml . | nindent 4 }}
 {{- end }}
 volumes:
+    {{- /*
+        The client extension's own files -- a jar, static assets, batch data --
+        arrive as an OCI image mounted into a stock base image, rather than
+        baked into an image of their own. That leaves nothing to build between
+        the zip and the cluster.
+    */}}
+    {{- with .Values.artifact.reference }}
+    -   image:
+            pullPolicy: {{ $.Values.artifact.pullPolicy }}
+            reference: {{ . }}
+        name: artifact
+    {{- end }}
     -   configMap:
             name: {{ include "liferay-client-extension.dxpMetadataName" . }}
         name: lxc-dxp-metadata

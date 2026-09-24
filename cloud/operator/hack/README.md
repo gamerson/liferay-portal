@@ -13,6 +13,8 @@ satisfies it reconciles what is missing and reports the rest as already done.
 ./run-all.sh
 ```
 
+Set `SKIP_BOOTSTRAP=true` to rerun the scenarios and checks against a cluster that is already up.
+
 Cluster, operator, Liferay, sample images, four scenarios, the end to end
 checks, and the status report. Expect this to take a while on a cold cluster --
 Liferay boots against an empty database on the first run.
@@ -21,13 +23,35 @@ Liferay boots against an empty database on the first run.
 
 | Script | What it does |
 | --- | --- |
-| `bootstrap.sh` | Creates the k3d cluster, MariaDB, MinIO, the operator, and Liferay. |
+| `bootstrap.sh` | Creates the OCI registry, a Kubernetes 1.36 k3d cluster, MariaDB, the operator, and Liferay. |
 | `patch-coredns.sh` | Resolves `*.localtest.me` to the cluster load balancer, in-cluster and out. |
 | `stage-modules.sh` | Builds the portal modules under test and stages them for the init container overlay. |
-| `build-samples.sh` | Builds a container image per sample from its `dist` zip and imports them. |
-| `deploy-samples.sh` | `deploy-samples.sh <cx-namespace> <liferay-namespace> [sample ...]` |
+| `build-samples.sh` | Pulls the stock Liferay base images and imports them. Nothing sample specific is built. |
+| `package-cx-chart.sh` | `package-cx-chart.sh <sample> [version]` — publishes a zip as an artifact image and a chart, as CI would. |
+| `deploy-samples.sh` | `deploy-samples.sh <cx-namespace> <liferay-namespace> [sample ...]` — publishes, then installs from `oci://` with only the environment binding. |
 | `redeploy-operator.sh` | Rebuilds the operator image and rolls it. |
 | `report.sh` | Writes `../STATUS_REPORT.md`. |
+
+## From Zip To Cluster
+
+Nothing is built from a client extension's Dockerfile. `cx_artifact.py` reads it instead: the `FROM` names the stock base image the workload runs, and each `COPY` becomes a mount. The zip's files are published as a single layer OCI image, and the chart mounts it into the unmodified base image as an image volume.
+
+| Base image | Mount |
+| --- | --- |
+| `liferay/caddy` | `static/` at `/public_html` |
+| `liferay/jar-runner` | the jar at `/opt/liferay/jar-runner.jar` |
+| `liferay/batch` | `batch/` or `site-initializer/` under `/opt/liferay` |
+| `liferay/node-runner` | the whole zip at `/opt/liferay` |
+
+An image volume can only mount a directory. A `COPY` whose destination is a file therefore also gets a directory of its own inside the layer, holding the file under its destination name as a hard link, and that directory is mounted over the destination's parent. `/opt/liferay` is empty in every runner image, so nothing is hidden.
+
+Mounts are read only, so nothing can run against the files in the cluster. A `RUN` step is therefore replayed at package time instead: when the zip is copied whole to one destination, `package-cx-chart.sh` runs the step inside the zip's own base image against the unpacked zip, then builds the layer from the result. The node sample needs this — its zip carries one of its six dependencies, and `npm install` is where the rest come from. Any instruction that cannot be replayed is reported as a warning rather than dropped silently.
+
+`LCP.json` declares its probes with no initial delay and leaves start-up time to the platform. Kubernetes doesn't, so the chart also gets a `startupProbe` on the same endpoint, which holds liveness and readiness off until the process has answered once. Without it the kubelet kills a Spring Boot client extension before Tomcat is listening.
+
+A chart is republished only when its inputs change: the zip, `cx_artifact.py`, `package-cx-chart.sh`, or the chart itself.
+
+Image volumes need Kubernetes 1.33 or newer and a containerd that implements them, which is why the cluster runs 1.36.
 
 ## Virtual Instances
 
