@@ -7,16 +7,23 @@ metadata:
         {{- include "liferay-client-extension.labels" . | nindent 8 }}
     name: {{ include "liferay-client-extension.fullname" . }}
 spec:
-    {{- with .Values.clientExtension.clientExtensionYaml }}
-    clientExtensionYaml: |
-        {{- . | nindent 8 }}
+    {{- $configs := .Values.clientExtension.configs }}
+    {{- if and (not $configs) (.Files.Glob "files/*.client-extension-config.json") }}
+    {{- $collected := list }}
+    {{- range $path, $_ := .Files.Glob "files/*.client-extension-config.json" }}
+    {{- $collected = append $collected ($.Files.Get $path) }}
     {{- end }}
-    {{- with .Values.clientExtension.configs }}
+    {{- $configs = $collected }}
+    {{- end }}
+    {{- if $configs }}
     configs:
-        {{- range . }}
+        {{- range $configs }}
         -   |
             {{- . | nindent 12 }}
         {{- end }}
+    {{- else if .Values.clientExtension.clientExtensionYaml }}
+    clientExtensionYaml: |
+        {{- .Values.clientExtension.clientExtensionYaml | nindent 8 }}
     {{- end }}
     {{- with .Values.clientExtension.domain }}
     domain: {{ . | quote }}

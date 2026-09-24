@@ -19,8 +19,6 @@ source "${HACK_DIR}/lib.sh"
 
 CHART_DIR="$(cd "${HACK_DIR}/../../helm/client-extension" && pwd)"
 
-CXEXPAND="${BUILD_DIR:-/tmp/cx-spike-images}/cxexpand"
-
 PUBLIC_DOMAIN_SUFFIX="${PUBLIC_DOMAIN_SUFFIX:-localtest.me}"
 
 function main {
@@ -36,8 +34,6 @@ function main {
 		mapfile -t requested < <(samples)
 	fi
 
-	_build_cxexpand
-
 	kube create namespace "${cx_namespace}" --dry-run=client --output yaml | kube apply --filename -
 
 	log_step "Deploying ${#requested[@]} client extensions into ${cx_namespace} (Liferay in ${liferay_namespace})"
@@ -50,25 +46,18 @@ function main {
 	done
 }
 
-function _build_cxexpand {
-	if [ -x "${CXEXPAND}" ]
-	then
-		return
-	fi
-
-	mkdir --parents "$(dirname "${CXEXPAND}")"
-
-	(cd "${HACK_DIR}/../resources" && go build -o "${CXEXPAND}" ./cmd/cxexpand)
-}
-
 function _deploy_one {
 	local sample=${1}
 	local cx_namespace=${2}
 	local liferay_namespace=${3}
 
-	local expanded="${BUILD_DIR:-/tmp/cx-spike-images}/${sample}.expanded.yaml"
+	# The payload is taken verbatim from the build artifact rather than
+	# retranslated. The zip already carries the JSON the Gradle task produced,
+	# with globs resolved and frontend token definitions inlined, so what is
+	# deployed is byte for byte what was built.
+	local payload="${BUILD_DIR:-/tmp/cx-spike-images}/${sample}.config.json"
 
-	"${CXEXPAND}" "${SAMPLES_DIR}/${sample}" > "${expanded}"
+	_extract_payload "${sample}" "${payload}"
 
 	local kind
 	kind=$(sample_kind "${sample}")
@@ -88,7 +77,7 @@ function _deploy_one {
 		--set "image.tag=${IMAGE_TAG}"
 		--set "workload.containerPort=${port}"
 		--set "workload.kind=${kind}"
-		--set-file "clientExtension.clientExtensionYaml=${expanded}"
+		--set-file "clientExtension.configs[0]=${payload}"
 	)
 
 	if [ "${cx_namespace}" != "${liferay_namespace}" ]
@@ -129,6 +118,29 @@ function _deploy_one {
 	helm_cx upgrade --install "${sample}" "${CHART_DIR}" "${arguments[@]}" > /dev/null
 
 	echo "deployed ${sample} (${kind})"
+}
+
+# _extract_payload pulls the generated configuration out of the artifact. Every
+# sample ships exactly one.
+function _extract_payload {
+	local sample=${1}
+	local destination=${2}
+
+	mkdir --parents "$(dirname "${destination}")"
+
+	local entry
+
+	entry=$(unzip -Z1 "${SAMPLES_DIR}/${sample}/dist/${sample}.zip" \
+		'*client-extension-config.json' 2> /dev/null | head -1)
+
+	if [ -z "${entry}" ]
+	then
+		echo "no client-extension-config.json in ${sample}.zip" >&2
+
+		return 1
+	fi
+
+	unzip -p "${SAMPLES_DIR}/${sample}/dist/${sample}.zip" "${entry}" > "${destination}"
 }
 
 function _oauth_reference {

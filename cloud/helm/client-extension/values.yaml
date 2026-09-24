@@ -7,11 +7,17 @@
 # template, which is what rolls the pods when Liferay reissues credentials.
 
 clientExtension:
-    # Expanded client-extension.yaml. Globs and frontendTokenDefinitionJSON
-    # references must already be resolved by the build.
-    clientExtensionYaml: ""
-    # Pre-translated OSGi payloads, as an alternative to clientExtensionYaml.
+    # The OSGi configuration payloads, taken verbatim from the build's
+    # *.client-extension-config.json. This is the production path: the payload
+    # deployed is byte for byte the one the build produced, with no second
+    # translation to disagree with it. A chart packaged with the artifact can
+    # leave this empty and ship the file in files/ instead.
     configs: []
+    # Expanded client-extension.yaml, translated by the operator. A fallback for
+    # a local or hand-authored extension with no build artifact; ignored when
+    # configs is set. Globs and frontendTokenDefinitionJSON references must
+    # already be resolved.
+    clientExtensionYaml: ""
     # The host this client extension is reached at. One name serves both
     # callers: a browser resolves it through the Ingress, and Liferay resolves
     # the same name to the Service inside the cluster.
