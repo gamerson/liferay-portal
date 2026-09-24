@@ -68,13 +68,40 @@ Helm also has no way to report whether the virtual instance accepted the payload
 
 The operator does not template Services or Ingresses. Growing it in that direction turns it into a Helm chart reimplemented in Go.
 
-### Why The Operator Owns The Workload
+### Why The Chart Owns The Workload
 
-An earlier revision of this design had the chart template the workload and the custom resource reference it by name, matching the existing `LiferayEnvironment` pattern. That pattern has a defect worth avoiding: two controllers write the same field of the same object. `cloud/helm/default/templates/_statefulset.tpl:28` sets `replicas:` unconditionally, and `liferayenvironment_controller.go:535` writes `statefulSet.Spec.Replicas` with a field owner. Under Argo CD that is a standing out-of-sync and self-heal fight. It is tolerable today only because the licensing ceiling rarely binds.
+An earlier revision of this design embedded a `PodTemplateSpec` in the custom resource and had the operator create the workload, so that only one controller ever wrote the object. The argument was real -- `cloud/helm/default/templates/_statefulset.tpl:28` sets `replicas:` unconditionally while `liferayenvironment_controller.go:535` writes `statefulSet.Spec.Replicas` with a field owner, which under Argo CD is a standing out-of-sync and self-heal fight -- but the cost of embedding turned out to be larger than the problem it avoided.
 
-For client extensions, gating the workload until the ext-init ConfigMap exists is the entire point, so the operator would be mutating a chart-owned object on every reconcile. Embedding the pod template instead makes the operator the sole owner of its child, and Argo CD only ever sees the custom resource.
+`corev1.PodSpec` generates **8,070 lines of CRD schema, 97% of the file**. At 940 KB the CRD is 3.6 times over the 262144-byte limit on the `kubectl.kubernetes.io/last-applied-configuration` annotation, so `kubectl apply` refuses it outright:
 
-Embedding also removes an existing wart. Three of the forty-four sample extensions ship `FROM liferay/noop` as `kind: Job` — a container that exists only because the build pipeline must emit a workload. The Dockerfile carries a `# TODO: LPS-176095` comment. When the operator decides, the configuration-only case is an absent `spec.workload` and no child object at all.
+```
+The CustomResourceDefinition "clientextensions.cx.liferay.com" is invalid:
+metadata.annotations: Too long: must have at most 262144 bytes
+```
+
+Helm installs `crds/` with a plain create and never upgrades them, so the documented way to upgrade this CRD was a command that could not work. The same embedding cost us `EmbeddedObjectMeta`: the generated schema for a full `ObjectMeta` is pruned by the API server, which silently discarded whatever the chart put in `spec.workload.template.metadata`, and that only surfaced under `kubectl apply --dry-run=server`. Referencing the workload instead brings the CRD to **275 lines and 11 KB**.
+
+Two assumptions behind the embedding argument also turned out to be false:
+
+- **The operator does not need to inject.** The names are deterministic -- `<serviceId>-lxc-ext-init` and `<virtualInstanceId>-lxc-dxp-metadata`, the mirror keeping the source name -- and the chart already holds both values, so it writes the volumes, mounts and environment itself.
+
+- **The operator does not need to gate.** A pod whose volume references a Secret that does not exist yet stays in `ContainerCreating` until it appears. Waiting for credentials is ordinary Kubernetes behaviour, not something a controller has to arrange.
+
+What remains is one field: the operator stamps `cx.liferay.com/config-digest` on the pod template so that reissued credentials roll the pods, because every client extension runtime reads those files once at startup and nothing rereads them. Helm's three-way merge preserves a field absent from both the old and the new manifest, so the annotation survives an upgrade. That is a far smaller intersection than co-owning a whole template, and it is the only write.
+
+The trade this accepts is that deleting the ClientExtension no longer deletes the workload: the operator withdraws the ext-provision ConfigMap and Liferay unregisters the extension, but the pod keeps running until Helm removes it. The Helm release, not the custom resource, is the unit of lifecycle.
+
+In exchange the operator **validates instead of repairing**. It reports a `WorkloadAccepted` condition and, in `status.workloadIssues`, names the specific volume, mount or variable the workload is missing:
+
+```
+no volume mounts Secret "liferay-sample-etc-node-lxc-ext-init", so the pod
+cannot read its OAuth2 credentials
+container "client-extension" does not mount /etc/liferay/lxc/ext-init-metadata
+```
+
+Silently re-adding a mount would be reverted on the next Argo CD sync and would hide a chart that is wrong. Naming it is what lets someone fix it at the source.
+
+Anyone not using this chart has to wire those mounts themselves. That is the accepted cost of the model; a mutating admission webhook could restore automatic injection later if a non-chart path ever matters.
 
 ### The ClientExtension Custom Resource
 
@@ -168,13 +195,13 @@ Two limits are worth stating plainly. `.serviceScheme` is taken from the portal'
 
 - The `dxp.lxc.liferay.com/virtualInstanceId` and `ext.lxc.liferay.com/serviceId` labels.
 
-The injected volume names, mount paths, environment variable names, and label keys are reserved. A user-supplied collision is rejected at admission. The operator is otherwise **additive only** on `spec.workload.template.metadata.labels`: it may add labels but never removes or rewrites what the chart placed there, so the chart keeps control of the labels its Service selects on.
+These are written by the chart, in one shared `podSpec` helper so that a Deployment, a Job and a CronJob cannot disagree about them. The operator checks they are present and reports what is missing; it does not add them.
 
-Because the operator does not create the workload until the ext-init data exists, the `mountInitConfig` flag and the scheduling gate workaround both disappear.
+Because the pod cannot start until the ext-init Secret exists, the `mountInitConfig` flag and the scheduling gate workaround both disappear.
 
 ### Naming
 
-The child workload's name is exactly the custom resource's `metadata.name`, with no suffix or derivation. The chart names the custom resource with its `fullname` helper, so the Service selector and any future `scaleTargetRef` resolve without guessing.
+The workload's name is exactly the custom resource's `metadata.name`, with no suffix or derivation. The chart names both with its `fullname` helper, so `spec.workloadRef.name`, the Service selector and any future `scaleTargetRef` resolve without guessing.
 
 ### Status And Print Columns
 
@@ -183,7 +210,7 @@ The child workload's name is exactly the custom resource's `metadata.name`, with
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:JSONPath=`.spec.liferayEnvironmentRef.namespace`,name="DXP-Namespace",type=string
 // +kubebuilder:printcolumn:JSONPath=`.spec.virtualInstanceId`,name="Virtual-Instance",type=string
-// +kubebuilder:printcolumn:JSONPath=`.spec.workload.kind`,name="Workload",type=string
+// +kubebuilder:printcolumn:JSONPath=`.spec.workloadRef.kind`,name="Workload",type=string
 // +kubebuilder:printcolumn:JSONPath=`.status.conditions[?(@.type=="Provisioned")].status`,name="Provisioned",type=string
 // +kubebuilder:printcolumn:JSONPath=`.status.phase`,name="Phase",type=string
 ```
@@ -475,7 +502,7 @@ The shared virtual instance mirror is reconciled inside the `ClientExtension` re
 
 ## Out Of Scope For The Spike
 
-- **HorizontalPodAutoscaler.** Deferred. With it out, the operator unconditionally owns `spec.replicas`. If autoscaling returns, the operator must omit `replicas` entirely when `spec.workload.replicas` is nil, leaving the field for the autoscaler, or the two will fight over it exactly as described under **Why The Operator Owns The Workload**.
+- **HorizontalPodAutoscaler.** No longer a conflict. The chart owns the Deployment, so an autoscaler and the chart negotiate `spec.replicas` the way they do for any other chart-managed workload, and the operator never writes that field.
 
 - **The CoreDNS hooks.** `templates/hooks/` patches CoreDNS from a Job in `kube-system` with its own RBAC. It is a local development convenience and should not be carried into a production chart or the operator.
 

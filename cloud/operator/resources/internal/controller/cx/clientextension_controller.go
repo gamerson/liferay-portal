@@ -187,7 +187,7 @@ func (reconciler *ClientExtensionReconciler) Reconcile(
 		extInitData = extInit.Data
 	}
 
-	ready, error := reconciler.applyWorkload(context, &clientExtension, WorkloadSources{
+	ready, error := reconciler.reconcileWorkload(context, &clientExtension, WorkloadSources{
 		ConfigDigest:             ConfigDigest(dxpMetadata.Data, extInitData),
 		DXPMetadataConfigMapName: dxpMetadataSource,
 		ExtInitSecretName:        extInitSecretName,
@@ -275,12 +275,68 @@ func (reconciler *ClientExtensionReconciler) SetupWithManager(
 		return requests
 	}
 
+	// The workload is deployed by the chart, not by this operator, so there is
+	// no owner reference to follow and Owns() would never fire for it. The
+	// reference runs the other way: find the client extensions that named this
+	// object.
+	mapWorkload := func(kind string) handler.MapFunc {
+		return func(
+			context context.Context, object client.Object,
+		) []reconcile.Request {
+			var list cxv1alpha1.ClientExtensionList
+
+			if error := reconciler.List(
+				context, &list, client.InNamespace(object.GetNamespace()),
+			); error != nil {
+				return nil
+			}
+
+			var requests []reconcile.Request
+
+			for index := range list.Items {
+				clientExtension := &list.Items[index]
+				reference := clientExtension.Spec.WorkloadRef
+
+				if reference == nil {
+					continue
+				}
+
+				if (reference.Kind != kind) || (reference.Name != object.GetName()) {
+					continue
+				}
+
+				requests = append(requests, reconcile.Request{
+					NamespacedName: types.NamespacedName{
+						Name: clientExtension.Name, Namespace: clientExtension.Namespace,
+					},
+				})
+			}
+
+			return requests
+		}
+	}
+
 	return controllerruntime.NewControllerManagedBy(manager).
 		For(&cxv1alpha1.ClientExtension{}).
-		Owns(&appsv1.Deployment{}).
-		Owns(&batchv1.CronJob{}).
-		Owns(&batchv1.Job{}).
 		Owns(&corev1.Secret{}).
+		Watches(
+			&appsv1.Deployment{},
+			handler.EnqueueRequestsFromMapFunc(
+				mapWorkload(cxv1alpha1.WorkloadKindDeployment),
+			),
+		).
+		Watches(
+			&batchv1.CronJob{},
+			handler.EnqueueRequestsFromMapFunc(
+				mapWorkload(cxv1alpha1.WorkloadKindCronJob),
+			),
+		).
+		Watches(
+			&batchv1.Job{},
+			handler.EnqueueRequestsFromMapFunc(
+				mapWorkload(cxv1alpha1.WorkloadKindJob),
+			),
+		).
 		WatchesRawSource(
 			source.Kind(
 				manager.GetCache(), client.Object(&corev1.ConfigMap{}),
@@ -501,92 +557,123 @@ func (reconciler *ClientExtensionReconciler) ensureDXPMetadataMirror(
 	return name, nil
 }
 
-func (reconciler *ClientExtensionReconciler) applyWorkload(
+// reconcileWorkload observes the workload the chart deployed, reports whether
+// it is wired correctly, and stamps the configuration digest so that reissued
+// credentials roll the pods.
+//
+// The operator does not create this object. It belongs to the chart, so Helm
+// and Argo CD reconcile it like any other Deployment, Job or CronJob, and the
+// only field written back here is the digest annotation.
+func (reconciler *ClientExtensionReconciler) reconcileWorkload(
 	context context.Context, clientExtension *cxv1alpha1.ClientExtension, sources WorkloadSources,
 ) (bool, error) {
-	desired, error := BuildWorkload(clientExtension, sources)
+	reference := clientExtension.Spec.WorkloadRef
+
+	if reference == nil {
+		clientExtension.Status.WorkloadIssues = nil
+		clientExtension.Status.WorkloadName = ""
+
+		setCondition(
+			clientExtension, cxv1alpha1.ConditionWorkloadAccepted, metav1.ConditionTrue,
+			"ConfigurationOnly",
+			"The client extension declares no workload, so there is nothing to run.",
+		)
+
+		return true, nil
+	}
+
+	workload, error := EmptyWorkload(reference.Kind)
 
 	if error != nil {
 		return false, error
 	}
 
-	if desired == nil {
+	getError := reconciler.Get(
+		context,
+		types.NamespacedName{
+			Name: reference.Name, Namespace: clientExtension.Namespace,
+		},
+		workload,
+	)
+
+	if apierrors.IsNotFound(getError) {
 		clientExtension.Status.WorkloadName = ""
+		clientExtension.Status.WorkloadIssues = nil
 
-		return true, nil
+		setCondition(
+			clientExtension, cxv1alpha1.ConditionWorkloadAccepted, metav1.ConditionFalse,
+			"WorkloadNotFound",
+			fmt.Sprintf(
+				"No %s named %q in namespace %q. The chart that deploys it may not have been installed.",
+				reference.Kind, reference.Name, clientExtension.Namespace,
+			),
+		)
+
+		return false, nil
+	} else if getError != nil {
+		return false, getError
 	}
 
-	if error := controllerutil.SetControllerReference(
-		clientExtension, desired, reconciler.Scheme(),
-	); error != nil {
+	clientExtension.Status.WorkloadName = workload.GetName()
+
+	issues, error := ValidateWorkload(workload, sources)
+
+	if error != nil {
 		return false, error
 	}
 
-	// A Job's pod template is immutable, so an existing one is left alone.
-	// Rolling a batch client extension forward means deleting the Job, which
-	// is a deliberate act rather than a side effect of reconciliation.
-	if clientExtension.Spec.Workload.Kind == cxv1alpha1.WorkloadKindJob {
-		var existing batchv1.Job
+	clientExtension.Status.WorkloadIssues = issues
 
-		if getError := reconciler.Get(
-			context,
-			types.NamespacedName{Name: desired.GetName(), Namespace: desired.GetNamespace()},
-			&existing,
-		); getError == nil {
-			clientExtension.Status.WorkloadName = desired.GetName()
+	if len(issues) > 0 {
+		setCondition(
+			clientExtension, cxv1alpha1.ConditionWorkloadAccepted, metav1.ConditionFalse,
+			"WorkloadMisconfigured",
+			fmt.Sprintf(
+				"%s %q is missing what the client extension runtime reads at startup; see status.workloadIssues.",
+				reference.Kind, reference.Name,
+			),
+		)
 
-			return existing.Status.Succeeded > 0, nil
-		} else if !apierrors.IsNotFound(getError) {
-			return false, getError
+		return false, nil
+	}
+
+	setCondition(
+		clientExtension, cxv1alpha1.ConditionWorkloadAccepted, metav1.ConditionTrue, "Wired",
+		fmt.Sprintf(
+			"%s %q mounts the virtual instance routes and, where required, the OAuth2 credentials.",
+			reference.Kind, reference.Name,
+		),
+	)
+
+	// A Job's pod template is immutable, so the digest cannot be stamped on one
+	// that already exists. Rolling a batch client extension forward means
+	// replacing the Job, which is the chart's decision rather than a side
+	// effect of reconciliation.
+	if reference.Kind != cxv1alpha1.WorkloadKindJob {
+		stamped, error := StampConfigDigest(workload, sources.ConfigDigest)
+
+		if error != nil {
+			return false, error
+		}
+
+		if stamped {
+			if updateError := reconciler.Update(context, workload); updateError != nil {
+				return false, updateError
+			}
+
+			if reconciler.Recorder != nil {
+				reconciler.Recorder.Eventf(
+					clientExtension, corev1.EventTypeNormal, "WorkloadRolled",
+					"Rolled %s %q because the virtual instance routes or OAuth2 credentials changed.",
+					reference.Kind, reference.Name,
+				)
+			}
+
+			return false, nil
 		}
 	}
 
-	if error := reconciler.Patch(
-		context, desired, client.Apply, client.ForceOwnership, client.FieldOwner(fieldOwner),
-	); error != nil {
-		return false, error
-	}
-
-	clientExtension.Status.WorkloadName = desired.GetName()
-
-	return reconciler.workloadAvailable(context, clientExtension)
-}
-
-func (reconciler *ClientExtensionReconciler) workloadAvailable(
-	context context.Context, clientExtension *cxv1alpha1.ClientExtension,
-) (bool, error) {
-	name := types.NamespacedName{
-		Name: clientExtension.Name, Namespace: clientExtension.Namespace,
-	}
-
-	switch clientExtension.Spec.Workload.Kind {
-	case cxv1alpha1.WorkloadKindCronJob:
-		var cronJob batchv1.CronJob
-
-		if error := reconciler.Get(context, name, &cronJob); error != nil {
-			return false, client.IgnoreNotFound(error)
-		}
-
-		return true, nil
-	case cxv1alpha1.WorkloadKindDeployment:
-		var deployment appsv1.Deployment
-
-		if error := reconciler.Get(context, name, &deployment); error != nil {
-			return false, client.IgnoreNotFound(error)
-		}
-
-		return deployment.Status.AvailableReplicas > 0, nil
-	case cxv1alpha1.WorkloadKindJob:
-		var job batchv1.Job
-
-		if error := reconciler.Get(context, name, &job); error != nil {
-			return false, client.IgnoreNotFound(error)
-		}
-
-		return job.Status.Succeeded > 0, nil
-	}
-
-	return false, nil
+	return WorkloadAvailable(workload), nil
 }
 
 // finalize removes the configuration from Liferay's namespace and waits for

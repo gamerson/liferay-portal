@@ -1,7 +1,6 @@
 package v1alpha1
 
 import (
-	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -27,6 +26,12 @@ const (
 
 	// ConditionReady reports that the workload, if any, is available.
 	ConditionReady = "Ready"
+
+	// ConditionWorkloadAccepted reports whether the referenced workload was
+	// found and is wired to the metadata this client extension needs. The
+	// operator no longer builds the pod template, so this is where a workload
+	// missing a mount is reported rather than silently corrected.
+	ConditionWorkloadAccepted = "WorkloadAccepted"
 )
 
 // Workload kinds.
@@ -74,57 +79,37 @@ type ConfigurationError struct {
 	PID string `json:"pid,omitempty"`
 }
 
-// EmbeddedObjectMeta is the subset of ObjectMeta a pod template may carry.
-// The full ObjectMeta cannot be embedded: its generated schema is pruned by the
-// API server, which silently discards whatever the chart put in
-// spec.workload.template.metadata.
-type EmbeddedObjectMeta struct {
+// WorkloadRef names the workload that runs this client extension. The workload
+// is deployed alongside the ClientExtension by the chart rather than embedded
+// here, so it stays an ordinary Deployment, Job or CronJob that Helm and Argo CD
+// can reconcile like any other.
+//
+// Embedding a pod template instead would put corev1.PodSpec into this CRD, and
+// the generated schema for it is 8,000 lines -- 97% of the file, and 3.6 times
+// over the 262144-byte limit on the last-applied-configuration annotation, which
+// makes the CRD impossible to install with a client-side kubectl apply.
+//
+// The workload always lives in the ClientExtension's own namespace: a reference
+// across namespaces could not be resolved without granting this operator read
+// access to workloads everywhere.
+type WorkloadRef struct {
+	// +kubebuilder:default=apps/v1
+	// +kubebuilder:validation:Enum=apps/v1;batch/v1
 	// +optional
-	Annotations map[string]string `json:"annotations,omitempty"`
+	APIVersion string `json:"apiVersion,omitempty"`
 
-	// +optional
-	Labels map[string]string `json:"labels,omitempty"`
-}
-
-// PodTemplate is a pod template with an embeddable metadata section.
-type PodTemplate struct {
-	// +optional
-	Metadata EmbeddedObjectMeta `json:"metadata,omitempty"`
-
-	// +kubebuilder:validation:Required
-	Spec corev1.PodSpec `json:"spec"`
-}
-
-// Workload describes the child object the operator creates. Omit it entirely
-// for a configuration-only client extension.
-type Workload struct {
-	// +optional
-	BackoffLimit *int32 `json:"backoffLimit,omitempty"`
-
-	// Kind is immutable. Changing it would require deleting and recreating the
-	// child, which must be an explicit user action.
 	// +kubebuilder:validation:Enum=CronJob;Deployment;Job
 	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="workload kind is immutable"
 	Kind string `json:"kind"`
 
-	// Replicas applies to Deployment only. Leave it unset to let an external
-	// autoscaler own the field.
-	// +optional
-	Replicas *int32 `json:"replicas,omitempty"`
-
-	// Schedule applies to CronJob only.
-	// +optional
-	Schedule string `json:"schedule,omitempty"`
-
 	// +kubebuilder:validation:Required
-	Template PodTemplate `json:"template"`
+	Name string `json:"name"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:printcolumn:JSONPath=`.spec.liferayEnvironmentRef.namespace`,name="DXP-Namespace",type=string
 // +kubebuilder:printcolumn:JSONPath=`.spec.virtualInstanceId`,name="Virtual-Instance",type=string
-// +kubebuilder:printcolumn:JSONPath=`.spec.workload.kind`,name="Workload",type=string
+// +kubebuilder:printcolumn:JSONPath=`.spec.workloadRef.kind`,name="Workload",type=string
 // +kubebuilder:printcolumn:JSONPath=`.status.conditions[?(@.type=="Delivered")].status`,name="Delivered",type=string
 // +kubebuilder:printcolumn:JSONPath=`.status.conditions[?(@.type=="ConfigurationAccepted")].status`,name="Config-Accepted",type=string
 // +kubebuilder:printcolumn:JSONPath=`.status.conditions[?(@.type=="Provisioned")].status`,name="Provisioned",type=string
@@ -188,8 +173,10 @@ type ClientExtensionSpec struct {
 	// +kubebuilder:validation:Required
 	VirtualInstanceID string `json:"virtualInstanceId"`
 
+	// WorkloadRef is the workload this client extension runs as. Omit it
+	// entirely for a configuration-only client extension.
 	// +optional
-	Workload *Workload `json:"workload,omitempty"`
+	WorkloadRef *WorkloadRef `json:"workloadRef,omitempty"`
 }
 
 type ClientExtensionStatus struct {
@@ -221,6 +208,12 @@ type ClientExtensionStatus struct {
 	// +kubebuilder:validation:Enum=Degraded;Pending;Ready
 	// +optional
 	Phase string `json:"phase,omitempty"`
+
+	// WorkloadIssues are the specific problems found on the referenced
+	// workload. Knowing which mount or variable is missing is the point of
+	// validating rather than injecting.
+	// +optional
+	WorkloadIssues []string `json:"workloadIssues,omitempty"`
 
 	// +optional
 	WorkloadName string `json:"workloadName,omitempty"`

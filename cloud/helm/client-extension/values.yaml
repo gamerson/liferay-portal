@@ -1,7 +1,10 @@
-# The chart owns Ingress, Service and ServiceAccount. Everything else -- the
-# configuration payload, the ext-provision ConfigMaps and the workload itself
-# -- is owned by the DXP operator through the ClientExtension resource this
-# chart renders.
+# The chart owns the workload, Ingress, Service and ServiceAccount, so Helm and
+# Argo CD reconcile them like any other manifests. The DXP operator owns the
+# configuration payload, the ext-provision ConfigMaps and the credentials it
+# mirrors back, through the ClientExtension resource this chart renders. The
+# operator validates the workload's wiring and reports it on the resource, but
+# it never edits the spec -- the one exception is a digest annotation on the pod
+# template, which is what rolls the pods when Liferay reissues credentials.
 
 clientExtension:
     # Expanded client-extension.yaml. Globs and frontendTokenDefinitionJSON
@@ -9,18 +12,21 @@ clientExtension:
     clientExtensionYaml: ""
     # Pre-translated OSGi payloads, as an alternative to clientExtensionYaml.
     configs: []
-    domains:
-        # Cluster-local address Liferay calls a microservice at. Use "auto" to
-        # derive it from the chart's Service.
-        internal: ""
-        # Routable host a browser fetches frontend assets from.
-        public: ""
+    # The host this client extension is reached at. One name serves both
+    # callers: a browser resolves it through the Ingress, and Liferay resolves
+    # the same name to the Service inside the cluster.
+    domain: ""
     liferayEnvironment:
         name: liferay-default
         # Empty means Liferay runs in this same namespace.
         namespace: ""
     # Defaults to serviceId. Must match what the build used.
     projectName: ""
+    # Whether to mount the OAuth2 credentials. Left unset it is detected from
+    # the payload, since Liferay issues them only for a client extension that
+    # declares an oAuthApplication entry. Set it explicitly when the payload is
+    # pre-translated and opaque.
+    requiresOAuth: null
     serviceId: ""
     virtualInstanceId: liferay.com
 fullnameOverride: ""

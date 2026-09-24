@@ -10,97 +10,27 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	client "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// WorkloadSources names the objects the pod template is wired to.
+// WorkloadSources names the objects the workload's pod template is expected to
+// be wired to.
 type WorkloadSources struct {
-	// ConfigDigest fingerprints the content those objects carry. It is
-	// stamped onto the pod template so that a change rolls the pods.
+	// ConfigDigest fingerprints the content those objects carry. It is stamped
+	// onto the pod template so that a change rolls the pods.
 	ConfigDigest string
 
 	// DXPMetadataConfigMapName is the ConfigMap carrying the virtual
 	// instance's routes, either Liferay's own or the mirror.
 	DXPMetadataConfigMapName string
 
-	// ExtInitSecretName is the Secret carrying the OAuth2 credentials.
+	// ExtInitSecretName is the Secret carrying the OAuth2 credentials. It is
+	// empty for a client extension that declares no OAuth2 application, which
+	// Liferay never issues credentials for.
 	ExtInitSecretName string
 }
 
-// BuildWorkload renders the child object for a client extension. It returns
-// nil when the client extension is configuration only.
-func BuildWorkload(
-	clientExtension *cxv1alpha1.ClientExtension, sources WorkloadSources,
-) (client.Object, error) {
-	workload := clientExtension.Spec.Workload
-
-	if workload == nil {
-		return nil, nil
-	}
-
-	template := corev1.PodTemplateSpec{
-		ObjectMeta: metav1.ObjectMeta{
-			Annotations: workload.Template.Metadata.Annotations,
-			Labels:      workload.Template.Metadata.Labels,
-		},
-		Spec: *workload.Template.Spec.DeepCopy(),
-	}
-
-	injectPodTemplate(&template, clientExtension, sources)
-
-	objectMeta := metav1.ObjectMeta{
-		Labels:    WorkloadLabels(clientExtension),
-		Name:      clientExtension.Name,
-		Namespace: clientExtension.Namespace,
-	}
-
-	switch workload.Kind {
-	case cxv1alpha1.WorkloadKindCronJob:
-		template.Spec.RestartPolicy = restartPolicyOrDefault(template.Spec.RestartPolicy)
-
-		return &batchv1.CronJob{
-			ObjectMeta: objectMeta,
-			TypeMeta:   metav1.TypeMeta{APIVersion: "batch/v1", Kind: "CronJob"},
-			Spec: batchv1.CronJobSpec{
-				ConcurrencyPolicy: batchv1.ForbidConcurrent,
-				JobTemplate: batchv1.JobTemplateSpec{
-					Spec: batchv1.JobSpec{
-						BackoffLimit: workload.BackoffLimit,
-						Template:     template,
-					},
-				},
-				Schedule: workload.Schedule,
-			},
-		}, nil
-	case cxv1alpha1.WorkloadKindDeployment:
-		return &appsv1.Deployment{
-			ObjectMeta: objectMeta,
-			TypeMeta:   metav1.TypeMeta{APIVersion: "apps/v1", Kind: "Deployment"},
-			Spec: appsv1.DeploymentSpec{
-				Replicas: workload.Replicas,
-				Selector: &metav1.LabelSelector{MatchLabels: SelectorLabels(clientExtension)},
-				Template: template,
-			},
-		}, nil
-	case cxv1alpha1.WorkloadKindJob:
-		template.Spec.RestartPolicy = restartPolicyOrDefault(template.Spec.RestartPolicy)
-
-		return &batchv1.Job{
-			ObjectMeta: objectMeta,
-			TypeMeta:   metav1.TypeMeta{APIVersion: "batch/v1", Kind: "Job"},
-			Spec: batchv1.JobSpec{
-				BackoffLimit: workload.BackoffLimit,
-				Template:     template,
-			},
-		}, nil
-	}
-
-	return nil, fmt.Errorf("unsupported workload kind %q", workload.Kind)
-}
-
-// EmptyWorkload returns a typed empty object for a workload kind, for lookups
-// and deletions.
+// EmptyWorkload returns a typed empty object for a workload kind, for lookups.
 func EmptyWorkload(kind string) (client.Object, error) {
 	switch kind {
 	case cxv1alpha1.WorkloadKindCronJob:
@@ -114,154 +44,124 @@ func EmptyWorkload(kind string) (client.Object, error) {
 	return nil, fmt.Errorf("unsupported workload kind %q", kind)
 }
 
-// SelectorLabels are the labels the chart's Service selects on. The operator
-// adds to pod labels but never removes or rewrites what the chart set, so the
-// chart keeps control of its own selector.
-func SelectorLabels(clientExtension *cxv1alpha1.ClientExtension) map[string]string {
-	return map[string]string{
-		"app.kubernetes.io/instance": clientExtension.Name,
-		"app.kubernetes.io/name":     clientExtension.Spec.ServiceID,
+// PodTemplateOf returns the pod template a workload object carries, so that one
+// caller can read or stamp it without switching on the kind.
+func PodTemplateOf(workload client.Object) (*corev1.PodTemplateSpec, error) {
+	switch typed := workload.(type) {
+	case *appsv1.Deployment:
+		return &typed.Spec.Template, nil
+	case *batchv1.CronJob:
+		return &typed.Spec.JobTemplate.Spec.Template, nil
+	case *batchv1.Job:
+		return &typed.Spec.Template, nil
 	}
+
+	return nil, fmt.Errorf("unsupported workload type %T", workload)
 }
 
-// WorkloadLabels are the labels stamped on the child object itself.
-func WorkloadLabels(clientExtension *cxv1alpha1.ClientExtension) map[string]string {
-	var labels = map[string]string{}
-
-	for key, value := range SelectorLabels(clientExtension) {
-		labels[key] = value
+// WorkloadAvailable reports whether a workload is serving. A Job is available
+// once it has succeeded; the others once a replica reports ready.
+func WorkloadAvailable(workload client.Object) bool {
+	switch typed := workload.(type) {
+	case *appsv1.Deployment:
+		return typed.Status.ReadyReplicas > 0
+	case *batchv1.CronJob:
+		// A CronJob runs on its schedule; there is nothing to wait for, and
+		// treating "has not fired yet" as unready would leave every scheduled
+		// client extension permanently pending.
+		return true
+	case *batchv1.Job:
+		return typed.Status.Succeeded > 0
 	}
 
-	labels["app.kubernetes.io/managed-by"] = "dxp-operator"
-	labels[LabelServiceID] = clientExtension.Spec.ServiceID
-	labels[LabelVirtualInstance] = clientExtension.Spec.VirtualInstanceID
-
-	return labels
+	return false
 }
 
-// injectPodTemplate wires the two metadata sources into every container and
-// stamps the labels Liferay correlates on. It is additive on labels: a label
-// the chart already placed is left alone.
-func injectPodTemplate(
-	template *corev1.PodTemplateSpec, clientExtension *cxv1alpha1.ClientExtension,
-	sources WorkloadSources,
-) {
-	if template.Labels == nil {
-		template.Labels = map[string]string{}
+// ValidateWorkload checks that the pod template is wired to the metadata the
+// client extension runtime reads at startup.
+//
+// The operator deliberately reports rather than repairs. The workload belongs
+// to the chart, so Helm and Argo CD own its spec; silently adding a mount here
+// would be reverted on the next sync and would hide a chart that is wrong.
+// Naming the missing piece is what lets someone fix it at the source.
+func ValidateWorkload(
+	workload client.Object, sources WorkloadSources,
+) ([]string, error) {
+	template, error := PodTemplateOf(workload)
+
+	if error != nil {
+		return nil, error
 	}
 
-	for key, value := range WorkloadLabels(clientExtension) {
-		if _, found := template.Labels[key]; !found {
-			template.Labels[key] = value
-		}
+	var issues []string
+
+	if !hasConfigMapVolume(template.Spec.Volumes, sources.DXPMetadataConfigMapName) {
+		issues = append(
+			issues,
+			fmt.Sprintf(
+				"no volume mounts ConfigMap %q, so the pod cannot read the virtual instance routes",
+				sources.DXPMetadataConfigMapName,
+			),
+		)
 	}
 
-	// Both payloads are mounted as files, and every client extension runtime
-	// reads them once at startup -- Spring Boot builds its configtree, Caddy
-	// its CORS allow list. Kubernetes propagates a changed ConfigMap or Secret
-	// into the running container, but nothing rereads it, so a credential
-	// Liferay reissued leaves the pod authenticating with the previous one
-	// until something restarts it. Stamping the digest here is what makes that
-	// restart happen.
-	if sources.ConfigDigest != "" {
-		if template.Annotations == nil {
-			template.Annotations = map[string]string{}
-		}
+	if sources.ExtInitSecretName != "" &&
+		!hasSecretVolume(template.Spec.Volumes, sources.ExtInitSecretName) {
 
-		template.Annotations[AnnotationConfigDigest] = sources.ConfigDigest
+		issues = append(
+			issues,
+			fmt.Sprintf(
+				"no volume mounts Secret %q, so the pod cannot read its OAuth2 credentials",
+				sources.ExtInitSecretName,
+			),
+		)
 	}
 
-	template.Spec.Volumes = upsertVolume(template.Spec.Volumes, corev1.Volume{
-		Name: VolumeDXP,
-		VolumeSource: corev1.VolumeSource{
-			ConfigMap: &corev1.ConfigMapVolumeSource{
-				LocalObjectReference: corev1.LocalObjectReference{
-					Name: sources.DXPMetadataConfigMapName,
-				},
-			},
-		},
-	})
+	containers := template.Spec.Containers
 
-	// A client extension with no OAuth2 application has no credentials to
-	// mount. Liferay only writes ext-init for extensions that declare one.
-	if sources.ExtInitSecretName != "" {
-		template.Spec.Volumes = upsertVolume(template.Spec.Volumes, corev1.Volume{
-			Name: VolumeExtInit,
-			VolumeSource: corev1.VolumeSource{
-				Secret: &corev1.SecretVolumeSource{SecretName: sources.ExtInitSecretName},
-			},
-		})
+	if len(containers) == 0 {
+		return append(issues, "the pod template declares no containers"), nil
 	}
 
-	for index := range template.Spec.Containers {
-		injectContainer(&template.Spec.Containers[index], sources)
+	for index := range containers {
+		issues = append(issues, containerIssues(&containers[index], sources)...)
 	}
 
-	for index := range template.Spec.InitContainers {
-		injectContainer(&template.Spec.InitContainers[index], sources)
-	}
+	return issues, nil
 }
 
-func injectContainer(container *corev1.Container, sources WorkloadSources) {
-	container.Env = upsertEnv(container.Env, corev1.EnvVar{
-		Name: EnvRoutesClientExtension, Value: MountPathExtInit,
-	})
-	container.Env = upsertEnv(container.Env, corev1.EnvVar{
-		Name: EnvRoutesDXP, Value: MountPathDXP,
-	})
-
-	container.VolumeMounts = upsertVolumeMount(container.VolumeMounts, corev1.VolumeMount{
-		MountPath: MountPathDXP, Name: VolumeDXP, ReadOnly: true,
-	})
-	if sources.ExtInitSecretName != "" {
-		container.VolumeMounts = upsertVolumeMount(container.VolumeMounts, corev1.VolumeMount{
-			MountPath: MountPathExtInit, Name: VolumeExtInit, ReadOnly: true,
-		})
-	}
-}
-
-func restartPolicyOrDefault(policy corev1.RestartPolicy) corev1.RestartPolicy {
-	if policy == "" {
-		return corev1.RestartPolicyNever
+// StampConfigDigest writes the digest onto the pod template and reports whether
+// anything changed.
+//
+// This is the one field the operator writes on a workload it does not own.
+// Kubernetes propagates a changed ConfigMap or Secret into a running container,
+// but nothing rereads it -- every client extension runtime parses those files
+// once at startup -- so a credential Liferay reissued would otherwise leave the
+// pod authenticating with the previous one. Helm's three-way merge preserves a
+// field absent from both the old and the new manifest, so the annotation
+// survives an upgrade.
+func StampConfigDigest(workload client.Object, digest string) (bool, error) {
+	if digest == "" {
+		return false, nil
 	}
 
-	return policy
-}
+	template, error := PodTemplateOf(workload)
 
-func upsertEnv(values []corev1.EnvVar, value corev1.EnvVar) []corev1.EnvVar {
-	for index := range values {
-		if values[index].Name == value.Name {
-			values[index] = value
-
-			return values
-		}
+	if error != nil {
+		return false, error
 	}
 
-	return append(values, value)
-}
-
-func upsertVolume(values []corev1.Volume, value corev1.Volume) []corev1.Volume {
-	for index := range values {
-		if values[index].Name == value.Name {
-			values[index] = value
-
-			return values
-		}
+	if template.Annotations[AnnotationConfigDigest] == digest {
+		return false, nil
 	}
 
-	return append(values, value)
-}
-
-func upsertVolumeMount(values []corev1.VolumeMount, value corev1.VolumeMount) []corev1.VolumeMount {
-	for index := range values {
-		if values[index].Name == value.Name {
-			values[index] = value
-
-			return values
-		}
+	if template.Annotations == nil {
+		template.Annotations = map[string]string{}
 	}
 
-	return append(values, value)
+	template.Annotations[AnnotationConfigDigest] = digest
+
+	return true, nil
 }
 
 // ConfigDigest fingerprints the payloads a pod reads at startup. Keys are
@@ -287,4 +187,95 @@ func ConfigDigest(payloads ...map[string]string) string {
 	}
 
 	return hex.EncodeToString(hash.Sum(nil))
+}
+
+func containerIssues(container *corev1.Container, sources WorkloadSources) []string {
+	var issues []string
+
+	for _, required := range []struct {
+		name  string
+		value string
+	}{
+		{EnvRoutesClientExtension, MountPathExtInit},
+		{EnvRoutesDXP, MountPathDXP},
+	} {
+		if sources.ExtInitSecretName == "" && required.name == EnvRoutesClientExtension {
+			continue
+		}
+
+		if !hasEnv(container.Env, required.name) {
+			issues = append(
+				issues,
+				fmt.Sprintf(
+					"container %q does not set %s", container.Name, required.name,
+				),
+			)
+		}
+	}
+
+	if !hasMountPath(container.VolumeMounts, MountPathDXP) {
+		issues = append(
+			issues,
+			fmt.Sprintf(
+				"container %q does not mount %s", container.Name, MountPathDXP,
+			),
+		)
+	}
+
+	if sources.ExtInitSecretName != "" &&
+		!hasMountPath(container.VolumeMounts, MountPathExtInit) {
+
+		issues = append(
+			issues,
+			fmt.Sprintf(
+				"container %q does not mount %s", container.Name, MountPathExtInit,
+			),
+		)
+	}
+
+	return issues
+}
+
+func hasConfigMapVolume(volumes []corev1.Volume, name string) bool {
+	for index := range volumes {
+		source := volumes[index].ConfigMap
+
+		if (source != nil) && (source.Name == name) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func hasEnv(values []corev1.EnvVar, name string) bool {
+	for index := range values {
+		if values[index].Name == name {
+			return true
+		}
+	}
+
+	return false
+}
+
+func hasMountPath(mounts []corev1.VolumeMount, path string) bool {
+	for index := range mounts {
+		if mounts[index].MountPath == path {
+			return true
+		}
+	}
+
+	return false
+}
+
+func hasSecretVolume(volumes []corev1.Volume, name string) bool {
+	for index := range volumes {
+		source := volumes[index].Secret
+
+		if (source != nil) && (source.SecretName == name) {
+			return true
+		}
+	}
+
+	return false
 }
