@@ -104,16 +104,16 @@ tests:
             portalComponentDenyList: []
     -   asserts:
             -   matchRegex:
-                    path: data["unicast.xml"]
+                    path: data["unicast-control.xml"]
                     pattern: bind_port="7800"
             -   matchRegex:
-                    path: data["unicast.xml"]
+                    path: data["unicast-control.xml"]
                     pattern: dns_query='_cluster\._tcp\.
             -   matchRegex:
-                    path: data["unicast-tx.xml"]
+                    path: data["unicast-transport.xml"]
                     pattern: bind_port="7801"
             -   matchRegex:
-                    path: data["unicast-tx.xml"]
+                    path: data["unicast-transport.xml"]
                     pattern: dns_query='_cluster-tx\._tcp\.
         it: Binds each cluster channel to its own port and discovery query
         set:
@@ -121,19 +121,19 @@ tests:
     -   asserts:
             -   matchRegex:
                     path: data["portal-cloud.properties"]
-                    pattern: cluster\.link\.channel\.properties\.control=/opt/liferay/unicast\.xml
+                    pattern: cluster\.link\.channel\.properties\.control=/opt/liferay/unicast-control\.xml
             -   matchRegex:
                     path: data["portal-cloud.properties"]
-                    pattern: cluster\.link\.channel\.properties\.transport\.0=/opt/liferay/unicast-tx\.xml
+                    pattern: cluster\.link\.channel\.properties\.transport\.0=/opt/liferay/unicast-transport\.xml
         it: Gives the control and transport channels separate JGroups configurations
         set:
             replicaCount: 2
     -   asserts:
             -   matchRegex:
-                    path: data["unicast.xml"]
+                    path: data["unicast-control.xml"]
                     pattern: bind_port="7800"
             -   matchRegex:
-                    path: data["unicast-tx.xml"]
+                    path: data["unicast-transport.xml"]
                     pattern: bind_port="7801"
         it: Resolves the JGroups bind port by name regardless of service port order
         set:
