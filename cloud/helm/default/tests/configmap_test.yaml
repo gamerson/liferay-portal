@@ -102,3 +102,52 @@ tests:
         it: Omits the component deny list override when the deny list is empty
         set:
             portalComponentDenyList: []
+    -   asserts:
+            -   matchRegex:
+                    path: data["unicast.xml"]
+                    pattern: bind_port="7800"
+            -   matchRegex:
+                    path: data["unicast.xml"]
+                    pattern: dns_query='_cluster\._tcp\.
+            -   matchRegex:
+                    path: data["unicast-tx.xml"]
+                    pattern: bind_port="7801"
+            -   matchRegex:
+                    path: data["unicast-tx.xml"]
+                    pattern: dns_query='_cluster-tx\._tcp\.
+        it: Binds each cluster channel to its own port and discovery query
+        set:
+            replicaCount: 2
+    -   asserts:
+            -   matchRegex:
+                    path: data["portal-cloud.properties"]
+                    pattern: cluster\.link\.channel\.properties\.control=/opt/liferay/unicast\.xml
+            -   matchRegex:
+                    path: data["portal-cloud.properties"]
+                    pattern: cluster\.link\.channel\.properties\.transport\.0=/opt/liferay/unicast-tx\.xml
+        it: Gives the control and transport channels separate JGroups configurations
+        set:
+            replicaCount: 2
+    -   asserts:
+            -   matchRegex:
+                    path: data["unicast.xml"]
+                    pattern: bind_port="7800"
+            -   matchRegex:
+                    path: data["unicast-tx.xml"]
+                    pattern: bind_port="7801"
+        it: Resolves the JGroups bind port by name regardless of service port order
+        set:
+            replicaCount: 2
+            service.ports:
+                -   name: http
+                    port: 8080
+                    protocol: TCP
+                    targetPort: http
+                -   name: cluster-tx
+                    port: 7801
+                    protocol: TCP
+                    targetPort: cluster-tx
+                -   name: cluster
+                    port: 7800
+                    protocol: TCP
+                    targetPort: cluster

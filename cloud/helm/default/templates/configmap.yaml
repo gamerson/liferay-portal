@@ -67,7 +67,7 @@ data:
         {{ if or (gt (int .Values.replicaCount) 1) .Values.autoscaling.enabled -}}
         cluster.link.autodetect.address=
         cluster.link.channel.properties.control=/opt/liferay/unicast.xml
-        cluster.link.channel.properties.transport.0=/opt/liferay/unicast.xml
+        cluster.link.channel.properties.transport.0=/opt/liferay/unicast-tx.xml
         cluster.link.enabled=true
         enterprise.product.notification.enabled=false
         {{ end }}
@@ -76,8 +76,10 @@ data:
         include-and-override=portal-liferay-online-config.properties
         include-and-override=portal-cloud.properties
     {{ if or (gt (int .Values.replicaCount) 1) .Values.autoscaling.enabled }}
+    unicast-tx.xml: |
+        {{- tpl (.Files.Get "resources/unicast.xml") (merge (dict "channelPortName" "cluster-tx") $) | nindent 8 }}
     unicast.xml: |
-        {{- tpl (.Files.Get "resources/unicast.xml") $ | nindent 8 }}
+        {{- tpl (.Files.Get "resources/unicast.xml") (merge (dict "channelPortName" "cluster") $) | nindent 8 }}
     {{- end }}
     {{- end }}
     {{- if .Values.configmap.data }}
