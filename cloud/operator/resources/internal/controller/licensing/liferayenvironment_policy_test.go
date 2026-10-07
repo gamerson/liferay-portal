@@ -44,6 +44,7 @@ func TestAdmissionPolicyDeniesOverLimitReplicas(t *testing.T) {
 	config := startPolicyEnvironment(t)
 
 	testCases := map[string]struct {
+		activationMode   string
 		labelNamespace   bool
 		maxClusterNodes  *int32
 		namespaceName    string
@@ -65,6 +66,14 @@ func TestAdmissionPolicyDeniesOverLimitReplicas(t *testing.T) {
 			namespaceName:   "liferay-licensed",
 			replicaCeiling:  pointerInt32(1),
 			shouldDeny:      true,
+		},
+		"a licensed maximum DXP reports without a replica ceiling allows any write": {
+			activationMode:  activationModeDXP,
+			labelNamespace:  true,
+			maxClusterNodes: pointerInt32(1),
+			namespaceName:   "liferay-dxp-fallback",
+			replicaCeiling:  nil,
+			shouldDeny:      false,
 		},
 		"a licensed maximum without a replica ceiling denies an over limit write": {
 			labelNamespace:  true,
@@ -99,8 +108,9 @@ func TestAdmissionPolicyDeniesOverLimitReplicas(t *testing.T) {
 	for name, testCase := range testCases {
 		t.Run(name, func(t *testing.T) {
 			writeClient := newPolicyFixture(
-				config, testCase.labelNamespace, testCase.maxClusterNodes,
-				testCase.namespaceName, testCase.replicaCeiling, t,
+				testCase.activationMode, config, testCase.labelNamespace,
+				testCase.maxClusterNodes, testCase.namespaceName,
+				testCase.replicaCeiling, t,
 			)
 
 			error := attemptOverLimitWrite(
@@ -346,7 +356,8 @@ func awaitPolicyEnforcement(config *rest.Config, t *testing.T) {
 	t.Helper()
 
 	writeClient := newPolicyFixture(
-		config, true, pointerInt32(1), policyProbeNamespace, pointerInt32(1), t,
+		"", config, true, pointerInt32(1), policyProbeNamespace,
+		pointerInt32(1), t,
 	)
 
 	if error := awaitForbidden(
@@ -527,8 +538,9 @@ func installAdmissionPolicy(config *rest.Config, t *testing.T) {
 }
 
 func newPolicyFixture(
-	config *rest.Config, labelNamespace bool, maxClusterNodes *int32,
-	namespaceName string, replicaCeiling *int32, t *testing.T,
+	activationMode string, config *rest.Config, labelNamespace bool,
+	maxClusterNodes *int32, namespaceName string, replicaCeiling *int32,
+	t *testing.T,
 ) client.Client {
 	t.Helper()
 
@@ -562,15 +574,19 @@ func newPolicyFixture(
 			Namespace: namespaceName,
 		},
 		Spec: licensingv1alpha1.LiferayEnvironmentSpec{
-			ActivationCodeSecretRef: licensingv1alpha1.SecretKeyRef{
-				Key:  "activationCode",
-				Name: "dev-activation",
-			},
+			ActivationMode:  activationMode,
 			DesiredReplicas: pointerInt32(3),
 			WorkloadRef: licensingv1alpha1.WorkloadRef{
 				Name: "dev-liferay",
 			},
 		},
+	}
+
+	if activationMode != activationModeDXP {
+		liferayEnvironment.Spec.ActivationCodeSecretRef = &licensingv1alpha1.SecretKeyRef{
+			Key:  "activationCode",
+			Name: "dev-activation",
+		}
 	}
 
 	if error := setUpClient.Create(
@@ -652,7 +668,7 @@ func newPolicyReconciler(
 			Namespace: namespaceName,
 		},
 		Spec: licensingv1alpha1.LiferayEnvironmentSpec{
-			ActivationCodeSecretRef: licensingv1alpha1.SecretKeyRef{
+			ActivationCodeSecretRef: &licensingv1alpha1.SecretKeyRef{
 				Key:  "activationCode",
 				Name: "dev-activation",
 			},

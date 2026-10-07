@@ -40,6 +40,10 @@ spec:
         -   jsonPath: .status.effectiveReplicas
             name: Effective
             type: integer
+        -   jsonPath: .spec.activationMode
+            name: Mode
+            priority: 1
+            type: string
         -   jsonPath: .status.phase
             name: Phase
             priority: 1
@@ -89,6 +93,12 @@ spec:
                                 -   key
                                 -   name
                                 type: object
+                            activationMode:
+                                default: Operator
+                                enum:
+                                -   DXP
+                                -   Operator
+                                type: string
                             autoscaling:
                                 properties:
                                     maxReplicas:
@@ -125,9 +135,13 @@ spec:
                                 -   name
                                 type: object
                         required:
-                        -   activationCodeSecretRef
                         -   workloadRef
                         type: object
+                        x-kubernetes-validations:
+                        -   message: activationCodeSecretRef is required unless activationMode is
+                                DXP
+                            rule: (has(self.activationMode) && self.activationMode == 'DXP') ||
+                                has(self.activationCodeSecretRef)
                     status:
                         properties:
                             activatedAt:

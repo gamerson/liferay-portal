@@ -2,6 +2,10 @@
 {{- .Values.licensing.activationCodeSecretName | default (printf "%s-activation" (include "liferay.name" .)) }}
 {{- end }}
 
+{{- define "liferay.activatedByDXP" -}}
+{{- and .Values.licensing.enabled (eq .Values.licensing.activationMode "DXP") }}
+{{- end }}
+
 {{- define "liferay.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}

@@ -33,6 +33,7 @@ dependencies {
 	compileOnly group: "com.fasterxml.jackson.core", name: "jackson-annotations", version: "2.18.11"
 	compileOnly group: "com.fasterxml.jackson.core", name: "jackson-core", version: "2.18.11"
 	compileOnly group: "com.fasterxml.jackson.core", name: "jackson-databind", version: "2.18.11"
+	compileOnly group: "com.liferay", name: "biz.aQute.bnd.annotation", version: "4.2.0.LIFERAY-PATCHED-2"
 	compileOnly group: "com.liferay", name: "org.apache.felix.configurator", version: "1.0.18.LIFERAY-PATCHED-3"
 	compileOnly group: "com.liferay.portal", name: "com.liferay.portal.impl", version: "default"
 	compileOnly group: "com.liferay.portal", name: "com.liferay.portal.kernel", version: "default"
@@ -44,10 +45,12 @@ dependencies {
 	compileOnly project(":apps:static:osgi:osgi-util")
 	compileOnly project(":apps:static:portal-configuration:portal-configuration-metatype-api")
 	compileOnly project(":apps:static:portal-configuration:portal-configuration-persistence-api")
+	compileOnly project(":apps:static:portal-environment:portal-environment-api")
 	compileOnly project(":apps:static:portal-file-install:portal-file-install-api")
 	compileOnly project(":apps:static:portal-k8s-agent:portal-k8s-agent-api")
 	compileOnly project(":core:petra:petra-function")
 	compileOnly project(":core:petra:petra-lang")
 	compileOnly project(":core:petra:petra-reflect")
 	compileOnly project(":core:petra:petra-string")
+	testImplementation group: "com.squareup.okhttp3", name: "mockwebserver", version: "4.12.0"
 }

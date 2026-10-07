@@ -1,4 +1,4 @@
-{{- if and .Values.licensing.enabled .Values.licensing.onlineActivationWorkflow.enabled -}}
+{{- if and .Values.licensing.enabled .Values.licensing.onlineActivationWorkflow.enabled (ne .Values.licensing.activationMode "DXP") -}}
 {{- $userAccess := .Values.licensing.onlineActivationWorkflow.userAccess -}}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role

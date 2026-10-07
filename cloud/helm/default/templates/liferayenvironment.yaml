@@ -10,9 +10,12 @@ metadata:
     name: {{ include "liferay.name" . }}
     namespace: {{ include "liferay.namespace" . }}
 spec:
+    {{- if ne (include "liferay.activatedByDXP" .) "true" }}
     activationCodeSecretRef:
         key: {{ .Values.licensing.activationCodeSecretKey }}
         name: {{ include "liferay.activationCodeSecretName" . }}
+    {{- end }}
+    activationMode: {{ .Values.licensing.activationMode }}
     {{- if .Values.autoscaling.enabled }}
     autoscaling:
         {{- if eq .Values.autoscaling.type "keda" }}

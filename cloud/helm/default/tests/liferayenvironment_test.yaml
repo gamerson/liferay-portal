@@ -38,6 +38,16 @@ tests:
             licensing.enabled: true
     -   asserts:
             -   equal:
+                    path: spec.activationMode
+                    value: DXP
+            -   notExists:
+                    path: spec.activationCodeSecretRef
+        it: Hands activation to DXP without an activation code secret reference
+        set:
+            licensing.activationMode: DXP
+            licensing.enabled: true
+    -   asserts:
+            -   equal:
                     path: spec.activationCodeSecretRef.name
                     value: liferay-default-activation
         it: Keeps the activation code reference the custom resource requires

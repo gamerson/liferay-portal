@@ -39,9 +39,12 @@ spec:
                 ' for StatefulSet "' + variables.workloadName + '"'
             reason: Forbidden
     variables:
+        -   expression: "has(params.spec.activationMode) && params.spec.activationMode == 'DXP'"
+            name: dxpActivated
         -   expression: >-
                 has(params.status) && (has(params.status.replicaCeiling) ||
-                (has(params.status.license) && has(params.status.license.maxClusterNodes)))
+                (!variables.dxpActivated && has(params.status.license) &&
+                has(params.status.license.maxClusterNodes)))
             name: hasCeiling
         -   expression: "has(request.subResource) && request.subResource == 'scale'"
             name: isScale
