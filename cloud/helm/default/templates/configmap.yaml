@@ -71,6 +71,13 @@ data:
         cluster.link.enabled=true
         enterprise.product.notification.enabled=false
         {{ end }}
+        {{- if eq (include "liferay.activatedByDXP" .) "true" }}
+        configuration.override.com.liferay.portal.k8s.agent.internal.configuration.LiferayEnvironmentConfiguration_liferayEnvironmentName={{ include "liferay.name" . | quote }}
+        {{- with .Values.licensing.addOnsDir }}
+        configuration.override.com.liferay.portal.k8s.agent.internal.configuration.LiferayEnvironmentConfiguration_addOnsDir={{ . | quote }}
+        {{- end }}
+        configuration.override.com.liferay.portal.k8s.agent.internal.configuration.LiferayEnvironmentConfiguration_service.bundleLocation="?"
+        {{- end }}
         {{- tpl (.Files.Get "resources/portal-cloud.properties") $ | nindent 8 }}
     portal-ext.properties: |
         include-and-override=portal-liferay-online-config.properties

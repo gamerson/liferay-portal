@@ -1,4 +1,4 @@
-{{- if and .Values.licensing.enabled .Values.licensing.onlineActivationWorkflow.enabled -}}
+{{- if and .Values.licensing.enabled .Values.licensing.onlineActivationWorkflow.enabled (ne .Values.licensing.activationMode "DXP") -}}
 {{- $onlineActivationWorkflow := .Values.licensing.onlineActivationWorkflow -}}
 apiVersion: argoproj.io/v1alpha1
 kind: WorkflowTemplate

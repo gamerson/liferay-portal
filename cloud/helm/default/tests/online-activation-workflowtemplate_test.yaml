@@ -36,6 +36,14 @@ tests:
     -   asserts:
             -   hasDocuments:
                     count: 0
+        it: Omits the template when DXP activates
+        set:
+            licensing.activationMode: DXP
+            licensing.enabled: true
+            licensing.onlineActivationWorkflow.enabled: true
+    -   asserts:
+            -   hasDocuments:
+                    count: 0
         it: Omits the template when licensing is disabled
         set:
             licensing.enabled: false

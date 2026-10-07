@@ -1,0 +1,3 @@
+Bundle-Name: Liferay Portal Environment Implementation
+Bundle-SymbolicName: com.liferay.portal.environment.impl
+Bundle-Version: 1.0.0

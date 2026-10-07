@@ -1,0 +1,14 @@
+FROM liferay/dxp:2026.q3.5
+
+RUN rm --force --recursive \
+		/opt/liferay/data/document_library/[0-9]* \
+		/opt/liferay/data/elasticsearch8 \
+		/opt/liferay/data/hypersonic \
+		/opt/liferay/osgi \
+		/opt/liferay/tomcat/lib \
+		/opt/liferay/tomcat/webapps/ROOT \
+		/opt/liferay/work
+
+COPY --chown=liferay:liferay bundle/osgi /opt/liferay/osgi
+COPY --chown=liferay:liferay bundle/tomcat/lib /opt/liferay/tomcat/lib
+COPY --chown=liferay:liferay bundle/tomcat/webapps/ROOT /opt/liferay/tomcat/webapps/ROOT

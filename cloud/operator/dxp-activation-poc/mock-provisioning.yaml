@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    labels:
+        app: mock-provisioning
+    name: mock-provisioning
+    namespace: liferay-system
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: mock-provisioning
+    template:
+        metadata:
+            labels:
+                app: mock-provisioning
+        spec:
+            containers:
+                -   env:
+                        -   name: MOCK_ACTIVATION_CODES
+                            value: demo-activation-code
+                        -   name: MOCK_BASE_URL
+                            value: http://mock-provisioning.liferay-system.svc:8080
+                        -   name: MOCK_MAX_CLUSTER_NODES
+                            value: "2"
+                    image: liferay/mock-provisioning:lcd-53829
+                    imagePullPolicy: IfNotPresent
+                    name: mock-provisioning
+                    ports:
+                        -   containerPort: 8080
+                            name: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: mock-provisioning
+    namespace: liferay-system
+spec:
+    ports:
+        -   name: http
+            port: 8080
+            targetPort: http
+    selector:
+        app: mock-provisioning

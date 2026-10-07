@@ -393,6 +393,8 @@ initContainers: []
 licensing:
     activationCodeSecretKey: activationCode
     activationCodeSecretName: ""
+    activationMode: Operator
+    addOnsDir: ""
     dxpVersion: ""
     enabled: false
     initScriptsVolumeName: liferay-init-scripts-default

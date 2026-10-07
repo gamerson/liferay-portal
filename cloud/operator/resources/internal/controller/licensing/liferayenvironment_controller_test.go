@@ -3637,7 +3637,7 @@ func activatedEnvironment() *licensingv1alpha1.LiferayEnvironment {
 			Namespace: "liferay-dev",
 		},
 		Spec: licensingv1alpha1.LiferayEnvironmentSpec{
-			ActivationCodeSecretRef: licensingv1alpha1.SecretKeyRef{
+			ActivationCodeSecretRef: &licensingv1alpha1.SecretKeyRef{
 				Key:  "activationCode",
 				Name: "dev-activation",
 			},
@@ -4096,7 +4096,7 @@ func pendingEnvironment() *licensingv1alpha1.LiferayEnvironment {
 			Namespace: "liferay-dev",
 		},
 		Spec: licensingv1alpha1.LiferayEnvironmentSpec{
-			ActivationCodeSecretRef: licensingv1alpha1.SecretKeyRef{
+			ActivationCodeSecretRef: &licensingv1alpha1.SecretKeyRef{
 				Key:  "activationCode",
 				Name: "dev-activation",
 			},

@@ -48,6 +48,18 @@ tests:
         set:
             replicaCount: 2
     -   asserts:
+            -   matchRegex:
+                    path: data["portal-cloud.properties"]
+                    pattern: LiferayEnvironmentConfiguration_addOnsDir="/marketplace"
+            -   matchRegex:
+                    path: data["portal-cloud.properties"]
+                    pattern: LiferayEnvironmentConfiguration_liferayEnvironmentName="liferay-default"
+        it: Configures the Kubernetes environment for DXP when DXP activates
+        set:
+            licensing.activationMode: DXP
+            licensing.addOnsDir: /marketplace
+            licensing.enabled: true
+    -   asserts:
             -   notExists:
                     path: data["portal-cloud.properties"]
         it: Drops the default data when configmap defaults are overridden

@@ -29,6 +29,7 @@ tests:
                         activationCodeSecretRef:
                             key: activationCode
                             name: liferay-default-activation
+                        activationMode: Operator
                         desiredReplicas: 1
                         workloadRef:
                             name: liferay-default

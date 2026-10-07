@@ -66,6 +66,7 @@ type LicenseStatus struct {
 // +kubebuilder:printcolumn:JSONPath=`.spec.desiredReplicas`,name="Desired",type=integer
 // +kubebuilder:printcolumn:JSONPath=`.status.replicaCeiling`,name="Ceiling",type=integer
 // +kubebuilder:printcolumn:JSONPath=`.status.effectiveReplicas`,name="Effective",type=integer
+// +kubebuilder:printcolumn:JSONPath=`.spec.activationMode`,name="Mode",priority=1,type=string
 // +kubebuilder:printcolumn:JSONPath=`.status.phase`,name="Phase",priority=1,type=string
 // +kubebuilder:printcolumn:JSONPath=`.status.environmentId`,name="Environment-ID",priority=1,type=string
 // +kubebuilder:printcolumn:JSONPath=`.status.activatedAt`,name="Activated-At",priority=1,type=date
@@ -88,9 +89,15 @@ type LiferayEnvironmentList struct {
 	Items []LiferayEnvironment `json:"items"`
 }
 
+// +kubebuilder:validation:XValidation:message="activationCodeSecretRef is required unless activationMode is DXP",rule="(has(self.activationMode) && self.activationMode == 'DXP') || has(self.activationCodeSecretRef)"
 type LiferayEnvironmentSpec struct {
-	// +kubebuilder:validation:Required
-	ActivationCodeSecretRef SecretKeyRef `json:"activationCodeSecretRef"`
+	// +optional
+	ActivationCodeSecretRef *SecretKeyRef `json:"activationCodeSecretRef,omitempty"`
+
+	// +kubebuilder:default=Operator
+	// +kubebuilder:validation:Enum=DXP;Operator
+	// +optional
+	ActivationMode string `json:"activationMode,omitempty"`
 
 	// +optional
 	Autoscaling *Autoscaling `json:"autoscaling,omitempty"`

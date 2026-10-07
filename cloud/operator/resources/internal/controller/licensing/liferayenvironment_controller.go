@@ -107,6 +107,12 @@ func (liferayEnvironmentReconciler *LiferayEnvironmentReconciler) Reconcile(
 
 	liferayEnvironment.Status.EnvironmentID = environmentID
 
+	if liferayEnvironment.Spec.ActivationMode == activationModeDXP {
+		return liferayEnvironmentReconciler.reconcileDXPActivation(
+			context, liferayEnvironment,
+		)
+	}
+
 	privateKey, error := liferayEnvironmentReconciler.ensureIdentity(
 		context, liferayEnvironment,
 	)
@@ -209,6 +215,7 @@ func (liferayEnvironmentReconciler *LiferayEnvironmentReconciler) SetupWithManag
 			predicate.Or(
 				predicate.AnnotationChangedPredicate{},
 				predicate.GenerationChangedPredicate{},
+				dxpReportChangedPredicate,
 			),
 		),
 	).Named(
@@ -1620,6 +1627,10 @@ func (liferayEnvironmentReconciler *LiferayEnvironmentReconciler) readActivation
 	liferayEnvironment *licensingv1alpha1.LiferayEnvironment,
 ) (string, error) {
 	reference := liferayEnvironment.Spec.ActivationCodeSecretRef
+
+	if reference == nil {
+		return "", errors.NewNotFound(corev1.Resource("secrets"), "")
+	}
 
 	key := types.NamespacedName{
 		Name:      reference.Name,

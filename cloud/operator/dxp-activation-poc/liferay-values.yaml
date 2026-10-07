@@ -1,0 +1,24 @@
+customEnv:
+    x-dxp-activation-poc:
+        -   name: LIFERAY_CLUSTER_PERIOD_LINK_PERIOD_ENABLED
+            value: "false"
+        -   name: LIFERAY_PROVISIONING_BASE_URL
+            value: http://mock-provisioning.liferay-system.svc:8080
+        -   name: LIFERAY_PROVISIONING_HEARTBEAT_INTERVAL
+            value: "20"
+image:
+    pullPolicy: IfNotPresent
+    repository: liferay/dxp-environment-poc
+    tag: lcd-53829
+licensing:
+    activationMode: DXP
+    addOnsDir: /opt/liferay/data/add-ons
+    enabled: true
+replicaCount: 3
+resources:
+    limits:
+        cpu: 4000m
+        memory: 6Gi
+    requests:
+        cpu: 500m
+        memory: 3Gi

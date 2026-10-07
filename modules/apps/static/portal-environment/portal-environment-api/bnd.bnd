@@ -1,0 +1,6 @@
+Bundle-Name: Liferay Portal Environment API
+Bundle-SymbolicName: com.liferay.portal.environment.api
+Bundle-Version: 1.0.0
+Export-Package:\
+	com.liferay.portal.environment,\
+	com.liferay.portal.environment.util
