@@ -10,3 +10,4 @@ operator/resources/api/cx/v1alpha1/zz_generated.deepcopy.go
 operator/resources/api/licensing/v1alpha1/zz_generated.deepcopy.go
 operator/resources/build/manager
 operator/resources/manager
+sdk/cx-package/chart/

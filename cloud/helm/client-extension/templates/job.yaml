@@ -1,0 +1,20 @@
+{{- if and .Values.workload.enabled (eq .Values.workload.kind "Job") }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+    annotations:
+        # A Job's pod template is immutable, so Helm cannot upgrade one in
+        # place. Replacing it on every upgrade would rerun the import; leaving
+        # it means a changed image needs the Job deleting first.
+        helm.sh/resource-policy: keep
+    labels:
+        {{- include "liferay-client-extension.labels" . | nindent 8 }}
+    name: {{ include "liferay-client-extension.fullname" . }}
+spec:
+    backoffLimit: {{ .Values.workload.backoffLimit }}
+    template:
+        metadata:
+            {{- include "liferay-client-extension.podTemplateMetadata" . | nindent 12 }}
+        spec:
+            {{- include "liferay-client-extension.podSpec" . | nindent 12 }}
+{{- end }}
