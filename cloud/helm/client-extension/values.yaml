@@ -1,7 +1,8 @@
-# liferay-cx-package bakes everything the build produced into these defaults:
-# the configuration payload, the base image, the artifact and the workload shape
-# from LCP.json. What is left to supply per environment is the binding: which
-# virtual instance, which DXP namespace and which host.
+# Packaging a client extension, with the Liferay Workspace's
+# publishClientExtension task, bakes everything the build produced into these
+# defaults: the configuration payload, the base image, the artifact and the
+# workload shape from LCP.json. What is left to supply per environment is the
+# binding: which virtual instance, which DXP namespace and which host.
 
 # The client extension's own files, published as a single layer OCI image and
 # mounted read only into the base image named by image. Each mount maps a
