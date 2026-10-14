@@ -32,6 +32,7 @@ import com.liferay.gradle.plugins.workspace.internal.util.JsonNodeUtil;
 import com.liferay.gradle.plugins.workspace.internal.util.StringUtil;
 import com.liferay.gradle.plugins.workspace.internal.util.copy.HashifyAction;
 import com.liferay.gradle.plugins.workspace.task.CreateClientExtensionConfigTask;
+import com.liferay.gradle.plugins.workspace.task.PublishClientExtensionTask;
 import com.liferay.gradle.plugins.workspace.task.WriteLanguageBatchEngineDataTask;
 import com.liferay.gradle.util.ArrayUtil;
 import com.liferay.gradle.util.Validator;
@@ -77,6 +78,8 @@ import org.gradle.api.file.CopySpec;
 import org.gradle.api.file.Directory;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.ProjectLayout;
+import org.gradle.api.file.RegularFile;
+import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.initialization.Settings;
 import org.gradle.api.invocation.Gradle;
 import org.gradle.api.logging.Logger;
@@ -86,6 +89,7 @@ import org.gradle.api.plugins.PluginManager;
 import org.gradle.api.provider.Property;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.provider.SetProperty;
+import org.gradle.api.publish.plugins.PublishingPlugin;
 import org.gradle.api.tasks.Copy;
 import org.gradle.api.tasks.Delete;
 import org.gradle.api.tasks.JavaExec;
@@ -94,6 +98,7 @@ import org.gradle.api.tasks.TaskInputs;
 import org.gradle.api.tasks.TaskOutputs;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.TaskState;
+import org.gradle.api.tasks.bundling.AbstractArchiveTask;
 import org.gradle.api.tasks.bundling.Zip;
 import org.gradle.language.base.plugins.LifecycleBasePlugin;
 import org.gradle.process.ProcessForkOptions;
@@ -115,6 +120,12 @@ public class ClientExtensionProjectConfigurator
 
 	public static final String CREATE_CLIENT_EXTENSION_CONFIG_TASK_NAME =
 		"createClientExtensionConfig";
+
+	public static final String PACKAGE_CLIENT_EXTENSION_TASK_NAME =
+		"packageClientExtension";
+
+	public static final String PUBLISH_CLIENT_EXTENSION_TASK_NAME =
+		"publishClientExtension";
 
 	public static final String VALIDATE_CLIENT_EXTENSION_IDS_TASK_NAME =
 		"validateClientExtensionIds";
@@ -314,6 +325,9 @@ public class ClientExtensionProjectConfigurator
 			project, assembleClientExtensionTaskProvider,
 			createClientExtensionConfigTaskProvider, workspaceExtension);
 
+		_addPublishClientExtensionTasks(
+			project, buildClientExtensionZipTaskProvider);
+
 		_configureLiferayRoutes(project, workspaceExtension);
 
 		if (_isLanguageProject(project)) {
@@ -474,6 +488,57 @@ public class ClientExtensionProjectConfigurator
 			project, LifecycleBasePlugin.CLEAN_TASK_NAME);
 
 		cleanTask.dependsOn(dockerRemoveImage);
+	}
+
+	private void _addPublishClientExtensionTasks(
+		Project project,
+		TaskProvider<Zip> buildClientExtensionZipTaskProvider) {
+
+		Provider<RegularFile> zipFileProvider =
+			buildClientExtensionZipTaskProvider.flatMap(
+				AbstractArchiveTask::getArchiveFile);
+
+		TaskProvider<PublishClientExtensionTask>
+			packageClientExtensionTaskProvider = GradleUtil.addTaskProvider(
+				project, PACKAGE_CLIENT_EXTENSION_TASK_NAME,
+				PublishClientExtensionTask.class);
+
+		packageClientExtensionTaskProvider.configure(
+			publishClientExtensionTask -> {
+				publishClientExtensionTask.setDescription(
+					"Packages the client extension as an OCI artifact and a " +
+						"Helm chart without pushing them.");
+				publishClientExtensionTask.setGroup(BasePlugin.BUILD_GROUP);
+
+				Property<Boolean> pushProperty =
+					publishClientExtensionTask.getPush();
+
+				pushProperty.set(false);
+
+				RegularFileProperty zipFileProperty =
+					publishClientExtensionTask.getZipFile();
+
+				zipFileProperty.set(zipFileProvider);
+			});
+
+		TaskProvider<PublishClientExtensionTask>
+			publishClientExtensionTaskProvider = GradleUtil.addTaskProvider(
+				project, PUBLISH_CLIENT_EXTENSION_TASK_NAME,
+				PublishClientExtensionTask.class);
+
+		publishClientExtensionTaskProvider.configure(
+			publishClientExtensionTask -> {
+				publishClientExtensionTask.setDescription(
+					"Publishes the client extension to an OCI registry as an " +
+						"artifact to mount and a Helm chart that runs it.");
+				publishClientExtensionTask.setGroup(
+					PublishingPlugin.PUBLISH_TASK_GROUP);
+
+				RegularFileProperty zipFileProperty =
+					publishClientExtensionTask.getZipFile();
+
+				zipFileProperty.set(zipFileProvider);
+			});
 	}
 
 	private TaskProvider<Zip> _baseConfigureClientExtensionProject(

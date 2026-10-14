@@ -3,9 +3,10 @@ import de.undercouch.gradle.tasks.download.Download
 apply plugin: "de.undercouch.download"
 
 task downloadNodeInfo(type: Download)
+task zipClientExtensionChart(type: Zip)
 
-sourceCompatibility = "1.8"
-targetCompatibility = "1.8"
+sourceCompatibility = "17"
+targetCompatibility = "17"
 
 String gradleVersion = "8.5"
 
@@ -53,7 +54,10 @@ dependencies {
 	implementation group: "com.liferay", name: "com.liferay.project.templates.extensions", version: "1.0.146"
 	implementation group: "com.liferay", name: "com.liferay.release.util", version: "1.0.1"
 	implementation group: "de.undercouch", name: "gradle-download-task", version: "5.4.0"
+	implementation group: "land.oras", name: "oras-java-sdk", version: "0.8.5"
 	implementation group: "net.saliman", name: "gradle-properties-plugin", version: "1.4.6"
+	implementation group: "org.apache.commons", name: "commons-compress", version: "1.26.0"
+	implementation group: "org.yaml", name: "snakeyaml", version: "2.3"
 
 	runtimeOnly group: "com.liferay", name: "com.liferay.ant.bnd", version: "3.2.19"
 	runtimeOnly group: "org.ow2.asm", name: "asm", version: "9.7"
@@ -81,10 +85,22 @@ liferayOSGi {
 
 processResources {
 	from downloadNodeInfo
+
+	into("com/liferay/gradle/plugins/workspace/internal/client/extension/oci/dependencies") {
+		from zipClientExtensionChart
+	}
 }
 
 updateFileVersions {
 	match(/name: "com\.liferay\.gradle\.plugins\.workspace", version: "(\d.+)"/, "../../../modules/sdk/project-templates/project-templates-workspace/src/main/resources/archetype-resources/settings.gradle")
 	match(/name: "com\.liferay\.gradle\.plugins\.workspace", version: "(\d.+)"/, "../../../workspaces/liferay-sample-workspace/settings.gradle")
 	match(/name: "com\.liferay\.gradle\.plugins\.workspace", version: "(\d.+)"/, "../../../workspaces/refresh_liferay_sample_workspace.sh")
+}
+
+zipClientExtensionChart {
+	archiveFileName = "client-extension-chart.zip"
+	destinationDirectory = new File(buildDir, "client-extension-chart")
+	from "../../../cloud/helm/client-extension"
+	preserveFileTimestamps = false
+	reproducibleFileOrder = true
 }

@@ -1,0 +1,87 @@
+# Packaging a client extension, with the Liferay Workspace's
+# publishClientExtension task, bakes everything the build produced into these
+# defaults: the configuration payload, the base image, the artifact and the
+# workload shape from LCP.json. What is left to supply per environment is the
+# binding: which virtual instance, which DXP namespace and which host.
+
+# The client extension's own files, published as a single layer OCI image and
+# mounted read only into the base image named by image. Each mount maps a
+# directory of the artifact onto a path in the container, following the COPY
+# lines of the Dockerfile in the build zip. Image volumes need Kubernetes 1.33
+# or newer.
+artifact:
+    mounts: []
+    pullPolicy: IfNotPresent
+    reference: ""
+clientExtension:
+    # The OSGi configurations, keyed by configuration key, taken verbatim from
+    # the build's *.client-extension-config.json.
+    configs: {}
+    # The host this client extension is reached at, by browsers through the
+    # Ingress and by DXP through the Service.
+    domain: ""
+    # The namespace DXP runs in. Leave it empty when DXP runs in the release's
+    # own namespace. Delivering from another namespace needs DXP's namespace to
+    # list this one in its cx.liferay.com/allowed-client-extension-namespaces
+    # annotation.
+    dxpNamespace: ""
+    serviceId: ""
+    virtualInstanceId: liferay.com
+fullnameOverride: ""
+# The stock base image the workload runs, such as liferay/caddy or
+# liferay/jar-runner.
+image:
+    pullPolicy: IfNotPresent
+    repository: ""
+    tag: latest
+imagePullSecrets: []
+ingress:
+    annotations: {}
+    className: ""
+    enabled: false
+    hosts: []
+    tls: []
+labels: {}
+nameOverride: ""
+# The DXP operator writes the dxp metadata and ext-init mirrors into this
+# namespace when DXP runs in another one. The RoleBinding that lets it is
+# rendered only then.
+operatorServiceAccount:
+    name: dxp-operator
+    namespace: dxp-operator-system
+podAnnotations: {}
+podLabels: {}
+service:
+    enabled: false
+    port: 80
+    targetPort: 80
+    type: ClusterIP
+serviceAccount:
+    annotations: {}
+    create: false
+    name: ""
+workload:
+    affinity: {}
+    backoffLimit: 6
+    containerPort: 80
+    # False for a configuration only client extension, which has nothing to
+    # run.
+    enabled: true
+    env: {}
+    # CronJob, Deployment or Job. Immutable once created.
+    kind: Deployment
+    livenessProbe: {}
+    nodeSelector: {}
+    podSecurityContext: {}
+    readinessProbe: {}
+    replicas: 1
+    resources: {}
+    schedule: ""
+    securityContext: {}
+    # Holds off liveness and readiness until the process has come up once. A
+    # JVM client extension takes tens of seconds to start, and a liveness probe
+    # with no delay kills it before it ever listens.
+    startupProbe: {}
+    tolerations: []
+    volumeMounts: []
+    volumes: []
