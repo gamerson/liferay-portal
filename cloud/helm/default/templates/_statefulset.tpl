@@ -10,6 +10,25 @@
 {{- $marketplace := .statefulset.marketplace | default dict }}
 {{- $marketplaceClaimName := printf "%s-marketplace" (include "liferay.name" .root) }}
 {{- $marketplaceVolumeName := "liferay-marketplace" }}
+{{- $overlay := .statefulset.overlay | default dict }}
+{{- $overlayArtifacts := $overlay.artifacts | default list }}
+{{- $overlayHotfixName := "" }}
+{{- $overlayNames := list }}
+{{- range $overlayArtifacts }}
+{{- if not (regexMatch "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$" (required "overlay.artifacts[].name is required" .name)) }}
+{{- fail (printf "overlay.artifacts[].name %q must be a lowercase DNS label" .name) }}
+{{- end }}
+{{- if has .name $overlayNames }}
+{{- fail (printf "overlay.artifacts[].name %q is used more than once" .name) }}
+{{- end }}
+{{- if .hotfix }}
+{{- if $overlayHotfixName }}
+{{- fail (printf "overlay.artifacts %q and %q both set hotfix, and only one hotfix can be installed" $overlayHotfixName .name) }}
+{{- end }}
+{{- $overlayHotfixName = .name }}
+{{- end }}
+{{- $overlayNames = append $overlayNames .name }}
+{{- end }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -54,7 +73,7 @@ spec:
             {{- end }}
             containers:
                 -   #
-                    {{- if or .statefulset.env .statefulset.customEnv }}
+                    {{- if or .statefulset.env .statefulset.customEnv $overlayArtifacts }}
                     env:
                         {{- with .statefulset.env }}
                         {{- toYaml . | nindent 22 }}
@@ -63,6 +82,9 @@ spec:
                         {{- if and $v (gt (len $v) 0) }}
                         {{- toYaml $v | nindent 22 }}
                         {{- end }}
+                        {{- end }}
+                        {{- if $overlayArtifacts }}
+                        {{- list (dict "name" "LIFERAY_OVERLAY_DIR" "value" "/mnt/liferay/overlays") (dict "name" "LIFERAY_OVERLAY_NAMES" "value" (join " " $overlayNames)) | toYaml | nindent 22 }}
                         {{- end }}
                     {{- end }}
                     {{- $networkEnvFrom := and (eq .name "") .statefulset.network .statefulset.network.enabled .statefulset.network.hostnames }}
@@ -112,15 +134,26 @@ spec:
                     startupProbe:
                         {{- toYaml . | nindent 22 }}
                     {{- end }}
-                    {{- if or .statefulset.volumeMounts .statefulset.customVolumeMounts}}
+                    {{- if or .statefulset.volumeMounts .statefulset.customVolumeMounts $overlayArtifacts }}
                     volumeMounts:
-                        {{- with .statefulset.volumeMounts }}
-                        {{- toYaml . | nindent 22 }}
+                        {{- range .statefulset.volumeMounts }}
+                        {{- if not (and $overlayHotfixName (eq .mountPath "/mnt/liferay/patching")) }}
+                        {{- list . | toYaml | nindent 22 }}
+                        {{- end }}
                         {{- end }}
                         {{- range $k, $v := .statefulset.customVolumeMounts }}
                         {{- if and $v (gt (len $v) 0) }}
                         {{- toYaml $v | nindent 22 }}
                         {{- end }}
+                        {{- end }}
+                        {{- range $overlayArtifacts }}
+                        {{- list (dict "mountPath" (printf "/mnt/liferay/overlays/%s" .name) "name" (printf "liferay-overlay-%s" .name) "readOnly" true) | toYaml | nindent 22 }}
+                        {{- end }}
+                        {{- with $overlayHotfixName }}
+                        {{- list (dict "mountPath" "/mnt/liferay/patching" "name" (printf "liferay-overlay-%s" .) "readOnly" true "subPath" "patching") | toYaml | nindent 22 }}
+                        {{- end }}
+                        {{- if $overlayArtifacts }}
+                        {{- list (dict "mountPath" "/usr/local/liferay/scripts/pre-configure/020_copy_overlay_files.sh" "name" $overlay.initScriptsVolumeName "subPath" "overlay-files.sh") | toYaml | nindent 22 }}
                         {{- end }}
                     {{- end }}
             {{- if or .statefulset.pullSecrets .statefulset.customPullSecrets}}
@@ -176,7 +209,7 @@ spec:
             tolerations:
             {{- toYaml . | nindent 12 }}
             {{- end }}
-            {{- if or .statefulset.volumes .statefulset.customVolumes $licensing.enabled $marketplace.enabled }}
+            {{- if or .statefulset.volumes .statefulset.customVolumes $licensing.enabled $marketplace.enabled $overlayArtifacts }}
             volumes:
                 {{- with .statefulset.volumes }}
                 {{- toYaml . | nindent 16 }}
@@ -189,6 +222,9 @@ spec:
                 {{- end }}
                 {{- if $marketplace.enabled }}
                 {{- list (dict "name" $marketplaceVolumeName "persistentVolumeClaim" (dict "claimName" $marketplaceClaimName)) | toYaml | nindent 16 }}
+                {{- end }}
+                {{- range $overlayArtifacts }}
+                {{- list (dict "image" (dict "pullPolicy" (.pullPolicy | default "IfNotPresent") "reference" (required "overlay.artifacts[].reference is required" .reference)) "name" (printf "liferay-overlay-%s" .name)) | toYaml | nindent 16 }}
                 {{- end }}
             {{- end }}
     {{- with .statefulset.updateStrategy }}

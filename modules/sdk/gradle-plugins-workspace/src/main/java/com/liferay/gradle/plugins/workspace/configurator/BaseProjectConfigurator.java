@@ -13,12 +13,14 @@ import com.liferay.gradle.plugins.workspace.ProjectConfigurator;
 import com.liferay.gradle.plugins.workspace.WorkspaceExtension;
 import com.liferay.gradle.plugins.workspace.WorkspacePlugin;
 import com.liferay.gradle.plugins.workspace.internal.util.GradleUtil;
+import com.liferay.gradle.plugins.workspace.task.PublishOverlayTask;
 import com.liferay.gradle.util.Validator;
 
 import java.io.File;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
@@ -26,6 +28,7 @@ import org.gradle.api.GradleException;
 import org.gradle.api.NamedDomainObjectCollection;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
+import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.DuplicatesStrategy;
 import org.gradle.api.initialization.Settings;
 import org.gradle.api.tasks.Copy;
@@ -132,6 +135,20 @@ public abstract class BaseProjectConfigurator implements ProjectConfigurator {
 			RootProjectConfigurator.BUILD_DOCKER_IMAGE_TASK_NAME);
 
 		buildDockerImageTask.dependsOn(copy);
+
+		PublishOverlayTask publishOverlayTask =
+			(PublishOverlayTask)GradleUtil.getTask(
+				project.getRootProject(),
+				RootProjectConfigurator.PUBLISH_OVERLAY_TASK_NAME);
+
+		ConfigurableFileCollection overlayFiles =
+			publishOverlayTask.getDeployFiles();
+
+		if (Objects.equals(dockerDeployDir.getName(), "client-extensions")) {
+			overlayFiles = publishOverlayTask.getClientExtensionFiles();
+		}
+
+		overlayFiles.from(sourcePath);
 
 		return copy;
 	}

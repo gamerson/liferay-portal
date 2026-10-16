@@ -1,0 +1,4 @@
+Bundle-Name: Acme Overlay Demo
+Bundle-SymbolicName: com.acme.overlay.demo
+Bundle-Version: 1.0.0
+-reproducible: true

@@ -1,0 +1,10 @@
+image:
+    pullPolicy: IfNotPresent
+    tag: 2026.q3.5
+resources:
+    limits:
+        cpu: 4000m
+        memory: 6Gi
+    requests:
+        cpu: 1000m
+        memory: 3Gi

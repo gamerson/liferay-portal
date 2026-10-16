@@ -235,6 +235,45 @@ customInitContainers:
                     volumeMounts:
                         -   mountPath: /temp
                             name: liferay-persistent-volume
+    x-liferay-prepopulate-overlay:
+        -   containerTemplate: |
+                {{- if .overlay.artifacts }}
+                {{- $overlayNames := list }}
+                {{- range .overlay.artifacts }}
+                {{- $overlayNames = append $overlayNames .name }}
+                {{- end }}
+                -   command:
+                        -   bash
+                        -   /liferay-init-scripts/overlay-link.sh
+                    env:
+                        -   name: LIFERAY_OVERLAY_DIR
+                            value: /mnt/liferay/overlays
+                        -   name: LIFERAY_OVERLAY_NAMES
+                            value: {{ join " " $overlayNames | quote }}
+                        -   name: LIFERAY_OVERLAY_TARGET_DIR
+                            value: /temp
+                    image: {{ printf "%s:%s" .image.repository (.image.tag | toString) }}
+                    imagePullPolicy: {{ .image.pullPolicy }}
+                    name: liferay-prepopulate-overlay
+                    securityContext:
+                        allowPrivilegeEscalation: false
+                        capabilities:
+                            drop:
+                                -   ALL
+                        seccompProfile:
+                            type: RuntimeDefault
+                    volumeMounts:
+                        -   mountPath: /liferay-init-scripts/overlay-link.sh
+                            name: {{ .overlay.initScriptsVolumeName }}
+                            subPath: overlay-link.sh
+                        {{- range .overlay.artifacts }}
+                        -   mountPath: /mnt/liferay/overlays/{{ .name }}
+                            name: liferay-overlay-{{ .name }}
+                            readOnly: true
+                        {{- end }}
+                        -   mountPath: /temp
+                            name: liferay-persistent-volume
+                {{- end }}
     x-liferay-wait-on-services:
         -   containerTemplate: |
                 -   command:
@@ -458,6 +497,7 @@ networkPolicy:
     gatewayPodLabel: envoy
 nodeSelector: {}
 overlay:
+    artifacts: []
     copy: []
     enabled: false
     image:

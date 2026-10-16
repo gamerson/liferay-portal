@@ -32,6 +32,7 @@ import com.liferay.gradle.plugins.workspace.internal.util.GradleUtil;
 import com.liferay.gradle.plugins.workspace.internal.util.StringUtil;
 import com.liferay.gradle.plugins.workspace.task.CreateTokenTask;
 import com.liferay.gradle.plugins.workspace.task.InitBundleTask;
+import com.liferay.gradle.plugins.workspace.task.PublishOverlayTask;
 import com.liferay.gradle.plugins.workspace.task.UpgradeJakartaTask;
 import com.liferay.gradle.plugins.workspace.task.UpgradeSourceCodeTask;
 import com.liferay.gradle.plugins.workspace.task.VerifyBundleTask;
@@ -78,6 +79,7 @@ import org.gradle.api.artifacts.ConfigurationContainer;
 import org.gradle.api.artifacts.DependencySet;
 import org.gradle.api.artifacts.dsl.DependencyHandler;
 import org.gradle.api.execution.TaskExecutionGraph;
+import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.CopySpec;
 import org.gradle.api.file.Directory;
 import org.gradle.api.file.DirectoryProperty;
@@ -172,6 +174,8 @@ public class RootProjectConfigurator implements Plugin<Project> {
 
 	public static final String PRUNE_DOCKER_IMAGE_TASK_NAME =
 		"pruneDockerImage";
+
+	public static final String PUBLISH_OVERLAY_TASK_NAME = "publishOverlay";
 
 	public static final String PULL_DOCKER_IMAGE_TASK_NAME = "pullDockerImage";
 
@@ -282,6 +286,9 @@ public class RootProjectConfigurator implements Plugin<Project> {
 		_addDockerTasks(
 			project, workspaceExtension, providedModulesConfiguration,
 			verifyProductTask);
+
+		_addTaskPublishOverlay(
+			project, workspaceExtension, providedModulesConfiguration);
 
 		UpgradeSourceCodeTask upgradeSourceCodeTask = _addTaskUpgradeSourceCode(
 			project);
@@ -1187,6 +1194,37 @@ public class RootProjectConfigurator implements Plugin<Project> {
 			});
 
 		return dockerLogsContainer;
+	}
+
+	private PublishOverlayTask _addTaskPublishOverlay(
+		Project project, WorkspaceExtension workspaceExtension,
+		Configuration providedModulesConfiguration) {
+
+		PublishOverlayTask publishOverlayTask = GradleUtil.addTask(
+			project, PUBLISH_OVERLAY_TASK_NAME, PublishOverlayTask.class);
+
+		DirectoryProperty configsDirProperty =
+			publishOverlayTask.getConfigsDir();
+
+		configsDirProperty.set(workspaceExtension.getConfigsDir());
+
+		ConfigurableFileCollection deployFiles =
+			publishOverlayTask.getDeployFiles();
+
+		deployFiles.from(providedModulesConfiguration);
+
+		Property<String> environmentProperty =
+			publishOverlayTask.getEnvironment();
+
+		environmentProperty.set(
+			project.provider(workspaceExtension::getEnvironment));
+
+		publishOverlayTask.setDescription(
+			"Publishes this workspace's modules, configs, and hotfix as an " +
+				"image that the Liferay Helm chart mounts as an overlay.");
+		publishOverlayTask.setGroup(DOCKER_GROUP);
+
+		return publishOverlayTask;
 	}
 
 	private DockerPullImage _addTaskPullDockerImage(

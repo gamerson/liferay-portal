@@ -1,0 +1,4 @@
+.gradle/
+build/
+configs/hotfix/patching/*.zip
+modules/*/build/

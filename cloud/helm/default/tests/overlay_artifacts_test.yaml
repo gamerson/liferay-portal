@@ -1,0 +1,134 @@
+suite: Overlay Artifacts
+templates:
+    -   templates/configmap.yaml
+    -   templates/liferay-init-scripts-cm.yaml
+    -   templates/liferay-network-cm.yaml
+    -   templates/workloads.yaml
+tests:
+    -   asserts:
+            -   equal:
+                    path: spec.template.spec.initContainers[0].name
+                    value: liferay-prepopulate-data
+            -   equal:
+                    path: spec.template.spec.initContainers[1].name
+                    value: liferay-prepopulate-overlay
+            -   contains:
+                    content:
+                        name: LIFERAY_OVERLAY_NAMES
+                        value: acme configs
+                    path: spec.template.spec.initContainers[1].env
+            -   contains:
+                    content:
+                        mountPath: /mnt/liferay/overlays/configs
+                        name: liferay-overlay-configs
+                        readOnly: true
+                    path: spec.template.spec.initContainers[1].volumeMounts
+        documentSelector:
+            path: kind
+            skipEmptyTemplates: true
+            value: StatefulSet
+        it: Links overlay artifacts after the persistent volume is prepopulated
+        set:
+            overlay.artifacts:
+                -   name: acme
+                    reference: registry.example.com/acme/overlay@sha256:1111
+                -   name: configs
+                    reference: registry.example.com/acme/configs@sha256:2222
+    -   asserts:
+            -   contains:
+                    content:
+                        image:
+                            pullPolicy: IfNotPresent
+                            reference: registry.example.com/acme/overlay@sha256:1111
+                        name: liferay-overlay-acme
+                    path: spec.template.spec.volumes
+            -   contains:
+                    content:
+                        image:
+                            pullPolicy: Always
+                            reference: registry.example.com/acme/configs@sha256:2222
+                        name: liferay-overlay-configs
+                    path: spec.template.spec.volumes
+            -   contains:
+                    content:
+                        mountPath: /mnt/liferay/overlays/acme
+                        name: liferay-overlay-acme
+                        readOnly: true
+                    path: spec.template.spec.containers[0].volumeMounts
+            -   contains:
+                    content:
+                        name: LIFERAY_OVERLAY_NAMES
+                        value: acme configs
+                    path: spec.template.spec.containers[0].env
+            -   contains:
+                    content:
+                        mountPath: /usr/local/liferay/scripts/pre-configure/020_copy_overlay_files.sh
+                        name: liferay-init-scripts-default
+                        subPath: overlay-files.sh
+                    path: spec.template.spec.containers[0].volumeMounts
+        documentSelector:
+            path: kind
+            skipEmptyTemplates: true
+            value: StatefulSet
+        it: Mounts each overlay artifact as an image volume pinned to its reference
+        set:
+            overlay.artifacts:
+                -   name: acme
+                    reference: registry.example.com/acme/overlay@sha256:1111
+                -   name: configs
+                    pullPolicy: Always
+                    reference: registry.example.com/acme/configs@sha256:2222
+    -   asserts:
+            -   contains:
+                    content:
+                        mountPath: /mnt/liferay/patching
+                        name: liferay-overlay-acme
+                        readOnly: true
+                        subPath: patching
+                    path: spec.template.spec.containers[0].volumeMounts
+            -   notContains:
+                    content:
+                        mountPath: /mnt/liferay/patching
+                        name: liferay-persistent-volume
+                        subPath: mnt/liferay/patching
+                    path: spec.template.spec.containers[0].volumeMounts
+        documentSelector:
+            path: kind
+            skipEmptyTemplates: true
+            value: StatefulSet
+        it: Mounts the hotfix artifact's patching directory in place of the persistent volume
+        set:
+            overlay.artifacts:
+                -   hotfix: true
+                    name: acme
+                    reference: registry.example.com/acme/overlay@sha256:1111
+    -   asserts:
+            -   notContains:
+                    any: true
+                    content:
+                        name: liferay-prepopulate-overlay
+                    path: spec.template.spec.initContainers
+            -   notContains:
+                    content:
+                        mountPath: /usr/local/liferay/scripts/pre-configure/020_copy_overlay_files.sh
+                        name: liferay-init-scripts-default
+                        subPath: overlay-files.sh
+                    path: spec.template.spec.containers[0].volumeMounts
+        documentSelector:
+            path: kind
+            skipEmptyTemplates: true
+            value: StatefulSet
+        it: Omits the overlay link step when no artifacts are set
+    -   asserts:
+            -   failedTemplate:
+                    errorPattern: both set hotfix
+        it: Rejects a second artifact that sets hotfix
+        set:
+            overlay.artifacts:
+                -   hotfix: true
+                    name: acme
+                    reference: registry.example.com/acme/overlay@sha256:1111
+                -   hotfix: true
+                    name: other
+                    reference: registry.example.com/acme/other@sha256:2222
+        template: templates/workloads.yaml

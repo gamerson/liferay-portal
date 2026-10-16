@@ -1,0 +1,14 @@
+dependencies {
+	compileOnly group: "org.osgi", name: "org.osgi.service.component.annotations", version: "1.4.0"
+	compileOnly group: "org.osgi", name: "org.osgi.service.metatype.annotations", version: "1.4.1"
+}
+
+processResources {
+	String build = project.property("acme.overlay.demo.build")
+
+	inputs.property "build", build
+
+	filesMatching("acme-overlay-demo.properties") {
+		expand build: build
+	}
+}
