@@ -58,6 +58,7 @@ import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.ProjectLayout;
 import org.gradle.api.file.RegularFile;
 import org.gradle.api.logging.Logger;
+import org.gradle.api.plugins.PluginManager;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.provider.ProviderFactory;
 import org.gradle.api.tasks.Input;
@@ -212,7 +213,9 @@ public class CreateClientExtensionConfigTask extends DefaultTask {
 				ResourceUtil.getLocalFileResolver(getInputDockerfileFile()),
 				ResourceUtil.getClassLoaderResolver(
 					CreateClientExtensionConfigTask.class,
-					_getTemplatePath(classificationGrouping, "Dockerfile"))),
+					_getTemplatePath(
+						_getDockerfileGrouping(classificationGrouping),
+						"Dockerfile"))),
 			getDockerFile(), substitutionMap);
 		_writeToOutputFile(
 			_getLCPJsonFileContent(classificationGrouping), getLcpJsonFile(),
@@ -244,6 +247,11 @@ public class CreateClientExtensionConfigTask extends DefaultTask {
 	@InputFiles
 	public File getInputLcpJsonFile() {
 		return GradleUtil.toFile(_project, "LCP.json");
+	}
+
+	@InputFiles
+	public File getInputPackageJsonFile() {
+		return GradleUtil.toFile(_project, "package.json");
 	}
 
 	@InputFiles
@@ -440,6 +448,26 @@ public class CreateClientExtensionConfigTask extends DefaultTask {
 
 			entry.setValue(values);
 		}
+	}
+
+	private String _getDockerfileGrouping(String classificationGrouping) {
+		PluginManager pluginManager = _project.getPluginManager();
+
+		if (pluginManager.hasPlugin("org.springframework.boot")) {
+			return "microservice-java";
+		}
+
+		if (!Objects.equals(classificationGrouping, "microservice")) {
+			return classificationGrouping;
+		}
+
+		File packageJsonFile = getInputPackageJsonFile();
+
+		if (packageJsonFile.exists()) {
+			return "microservice-node";
+		}
+
+		return "microservice-java";
 	}
 
 	private String _getFileContent(File file) {
