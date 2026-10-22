@@ -1,0 +1,11 @@
+ext.clientExtensionBuildDir = "client-extension-default"
+ext.expectedContentStrings = [
+	'COPY --chown=liferay:liferay *.jar /opt/liferay/jar-runner.jar',
+]
+ext.expectedFilePath = "Dockerfile"
+ext.taskPath = ":custom-dockerfile:createClientExtensionConfig"
+ext.unexpectedContentStrings = [
+	'ENV CUSTOM_DOCKERFILE=true',
+]
+
+apply from: project.property("commonScript.testClientExtensionBuildFileContentsTestCase.gradle")
