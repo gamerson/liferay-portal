@@ -65,13 +65,14 @@ public class HelmChartSourceTest {
 
 	@Test
 	public void testResolveWhenReferenceIsBlank() throws Exception {
-		HelmChartSource helmChartSource = HelmChartSource.resolve(
+		HelmChartSource helmChartSource = HelmChartSource.resolveReference(
 			null, _rootDir);
 
 		Assert.assertEquals("embedded", helmChartSource.getOrigin());
 
-		HelmChartSource directoryHelmChartSource = HelmChartSource.resolve(
-			"cloud/helm/client-extension", _rootDir);
+		HelmChartSource directoryHelmChartSource =
+			HelmChartSource.resolveReference(
+				"cloud/helm/client-extension", _rootDir);
 
 		Map<String, byte[]> chartFiles = helmChartSource.getChartFiles();
 		Map<String, byte[]> directoryChartFiles =
@@ -90,7 +91,7 @@ public class HelmChartSourceTest {
 
 		Files.write(file.toPath(), _createChartArchiveData());
 
-		HelmChartSource helmChartSource = HelmChartSource.resolve(
+		HelmChartSource helmChartSource = HelmChartSource.resolveReference(
 			file.getName(), temporaryFolder.getRoot());
 
 		_assertChartFiles(helmChartSource);
@@ -102,7 +103,7 @@ public class HelmChartSourceTest {
 
 	@Test
 	public void testResolveWhenReferenceIsChartDirectory() throws Exception {
-		HelmChartSource helmChartSource = HelmChartSource.resolve(
+		HelmChartSource helmChartSource = HelmChartSource.resolveReference(
 			"cloud/helm/client-extension", _rootDir);
 
 		_assertChartFiles(helmChartSource);
@@ -141,7 +142,7 @@ public class HelmChartSourceTest {
 				"http://127.0.0.1:" + inetSocketAddress.getPort() +
 					"/able-1.0.0.tgz";
 
-			HelmChartSource helmChartSource = HelmChartSource.resolve(
+			HelmChartSource helmChartSource = HelmChartSource.resolveReference(
 				url, _rootDir);
 
 			_assertChartFiles(helmChartSource);
@@ -193,7 +194,7 @@ public class HelmChartSourceTest {
 		throws Exception {
 
 		try {
-			HelmChartSource.resolve(file.getAbsolutePath(), _rootDir);
+			HelmChartSource.resolveReference(file.getAbsolutePath(), _rootDir);
 
 			Assert.fail();
 		}
@@ -207,7 +208,8 @@ public class HelmChartSourceTest {
 	private byte[] _createChartArchiveData() throws Exception {
 		HelmChartArchive helmChartArchive = HelmChartArchive.create(
 			"able",
-			HelmChartSource.resolve("cloud/helm/client-extension", _rootDir),
+			HelmChartSource.resolveReference(
+				"cloud/helm/client-extension", _rootDir),
 			Map.of(), "1.0.0");
 
 		return helmChartArchive.getData();
