@@ -48,6 +48,23 @@ public class HelmChartSource {
 	public static final String ANNOTATION_VALUES_CONTRACT =
 		"cx.liferay.com/values-contract";
 
+	public static File getLocalFile(String reference, File rootDir) {
+		if ((reference == null) || reference.isBlank() ||
+			reference.startsWith("http://") ||
+			reference.startsWith("https://")) {
+
+			return null;
+		}
+
+		File file = new File(reference);
+
+		if (file.isAbsolute()) {
+			return file;
+		}
+
+		return new File(rootDir, reference);
+	}
+
 	public static HelmChartSource resolveReference(
 			String reference, File rootDir)
 		throws InterruptedException, IOException {
@@ -63,13 +80,7 @@ public class HelmChartSource {
 			helmChartSource = _readURL(reference);
 		}
 		else {
-			File file = new File(reference);
-
-			if (!file.isAbsolute()) {
-				file = new File(rootDir, reference);
-			}
-
-			helmChartSource = _readLocal(file);
+			helmChartSource = _readLocal(getLocalFile(reference, rootDir));
 		}
 
 		helmChartSource._validate(reference);

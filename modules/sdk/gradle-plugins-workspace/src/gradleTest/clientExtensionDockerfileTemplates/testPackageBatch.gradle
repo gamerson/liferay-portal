@@ -1,0 +1,8 @@
+ext.clientExtensionBuildDir = "client-extension-package"
+ext.expectedContentStrings = [
+	'batch/organization.batch-engine-data.json',
+]
+ext.expectedFilePath = "batch-0.1.0-layer.tar"
+ext.taskPath = ":batch:packageClientExtension"
+
+apply from: project.property("commonScript.testClientExtensionBuildFileContentsTestCase.gradle")

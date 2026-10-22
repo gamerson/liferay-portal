@@ -1,0 +1,8 @@
+ext.clientExtensionBuildDir = "client-extension-package"
+ext.expectedContentStrings = [
+	'.mounts/0/jar-runner.jar',
+]
+ext.expectedFilePath = "spring-boot-0.1.0-layer.tar"
+ext.taskPath = ":spring-boot:packageClientExtension"
+
+apply from: project.property("commonScript.testClientExtensionBuildFileContentsTestCase.gradle")

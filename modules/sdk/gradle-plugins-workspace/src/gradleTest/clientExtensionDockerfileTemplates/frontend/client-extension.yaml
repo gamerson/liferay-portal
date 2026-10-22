@@ -1,0 +1,7 @@
+assemble:
+    -   from: src
+        into: static
+frontend-global-js:
+    name: Frontend Global JS
+    type: globalJS
+    url: global.js
