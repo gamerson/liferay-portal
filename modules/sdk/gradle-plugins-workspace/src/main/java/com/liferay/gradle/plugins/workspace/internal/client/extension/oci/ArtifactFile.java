@@ -232,9 +232,11 @@ public class ArtifactFile {
 			for (Map.Entry<PosixFilePermission, Integer> entry :
 					_posixFilePermissionModes.entrySet()) {
 
-				if (posixFilePermissions.contains(entry.getKey())) {
-					mode |= entry.getValue();
+				if (!posixFilePermissions.contains(entry.getKey())) {
+					continue;
 				}
+
+				mode |= entry.getValue();
 			}
 
 			return mode;
@@ -261,9 +263,11 @@ public class ArtifactFile {
 		for (Map.Entry<PosixFilePermission, Integer> entry :
 				_posixFilePermissionModes.entrySet()) {
 
-			if ((mode & entry.getValue()) != 0) {
-				posixFilePermissions.add(entry.getKey());
+			if ((mode & entry.getValue()) == 0) {
+				continue;
 			}
+
+			posixFilePermissions.add(entry.getKey());
 		}
 
 		try {

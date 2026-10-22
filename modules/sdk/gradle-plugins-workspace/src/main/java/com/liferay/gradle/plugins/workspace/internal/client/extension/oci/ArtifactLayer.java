@@ -63,11 +63,13 @@ public class ArtifactLayer {
 				);
 
 				for (ArtifactFile artifactFile : artifactFiles.values()) {
-					if (!artifactFile.isDirectory() &&
-						pathMatcher.matches(Path.of(artifactFile.getName()))) {
+					if (artifactFile.isDirectory() ||
+						!pathMatcher.matches(Path.of(artifactFile.getName()))) {
 
-						matches.add(artifactFile.getName());
+						continue;
 					}
+
+					matches.add(artifactFile.getName());
 				}
 
 				if (matches.isEmpty()) {

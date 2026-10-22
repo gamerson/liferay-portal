@@ -75,9 +75,11 @@ public class HelmChartValues {
 
 			Map<?, ?> probe = _getMap(lcp.get(probeName));
 
-			if ((probe != null) && !probe.isEmpty()) {
-				workload.put(probeName, probe);
+			if ((probe == null) || probe.isEmpty()) {
+				continue;
 			}
+
+			workload.put(probeName, probe);
 		}
 
 		Map<String, Object> startupProbe = _getStartupProbe(lcp);
@@ -261,9 +263,11 @@ public class HelmChartValues {
 
 				Object value = probe.get(handler);
 
-				if (value != null) {
-					startupProbe.put(handler, value);
+				if (value == null) {
+					continue;
 				}
+
+				startupProbe.put(handler, value);
 			}
 
 			if (startupProbe.size() > 2) {
