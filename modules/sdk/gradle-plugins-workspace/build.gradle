@@ -3,6 +3,7 @@ import de.undercouch.gradle.tasks.download.Download
 apply plugin: "de.undercouch.download"
 
 task downloadNodeInfo(type: Download)
+task zipClientExtensionHelmChart(type: Zip)
 
 sourceCompatibility = "17"
 targetCompatibility = "17"
@@ -33,7 +34,7 @@ configurations {
 }
 
 dependencies {
-	compileOnly fileTree(builtBy: [rootProject.tasks.getByName("extractGradleApi" + gradleVersion.replace(".", ""))], dir: new File(rootProject.buildDir, "gradle-${gradleVersion}"))
+	compileOnly fileTree(builtBy: [rootProject.tasks.getByName("extractGradleApi" + gradleVersion.replace(".", ""))], dir: new File(rootProject.buildDir, "gradle-${gradleVersion}"), excludes: ["lib/commons-compress-*.jar", "lib/commons-io-*.jar", "lib/plugins/snakeyaml-*.jar"])
 
 	implementation group: "biz.aQute.bnd", name: "biz.aQute.bndlib", version: "6.4.0"
 	implementation group: "com.bmuschko", name: "gradle-docker-plugin", version: "9.4.0"
@@ -55,6 +56,7 @@ dependencies {
 	implementation group: "de.undercouch", name: "gradle-download-task", version: "5.4.0"
 	implementation group: "net.saliman", name: "gradle-properties-plugin", version: "1.4.6"
 	implementation group: "org.apache.commons", name: "commons-compress", version: "1.26.0"
+	implementation group: "org.yaml", name: "snakeyaml", version: "2.3"
 
 	runtimeOnly group: "com.liferay", name: "com.liferay.ant.bnd", version: "3.2.19"
 	runtimeOnly group: "org.ow2.asm", name: "asm", version: "9.7"
@@ -82,10 +84,22 @@ liferayOSGi {
 
 processResources {
 	from downloadNodeInfo
+
+	into("com/liferay/gradle/plugins/workspace/internal/client/extension/oci/dependencies") {
+		from zipClientExtensionHelmChart
+	}
 }
 
 updateFileVersions {
 	match(/name: "com\.liferay\.gradle\.plugins\.workspace", version: "(\d.+)"/, "../../../modules/sdk/project-templates/project-templates-workspace/src/main/resources/archetype-resources/settings.gradle")
 	match(/name: "com\.liferay\.gradle\.plugins\.workspace", version: "(\d.+)"/, "../../../workspaces/liferay-sample-workspace/settings.gradle")
 	match(/name: "com\.liferay\.gradle\.plugins\.workspace", version: "(\d.+)"/, "../../../workspaces/refresh_liferay_sample_workspace.sh")
+}
+
+zipClientExtensionHelmChart {
+	archiveFileName = "client-extension-helm-chart.zip"
+	destinationDirectory = new File(buildDir, "client-extension-helm-chart")
+	from "../../../cloud/helm/client-extension"
+	preserveFileTimestamps = false
+	reproducibleFileOrder = true
 }
