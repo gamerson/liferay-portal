@@ -42,9 +42,11 @@ public class ClientExtensionDockerfile {
 			List<String> words = new ArrayList<>();
 
 			for (String word : instruction.split(" ")) {
-				if (!word.startsWith("--")) {
-					words.add(word);
+				if (word.startsWith("--")) {
+					continue;
 				}
+
+				words.add(word);
 			}
 
 			String keyword = words.remove(0);

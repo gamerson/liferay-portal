@@ -48,7 +48,8 @@ public class HelmChartSource {
 	public static final String ANNOTATION_VALUES_CONTRACT =
 		"cx.liferay.com/values-contract";
 
-	public static HelmChartSource resolveReference(String reference, File rootDir)
+	public static HelmChartSource resolveReference(
+			String reference, File rootDir)
 		throws InterruptedException, IOException {
 
 		HelmChartSource helmChartSource = null;
@@ -119,10 +120,12 @@ public class HelmChartSource {
 				ZipEntry zipEntry = null;
 
 				while ((zipEntry = zipInputStream.getNextEntry()) != null) {
-					if (!zipEntry.isDirectory()) {
-						chartFiles.put(
-							zipEntry.getName(), zipInputStream.readAllBytes());
+					if (zipEntry.isDirectory()) {
+						continue;
 					}
+
+					chartFiles.put(
+						zipEntry.getName(), zipInputStream.readAllBytes());
 				}
 			}
 		}

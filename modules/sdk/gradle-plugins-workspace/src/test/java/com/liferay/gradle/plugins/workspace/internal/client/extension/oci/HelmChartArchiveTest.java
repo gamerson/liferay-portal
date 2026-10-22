@@ -80,8 +80,8 @@ public class HelmChartArchiveTest {
 
 		Files.write(file.toPath(), helmChartArchive.getData());
 
-		HelmChartSource archiveHelmChartSource = HelmChartSource.resolveReference(
-			file.getAbsolutePath(), rootDir);
+		HelmChartSource archiveHelmChartSource =
+			HelmChartSource.resolveReference(file.getAbsolutePath(), rootDir);
 
 		Map<String, byte[]> chartFiles = archiveHelmChartSource.getChartFiles();
 
