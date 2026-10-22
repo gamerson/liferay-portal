@@ -81,6 +81,14 @@ public class CreateClientExtensionConfigTask extends DefaultTask {
 		_clientExtensionConfigFile = _addTaskOutputFile(
 			_project.getName() + ".client-extension-config.json");
 
+		ProjectLayout projectLayout = _project.getLayout();
+
+		DirectoryProperty buildDirectoryProperty =
+			projectLayout.getBuildDirectory();
+
+		_defaultDockerFile = buildDirectoryProperty.file(
+			"client-extension-default/Dockerfile");
+
 		_dockerFile = _addTaskOutputFile("Dockerfile");
 		_lcpJsonFile = _addTaskOutputFile("LCP.json");
 		_pluginPackagePropertiesFile = _addTaskOutputFile(
@@ -208,15 +216,24 @@ public class CreateClientExtensionConfigTask extends DefaultTask {
 
 		pluginPackageProperties.putIfAbsent("module-group-id", "liferay");
 
+		String dockerfileTemplatePath = _getTemplatePath(
+			_getDockerfileGrouping(classificationGrouping), "Dockerfile");
+
 		_writeToOutputFile(
 			ResourceUtil.readString(
 				ResourceUtil.getLocalFileResolver(getInputDockerfileFile()),
 				ResourceUtil.getClassLoaderResolver(
 					CreateClientExtensionConfigTask.class,
-					_getTemplatePath(
-						_getDockerfileGrouping(classificationGrouping),
-						"Dockerfile"))),
+					dockerfileTemplatePath)),
 			getDockerFile(), substitutionMap);
+
+		_writeToOutputFile(
+			ResourceUtil.readString(
+				ResourceUtil.getClassLoaderResolver(
+					CreateClientExtensionConfigTask.class,
+					dockerfileTemplatePath)),
+			getDefaultDockerFile(), substitutionMap);
+
 		_writeToOutputFile(
 			_getLCPJsonFileContent(classificationGrouping), getLcpJsonFile(),
 			substitutionMap);
@@ -232,6 +249,11 @@ public class CreateClientExtensionConfigTask extends DefaultTask {
 	@OutputFile
 	public File getClientExtensionConfigFile() {
 		return GradleUtil.toFile(_project, _clientExtensionConfigFile);
+	}
+
+	@OutputFile
+	public File getDefaultDockerFile() {
+		return GradleUtil.toFile(_project, _defaultDockerFile);
 	}
 
 	@OutputFile
@@ -985,6 +1007,7 @@ public class CreateClientExtensionConfigTask extends DefaultTask {
 	private final String _buildDir;
 	private final Object _clientExtensionConfigFile;
 	private final Set<ClientExtension> _clientExtensions = new HashSet<>();
+	private final Provider<RegularFile> _defaultDockerFile;
 	private Object _dockerFile;
 	private Object _lcpJsonFile;
 	private final ObjectMapper _objectMapper = new ObjectMapper();
