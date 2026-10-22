@@ -1,0 +1,8 @@
+ext.clientExtensionBuildDir = "client-extension-package"
+ext.expectedContentStrings = [
+	'static/global.js',
+]
+ext.expectedFilePath = "frontend-0.1.0-layer.tar"
+ext.taskPath = ":frontend:packageClientExtension"
+
+apply from: project.property("commonScript.testClientExtensionBuildFileContentsTestCase.gradle")
