@@ -1,3 +1,5 @@
+assemble:
+    -   fromTask: bootJar
 spring-boot-oauth-application-headless-server:
     .serviceAddress: localhost:58081
     .serviceScheme: http
