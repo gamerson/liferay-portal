@@ -1,0 +1,7 @@
+ext.expectedContentStrings = [
+	'FROM liferay/jar-runner:latest',
+]
+ext.expectedFilePath = "Dockerfile"
+ext.taskPath = ":microservice:createClientExtensionConfig"
+
+apply from: project.property("commonScript.testClientExtensionBuildFileContentsTestCase.gradle")

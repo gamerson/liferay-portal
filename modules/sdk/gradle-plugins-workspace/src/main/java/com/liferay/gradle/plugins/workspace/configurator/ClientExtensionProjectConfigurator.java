@@ -31,7 +31,10 @@ import com.liferay.gradle.plugins.workspace.internal.util.GradleUtil;
 import com.liferay.gradle.plugins.workspace.internal.util.JsonNodeUtil;
 import com.liferay.gradle.plugins.workspace.internal.util.StringUtil;
 import com.liferay.gradle.plugins.workspace.internal.util.copy.HashifyAction;
+import com.liferay.gradle.plugins.workspace.task.BaseClientExtensionPackageTask;
 import com.liferay.gradle.plugins.workspace.task.CreateClientExtensionConfigTask;
+import com.liferay.gradle.plugins.workspace.task.PackageClientExtensionTask;
+import com.liferay.gradle.plugins.workspace.task.PublishClientExtensionTask;
 import com.liferay.gradle.plugins.workspace.task.WriteLanguageBatchEngineDataTask;
 import com.liferay.gradle.util.ArrayUtil;
 import com.liferay.gradle.util.Validator;
@@ -77,6 +80,7 @@ import org.gradle.api.file.CopySpec;
 import org.gradle.api.file.Directory;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.ProjectLayout;
+import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.initialization.Settings;
 import org.gradle.api.invocation.Gradle;
 import org.gradle.api.logging.Logger;
@@ -86,6 +90,7 @@ import org.gradle.api.plugins.PluginManager;
 import org.gradle.api.provider.Property;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.provider.SetProperty;
+import org.gradle.api.publish.plugins.PublishingPlugin;
 import org.gradle.api.tasks.Copy;
 import org.gradle.api.tasks.Delete;
 import org.gradle.api.tasks.JavaExec;
@@ -115,6 +120,12 @@ public class ClientExtensionProjectConfigurator
 
 	public static final String CREATE_CLIENT_EXTENSION_CONFIG_TASK_NAME =
 		"createClientExtensionConfig";
+
+	public static final String PACKAGE_CLIENT_EXTENSION_TASK_NAME =
+		"packageClientExtension";
+
+	public static final String PUBLISH_CLIENT_EXTENSION_TASK_NAME =
+		"publishClientExtension";
 
 	public static final String VALIDATE_CLIENT_EXTENSION_IDS_TASK_NAME =
 		"validateClientExtensionIds";
@@ -314,6 +325,10 @@ public class ClientExtensionProjectConfigurator
 			project, assembleClientExtensionTaskProvider,
 			createClientExtensionConfigTaskProvider, workspaceExtension);
 
+		_addClientExtensionPackageTasks(
+			project, buildClientExtensionZipTaskProvider,
+			createClientExtensionConfigTaskProvider);
+
 		_configureLiferayRoutes(project, workspaceExtension);
 
 		if (_isLanguageProject(project)) {
@@ -379,6 +394,63 @@ public class ClientExtensionProjectConfigurator
 	}
 
 	protected static final String NAME = "client.extension";
+
+	private void _addClientExtensionPackageTasks(
+		Project project, TaskProvider<Zip> buildClientExtensionZipTaskProvider,
+		TaskProvider<CreateClientExtensionConfigTask>
+			createClientExtensionConfigTaskProvider) {
+
+		Action<BaseClientExtensionPackageTask> action =
+			baseClientExtensionPackageTask -> {
+				baseClientExtensionPackageTask.dependsOn(
+					createClientExtensionConfigTaskProvider);
+
+				RegularFileProperty defaultDockerfileProperty =
+					baseClientExtensionPackageTask.getDefaultDockerfile();
+
+				defaultDockerfileProperty.fileProvider(
+					createClientExtensionConfigTaskProvider.map(
+						CreateClientExtensionConfigTask::getDefaultDockerFile));
+
+				RegularFileProperty zipFileProperty =
+					baseClientExtensionPackageTask.getZipFile();
+
+				zipFileProperty.set(
+					buildClientExtensionZipTaskProvider.flatMap(
+						Zip::getArchiveFile));
+			};
+
+		TaskProvider<PackageClientExtensionTask>
+			packageClientExtensionTaskProvider = GradleUtil.addTaskProvider(
+				project, PACKAGE_CLIENT_EXTENSION_TASK_NAME,
+				PackageClientExtensionTask.class);
+
+		packageClientExtensionTaskProvider.configure(action);
+
+		packageClientExtensionTaskProvider.configure(
+			packageClientExtensionTask -> {
+				packageClientExtensionTask.setDescription(
+					"Packages the client extension as an artifact layer and " +
+						"a Helm chart.");
+				packageClientExtensionTask.setGroup(BasePlugin.BUILD_GROUP);
+			});
+
+		TaskProvider<PublishClientExtensionTask>
+			publishClientExtensionTaskProvider = GradleUtil.addTaskProvider(
+				project, PUBLISH_CLIENT_EXTENSION_TASK_NAME,
+				PublishClientExtensionTask.class);
+
+		publishClientExtensionTaskProvider.configure(action);
+
+		publishClientExtensionTaskProvider.configure(
+			publishClientExtensionTask -> {
+				publishClientExtensionTask.setDescription(
+					"Publishes the client extension's artifact layer and " +
+						"Helm chart to an OCI registry.");
+				publishClientExtensionTask.setGroup(
+					PublishingPlugin.PUBLISH_TASK_GROUP);
+			});
+	}
 
 	private void _addDockerTasks(
 		Project project, TaskProvider<Copy> assembleClientExtensionTaskProvider,

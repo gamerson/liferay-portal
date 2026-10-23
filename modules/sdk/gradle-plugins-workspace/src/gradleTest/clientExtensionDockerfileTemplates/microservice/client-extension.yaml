@@ -1,0 +1,12 @@
+microservice-oauth-application-user-agent:
+    .serviceAddress: localhost:58081
+    .serviceScheme: http
+    name: Microservice OAuth Application User Agent
+    scopes:
+        -   Liferay.Headless.Admin.Workflow.everything
+    type: oAuthApplicationUserAgent
+microservice-object-action:
+    name: Microservice Object Action
+    oAuth2ApplicationExternalReferenceCode: microservice-oauth-application-user-agent
+    resourcePath: /object/action
+    type: objectAction

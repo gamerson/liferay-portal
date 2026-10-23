@@ -58,6 +58,7 @@ import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.ProjectLayout;
 import org.gradle.api.file.RegularFile;
 import org.gradle.api.logging.Logger;
+import org.gradle.api.plugins.PluginManager;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.provider.ProviderFactory;
 import org.gradle.api.tasks.Input;
@@ -79,6 +80,14 @@ public class CreateClientExtensionConfigTask extends DefaultTask {
 				_project);
 		_clientExtensionConfigFile = _addTaskOutputFile(
 			_project.getName() + ".client-extension-config.json");
+
+		ProjectLayout projectLayout = _project.getLayout();
+
+		DirectoryProperty buildDirectoryProperty =
+			projectLayout.getBuildDirectory();
+
+		_defaultDockerFile = buildDirectoryProperty.file(
+			"client-extension-default/Dockerfile");
 
 		_dockerFile = _addTaskOutputFile("Dockerfile");
 		_lcpJsonFile = _addTaskOutputFile("LCP.json");
@@ -207,13 +216,24 @@ public class CreateClientExtensionConfigTask extends DefaultTask {
 
 		pluginPackageProperties.putIfAbsent("module-group-id", "liferay");
 
+		String dockerfileTemplatePath = _getTemplatePath(
+			_getDockerfileGrouping(classificationGrouping), "Dockerfile");
+
 		_writeToOutputFile(
 			ResourceUtil.readString(
 				ResourceUtil.getLocalFileResolver(getInputDockerfileFile()),
 				ResourceUtil.getClassLoaderResolver(
 					CreateClientExtensionConfigTask.class,
-					_getTemplatePath(classificationGrouping, "Dockerfile"))),
+					dockerfileTemplatePath)),
 			getDockerFile(), substitutionMap);
+
+		_writeToOutputFile(
+			ResourceUtil.readString(
+				ResourceUtil.getClassLoaderResolver(
+					CreateClientExtensionConfigTask.class,
+					dockerfileTemplatePath)),
+			getDefaultDockerFile(), substitutionMap);
+
 		_writeToOutputFile(
 			_getLCPJsonFileContent(classificationGrouping), getLcpJsonFile(),
 			substitutionMap);
@@ -232,6 +252,11 @@ public class CreateClientExtensionConfigTask extends DefaultTask {
 	}
 
 	@OutputFile
+	public File getDefaultDockerFile() {
+		return GradleUtil.toFile(_project, _defaultDockerFile);
+	}
+
+	@OutputFile
 	public File getDockerFile() {
 		return GradleUtil.toFile(_project, _dockerFile);
 	}
@@ -244,6 +269,11 @@ public class CreateClientExtensionConfigTask extends DefaultTask {
 	@InputFiles
 	public File getInputLcpJsonFile() {
 		return GradleUtil.toFile(_project, "LCP.json");
+	}
+
+	@InputFiles
+	public File getInputPackageJsonFile() {
+		return GradleUtil.toFile(_project, "package.json");
 	}
 
 	@InputFiles
@@ -440,6 +470,26 @@ public class CreateClientExtensionConfigTask extends DefaultTask {
 
 			entry.setValue(values);
 		}
+	}
+
+	private String _getDockerfileGrouping(String classificationGrouping) {
+		PluginManager pluginManager = _project.getPluginManager();
+
+		if (pluginManager.hasPlugin("org.springframework.boot")) {
+			return "microservice-java";
+		}
+
+		if (!Objects.equals(classificationGrouping, "microservice")) {
+			return classificationGrouping;
+		}
+
+		File packageJsonFile = getInputPackageJsonFile();
+
+		if (packageJsonFile.exists()) {
+			return "microservice-node";
+		}
+
+		return "microservice-java";
 	}
 
 	private String _getFileContent(File file) {
@@ -957,6 +1007,7 @@ public class CreateClientExtensionConfigTask extends DefaultTask {
 	private final String _buildDir;
 	private final Object _clientExtensionConfigFile;
 	private final Set<ClientExtension> _clientExtensions = new HashSet<>();
+	private final Provider<RegularFile> _defaultDockerFile;
 	private Object _dockerFile;
 	private Object _lcpJsonFile;
 	private final ObjectMapper _objectMapper = new ObjectMapper();
