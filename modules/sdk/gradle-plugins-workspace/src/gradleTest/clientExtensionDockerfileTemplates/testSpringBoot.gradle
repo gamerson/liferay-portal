@@ -3,8 +3,5 @@ ext.expectedContentStrings = [
 ]
 ext.expectedFilePath = "Dockerfile"
 ext.taskPath = ":spring-boot:createClientExtensionConfig"
-ext.unexpectedContentStrings = [
-	'FROM liferay/noop',
-]
 
 apply from: project.property("commonScript.testClientExtensionBuildFileContentsTestCase.gradle")

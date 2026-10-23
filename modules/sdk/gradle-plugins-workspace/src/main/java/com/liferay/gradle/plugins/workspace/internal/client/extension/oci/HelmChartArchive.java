@@ -216,7 +216,7 @@ public class HelmChartArchive {
 
 			Node valueNode = nodeTuple.getValueNode();
 
-			if ((value instanceof Map) &&
+			if (path.isEmpty() && (value instanceof Map) &&
 				(valueNode instanceof MappingNode valueMappingNode) &&
 				!valueMappingNode.getValue(
 				).isEmpty()) {
@@ -235,8 +235,6 @@ public class HelmChartArchive {
 			nodeTuples.set(
 				index, new NodeTuple(nodeTuple.getKeyNode(), newValueNode));
 		}
-
-		mappingNode.setValue(nodeTuples);
 	}
 
 	private HelmChartArchive(Map<String, Object> chartMetadata, byte[] data) {

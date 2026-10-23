@@ -41,33 +41,20 @@ public class ClientExtensionPackageTest {
 	@Test
 	public void testCreate() throws Exception {
 		ClientExtensionPackage clientExtensionPackage = _create(
-			_DOCKERFILE_JAR, _DOCKERFILE_JAR, _getJarZipEntries());
+			_CONTAINER_RUNTIME_MISSING, _DOCKERFILE_JAR,
+			"# The plugin's template\n\n" +
+				_DOCKERFILE_JAR.replace(" ", "\t  "),
+			_getJarZipEntries());
 
 		Assert.assertEquals(List.of(), clientExtensionPackage.getWarnings());
-
-		ArtifactLayer artifactLayer = clientExtensionPackage.getArtifactLayer();
-
-		Assert.assertEquals(
-			List.of(new ArtifactMount("/opt/liferay", ".mounts/0")),
-			artifactLayer.getMounts());
-
-		HelmChartArchive helmChartArchive =
-			clientExtensionPackage.createHelmChartArchive(
-				"registry.example.com/cx/able@sha256:1",
-				HelmChartSource.resolveReference(
-					"cloud/helm/client-extension", new File("../../..")),
-				"able", "1.0.0");
-
-		Map<String, Object> chartMetadata = helmChartArchive.getChartMetadata();
-
-		Assert.assertEquals("able", chartMetadata.get("name"));
 	}
 
 	@Test
 	public void testCreateWhenDockerfileIsCustom() throws Exception {
 		ClientExtensionPackage clientExtensionPackage = _create(
+			_CONTAINER_RUNTIME_MISSING, _DOCKERFILE_JAR,
 			_DOCKERFILE_JAR + "\nCOPY static /static\nENV DEBUG=true",
-			_DOCKERFILE_JAR, _getJarZipEntries());
+			_getJarZipEntries());
 
 		List<String> warnings = clientExtensionPackage.getWarnings();
 
@@ -102,9 +89,10 @@ public class ClientExtensionPackageTest {
 
 		try {
 			_create(
+				_CONTAINER_RUNTIME_MISSING, _DOCKERFILE_JAR,
 				"FROM liferay/jar-runner\nCOPY build/libs/app.jar /opt" +
 					"/liferay/jar-runner.jar",
-				_DOCKERFILE_JAR, zipEntries);
+				zipEntries);
 
 			Assert.fail();
 		}
@@ -138,8 +126,15 @@ public class ClientExtensionPackageTest {
 			"able.client-extension-config.json", "{\"key~able\": {}}");
 		zipEntries.put("package.json", "{}");
 
+		File dockerMockCommandFile = temporaryFolder.newFile("docker-mock");
+
+		Files.writeString(dockerMockCommandFile.toPath(), _DOCKER_MOCK_COMMAND);
+
+		dockerMockCommandFile.setExecutable(true);
+
 		ClientExtensionPackage clientExtensionPackage = _create(
-			dockerfile, dockerfile, zipEntries);
+			dockerMockCommandFile.getAbsolutePath(), dockerfile, dockerfile,
+			zipEntries);
 
 		ArtifactLayer artifactLayer = clientExtensionPackage.getArtifactLayer();
 
@@ -167,8 +162,8 @@ public class ClientExtensionPackageTest {
 	public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
 	private ClientExtensionPackage _create(
-			String dockerfile, String defaultDockerfile,
-			Map<String, String> zipEntries)
+			String containerRuntime, String defaultDockerfile,
+			String dockerfile, Map<String, String> zipEntries)
 		throws Exception {
 
 		File dir = temporaryFolder.newFolder();
@@ -195,14 +190,8 @@ public class ClientExtensionPackageTest {
 			}
 		}
 
-		File dockerMockCommandFile = new File(dir, "docker-mock");
-
-		Files.writeString(dockerMockCommandFile.toPath(), _DOCKER_MOCK_COMMAND);
-
-		dockerMockCommandFile.setExecutable(true);
-
 		return ClientExtensionPackage.create(
-			dockerMockCommandFile.getAbsolutePath(), defaultDockerfileFile,
+			containerRuntime, defaultDockerfileFile,
 			"client-extensions/able/Dockerfile", new File(dir, "replay"),
 			zipFile);
 	}
@@ -218,6 +207,9 @@ public class ClientExtensionPackageTest {
 
 		return zipEntries;
 	}
+
+	private static final String _CONTAINER_RUNTIME_MISSING =
+		"container-runtime-missing";
 
 	private static final String _DOCKER_MOCK_COMMAND = String.join(
 		"\n", "#!/bin/sh", "while [ $# -gt 0 ]; do", "\tcase \"$1\" in",

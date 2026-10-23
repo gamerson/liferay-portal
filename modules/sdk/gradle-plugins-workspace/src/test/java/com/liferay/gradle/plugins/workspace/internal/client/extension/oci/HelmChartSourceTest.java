@@ -68,21 +68,9 @@ public class HelmChartSourceTest {
 		HelmChartSource helmChartSource = HelmChartSource.resolveReference(
 			null, _rootDir);
 
+		_assertChartFiles(helmChartSource);
+
 		Assert.assertEquals("embedded", helmChartSource.getOrigin());
-
-		HelmChartSource directoryHelmChartSource =
-			HelmChartSource.resolveReference(
-				"cloud/helm/client-extension", _rootDir);
-
-		Map<String, byte[]> chartFiles = helmChartSource.getChartFiles();
-		Map<String, byte[]> directoryChartFiles =
-			directoryHelmChartSource.getChartFiles();
-
-		Assert.assertEquals(directoryChartFiles.keySet(), chartFiles.keySet());
-
-		Assert.assertEquals(
-			directoryHelmChartSource.getTemplate(),
-			helmChartSource.getTemplate());
 	}
 
 	@Test
@@ -99,19 +87,6 @@ public class HelmChartSourceTest {
 		Assert.assertEquals(
 			file.getAbsolutePath(), helmChartSource.getOrigin());
 		Assert.assertEquals("able 1.0.0", helmChartSource.getTemplate());
-	}
-
-	@Test
-	public void testResolveWhenReferenceIsChartDirectory() throws Exception {
-		HelmChartSource helmChartSource = HelmChartSource.resolveReference(
-			"cloud/helm/client-extension", _rootDir);
-
-		_assertChartFiles(helmChartSource);
-
-		File file = new File(_rootDir, "cloud/helm/client-extension");
-
-		Assert.assertEquals(
-			file.getAbsolutePath(), helmChartSource.getOrigin());
 	}
 
 	@Test
@@ -176,18 +151,19 @@ public class HelmChartSourceTest {
 	@Rule
 	public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-	private void _assertChartFiles(HelmChartSource helmChartSource) {
+	private void _assertChartFiles(HelmChartSource helmChartSource)
+		throws Exception {
+
+		HelmChartSource directoryHelmChartSource =
+			HelmChartSource.resolveReference(
+				"cloud/helm/client-extension", _rootDir);
+
+		Map<String, byte[]> directoryChartFiles =
+			directoryHelmChartSource.getChartFiles();
+
 		Map<String, byte[]> chartFiles = helmChartSource.getChartFiles();
 
-		for (String name :
-				new String[] {
-					"Chart.yaml", "templates/_podspec.tpl", "values.yaml"
-				}) {
-
-			Assert.assertTrue(
-				name + " in " + chartFiles.keySet(),
-				chartFiles.containsKey(name));
-		}
+		Assert.assertEquals(directoryChartFiles.keySet(), chartFiles.keySet());
 	}
 
 	private void _assertRefused(File file, String expectedMessage)

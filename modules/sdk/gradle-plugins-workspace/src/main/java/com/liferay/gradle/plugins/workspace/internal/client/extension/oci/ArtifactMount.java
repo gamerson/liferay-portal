@@ -57,10 +57,7 @@ public class ArtifactMount {
 		Map<String, Object> map = new LinkedHashMap<>();
 
 		map.put("mountPath", _mountPath);
-
-		if (!_subpath.isEmpty()) {
-			map.put("subPath", _subpath);
-		}
+		map.put("subPath", _subpath);
 
 		return map;
 	}
