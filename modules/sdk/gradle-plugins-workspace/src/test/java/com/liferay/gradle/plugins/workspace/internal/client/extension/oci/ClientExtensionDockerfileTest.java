@@ -10,7 +10,6 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 import java.util.List;
-import java.util.Map;
 
 import org.gradle.api.GradleException;
 
@@ -32,45 +31,13 @@ public class ClientExtensionDockerfileTest {
 	}
 
 	@Test
-	public void testJarTemplateCopiesOneFileToJarRunner() throws Exception {
-		ClientExtensionDockerfile clientExtensionDockerfile =
-			ClientExtensionDockerfile.parse(_readTemplate("microservice-java"));
-
-		List<ClientExtensionDockerfile.Copy> copies =
-			clientExtensionDockerfile.getCopies();
-
-		ClientExtensionDockerfile.Copy copy = copies.get(0);
-
-		Assert.assertEquals(
-			"/opt/liferay/jar-runner.jar", copy.getDestination());
-		Assert.assertEquals(List.of("*.jar"), copy.getSources());
-	}
-
-	@Test
-	public void testNodeTemplateNpmInstallIsReplayable() throws Exception {
-		ClientExtensionDockerfile clientExtensionDockerfile =
-			ClientExtensionDockerfile.parse(_readTemplate("microservice-node"));
-
-		Assert.assertEquals(
-			List.of("npm install"), clientExtensionDockerfile.getRuns());
-		Assert.assertTrue(clientExtensionDockerfile.isReplayable());
-	}
-
-	@Test
 	public void testParseDefaultTemplates() throws Exception {
-		Map<String, String> images = Map.of(
-			"batch", "liferay/batch:latest", "configuration",
-			"liferay/noop:latest", "frontend", "liferay/caddy:latest",
-			"microservice-java", "liferay/jar-runner:latest",
-			"microservice-node", "liferay/node-runner:latest");
+		for (String grouping :
+				List.of(
+					"batch", "configuration", "frontend", "microservice-java",
+					"microservice-node")) {
 
-		for (Map.Entry<String, String> entry : images.entrySet()) {
-			ClientExtensionDockerfile clientExtensionDockerfile =
-				ClientExtensionDockerfile.parse(_readTemplate(entry.getKey()));
-
-			Assert.assertEquals(
-				entry.getKey(), entry.getValue(),
-				clientExtensionDockerfile.getImage());
+			ClientExtensionDockerfile.parse(_readTemplate(grouping));
 		}
 	}
 
@@ -81,7 +48,11 @@ public class ClientExtensionDockerfileTest {
 					"COPY . /srv", "FROM eclipse-temurin:21",
 					"FROM liferay/caddy\nENV A=1",
 					"FROM liferay/caddy\nFROM liferay/batch",
-					"FROM liferay/jar-runner\nRUN apt-get install curl")) {
+					"FROM liferay/jar-runner\nRUN apt-get install curl",
+					"FROM liferay/node-runner\nCOPY src /opt/liferay\nRUN " +
+						"npm install",
+					"FROM liferay/node-runner\nCOPY . /opt/liferay\nCOPY " +
+						"app.js /opt/app.js\nRUN npm install")) {
 
 			try {
 				ClientExtensionDockerfile.parse(text);

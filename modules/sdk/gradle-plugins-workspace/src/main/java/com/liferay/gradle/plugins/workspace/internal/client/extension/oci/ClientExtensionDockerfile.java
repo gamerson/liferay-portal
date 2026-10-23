@@ -92,6 +92,12 @@ public class ClientExtensionDockerfile {
 					"liferay/node-runner");
 		}
 
+		if (!runs.isEmpty() && !_isWholeZipCopy(copies)) {
+			throw new GradleException(
+				"Dockerfile RUN instructions are supported only when the zip " +
+					"is copied whole to one destination");
+		}
+
 		return new ClientExtensionDockerfile(copies, image, runs);
 	}
 
@@ -108,19 +114,7 @@ public class ClientExtensionDockerfile {
 	}
 
 	public boolean isReplayable() {
-		if (_runs.isEmpty() || (_copies.size() != 1)) {
-			return false;
-		}
-
-		Copy copy = _copies.get(0);
-
-		List<String> sources = copy.getSources();
-
-		if (sources.equals(List.of(".")) || sources.equals(List.of("./"))) {
-			return true;
-		}
-
-		return false;
+		return !_runs.isEmpty();
 	}
 
 	public static class Copy {
@@ -144,20 +138,26 @@ public class ClientExtensionDockerfile {
 	}
 
 	private static String _getRepository(String image) {
-		int index = image.indexOf('@');
+		return image.substring(0, image.lastIndexOf(':'));
+	}
 
-		if (index < 0) {
-			index = image.lastIndexOf(':');
+	private static boolean _isWholeZipCopy(List<Copy> copies) {
+		if (copies.size() != 1) {
+			return false;
 		}
 
-		return image.substring(0, index);
+		Copy copy = copies.get(0);
+
+		List<String> sources = copy.getSources();
+
+		if (sources.equals(List.of(".")) || sources.equals(List.of("./"))) {
+			return true;
+		}
+
+		return false;
 	}
 
 	private static String _normalizeImage(String image) {
-		if (image.contains("@")) {
-			return image;
-		}
-
 		int index = image.lastIndexOf('/');
 
 		String name = image.substring(index + 1);

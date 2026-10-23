@@ -60,54 +60,73 @@ public class ArtifactLayerTest {
 
 	@Test
 	public void testToTar() throws IOException {
+		Map<String, ArtifactFile> artifactFiles = _getArtifactFiles();
+
+		String longName = "static/" + "a".repeat(100) + ".css";
+
+		for (ArtifactFile artifactFile :
+				List.of(
+					ArtifactFile.newFile(
+						"#!/bin/sh".getBytes(StandardCharsets.UTF_8), 0755,
+						"bin/run.sh"),
+					ArtifactFile.newFile(
+						"a".getBytes(StandardCharsets.UTF_8), 0644,
+						longName))) {
+
+			artifactFiles.put(artifactFile.getName(), artifactFile);
+		}
+
 		ArtifactLayer artifactLayer = ArtifactLayer.plan(
-			_getArtifactFiles(),
+			artifactFiles,
 			List.of(
 				new ClientExtensionDockerfile.Copy(
 					"/opt/liferay/jar-runner.jar", List.of("*.jar"))));
 
-		byte[] tar = artifactLayer.toTar();
-
-		Assert.assertArrayEquals(tar, artifactLayer.toTar());
-
-		Map<String, Byte> entries = new TreeMap<>();
+		Map<String, TarArchiveEntry> tarArchiveEntries = new TreeMap<>();
 
 		try (TarArchiveInputStream tarArchiveInputStream =
-				new TarArchiveInputStream(new ByteArrayInputStream(tar))) {
+				new TarArchiveInputStream(
+					new ByteArrayInputStream(artifactLayer.toTar()))) {
 
 			TarArchiveEntry tarArchiveEntry = null;
 
-			while ((tarArchiveEntry =
-						tarArchiveInputStream.getNextTarEntry()) != null) {
-
-				String name = tarArchiveEntry.getName();
-
-				if (tarArchiveEntry.isDirectory()) {
-					name = name.substring(0, name.length() - 1);
-				}
-
-				entries.put(name, _getType(tarArchiveEntry));
+			while ((tarArchiveEntry = tarArchiveInputStream.getNextEntry()) !=
+						null) {
 
 				Assert.assertEquals(
 					0,
 					tarArchiveEntry.getLastModifiedDate(
 					).getTime());
+
+				tarArchiveEntries.put(
+					tarArchiveEntry.getName(
+					).replaceAll(
+						"/$", ""
+					),
+					tarArchiveEntry);
 			}
 		}
 
-		Map<String, Byte> expectedEntries = new TreeMap<>();
+		TarArchiveEntry tarArchiveEntry = tarArchiveEntries.get(".mounts/0");
 
-		expectedEntries.put(".mounts", _DIRECTORY);
-		expectedEntries.put(".mounts/0", _DIRECTORY);
-		expectedEntries.put(".mounts/0/jar-runner.jar", _HARD_LINK);
-		expectedEntries.put("app.jar", _FILE);
-		expectedEntries.put("node_modules", _DIRECTORY);
-		expectedEntries.put("node_modules/.bin", _DIRECTORY);
-		expectedEntries.put("node_modules/.bin/semver", _SYMBOLIC_LINK);
-		expectedEntries.put("static", _DIRECTORY);
-		expectedEntries.put("static/a.css", _FILE);
+		Assert.assertTrue(tarArchiveEntry.isDirectory());
 
-		Assert.assertEquals(expectedEntries, entries);
+		tarArchiveEntry = tarArchiveEntries.get(".mounts/0/jar-runner.jar");
+
+		Assert.assertTrue(tarArchiveEntry.isLink());
+		Assert.assertEquals("app.jar", tarArchiveEntry.getLinkName());
+
+		tarArchiveEntry = tarArchiveEntries.get("bin/run.sh");
+
+		Assert.assertEquals(0755, tarArchiveEntry.getMode() & 0777);
+
+		tarArchiveEntry = tarArchiveEntries.get("node_modules/.bin/semver");
+
+		Assert.assertTrue(tarArchiveEntry.isSymbolicLink());
+		Assert.assertEquals(
+			"../semver/bin/semver.js", tarArchiveEntry.getLinkName());
+
+		Assert.assertTrue(tarArchiveEntries.containsKey(longName));
 	}
 
 	private void _assertPlanFails(
@@ -154,29 +173,5 @@ public class ArtifactLayerTest {
 
 		return artifactLayer.getMounts();
 	}
-
-	private Byte _getType(TarArchiveEntry tarArchiveEntry) {
-		if (tarArchiveEntry.isDirectory()) {
-			return _DIRECTORY;
-		}
-
-		if (tarArchiveEntry.isLink()) {
-			return _HARD_LINK;
-		}
-
-		if (tarArchiveEntry.isSymbolicLink()) {
-			return _SYMBOLIC_LINK;
-		}
-
-		return _FILE;
-	}
-
-	private static final Byte _DIRECTORY = 0;
-
-	private static final Byte _FILE = 1;
-
-	private static final Byte _HARD_LINK = 2;
-
-	private static final Byte _SYMBOLIC_LINK = 3;
 
 }

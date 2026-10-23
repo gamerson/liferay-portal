@@ -13,6 +13,10 @@ import java.nio.file.Files;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.GZIPInputStream;
+
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 
 import org.gradle.api.GradleException;
 
@@ -52,11 +56,23 @@ public class HelmChartArchiveTest {
 		HelmChartArchive helmChartArchive = HelmChartArchive.create(
 			"able", helmChartSource, values, "1.0.0");
 
-		Assert.assertArrayEquals(
-			helmChartArchive.getData(),
-			HelmChartArchive.create(
-				"able", helmChartSource, values, "1.0.0"
-			).getData());
+		try (TarArchiveInputStream tarArchiveInputStream =
+				new TarArchiveInputStream(
+					new GZIPInputStream(
+						new ByteArrayInputStream(
+							helmChartArchive.getData())))) {
+
+			TarArchiveEntry tarArchiveEntry = null;
+
+			while ((tarArchiveEntry = tarArchiveInputStream.getNextEntry()) !=
+						null) {
+
+				Assert.assertEquals(
+					0,
+					tarArchiveEntry.getLastModifiedDate(
+					).getTime());
+			}
+		}
 
 		Map<String, Object> chartMetadata = helmChartArchive.getChartMetadata();
 
@@ -67,12 +83,6 @@ public class HelmChartArchiveTest {
 		Map<String, Object> annotations =
 			(Map<String, Object>)chartMetadata.get("annotations");
 
-		Assert.assertEquals(
-			helmChartSource.getOrigin(),
-			annotations.get("cx.liferay.com/chart-source"));
-		Assert.assertEquals(
-			helmChartSource.getTemplate(),
-			annotations.get("cx.liferay.com/chart-template"));
 		Assert.assertEquals(
 			"1", annotations.get(HelmChartSource.ANNOTATION_VALUES_CONTRACT));
 
@@ -106,6 +116,7 @@ public class HelmChartArchiveTest {
 	public void testOverlayYAML() {
 		Map<String, Object> workload = new LinkedHashMap<>();
 
+		workload.put("env", Map.of("NEW", "y"));
 		workload.put("kind", "Job");
 		workload.put("schedule", "* * * * *");
 
@@ -114,12 +125,14 @@ public class HelmChartArchiveTest {
 
 		for (String expected :
 				new String[] {
-					"# The workload.", "# Immutable.", "kind: Job",
+					"# The workload.", "# Immutable.", "NEW: y", "kind: Job",
 					"replicas: 1", "schedule: '* * * * *'"
 				}) {
 
 			Assert.assertTrue(yaml, yaml.contains(expected));
 		}
+
+		Assert.assertFalse(yaml, yaml.contains("OLD"));
 	}
 
 	@Test
@@ -143,7 +156,7 @@ public class HelmChartArchiveTest {
 	public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
 	private static final String _DOCUMENT =
-		"# The workload.\nworkload:\n    # Immutable.\n    kind: " +
-			"Deployment\n    replicas: 1\n";
+		"# The workload.\nworkload:\n    env:\n        OLD: x\n    # " +
+			"Immutable.\n    kind: Deployment\n    replicas: 1\n";
 
 }

@@ -91,17 +91,10 @@ public class ClientExtensionPackage {
 				});
 		}
 
-		List<String> runs = clientExtensionDockerfile.getRuns();
-
 		if (clientExtensionDockerfile.isReplayable()) {
 			artifactFiles = _replayRuns(
 				artifactFiles, clientExtensionDockerfile, containerRuntime,
 				workDir);
-		}
-		else if (!runs.isEmpty()) {
-			throw new GradleException(
-				"Dockerfile RUN instructions are supported only when the zip " +
-					"is copied whole to one destination");
 		}
 
 		ArtifactLayer artifactLayer = null;

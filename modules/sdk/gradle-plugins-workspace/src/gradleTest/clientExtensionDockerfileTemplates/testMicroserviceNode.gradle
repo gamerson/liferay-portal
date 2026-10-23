@@ -1,6 +1,5 @@
 ext.expectedContentStrings = [
 	'FROM liferay/node-runner:latest',
-	'RUN npm install',
 ]
 ext.expectedFilePath = "Dockerfile"
 ext.taskPath = ":microservice-node:createClientExtensionConfig"

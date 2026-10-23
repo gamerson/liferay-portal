@@ -35,7 +35,14 @@ public class HelmChartValuesTest {
 			"FROM liferay/jar-runner\nCOPY *.jar /opt/liferay/jar-runner.jar",
 			lcp, List.of(new ArtifactMount("/opt/liferay", ".mounts/0")));
 
-		Assert.assertEquals("able", values.get("fullnameOverride"));
+		Assert.assertEquals(
+			Map.of(
+				"mounts",
+				List.of(
+					Map.of(
+						"mountPath", "/opt/liferay", "subPath", ".mounts/0")),
+				"reference", "registry/cx/able@sha256:1"),
+			values.get("artifact"));
 		Assert.assertEquals(
 			Map.of("repository", "liferay/jar-runner", "tag", "latest"),
 			values.get("image"));
