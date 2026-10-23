@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
+import javax.net.ssl.SSLException;
+
 import land.oras.Config;
 import land.oras.Index;
 import land.oras.Layer;
@@ -30,6 +32,7 @@ import land.oras.Manifest;
 import land.oras.ManifestDescriptor;
 import land.oras.OCILayout;
 import land.oras.Platform;
+import land.oras.exception.OrasException;
 
 import org.junit.Assert;
 import org.junit.Rule;
@@ -163,6 +166,34 @@ public class OCIPublisherTest {
 		Assert.assertArrayEquals(
 			helmChartArchive.getData(),
 			_getBlob(layer.getDigest(), layoutRef, ociLayout, layer.getSize()));
+	}
+
+	@Test
+	public void testToRegistryException() {
+		RuntimeException runtimeException = OCIPublisher.toRegistryException(
+			new OrasException(
+				"Unable to create HTTP request",
+				new SSLException(
+					"Unrecognized SSL message, plaintext connection?")),
+			"localhost:5000/example");
+
+		String message = runtimeException.getMessage();
+
+		Assert.assertTrue(
+			message,
+			message.contains(
+				"Unable to reach \"localhost:5000/example\" over HTTPS"));
+		Assert.assertTrue(message, message.contains("registries.conf"));
+	}
+
+	@Test
+	public void testToRegistryExceptionWhenCauseIsNotSSLException() {
+		OrasException orasException = new OrasException(401, "Unauthorized");
+
+		Assert.assertSame(
+			orasException,
+			OCIPublisher.toRegistryException(
+				orasException, "localhost:5000/example"));
 	}
 
 	@Rule
