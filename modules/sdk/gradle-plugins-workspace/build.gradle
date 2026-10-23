@@ -56,7 +56,7 @@ dependencies {
 	implementation group: "de.undercouch", name: "gradle-download-task", version: "5.4.0"
 	implementation group: "land.oras", name: "oras-java-sdk", version: "0.8.5"
 	implementation group: "net.saliman", name: "gradle-properties-plugin", version: "1.4.6"
-	implementation group: "org.apache.commons", name: "commons-compress", version: "1.26.0"
+	implementation group: "org.apache.commons", name: "commons-compress", version: "1.28.0"
 	implementation group: "org.yaml", name: "snakeyaml", version: "2.3"
 
 	runtimeOnly group: "com.liferay", name: "com.liferay.ant.bnd", version: "3.2.19"

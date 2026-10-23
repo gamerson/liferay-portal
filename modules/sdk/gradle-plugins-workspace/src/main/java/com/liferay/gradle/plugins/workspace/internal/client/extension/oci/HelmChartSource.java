@@ -31,6 +31,15 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import land.oras.Config;
+import land.oras.ContainerRef;
+import land.oras.Descriptor;
+import land.oras.Layer;
+import land.oras.Manifest;
+import land.oras.OCI;
+import land.oras.Ref;
+import land.oras.Registry;
+
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 
@@ -51,7 +60,8 @@ public class HelmChartSource {
 	public static File getLocalFile(String reference, File rootDir) {
 		if ((reference == null) || reference.isBlank() ||
 			reference.startsWith("http://") ||
-			reference.startsWith("https://")) {
+			reference.startsWith("https://") ||
+			reference.startsWith("oci://")) {
 
 			return null;
 		}
@@ -65,6 +75,46 @@ public class HelmChartSource {
 		return new File(rootDir, reference);
 	}
 
+	public static <T extends Ref<T>> HelmChartSource pull(
+			OCI<T> oci, T ref, String repository)
+		throws IOException {
+
+		Descriptor descriptor = oci.getDescriptor(ref);
+
+		if (!OCIPublisher.MEDIA_TYPE_IMAGE_MANIFEST.equals(
+				descriptor.getMediaType())) {
+
+			throw new GradleException(
+				"\"" + repository + "\" is not a Helm chart");
+		}
+
+		Manifest manifest = oci.getManifest(ref);
+
+		Config config = manifest.getConfig();
+
+		if (!OCIPublisher.MEDIA_TYPE_HELM_CONFIG.equals(
+				config.getMediaType())) {
+
+			throw new GradleException(
+				"\"" + repository + "\" is not a Helm chart");
+		}
+
+		for (Layer layer : manifest.getLayers()) {
+			if (!OCIPublisher.MEDIA_TYPE_HELM_CHART.equals(
+					layer.getMediaType())) {
+
+				continue;
+			}
+
+			return new HelmChartSource(
+				_readTGZ(oci.getBlob(ref.withDigest(layer.getDigest()))),
+				repository + "@" + descriptor.getDigest());
+		}
+
+		throw new GradleException(
+			"\"" + repository + "\" has no Helm chart archive layer");
+	}
+
 	public static HelmChartSource resolveReference(
 			String reference, File rootDir)
 		throws InterruptedException, IOException {
@@ -73,6 +123,18 @@ public class HelmChartSource {
 
 		if ((reference == null) || reference.isBlank()) {
 			helmChartSource = new HelmChartSource(_readEmbedded(), "embedded");
+		}
+		else if (reference.startsWith("oci://")) {
+			ContainerRef containerRef = ContainerRef.parse(
+				reference.substring("oci://".length()));
+
+			helmChartSource = pull(
+				Registry.builder(
+				).defaults(
+				).build(),
+				containerRef,
+				"oci://" + containerRef.getRegistry() + "/" +
+					containerRef.getFullRepository());
 		}
 		else if (reference.startsWith("http://") ||
 				 reference.startsWith("https://")) {

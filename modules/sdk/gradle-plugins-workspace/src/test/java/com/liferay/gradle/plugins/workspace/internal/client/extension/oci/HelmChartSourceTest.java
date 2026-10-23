@@ -19,6 +19,9 @@ import java.nio.file.Path;
 import java.util.Map;
 import java.util.zip.GZIPOutputStream;
 
+import land.oras.LayoutRef;
+import land.oras.OCILayout;
+
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 
@@ -33,6 +36,56 @@ import org.junit.rules.TemporaryFolder;
  * @author Gregory Amerson
  */
 public class HelmChartSourceTest {
+
+	@Test
+	public void testPull() throws Exception {
+		OCILayout ociLayout = _getOCILayout();
+
+		LayoutRef layoutRef = LayoutRef.parse(ociLayout.getPath() + ":1.0.0");
+
+		OCIPublisher<LayoutRef> ociPublisher = new OCIPublisher<>(ociLayout);
+
+		String digest = ociPublisher.publishHelmChart(
+			_createHelmChartArchive(), layoutRef);
+
+		HelmChartSource helmChartSource = HelmChartSource.pull(
+			ociLayout, layoutRef, "oci://registry.example.com/charts/able");
+
+		_assertChartFiles(helmChartSource);
+
+		Assert.assertEquals(
+			"oci://registry.example.com/charts/able@" + digest,
+			helmChartSource.getOrigin());
+		Assert.assertEquals("able 1.0.0", helmChartSource.getTemplate());
+	}
+
+	@Test
+	public void testPullWhenReferenceIsNotHelmChart() throws Exception {
+		OCILayout ociLayout = _getOCILayout();
+
+		LayoutRef layoutRef = LayoutRef.parse(ociLayout.getPath() + ":1.0.0");
+
+		OCIPublisher<LayoutRef> ociPublisher = new OCIPublisher<>(ociLayout);
+
+		ociPublisher.publishArtifact(
+			layoutRef, "layer".getBytes(StandardCharsets.UTF_8));
+
+		try {
+			HelmChartSource.pull(
+				ociLayout, layoutRef, "oci://registry.example.com/cx/able");
+
+			Assert.fail();
+		}
+		catch (GradleException gradleException) {
+			String message = gradleException.getMessage();
+
+			Assert.assertTrue(
+				message,
+				message.contains(
+					"\"oci://registry.example.com/cx/able\" is not a Helm " +
+						"chart"));
+		}
+	}
 
 	@Test
 	public void testResolveWhenChartArchiveEntryPathIsInvalid()
@@ -182,11 +235,7 @@ public class HelmChartSourceTest {
 	}
 
 	private byte[] _createChartArchiveData() throws Exception {
-		HelmChartArchive helmChartArchive = HelmChartArchive.create(
-			"able",
-			HelmChartSource.resolveReference(
-				"cloud/helm/client-extension", _rootDir),
-			Map.of(), "1.0.0");
+		HelmChartArchive helmChartArchive = _createHelmChartArchive();
 
 		return helmChartArchive.getData();
 	}
@@ -200,6 +249,23 @@ public class HelmChartSourceTest {
 		Files.writeString(dirPath.resolve("values.yaml"), "a: b\n");
 
 		return dir;
+	}
+
+	private HelmChartArchive _createHelmChartArchive() throws Exception {
+		return HelmChartArchive.create(
+			"able",
+			HelmChartSource.resolveReference(
+				"cloud/helm/client-extension", _rootDir),
+			Map.of(), "1.0.0");
+	}
+
+	private OCILayout _getOCILayout() throws Exception {
+		File dir = temporaryFolder.newFolder();
+
+		return OCILayout.builder(
+		).defaults(
+			dir.toPath()
+		).build();
 	}
 
 	private static final File _rootDir = new File("../../..");

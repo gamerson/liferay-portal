@@ -8,6 +8,8 @@ package com.liferay.gradle.plugins.workspace.internal.client.extension.oci;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
+import com.liferay.gradle.plugins.workspace.internal.util.StringUtil;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
@@ -23,16 +25,52 @@ import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPOutputStream;
 
+import javax.net.ssl.SSLException;
+
 import land.oras.Index;
 import land.oras.Manifest;
 import land.oras.ManifestDescriptor;
 import land.oras.OCI;
 import land.oras.Ref;
+import land.oras.exception.OrasException;
+
+import org.gradle.api.GradleException;
 
 /**
  * @author Gregory Amerson
  */
 public class OCIPublisher<T extends Ref<T>> {
+
+	public static final String MEDIA_TYPE_HELM_CHART =
+		"application/vnd.cncf.helm.chart.content.v1.tar+gzip";
+
+	public static final String MEDIA_TYPE_HELM_CONFIG =
+		"application/vnd.cncf.helm.config.v1+json";
+
+	public static final String MEDIA_TYPE_IMAGE_MANIFEST =
+		"application/vnd.oci.image.manifest.v1+json";
+
+	public static RuntimeException toRegistryException(
+		OrasException orasException, String reference) {
+
+		Throwable throwable = orasException;
+
+		while (throwable != null) {
+			if (throwable instanceof SSLException) {
+				return new GradleException(
+					StringUtil.concat(
+						"Unable to reach \"", reference, "\" over HTTPS. If ",
+						"its registry only accepts HTTP, such as a local ",
+						"registry, mark the registry insecure in ",
+						"~/.config/containers/registries.conf."),
+					orasException);
+			}
+
+			throwable = throwable.getCause();
+		}
+
+		return orasException;
+	}
 
 	public OCIPublisher(OCI<T> oci) {
 		_oci = oci;
@@ -68,7 +106,7 @@ public class OCIPublisher<T extends Ref<T>> {
 				Manifest.fromJson(new String(data, StandardCharsets.UTF_8)));
 
 			Map<String, Object> manifest = _getDescriptor(
-				data, _MEDIA_TYPE_IMAGE_MANIFEST);
+				data, MEDIA_TYPE_IMAGE_MANIFEST);
 
 			manifest.put("platform", platform);
 
@@ -100,8 +138,8 @@ public class OCIPublisher<T extends Ref<T>> {
 			_pushBlob(
 				_objectMapper.writeValueAsBytes(
 					helmChartArchive.getChartMetadata()),
-				_MEDIA_TYPE_HELM_CONFIG, ref),
-			_pushBlob(helmChartArchive.getData(), _MEDIA_TYPE_HELM_CHART, ref));
+				MEDIA_TYPE_HELM_CONFIG, ref),
+			_pushBlob(helmChartArchive.getData(), MEDIA_TYPE_HELM_CHART, ref));
 
 		Manifest manifest = _oci.pushManifest(
 			ref, Manifest.fromJson(new String(data, StandardCharsets.UTF_8)));
@@ -165,17 +203,11 @@ public class OCIPublisher<T extends Ref<T>> {
 
 		manifest.put("config", config);
 		manifest.put("layers", List.of(layer));
-		manifest.put("mediaType", _MEDIA_TYPE_IMAGE_MANIFEST);
+		manifest.put("mediaType", MEDIA_TYPE_IMAGE_MANIFEST);
 		manifest.put("schemaVersion", 2);
 
 		return _objectMapper.writeValueAsBytes(manifest);
 	}
-
-	private static final String _MEDIA_TYPE_HELM_CHART =
-		"application/vnd.cncf.helm.chart.content.v1.tar+gzip";
-
-	private static final String _MEDIA_TYPE_HELM_CONFIG =
-		"application/vnd.cncf.helm.config.v1+json";
 
 	private static final String _MEDIA_TYPE_IMAGE_CONFIG =
 		"application/vnd.oci.image.config.v1+json";
@@ -185,9 +217,6 @@ public class OCIPublisher<T extends Ref<T>> {
 
 	private static final String _MEDIA_TYPE_IMAGE_LAYER =
 		"application/vnd.oci.image.layer.v1.tar+gzip";
-
-	private static final String _MEDIA_TYPE_IMAGE_MANIFEST =
-		"application/vnd.oci.image.manifest.v1+json";
 
 	private static final ObjectMapper _objectMapper = new ObjectMapper(
 	).configure(
