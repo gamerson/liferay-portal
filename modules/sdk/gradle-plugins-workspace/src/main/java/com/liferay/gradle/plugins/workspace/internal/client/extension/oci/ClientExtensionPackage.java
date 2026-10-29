@@ -7,6 +7,7 @@ package com.liferay.gradle.plugins.workspace.internal.client.extension.oci;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 import com.liferay.gradle.plugins.workspace.internal.util.StringUtil;
 
@@ -14,18 +15,24 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HexFormat;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.gradle.api.GradleException;
 
@@ -125,8 +132,19 @@ public class ClientExtensionPackage {
 			String serviceId, String version)
 		throws IOException {
 
+		Map<String, String> annotations = new LinkedHashMap<>();
+
+		if (!artifactReference.isEmpty()) {
+			annotations.put(
+				HelmChartArchive.ANNOTATION_ARTIFACT, artifactReference);
+		}
+
+		annotations.put(
+			HelmChartArchive.ANNOTATION_CONTENT_DIGEST,
+			getContentDigest(helmChartSource, serviceId));
+
 		return HelmChartArchive.create(
-			serviceId, helmChartSource,
+			annotations, serviceId, helmChartSource,
 			HelmChartValues.derive(
 				artifactReference, _configs, _clientExtensionDockerfile, _lcp,
 				_artifactLayer.getMounts(), serviceId),
@@ -135,6 +153,89 @@ public class ClientExtensionPackage {
 
 	public ArtifactLayer getArtifactLayer() {
 		return _artifactLayer;
+	}
+
+	/**
+	 * Returns the SHA-256 digest of what the Helm chart deploys: the template
+	 * chart, the values derived from the client extension without the
+	 * artifact reference, and the artifact layer's files. It leaves out
+	 * buildTimestamp and the generated files that carry it, so rebuilding
+	 * unchanged sources keeps the same digest.
+	 */
+	public String getContentDigest(
+			HelmChartSource helmChartSource, String serviceId)
+		throws IOException {
+
+		MessageDigest messageDigest = _newMessageDigest();
+
+		Map<String, byte[]> chartFiles = new TreeMap<>(
+			helmChartSource.getChartFiles());
+
+		for (Map.Entry<String, byte[]> entry : chartFiles.entrySet()) {
+			_update(messageDigest, "chart");
+			_update(messageDigest, entry.getKey());
+			_update(messageDigest, entry.getValue());
+		}
+
+		_update(messageDigest, "values");
+		_update(
+			messageDigest,
+			_objectMapper.writeValueAsBytes(
+				HelmChartValues.derive(
+					"", _withoutBuildTimestamps(_configs),
+					_clientExtensionDockerfile, _lcp,
+					_artifactLayer.getMounts(), serviceId)));
+
+		Map<String, ArtifactFile> artifactFiles = new TreeMap<>(
+			_artifactLayer.getArtifactFiles());
+
+		for (ArtifactFile artifactFile : artifactFiles.values()) {
+			String name = artifactFile.getName();
+
+			if (name.endsWith(".client-extension-config.json") ||
+				name.endsWith("WEB-INF/liferay-plugin-package.properties")) {
+
+				continue;
+			}
+
+			_update(messageDigest, "file");
+			_update(messageDigest, name);
+			_update(messageDigest, String.valueOf(artifactFile.getMode()));
+
+			if (artifactFile.isDirectory()) {
+				_update(messageDigest, "directory");
+			}
+			else if (artifactFile.isSymbolicLink()) {
+				_update(messageDigest, "link");
+				_update(messageDigest, artifactFile.getLinkTarget());
+			}
+			else {
+				_update(messageDigest, "data");
+				_update(messageDigest, artifactFile.getData());
+			}
+		}
+
+		HexFormat hexFormat = HexFormat.of();
+
+		return "sha256:" + hexFormat.formatHex(messageDigest.digest());
+	}
+
+	/**
+	 * Returns the version of a client extension that declares none: 0.0.0-g
+	 * and the first 12 hex digits of its content digest, so the version
+	 * changes only when what the chart deploys changes. The "g" keeps the
+	 * pre-release identifier valid in SemVer even when the hex digits are all
+	 * numbers with a leading zero.
+	 */
+	public String getContentVersion(
+			HelmChartSource helmChartSource, String serviceId)
+		throws IOException {
+
+		String contentDigest = getContentDigest(helmChartSource, serviceId);
+
+		int index = contentDigest.indexOf(':') + 1;
+
+		return "0.0.0-g" + contentDigest.substring(index, index + 12);
 	}
 
 	public List<String> getWarnings() {
@@ -240,6 +341,24 @@ public class ClientExtensionPackage {
 		return ArtifactFile.readDirectory(workDirPath);
 	}
 
+	/**
+	 * Adds the data to the digest after its length, so that no two sequences
+	 * of fields can produce the same input.
+	 */
+	private static void _update(MessageDigest messageDigest, byte[] data) {
+		ByteBuffer byteBuffer = ByteBuffer.allocate(Long.BYTES);
+
+		byteBuffer.putLong(data.length);
+
+		messageDigest.update(byteBuffer.array());
+
+		messageDigest.update(data);
+	}
+
+	private static void _update(MessageDigest messageDigest, String text) {
+		_update(messageDigest, text.getBytes(StandardCharsets.UTF_8));
+	}
+
 	private ClientExtensionPackage(
 		ArtifactLayer artifactLayer,
 		ClientExtensionDockerfile clientExtensionDockerfile,
@@ -253,7 +372,45 @@ public class ClientExtensionPackage {
 		_warnings = warnings;
 	}
 
-	private static final ObjectMapper _objectMapper = new ObjectMapper();
+	private MessageDigest _newMessageDigest() {
+		try {
+			return MessageDigest.getInstance("SHA-256");
+		}
+		catch (NoSuchAlgorithmException noSuchAlgorithmException) {
+			throw new IllegalStateException(noSuchAlgorithmException);
+		}
+	}
+
+	/**
+	 * Returns the configs without the buildTimestamp that every rebuild of
+	 * the zip changes.
+	 */
+	private Map<String, Object> _withoutBuildTimestamps(
+		Map<String, Object> configs) {
+
+		Map<String, Object> configsWithoutBuildTimestamps = new TreeMap<>();
+
+		for (Map.Entry<String, Object> entry : configs.entrySet()) {
+			Object value = entry.getValue();
+
+			if (value instanceof Map<?, ?> map) {
+				Map<Object, Object> configuration = new LinkedHashMap<>(map);
+
+				configuration.remove("buildTimestamp");
+
+				value = configuration;
+			}
+
+			configsWithoutBuildTimestamps.put(entry.getKey(), value);
+		}
+
+		return configsWithoutBuildTimestamps;
+	}
+
+	private static final ObjectMapper _objectMapper = new ObjectMapper(
+	).configure(
+		SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true
+	);
 
 	private final ArtifactLayer _artifactLayer;
 	private final ClientExtensionDockerfile _clientExtensionDockerfile;

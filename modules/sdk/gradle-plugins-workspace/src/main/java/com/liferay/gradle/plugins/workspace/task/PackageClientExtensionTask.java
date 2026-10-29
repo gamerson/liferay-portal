@@ -17,7 +17,6 @@ import java.util.List;
 
 import org.gradle.api.Project;
 import org.gradle.api.logging.Logger;
-import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.TaskAction;
 
 /**
@@ -40,9 +39,8 @@ public class PackageClientExtensionTask extends BaseClientExtensionPackageTask {
 
 		String serviceId = project.getName();
 
-		Property<String> chartVersionProperty = getChartVersion();
-
-		String version = chartVersionProperty.get();
+		String version = resolveVersion(
+			clientExtensionPackage, helmChartSource);
 
 		Logger logger = getLogger();
 

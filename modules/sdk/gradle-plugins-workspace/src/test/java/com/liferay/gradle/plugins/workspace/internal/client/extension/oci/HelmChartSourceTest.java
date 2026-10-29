@@ -253,7 +253,7 @@ public class HelmChartSourceTest {
 
 	private HelmChartArchive _createHelmChartArchive() throws Exception {
 		return HelmChartArchive.create(
-			"able",
+			Map.of(), "able",
 			HelmChartSource.resolveReference(
 				"cloud/helm/client-extension", _rootDir),
 			Map.of(), "1.0.0");

@@ -39,9 +39,28 @@ import org.yaml.snakeyaml.representer.Representer;
  */
 public class HelmChartArchive {
 
+	/**
+	 * Names the artifact the chart mounts, as a reference pinned by digest.
+	 */
+	public static final String ANNOTATION_ARTIFACT = "cx.liferay.com/artifact";
+
+	/**
+	 * Holds the client extension's content digest, which tells whether two
+	 * charts of the same version deploy the same thing.
+	 */
+	public static final String ANNOTATION_CONTENT_DIGEST =
+		"cx.liferay.com/content-digest";
+
+	/**
+	 * Returns the chart for the client extension. The annotations are added to
+	 * the chart's own, beside the template it was made from. The chart's
+	 * origin is recorded only when it is not a local file, so a published
+	 * chart never carries a path from the machine that built it.
+	 */
 	public static HelmChartArchive create(
-			String chartName, HelmChartSource helmChartSource,
-			Map<String, Object> values, String version)
+			Map<String, String> annotations, String chartName,
+			HelmChartSource helmChartSource, Map<String, Object> values,
+			String version)
 		throws IOException {
 
 		Map<String, byte[]> archiveFiles = new TreeMap<>(
@@ -49,11 +68,17 @@ public class HelmChartArchive {
 
 		Map<String, Object> chartOverlay = new LinkedHashMap<>();
 
-		chartOverlay.put(
-			"annotations",
-			Map.of(
-				_ANNOTATION_CHART_SOURCE, helmChartSource.getOrigin(),
-				_ANNOTATION_CHART_TEMPLATE, helmChartSource.getTemplate()));
+		Map<String, Object> chartAnnotations = new TreeMap<>(annotations);
+
+		if (!helmChartSource.isLocal()) {
+			chartAnnotations.put(
+				_ANNOTATION_CHART_SOURCE, helmChartSource.getOrigin());
+		}
+
+		chartAnnotations.put(
+			_ANNOTATION_CHART_TEMPLATE, helmChartSource.getTemplate());
+
+		chartOverlay.put("annotations", chartAnnotations);
 		chartOverlay.put("appVersion", version);
 		chartOverlay.put("name", chartName);
 		chartOverlay.put("version", version);

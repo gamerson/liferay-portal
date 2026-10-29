@@ -5,6 +5,7 @@
 
 package com.liferay.gradle.plugins.workspace.internal.client.extension.oci;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
@@ -23,10 +24,13 @@ import java.util.HexFormat;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.zip.GZIPOutputStream;
 
 import javax.net.ssl.SSLException;
 
+import land.oras.Config;
+import land.oras.Descriptor;
 import land.oras.Index;
 import land.oras.Manifest;
 import land.oras.ManifestDescriptor;
@@ -74,6 +78,41 @@ public class OCIPublisher<T extends Ref<T>> {
 
 	public OCIPublisher(OCI<T> oci) {
 		_oci = oci;
+	}
+
+	/**
+	 * Returns the digest of the manifest published at the reference.
+	 */
+	public String getDigest(T ref) {
+		Descriptor descriptor = _oci.probeDescriptor(ref);
+
+		return descriptor.getDigest();
+	}
+
+	/**
+	 * Returns the metadata of the Helm chart published at the reference, or
+	 * null when nothing is published there.
+	 */
+	public Map<String, Object> getHelmChartMetadata(T ref) throws IOException {
+		Manifest manifest = null;
+
+		try {
+			manifest = _oci.getManifest(ref);
+		}
+		catch (OrasException orasException) {
+			if (Objects.equals(orasException.getStatusCode(), 404)) {
+				return null;
+			}
+
+			throw orasException;
+		}
+
+		Config config = manifest.getConfig();
+
+		return _objectMapper.readValue(
+			_oci.getBlob(ref.withDigest(config.getDigest())),
+			new TypeReference<Map<String, Object>>() {
+			});
 	}
 
 	public String publishArtifact(T ref, byte[] tar) throws IOException {

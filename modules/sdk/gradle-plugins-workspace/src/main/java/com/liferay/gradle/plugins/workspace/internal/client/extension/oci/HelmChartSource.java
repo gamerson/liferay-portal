@@ -162,6 +162,18 @@ public class HelmChartSource {
 		return _chartMetadata.get("name") + " " + _chartMetadata.get("version");
 	}
 
+	/**
+	 * Returns whether the chart was read from a directory or an archive on
+	 * this machine, rather than embedded in the plugin or downloaded.
+	 */
+	public boolean isLocal() {
+		if (_origin.equals("embedded") || _origin.contains("://")) {
+			return false;
+		}
+
+		return true;
+	}
+
 	private static String _getSHA256(byte[] data) {
 		try {
 			MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");

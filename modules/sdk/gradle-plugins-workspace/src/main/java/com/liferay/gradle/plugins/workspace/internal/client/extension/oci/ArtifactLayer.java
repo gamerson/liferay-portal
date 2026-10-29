@@ -122,6 +122,10 @@ public class ArtifactLayer {
 		return new ArtifactLayer(artifactFiles, hardLinks, mounts);
 	}
 
+	public Map<String, ArtifactFile> getArtifactFiles() {
+		return Collections.unmodifiableMap(_artifactFiles);
+	}
+
 	public List<ArtifactMount> getMounts() {
 		return Collections.unmodifiableList(_mounts);
 	}

@@ -54,7 +54,8 @@ public class HelmChartArchiveTest {
 			List.of(new ArtifactMount("/opt/liferay", ".mounts/0")), "able");
 
 		HelmChartArchive helmChartArchive = HelmChartArchive.create(
-			"able", helmChartSource, values, "1.0.0");
+			Map.of("able.example.com/baker", "charlie"), "able",
+			helmChartSource, values, "1.0.0");
 
 		try (TarArchiveInputStream tarArchiveInputStream =
 				new TarArchiveInputStream(
@@ -84,7 +85,12 @@ public class HelmChartArchiveTest {
 			(Map<String, Object>)chartMetadata.get("annotations");
 
 		Assert.assertEquals(
+			"charlie", annotations.get("able.example.com/baker"));
+		Assert.assertEquals(
 			"1", annotations.get(HelmChartSource.ANNOTATION_VALUES_CONTRACT));
+		Assert.assertFalse(
+			annotations.toString(),
+			annotations.containsKey("cx.liferay.com/chart-source"));
 
 		File file = temporaryFolder.newFile("able-1.0.0.tgz");
 
@@ -110,6 +116,22 @@ public class HelmChartArchiveTest {
 
 		Assert.assertEquals("CronJob", workload.get("kind"));
 		Assert.assertEquals("* * * * *", workload.get("schedule"));
+	}
+
+	@Test
+	public void testCreateWhenChartIsNotLocal() throws Exception {
+		HelmChartArchive helmChartArchive = HelmChartArchive.create(
+			Map.of(), "able",
+			HelmChartSource.resolveReference(null, new File("../../..")),
+			Map.of(), "1.0.0");
+
+		Map<String, Object> chartMetadata = helmChartArchive.getChartMetadata();
+
+		Map<String, Object> annotations =
+			(Map<String, Object>)chartMetadata.get("annotations");
+
+		Assert.assertEquals(
+			"embedded", annotations.get("cx.liferay.com/chart-source"));
 	}
 
 	@Test

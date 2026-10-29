@@ -51,13 +51,6 @@ public abstract class BaseClientExtensionPackageTask extends DefaultTask {
 
 		_chart.convention(getGradleProperty("chart"));
 
-		_chartVersion = objectFactory.property(String.class);
-
-		Provider<String> chartVersionProvider = getGradleProperty(
-			"chart.version");
-
-		_chartVersion.convention(chartVersionProvider.orElse("0.1.0"));
-
 		_containerRuntime = objectFactory.property(String.class);
 
 		Provider<String> containerRuntimeProvider = getGradleProperty(
@@ -75,6 +68,24 @@ public abstract class BaseClientExtensionPackageTask extends DefaultTask {
 			projectLayout.getBuildDirectory();
 
 		_outputDir.convention(buildDirectoryProperty.dir(outputDirName));
+
+		_version = objectFactory.property(String.class);
+
+		ProviderFactory providerFactory = project.getProviders();
+
+		Provider<String> projectVersionProvider = providerFactory.provider(
+			() -> {
+				String version = String.valueOf(project.getVersion());
+
+				if (version.equals(Project.DEFAULT_VERSION)) {
+					return null;
+				}
+
+				return version;
+			});
+
+		_version.convention(
+			projectVersionProvider.orElse(getGradleProperty("version")));
 
 		_zipFile = objectFactory.fileProperty();
 	}
@@ -99,11 +110,6 @@ public abstract class BaseClientExtensionPackageTask extends DefaultTask {
 		return project.files(file);
 	}
 
-	@Input
-	public Property<String> getChartVersion() {
-		return _chartVersion;
-	}
-
 	@Internal
 	public Property<String> getContainerRuntime() {
 		return _containerRuntime;
@@ -117,6 +123,18 @@ public abstract class BaseClientExtensionPackageTask extends DefaultTask {
 	@OutputDirectory
 	public DirectoryProperty getOutputDir() {
 		return _outputDir;
+	}
+
+	/**
+	 * Returns the version of the client extension's files and chart. It
+	 * defaults to the project's Gradle version, then to the
+	 * liferay.workspace.client.extension.version property. With neither,
+	 * {@link #resolveVersion} derives one from the content.
+	 */
+	@Input
+	@Optional
+	public Property<String> getVersion() {
+		return _version;
 	}
 
 	@InputFile
@@ -185,6 +203,27 @@ public abstract class BaseClientExtensionPackageTask extends DefaultTask {
 	}
 
 	/**
+	 * Returns the version to package or publish: the version property when it
+	 * has a value, or else the version derived from the content.
+	 */
+	protected String resolveVersion(
+			ClientExtensionPackage clientExtensionPackage,
+			HelmChartSource helmChartSource)
+		throws IOException {
+
+		String version = _version.getOrNull();
+
+		if ((version != null) && !version.isBlank()) {
+			return version;
+		}
+
+		Project project = getProject();
+
+		return clientExtensionPackage.getContentVersion(
+			helmChartSource, project.getName());
+	}
+
+	/**
 	 * Writes the data to a file with the name in the output directory and
 	 * returns the file.
 	 */
@@ -210,10 +249,10 @@ public abstract class BaseClientExtensionPackageTask extends DefaultTask {
 	}
 
 	private final Property<String> _chart;
-	private final Property<String> _chartVersion;
 	private final Property<String> _containerRuntime;
 	private final RegularFileProperty _defaultDockerfile;
 	private final DirectoryProperty _outputDir;
+	private final Property<String> _version;
 	private final RegularFileProperty _zipFile;
 
 }

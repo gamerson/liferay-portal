@@ -14,10 +14,12 @@ import com.liferay.gradle.plugins.workspace.internal.client.extension.oci.Client
 import com.liferay.gradle.plugins.workspace.internal.client.extension.oci.HelmChartArchive;
 import com.liferay.gradle.plugins.workspace.internal.client.extension.oci.HelmChartSource;
 import com.liferay.gradle.plugins.workspace.internal.client.extension.oci.OCIPublisher;
+import com.liferay.gradle.plugins.workspace.internal.util.StringUtil;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import land.oras.ContainerRef;
 import land.oras.Registry;
@@ -103,15 +105,67 @@ public class PublishClientExtensionTask extends BaseClientExtensionPackageTask {
 
 		String serviceId = project.getName();
 
-		Property<String> chartVersionProperty = getChartVersion();
-
-		String version = chartVersionProperty.get();
+		String version = resolveVersion(
+			clientExtensionPackage, helmChartSource);
 
 		String tag = version.replace('+', '_');
 
+		String helmChartRepository = registry + "/charts/" + serviceId;
+
+		ContainerRef helmChartRef = ContainerRef.parse(
+			helmChartRepository + ":" + tag);
+
 		Logger logger = getLogger();
 
-		Map<String, Object> summary = new LinkedHashMap<>();
+		// A published version names one build, so it is pushed again only
+		// as a snapshot. Otherwise the chart already at the tag must hold the
+		// same content, and then there is nothing to push.
+
+		if (!version.endsWith("-SNAPSHOT")) {
+			Map<String, Object> publishedChartMetadata =
+				ociPublisher.getHelmChartMetadata(helmChartRef);
+
+			if (publishedChartMetadata != null) {
+				Map<?, ?> annotations = Map.of();
+
+				if (publishedChartMetadata.get("annotations") instanceof
+						Map<?, ?> map) {
+
+					annotations = map;
+				}
+
+				if (!Objects.equals(
+						annotations.get(
+							HelmChartArchive.ANNOTATION_CONTENT_DIGEST),
+						clientExtensionPackage.getContentDigest(
+							helmChartSource, serviceId))) {
+
+					throw new GradleException(
+						StringUtil.concat(
+							"Version ", version, " of \"", serviceId,
+							"\" is already published to oci://",
+							helmChartRepository, " with different content. ",
+							"Publish the change as a new version, or use a ",
+							"-SNAPSHOT version to republish it."));
+				}
+
+				logger.lifecycle(
+					"Helm chart oci://{} version {} is already published " +
+						"with the same content",
+					helmChartRepository, version);
+
+				Object artifactReference = annotations.get(
+					HelmChartArchive.ANNOTATION_ARTIFACT);
+
+				_writeSummary(
+					(artifactReference == null) ? "" :
+						String.valueOf(artifactReference),
+					ociPublisher.getDigest(helmChartRef), helmChartRepository,
+					version);
+
+				return;
+			}
+		}
 
 		String artifactReference = "";
 
@@ -129,8 +183,6 @@ public class PublishClientExtensionTask extends BaseClientExtensionPackageTask {
 					"@" + digest;
 
 			logger.lifecycle("Published artifact {}", artifactReference);
-
-			summary.put("artifact", Map.of("reference", artifactReference));
 		}
 
 		HelmChartArchive helmChartArchive =
@@ -140,16 +192,31 @@ public class PublishClientExtensionTask extends BaseClientExtensionPackageTask {
 		writeFile(
 			helmChartArchive.getData(), serviceId + "-" + version + ".tgz");
 
-		String helmChartRepository = registry + "/charts/" + serviceId;
-
 		String digest = ociPublisher.publishHelmChart(
-			helmChartArchive,
-			ContainerRef.parse(helmChartRepository + ":" + tag));
+			helmChartArchive, helmChartRef);
 
 		logger.lifecycle(
 			"Published Helm chart oci://{} version {} from {} ({})",
 			helmChartRepository, version, helmChartSource.getTemplate(),
 			helmChartSource.getOrigin());
+
+		_writeSummary(artifactReference, digest, helmChartRepository, version);
+	}
+
+	/**
+	 * Writes summary.json, which tells CI what to put in an environment's
+	 * liferay.yaml.
+	 */
+	private void _writeSummary(
+			String artifactReference, String digest, String helmChartRepository,
+			String version)
+		throws Exception {
+
+		Map<String, Object> summary = new LinkedHashMap<>();
+
+		if (!artifactReference.isEmpty()) {
+			summary.put("artifact", Map.of("reference", artifactReference));
+		}
 
 		Map<String, Object> helmChart = new LinkedHashMap<>();
 

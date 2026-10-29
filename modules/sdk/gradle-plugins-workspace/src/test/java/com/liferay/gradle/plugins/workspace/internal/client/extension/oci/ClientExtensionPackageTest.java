@@ -158,6 +158,48 @@ public class ClientExtensionPackageTest {
 		Assert.assertTrue(names.toString(), names.contains("package.json"));
 	}
 
+	@Test
+	public void testGetContentDigest() throws Exception {
+		String contentDigest = _getContentDigest(_getJarZipEntries());
+
+		Map<String, String> zipEntries = _getJarZipEntries();
+
+		zipEntries.put(
+			"WEB-INF/liferay-plugin-package.properties",
+			"#Thu Oct 29 12:00:00 CDT 2026");
+		zipEntries.put(
+			"able.client-extension-config.json",
+			"{\"key~able\": {\"buildTimestamp\": 1}}");
+
+		Assert.assertEquals(contentDigest, _getContentDigest(zipEntries));
+
+		zipEntries = _getJarZipEntries();
+
+		zipEntries.put("static/a.css", "a {color: red}");
+
+		Assert.assertNotEquals(contentDigest, _getContentDigest(zipEntries));
+
+		zipEntries = _getJarZipEntries();
+
+		zipEntries.put(
+			"able.client-extension-config.json",
+			"{\"key~able\": {\"name\": \"Able\"}}");
+
+		Assert.assertNotEquals(contentDigest, _getContentDigest(zipEntries));
+	}
+
+	@Test
+	public void testGetContentVersion() throws Exception {
+		ClientExtensionPackage clientExtensionPackage = _create(
+			_CONTAINER_RUNTIME_MISSING, _DOCKERFILE_JAR, _DOCKERFILE_JAR,
+			_getJarZipEntries());
+
+		String version = clientExtensionPackage.getContentVersion(
+			_getHelmChartSource(), "able");
+
+		Assert.assertTrue(version, version.matches("0\\.0\\.0-g[0-9a-f]{12}"));
+	}
+
 	@Rule
 	public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
@@ -194,6 +236,22 @@ public class ClientExtensionPackageTest {
 			containerRuntime, defaultDockerfileFile,
 			"client-extensions/able/Dockerfile", new File(dir, "replay"),
 			zipFile);
+	}
+
+	private String _getContentDigest(Map<String, String> zipEntries)
+		throws Exception {
+
+		ClientExtensionPackage clientExtensionPackage = _create(
+			_CONTAINER_RUNTIME_MISSING, _DOCKERFILE_JAR, _DOCKERFILE_JAR,
+			zipEntries);
+
+		return clientExtensionPackage.getContentDigest(
+			_getHelmChartSource(), "able");
+	}
+
+	private HelmChartSource _getHelmChartSource() throws Exception {
+		return HelmChartSource.resolveReference(
+			"cloud/helm/client-extension", new File("../../.."));
 	}
 
 	private Map<String, String> _getJarZipEntries() {
