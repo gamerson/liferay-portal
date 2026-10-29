@@ -8,13 +8,22 @@ suite: ApplicationSets and AppProjects
 templates:
     -   templates/application-infrastructure-provider.yaml
     -   templates/application-observability.yaml
+    -   templates/applicationset-client-extension.yaml
     -   templates/applicationset-infrastructure.yaml
     -   templates/applicationset-liferay.yaml
     -   templates/applicationset-resources.yaml
     -   templates/appproject-application.yaml
+    -   templates/appproject-client-extension.yaml
     -   templates/appproject-infrastructure.yaml
     -   templates/appproject-operator.yaml
 tests:
+    -   asserts:
+            -   equal:
+                    path: spec.sourceRepos
+                    value:
+                        -   oci://**
+                template: templates/appproject-client-extension.yaml
+        it: Allows client extension charts from any OCI registry when no registry is listed
     -   asserts:
             -   equal:
                     path: metadata.annotations["argocd.argoproj.io/sync-wave"]
@@ -51,6 +60,20 @@ tests:
             infrastructureProvider:
                 repoURL: oci://us-central1-docker.pkg.dev/external-assets-nonprd/liferay-helm-chart/lcd-12345/abc1234/liferay-azure-infrastructure-provider
     -   asserts:
+            -   equal:
+                    path: spec.template.metadata.name
+                    value: "{{ index .path.segments 1 }}-{{ index .path.segments 3 }}-{{ base .chart }}"
+                template: templates/applicationset-client-extension.yaml
+            -   equal:
+                    path: spec.template.spec.destination.namespace
+                    value: liferay-{{ index .path.segments 1 }}-{{ index .path.segments 3 }}
+                template: templates/applicationset-client-extension.yaml
+            -   contains:
+                    content:
+                        name: network.gatewayName
+                        value: "{{ index .path.segments 1 }}-{{ index .path.segments 3 }}-gateway"
+                    path: spec.template.spec.source.helm.parameters
+                template: templates/applicationset-client-extension.yaml
             -   equal:
                     path: spec.template.metadata.name
                     value: "{{path[1]}}-{{path[3]}}-infra"
@@ -257,6 +280,21 @@ tests:
             infrastructureProvider:
                 repoURL: oci://example-registry/liferay-aws-infrastructure-provider
     -   asserts:
+            -   equal:
+                    path: spec.sourceRepos
+                    value:
+                        -   oci://ghcr.io/example/liferay-client-extensions
+                        -   oci://ghcr.io/example/liferay-client-extensions/**
+                        -   oci://registry.example.com/team/cx
+                        -   oci://registry.example.com/team/cx/**
+                template: templates/appproject-client-extension.yaml
+        it: Lists each allowed client extension registry and everything under it in the client extension AppProject
+        set:
+            clientExtensions:
+                sourceRepos:
+                    -   oci://ghcr.io/example/liferay-client-extensions
+                    -   oci://registry.example.com/team/cx/charts/liferay-sample-global-css-1
+    -   asserts:
             -   contains:
                     content:
                         name: liferay-default.clientExtensions.delivery.operatorServiceAccount.name
@@ -276,6 +314,9 @@ tests:
                 template: templates/application-infrastructure-provider.yaml
             -   hasDocuments:
                     count: 0
+                template: templates/applicationset-client-extension.yaml
+            -   hasDocuments:
+                    count: 0
                 template: templates/applicationset-infrastructure.yaml
             -   hasDocuments:
                     count: 0
@@ -283,11 +324,28 @@ tests:
             -   hasDocuments:
                     count: 0
                 template: templates/applicationset-resources.yaml
+            -   hasDocuments:
+                    count: 0
+                template: templates/appproject-client-extension.yaml
         it: Omits the Applications and ApplicationSets that can be disabled
         set:
             infrastructure.enabled: false
             infrastructureProvider.enabled: false
             liferay.enabled: false
+    -   asserts:
+            -   hasDocuments:
+                    count: 0
+                template: templates/applicationset-client-extension.yaml
+            -   hasDocuments:
+                    count: 0
+                template: templates/appproject-client-extension.yaml
+        it: Omits the client extension ApplicationSet and AppProject when the DXP operator does not reconcile client extensions
+        set:
+            operatorApplications:
+                dxpOperator:
+                    values:
+                        clientExtensions:
+                            enabled: false
     -   asserts:
             -   isEmpty:
                     path: spec.sourceRepos
