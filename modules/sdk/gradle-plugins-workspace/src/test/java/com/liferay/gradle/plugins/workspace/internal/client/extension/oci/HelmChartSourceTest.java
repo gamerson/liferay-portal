@@ -5,6 +5,8 @@
 
 package com.liferay.gradle.plugins.workspace.internal.client.extension.oci;
 
+import com.liferay.gradle.plugins.workspace.internal.util.StringUtil;
+
 import com.sun.net.httpserver.HttpServer;
 
 import java.io.File;
@@ -17,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.zip.GZIPOutputStream;
 
 import land.oras.LayoutRef;
@@ -114,6 +117,31 @@ public class HelmChartSourceTest {
 
 		_assertRefused(
 			file, "\"able/../values.yaml\" is not under the chart's directory");
+	}
+
+	@Test
+	public void testResolveWhenChartHasHelmIgnore() throws Exception {
+		File dir = _createChartDirectory(
+			StringUtil.concat(
+				"annotations:\n  ", HelmChartSource.ANNOTATION_VALUES_CONTRACT,
+				": \"1\"\napiVersion: v2\nname: able\nversion: 1.0.0\n"));
+
+		Path dirPath = dir.toPath();
+
+		Files.writeString(dirPath.resolve(".helmignore"), "tests/\n");
+
+		Files.createDirectories(dirPath.resolve("tests"));
+
+		Files.writeString(dirPath.resolve("tests/able_test.yaml"), "a: b\n");
+
+		HelmChartSource helmChartSource = HelmChartSource.resolveReference(
+			dir.getAbsolutePath(), _rootDir);
+
+		Map<String, byte[]> chartFiles = helmChartSource.getChartFiles();
+
+		Assert.assertEquals(
+			Set.of(".helmignore", "Chart.yaml", "values.yaml"),
+			chartFiles.keySet());
 	}
 
 	@Test

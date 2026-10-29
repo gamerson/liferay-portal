@@ -31,10 +31,18 @@ import org.gradle.api.GradleException;
  */
 public class ArtifactLayer {
 
+	/**
+	 * Returns the layer for the Dockerfile's COPY instructions. The layer
+	 * holds only the files they copy, so files the workload never sees, such
+	 * as the Dockerfile and LCP.json beside a frontend's static files, are not
+	 * published.
+	 */
 	public static ArtifactLayer plan(
 		Map<String, ArtifactFile> artifactFiles,
 		List<ClientExtensionDockerfile.Copy> copies) {
 
+		Set<String> copiedDirectories = new TreeSet<>();
+		Set<String> copiedFileNames = new TreeSet<>();
 		Map<String, List<String[]>> fileDestinations = new TreeMap<>();
 		List<ArtifactMount> mounts = new ArrayList<>();
 
@@ -49,6 +57,8 @@ public class ArtifactLayer {
 				}
 
 				if (_isDirectory(artifactFiles, source)) {
+					copiedDirectories.add(source);
+
 					mounts.add(
 						new ArtifactMount(_getMountPath(destination), source));
 
@@ -86,6 +96,8 @@ public class ArtifactLayer {
 									"directory ending in /");
 				}
 
+				copiedFileNames.addAll(matches);
+
 				for (String match : matches) {
 					String target = destination;
 
@@ -119,7 +131,21 @@ public class ArtifactLayer {
 			mounts.add(new ArtifactMount(entry.getKey(), mountDirectory));
 		}
 
-		return new ArtifactLayer(artifactFiles, hardLinks, mounts);
+		Map<String, ArtifactFile> copiedArtifactFiles = new TreeMap<>();
+
+		for (Map.Entry<String, ArtifactFile> entry : artifactFiles.entrySet()) {
+			String name = entry.getKey();
+
+			if (!copiedFileNames.contains(name) &&
+				!_isInDirectory(copiedDirectories, name)) {
+
+				continue;
+			}
+
+			copiedArtifactFiles.put(name, entry.getValue());
+		}
+
+		return new ArtifactLayer(copiedArtifactFiles, hardLinks, mounts);
 	}
 
 	public Map<String, ArtifactFile> getArtifactFiles() {
@@ -242,6 +268,20 @@ public class ArtifactLayer {
 
 		for (String fileName : artifactFiles.keySet()) {
 			if (fileName.startsWith(name + "/")) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private static boolean _isInDirectory(
+		Set<String> directories, String name) {
+
+		for (String directory : directories) {
+			if (directory.isEmpty() || name.equals(directory) ||
+				name.startsWith(directory + "/")) {
+
 				return true;
 			}
 		}

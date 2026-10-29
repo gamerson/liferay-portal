@@ -242,8 +242,8 @@ public class ClientExtensionPackageTest {
 		throws Exception {
 
 		ClientExtensionPackage clientExtensionPackage = _create(
-			_CONTAINER_RUNTIME_MISSING, _DOCKERFILE_JAR, _DOCKERFILE_JAR,
-			zipEntries);
+			_CONTAINER_RUNTIME_MISSING, _DOCKERFILE_COPY_ALL,
+			_DOCKERFILE_COPY_ALL, zipEntries);
 
 		return clientExtensionPackage.getContentDigest(
 			_getHelmChartSource(), "able");
@@ -274,6 +274,10 @@ public class ClientExtensionPackageTest {
 		"\t\t--volume) dir=\"${2%%:*}\"; shift 2 ;;",
 		"\t\t-c) cd \"$dir\" && exec sh -c \"$2\" ;;", "\t\t*) shift ;;",
 		"\tesac", "done", "exit 1");
+
+	private static final String _DOCKERFILE_COPY_ALL =
+		"FROM liferay/node-runner:latest\n\nCOPY --chown=liferay:liferay . " +
+			"/opt/liferay";
 
 	private static final String _DOCKERFILE_JAR =
 		"FROM liferay/jar-runner:latest\n\nCOPY --chown=liferay:liferay " +

@@ -12,7 +12,9 @@ import java.nio.charset.StandardCharsets;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
@@ -80,7 +82,8 @@ public class ArtifactLayerTest {
 			artifactFiles,
 			List.of(
 				new ClientExtensionDockerfile.Copy(
-					"/opt/liferay/jar-runner.jar", List.of("*.jar"))));
+					"/opt/liferay/jar-runner.jar", List.of("*.jar")),
+				new ClientExtensionDockerfile.Copy("/opt/app/", List.of("."))));
 
 		Map<String, TarArchiveEntry> tarArchiveEntries = new TreeMap<>();
 
@@ -129,6 +132,18 @@ public class ArtifactLayerTest {
 		Assert.assertTrue(tarArchiveEntries.containsKey(longName));
 	}
 
+	@Test
+	public void testToTarWhenCopiesLeaveOutFiles() throws IOException {
+		Assert.assertEquals(
+			Set.of("static/", "static/a.css"),
+			_getTarEntryNames("/public_html/", "static"));
+		Assert.assertEquals(
+			Set.of(
+				".mounts/", ".mounts/0/", ".mounts/0/jar-runner.jar",
+				"app.jar"),
+			_getTarEntryNames("/opt/liferay/jar-runner.jar", "*.jar"));
+	}
+
 	private void _assertPlanFails(
 		String destination, String source, String expectedMessage) {
 
@@ -172,6 +187,33 @@ public class ArtifactLayerTest {
 					destination, List.of(source))));
 
 		return artifactLayer.getMounts();
+	}
+
+	private Set<String> _getTarEntryNames(String destination, String source)
+		throws IOException {
+
+		ArtifactLayer artifactLayer = ArtifactLayer.plan(
+			_getArtifactFiles(),
+			List.of(
+				new ClientExtensionDockerfile.Copy(
+					destination, List.of(source))));
+
+		Set<String> names = new TreeSet<>();
+
+		try (TarArchiveInputStream tarArchiveInputStream =
+				new TarArchiveInputStream(
+					new ByteArrayInputStream(artifactLayer.toTar()))) {
+
+			TarArchiveEntry tarArchiveEntry = null;
+
+			while ((tarArchiveEntry = tarArchiveInputStream.getNextEntry()) !=
+						null) {
+
+				names.add(tarArchiveEntry.getName());
+			}
+		}
+
+		return names;
 	}
 
 }

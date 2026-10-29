@@ -318,7 +318,7 @@ public class HelmChartSource {
 	}
 
 	private HelmChartSource(Map<String, byte[]> chartFiles, String origin) {
-		_chartFiles = chartFiles;
+		_chartFiles = HelmIgnore.filter(chartFiles);
 		_origin = origin;
 
 		_chartMetadata = _readChartMetadata();
