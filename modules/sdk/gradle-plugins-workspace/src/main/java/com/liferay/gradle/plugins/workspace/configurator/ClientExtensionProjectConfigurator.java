@@ -94,11 +94,13 @@ import org.gradle.api.publish.plugins.PublishingPlugin;
 import org.gradle.api.tasks.Copy;
 import org.gradle.api.tasks.Delete;
 import org.gradle.api.tasks.JavaExec;
+import org.gradle.api.tasks.TaskCollection;
 import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.TaskInputs;
 import org.gradle.api.tasks.TaskOutputs;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.TaskState;
+import org.gradle.api.tasks.bundling.AbstractArchiveTask;
 import org.gradle.api.tasks.bundling.Zip;
 import org.gradle.language.base.plugins.LifecycleBasePlugin;
 import org.gradle.process.ProcessForkOptions;
@@ -328,6 +330,8 @@ public class ClientExtensionProjectConfigurator
 		_addClientExtensionPackageTasks(
 			project, buildClientExtensionZipTaskProvider,
 			createClientExtensionConfigTaskProvider);
+
+		_configureArchiveTasks(project);
 
 		_configureLiferayRoutes(project, workspaceExtension);
 
@@ -595,6 +599,26 @@ public class ClientExtensionProjectConfigurator
 			project, buildClientExtensionZipTaskProvider);
 
 		return buildClientExtensionZipTaskProvider;
+	}
+
+	/**
+	 * Makes every archive the client extension project builds reproducible,
+	 * such as the jar that "fromTask: bootJar" assembles. An archive then
+	 * depends only on its files, so an unchanged client extension keeps its
+	 * content digest, and the version derived from it, across clean builds.
+	 * A build script can still turn file timestamps back on for an archive.
+	 */
+	private void _configureArchiveTasks(Project project) {
+		TaskContainer taskContainer = project.getTasks();
+
+		TaskCollection<AbstractArchiveTask> abstractArchiveTasks =
+			taskContainer.withType(AbstractArchiveTask.class);
+
+		abstractArchiveTasks.configureEach(
+			abstractArchiveTask -> {
+				abstractArchiveTask.setPreserveFileTimestamps(false);
+				abstractArchiveTask.setReproducibleFileOrder(true);
+			});
 	}
 
 	private void _configureArtifacts(
