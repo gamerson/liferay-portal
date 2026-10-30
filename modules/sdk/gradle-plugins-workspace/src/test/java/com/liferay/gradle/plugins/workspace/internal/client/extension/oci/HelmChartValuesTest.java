@@ -77,6 +77,7 @@ public class HelmChartValuesTest {
 		Assert.assertEquals(
 			Map.of("LIFERAY_BATCH_OAUTH_APP_ERC", "able-batch"),
 			workload.get("env"));
+		Assert.assertNull(workload.get("volumes"));
 	}
 
 	@Test
@@ -95,6 +96,23 @@ public class HelmChartValuesTest {
 			"workload");
 
 		Assert.assertFalse((Boolean)workload.get("enabled"));
+	}
+
+	@Test
+	public void testDeriveWhenClientExtensionIsFrontend() {
+		Map<String, Object> values = _derive(
+			Map.of(), "FROM liferay/caddy\nCOPY static/ /public_html/",
+			Map.of(), List.of(new ArtifactMount("/public_html", "static")));
+
+		Map<String, Object> workload = (Map<String, Object>)values.get(
+			"workload");
+
+		Assert.assertEquals(
+			List.of(Map.of("mountPath", "/etc/caddy.d", "name", "caddy-d")),
+			workload.get("volumeMounts"));
+		Assert.assertEquals(
+			List.of(Map.of("emptyDir", Map.of(), "name", "caddy-d")),
+			workload.get("volumes"));
 	}
 
 	@Test

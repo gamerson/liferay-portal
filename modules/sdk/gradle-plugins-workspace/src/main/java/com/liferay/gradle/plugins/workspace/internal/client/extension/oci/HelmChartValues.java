@@ -128,6 +128,26 @@ public class HelmChartValues {
 
 		workload.put("enabled", workloadEnabled);
 
+		// liferay/caddy writes the CORS rules for DXP's domains into
+		// /etc/caddy.d when it starts. The chart runs every workload as a
+		// non-root user, who cannot write the image's /etc/caddy.d, so mount a
+		// writable empty directory there. Without the rules, browsers refuse
+		// the cross-origin ES modules a custom element loads.
+
+		if (repository.endsWith("liferay/caddy")) {
+			workload.put(
+				"volumeMounts",
+				List.of(
+					new TreeMap<>(
+						Map.of(
+							"mountPath", "/etc/caddy.d", "name", "caddy-d"))));
+			workload.put(
+				"volumes",
+				List.of(
+					new TreeMap<>(
+						Map.of("emptyDir", Map.of(), "name", "caddy-d"))));
+		}
+
 		if (mounts.isEmpty()) {
 			artifactReference = "";
 		}
