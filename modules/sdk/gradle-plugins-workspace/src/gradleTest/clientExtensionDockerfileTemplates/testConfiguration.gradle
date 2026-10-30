@@ -1,0 +1,7 @@
+ext.expectedContentStrings = [
+	'FROM liferay/noop',
+]
+ext.expectedFilePath = "Dockerfile"
+ext.taskPath = ":configuration:createClientExtensionConfig"
+
+apply from: project.property("commonScript.testClientExtensionBuildFileContentsTestCase.gradle")

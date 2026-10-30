@@ -1,0 +1,29 @@
+import java.time.ZoneId
+
+import java.util.zip.ZipFile
+
+task runGradleTest
+
+Task bootJarTask = tasks.getByPath(":spring-boot:bootJar")
+
+runGradleTest {
+	dependsOn bootJarTask
+
+	doLast {
+		File jarFile = bootJarTask.archiveFile.get().asFile
+
+		Set<Long> times = new ZipFile(jarFile).withCloseable {
+			ZipFile zipFile ->
+
+			zipFile.entries().collect {
+				it.time
+			} as Set
+		}
+
+		assert times.size() == 1
+
+		Date date = new Date(times.first())
+
+		assert date.toInstant().atZone(ZoneId.systemDefault()).year == 1980
+	}
+}

@@ -1,0 +1,21 @@
+assemble:
+    -   include:
+            -   "**/*.js"
+            -   package.json
+microservice-node-oauth-application-user-agent:
+    .serviceAddress: localhost:3001
+    .serviceScheme: http
+    name: Microservice Node OAuth Application User Agent
+    scopes:
+        -   Liferay.Headless.Admin.Workflow.everything
+    type: oAuthApplicationUserAgent
+microservice-node-object-action-1:
+    name: Microservice Node Object Action 1
+    oAuth2ApplicationExternalReferenceCode: microservice-node-oauth-application-user-agent
+    resourcePath: /sample/object/action/1
+    type: objectAction
+microservice-node-object-action-2:
+    name: Microservice Node Object Action 2
+    oAuth2ApplicationExternalReferenceCode: microservice-node-oauth-application-user-agent
+    resourcePath: /sample/object/action/2
+    type: objectAction

@@ -31,7 +31,10 @@ import com.liferay.gradle.plugins.workspace.internal.util.GradleUtil;
 import com.liferay.gradle.plugins.workspace.internal.util.JsonNodeUtil;
 import com.liferay.gradle.plugins.workspace.internal.util.StringUtil;
 import com.liferay.gradle.plugins.workspace.internal.util.copy.HashifyAction;
+import com.liferay.gradle.plugins.workspace.task.BaseClientExtensionPackageTask;
 import com.liferay.gradle.plugins.workspace.task.CreateClientExtensionConfigTask;
+import com.liferay.gradle.plugins.workspace.task.PackageClientExtensionTask;
+import com.liferay.gradle.plugins.workspace.task.PublishClientExtensionTask;
 import com.liferay.gradle.plugins.workspace.task.WriteLanguageBatchEngineDataTask;
 import com.liferay.gradle.util.ArrayUtil;
 import com.liferay.gradle.util.Validator;
@@ -77,6 +80,7 @@ import org.gradle.api.file.CopySpec;
 import org.gradle.api.file.Directory;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.ProjectLayout;
+import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.initialization.Settings;
 import org.gradle.api.invocation.Gradle;
 import org.gradle.api.logging.Logger;
@@ -86,14 +90,17 @@ import org.gradle.api.plugins.PluginManager;
 import org.gradle.api.provider.Property;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.provider.SetProperty;
+import org.gradle.api.publish.plugins.PublishingPlugin;
 import org.gradle.api.tasks.Copy;
 import org.gradle.api.tasks.Delete;
 import org.gradle.api.tasks.JavaExec;
+import org.gradle.api.tasks.TaskCollection;
 import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.TaskInputs;
 import org.gradle.api.tasks.TaskOutputs;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.TaskState;
+import org.gradle.api.tasks.bundling.AbstractArchiveTask;
 import org.gradle.api.tasks.bundling.Zip;
 import org.gradle.language.base.plugins.LifecycleBasePlugin;
 import org.gradle.process.ProcessForkOptions;
@@ -115,6 +122,12 @@ public class ClientExtensionProjectConfigurator
 
 	public static final String CREATE_CLIENT_EXTENSION_CONFIG_TASK_NAME =
 		"createClientExtensionConfig";
+
+	public static final String PACKAGE_CLIENT_EXTENSION_TASK_NAME =
+		"packageClientExtension";
+
+	public static final String PUBLISH_CLIENT_EXTENSION_TASK_NAME =
+		"publishClientExtension";
 
 	public static final String VALIDATE_CLIENT_EXTENSION_IDS_TASK_NAME =
 		"validateClientExtensionIds";
@@ -314,6 +327,12 @@ public class ClientExtensionProjectConfigurator
 			project, assembleClientExtensionTaskProvider,
 			createClientExtensionConfigTaskProvider, workspaceExtension);
 
+		_addClientExtensionPackageTasks(
+			project, buildClientExtensionZipTaskProvider,
+			createClientExtensionConfigTaskProvider);
+
+		_configureArchiveTasks(project);
+
 		_configureLiferayRoutes(project, workspaceExtension);
 
 		if (_isLanguageProject(project)) {
@@ -379,6 +398,63 @@ public class ClientExtensionProjectConfigurator
 	}
 
 	protected static final String NAME = "client.extension";
+
+	private void _addClientExtensionPackageTasks(
+		Project project, TaskProvider<Zip> buildClientExtensionZipTaskProvider,
+		TaskProvider<CreateClientExtensionConfigTask>
+			createClientExtensionConfigTaskProvider) {
+
+		Action<BaseClientExtensionPackageTask> action =
+			baseClientExtensionPackageTask -> {
+				baseClientExtensionPackageTask.dependsOn(
+					createClientExtensionConfigTaskProvider);
+
+				RegularFileProperty defaultDockerfileProperty =
+					baseClientExtensionPackageTask.getDefaultDockerfile();
+
+				defaultDockerfileProperty.fileProvider(
+					createClientExtensionConfigTaskProvider.map(
+						CreateClientExtensionConfigTask::getDefaultDockerFile));
+
+				RegularFileProperty zipFileProperty =
+					baseClientExtensionPackageTask.getZipFile();
+
+				zipFileProperty.set(
+					buildClientExtensionZipTaskProvider.flatMap(
+						Zip::getArchiveFile));
+			};
+
+		TaskProvider<PackageClientExtensionTask>
+			packageClientExtensionTaskProvider = GradleUtil.addTaskProvider(
+				project, PACKAGE_CLIENT_EXTENSION_TASK_NAME,
+				PackageClientExtensionTask.class);
+
+		packageClientExtensionTaskProvider.configure(action);
+
+		packageClientExtensionTaskProvider.configure(
+			packageClientExtensionTask -> {
+				packageClientExtensionTask.setDescription(
+					"Packages the client extension as an artifact layer and " +
+						"a Helm chart.");
+				packageClientExtensionTask.setGroup(BasePlugin.BUILD_GROUP);
+			});
+
+		TaskProvider<PublishClientExtensionTask>
+			publishClientExtensionTaskProvider = GradleUtil.addTaskProvider(
+				project, PUBLISH_CLIENT_EXTENSION_TASK_NAME,
+				PublishClientExtensionTask.class);
+
+		publishClientExtensionTaskProvider.configure(action);
+
+		publishClientExtensionTaskProvider.configure(
+			publishClientExtensionTask -> {
+				publishClientExtensionTask.setDescription(
+					"Publishes the client extension's artifact layer and " +
+						"Helm chart to an OCI registry.");
+				publishClientExtensionTask.setGroup(
+					PublishingPlugin.PUBLISH_TASK_GROUP);
+			});
+	}
 
 	private void _addDockerTasks(
 		Project project, TaskProvider<Copy> assembleClientExtensionTaskProvider,
@@ -523,6 +599,26 @@ public class ClientExtensionProjectConfigurator
 			project, buildClientExtensionZipTaskProvider);
 
 		return buildClientExtensionZipTaskProvider;
+	}
+
+	/**
+	 * Makes every archive the client extension project builds reproducible,
+	 * such as the jar that "fromTask: bootJar" assembles. An archive then
+	 * depends only on its files, so an unchanged client extension keeps its
+	 * content digest, and the version derived from it, across clean builds.
+	 * A build script can still turn file timestamps back on for an archive.
+	 */
+	private void _configureArchiveTasks(Project project) {
+		TaskContainer taskContainer = project.getTasks();
+
+		TaskCollection<AbstractArchiveTask> abstractArchiveTasks =
+			taskContainer.withType(AbstractArchiveTask.class);
+
+		abstractArchiveTasks.configureEach(
+			abstractArchiveTask -> {
+				abstractArchiveTask.setPreserveFileTimestamps(false);
+				abstractArchiveTask.setReproducibleFileOrder(true);
+			});
 	}
 
 	private void _configureArtifacts(

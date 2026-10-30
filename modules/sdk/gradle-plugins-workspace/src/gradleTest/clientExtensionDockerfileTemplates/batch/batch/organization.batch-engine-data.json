@@ -1,0 +1,11 @@
+{
+	"configuration": {
+		"className": "com.liferay.headless.admin.user.dto.v1_0.Organization",
+		"parameters": {
+			"createStrategy": "INSERT"
+		},
+		"taskItemDelegateName": "DEFAULT"
+	},
+	"items": [
+	]
+}

@@ -1,0 +1,13 @@
+.DS_Store
+/.idea
+/bundles
+/poshi/poshi-ext.properties
+/poshi/test-results
+/poshi/tests
+TEST-frontend-js.xml
+bin
+build
+dist
+node_modules
+node_modules_cache
+test-classes

@@ -1,0 +1,9 @@
+assemble:
+    -   fromTask: bootJar
+spring-boot-oauth-application-headless-server:
+    .serviceAddress: localhost:58081
+    .serviceScheme: http
+    name: Spring Boot OAuth Application Headless Server
+    scopes:
+        -   Liferay.Headless.Admin.Workflow.everything
+    type: oAuthApplicationHeadlessServer

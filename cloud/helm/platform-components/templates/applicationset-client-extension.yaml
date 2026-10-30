@@ -1,0 +1,70 @@
+{{- $dxpOperator := .Values.operatorApplications.dxpOperator -}}
+{{- if and .Values.liferay.enabled $dxpOperator.enabled (dig "clientExtensions" "enabled" false ($dxpOperator.values | default dict)) -}}
+{{- $gitops := .Values.gitops -}}
+{{- $layout := $gitops.layout -}}
+{{- $environmentId := regexReplaceAll "\\{\\{path\\[(\\d+)\\]\\}\\}" $layout.environmentId "{{ index .path.segments ${1} }}" -}}
+{{- $projectId := regexReplaceAll "\\{\\{path\\[(\\d+)\\]\\}\\}" $layout.projectId "{{ index .path.segments ${1} }}" -}}
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+    annotations:
+        argocd.argoproj.io/sync-wave: "-60"
+    finalizers:
+        -   resources-finalizer.argocd.argoproj.io
+    labels:
+        {{- include "liferay-platform.labels" . | nindent 8 }}
+        app.kubernetes.io/name: client-extension-applicationset
+    name: client-extension-applicationset
+    namespace: {{ .Release.Namespace }}
+spec:
+    generators:
+        -   matrix:
+                generators:
+                    -   git:
+                            files:
+                                -   path: {{ $layout.environments }}/{{ $layout.liferayValuesFilename }}
+                            repoURL: {{ $gitops.repository.url }}
+                            revision: {{ $gitops.repository.revision }}
+                    -   list:
+                            elementsYaml: {{ `{{ get . "clientExtensions" | default list | toJson }}` | quote }}
+    goTemplate: true
+    goTemplateOptions:
+        -   missingkey=error
+    template:
+        metadata:
+            labels:
+                {{- include "liferay-platform.labels" . | nindent 16 }}
+            name: {{ printf "%s-%s-{{ base .chart }}" $projectId $environmentId | quote }}
+        spec:
+            destination:
+                namespace: {{ printf "liferay-%s-%s" $projectId $environmentId | quote }}
+                server: https://kubernetes.default.svc
+            project: liferay-client-extension
+            source:
+                helm:
+                    parameters:
+                        -   name: network.gatewayName
+                            value: {{ printf "%s-%s-gateway" $projectId $environmentId | quote }}
+                    releaseName: {{ `{{ base .chart }}` | quote }}
+                path: .
+                repoURL: {{ `{{ .chart }}` | quote }}
+                targetRevision: {{ `{{ .version }}` | quote }}
+            syncPolicy:
+                automated:
+                    prune: true
+                    selfHeal: true
+                retry:
+                    backoff:
+                        duration: 30s
+                        factor: 2
+                        maxDuration: 10m
+                    limit: 10
+    templatePatch: |
+        {{`{{- with get . "values" }}`}}
+        spec:
+            source:
+                helm:
+                    valuesObject:
+                        {{`{{- toYaml . | nindent 16 }}`}}
+        {{`{{- end }}`}}
+{{- end -}}

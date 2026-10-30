@@ -1,0 +1,12 @@
+custom-dockerfile-oauth-application-user-agent:
+    .serviceAddress: localhost:58081
+    .serviceScheme: http
+    name: Custom Dockerfile OAuth Application User Agent
+    scopes:
+        -   Liferay.Headless.Admin.Workflow.everything
+    type: oAuthApplicationUserAgent
+custom-dockerfile-object-action:
+    name: Custom Dockerfile Object Action
+    oAuth2ApplicationExternalReferenceCode: custom-dockerfile-oauth-application-user-agent
+    resourcePath: /object/action
+    type: objectAction
