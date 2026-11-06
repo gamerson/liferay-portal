@@ -32,6 +32,7 @@ import com.liferay.gradle.plugins.workspace.internal.util.JsonNodeUtil;
 import com.liferay.gradle.plugins.workspace.internal.util.StringUtil;
 import com.liferay.gradle.plugins.workspace.internal.util.copy.HashifyAction;
 import com.liferay.gradle.plugins.workspace.task.CreateClientExtensionConfigTask;
+import com.liferay.gradle.plugins.workspace.task.PublishClientExtensionTask;
 import com.liferay.gradle.plugins.workspace.task.WriteLanguageBatchEngineDataTask;
 import com.liferay.gradle.util.ArrayUtil;
 import com.liferay.gradle.util.Validator;
@@ -85,7 +86,9 @@ import org.gradle.api.plugins.ExtensionAware;
 import org.gradle.api.plugins.PluginManager;
 import org.gradle.api.provider.Property;
 import org.gradle.api.provider.Provider;
+import org.gradle.api.provider.ProviderFactory;
 import org.gradle.api.provider.SetProperty;
+import org.gradle.api.publish.plugins.PublishingPlugin;
 import org.gradle.api.tasks.Copy;
 import org.gradle.api.tasks.Delete;
 import org.gradle.api.tasks.JavaExec;
@@ -115,6 +118,9 @@ public class ClientExtensionProjectConfigurator
 
 	public static final String CREATE_CLIENT_EXTENSION_CONFIG_TASK_NAME =
 		"createClientExtensionConfig";
+
+	public static final String PUBLISH_CLIENT_EXTENSION_TASK_NAME =
+		"publishClientExtension";
 
 	public static final String VALIDATE_CLIENT_EXTENSION_IDS_TASK_NAME =
 		"validateClientExtensionIds";
@@ -314,6 +320,9 @@ public class ClientExtensionProjectConfigurator
 			project, assembleClientExtensionTaskProvider,
 			createClientExtensionConfigTaskProvider, workspaceExtension);
 
+		_addPublishClientExtensionTask(
+			project, createClientExtensionConfigTaskProvider);
+
 		_configureLiferayRoutes(project, workspaceExtension);
 
 		if (_isLanguageProject(project)) {
@@ -449,6 +458,7 @@ public class ClientExtensionProjectConfigurator
 		SetProperty<String> setProperty = dockerBuildImage.getImages();
 
 		setProperty.add(dockerImageId);
+		setProperty.addAll(_getClientExtensionImages(project));
 
 		Property<String> property = dockerRemoveImage.getImageId();
 
@@ -474,6 +484,92 @@ public class ClientExtensionProjectConfigurator
 			project, LifecycleBasePlugin.CLEAN_TASK_NAME);
 
 		cleanTask.dependsOn(dockerRemoveImage);
+	}
+
+	private void _addPublishClientExtensionTask(
+		Project project,
+		TaskProvider<CreateClientExtensionConfigTask>
+			createClientExtensionConfigTaskProvider) {
+
+		TaskProvider<PublishClientExtensionTask>
+			publishClientExtensionTaskProvider = GradleUtil.addTaskProvider(
+				project, PUBLISH_CLIENT_EXTENSION_TASK_NAME,
+				PublishClientExtensionTask.class);
+
+		publishClientExtensionTaskProvider.configure(
+			publishClientExtensionTask -> {
+				publishClientExtensionTask.dependsOn(
+					RootProjectConfigurator.BUILD_DOCKER_IMAGE_TASK_NAME);
+				publishClientExtensionTask.setDescription(
+					"Pushes the client extension's Docker image and writes " +
+						"the liferay-client-extension chart values that " +
+							"deploy it.");
+				publishClientExtensionTask.setGroup(
+					PublishingPlugin.PUBLISH_TASK_GROUP);
+
+				ProviderFactory providerFactory = project.getProviders();
+
+				publishClientExtensionTask.getChart(
+				).convention(
+					providerFactory.gradleProperty(
+						_PROPERTY_PREFIX + "chart"
+					).orElse(
+						_CHART
+					)
+				);
+
+				publishClientExtensionTask.getChartVersion(
+				).convention(
+					providerFactory.gradleProperty(
+						_PROPERTY_PREFIX + "chart.version"
+					).orElse(
+						_CHART_VERSION
+					)
+				);
+
+				publishClientExtensionTask.getClientExtensionConfigFile(
+				).fileProvider(
+					createClientExtensionConfigTaskProvider.map(
+						CreateClientExtensionConfigTask::
+							getClientExtensionConfigFile)
+				);
+
+				publishClientExtensionTask.getDockerfile(
+				).fileProvider(
+					createClientExtensionConfigTaskProvider.map(
+						CreateClientExtensionConfigTask::getDockerFile)
+				);
+
+				publishClientExtensionTask.getHelm(
+				).convention(
+					providerFactory.gradleProperty(
+						_PROPERTY_PREFIX + "helm"
+					).orElse(
+						"helm"
+					)
+				);
+
+				publishClientExtensionTask.getImages(
+				).addAll(
+					_getClientExtensionImages(project)
+				);
+
+				publishClientExtensionTask.getLcpJsonFile(
+				).fileProvider(
+					createClientExtensionConfigTaskProvider.map(
+						CreateClientExtensionConfigTask::getLcpJsonFile)
+				);
+
+				publishClientExtensionTask.getRegistry(
+				).convention(
+					_getRegistryProvider(project)
+				);
+
+				publishClientExtensionTask.getVersion(
+				).convention(
+					_getVersionProvider(project)
+				);
+			});
 	}
 
 	private TaskProvider<Zip> _baseConfigureClientExtensionProject(
@@ -1179,6 +1275,28 @@ public class ClientExtensionProjectConfigurator
 		copy.from(buildClientExtensionZipTaskProvider);
 	}
 
+	/**
+	 * Returns the image that publishClientExtension pushes,
+	 * &lt;registry&gt;/&lt;project name&gt;:&lt;version&gt;, as a list that is empty until the
+	 * liferay.workspace.client.extension.registry property and a version are
+	 * set. The version is the project's Gradle version, or else the
+	 * liferay.workspace.client.extension.version property.
+	 */
+	private Provider<List<String>> _getClientExtensionImages(Project project) {
+		Provider<String> registryProvider = _getRegistryProvider(project);
+
+		Provider<String> imageProvider = registryProvider.zip(
+			_getVersionProvider(project),
+			(registry, version) -> StringUtil.concat(
+				registry, "/", project.getName(), ":", version));
+
+		return imageProvider.map(
+			List::of
+		).orElse(
+			List.of()
+		);
+	}
+
 	private String _getDockerImageId(Project project) {
 		String propertyName = "imageId";
 
@@ -1224,6 +1342,34 @@ public class ClientExtensionProjectConfigurator
 		}
 
 		return (Map<String, Object>)value;
+	}
+
+	private Provider<String> _getRegistryProvider(Project project) {
+		ProviderFactory providerFactory = project.getProviders();
+
+		return providerFactory.gradleProperty(_PROPERTY_PREFIX + "registry");
+	}
+
+	/**
+	 * Returns the client extension's version: its Gradle version, or else the
+	 * liferay.workspace.client.extension.version property.
+	 */
+	private Provider<String> _getVersionProvider(Project project) {
+		ProviderFactory providerFactory = project.getProviders();
+
+		Provider<String> versionProvider = providerFactory.provider(
+			() -> {
+				String version = String.valueOf(project.getVersion());
+
+				if (version.equals(Project.DEFAULT_VERSION)) {
+					return null;
+				}
+
+				return version;
+			});
+
+		return versionProvider.orElse(
+			providerFactory.gradleProperty(_PROPERTY_PREFIX + "version"));
 	}
 
 	private boolean _isActiveProfile(Project project, String profileName) {
@@ -1443,6 +1589,12 @@ public class ClientExtensionProjectConfigurator
 				StringUtil.join(StringUtil.COMMA_AND_SPACE, validValues)));
 	}
 
+	private static final String _CHART =
+		"oci://us-central1-docker.pkg.dev/external-assets-prd" +
+			"/liferay-helm-chart/liferay-client-extension";
+
+	private static final String _CHART_VERSION = "0.1.1";
+
 	private static final String _CLIENT_EXTENSION_YAML =
 		"client-extension.yaml";
 
@@ -1452,6 +1604,9 @@ public class ClientExtensionProjectConfigurator
 		"LIFERAY_ROUTES_CLIENT_EXTENSION";
 
 	private static final String _ENV_LIFERAY_ROUTES_DXP = "LIFERAY_ROUTES_DXP";
+
+	private static final String _PROPERTY_PREFIX =
+		WorkspacePlugin.PROPERTY_PREFIX + "client.extension.";
 
 	private static final Pattern _overrideClientExtensionYamlPattern =
 		Pattern.compile("^client-extension\\.([a-z]+)\\.yaml$");
