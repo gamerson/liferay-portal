@@ -26,6 +26,8 @@ argocd:
     sso:
         credentialsSecretKey: ""
         enabled: false
+clientExtensions:
+    sourceRepos: []
 clusterBootstrap:
     enabled: true
     image: alpine:3
