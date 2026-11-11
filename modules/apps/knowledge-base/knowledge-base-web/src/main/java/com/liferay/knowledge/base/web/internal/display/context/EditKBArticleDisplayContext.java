@@ -74,6 +74,19 @@ public class EditKBArticleDisplayContext {
 
 		_httpServletRequest = PortalUtil.getHttpServletRequest(
 			liferayPortletRequest);
+
+		KBTemplate kbTemplate = (KBTemplate)liferayPortletRequest.getAttribute(
+			KBWebKeys.KNOWLEDGE_BASE_KB_TEMPLATE);
+
+		if (kbTemplate == null) {
+			_kbTemplateContent = StringPool.BLANK;
+			_kbTemplateTitle = StringPool.BLANK;
+		}
+		else {
+			_kbTemplateContent = kbTemplate.getContent();
+			_kbTemplateTitle = kbTemplate.getTitle();
+		}
+
 		_redirect = PortalUtil.escapeRedirect(
 			ParamUtil.getString(
 				liferayPortletRequest.getHttpServletRequest(), "redirect",
@@ -135,7 +148,7 @@ public class EditKBArticleDisplayContext {
 	public String getContent() {
 		return BeanParamUtil.getString(
 			getKBArticle(), _liferayPortletRequest, "content",
-			_getKBTemplateContent());
+			KBArticle::getContent, _kbTemplateContent);
 	}
 
 	public String getDatePickerFormattedDisplayDate() {
@@ -255,12 +268,13 @@ public class EditKBArticleDisplayContext {
 	public String getKBArticleTitle() {
 		return BeanParamUtil.getString(
 			getKBArticle(), _liferayPortletRequest, "title",
-			_getKBTemplateTitle());
+			KBArticle::getTitle, _kbTemplateTitle);
 	}
 
 	public String getKBArticleURLTitle() {
 		return BeanParamUtil.getString(
-			getKBArticle(), _liferayPortletRequest, "urlTitle");
+			getKBArticle(), _liferayPortletRequest, "urlTitle",
+			KBArticle::getUrlTitle);
 	}
 
 	public String getKBArticleVersion() {
@@ -276,6 +290,7 @@ public class EditKBArticleDisplayContext {
 
 		_parentResourceClassNameId = BeanParamUtil.getLong(
 			getKBArticle(), _liferayPortletRequest, "parentResourceClassNameId",
+			KBArticle::getParentResourceClassNameId,
 			PortalUtil.getClassNameId(KBFolderConstants.getClassName()));
 
 		return _parentResourceClassNameId;
@@ -288,6 +303,7 @@ public class EditKBArticleDisplayContext {
 
 		_parentResourcePrimKey = BeanParamUtil.getLong(
 			getKBArticle(), _liferayPortletRequest, "parentResourcePrimKey",
+			KBArticle::getParentResourcePrimKey,
 			KBFolderConstants.DEFAULT_PARENT_FOLDER_ID);
 
 		return _parentResourcePrimKey;
@@ -314,7 +330,8 @@ public class EditKBArticleDisplayContext {
 		}
 
 		_resourcePrimKey = BeanParamUtil.getLong(
-			getKBArticle(), _liferayPortletRequest, "resourcePrimKey");
+			getKBArticle(), _liferayPortletRequest, "resourcePrimKey",
+			KBArticle::getResourcePrimKey);
 
 		return _resourcePrimKey;
 	}
@@ -570,43 +587,13 @@ public class EditKBArticleDisplayContext {
 		return _kbSectionPortletInstanceConfiguration;
 	}
 
-	private KBTemplate _getKBTemplate() {
-		if (_kbTemplate != null) {
-			return _kbTemplate;
-		}
-
-		_kbTemplate = (KBTemplate)_liferayPortletRequest.getAttribute(
-			KBWebKeys.KNOWLEDGE_BASE_KB_TEMPLATE);
-
-		return _kbTemplate;
-	}
-
-	private String _getKBTemplateContent() {
-		KBTemplate kbTemplate = _getKBTemplate();
-
-		if (kbTemplate == null) {
-			return StringPool.BLANK;
-		}
-
-		return kbTemplate.getContent();
-	}
-
-	private String _getKBTemplateTitle() {
-		KBTemplate kbTemplate = _getKBTemplate();
-
-		if (kbTemplate == null) {
-			return StringPool.BLANK;
-		}
-
-		return kbTemplate.getTitle();
-	}
-
 	private final HttpServletRequest _httpServletRequest;
 	private KBArticle _kbArticle;
 	private final KBGroupServiceConfiguration _kbGroupServiceConfiguration;
 	private KBSectionPortletInstanceConfiguration
 		_kbSectionPortletInstanceConfiguration;
-	private KBTemplate _kbTemplate;
+	private final String _kbTemplateContent;
+	private final String _kbTemplateTitle;
 	private final LiferayPortletRequest _liferayPortletRequest;
 	private final LiferayPortletResponse _liferayPortletResponse;
 	private Boolean _neverExpire;

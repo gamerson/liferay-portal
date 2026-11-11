@@ -6,6 +6,8 @@
 import {Locator, Page, expect} from '@playwright/test';
 
 import {clickAndExpectToBeVisible} from '../../../../utils/clickAndExpectToBeVisible';
+import getRandomString from '../../../../utils/getRandomString';
+import {waitForAlert} from '../../../../utils/waitForAlert';
 import {DataSetPage} from '../../../site-cms-site-initializer/main/pages/DataSetPage';
 import {EditFieldMappingsPage} from './EditFieldMappingsPage';
 
@@ -18,6 +20,7 @@ export class FieldMappingsPage {
 	readonly row: (channelField: string) => Locator;
 	readonly sourceAttributes: (channelField: string) => Locator;
 	readonly status: (channelField: string) => Locator;
+	readonly transformationRules: (channelField: string) => Locator;
 
 	constructor(page: Page) {
 		this.channelField = (channelField) =>
@@ -43,6 +46,8 @@ export class FieldMappingsPage {
 			this.row(channelField).locator('.cell-sourceAttributes');
 		this.status = (channelField) =>
 			this.row(channelField).locator('.cell-status .label');
+		this.transformationRules = (channelField) =>
+			this.row(channelField).locator('.cell-transformationRules');
 	}
 
 	async clearMapping(channelField: string) {
@@ -59,6 +64,19 @@ export class FieldMappingsPage {
 			action: 'Edit',
 			filter: channelField,
 		});
+	}
+
+	async executeConnector() {
+		await clickAndExpectToBeVisible({
+			autoClick: true,
+			target: this.moreActionsMenuItem('Execute'),
+			trigger: this.moreActionsButton,
+		});
+
+		await waitForAlert(
+			this.page,
+			'Execution has started successfully and will continue in the background.'
+		);
 	}
 
 	async expectClearVisible(channelField: string) {
@@ -99,7 +117,10 @@ export class FieldMappingsPage {
 		const editFieldMappingsPage = new EditFieldMappingsPage(this.page);
 
 		for (const {channelField, sourceAttribute, value} of [
-			{channelField: 'Catalog ID', value: '1'},
+			{
+				channelField: 'Catalog External Reference Code',
+				value: getRandomString(),
+			},
 			{channelField: 'Name', sourceAttribute: 'Title (title)'},
 			{channelField: 'Product Type', value: 'simple'},
 			{channelField: 'SKU', sourceAttribute: 'SKU (sku)'},
@@ -119,5 +140,15 @@ export class FieldMappingsPage {
 
 			await expect(this.status(channelField)).toHaveText('Mapped');
 		}
+	}
+
+	async openConnectorSchedule() {
+		await clickAndExpectToBeVisible({
+			autoClick: true,
+			target: this.moreActionsMenuItem('Schedule'),
+			trigger: this.moreActionsButton,
+		});
+
+		await this.page.waitForURL(/edit_dispatch_trigger/);
 	}
 }

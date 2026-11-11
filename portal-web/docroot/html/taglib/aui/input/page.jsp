@@ -268,7 +268,7 @@ boolean choiceField = checkboxField || radioField;
 			valueString = BeanPropertiesUtil.getStringSilent(bean, name);
 		}
 		else if (!ignoreRequestValue && (Validator.isNull(type) || _TYPES.contains(type))) {
-			valueString = BeanParamUtil.getStringSilent(bean, request, name, valueString);
+			valueString = BeanParamUtil.getString(bean, request, name, AUIUtil.getBeanPropertyFunction(name, valueString), valueString);
 
 			if (Validator.isNotNull(fieldParam)) {
 				valueString = ParamUtil.getString(request, fieldParam, valueString);
@@ -336,15 +336,19 @@ boolean choiceField = checkboxField || radioField;
 						var resizeInstance = new A.Resize(
 							{
 								after: {
-									'end': function(event) {
-										Liferay.Util.Session.set('<%= _TEXTAREA_WIDTH_HEIGHT_PREFIX %><%= namespace + id %>', textareaNode.getStyle('height') + ',' + textareaNode.getStyle('width'));
-									}
+									end: function (event) {
+										Liferay.Util.Session.set(
+											'<%= _TEXTAREA_WIDTH_HEIGHT_PREFIX %><%= namespace + id %>',
+											textareaNode.getStyle('height') +
+												',' +
+												textareaNode.getStyle('width')
+										);
+									},
 								},
 								autoHide: true,
 								handles: 'r, br, b',
-								node: textareaNode
-							}
-						);
+								node: textareaNode,
+							});
 
 						textareaNode.setData('resizeInstance', resizeInstance);
 					</aui:script>

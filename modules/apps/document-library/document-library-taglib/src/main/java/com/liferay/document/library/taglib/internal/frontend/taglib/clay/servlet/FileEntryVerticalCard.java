@@ -49,6 +49,13 @@ public class FileEntryVerticalCard implements VerticalCard {
 			repositoryBrowserTagDisplayContext;
 
 		_fileVersion = fileEntry.getFileVersion();
+
+		if (fileEntry.getModel() instanceof DLFileEntry dlFileEntry) {
+			_status = dlFileEntry.getStatus();
+		}
+		else {
+			_status = WorkflowConstants.STATUS_APPROVED;
+		}
 	}
 
 	@Override
@@ -102,7 +109,7 @@ public class FileEntryVerticalCard implements VerticalCard {
 	@Override
 	public List<LabelItem> getLabels() {
 		return LabelItemListBuilder.add(
-			labelItem -> labelItem.setStatus(_getStatus())
+			labelItem -> labelItem.setStatus(_status)
 		).build();
 	}
 
@@ -137,19 +144,12 @@ public class FileEntryVerticalCard implements VerticalCard {
 		return !_actions.isEmpty();
 	}
 
-	private int _getStatus() {
-		if (_fileEntry.getModel() instanceof DLFileEntry dlFileEntry) {
-			return dlFileEntry.getStatus();
-		}
-
-		return WorkflowConstants.STATUS_APPROVED;
-	}
-
 	private final Set<String> _actions;
 	private final FileEntry _fileEntry;
 	private final FileVersion _fileVersion;
 	private final HttpServletRequest _httpServletRequest;
 	private final RepositoryBrowserTagDisplayContext
 		_repositoryBrowserTagDisplayContext;
+	private final int _status;
 
 }

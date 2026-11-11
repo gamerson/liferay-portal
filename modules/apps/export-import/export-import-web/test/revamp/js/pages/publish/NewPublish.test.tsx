@@ -112,6 +112,7 @@ const getFilteredPreviewCall = () =>
 
 const mockAPIRoutes = ({
 	deleteStatus = 204,
+	postError = false,
 	scheduledPublishProcess = SCHEDULED_PUBLISH_PROCESS,
 } = {}) => {
 	fetch.mockResponse(async (request) => {
@@ -119,6 +120,20 @@ const mockAPIRoutes = ({
 			return {
 				body: '',
 				status: deleteStatus,
+			};
+		}
+
+		if (
+			postError &&
+			request.method === 'POST' &&
+			request.url.endsWith('publish-processes')
+		) {
+			return {
+				body: JSON.stringify({
+					status: 'BAD_REQUEST',
+					title: 'Server error title',
+				}),
+				status: 400,
 			};
 		}
 
@@ -1104,6 +1119,27 @@ describe('NewPublish', () => {
 		expect(Liferay.Util.openToast).toHaveBeenCalledWith(
 			expect.objectContaining({type: 'danger'})
 		);
+	});
+
+	it('shows the server error title when the publication fails', async () => {
+		mockAPIRoutes({postError: true});
+
+		renderComponent();
+
+		await fillRequiredFields();
+
+		await user.click(
+			screen.getByRole('button', {name: /publish-to-live/i})
+		);
+
+		await waitFor(() => {
+			expect(Liferay.Util.openToast).toHaveBeenCalledWith({
+				message: 'Server error title',
+				type: 'danger',
+			});
+		});
+
+		expect(Liferay.Util.navigate).not.toHaveBeenCalled();
 	});
 
 	it('requires a cron expression for a custom recurrence', async () => {

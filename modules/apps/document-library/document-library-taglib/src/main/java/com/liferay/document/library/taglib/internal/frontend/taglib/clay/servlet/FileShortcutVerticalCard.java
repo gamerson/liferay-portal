@@ -49,6 +49,13 @@ public class FileShortcutVerticalCard implements VerticalCard {
 			repositoryBrowserTagDisplayContext;
 
 		_fileVersion = fileShortcut.getFileVersion();
+
+		if (fileShortcut.getModel() instanceof DLFileShortcut dlFileShortcut) {
+			_status = dlFileShortcut.getStatus();
+		}
+		else {
+			_status = WorkflowConstants.STATUS_APPROVED;
+		}
 	}
 
 	@Override
@@ -102,7 +109,7 @@ public class FileShortcutVerticalCard implements VerticalCard {
 	@Override
 	public List<LabelItem> getLabels() {
 		return LabelItemListBuilder.add(
-			labelItem -> labelItem.setStatus(_getStatus())
+			labelItem -> labelItem.setStatus(_status)
 		).build();
 	}
 
@@ -137,19 +144,12 @@ public class FileShortcutVerticalCard implements VerticalCard {
 		return !_actions.isEmpty();
 	}
 
-	private int _getStatus() {
-		if (_fileShortcut.getModel() instanceof DLFileShortcut dlFileShortcut) {
-			return dlFileShortcut.getStatus();
-		}
-
-		return WorkflowConstants.STATUS_APPROVED;
-	}
-
 	private final Set<String> _actions;
 	private final FileShortcut _fileShortcut;
 	private final FileVersion _fileVersion;
 	private final HttpServletRequest _httpServletRequest;
 	private final RepositoryBrowserTagDisplayContext
 		_repositoryBrowserTagDisplayContext;
+	private final int _status;
 
 }

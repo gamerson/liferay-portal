@@ -38,6 +38,7 @@ import com.liferay.commerce.model.CommerceOrderType;
 import com.liferay.commerce.model.CommerceShippingEngine;
 import com.liferay.commerce.model.CommerceShippingMethod;
 import com.liferay.commerce.model.CommerceShippingOption;
+import com.liferay.commerce.order.CommerceOrderHttpHelper;
 import com.liferay.commerce.order.CommerceOrderValidatorRegistry;
 import com.liferay.commerce.order.CommerceOrderValidatorResult;
 import com.liferay.commerce.order.engine.CommerceOrderEngine;
@@ -100,6 +101,7 @@ import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.servlet.DummyHttpServletResponse;
 import com.liferay.portal.kernel.settings.GroupServiceSettingsLocator;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
+import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.BigDecimalUtil;
 import com.liferay.portal.kernel.util.CalendarFactoryUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -126,6 +128,7 @@ import java.security.Key;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -147,7 +150,11 @@ public class CartResourceImpl extends BaseCartResourceImpl {
 
 	@Override
 	public Response deleteCart(Long cartId) throws Exception {
-		_commerceOrderService.deleteCommerceOrder(cartId);
+		CommerceOrder commerceOrder = _commerceOrderService.getCommerceOrder(
+			cartId);
+
+		_commerceOrderService.deleteCommerceOrder(
+			commerceOrder.getCommerceOrderId());
 
 		Response.ResponseBuilder responseBuilder = Response.noContent();
 
@@ -236,6 +243,15 @@ public class CartResourceImpl extends BaseCartResourceImpl {
 
 		CommerceChannel commerceChannel =
 			_commerceChannelLocalService.getCommerceChannel(channelId);
+
+		long[] commerceAccountIds = _getCommerceAccountIds(
+			commerceChannel.getGroupId());
+
+		if ((commerceAccountIds != null) &&
+			!ArrayUtil.contains(commerceAccountIds, accountId)) {
+
+			return Page.of(Collections.emptyList());
+		}
 
 		return SearchUtil.search(
 			null,
@@ -454,6 +470,13 @@ public class CartResourceImpl extends BaseCartResourceImpl {
 
 		CommerceChannelConfigurationUtil.validateGuestCheckout(
 			commerceOrder.getCommerceOrderId());
+
+		if (commerceOrder.isGuestOrder()) {
+			contextHttpServletRequest.setAttribute(
+				_commerceOrderHttpHelper.getCookieName(
+					commerceOrder.getGroupId()),
+				commerceOrder.getUuid());
+		}
 
 		_updateOrder(commerceOrder, cart);
 
@@ -1506,6 +1529,9 @@ public class CartResourceImpl extends BaseCartResourceImpl {
 
 	@Reference
 	private CommerceOrderEngine _commerceOrderEngine;
+
+	@Reference
+	private CommerceOrderHttpHelper _commerceOrderHttpHelper;
 
 	@Reference
 	private CommerceOrderItemService _commerceOrderItemService;

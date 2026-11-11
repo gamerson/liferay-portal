@@ -14,10 +14,10 @@ String redirect = ParamUtil.getString(request, "redirect");
 
 WorkflowDefinition workflowDefinition = (WorkflowDefinition)request.getAttribute(WebKeys.WORKFLOW_DEFINITION);
 
-String name = BeanParamUtil.getString(workflowDefinition, request, "name");
-int version = BeanParamUtil.getInteger(workflowDefinition, request, "version");
-String content = BeanParamUtil.getString(workflowDefinition, request, "contentAsXML");
-boolean active = BeanParamUtil.getBoolean(workflowDefinition, request, "active");
+String name = BeanParamUtil.getString(workflowDefinition, request, "name", WorkflowDefinition::getName);
+int version = BeanParamUtil.getInteger(workflowDefinition, request, "version", WorkflowDefinition::getVersion);
+String content = BeanParamUtil.getString(workflowDefinition, request, "contentAsXML", WorkflowDefinition::getContentAsXML);
+boolean active = BeanParamUtil.getBoolean(workflowDefinition, request, "active", WorkflowDefinition::isActive);
 
 String duplicateTitle = workflowDefinitionDisplayContext.getDuplicateTitle(workflowDefinition);
 
@@ -244,7 +244,7 @@ renderResponse.setTitle((workflowDefinition == null) ? LanguageUtil.get(request,
 								<liferay-ui:input-localized
 									name="title"
 									placeholder="untitled-workflow"
-									xml="<%= (workflowDefinition == null) ? StringPool.BLANK : workflowDefinition.getTitle() %>"
+									xml='<%= BeanPropertiesUtil.getString(workflowDefinition, "title") %>'
 								/>
 							</aui:field-wrapper>
 						</clay:col>

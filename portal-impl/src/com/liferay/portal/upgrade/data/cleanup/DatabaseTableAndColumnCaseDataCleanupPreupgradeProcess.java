@@ -20,11 +20,11 @@ import com.liferay.portal.kernel.upgrade.data.cleanup.DataCleanupPreupgradeProce
 import com.liferay.portal.kernel.upgrade.data.cleanup.util.DataCleanupLoggingUtil;
 import com.liferay.portal.kernel.util.PropsValues;
 import com.liferay.portal.kernel.util.StringUtil;
-import com.liferay.portal.kernel.util.Validator;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -95,19 +95,26 @@ public class DatabaseTableAndColumnCaseDataCleanupPreupgradeProcess
 			alterTableName(tempTableName, expectedTableName);
 		}
 
-		Map<String, List<String>> columnDefinitionsMap =
+		Map<String, Map<String, String>> expectedColumnNamesMap = new TreeMap<>(
+			String.CASE_INSENSITIVE_ORDER);
+
+		_putColumnNames(
 			DBResourceUtil.getServiceComponentPortalColumnDefinitionsMap(
-				connection);
-
-		if (columnDefinitionsMap.isEmpty()) {
-			return;
-		}
-
-		columnDefinitionsMap.putAll(
+				connection),
+			expectedColumnNamesMap);
+		_putColumnNames(
 			DBResourceUtil.getServiceComponentModuleColumnDefinitionsMap(
-				connection));
+				connection),
+			expectedColumnNamesMap);
+		_putColumnNames(
+			DBResourceUtil.getPortalColumnDefinitionsMap(),
+			expectedColumnNamesMap);
+		_putColumnNames(
+			DBResourceUtil.getModuleColumnDefinitionsMap(),
+			expectedColumnNamesMap);
 
-		Map<String, Map<String, String>> columnsMap = new TreeMap<>();
+		Map<String, Map<String, String>> columnNamesMap = new TreeMap<>(
+			String.CASE_INSENSITIVE_ORDER);
 
 		for (String tableName : expectedTableNames) {
 			try (ResultSet resultSet = databaseMetaData.getColumns(
@@ -117,7 +124,7 @@ public class DatabaseTableAndColumnCaseDataCleanupPreupgradeProcess
 				while (resultSet.next()) {
 					String columnName = resultSet.getString("COLUMN_NAME");
 
-					columnsMap.computeIfAbsent(
+					columnNamesMap.computeIfAbsent(
 						tableName,
 						k -> new TreeMap<>(String.CASE_INSENSITIVE_ORDER)
 					).put(
@@ -127,16 +134,20 @@ public class DatabaseTableAndColumnCaseDataCleanupPreupgradeProcess
 			}
 		}
 
-		for (Map.Entry<String, List<String>> entry :
-				columnDefinitionsMap.entrySet()) {
+		for (Map.Entry<String, Map<String, String>> entry :
+				columnNamesMap.entrySet()) {
 
 			String tableName = entry.getKey();
-			List<String> columnDefinitions = entry.getValue();
 
-			Map<String, String> columnNames = columnsMap.get(tableName);
+			Map<String, String> expectedColumnNames =
+				expectedColumnNamesMap.get(tableName);
+
+			if (expectedColumnNames == null) {
+				continue;
+			}
 
 			_validateColumnNamesCasing(
-				dbInspector, columnDefinitions, columnNames,
+				entry.getValue(), dbInspector, expectedColumnNames.values(),
 				databaseMetaData.getMaxColumnNameLength(),
 				dbInspector.normalizeName(tableName));
 		}
@@ -156,26 +167,36 @@ public class DatabaseTableAndColumnCaseDataCleanupPreupgradeProcess
 		);
 	}
 
+	private void _putColumnNames(
+		Map<String, List<String>> columnDefinitionsMap,
+		Map<String, Map<String, String>> expectedColumnNamesMap) {
+
+		for (Map.Entry<String, List<String>> entry :
+				columnDefinitionsMap.entrySet()) {
+
+			Map<String, String> columnNames =
+				expectedColumnNamesMap.computeIfAbsent(
+					entry.getKey(),
+					tableName -> new TreeMap<>(String.CASE_INSENSITIVE_ORDER));
+
+			for (String columnDefinition : entry.getValue()) {
+				String columnName =
+					StringUtil.split(columnDefinition, StringPool.SPACE)[0];
+
+				columnNames.put(columnName, columnName);
+			}
+		}
+	}
+
 	private void _validateColumnNamesCasing(
-			DBInspector dbInspector, List<String> columnDefinitions,
-			Map<String, String> columnNames, int maxColumnNameLength,
+			Map<String, String> columnNames, DBInspector dbInspector,
+			Collection<String> expectedColumnNames, int maxColumnNameLength,
 			String tableName)
 		throws Exception {
 
-		if ((columnNames == null) || columnNames.isEmpty()) {
-			return;
-		}
-
 		DB db = DBManagerUtil.getDB();
 
-		for (String columnDefinition : columnDefinitions) {
-			if (Validator.isNull(columnDefinition)) {
-				continue;
-			}
-
-			String expectedColumnName =
-				StringUtil.split(columnDefinition, StringPool.SPACE)[0];
-
+		for (String expectedColumnName : expectedColumnNames) {
 			if ((db.getDBType() != DBType.MARIADB) &&
 				(db.getDBType() != DBType.MYSQL)) {
 
@@ -207,26 +228,14 @@ public class DatabaseTableAndColumnCaseDataCleanupPreupgradeProcess
 				_log, tableName + ", column " + columnName, expectedColumnName,
 				"it was incorrectly cased");
 
-			int index = columnDefinition.indexOf(StringPool.SPACE);
-
-			String columnDataType =
-				(index != -1) ? columnDefinition.substring(index + 1) : "";
-
 			String tempColumnName = _getTempName(
 				maxColumnNameLength, expectedColumnName);
 
-			String tempColumnDefinition =
-				tempColumnName + StringPool.SPACE + columnDataType;
+			db.alterColumnName(
+				connection, tableName, columnName, tempColumnName);
 
 			db.alterColumnName(
-				connection, tableName, columnName, tempColumnDefinition);
-
-			String expectedColumnDefinition =
-				expectedColumnName + StringPool.SPACE + columnDataType;
-
-			db.alterColumnName(
-				connection, tableName, tempColumnName,
-				expectedColumnDefinition);
+				connection, tableName, tempColumnName, expectedColumnName);
 		}
 	}
 

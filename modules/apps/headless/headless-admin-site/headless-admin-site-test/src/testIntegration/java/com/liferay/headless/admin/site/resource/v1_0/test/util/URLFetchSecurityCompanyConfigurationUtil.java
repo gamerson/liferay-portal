@@ -16,16 +16,14 @@ import com.liferay.portal.security.configuration.URLFetchSecurityCompanyConfigur
 public class URLFetchSecurityCompanyConfigurationUtil {
 
 	public static <T> T swap(
-			String[] urlHostsAllowed, boolean urlLocalNetworkAccessEnabled,
-			UnsafeSupplier<T, Exception> unsafeSupplier)
+			UnsafeSupplier<T, Exception> unsafeSupplier,
+			boolean urlLocalNetworkAccessEnabled)
 		throws Exception {
 
 		try (ConfigurationTemporarySwapper configurationTemporarySwapper =
 				new ConfigurationTemporarySwapper(
 					URLFetchSecurityCompanyConfiguration.class.getName(),
 					HashMapDictionaryBuilder.<String, Object>put(
-						"urlHostsAllowed", urlHostsAllowed
-					).put(
 						"urlLocalNetworkAccessEnabled",
 						urlLocalNetworkAccessEnabled
 					).build())) {
@@ -34,15 +32,17 @@ public class URLFetchSecurityCompanyConfigurationUtil {
 		}
 	}
 
-	public static <T> T swapURLLocalNetworkAccessEnabled(
-			boolean urlLocalNetworkAccessEnabled,
-			UnsafeSupplier<T, Exception> unsafeSupplier)
+	public static <T> T swap(
+			UnsafeSupplier<T, Exception> unsafeSupplier,
+			String[] urlHostsAllowed, boolean urlLocalNetworkAccessEnabled)
 		throws Exception {
 
 		try (ConfigurationTemporarySwapper configurationTemporarySwapper =
 				new ConfigurationTemporarySwapper(
 					URLFetchSecurityCompanyConfiguration.class.getName(),
 					HashMapDictionaryBuilder.<String, Object>put(
+						"urlHostsAllowed", urlHostsAllowed
+					).put(
 						"urlLocalNetworkAccessEnabled",
 						urlLocalNetworkAccessEnabled
 					).build())) {

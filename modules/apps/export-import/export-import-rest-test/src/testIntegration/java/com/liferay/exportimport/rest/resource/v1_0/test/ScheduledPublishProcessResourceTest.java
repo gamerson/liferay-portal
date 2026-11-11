@@ -25,18 +25,27 @@ import com.liferay.exportimport.rest.client.dto.v1_0.PortletDataHandlerTreeSelec
 import com.liferay.exportimport.rest.client.dto.v1_0.PublishProcessRequest;
 import com.liferay.exportimport.rest.client.dto.v1_0.ScheduledPublishProcess;
 import com.liferay.exportimport.rest.client.dto.v1_0.ScheduledPublishProcessRequest;
+import com.liferay.exportimport.rest.client.http.HttpInvoker;
 import com.liferay.exportimport.rest.client.pagination.Page;
 import com.liferay.exportimport.rest.client.pagination.Pagination;
+import com.liferay.exportimport.rest.client.resource.v1_0.ScheduledPublishProcessResource;
 import com.liferay.journal.model.JournalArticle;
 import com.liferay.layout.admin.constants.LayoutAdminPortletKeys;
 import com.liferay.petra.string.StringPool;
+import com.liferay.portal.kernel.json.JSONFactory;
+import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.language.LanguageUtil;
+import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.test.util.GroupTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.test.util.UserTestUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.CalendarFactoryUtil;
+import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.MapUtil;
+import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.PropsValues;
 import com.liferay.portal.kernel.util.Time;
 import com.liferay.portal.kernel.util.TimeZoneUtil;
 import com.liferay.portal.test.log.LogCapture;
@@ -48,6 +57,7 @@ import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TimeZone;
@@ -229,6 +239,47 @@ public class ScheduledPublishProcessResourceTest
 			});
 	}
 
+	private void _assertPostSiteScheduledPublishProcessProblem(
+			String key, Locale locale,
+			String scheduledPublishProcessCronExpression, String type)
+		throws Exception {
+
+		User user = UserTestUtil.getAdminUser(testCompany.getCompanyId());
+
+		ScheduledPublishProcessResource scheduledPublishProcessResource =
+			ScheduledPublishProcessResource.builder(
+			).authentication(
+				user.getEmailAddress(), PropsValues.DEFAULT_ADMIN_PASSWORD
+			).endpoint(
+				testCompany.getVirtualHostname(),
+				PortalUtil.getPortalServerPort(false), "http"
+			).locale(
+				locale
+			).build();
+
+		HttpInvoker.HttpResponse httpResponse =
+			scheduledPublishProcessResource.
+				postSiteScheduledPublishProcessHttpResponse(
+					testGroup.getExternalReferenceCode(),
+					new ScheduledPublishProcessRequest() {
+						{
+							cronExpression =
+								scheduledPublishProcessCronExpression;
+							publishProcessRequest = _toPublishProcessRequest(
+								RandomTestUtil.randomString());
+						}
+					});
+
+		assertHttpResponseStatusCode(400, httpResponse);
+
+		JSONObject jsonObject = _jsonFactory.createJSONObject(
+			httpResponse.getContent());
+
+		Assert.assertEquals(
+			LanguageUtil.get(locale, key), jsonObject.getString("title"));
+		Assert.assertEquals(type, jsonObject.getString("type"));
+	}
+
 	private void _assertScheduledPublishProcess(
 			String expectedRange, DateFilter publishProcessDateFilter,
 			PortletDataHandler... publishProcessPortletDataHandlers)
@@ -408,33 +459,30 @@ public class ScheduledPublishProcessResourceTest
 	private void _testPostSiteScheduledPublishProcessWithInvalidCronExpression()
 		throws Exception {
 
-		try (LogCapture logCapture = LoggerTestUtil.configureLog4JLogger(
-				"com.liferay.portal.vulcan.internal.jaxrs.exception.mapper." +
-					"WebApplicationExceptionMapper",
-				LoggerTestUtil.WARN)) {
-
-			for (String publishProcessCronExpression :
-					new String[] {
-						RandomTestUtil.randomString(), "0 30 9 22 8 ? 2020",
-						"0 0 12 31 2 ? *"
-					}) {
-
-				assertHttpResponseStatusCode(
-					400,
-					scheduledPublishProcessResource.
-						postSiteScheduledPublishProcessHttpResponse(
-							testGroup.getExternalReferenceCode(),
-							new ScheduledPublishProcessRequest() {
-								{
-									cronExpression =
-										publishProcessCronExpression;
-									publishProcessRequest =
-										_toPublishProcessRequest(
-											RandomTestUtil.randomString());
-								}
-							}));
-			}
-		}
+		_assertPostSiteScheduledPublishProcessProblem(
+			"please-enter-a-valid-cron-expression", LocaleUtil.SPAIN,
+			RandomTestUtil.randomString(),
+			"ScheduledPublishProcessScheduleException.MustBeValid");
+		_assertPostSiteScheduledPublishProcessProblem(
+			"please-enter-a-valid-cron-expression", LocaleUtil.getDefault(),
+			RandomTestUtil.randomString(),
+			"ScheduledPublishProcessScheduleException.MustBeValid");
+		_assertPostSiteScheduledPublishProcessProblem(
+			"the-scheduled-process-will-never-run", LocaleUtil.SPAIN,
+			"0 0 12 31 2 ? *",
+			"ScheduledPublishProcessScheduleException.MustRunAtLeastOnce");
+		_assertPostSiteScheduledPublishProcessProblem(
+			"the-scheduled-process-will-never-run", LocaleUtil.SPAIN,
+			"0 30 9 22 8 ? 2020",
+			"ScheduledPublishProcessScheduleException.MustRunAtLeastOnce");
+		_assertPostSiteScheduledPublishProcessProblem(
+			"the-scheduled-process-will-never-run", LocaleUtil.getDefault(),
+			"0 0 12 31 2 ? *",
+			"ScheduledPublishProcessScheduleException.MustRunAtLeastOnce");
+		_assertPostSiteScheduledPublishProcessProblem(
+			"the-scheduled-process-will-never-run", LocaleUtil.getDefault(),
+			"0 30 9 22 8 ? 2020",
+			"ScheduledPublishProcessScheduleException.MustRunAtLeastOnce");
 	}
 
 	private void _testPostSiteScheduledPublishProcessWithInvalidDateRange()
@@ -711,5 +759,8 @@ public class ScheduledPublishProcessResourceTest
 	@Inject
 	private ExportImportConfigurationLocalService
 		_exportImportConfigurationLocalService;
+
+	@Inject
+	private JSONFactory _jsonFactory;
 
 }

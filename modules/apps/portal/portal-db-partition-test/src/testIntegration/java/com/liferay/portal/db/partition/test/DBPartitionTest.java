@@ -553,6 +553,8 @@ public class DBPartitionTest extends BaseDBPartitionTestCase {
 		}
 		else {
 			_testDefaultPartitionName(
+				"/* ' */ use " + defaultPartitionName + " /* ' */", true);
+			_testDefaultPartitionName(
 				"drop view if exists `" + defaultPartitionName + "`.TestView",
 				true);
 			_testDefaultPartitionName("use " + defaultPartitionName, true);
@@ -985,6 +987,21 @@ public class DBPartitionTest extends BaseDBPartitionTestCase {
 					COMPANY_IDS[0])) {
 
 			db.runSQL(sql);
+
+			Assert.assertFalse(unsupported);
+		}
+		catch (UnsupportedOperationException unsupportedOperationException) {
+			Assert.assertTrue(unsupported);
+			Assert.assertEquals(
+				"Unsupported SQL: " + sql,
+				unsupportedOperationException.getMessage());
+		}
+
+		try (SafeCloseable safeCloseable =
+				CompanyThreadLocal.setCompanyIdWithSafeCloseable(
+					COMPANY_IDS[0]);
+			PreparedStatement preparedStatement = connection.prepareStatement(
+				sql)) {
 
 			Assert.assertFalse(unsupported);
 		}

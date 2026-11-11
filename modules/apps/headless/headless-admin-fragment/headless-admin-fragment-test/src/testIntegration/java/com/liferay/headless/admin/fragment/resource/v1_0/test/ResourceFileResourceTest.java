@@ -52,6 +52,9 @@ import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.PropsValues;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.test.log.LogCapture;
+import com.liferay.portal.test.log.LogEntry;
+import com.liferay.portal.test.log.LoggerTestUtil;
 import com.liferay.portal.test.rule.FeatureFlag;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
@@ -117,6 +120,19 @@ public class ResourceFileResourceTest extends BaseResourceFileResourceTestCase {
 			"/content_2.txt",
 			httpExchange -> _writeBytes(_content2Bytes, httpExchange));
 
+		_httpServer.createContext(
+			"/redirect",
+			httpExchange -> {
+				Headers responseHeaders = httpExchange.getResponseHeaders();
+
+				responseHeaders.set(
+					HttpHeaders.LOCATION, _localhostContent1URL);
+
+				httpExchange.sendResponseHeaders(302, -1);
+
+				httpExchange.close();
+			});
+
 		_httpServer.start();
 
 		_content1Base64 = Base64.encode(_content1Bytes);
@@ -127,6 +143,12 @@ public class ResourceFileResourceTest extends BaseResourceFileResourceTestCase {
 
 		_content1URL = baseURL + "/content_1.txt";
 		_content2URL = baseURL + "/content_2.txt";
+
+		_localhostContent1URL =
+			"http://localhost:" + inetSocketAddress.getPort() +
+				"/content_1.txt";
+
+		_redirectURL = baseURL + "/redirect";
 	}
 
 	@AfterClass
@@ -226,18 +248,20 @@ public class ResourceFileResourceTest extends BaseResourceFileResourceTestCase {
 
 	@Override
 	@Test
-	@TestInfo({"LPD-88395", "LPD-107149"})
+	@TestInfo({"LPD-88395", "LPD-107149", "LPD-110076"})
 	public void testPostSiteResourceFile() throws Exception {
 		super.testPostSiteResourceFile();
 
 		_testPostSiteResourceFile();
 		_testPostSiteResourceFileBatch();
+		_testPostSiteResourceFileBatchFileURLReferenceURLFetchSecurity();
 		_testPostSiteResourceFileDuplicateExternalReferenceCodeProblemException();
 		_testPostSiteResourceFileFileURLReferenceFileBase64();
 		_testPostSiteResourceFileFileURLReferenceFileBase64AndURL();
 		_testPostSiteResourceFileFileURLReferenceFileBase64AndURLNullProblemException();
 		_testPostSiteResourceFileFileURLReferenceNullProblemException();
 		_testPostSiteResourceFileFileURLReferenceURL();
+		_testPostSiteResourceFileFileURLReferenceURLFetchSecurity();
 		_testPostSiteResourceFileFileURLReferenceURLLARProblemException();
 		_testPostSiteResourceFileFileURLReferenceURLUnreachableProblemException();
 		_testPostSiteResourceFileFileURLReferenceURLUnsupportedProtocolProblemException();
@@ -256,7 +280,7 @@ public class ResourceFileResourceTest extends BaseResourceFileResourceTestCase {
 
 	@Override
 	@Test
-	@TestInfo({"LPD-88395", "LPD-102182", "LPD-107149"})
+	@TestInfo({"LPD-88395", "LPD-102182", "LPD-107149", "LPD-110076"})
 	public void testPutSiteResourceFile() throws Exception {
 		_testPutSiteResourceFile();
 		_testPutSiteResourceFileBatch();
@@ -265,6 +289,7 @@ public class ResourceFileResourceTest extends BaseResourceFileResourceTestCase {
 		_testPutSiteResourceFileFileURLReferenceFileBase64AndURLNullProblemException();
 		_testPutSiteResourceFileFileURLReferenceNullProblemException();
 		_testPutSiteResourceFileFileURLReferenceURL();
+		_testPutSiteResourceFileFileURLReferenceURLFetchSecurity();
 		_testPutSiteResourceFileName();
 		_testPutSiteResourceFileNameNullProblemException();
 		_testPutSiteResourceFilePortletFileProblemException();
@@ -493,6 +518,31 @@ public class ResourceFileResourceTest extends BaseResourceFileResourceTestCase {
 			ServiceContextTestUtil.getServiceContext(testGroup.getGroupId()));
 	}
 
+	private void _assertAllowedHost(
+			byte[] expectedBytes, String url, String[] urlHostsAllowed,
+			boolean urlLocalNetworkAccessEnabled)
+		throws Exception {
+
+		ResourceFile resourceFile = _randomResourceFile(
+			_getFragmentSetExternalReferenceCode());
+
+		FileURLReference fileURLReference = new FileURLReference();
+
+		fileURLReference.setUrl(url);
+
+		resourceFile.setFileURLReference(fileURLReference);
+
+		ResourceFile postResourceFile =
+			URLFetchSecurityCompanyConfigurationUtil.swap(
+				() -> resourceFileResource.postSiteResourceFile(
+					testGroup.getExternalReferenceCode(), resourceFile),
+				urlHostsAllowed, urlLocalNetworkAccessEnabled);
+
+		_assertContent(
+			expectedBytes, postResourceFile.getExternalReferenceCode(),
+			testGroup.getGroupId());
+	}
+
 	private void _assertContent(
 			byte[] expectedBytes, String externalReferenceCode, long groupId)
 		throws Exception {
@@ -557,6 +607,34 @@ public class ResourceFileResourceTest extends BaseResourceFileResourceTestCase {
 		Problem problem = problemException.getProblem();
 
 		Assert.assertEquals(status, problem.getStatus());
+	}
+
+	private void _assertRestrictedHost(
+			String expectedHost, String expectedURL, String url,
+			String[] urlHostsAllowed, boolean urlLocalNetworkAccessEnabled)
+		throws Exception {
+
+		URLFetchSecurityCompanyConfigurationUtil.swap(
+			() -> {
+				_testPostSiteResourceFileFileURLReferenceProblemException(
+					StringBundler.concat(
+						"Unable to download file from ", expectedURL,
+						" because of restricted host ", expectedHost),
+					url);
+
+				return null;
+			},
+			urlHostsAllowed, urlLocalNetworkAccessEnabled);
+	}
+
+	private void _assertRestrictedHost(
+			String expectedHost, String url, String[] urlHostsAllowed,
+			boolean urlLocalNetworkAccessEnabled)
+		throws Exception {
+
+		_assertRestrictedHost(
+			expectedHost, url, url, urlHostsAllowed,
+			urlLocalNetworkAccessEnabled);
 	}
 
 	private void _assertURLContent(byte[] expectedBytes, String urlString)
@@ -724,11 +802,10 @@ public class ResourceFileResourceTest extends BaseResourceFileResourceTestCase {
 		resourceFile.setFileURLReference(fileURLReference);
 
 		ResourceFile postResourceFile =
-			URLFetchSecurityCompanyConfigurationUtil.
-				swapURLLocalNetworkAccessEnabled(
-					() -> resourceFileResource.postSiteResourceFile(
-						testGroup.getExternalReferenceCode(), resourceFile),
-					true);
+			URLFetchSecurityCompanyConfigurationUtil.swap(
+				() -> resourceFileResource.postSiteResourceFile(
+					testGroup.getExternalReferenceCode(), resourceFile),
+				true);
 
 		_assertContent(
 			expectedBytes, postResourceFile.getExternalReferenceCode(),
@@ -1490,6 +1567,51 @@ public class ResourceFileResourceTest extends BaseResourceFileResourceTestCase {
 			irrelevantGroup.getGroupId());
 	}
 
+	private void _testPostSiteResourceFileBatchFileURLReferenceURLFetchSecurity()
+		throws Exception {
+
+		ResourceFile resourceFile = _randomResourceFile(
+			_getFragmentSetExternalReferenceCode());
+
+		FileURLReference fileURLReference = new FileURLReference();
+
+		fileURLReference.setUrl(_content1URL);
+
+		resourceFile.setFileURLReference(fileURLReference);
+
+		try (LogCapture logCapture = LoggerTestUtil.configureLog4JLogger(
+				"com.liferay.batch.engine.internal." +
+					"BatchEngineImportTaskExecutorImpl",
+				LoggerTestUtil.ERROR)) {
+
+			waitForFinish(
+				"FAILED",
+				HTTPTestUtil.invokeToJSONObject(
+					"[" + resourceFile + "]",
+					"headless-admin-fragment/v1.0/sites/" +
+						testGroup.getExternalReferenceCode() +
+							"/resource-files/batch?createStrategy=INSERT",
+					Http.Method.POST));
+
+			List<LogEntry> logEntries = logCapture.getLogEntries();
+
+			LogEntry logEntry = logEntries.get(0);
+
+			Throwable throwable = logEntry.getThrowable();
+
+			Assert.assertEquals(
+				"Unable to download file from " + _content1URL +
+					" because of restricted host 127.0.0.1",
+				throwable.getMessage());
+		}
+
+		Assert.assertNull(
+			PortletFileRepositoryUtil.
+				fetchPortletFileEntryByExternalReferenceCode(
+					resourceFile.getExternalReferenceCode(),
+					testGroup.getGroupId()));
+	}
+
 	private void _testPostSiteResourceFileDuplicateExternalReferenceCodeProblemException()
 		throws Exception {
 
@@ -1600,6 +1722,33 @@ public class ResourceFileResourceTest extends BaseResourceFileResourceTestCase {
 		_postSiteResourceFileAndAssertContent(_content1Bytes, fileURLReference);
 	}
 
+	private void _testPostSiteResourceFileFileURLReferenceURLFetchSecurity()
+		throws Exception {
+
+		_assertAllowedHost(_content1Bytes, _content1URL, new String[0], true);
+		_assertAllowedHost(
+			_content2Bytes, _content2URL, new String[] {"127.0.0.1"}, true);
+		_assertRestrictedHost(
+			"10.0.0.1", "http://10.0.0.1", new String[0], false);
+		_assertRestrictedHost("127.0.0.1", _content1URL, new String[0], false);
+		_assertRestrictedHost(
+			"127.0.0.1", _content1URL, new String[] {"127.0.0.1"}, false);
+		_assertRestrictedHost(
+			"127.0.0.1", _content1URL,
+			new String[] {RandomTestUtil.randomString()}, false);
+		_assertRestrictedHost(
+			"127.0.0.1", _content1URL,
+			new String[] {RandomTestUtil.randomString()}, true);
+		_assertRestrictedHost(
+			"169.254.169.254", "http://169.254.169.254/latest/meta-data",
+			new String[0], false);
+		_assertRestrictedHost(
+			"localhost", _localhostContent1URL, _redirectURL,
+			new String[] {"127.0.0.1"}, true);
+		_assertRestrictedHost(
+			"localhost", _localhostContent1URL, new String[0], false);
+	}
+
 	private void _testPostSiteResourceFileFileURLReferenceURLLARProblemException()
 		throws Exception {
 
@@ -1614,15 +1763,14 @@ public class ResourceFileResourceTest extends BaseResourceFileResourceTestCase {
 
 		String url = "http://127.0.0.1:1/" + RandomTestUtil.randomString();
 
-		URLFetchSecurityCompanyConfigurationUtil.
-			swapURLLocalNetworkAccessEnabled(
-				() -> {
-					_testPostSiteResourceFileFileURLReferenceProblemException(
-						"Unable to download file from " + url, url);
+		URLFetchSecurityCompanyConfigurationUtil.swap(
+			() -> {
+				_testPostSiteResourceFileFileURLReferenceProblemException(
+					"Unable to download file from " + url, url);
 
-					return null;
-				},
-				true);
+				return null;
+			},
+			true);
 	}
 
 	private void _testPostSiteResourceFileFileURLReferenceURLUnsupportedProtocolProblemException()
@@ -2154,16 +2302,61 @@ public class ResourceFileResourceTest extends BaseResourceFileResourceTestCase {
 
 		updatedResourceFile.setFileURLReference(fileURLReference);
 
-		URLFetchSecurityCompanyConfigurationUtil.
-			swapURLLocalNetworkAccessEnabled(
-				() -> resourceFileResource.putSiteResourceFile(
-					testGroup.getExternalReferenceCode(),
-					postResourceFile.getExternalReferenceCode(),
-					updatedResourceFile),
-				true);
+		URLFetchSecurityCompanyConfigurationUtil.swap(
+			() -> resourceFileResource.putSiteResourceFile(
+				testGroup.getExternalReferenceCode(),
+				postResourceFile.getExternalReferenceCode(),
+				updatedResourceFile),
+			true);
 
 		_assertContent(
 			_content2Bytes, postResourceFile.getExternalReferenceCode(),
+			testGroup.getGroupId());
+	}
+
+	private void _testPutSiteResourceFileFileURLReferenceURLFetchSecurity()
+		throws Exception {
+
+		FragmentCollection fragmentCollection = _addFragmentCollection(
+			testGroup.getGroupId());
+
+		ResourceFile resourceFile = _randomResourceFile(
+			fragmentCollection.getExternalReferenceCode());
+
+		byte[] bytes = RandomTestUtil.randomBytes();
+
+		resourceFile.setFileURLReference(_toFileURLReference(bytes));
+
+		ResourceFile postResourceFile =
+			resourceFileResource.postSiteResourceFile(
+				testGroup.getExternalReferenceCode(), resourceFile);
+
+		ResourceFile updatedResourceFile = _randomResourceFile(
+			fragmentCollection.getExternalReferenceCode());
+
+		FileURLReference fileURLReference = new FileURLReference();
+
+		fileURLReference.setUrl(_content2URL);
+
+		updatedResourceFile.setFileURLReference(fileURLReference);
+
+		Problem.ProblemException problemException = Assert.assertThrows(
+			Problem.ProblemException.class,
+			() -> resourceFileResource.putSiteResourceFile(
+				testGroup.getExternalReferenceCode(),
+				postResourceFile.getExternalReferenceCode(),
+				updatedResourceFile));
+
+		Problem problem = problemException.getProblem();
+
+		Assert.assertEquals("BAD_REQUEST", problem.getStatus());
+		Assert.assertEquals(
+			"Unable to download file from " + _content2URL +
+				" because of restricted host 127.0.0.1",
+			problem.getTitle());
+
+		_assertContent(
+			bytes, postResourceFile.getExternalReferenceCode(),
 			testGroup.getGroupId());
 	}
 
@@ -2385,6 +2578,8 @@ public class ResourceFileResourceTest extends BaseResourceFileResourceTestCase {
 	private static byte[] _content2Bytes;
 	private static String _content2URL;
 	private static HttpServer _httpServer;
+	private static String _localhostContent1URL;
+	private static String _redirectURL;
 
 	@Inject
 	private DLAppLocalService _dlAppLocalService;

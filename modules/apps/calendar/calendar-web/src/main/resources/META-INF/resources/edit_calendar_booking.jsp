@@ -10,7 +10,7 @@
 <%
 String activeView = ParamUtil.getString(request, "activeView", defaultView);
 
-boolean allDay = BeanParamUtil.getBoolean(calendarBooking, request, "allDay");
+boolean allDay = BeanParamUtil.getBoolean(calendarBooking, request, "allDay", CalendarBooking::isAllDay);
 
 TimeZone calendarBookingTimeZone = allDay ? TimeZone.getTimeZone(StringPool.UTC) : userTimeZone;
 
@@ -26,21 +26,13 @@ userStartTimeJCalendar.add(java.util.Calendar.HOUR, 1);
 
 userStartTimeJCalendar.set(java.util.Calendar.MINUTE, 0);
 
-long calendarBookingId = 0;
+long calendarBookingId = BeanPropertiesUtil.getLong(calendarBooking, "calendarBookingId");
 
-if (calendarBooking != null) {
-	calendarBookingId = calendarBooking.getCalendarBookingId();
-}
+int instanceIndex = BeanParamUtil.getInteger(calendarBooking, request, "instanceIndex", CalendarBooking::getInstanceIndex);
 
-int instanceIndex = BeanParamUtil.getInteger(calendarBooking, request, "instanceIndex");
+long calendarId = BeanParamUtil.getLong(calendarBooking, request, "calendarId", CalendarBooking::getCalendarId, defaultCalendar.getCalendarId());
 
-long calendarId = BeanParamUtil.getLong(calendarBooking, request, "calendarId", defaultCalendar.getCalendarId());
-
-long startTime = defaultStartTimeJCalendar.getTimeInMillis();
-
-if (calendarBooking != null) {
-	startTime = calendarBooking.getStartTime();
-}
+long startTime = BeanPropertiesUtil.getLong(calendarBooking, "startTime", defaultStartTimeJCalendar.getTimeInMillis());
 
 java.util.Calendar startTimeJCalendar = JCalendarUtil.getJCalendar(startTime, calendarBookingTimeZone);
 
@@ -66,11 +58,7 @@ java.util.Calendar defaultEndTimeJCalendar = (java.util.Calendar)startTimeJCalen
 
 defaultEndTimeJCalendar.add(java.util.Calendar.MINUTE, defaultDuration);
 
-long endTime = defaultEndTimeJCalendar.getTimeInMillis();
-
-if (calendarBooking != null) {
-	endTime = calendarBooking.getEndTime();
-}
+long endTime = BeanPropertiesUtil.getLong(calendarBooking, "endTime", defaultEndTimeJCalendar.getTimeInMillis());
 
 java.util.Calendar endTimeJCalendar = JCalendarUtil.getJCalendar(endTime, calendarBookingTimeZone);
 
@@ -92,10 +80,10 @@ endTimeJCalendar.setFirstDayOfWeek(weekStartsOn + 1);
 
 endTime = endTimeJCalendar.getTimeInMillis();
 
-long firstReminder = BeanParamUtil.getLong(calendarBooking, request, "firstReminder");
-String firstReminderType = BeanParamUtil.getString(calendarBooking, request, "firstReminderType", CalendarServiceConfigurationValues.CALENDAR_NOTIFICATION_DEFAULT_TYPE.name());
-long secondReminder = BeanParamUtil.getLong(calendarBooking, request, "secondReminder");
-String secondReminderType = BeanParamUtil.getString(calendarBooking, request, "secondReminderType", CalendarServiceConfigurationValues.CALENDAR_NOTIFICATION_DEFAULT_TYPE.name());
+long firstReminder = BeanParamUtil.getLong(calendarBooking, request, "firstReminder", CalendarBooking::getFirstReminder);
+String firstReminderType = BeanParamUtil.getString(calendarBooking, request, "firstReminderType", CalendarBooking::getFirstReminderType, CalendarServiceConfigurationValues.CALENDAR_NOTIFICATION_DEFAULT_TYPE.name());
+long secondReminder = BeanParamUtil.getLong(calendarBooking, request, "secondReminder", CalendarBooking::getSecondReminder);
+String secondReminderType = BeanParamUtil.getString(calendarBooking, request, "secondReminderType", CalendarBooking::getSecondReminderType, CalendarServiceConfigurationValues.CALENDAR_NOTIFICATION_DEFAULT_TYPE.name());
 
 JSONArray acceptedCalendarsJSONArray = JSONFactoryUtil.createJSONArray();
 JSONArray declinedCalendarsJSONArray = JSONFactoryUtil.createJSONArray();

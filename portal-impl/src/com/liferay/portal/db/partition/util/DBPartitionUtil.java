@@ -50,6 +50,7 @@ import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.spring.hibernate.DialectDetector;
 
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -139,6 +140,15 @@ public class DBPartitionUtil {
 			Connection connection = dataSource.getConnection();
 
 			AutoCloseable autoCloseable = _disableAutoCommit(connection)) {
+
+			String partitionName = getPartitionName(toCompanyId);
+
+			if (_dbPartitionDB.existsPartition(connection, partitionName)) {
+				throw new IllegalArgumentException(
+					StringBundler.concat(
+						"Database partition ", partitionName,
+						" already exists"));
+			}
 
 			_copyDBPartition(connection, fromCompanyId, toCompanyId);
 		}
@@ -300,14 +310,15 @@ public class DBPartitionUtil {
 
 		List<String> pids = new ArrayList<>();
 
-		try (Connection connection = ConnectionUtil.getConnection(
+		try (SafeCloseable safeCloseable =
+				CompanyThreadLocal.setRawCompanyIdWithSafeCloseable(companyId);
+
+			Connection connection = ConnectionUtil.getConnection(
 				InfrastructureUtil.getDataSource());
 
 			PreparedStatement preparedStatement = connection.prepareStatement(
-				StringBundler.concat(
-					"select configurationId from ", getPartitionName(companyId),
-					".Configuration_ where dictionary like ",
-					"'%org.apache.felix.configadmin.revision%'"));
+				"select configurationId from Configuration_ where dictionary " +
+					"like '%org.apache.felix.configadmin.revision%'");
 
 			ResultSet resultSet = preparedStatement.executeQuery()) {
 
@@ -322,14 +333,14 @@ public class DBPartitionUtil {
 	public static Map<String, String> getConfigurations(long companyId)
 		throws SQLException {
 
-		DataSource dataSource = InfrastructureUtil.getDataSource();
+		try (SafeCloseable safeCloseable =
+				CompanyThreadLocal.setRawCompanyIdWithSafeCloseable(companyId);
 
-		try (Connection connection = ConnectionUtil.getConnection(dataSource);
+			Connection connection = ConnectionUtil.getConnection(
+				InfrastructureUtil.getDataSource());
 
 			PreparedStatement preparedStatement = connection.prepareStatement(
-				StringBundler.concat(
-					"select configurationId, dictionary from ",
-					getPartitionName(companyId), ".Configuration_"));
+				"select configurationId, dictionary from Configuration_");
 
 			ResultSet resultSet = preparedStatement.executeQuery()) {
 
@@ -603,12 +614,9 @@ public class DBPartitionUtil {
 					"Database partition ", partitionName, " already exists"));
 		}
 
-		try (PreparedStatement preparedStatement = connection.prepareStatement(
-				_dbPartitionDB.getCreatePartitionSQL(
-					connection, partitionName))) {
+		_createPartition(connection, partitionName);
 
-			preparedStatement.executeUpdate();
-
+		try {
 			DBInspector dbInspector = new DBInspector(connection);
 
 			DatabaseMetaData databaseMetaData = connection.getMetaData();
@@ -763,13 +771,62 @@ public class DBPartitionUtil {
 		}
 	}
 
+	private static void _checkSQL(String sql) {
+		if (_isDefaultCompany()) {
+			return;
+		}
+
+		String lowerCaseSQL = StringUtil.toLowerCase(sql);
+
+		int count = StringUtil.count(
+			lowerCaseSQL, PropsValues.DATABASE_PARTITION_SCHEMA_NAME_PREFIX);
+
+		if (count == 0) {
+			count = StringUtil.count(
+				lowerCaseSQL, DATABASE_EXPORTED_PARTITION_SCHEMA_NAME_PREFIX);
+		}
+
+		if (count > 0) {
+			throw new UnsupportedOperationException("Unsupported SQL: " + sql);
+		}
+
+		Matcher setPartitionMatcher = _setPartitionPattern.matcher(
+			lowerCaseSQL);
+
+		if (setPartitionMatcher.lookingAt()) {
+			throw new UnsupportedOperationException("Unsupported SQL: " + sql);
+		}
+
+		if (!lowerCaseSQL.contains(
+				StringUtil.toLowerCase(_defaultPartitionName))) {
+
+			return;
+		}
+
+		Matcher quotedStringMatcher = _quotedStringPattern.matcher(
+			lowerCaseSQL);
+
+		String unquotedSQL = quotedStringMatcher.replaceAll(
+			StringPool.DOUBLE_APOSTROPHE);
+
+		Matcher defaultPartitionNameMatcher =
+			_defaultPartitionNamePattern.matcher(unquotedSQL);
+
+		if (defaultPartitionNameMatcher.find()) {
+			throw new UnsupportedOperationException("Unsupported SQL: " + sql);
+		}
+	}
+
 	private static void _copyDBPartition(
 			Connection connection, long fromCompanyId, long toCompanyId)
 		throws PortalException {
 
+		String targetPartitionName = getPartitionName(toCompanyId);
+
+		_createPartition(connection, targetPartitionName);
+
 		List<String> quartzTableNames = new ArrayList<>();
 		String sourcePartitionName = getPartitionName(fromCompanyId);
-		String targetPartitionName = getPartitionName(toCompanyId);
 
 		try {
 			_copySchema(
@@ -979,64 +1036,87 @@ public class DBPartitionUtil {
 			String targetPartitionName, String... excludedDataTableNames)
 		throws SQLException {
 
+		DatabaseMetaData databaseMetaData = connection.getMetaData();
+
+		try (ResultSet resultSet = databaseMetaData.getTables(
+				_dbPartitionDB.getCatalog(connection, sourcePartitionName),
+				_dbPartitionDB.getSchema(connection, sourcePartitionName), null,
+				new String[] {"TABLE", "VIEW"});
+			Statement statement = connection.createStatement()) {
+
+			while (resultSet.next()) {
+				String fromTableName = resultSet.getString("TABLE_NAME");
+
+				if (Objects.equals(resultSet.getString("TABLE_TYPE"), "VIEW")) {
+					statement.executeUpdate(
+						_dbPartitionDB.getCreateViewSQL(
+							_defaultPartitionName, targetPartitionName,
+							fromTableName));
+
+					continue;
+				}
+
+				statement.executeUpdate(
+					_dbPartitionDB.getCreateTableSQL(
+						connection, sourcePartitionName, targetPartitionName,
+						fromTableName, fromTableName));
+
+				if (StringUtil.equalsIgnoreCase(
+						fromTableName, "Configuration_") ||
+					ArrayUtil.contains(
+						excludedDataTableNames, fromTableName, true)) {
+
+					continue;
+				}
+
+				statement.executeUpdate(
+					_getCopyDataSQL(
+						sourcePartitionName, targetPartitionName, fromTableName,
+						fromTableName,
+						_getColumnNames(
+							connection, sourcePartitionName, fromTableName),
+						StringPool.BLANK));
+			}
+		}
+
+		try (Statement statement = connection.createStatement()) {
+			for (String createRuleSQL :
+					_dbPartitionDB.getCreateRulesSQL(targetPartitionName)) {
+
+				statement.executeUpdate(createRuleSQL);
+			}
+		}
+	}
+
+	private static void _createPartition(
+			Connection connection, String partitionName)
+		throws PortalException {
+
 		try (PreparedStatement preparedStatement = connection.prepareStatement(
 				_dbPartitionDB.getCreatePartitionSQL(
-					connection, targetPartitionName))) {
+					connection, partitionName))) {
 
 			preparedStatement.executeUpdate();
+		}
+		catch (SQLException sqlException1) {
+			DataSource dataSource = InfrastructureUtil.getDataSource();
 
-			DatabaseMetaData databaseMetaData = connection.getMetaData();
+			try (Connection existsConnection = dataSource.getConnection()) {
+				if (_dbPartitionDB.existsPartition(
+						existsConnection, partitionName)) {
 
-			try (ResultSet resultSet = databaseMetaData.getTables(
-					_dbPartitionDB.getCatalog(connection, sourcePartitionName),
-					_dbPartitionDB.getSchema(connection, sourcePartitionName),
-					null, new String[] {"TABLE", "VIEW"});
-				Statement statement = connection.createStatement()) {
-
-				while (resultSet.next()) {
-					String fromTableName = resultSet.getString("TABLE_NAME");
-
-					if (Objects.equals(
-							resultSet.getString("TABLE_TYPE"), "VIEW")) {
-
-						statement.executeUpdate(
-							_dbPartitionDB.getCreateViewSQL(
-								_defaultPartitionName, targetPartitionName,
-								fromTableName));
-
-						continue;
-					}
-
-					statement.executeUpdate(
-						_dbPartitionDB.getCreateTableSQL(
-							connection, sourcePartitionName,
-							targetPartitionName, fromTableName, fromTableName));
-
-					if (StringUtil.equalsIgnoreCase(
-							fromTableName, "Configuration_") ||
-						ArrayUtil.contains(
-							excludedDataTableNames, fromTableName, true)) {
-
-						continue;
-					}
-
-					statement.executeUpdate(
-						_getCopyDataSQL(
-							sourcePartitionName, targetPartitionName,
-							fromTableName, fromTableName,
-							_getColumnNames(
-								connection, sourcePartitionName, fromTableName),
-							StringPool.BLANK));
+					throw new IllegalArgumentException(
+						StringBundler.concat(
+							"Database partition ", partitionName,
+							" already exists"),
+						sqlException1);
 				}
 			}
-
-			try (Statement statement = connection.createStatement()) {
-				for (String createRuleSQL :
-						_dbPartitionDB.getCreateRulesSQL(targetPartitionName)) {
-
-					statement.executeUpdate(createRuleSQL);
-				}
+			catch (SQLException sqlException2) {
+				sqlException1.addSuppressed(sqlException2);
 			}
+
+			throw new PortalException(sqlException1);
 		}
 	}
 
@@ -1129,64 +1209,56 @@ public class DBPartitionUtil {
 
 		_checkExportedPartition(companyId, connection, exportedPartitionName);
 
+		_createPartition(connection, exportedPartitionName);
+
 		try {
-			try (PreparedStatement preparedStatement =
-					connection.prepareStatement(
-						_dbPartitionDB.getCreatePartitionSQL(
-							connection, exportedPartitionName))) {
+			DatabaseMetaData databaseMetaData = connection.getMetaData();
 
-				preparedStatement.executeUpdate();
+			DBInspector dbInspector = new DBInspector(connection);
 
-				DatabaseMetaData databaseMetaData = connection.getMetaData();
+			try (ResultSet resultSet = databaseMetaData.getTables(
+					_dbPartitionDB.getCatalog(
+						connection, _defaultPartitionName),
+					_dbPartitionDB.getSchema(connection, _defaultPartitionName),
+					null, new String[] {"TABLE"});
+				Statement statement = connection.createStatement()) {
 
-				DBInspector dbInspector = new DBInspector(connection);
+				while (resultSet.next()) {
+					String tableName = resultSet.getString("TABLE_NAME");
 
-				try (ResultSet resultSet = databaseMetaData.getTables(
-						_dbPartitionDB.getCatalog(
-							connection, _defaultPartitionName),
-						_dbPartitionDB.getSchema(
-							connection, _defaultPartitionName),
-						null, new String[] {"TABLE"});
-					Statement statement = connection.createStatement()) {
+					if (StringUtil.equalsIgnoreCase(
+							tableName, "Configuration_")) {
 
-					while (resultSet.next()) {
-						String tableName = resultSet.getString("TABLE_NAME");
+						statement.executeUpdate(
+							_dbPartitionDB.getCreateTableSQL(
+								connection, _defaultPartitionName,
+								exportedPartitionName, tableName));
 
-						if (StringUtil.equalsIgnoreCase(
-								tableName, "Configuration_")) {
-
-							statement.executeUpdate(
-								_dbPartitionDB.getCreateTableSQL(
-									connection, _defaultPartitionName,
-									exportedPartitionName, tableName));
-
-							continue;
-						}
-
-						if (dbInspector.isObjectTable(tableName) &&
-							!dbInspector.isObjectTable(
-								List.of(companyId), tableName)) {
-
-							continue;
-						}
-
-						_exportTable(
-							companyId, connection, tableName, statement,
-							dbInspector, false);
-
-						if (!StringUtil.equalsIgnoreCase(
-								tableName, "DLFileEntryType")) {
-
-							continue;
-						}
-
-						_moveData(
-							_defaultPartitionName, exportedPartitionName,
-							tableName,
-							_getColumnNames(
-								connection, _defaultPartitionName, tableName),
-							statement, " where companyId = 0", false);
+						continue;
 					}
+
+					if (dbInspector.isObjectTable(tableName) &&
+						!dbInspector.isObjectTable(
+							List.of(companyId), tableName)) {
+
+						continue;
+					}
+
+					_exportTable(
+						companyId, connection, tableName, statement,
+						dbInspector, false);
+
+					if (!StringUtil.equalsIgnoreCase(
+							tableName, "DLFileEntryType")) {
+
+						continue;
+					}
+
+					_moveData(
+						_defaultPartitionName, exportedPartitionName, tableName,
+						_getColumnNames(
+							connection, _defaultPartitionName, tableName),
+						statement, " where companyId = 0", false);
 				}
 			}
 		}
@@ -1212,6 +1284,8 @@ public class DBPartitionUtil {
 		String exportedPartitionName = getExportedPartitionName(companyId);
 
 		_checkExportedPartition(companyId, connection, exportedPartitionName);
+
+		_createPartition(connection, exportedPartitionName);
 
 		DBInspector dbInspector = new DBInspector(connection);
 
@@ -1460,9 +1534,46 @@ public class DBPartitionUtil {
 			}
 
 			@Override
+			public CallableStatement prepareCall(String sql)
+				throws SQLException {
+
+				_checkSQL(sql);
+				_setPartition();
+
+				return super.prepareCall(sql);
+			}
+
+			@Override
+			public CallableStatement prepareCall(
+					String sql, int resultSetType, int resultSetConcurrency)
+				throws SQLException {
+
+				_checkSQL(sql);
+				_setPartition();
+
+				return super.prepareCall(
+					sql, resultSetType, resultSetConcurrency);
+			}
+
+			@Override
+			public CallableStatement prepareCall(
+					String sql, int resultSetType, int resultSetConcurrency,
+					int resultSetHoldability)
+				throws SQLException {
+
+				_checkSQL(sql);
+				_setPartition();
+
+				return super.prepareCall(
+					sql, resultSetType, resultSetConcurrency,
+					resultSetHoldability);
+			}
+
+			@Override
 			public PreparedStatement prepareStatement(String sql)
 				throws SQLException {
 
+				_checkSQL(sql);
 				_setPartition();
 
 				return super.prepareStatement(sql);
@@ -1473,6 +1584,7 @@ public class DBPartitionUtil {
 					String sql, int autoGeneratedKeys)
 				throws SQLException {
 
+				_checkSQL(sql);
 				_setPartition();
 
 				return super.prepareStatement(sql, autoGeneratedKeys);
@@ -1483,6 +1595,7 @@ public class DBPartitionUtil {
 					String sql, int resultSetType, int resultSetConcurrency)
 				throws SQLException {
 
+				_checkSQL(sql);
 				_setPartition();
 
 				return super.prepareStatement(
@@ -1495,6 +1608,7 @@ public class DBPartitionUtil {
 					int resultSetHoldability)
 				throws SQLException {
 
+				_checkSQL(sql);
 				_setPartition();
 
 				return super.prepareStatement(
@@ -1507,6 +1621,7 @@ public class DBPartitionUtil {
 					String sql, int[] columnIndexes)
 				throws SQLException {
 
+				_checkSQL(sql);
 				_setPartition();
 
 				return super.prepareStatement(sql, columnIndexes);
@@ -1517,6 +1632,7 @@ public class DBPartitionUtil {
 					String sql, String[] columnNames)
 				throws SQLException {
 
+				_checkSQL(sql);
 				_setPartition();
 
 				return super.prepareStatement(sql, columnNames);
@@ -1767,6 +1883,20 @@ public class DBPartitionUtil {
 		return false;
 	}
 
+	private static boolean _isDefaultCompany() {
+
+		// Do not use getNonsystemCompanyId at this point because DataAccess
+		// might not be initialized
+
+		if ((CompanyThreadLocal.getCompanyId() == CompanyConstants.SYSTEM) ||
+			(CompanyThreadLocal.getCompanyId() == _defaultCompanyId)) {
+
+			return true;
+		}
+
+		return false;
+	}
+
 	private static boolean _isSkip(
 			DBInspector dbInspector, String tableName, boolean defaultCompany)
 		throws SQLException {
@@ -1981,58 +2111,64 @@ public class DBPartitionUtil {
 		return new StatementWrapper(statement) {
 
 			@Override
+			public void addBatch(String sql) throws SQLException {
+				_checkSQL(sql);
+
+				super.addBatch(sql);
+			}
+
+			@Override
+			public boolean execute(String sql) throws SQLException {
+				_checkSQL(sql);
+
+				return super.execute(sql);
+			}
+
+			@Override
+			public boolean execute(String sql, int autoGeneratedKeys)
+				throws SQLException {
+
+				_checkSQL(sql);
+
+				return super.execute(sql, autoGeneratedKeys);
+			}
+
+			@Override
+			public boolean execute(String sql, int[] columnIndexes)
+				throws SQLException {
+
+				_checkSQL(sql);
+
+				return super.execute(sql, columnIndexes);
+			}
+
+			@Override
+			public boolean execute(String sql, String[] columnNames)
+				throws SQLException {
+
+				_checkSQL(sql);
+
+				return super.execute(sql, columnNames);
+			}
+
+			@Override
+			public ResultSet executeQuery(String sql) throws SQLException {
+				_checkSQL(sql);
+
+				return super.executeQuery(sql);
+			}
+
+			@Override
 			public int executeUpdate(String sql) throws SQLException {
-				String lowerCaseSQL = StringUtil.toLowerCase(sql);
-
-				// Do not use getNonsystemCompanyId at this point because
-				// DataAccess might not be initialized
-
-				boolean defaultCompany = false;
-
-				if ((CompanyThreadLocal.getCompanyId() ==
-						CompanyConstants.SYSTEM) ||
-					(CompanyThreadLocal.getCompanyId() == _defaultCompanyId)) {
-
-					defaultCompany = true;
-				}
-
-				if (!defaultCompany) {
-					int count = StringUtil.count(
-						lowerCaseSQL,
-						PropsValues.DATABASE_PARTITION_SCHEMA_NAME_PREFIX);
-
-					if (count == 0) {
-						count = StringUtil.count(
-							lowerCaseSQL,
-							DATABASE_EXPORTED_PARTITION_SCHEMA_NAME_PREFIX);
-					}
-
-					if (count > 0) {
-						throw new UnsupportedOperationException(
-							"Unsupported SQL: " + sql);
-					}
-
-					Matcher quotedStringMatcher = _quotedStringPattern.matcher(
-						lowerCaseSQL);
-
-					String unquotedSQL = quotedStringMatcher.replaceAll("''");
-
-					Matcher defaultPartitionNameMatcher =
-						_defaultPartitionNamePattern.matcher(unquotedSQL);
-					Matcher setPartitionMatcher = _setPartitionPattern.matcher(
-						unquotedSQL);
-
-					if (defaultPartitionNameMatcher.find() ||
-						setPartitionMatcher.lookingAt()) {
-
-						throw new UnsupportedOperationException(
-							"Unsupported SQL: " + sql);
-					}
-				}
+				_checkSQL(sql);
 
 				Connection connection = statement.getConnection();
 
 				DBInspector dbInspector = new DBInspector(connection);
+
+				boolean defaultCompany = _isDefaultCompany();
+
+				String lowerCaseSQL = StringUtil.toLowerCase(sql);
 
 				String[] query = sql.split(StringPool.SPACE);
 
@@ -2102,6 +2238,33 @@ public class DBPartitionUtil {
 				catch (Exception exception) {
 					throw new SQLException(exception);
 				}
+			}
+
+			@Override
+			public int executeUpdate(String sql, int autoGeneratedKeys)
+				throws SQLException {
+
+				_checkSQL(sql);
+
+				return super.executeUpdate(sql, autoGeneratedKeys);
+			}
+
+			@Override
+			public int executeUpdate(String sql, int[] columnIndexes)
+				throws SQLException {
+
+				_checkSQL(sql);
+
+				return super.executeUpdate(sql, columnIndexes);
+			}
+
+			@Override
+			public int executeUpdate(String sql, String[] columnNames)
+				throws SQLException {
+
+				_checkSQL(sql);
+
+				return super.executeUpdate(sql, columnNames);
 			}
 
 		};

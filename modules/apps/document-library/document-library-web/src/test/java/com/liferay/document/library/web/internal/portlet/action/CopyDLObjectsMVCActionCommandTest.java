@@ -9,6 +9,7 @@ import com.liferay.depot.group.provider.SiteConnectedGroupGroupProvider;
 import com.liferay.document.library.configuration.DLSizeLimitConfigurationProvider;
 import com.liferay.document.library.kernel.model.DLFolderConstants;
 import com.liferay.portal.json.JSONObjectImpl;
+import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.model.Group;
@@ -17,11 +18,14 @@ import com.liferay.portal.kernel.portlet.JSONPortletResponseUtil;
 import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.service.RepositoryLocalService;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
+import com.liferay.portal.kernel.test.TestInfo;
 import com.liferay.portal.kernel.test.portlet.MockActionRequest;
 import com.liferay.portal.kernel.test.portlet.MockActionResponse;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
+import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.test.rule.LiferayUnitTestRule;
 
 import jakarta.portlet.ActionRequest;
@@ -29,10 +33,12 @@ import jakarta.portlet.ActionResponse;
 import jakarta.portlet.PortletRequest;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 
+import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
@@ -100,6 +106,111 @@ public class CopyDLObjectsMVCActionCommandTest {
 	}
 
 	@Test
+	@TestInfo({"LPD-109885", "LPD-113295"})
+	public void testCheckDestinationGroup() throws Exception {
+		long depotGroupId = RandomTestUtil.randomLong();
+
+		Group depotGroup = _setUpDepotGroup(depotGroupId);
+
+		long siteGroupId1 = RandomTestUtil.randomLong();
+
+		_setUpSiteGroup(siteGroupId1, new long[] {siteGroupId1, depotGroupId});
+
+		_checkDestinationGroup(
+			Mockito.mock(Group.class), new long[] {siteGroupId1, depotGroupId},
+			depotGroupId);
+		_checkDestinationGroup(
+			depotGroup, new long[] {depotGroupId}, siteGroupId1);
+
+		long siteGroupId2 = RandomTestUtil.randomLong();
+
+		_setUpSiteGroup(siteGroupId2, new long[] {siteGroupId2});
+
+		try {
+			_checkDestinationGroup(
+				depotGroup, new long[] {depotGroupId}, siteGroupId2);
+
+			Assert.fail();
+		}
+		catch (Exception exception) {
+			Assert.assertEquals(
+				"the-item-is-not-copied-because-the-site-and-asset-library-" +
+					"are-not-connected",
+				exception.getMessage());
+		}
+
+		try {
+			_checkDestinationGroup(
+				Mockito.mock(Group.class), new long[] {siteGroupId2},
+				depotGroupId);
+
+			Assert.fail();
+		}
+		catch (Exception exception) {
+			Assert.assertEquals(
+				"the-item-is-not-copied-because-the-site-and-asset-library-" +
+					"are-not-connected",
+				exception.getMessage());
+		}
+	}
+
+	@Test
+	@TestInfo({"LPD-113633", "LPS-186688"})
+	public void testDoProcessActionWhenDestinationGroupIsStaged()
+		throws Exception {
+
+		long destinationGroupId = RandomTestUtil.randomLong();
+
+		_setUpRepository(destinationGroupId, destinationGroupId);
+
+		Group destinationGroup = _groupLocalService.fetchGroup(
+			destinationGroupId);
+
+		Mockito.when(
+			destinationGroup.isStaged()
+		).thenReturn(
+			true
+		);
+
+		long sourceGroupId = RandomTestUtil.randomLong();
+
+		_setUpRepository(sourceGroupId, sourceGroupId);
+
+		MockActionRequest mockActionRequest = _getMockActionRequest(
+			destinationGroupId, sourceGroupId);
+
+		ThemeDisplay themeDisplay = Mockito.mock(ThemeDisplay.class);
+
+		Mockito.when(
+			themeDisplay.translate(Mockito.anyString())
+		).thenAnswer(
+			invocationOnMock -> invocationOnMock.getArgument(0)
+		);
+
+		mockActionRequest.setAttribute(WebKeys.THEME_DISPLAY, themeDisplay);
+
+		_copyDLObjectsMVCActionCommand.doProcessAction(
+			mockActionRequest, new MockActionResponse());
+
+		ArgumentCaptor<JSONObject> argumentCaptor = ArgumentCaptor.forClass(
+			JSONObject.class);
+
+		_jsonPortletResponseUtilMockedStatic.verify(
+			() -> JSONPortletResponseUtil.writeJSON(
+				Mockito.any(ActionRequest.class),
+				Mockito.any(ActionResponse.class), argumentCaptor.capture()));
+
+		JSONObject jsonObject = argumentCaptor.getValue();
+
+		JSONArray errorMessagesJSONArray = jsonObject.getJSONArray(
+			"errorMessages");
+
+		Assert.assertEquals(
+			"cannot-copy-to-the-live-version-of-a-site",
+			errorMessagesJSONArray.getString(0));
+	}
+
+	@Test
 	public void testRepositoryGroupIsUsed() throws Exception {
 		long destinationGroupId = RandomTestUtil.randomLong();
 		long destinationRepositoryId = RandomTestUtil.randomLong();
@@ -135,6 +246,15 @@ public class CopyDLObjectsMVCActionCommandTest {
 		);
 	}
 
+	private void _checkDestinationGroup(
+		Group group, long[] groupIds, long sourceGroupId) {
+
+		ReflectionTestUtil.invoke(
+			_copyDLObjectsMVCActionCommand, "_checkDestinationGroup",
+			new Class<?>[] {Group.class, long[].class, long.class}, group,
+			groupIds, sourceGroupId);
+	}
+
 	private MockActionRequest _getMockActionRequest(
 		long destinationRepositoryId, long sourceRepositoryId) {
 
@@ -149,6 +269,30 @@ public class CopyDLObjectsMVCActionCommandTest {
 			"sourceRepositoryId", String.valueOf(sourceRepositoryId));
 
 		return mockActionRequest;
+	}
+
+	private Group _setUpDepotGroup(long groupId) throws Exception {
+		Group group = Mockito.mock(Group.class);
+
+		Mockito.when(
+			group.getGroupId()
+		).thenReturn(
+			groupId
+		);
+
+		Mockito.when(
+			group.isDepot()
+		).thenReturn(
+			true
+		);
+
+		Mockito.when(
+			_groupLocalService.getGroup(groupId)
+		).thenReturn(
+			group
+		);
+
+		return group;
 	}
 
 	private void _setUpRepository(long groupId, long repositoryId)
@@ -197,6 +341,32 @@ public class CopyDLObjectsMVCActionCommandTest {
 			_repositoryLocalService.getRepository(repositoryId)
 		).thenReturn(
 			repository
+		);
+	}
+
+	private void _setUpSiteGroup(
+			long groupId, long[] currentAndAncestorSiteAndDepotGroupIds)
+		throws Exception {
+
+		Group group = Mockito.mock(Group.class);
+
+		Mockito.when(
+			group.getGroupId()
+		).thenReturn(
+			groupId
+		);
+
+		Mockito.when(
+			_groupLocalService.getGroup(groupId)
+		).thenReturn(
+			group
+		);
+
+		Mockito.when(
+			_siteConnectedGroupGroupProvider.
+				getCurrentAndAncestorSiteAndDepotGroupIds(groupId)
+		).thenReturn(
+			currentAndAncestorSiteAndDepotGroupIds
 		);
 	}
 

@@ -7,8 +7,10 @@ package com.liferay.headless.cms.internal.resource.v1_0;
 
 import com.liferay.asset.kernel.service.AssetEntryLocalService;
 import com.liferay.asset.link.service.AssetLinkLocalService;
+import com.liferay.asset.list.asset.entry.provider.AssetListAssetEntryProvider;
 import com.liferay.asset.list.service.AssetListEntryAssetEntryRelLocalService;
 import com.liferay.asset.list.service.AssetListEntryLocalService;
+import com.liferay.asset.list.service.AssetListEntrySegmentsEntryRelLocalService;
 import com.liferay.asset.list.service.AssetListEntryUsageLocalService;
 import com.liferay.depot.service.DepotEntryLocalService;
 import com.liferay.depot.service.DepotEntryService;
@@ -21,12 +23,14 @@ import com.liferay.headless.cms.internal.usage.UnlinkedAssetSearcher;
 import com.liferay.headless.cms.internal.util.CMSGroupUtil;
 import com.liferay.headless.cms.resource.v1_0.AssetStatisticsResource;
 import com.liferay.layout.page.template.service.LayoutPageTemplateEntryLocalService;
+import com.liferay.layout.page.template.service.LayoutPageTemplateStructureLocalService;
 import com.liferay.object.constants.ObjectFolderConstants;
 import com.liferay.object.model.ObjectDefinition;
 import com.liferay.object.model.ObjectEntryTable;
 import com.liferay.object.service.ObjectDefinitionLocalService;
 import com.liferay.object.service.ObjectDefinitionService;
 import com.liferay.object.service.ObjectEntryLocalService;
+import com.liferay.object.service.ObjectFieldLocalService;
 import com.liferay.object.service.ObjectRelationshipLocalService;
 import com.liferay.petra.sql.dsl.DSLQueryFactoryUtil;
 import com.liferay.petra.sql.dsl.expression.Predicate;
@@ -131,6 +135,11 @@ public class AssetStatisticsResourceImpl
 					() -> _getBrokenLinksCount(
 						objectDefinitionIds, selectedSpaceGroupIds,
 						spaceGroupIds));
+				setCompletedWorkflowTasksCount(
+					() -> _getWorkflowTasksCount(
+						classNames, selectedSpaceGroupIds,
+						KaleoTaskInstanceTokenTable.INSTANCE.completed.eq(
+							true)));
 				setExpiredCount(
 					() -> _getCount(
 						selectedSpaceGroupIds, objectDefinitionIds,
@@ -390,11 +399,14 @@ public class AssetStatisticsResourceImpl
 		try {
 			CollectionUsageResolver collectionUsageResolver =
 				new CollectionUsageResolver(
-					_assetEntryLocalService,
+					_assetEntryLocalService, _assetListAssetEntryProvider,
 					_assetListEntryAssetEntryRelLocalService,
 					_assetListEntryLocalService,
+					_assetListEntrySegmentsEntryRelLocalService,
 					_assetListEntryUsageLocalService, _depotEntryLocalService,
 					_layoutLocalService, _layoutPageTemplateEntryLocalService,
+					_layoutPageTemplateStructureLocalService,
+					_objectDefinitionLocalService, _objectFieldLocalService,
 					_portal, _portletPreferencesLocalService);
 			UnlinkedAssetSearcher unlinkedAssetSearcher =
 				new UnlinkedAssetSearcher(
@@ -449,6 +461,7 @@ public class AssetStatisticsResourceImpl
 			{
 				setApprovedCount(() -> 0L);
 				setBrokenLinksCount(() -> 0L);
+				setCompletedWorkflowTasksCount(() -> 0L);
 				setExpiredCount(() -> 0L);
 				setExpiringSoonCount(() -> 0L);
 				setInDraftCount(() -> 0L);
@@ -486,11 +499,18 @@ public class AssetStatisticsResourceImpl
 	private AssetLinkLocalService _assetLinkLocalService;
 
 	@Reference
+	private AssetListAssetEntryProvider _assetListAssetEntryProvider;
+
+	@Reference
 	private AssetListEntryAssetEntryRelLocalService
 		_assetListEntryAssetEntryRelLocalService;
 
 	@Reference
 	private AssetListEntryLocalService _assetListEntryLocalService;
+
+	@Reference
+	private AssetListEntrySegmentsEntryRelLocalService
+		_assetListEntrySegmentsEntryRelLocalService;
 
 	@Reference
 	private AssetListEntryUsageLocalService _assetListEntryUsageLocalService;
@@ -516,6 +536,10 @@ public class AssetStatisticsResourceImpl
 		_layoutPageTemplateEntryLocalService;
 
 	@Reference
+	private LayoutPageTemplateStructureLocalService
+		_layoutPageTemplateStructureLocalService;
+
+	@Reference
 	private ObjectDefinitionLocalService _objectDefinitionLocalService;
 
 	@Reference
@@ -523,6 +547,9 @@ public class AssetStatisticsResourceImpl
 
 	@Reference
 	private ObjectEntryLocalService _objectEntryLocalService;
+
+	@Reference
+	private ObjectFieldLocalService _objectFieldLocalService;
 
 	@Reference
 	private ObjectRelationshipLocalService _objectRelationshipLocalService;

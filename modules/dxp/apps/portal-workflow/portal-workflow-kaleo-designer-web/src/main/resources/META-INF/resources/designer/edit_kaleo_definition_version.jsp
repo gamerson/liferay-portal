@@ -25,9 +25,9 @@ KaleoDefinitionVersion kaleoDefinitionVersion = (KaleoDefinitionVersion)request.
 
 KaleoDefinition kaleoDefinition = kaleoDesignerDisplayContext.getKaleoDefinition(kaleoDefinitionVersion);
 
-String name = BeanParamUtil.getString(kaleoDefinitionVersion, request, "name");
-String draftVersion = BeanParamUtil.getString(kaleoDefinitionVersion, request, "version");
-String content = BeanParamUtil.getString(kaleoDefinitionVersion, request, "contentAsXML");
+String name = BeanParamUtil.getString(kaleoDefinitionVersion, request, "name", KaleoDefinitionVersion::getName);
+String draftVersion = BeanParamUtil.getString(kaleoDefinitionVersion, request, "version", KaleoDefinitionVersion::getVersion);
+String content = BeanParamUtil.getString(kaleoDefinitionVersion, request, "contentAsXML", KaleoDefinitionVersion::getContentAsXML);
 
 String latestDraftVersion = StringPool.BLANK;
 int version = 0;
@@ -189,7 +189,7 @@ String randomNamespace = StringUtil.randomId() + StringPool.UNDERLINE;
 								disabled='<%= kaleoDesignerDisplayContext.isDefinitionInputDisabled((Objects.equals(state, WorkflowWebKeys.WORKFLOW_PREVIEW_BEFORE_RESTORE_STATE) || Objects.equals(state, "view")), kaleoDefinitionVersion, permissionChecker) %>'
 								name="title"
 								placeholder="untitled-workflow"
-								xml="<%= (kaleoDefinitionVersion == null) ? StringPool.BLANK : kaleoDefinitionVersion.getTitle() %>"
+								xml='<%= BeanPropertiesUtil.getString(kaleoDefinitionVersion, "title") %>'
 							/>
 						</aui:fieldset>
 

@@ -10,12 +10,12 @@
 <%
 String redirect = ParamUtil.getString(request, "redirect");
 
-DDMDataProviderInstance ddmDataProviderInstance = ddmDataProviderDisplayContext.fetchDataProviderInstance();
+DDMDataProviderInstance ddmDataProviderInstance = ddmDataProviderDisplayContext.getDataProviderInstance();
 
-long dataProviderInstanceId = BeanParamUtil.getLong(ddmDataProviderInstance, request, "dataProviderInstanceId");
+long dataProviderInstanceId = BeanParamUtil.getLong(ddmDataProviderInstance, request, "dataProviderInstanceId", DDMDataProviderInstance::getDataProviderInstanceId);
 
-long groupId = BeanParamUtil.getLong(ddmDataProviderInstance, request, "groupId", scopeGroupId);
-String type = BeanParamUtil.getString(ddmDataProviderInstance, request, "type");
+long groupId = BeanParamUtil.getLong(ddmDataProviderInstance, request, "groupId", DDMDataProviderInstance::getGroupId, scopeGroupId);
+String type = BeanParamUtil.getString(ddmDataProviderInstance, request, "type", DDMDataProviderInstance::getType);
 
 portletDisplay.setShowBackIcon(true);
 portletDisplay.setURLBack(redirect);

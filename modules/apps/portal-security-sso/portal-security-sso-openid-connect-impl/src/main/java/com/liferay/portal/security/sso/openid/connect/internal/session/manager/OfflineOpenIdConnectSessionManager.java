@@ -131,23 +131,18 @@ public class OfflineOpenIdConnectSessionManager {
 		String authServerWellKnownURI, String clientId, OIDCTokens oidcTokens,
 		long userId) {
 
-		OpenIdConnectSession openIdConnectSession =
-			_openIdConnectSessionLocalService.fetchOpenIdConnectSession(
-				userId, authServerWellKnownURI, clientId);
-
-		if (openIdConnectSession == null) {
-			openIdConnectSession =
-				_openIdConnectSessionLocalService.createOpenIdConnectSession(
-					_counterLocalService.increment(
-						OpenIdConnectSession.class.getName()));
+		try {
+			return _startOpenIdConnectSession(
+				authServerWellKnownURI, clientId, oidcTokens, userId);
 		}
+		catch (Exception exception) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(exception);
+			}
 
-		_updateOpenIdConnectSession(
-			oidcTokens.getAccessToken(), authServerWellKnownURI, clientId,
-			oidcTokens.getIDTokenString(), oidcTokens.getRefreshToken(),
-			openIdConnectSession, userId);
-
-		return openIdConnectSession.getOpenIdConnectSessionId();
+			return _startOpenIdConnectSession(
+				authServerWellKnownURI, clientId, oidcTokens, userId);
+		}
 	}
 
 	@Activate
@@ -321,6 +316,29 @@ public class OfflineOpenIdConnectSessionManager {
 			dictionary);
 	}
 
+	private long _startOpenIdConnectSession(
+		String authServerWellKnownURI, String clientId, OIDCTokens oidcTokens,
+		long userId) {
+
+		OpenIdConnectSession openIdConnectSession =
+			_openIdConnectSessionLocalService.fetchOpenIdConnectSession(
+				userId, authServerWellKnownURI, clientId);
+
+		if (openIdConnectSession == null) {
+			openIdConnectSession =
+				_openIdConnectSessionLocalService.createOpenIdConnectSession(
+					_counterLocalService.increment(
+						OpenIdConnectSession.class.getName()));
+		}
+
+		_updateOpenIdConnectSession(
+			oidcTokens.getAccessToken(), authServerWellKnownURI, clientId,
+			oidcTokens.getIDTokenString(), oidcTokens.getRefreshToken(),
+			openIdConnectSession, userId);
+
+		return openIdConnectSession.getOpenIdConnectSessionId();
+	}
+
 	private void _unregisterServices() {
 		if (_messageListenerServiceRegistration != null) {
 			_messageListenerServiceRegistration.unregister();
@@ -466,7 +484,9 @@ public class OfflineOpenIdConnectSessionManager {
 				_openIdConnectSessionLocalService.fetchOpenIdConnectSession(
 					openIdConnectSessionId);
 
-			if (openIdConnectSession == null) {
+			if ((openIdConnectSession == null) ||
+				!_isAccessTokenExpiringSoon(openIdConnectSession)) {
+
 				return;
 			}
 

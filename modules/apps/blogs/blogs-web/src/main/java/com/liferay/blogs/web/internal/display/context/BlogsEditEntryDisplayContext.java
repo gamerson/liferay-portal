@@ -31,6 +31,7 @@ import com.liferay.item.selector.criteria.DownloadFileEntryItemSelectorReturnTyp
 import com.liferay.item.selector.criteria.FileEntryItemSelectorReturnType;
 import com.liferay.item.selector.criteria.image.criterion.ImageItemSelectorCriterion;
 import com.liferay.petra.string.StringPool;
+import com.liferay.portal.kernel.bean.BeanParamUtil;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONArray;
@@ -50,7 +51,6 @@ import com.liferay.portal.kernel.theme.PortletDisplay;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.Constants;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
@@ -125,10 +125,9 @@ public class BlogsEditEntryDisplayContext {
 			return _content;
 		}
 
-		_content = ParamUtil.getString(
-			_httpServletRequest, "content",
-			GetterUtil.get(
-				getBlogsEntry(), BlogsEntry::getContent, StringPool.BLANK));
+		_content = BeanParamUtil.getString(
+			getBlogsEntry(), _httpServletRequest, "content",
+			BlogsEntry::getContent);
 
 		return _content;
 	}
@@ -138,11 +137,10 @@ public class BlogsEditEntryDisplayContext {
 			return _coverImageCaption;
 		}
 
-		_coverImageCaption = ParamUtil.getString(
-			_httpServletRequest, "coverImageCaption",
-			GetterUtil.get(
-				getBlogsEntry(), BlogsEntry::getCoverImageCaption,
-				LanguageUtil.get(_httpServletRequest, "caption")));
+		_coverImageCaption = BeanParamUtil.getString(
+			getBlogsEntry(), _httpServletRequest, "coverImageCaption",
+			BlogsEntry::getCoverImageCaption,
+			LanguageUtil.get(_httpServletRequest, "caption"));
 
 		return _coverImageCaption;
 	}
@@ -152,10 +150,9 @@ public class BlogsEditEntryDisplayContext {
 			return _coverImageFileEntryId;
 		}
 
-		_coverImageFileEntryId = ParamUtil.getLong(
-			_httpServletRequest, "coverImageFileEntryId",
-			GetterUtil.get(
-				getBlogsEntry(), BlogsEntry::getCoverImageFileEntryId, 0L));
+		_coverImageFileEntryId = BeanParamUtil.getLong(
+			getBlogsEntry(), _httpServletRequest, "coverImageFileEntryId",
+			BlogsEntry::getCoverImageFileEntryId);
 
 		return _coverImageFileEntryId;
 	}
@@ -190,10 +187,9 @@ public class BlogsEditEntryDisplayContext {
 			return _description;
 		}
 
-		String description = ParamUtil.getString(
-			_httpServletRequest, "description",
-			GetterUtil.get(
-				getBlogsEntry(), BlogsEntry::getDescription, StringPool.BLANK));
+		String description = BeanParamUtil.getString(
+			getBlogsEntry(), _httpServletRequest, "description",
+			BlogsEntry::getDescription);
 
 		if (!isCustomAbstract()) {
 			description = StringUtil.shorten(
@@ -238,9 +234,9 @@ public class BlogsEditEntryDisplayContext {
 			return _entryId;
 		}
 
-		_entryId = ParamUtil.getLong(
-			_httpServletRequest, "entryId",
-			GetterUtil.get(getBlogsEntry(), BlogsEntry::getEntryId, 0L));
+		_entryId = BeanParamUtil.getLong(
+			getBlogsEntry(), _httpServletRequest, "entryId",
+			BlogsEntry::getEntryId);
 
 		return _entryId;
 	}
@@ -321,10 +317,9 @@ public class BlogsEditEntryDisplayContext {
 			return _smallImageFileEntryId;
 		}
 
-		_smallImageFileEntryId = ParamUtil.getLong(
-			_httpServletRequest, "smallImageFileEntryId",
-			GetterUtil.get(
-				getBlogsEntry(), BlogsEntry::getSmallImageFileEntryId, 0L));
+		_smallImageFileEntryId = BeanParamUtil.getLong(
+			getBlogsEntry(), _httpServletRequest, "smallImageFileEntryId",
+			BlogsEntry::getSmallImageFileEntryId);
 
 		return _smallImageFileEntryId;
 	}
@@ -392,9 +387,9 @@ public class BlogsEditEntryDisplayContext {
 					"status", blogsEntry.getStatus()
 				).put(
 					"subtitle",
-					ParamUtil.getString(
-						_httpServletRequest, "subtitle",
-						blogsEntry.getSubtitle())
+					BeanParamUtil.getString(
+						getBlogsEntry(), _httpServletRequest, "subtitle",
+						BlogsEntry::getSubtitle)
 				).put(
 					"title", getTitle()
 				).put(
@@ -409,10 +404,9 @@ public class BlogsEditEntryDisplayContext {
 			return _title;
 		}
 
-		_title = ParamUtil.getString(
-			_httpServletRequest, "title",
-			GetterUtil.get(
-				getBlogsEntry(), BlogsEntry::getTitle, StringPool.BLANK));
+		_title = BeanParamUtil.getString(
+			getBlogsEntry(), _httpServletRequest, "title",
+			BlogsEntry::getTitle);
 
 		return _title;
 	}
@@ -422,10 +416,9 @@ public class BlogsEditEntryDisplayContext {
 			return _urlTitle;
 		}
 
-		_urlTitle = ParamUtil.getString(
-			_httpServletRequest, "urlTitle",
-			GetterUtil.get(
-				getBlogsEntry(), BlogsEntry::getUrlTitle, StringPool.BLANK));
+		_urlTitle = BeanParamUtil.getString(
+			getBlogsEntry(), _httpServletRequest, "urlTitle",
+			BlogsEntry::getUrlTitle);
 
 		return _urlTitle;
 	}
@@ -462,10 +455,9 @@ public class BlogsEditEntryDisplayContext {
 		}
 
 		if (PropsValues.BLOGS_PINGBACK_ENABLED &&
-			ParamUtil.getBoolean(
-				_httpServletRequest, "allowPingbacks",
-				GetterUtil.get(
-					getBlogsEntry(), BlogsEntry::isAllowPingbacks, true))) {
+			BeanParamUtil.getBoolean(
+				getBlogsEntry(), _httpServletRequest, "allowPingbacks",
+				BlogsEntry::isAllowPingbacks, true)) {
 
 			_allowPingbacks = true;
 		}
@@ -482,10 +474,9 @@ public class BlogsEditEntryDisplayContext {
 		}
 
 		if (PropsValues.BLOGS_TRACKBACK_ENABLED &&
-			ParamUtil.getBoolean(
-				_httpServletRequest, "allowTrackbacks",
-				GetterUtil.get(
-					getBlogsEntry(), BlogsEntry::isAllowTrackbacks, true))) {
+			BeanParamUtil.getBoolean(
+				getBlogsEntry(), _httpServletRequest, "allowTrackbacks",
+				BlogsEntry::isAllowTrackbacks, true)) {
 
 			_allowTrackbacks = true;
 		}

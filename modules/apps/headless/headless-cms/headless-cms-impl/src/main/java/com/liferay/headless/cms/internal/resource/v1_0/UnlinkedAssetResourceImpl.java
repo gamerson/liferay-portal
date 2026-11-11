@@ -7,8 +7,10 @@ package com.liferay.headless.cms.internal.resource.v1_0;
 
 import com.liferay.asset.kernel.service.AssetEntryLocalService;
 import com.liferay.asset.link.service.AssetLinkLocalService;
+import com.liferay.asset.list.asset.entry.provider.AssetListAssetEntryProvider;
 import com.liferay.asset.list.service.AssetListEntryAssetEntryRelLocalService;
 import com.liferay.asset.list.service.AssetListEntryLocalService;
+import com.liferay.asset.list.service.AssetListEntrySegmentsEntryRelLocalService;
 import com.liferay.asset.list.service.AssetListEntryUsageLocalService;
 import com.liferay.depot.service.DepotEntryLocalService;
 import com.liferay.depot.service.DepotEntryService;
@@ -18,12 +20,14 @@ import com.liferay.headless.cms.internal.usage.UnlinkedAssetSearcher;
 import com.liferay.headless.cms.internal.util.CMSGroupUtil;
 import com.liferay.headless.cms.resource.v1_0.UnlinkedAssetResource;
 import com.liferay.layout.page.template.service.LayoutPageTemplateEntryLocalService;
+import com.liferay.layout.page.template.service.LayoutPageTemplateStructureLocalService;
 import com.liferay.object.constants.ObjectFolderConstants;
 import com.liferay.object.model.ObjectDefinition;
 import com.liferay.object.service.ObjectDefinitionLocalService;
 import com.liferay.object.service.ObjectDefinitionService;
 import com.liferay.object.service.ObjectEntryLocalService;
 import com.liferay.object.service.ObjectEntryService;
+import com.liferay.object.service.ObjectFieldLocalService;
 import com.liferay.object.service.ObjectRelationshipLocalService;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.feature.flag.FeatureFlagManagerUtil;
@@ -102,12 +106,15 @@ public class UnlinkedAssetResourceImpl extends BaseUnlinkedAssetResourceImpl {
 
 		CollectionUsageResolver collectionUsageResolver =
 			new CollectionUsageResolver(
-				_assetEntryLocalService,
+				_assetEntryLocalService, _assetListAssetEntryProvider,
 				_assetListEntryAssetEntryRelLocalService,
-				_assetListEntryLocalService, _assetListEntryUsageLocalService,
-				_depotEntryLocalService, _layoutLocalService,
-				_layoutPageTemplateEntryLocalService, _portal,
-				_portletPreferencesLocalService);
+				_assetListEntryLocalService,
+				_assetListEntrySegmentsEntryRelLocalService,
+				_assetListEntryUsageLocalService, _depotEntryLocalService,
+				_layoutLocalService, _layoutPageTemplateEntryLocalService,
+				_layoutPageTemplateStructureLocalService,
+				_objectDefinitionLocalService, _objectFieldLocalService,
+				_portal, _portletPreferencesLocalService);
 		UnlinkedAssetSearcher unlinkedAssetSearcher = new UnlinkedAssetSearcher(
 			_aggregations, _assetLinkLocalService,
 			_objectDefinitionLocalService, _objectEntryLocalService,
@@ -208,11 +215,18 @@ public class UnlinkedAssetResourceImpl extends BaseUnlinkedAssetResourceImpl {
 	private AssetLinkLocalService _assetLinkLocalService;
 
 	@Reference
+	private AssetListAssetEntryProvider _assetListAssetEntryProvider;
+
+	@Reference
 	private AssetListEntryAssetEntryRelLocalService
 		_assetListEntryAssetEntryRelLocalService;
 
 	@Reference
 	private AssetListEntryLocalService _assetListEntryLocalService;
+
+	@Reference
+	private AssetListEntrySegmentsEntryRelLocalService
+		_assetListEntrySegmentsEntryRelLocalService;
 
 	@Reference
 	private AssetListEntryUsageLocalService _assetListEntryUsageLocalService;
@@ -231,6 +245,10 @@ public class UnlinkedAssetResourceImpl extends BaseUnlinkedAssetResourceImpl {
 		_layoutPageTemplateEntryLocalService;
 
 	@Reference
+	private LayoutPageTemplateStructureLocalService
+		_layoutPageTemplateStructureLocalService;
+
+	@Reference
 	private ObjectDefinitionLocalService _objectDefinitionLocalService;
 
 	@Reference
@@ -241,6 +259,9 @@ public class UnlinkedAssetResourceImpl extends BaseUnlinkedAssetResourceImpl {
 
 	@Reference
 	private ObjectEntryService _objectEntryService;
+
+	@Reference
+	private ObjectFieldLocalService _objectFieldLocalService;
 
 	@Reference
 	private ObjectRelationshipLocalService _objectRelationshipLocalService;

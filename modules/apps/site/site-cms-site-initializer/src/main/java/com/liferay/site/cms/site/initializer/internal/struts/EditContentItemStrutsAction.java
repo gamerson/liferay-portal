@@ -15,11 +15,13 @@ import com.liferay.object.model.ObjectDefinition;
 import com.liferay.object.model.ObjectEntry;
 import com.liferay.object.service.ObjectDefinitionLocalService;
 import com.liferay.object.service.ObjectEntryService;
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.struts.StrutsAction;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.HttpComponentsUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.site.cms.site.initializer.internal.util.ActionUtil;
@@ -46,7 +48,17 @@ public class EditContentItemStrutsAction implements StrutsAction {
 			HttpServletResponse httpServletResponse)
 		throws Exception {
 
-		ObjectEntry objectEntry = _getObjectEntry(httpServletRequest);
+		ObjectEntry objectEntry = null;
+
+		try {
+			objectEntry = _getObjectEntry(httpServletRequest);
+		}
+		catch (PortalException portalException) {
+			_portal.sendError(
+				portalException, httpServletRequest, httpServletResponse);
+
+			return null;
+		}
 
 		String editURL = ActionUtil.getEditURL(
 			_formManager, _fragmentEntryLinkListenerRegistry,
@@ -55,6 +67,13 @@ public class EditContentItemStrutsAction implements StrutsAction {
 			_infoItemServiceRegistry, _infoSearchClassMapperRegistry,
 			_objectDefinitionLocalService.getObjectDefinition(
 				objectEntry.getObjectDefinitionId()));
+
+		long messageId = ParamUtil.getLong(httpServletRequest, "messageId");
+
+		if (messageId > 0) {
+			editURL = HttpComponentsUtil.addParameter(
+				editURL, "messageId", messageId);
+		}
 
 		String layoutMode = ParamUtil.getString(httpServletRequest, "p_l_mode");
 
@@ -133,5 +152,8 @@ public class EditContentItemStrutsAction implements StrutsAction {
 
 	@Reference
 	private ObjectEntryService _objectEntryService;
+
+	@Reference
+	private Portal _portal;
 
 }

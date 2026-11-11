@@ -17,6 +17,7 @@ import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.user.associated.data.anonymizer.UADAnonymousUserProvider;
 import com.liferay.user.associated.data.constants.UserAssociatedDataPortletKeys;
 import com.liferay.user.associated.data.display.UADDisplay;
 import com.liferay.user.associated.data.web.internal.constants.UADConstants;
@@ -28,10 +29,10 @@ import com.liferay.user.associated.data.web.internal.display.UADEntity;
 import com.liferay.user.associated.data.web.internal.display.UADHierarchyDisplay;
 import com.liferay.user.associated.data.web.internal.display.UADInfoPanelDisplay;
 import com.liferay.user.associated.data.web.internal.display.ViewUADEntitiesDisplay;
-import com.liferay.user.associated.data.web.internal.helper.SelectedUserHelper;
-import com.liferay.user.associated.data.web.internal.helper.UADApplicationSummaryHelper;
 import com.liferay.user.associated.data.web.internal.registry.UADRegistry;
 import com.liferay.user.associated.data.web.internal.util.GroupUtil;
+import com.liferay.user.associated.data.web.internal.util.SelectedUserUtil;
+import com.liferay.user.associated.data.web.internal.util.UADApplicationSummaryUtil;
 import com.liferay.user.associated.data.web.internal.util.UADSearchContainerBuilderUtil;
 
 import jakarta.portlet.PortletException;
@@ -63,7 +64,8 @@ public class ReviewUADDataMVCRenderCommand implements MVCRenderCommand {
 		throws PortletException {
 
 		try {
-			User user = _userHelper.getSelectedUser(renderRequest);
+			User user = SelectedUserUtil.getSelectedUser(
+				_portal, renderRequest, _uadAnonymousUserProvider);
 
 			List<ScopeDisplay> scopeDisplays = _getScopeDisplays(user);
 
@@ -182,8 +184,8 @@ public class ReviewUADDataMVCRenderCommand implements MVCRenderCommand {
 
 			ScopeDisplay scopeDisplay = new ScopeDisplay(
 				scope, groupIds,
-				_uadApplicationSummaryHelper.getUADApplicationSummaryDisplays(
-					user.getUserId(), groupIds));
+				UADApplicationSummaryUtil.getUADApplicationSummaryDisplays(
+					groupIds, _uadRegistry, user.getUserId()));
 
 			scopeDisplays.add(scopeDisplay);
 		}
@@ -225,8 +227,8 @@ public class ReviewUADDataMVCRenderCommand implements MVCRenderCommand {
 	}
 
 	private int _getTotalUADEntitiesCount(User user) {
-		return _uadApplicationSummaryHelper.getTotalReviewableUADEntitiesCount(
-			user.getUserId());
+		return UADApplicationSummaryUtil.getTotalReviewableUADEntitiesCount(
+			_uadRegistry, user.getUserId());
 	}
 
 	private UADInfoPanelDisplay _getUADInfoPanelDisplay(
@@ -253,9 +255,8 @@ public class ReviewUADDataMVCRenderCommand implements MVCRenderCommand {
 			renderRequest, "uadRegistryKey");
 
 		if (Validator.isNull(uadRegistryKey)) {
-			uadRegistryKey =
-				_uadApplicationSummaryHelper.getDefaultUADRegistryKey(
-					applicationKey);
+			uadRegistryKey = UADApplicationSummaryUtil.getDefaultUADRegistryKey(
+				applicationKey, _uadRegistry);
 		}
 
 		return uadRegistryKey;
@@ -320,12 +321,9 @@ public class ReviewUADDataMVCRenderCommand implements MVCRenderCommand {
 	private Portal _portal;
 
 	@Reference
-	private UADApplicationSummaryHelper _uadApplicationSummaryHelper;
+	private UADAnonymousUserProvider _uadAnonymousUserProvider;
 
 	@Reference
 	private UADRegistry _uadRegistry;
-
-	@Reference
-	private SelectedUserHelper _userHelper;
 
 }

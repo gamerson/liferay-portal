@@ -13,9 +13,11 @@ import com.liferay.item.selector.criteria.GroupItemSelectorReturnType;
 import com.liferay.item.selector.criteria.URLItemSelectorReturnType;
 import com.liferay.item.selector.criteria.UUIDItemSelectorReturnType;
 import com.liferay.item.selector.criteria.group.criterion.GroupItemSelectorCriterion;
+import com.liferay.petra.function.transform.TransformUtil;
 import com.liferay.petra.reflect.ReflectionUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.module.service.Snapshot;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.JavaConstants;
 import com.liferay.portal.kernel.util.ListUtil;
@@ -26,6 +28,7 @@ import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.site.item.selector.display.context.SitesItemSelectorViewDisplayContext;
 import com.liferay.site.item.selector.renderer.SiteItemSelectorViewRenderer;
 import com.liferay.site.search.GroupSearch;
+import com.liferay.staging.StagingGroupHelper;
 
 import jakarta.portlet.PortletRequest;
 import jakarta.portlet.PortletResponse;
@@ -49,12 +52,8 @@ import org.osgi.service.component.annotations.Reference;
  * @author Alejandro Tardín
  */
 public abstract class BaseDepotItemSelectorView
-	implements ItemSelectorView<GroupItemSelectorCriterion> {
-
-	@Override
-	public Class<GroupItemSelectorCriterion> getItemSelectorCriterionClass() {
-		return GroupItemSelectorCriterion.class;
-	}
+	<T extends GroupItemSelectorCriterion>
+		implements ItemSelectorView<T> {
 
 	@Override
 	public List<ItemSelectorReturnType> getSupportedItemSelectorReturnTypes() {
@@ -72,8 +71,11 @@ public abstract class BaseDepotItemSelectorView
 
 	@Override
 	public boolean isVisible(
-		GroupItemSelectorCriterion groupItemSelectorCriterion,
-		ThemeDisplay themeDisplay) {
+		T groupItemSelectorCriterion, ThemeDisplay themeDisplay) {
+
+		if (_siteItemSelectorViewRendererSnapshot.get() == null) {
+			return false;
+		}
 
 		if (groupItemSelectorCriterion == null) {
 			return true;
@@ -91,8 +93,8 @@ public abstract class BaseDepotItemSelectorView
 	@Override
 	public void renderHTML(
 			ServletRequest servletRequest, ServletResponse servletResponse,
-			GroupItemSelectorCriterion groupItemSelectorCriterion,
-			PortletURL portletURL, String itemSelectedEventName, boolean search)
+			T groupItemSelectorCriterion, PortletURL portletURL,
+			String itemSelectedEventName, boolean search)
 		throws IOException, ServletException {
 
 		SitesItemSelectorViewDisplayContext
@@ -100,6 +102,9 @@ public abstract class BaseDepotItemSelectorView
 				new DepotSitesItemSelectorViewDisplayContext(
 					(HttpServletRequest)servletRequest, itemSelectedEventName,
 					portletURL, groupItemSelectorCriterion);
+
+		SiteItemSelectorViewRenderer siteItemSelectorViewRenderer =
+			_siteItemSelectorViewRendererSnapshot.get();
 
 		siteItemSelectorViewRenderer.renderHTML(
 			depotSitesItemSelectorViewDisplayContext);
@@ -117,8 +122,12 @@ public abstract class BaseDepotItemSelectorView
 	protected DepotPanelAppController depotPanelAppController;
 
 	@Reference
-	protected SiteItemSelectorViewRenderer siteItemSelectorViewRenderer;
+	protected StagingGroupHelper stagingGroupHelper;
 
+	private static final Snapshot<SiteItemSelectorViewRenderer>
+		_siteItemSelectorViewRendererSnapshot = new Snapshot<>(
+			BaseDepotItemSelectorView.class, SiteItemSelectorViewRenderer.class,
+			null, true);
 	private static final List<ItemSelectorReturnType>
 		_supportedItemSelectorReturnTypes = Collections.unmodifiableList(
 			ListUtil.fromArray(
@@ -166,9 +175,26 @@ public abstract class BaseDepotItemSelectorView
 				customizeGroupItemSelectorCriterion(
 					_groupItemSelectorCriterion);
 
-				return depotEntryAdminSearchProvider.getGroupSearch(
-					_groupItemSelectorCriterion, getPortletRequest(),
-					getPortletResponse(), getPortletURL());
+				GroupSearch groupSearch =
+					depotEntryAdminSearchProvider.getGroupSearch(
+						_groupItemSelectorCriterion, getPortletRequest(),
+						getPortletResponse(), getPortletURL());
+				ThemeDisplay themeDisplay =
+					(ThemeDisplay)_httpServletRequest.getAttribute(
+						WebKeys.THEME_DISPLAY);
+
+				if (!stagingGroupHelper.isLocalStagingGroup(
+						themeDisplay.getScopeGroup())) {
+
+					return groupSearch;
+				}
+
+				groupSearch.setResultsAndTotal(
+					() -> TransformUtil.transform(
+						groupSearch.getResults(), this::_getLocalStagingGroup),
+					groupSearch.getTotal());
+
+				return groupSearch;
 			}
 			catch (PortalException portalException) {
 				return ReflectionUtil.throwException(portalException);
@@ -210,6 +236,17 @@ public abstract class BaseDepotItemSelectorView
 		@Override
 		public boolean isShowSortFilter() {
 			return true;
+		}
+
+		private Group _getLocalStagingGroup(Group group) {
+			Group localStagingGroup = stagingGroupHelper.fetchLocalStagingGroup(
+				group);
+
+			if (localStagingGroup == null) {
+				return group;
+			}
+
+			return localStagingGroup;
 		}
 
 		private final GroupItemSelectorCriterion _groupItemSelectorCriterion;
