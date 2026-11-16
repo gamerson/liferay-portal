@@ -29,7 +29,15 @@ runGradleTest {
 
 		assert descriptorHttpURLConnection.responseCode == 200
 
-		assert project(":client-extensions:able").file("build/client-extension-descriptor-image/digest").text == descriptorHttpURLConnection.getHeaderField("Docker-Content-Digest")
+		String descriptorDigest = descriptorHttpURLConnection.getHeaderField("Docker-Content-Digest")
+
+		assert project(":client-extensions:able").file("build/client-extension-descriptor-image/digest").text == descriptorDigest
+
+		HttpURLConnection digestTagHttpURLConnection = _openManifest(registry, "able-descriptor", "1.0.0.${descriptorDigest.substring(7, 19)}")
+
+		digestTagHttpURLConnection.requestMethod = "HEAD"
+
+		assert digestTagHttpURLConnection.getHeaderField("Docker-Content-Digest") == descriptorDigest
 
 		Map<String, Object> able = _pullDescriptor(registry, "able").descriptor
 
