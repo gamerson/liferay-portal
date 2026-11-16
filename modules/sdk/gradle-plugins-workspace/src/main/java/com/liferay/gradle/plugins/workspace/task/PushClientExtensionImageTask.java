@@ -28,6 +28,7 @@ import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.ProjectLayout;
 import org.gradle.api.file.RegularFile;
 import org.gradle.api.file.RegularFileProperty;
+import org.gradle.api.logging.Logger;
 import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.SetProperty;
 import org.gradle.api.tasks.OutputFile;
@@ -94,6 +95,10 @@ public class PushClientExtensionImageTask extends DockerPushImage {
 		parentFile.mkdirs();
 
 		Files.write(file.toPath(), digest.getBytes(StandardCharsets.UTF_8));
+
+		Logger logger = getLogger();
+
+		logger.lifecycle("Pushed {}@{}", image, digest);
 	}
 
 	private String _getDigest(String image, String imageRepository) {

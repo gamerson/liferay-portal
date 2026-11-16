@@ -23,7 +23,15 @@ runGradleTest {
 
 		String digest = httpURLConnection.getHeaderField("Docker-Content-Digest")
 
-		Map<String, Object> able = _pullDescriptor(registry, "able").clientExtension
+		HttpURLConnection descriptorHttpURLConnection = _openManifest(registry, "able-descriptor", "1.0.0")
+
+		descriptorHttpURLConnection.requestMethod = "HEAD"
+
+		assert descriptorHttpURLConnection.responseCode == 200
+
+		assert project(":client-extensions:able").file("build/client-extension-descriptor-image/digest").text == descriptorHttpURLConnection.getHeaderField("Docker-Content-Digest")
+
+		Map<String, Object> able = _pullDescriptor(registry, "able").descriptor
 
 		assert able.configs.size() > 0
 		assert able.descriptorVersion == 1
@@ -34,7 +42,7 @@ runGradleTest {
 		assert able.type == "service"
 		assert able.workload == null
 
-		Map<String, Object> baker = _pullDescriptor(registry, "baker").clientExtension
+		Map<String, Object> baker = _pullDescriptor(registry, "baker").descriptor
 
 		assert baker.configs.size() > 0
 		assert baker.image == null

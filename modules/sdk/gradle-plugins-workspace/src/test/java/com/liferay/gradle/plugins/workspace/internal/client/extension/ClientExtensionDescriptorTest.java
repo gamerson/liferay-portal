@@ -174,7 +174,7 @@ public class ClientExtensionDescriptorTest {
 
 		Assert.assertEquals(descriptorMap.toString(), 1, descriptorMap.size());
 
-		return (Map<String, Object>)descriptorMap.get("clientExtension");
+		return (Map<String, Object>)descriptorMap.get("descriptor");
 	}
 
 	private static final String _CONFIGURATION_KEY_HEADLESS_SERVER =

@@ -8,7 +8,6 @@ package com.liferay.gradle.plugins.workspace.configurator;
 import com.bmuschko.gradle.docker.DockerRegistryCredentials;
 import com.bmuschko.gradle.docker.DockerRemoteApiPlugin;
 import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage;
-import com.bmuschko.gradle.docker.tasks.image.DockerPushImage;
 import com.bmuschko.gradle.docker.tasks.image.DockerRemoveImage;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -624,23 +623,36 @@ public class ClientExtensionProjectConfigurator
 						CreateClientExtensionDescriptorTask::getOutputDir));
 			});
 
-		TaskProvider<DockerPushImage> publishClientExtensionTaskProvider =
-			GradleUtil.addTaskProvider(
+		TaskProvider<PushClientExtensionImageTask>
+			publishClientExtensionTaskProvider = GradleUtil.addTaskProvider(
 				project, PUBLISH_CLIENT_EXTENSION_TASK_NAME,
-				DockerPushImage.class);
+				PushClientExtensionImageTask.class);
 
 		publishClientExtensionTaskProvider.configure(
-			dockerPushImage -> {
-				dockerPushImage.dependsOn(
+			publishClientExtensionTask -> {
+				publishClientExtensionTask.dependsOn(
 					buildClientExtensionDescriptorImageTaskProvider,
 					pushClientExtensionImageTaskProvider);
-				dockerPushImage.setDescription(
+				publishClientExtensionTask.setDescription(
 					"Pushes the client extension's Docker image and a " +
 						"descriptor that the platform deploys it from.");
-				dockerPushImage.setGroup(PublishingPlugin.PUBLISH_TASK_GROUP);
+				publishClientExtensionTask.setGroup(
+					PublishingPlugin.PUBLISH_TASK_GROUP);
+
+				RegularFileProperty imageDigestFileProperty =
+					publishClientExtensionTask.getImageDigestFile();
+
+				ProjectLayout projectLayout = project.getLayout();
+
+				DirectoryProperty buildDirectoryProperty =
+					projectLayout.getBuildDirectory();
+
+				imageDigestFileProperty.set(
+					buildDirectoryProperty.file(
+						"client-extension-descriptor-image/digest"));
 
 				SetProperty<String> imagesSetProperty =
-					dockerPushImage.getImages();
+					publishClientExtensionTask.getImages();
 
 				imagesSetProperty.add(descriptorImageProvider);
 			});

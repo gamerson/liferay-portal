@@ -67,7 +67,7 @@ public class ClientExtensionDescriptor {
 
 		clientExtensionMap.put("type", type);
 
-		return Collections.singletonMap("clientExtension", clientExtensionMap);
+		return Collections.singletonMap("descriptor", clientExtensionMap);
 	}
 
 	/**

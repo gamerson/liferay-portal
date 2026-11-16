@@ -6,7 +6,7 @@ runGradleTest {
 	dependsOn ":client-extensions:able:createClientExtensionDescriptor", ":client-extensions:baker:createClientExtensionDescriptor"
 
 	doLast {
-		Map<String, Object> able = _readDescriptor("able").clientExtension
+		Map<String, Object> able = _readDescriptor("able").descriptor
 
 		assert able.configs.size() > 0
 		assert able.descriptorVersion == 1
@@ -16,7 +16,7 @@ runGradleTest {
 		assert able.type == "service"
 		assert able.workload == null
 
-		Map<String, Object> baker = _readDescriptor("baker").clientExtension
+		Map<String, Object> baker = _readDescriptor("baker").descriptor
 
 		assert baker.configs.size() > 0
 		assert baker.image == null
