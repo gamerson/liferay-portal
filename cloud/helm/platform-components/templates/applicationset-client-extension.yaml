@@ -10,6 +10,10 @@
 {{- end -}}
 {{- $environmentId := regexReplaceAll $segmentPattern $layout.environmentId "index .path.segments $1" -}}
 {{- $projectId := regexReplaceAll $segmentPattern $layout.projectId "index .path.segments $1" -}}
+{{- $basePath := regexReplaceAll "\\{\\{path\\[(\\d+)\\]\\}\\}" $layout.base "{{ index .path.segments $1 }}" -}}
+{{- if contains "{{path" $basePath -}}
+{{- fail "The value \"gitops.layout.base\" may only use {{path[n]}} placeholders for the client extension ApplicationSet" -}}
+{{- end -}}
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
@@ -23,16 +27,33 @@ metadata:
     name: client-extension-applicationset
     namespace: {{ .Release.Namespace }}
 spec:
+    {{- /*
+    Each environment's liferay.yaml is paired with its project's base
+    liferay.yaml. The matrix merges the two files' parameters key by key, with
+    the environment's values taking precedence, so the clientExtensions maps,
+    keyed by client extension name, combine into one map per environment. The
+    base file's path parameters are prefixed so they do not replace the
+    environment's. An entry that sets enabled to false, or has no descriptor or
+    version, produces no Application.
+    */}}
     generators:
         -   matrix:
                 generators:
-                    -   git:
-                            files:
-                                -   path: {{ $layout.environments }}/{{ $layout.liferayValuesFilename }}
-                            repoURL: {{ $gitops.repository.url }}
-                            revision: {{ $gitops.repository.revision }}
+                    -   matrix:
+                            generators:
+                                -   git:
+                                        files:
+                                            -   path: {{ $layout.environments }}/{{ $layout.liferayValuesFilename }}
+                                        repoURL: {{ $gitops.repository.url }}
+                                        revision: {{ $gitops.repository.revision }}
+                                -   git:
+                                        files:
+                                            -   path: {{ printf "%s/%s" $basePath $layout.liferayValuesFilename | quote }}
+                                        pathParamPrefix: base
+                                        repoURL: {{ $gitops.repository.url }}
+                                        revision: {{ $gitops.repository.revision }}
                     -   list:
-                            elementsYaml: {{ `{{ get . "clientExtensions" | default list | toJson }}` | quote }}
+                            elementsYaml: {{ `{{ $elements := list }}{{ $clientExtensions := get . "clientExtensions" }}{{ if kindIs "map" $clientExtensions }}{{ range $name, $clientExtension := $clientExtensions }}{{ if and (kindIs "map" $clientExtension) (ne (toString (get $clientExtension "enabled")) "false") (get $clientExtension "descriptor") (get $clientExtension "version") }}{{ $elements = append $elements (dict "descriptor" (get $clientExtension "descriptor") "name" $name "values" (get $clientExtension "values" | default dict) "version" (toString (get $clientExtension "version"))) }}{{ end }}{{ end }}{{ end }}{{ toJson $elements }}` | quote }}
     goTemplate: true
     goTemplateOptions:
         -   missingkey=error
@@ -41,7 +62,7 @@ spec:
             labels:
                 {{- include "liferay-platform.labels" . | nindent 16 }}
                 app.kubernetes.io/name: client-extension
-            name: {{ printf "{{ %s }}-{{ %s }}-{{ trimSuffix \"-descriptor\" (base .descriptor) }}" $projectId $environmentId | quote }}
+            name: {{ printf "{{ %s }}-{{ %s }}-{{ .name }}" $projectId $environmentId | quote }}
         spec:
             destination:
                 namespace: {{ printf "liferay-{{ %s }}-{{ %s }}" $projectId $environmentId | quote }}
@@ -60,17 +81,17 @@ spec:
                     parameters:
                         -   forceString: true
                             name: clientExtension.serviceId
-                            value: {{ `{{ trimSuffix "-descriptor" (base .descriptor) }}` | quote }}
+                            value: {{ `{{ .name }}` | quote }}
                         -   forceString: true
                             name: clientExtension.version
                             value: {{ `{{ .version }}` | quote }}
                         -   forceString: true
                             name: fullnameOverride
-                            value: {{ `{{ trimSuffix "-descriptor" (base .descriptor) }}` | quote }}
+                            value: {{ `{{ .name }}` | quote }}
                         -   forceString: true
                             name: network.gatewayName
                             value: {{ printf "{{ %s }}-{{ %s }}-gateway" $projectId $environmentId | quote }}
-                    releaseName: {{ `{{ trimSuffix "-descriptor" (base .descriptor) }}` | quote }}
+                    releaseName: {{ `{{ .name }}` | quote }}
                     valueFiles:
                         -   {{ `cxdescriptor://{{ trimPrefix "oci://" .descriptor }}:{{ .version }}` | quote }}
                     values: {{ `{{ get . "values" | default dict | toJson }}` | quote }}
