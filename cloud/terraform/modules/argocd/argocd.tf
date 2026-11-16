@@ -506,6 +506,11 @@ resource "helm_release" "argocd" {
 						}
 						volumeMounts=[
 							{
+								mountPath="/cxdescriptor-docker-config"
+								name="cxdescriptor-docker-config"
+								readOnly=true
+							},
+							{
 								mountPath="/helm-plugins"
 								name="helm-plugins"
 								readOnly=true
@@ -517,6 +522,19 @@ resource "helm_release" "argocd" {
 									name="argocd-repo-server-cxdescriptor"
 								}
 								name="cxdescriptor"
+							},
+							{
+								name="cxdescriptor-docker-config"
+								secret={
+									items=[
+										{
+											key=".dockerconfigjson"
+											path="config.json"
+										},
+									]
+									optional=true
+									secretName="argocd-cxdescriptor-registry-credentials"
+								}
 							},
 							{
 								emptyDir={}

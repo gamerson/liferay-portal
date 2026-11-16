@@ -162,6 +162,14 @@ run "should_install_the_cxdescriptor_helm_plugin" {
 		condition=yamldecode(helm_release.argocd.values[0]).repoServer.initContainers[0].securityContext.runAsUser == 65532
 		error_message="The cxdescriptor init container must run as a non-root user in the restricted argocd-system namespace"
 	}
+	assert {
+		condition=[for v in yamldecode(helm_release.argocd.values[0]).repoServer.volumes : v.secret if v.name == "cxdescriptor-docker-config"][0] == {items=[{key=".dockerconfigjson", path="config.json"}], optional=true, secretName="argocd-cxdescriptor-registry-credentials"}
+		error_message="The repo server must mount the optional client extension registry credentials as the docker config that the cxdescriptor plugin reads"
+	}
+	assert {
+		condition=[for m in yamldecode(helm_release.argocd.values[0]).repoServer.volumeMounts : m.mountPath if m.name == "cxdescriptor-docker-config"][0] == "/cxdescriptor-docker-config"
+		error_message="The repo server must mount the registry credentials where the cxdescriptor plugin points DOCKER_CONFIG"
+	}
 	command=plan
 }
 run "should_keep_the_chart_resource_exclusions" {
