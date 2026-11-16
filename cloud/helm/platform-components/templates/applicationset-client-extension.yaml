@@ -53,7 +53,7 @@ spec:
                                         repoURL: {{ $gitops.repository.url }}
                                         revision: {{ $gitops.repository.revision }}
                     -   list:
-                            elementsYaml: {{ `{{ $elements := list }}{{ $clientExtensions := get . "clientExtensions" }}{{ if kindIs "map" $clientExtensions }}{{ range $name, $clientExtension := $clientExtensions }}{{ if and (kindIs "map" $clientExtension) (ne (toString (get $clientExtension "enabled")) "false") (get $clientExtension "descriptor") (get $clientExtension "version") }}{{ $elements = append $elements (dict "descriptor" (get $clientExtension "descriptor") "name" $name "values" (get $clientExtension "values" | default dict) "version" (toString (get $clientExtension "version"))) }}{{ end }}{{ end }}{{ end }}{{ toJson $elements }}` | quote }}
+                            elementsYaml: |{{- .Files.Get "client-extension-elements.gotmpl" | nindent 32 }}
     goTemplate: true
     goTemplateOptions:
         -   missingkey=error

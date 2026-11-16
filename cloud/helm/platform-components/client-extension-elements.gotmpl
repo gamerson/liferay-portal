@@ -1,0 +1,29 @@
+{{- /*
+Argo CD renders this template for each environment, with the parameters of
+the environment's liferay.yaml merged over its project's base liferay.yaml,
+and the list generator turns the JSON array it prints into one Application per
+element.
+
+Every entry of the merged clientExtensions map becomes an element named after
+its key, unless it sets enabled to false. Anything that is not a map, and any
+entry without a descriptor or a version, is skipped instead of failing, because
+a failing template stops the ApplicationSet from updating any of its
+Applications. A bad value in an entry fails only its own Application.
+*/}}
+{{- $elements := list }}
+{{- $clientExtensions := get . "clientExtensions" }}
+{{- if kindIs "map" $clientExtensions }}
+    {{- range $name, $clientExtension := $clientExtensions }}
+        {{- if not (kindIs "map" $clientExtension) }}
+            {{- continue }}
+        {{- end }}
+        {{- if eq (toString (get $clientExtension "enabled")) "false" }}
+            {{- continue }}
+        {{- end }}
+        {{- if not (and (get $clientExtension "descriptor") (get $clientExtension "version")) }}
+            {{- continue }}
+        {{- end }}
+        {{- $elements = append $elements (merge (dict "name" $name) $clientExtension) }}
+    {{- end }}
+{{- end }}
+{{- toJson $elements }}
