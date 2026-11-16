@@ -74,10 +74,8 @@ spec:
                 The descriptor that Workspace publishes is read for each
                 Application by the repo server's cxdescriptor Helm plugin, so a
                 descriptor that cannot be read or mapped fails only its own
-                Application. An entry that sets digest pins the descriptor to
-                that content, so re-pushing its version tag changes nothing.
-                The values from liferay.yaml come next, and the parameters,
-                which the ApplicationSet derives, take precedence.
+                Application. The values from liferay.yaml come next, and the
+                parameters, which the ApplicationSet derives, take precedence.
                 */}}
                 helm:
                     parameters:
@@ -95,7 +93,7 @@ spec:
                             value: {{ printf "{{ %s }}-{{ %s }}-gateway" $projectId $environmentId | quote }}
                     releaseName: {{ `{{ .name }}` | quote }}
                     valueFiles:
-                        -   {{ `cxdescriptor://{{ trimPrefix "oci://" .descriptor }}:{{ .version }}{{ with get . "digest" }}@{{ . }}{{ end }}` | quote }}
+                        -   {{ `cxdescriptor://{{ trimPrefix "oci://" .descriptor }}:{{ .version }}` | quote }}
                     values: {{ `{{ get . "values" | default dict | toJson }}` | quote }}
             syncPolicy:
                 automated:

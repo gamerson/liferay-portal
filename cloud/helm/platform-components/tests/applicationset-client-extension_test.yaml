@@ -85,7 +85,7 @@ tests:
             -   equal:
                     path: spec.template.spec.source.helm.valueFiles
                     value:
-                        -   "cxdescriptor://{{ trimPrefix \"oci://\" .descriptor }}:{{ .version }}{{ with get . \"digest\" }}@{{ . }}{{ end }}"
+                        -   "cxdescriptor://{{ trimPrefix \"oci://\" .descriptor }}:{{ .version }}"
                 template: templates/applicationset-client-extension.yaml
             -   notExists:
                     path: spec.generators[0].matrix.generators[1].oci
@@ -137,7 +137,7 @@ tests:
                                     value: "{{ index .path.segments 2 }}-{{ index .path.segments 4 }}-gateway"
                             releaseName: "{{ .name }}"
                             valueFiles:
-                                -   "cxdescriptor://{{ trimPrefix \"oci://\" .descriptor }}:{{ .version }}{{ with get . \"digest\" }}@{{ . }}{{ end }}"
+                                -   "cxdescriptor://{{ trimPrefix \"oci://\" .descriptor }}:{{ .version }}"
                             values: "{{ get . \"values\" | default dict | toJson }}"
                         path: .
                         repoURL: oci://registry.example.com/charts/liferay-client-extension
